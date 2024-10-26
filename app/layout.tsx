@@ -1,15 +1,17 @@
-import './globals.css';
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import { ThemeProvider } from '@/components/theme-provider';
-import { LanguageProvider } from '@/components/language-provider';
-import { Sidebar } from '@/components/sidebar';
+import "./globals.css";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { ThemeProvider } from "@/components/theme-provider";
+import { LanguageProvider } from "@/components/language-provider";
+import { Sidebar } from "@/components/sidebar";
+import { Footer } from "@/components/sections/footer";
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Luxury Real Estate Agency',
-  description: 'Find your dream property with our exclusive real estate listings',
+  title: "Luxury Real Estate Agency",
+  description:
+    "Find your dream property with our exclusive real estate listings",
 };
 
 export default function RootLayout({
@@ -27,10 +29,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <LanguageProvider>
-            <div className="flex min-h-screen">
-              <Sidebar />
-              <main className="flex-1 ml-16">{children}</main>
-            </div>
+            <Sidebar />
+            <main className="flex flex-col">{children}</main>
+            <Footer />
           </LanguageProvider>
         </ThemeProvider>
       </body>
