@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useState } from "react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/components/language-provider";
 import {
@@ -9,8 +9,6 @@ import {
   Landmark,
   Users,
   Mail,
-  Menu,
-  X,
   Sun,
   Moon,
   Globe2,
@@ -24,27 +22,55 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { m, motion } from "framer-motion";
-import exp from "constants";
+import { motion } from "framer-motion";
 
-const menuItems = [
-  { icon: Home, label: "Home", href: "/" },
-  { icon: Building2, label: "Properties", href: "/properties" },
-  { icon: Landmark, label: "Land", href: "/land" },
-  { icon: Users, label: "About Us", href: "/about" },
-  { icon: Mail, label: "Contact", href: "/contact" },
-];
+const menuItems = {
+  en: [
+    { icon: Home, label: "Home", href: "/" },
+    { icon: Building2, label: "Properties", href: "/properties" },
+    { icon: Landmark, label: "Land", href: "/land" },
+    { icon: Users, label: "About Us", href: "/about" },
+    { icon: Mail, label: "Contact", href: "/contact" },
+  ],
+  es: [
+    { icon: Home, label: "Inicio", href: "/" },
+    { icon: Building2, label: "Propiedades", href: "/properties" },
+    { icon: Landmark, label: "Terrenos", href: "/land" },
+    { icon: Users, label: "Sobre Nosotros", href: "/about" },
+    { icon: Mail, label: "Contacto", href: "/contact" },
+  ],
+  it: [
+    { icon: Home, label: "Inizio", href: "/" },
+    { icon: Building2, label: "Proprietà", href: "/properties" },
+    { icon: Landmark, label: "Terreni", href: "/land" },
+    { icon: Users, label: "Chi Siamo", href: "/about" },
+    { icon: Mail, label: "Contatti", href: "/contact" },
+  ],
+};
 
 export function Sidebar({ className }: { className?: string }) {
   const [expanded, setExpanded] = useState(false);
   const { theme, setTheme } = useTheme();
   const { language, setLanguage } = useLanguage();
 
-  const languages = {
+  const languages: Record<AvailableLanguages, string> = {
     en: "English",
     es: "Español",
     it: "Italiano",
   };
+
+  function getThemeName(lang: AvailableLanguages) {
+    switch (lang) {
+      case "en":
+        return theme === "dark" ? "Light" : "Dark";
+      case "es":
+        return theme === "dark" ? "Claro" : "Oscuro";
+      case "it":
+        return theme === "dark" ? "Chiaro" : "Scuro";
+      default:
+        return "Theme";
+    }
+  }
 
   return (
     <aside
@@ -69,7 +95,7 @@ export function Sidebar({ className }: { className?: string }) {
         className={cn("flex flex-col z-50", expanded ? "w-48" : "w-16")}
       >
         <div className="flex-1 px-2 mt-10">
-          {menuItems.map((item) => (
+          {menuItems[language].map((item) => (
             <Button
               key={item.href}
               variant="ghost"
@@ -171,7 +197,7 @@ export function Sidebar({ className }: { className?: string }) {
                   transition={{ duration: 0.5, delay: 0.2 }}
                   className="text-balance"
                 >
-                  Theme
+                  {getThemeName(language as AvailableLanguages)}
                 </motion.p>
               )}
             </Button>
