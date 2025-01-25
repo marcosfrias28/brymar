@@ -1,6 +1,5 @@
 "use client";
 
-import { useLanguage } from "@/components/language-provider";
 import {
   Card,
   CardContent,
@@ -13,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Bed, Bath, Square, MapPin, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLangStore } from "@/utils/store/lang-store";
+import { FeaturedPropertiesTranslations as translations } from "@/lib/translations";
 
 const properties = [
   {
@@ -57,33 +58,8 @@ const properties = [
 ];
 
 export function FeaturedProperties() {
-  const { language } = useLanguage();
-
-  const translations = {
-    en: {
-      title: "Featured Luxury Properties",
-      subtitle:
-        "Discover our handpicked selection of the world's most extraordinary homes",
-      viewDetails: "View Details",
-      viewAll: "View All Properties",
-    },
-    es: {
-      title: "Propiedades de Lujo Destacadas",
-      subtitle:
-        "Descubre nuestra selección de las casas más extraordinarias del mundo",
-      viewDetails: "Ver Detalles",
-      viewAll: "Ver Todas las Propiedades",
-    },
-    it: {
-      title: "Proprietà di Lusso in Evidenza",
-      subtitle:
-        "Scopri la nostra selezione delle case più straordinarie del mondo",
-      viewDetails: "Visualizza Dettagli",
-      viewAll: "Visualizza Tutte le Proprietà",
-    },
-  };
-
-  const t = translations[language];
+  const language = useLangStore((prev) => prev.language);
+  const { title, subtitle, viewDetails, viewAll } = translations[language];
 
   return (
     <section className="py-24 px-4 bg-gray-50">
@@ -94,7 +70,7 @@ export function FeaturedProperties() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          {t.title}
+          {title}
         </motion.h2>
         <motion.p
           className="text-xl text-gray-600 text-center mb-16 max-w-3xl mx-auto"
@@ -102,7 +78,7 @@ export function FeaturedProperties() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          {t.subtitle}
+          {subtitle}
         </motion.p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
           {properties.map((property, index) => (
@@ -112,7 +88,7 @@ export function FeaturedProperties() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 * (index + 1) }}
             >
-              <Card className="overflow-hidden bg-white shadow-xl hover:shadow-2xl transition-shadow duration-300 aspect-[500/600]">
+              <Card className=" bg-white shadow-xl hover:shadow-2xl transition-shadow duration-300 aspect-[500/600]">
                 <AspectRatio ratio={16 / 9}>
                   <img
                     src={property.image}
@@ -156,7 +132,7 @@ export function FeaturedProperties() {
                     </div>
                   </div>
                   <Button className="w-full bg-gray-800 hover:bg-gray-700 text-white">
-                    {t.viewDetails}
+                    {viewDetails}
                   </Button>
                 </CardContent>
               </Card>
@@ -174,7 +150,7 @@ export function FeaturedProperties() {
             variant="outline"
             className="text-gray-800 dark:text-white border-gray-800 hover:bg-gray-100"
           >
-            {t.viewAll}
+            {viewAll}
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </motion.div>

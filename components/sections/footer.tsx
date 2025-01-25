@@ -1,19 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { useLanguage } from "@/components/language-provider";
+import { use, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
+import { useLangStore } from "@/utils/store/lang-store";
 
 export function Footer() {
-  const { language } = useLanguage();
+  const language = useLangStore((prev) => prev.language);
   const [cookiesDialogOpen, setCookiesDialogOpen] = useState(false);
   const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);
 
