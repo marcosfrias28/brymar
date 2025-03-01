@@ -3,15 +3,12 @@
 import { signOut } from "@/lib/actions/user-actions";
 import { ActionState } from "@/lib/validations";
 import { LucideLogOut } from "lucide-react";
-import Image from "next/image";
 import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
-import { AnimatePresence, motion } from "framer-motion";
-import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { useLangStore } from "@/utils/store/lang-store";
 import { CustomButton } from "@/components/custom-buttom";
 import { User } from "@/lib/db/schema";
+import { useTranslation } from "@/hooks/use-translation";
 
 const translations = {
   en: {
@@ -34,8 +31,8 @@ const LogOutButton = ({ user }: { user: User | null }) => {
     { error: "" }
   );
 
-  const language = useLangStore((prev) => prev.language);
-  const { logout: logoutText, pending: pendingText } = translations[language];
+  const { logout: logoutText, pending: pendingText } =
+    useTranslation(translations);
 
   useEffect(() => {
     if (state?.error) toast.error(state?.error);

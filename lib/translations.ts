@@ -100,6 +100,9 @@ export const SideBarTranslations = {
 
 export const translations = {
   en: {
+    dashboardPropertiesTitle: "Gestione Proprietà",
+    dashboardLandsTitle: "Gestione Terreni",
+    dashboardBlogTitle: "Gestione Blog",
     dashboard: {
       title: "Real Estate Dashboard",
       properties: "Properties",
@@ -144,6 +147,9 @@ export const translations = {
     },
   },
   es: {
+    dashboardPropertiesTitle: "Gestión de Propiedades",
+    dashboardLandsTitle: "Gestión de Terrenos",
+    dashboardBlogTitle: "Gestión de Blog",
     dashboard: {
       title: "Panel de Control Inmobiliario",
       properties: "Propiedades",
@@ -188,6 +194,9 @@ export const translations = {
     },
   },
   it: {
+    dashboardPropertiesTitle: "Gestione Proprietà",
+    dashboardLandsTitle: "Gestione Terreni",
+    dashboardBlogTitle: "Gestione Blog",
     dashboard: {
       title: "Dashboard Immobiliare",
       properties: "Proprietà",

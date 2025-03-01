@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Link2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signIn } from "@/lib/actions/user-actions";
-import { useLangStore } from "@/utils/store/lang-store";
 import { ActionState } from "@/lib/validations";
 import { SignFormTranslations } from "@/lib/translations";
 import { CustomInput } from "../../components/custom-input";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "@/hooks/use-translation";
 
 export function SignInForm() {
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
@@ -35,8 +35,6 @@ export function SignInForm() {
     }
   }, [state]);
 
-  const language = useLangStore((prev) => prev.language);
-
   const {
     title,
     subtitle,
@@ -46,7 +44,7 @@ export function SignInForm() {
     noAccount,
     createAccount,
     loading,
-  } = SignFormTranslations.signin[language];
+  } = useTranslation(SignFormTranslations.signin);
 
   return (
     <form

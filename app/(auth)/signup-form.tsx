@@ -6,19 +6,28 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signUp } from "@/lib/actions/user-actions";
-import { useLangStore } from "@/utils/store/lang-store";
 import { ActionState } from "@/lib/validations";
 import { SignFormTranslations } from "@/lib/translations";
 import { CustomInput } from "../../components/custom-input";
 import { toast } from "sonner";
+import { useTranslation } from "@/hooks/use-translation";
 
 export function SignUpForm() {
+  const {
+    title,
+    subtitle,
+    fields,
+    signUp: signUpText,
+    loading,
+    alreadyHaveAccount,
+    signIn: signInLinkText,
+  } = useTranslation(SignFormTranslations.signup);
+
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     signUp,
     { error: "" }
   );
 
-  const language = useLangStore((prev) => prev.language);
   useEffect(() => {
     if (state.error) toast.error(state.error);
     else if (state.redirect) {
@@ -28,16 +37,6 @@ export function SignUpForm() {
       }, 200);
     }
   }, [state]);
-
-  const {
-    title,
-    subtitle,
-    fields,
-    signUp: signUpText,
-    loading,
-    alreadyHaveAccount,
-    signIn: signInLinkText,
-  } = SignFormTranslations.signup[language];
 
   return (
     <form

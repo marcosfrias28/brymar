@@ -2,26 +2,21 @@
 
 import React, { useActionState, useEffect } from "react";
 import { LoginWrapper } from "../login-wrapper";
-import { useLangStore } from "@/utils/store/lang-store";
 import { ForgotPasswordTranslations as translations } from "@/lib/translations";
 import { ActionState } from "@/lib/validations";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSearchParams } from "next/navigation";
 import { CustomInput } from "@/components/custom-input";
 import { forgotPassword } from "@/lib/actions/user-actions";
+import { useTranslation } from "@/hooks/use-translation";
 
 const ForgotPasswordPage = () => {
-  const language = useLangStore((prev) => prev.language);
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     forgotPassword,
     { error: "" }
   );
-
-  const searchParams = useSearchParams();
-  const email = searchParams.get("email");
 
   useEffect(() => {
     if (state.error) toast.error(state.error);
@@ -40,9 +35,9 @@ const ForgotPasswordPage = () => {
     loading,
     alreadyVerified,
     signIn: signInLinkText,
-  } = translations[language];
+  } = useTranslation(translations);
 
-  if (!language || !translations[language]) return null;
+  if (!translations) return null;
 
   return (
     <LoginWrapper>
