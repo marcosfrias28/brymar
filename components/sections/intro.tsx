@@ -146,7 +146,8 @@ const SELLING_PROPERTIES = [
 ];
 const italianno = Italianno({ subsets: ["latin"], weight: ["400"] });
 
-export const Intro = ({ language }: { language: AvailableLanguages }) => {
+export const Intro = () => {
+  const language = useLangStore((prev) => prev.language);
   const { title, name, subtitle, cta } = HeroSectionTranslations[language];
   const introPhrase = [...title.split(" ")];
   const firstWord = introPhrase.shift();
@@ -154,7 +155,7 @@ export const Intro = ({ language }: { language: AvailableLanguages }) => {
 
   const WordsStyle = "bg-clip-text text-transparent bg-aurora bg-clip-text";
   return (
-    <section className="relative w-screen min-h-fit h-[150dvh] mt-20 text-center bg-black">
+    <section className="relative w-screen min-h-fit h-[150dvh] mt-36 text-center bg-black">
       <div className="w-full h-fit text-center text-foreground px-4 z-10 pt-20 pb-10 bg-background">
         <motion.h1
           initial={{ opacity: 0, y: 100 }}
@@ -239,24 +240,19 @@ export const Intro = ({ language }: { language: AvailableLanguages }) => {
           {SELLING_PROPERTIES.slice(
             0,
             Math.ceil(SELLING_PROPERTIES.length / 2)
-          ).map(
-            (
-              { id, imgSrc, name, location, beds, baths, price, area },
-              index
-            ) => (
-              <PropertyCard
-                key={id}
-                id={id}
-                sqm={area}
-                imageUrl={imgSrc}
-                title={name}
-                location={location}
-                bedrooms={beds}
-                bathrooms={baths}
-                price={price}
-              />
-            )
-          )}
+          ).map(({ id, imgSrc, name, location, beds, baths, price, area }) => (
+            <PropertyCard
+              key={id}
+              id={id}
+              sqm={area}
+              imageUrl={imgSrc}
+              title={name}
+              location={location}
+              bedrooms={beds}
+              bathrooms={baths}
+              price={price}
+            />
+          ))}
         </Marquee>
       </div>
       <div className="h-1/3 w-screen">

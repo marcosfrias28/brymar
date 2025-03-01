@@ -30,11 +30,9 @@ import { CustomButton } from "./custom-buttom";
 import { useLangStore } from "@/utils/store/lang-store";
 import { ModeToggle } from "./mode-toggle";
 import { SideBarTranslations as translations } from "@/lib/translations";
-import LogOutButton from "@/app/(auth)/logout-button";
 import { User } from "@/lib/db/schema";
 import { Button } from "./ui/button";
 import { motion, AnimatePresence, useScroll } from "framer-motion";
-import { useTheme } from "next-themes";
 import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -46,7 +44,7 @@ interface SideBarProps {
 const profileItems = [
   { icon: UserCheck2, href: "/dashboard/properties" },
   { icon: LogInIcon, href: "/sign-in" },
-  { icon: LogOutIcon, href: "/sign-out" },
+  { icon: LogOutIcon, href: "/sign-up" },
   { icon: Mail, href: "/dashboard/properties" },
 ];
 
@@ -95,7 +93,7 @@ export function Navbar({ className, user }: SideBarProps) {
           }}
           className={cn(
             // Posizione e layout
-            "fixed inset-0 z-50 p-4 mx-auto mt-4",
+            "fixed inset-0 z-50 p-4 mx-auto mt-8",
             // Stili di dimensioni e forma
             "w-screen max-w-screen-2xl h-fit rounded-xl shadow-xl shadow-black/50",
             // Stili visivi generali

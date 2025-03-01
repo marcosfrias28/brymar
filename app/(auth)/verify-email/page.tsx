@@ -5,7 +5,6 @@ import { useLangStore } from "@/utils/store/lang-store";
 import { VerifyEmailTranslations as translations } from "@/lib/translations";
 import { cn } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
 
 const VerifyEmailPage = () => {
   const language = useLangStore((prev) => prev.language);

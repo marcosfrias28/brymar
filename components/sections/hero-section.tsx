@@ -5,8 +5,7 @@ import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/all";
-import { useTranslation } from "react-i18next";
-import Article from "./article";
+import { Article } from "../article";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -83,20 +82,29 @@ export function HeroSection() {
     <section
       ref={sectionRef}
       className={cn(
-        "w-full h-[275vh] max-xl:h-[225vh] min-h-fit",
-        "bg-secondarybackground max-md:p-6 md:p-14 max-md:mt-20 p-20"
+        "relative w-full flex justify-center items-center",
+        "h-[275vh] max-xl:h-[225vh] min-h-fit",
+        "bg-secondarybackground max-md:p-6 md:p-14"
       )}
     >
       <h2
         ref={titleRef}
         className={cn(
-          "text-center",
-          "text-5xl md:text-7xl font-serif uppercase bg-clip-text text-transparent bg-aurora"
+          "absolute top-0 left-auto",
+          "text-center text-5xl md:text-7xl font-serif uppercase",
+          "bg-clip-text text-transparent bg-aurora mb-10"
         )}
       >
         Marbry Inmobiliaria
       </h2>
-      <div className="relative bg-secondary-foreground max-w-screen-xl mx-auto w-full h-full rounded-xl">
+      <section
+        className={cn(
+          "grid grid-cols-1 md:grid-cols-3 grid-rows-4",
+          "w-full h-[calc(100%-120px)] max-w-screen-2xl",
+          "mx-auto gap-y-4 md:gap-8 p-4 md:p-8 py-20",
+          "bg-secondary-foreground rounded-xl"
+        )}
+      >
         {articlesData.map((article, index) => (
           <Article
             key={index}
@@ -105,16 +113,16 @@ export function HeroSection() {
             title={article.title}
             description={article.description}
             className={cn(
-              index === 3 && "top-[3%] -left-72 lg:-left-32",
-              index === 2 && "top-[27%] -right-72 lg:-right-32",
-              index === 1 && "bottom-[27%] -left-72 lg:-left-32",
-              index === 0 && "bottom-[3%] -right-72 lg:-right-32"
+              index === 0 && "row-start-1 col-start-2 col-span-2 ml-40",
+              index === 1 && "row-start-2 col-start-1 col-span-2 -ml-40",
+              index === 2 && "row-start-3 col-start-2 col-span-2 ml-40",
+              index === 3 && "row-start-4 col-start-1 col-span-2 -ml-40"
             )}
-            imageClassName="rounded-xl w-[600px] md:w-[900px] lg:w-[1100px] h-full aspect-video"
+            imageClassName="rounded-xl w-full h-full object-cover"
             imageRef={imageRefs[index] as React.RefObject<HTMLImageElement>}
           />
         ))}
-      </div>
+      </section>
     </section>
   );
 }
