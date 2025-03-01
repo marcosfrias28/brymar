@@ -2,11 +2,10 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { LucideIcon } from "lucide-react";
 
 export interface CustomButtonProps {
   label?: string;
-  icon?: LucideIcon;
+  icon?: React.ElementType;
   className?: string;
   children?: React.ReactNode;
   handleClick?: () => void;

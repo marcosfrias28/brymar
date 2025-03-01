@@ -1,13 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { Moon, Sun } from "lucide-react";
+import { LucideProps, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { CustomButton } from "./custom-buttom";
 
+type IconType = React.ElementType<LucideProps>;
+
 export const ModeToggle = () => {
   const { theme, setTheme } = useTheme();
-  const [icon, setIcon] = React.useState<React.ElementType>(Sun);
+  const [icon, setIcon] = React.useState<IconType>(Sun);
 
   React.useEffect(() => {
     setIcon(theme === "dark" ? Moon : Sun);
