@@ -154,7 +154,7 @@ export const Intro = ({ language }: { language: AvailableLanguages }) => {
 
   const WordsStyle = "bg-clip-text text-transparent bg-aurora bg-clip-text";
   return (
-    <section className="relative w-screen min-h-fit h-[150dvh] flex flex-col items-center mt-20 text-center bg-black">
+    <section className="relative w-screen min-h-fit h-[150dvh] mt-20 text-center bg-black">
       <div className="w-full h-fit text-center text-foreground px-4 z-10 pt-20 pb-10 bg-background">
         <motion.h1
           initial={{ opacity: 0, y: 100 }}
@@ -190,12 +190,12 @@ export const Intro = ({ language }: { language: AvailableLanguages }) => {
           "hsl(24, 24%, 75%)",
           "hsl(162, 27%, 90%)",
         ]}
-        containerClassName="h-1/3 row-start-2 z-0"
+        containerClassName="h-1/3 row-start-2 z-0 max-lg:my-20"
         className="w-[110dvw] z-20"
         speed="slow"
       >
-        <section className="relative text-foreground flex max-w-4xl flex-col items-center text-center mx-auto">
-          <div className="pointer-events-none">
+        <section className="relative text-white flex max-w-4xl flex-col items-center text-center mx-auto">
+          <div className="pointer-events-none px-10">
             <p
               className={cn(
                 "font-sans font-black desktop:text-8xl smartphone:text-7xl smartphonexs:text-4xl",
@@ -234,8 +234,8 @@ export const Intro = ({ language }: { language: AvailableLanguages }) => {
           </Link>
         </section>
       </WavyBackground>
-      <div className="h-2/3 relative">
-        <Marquee className="h-1/2 w-screen " reverse>
+      <div className="h-1/3 w-screen">
+        <Marquee reverse>
           {SELLING_PROPERTIES.slice(
             0,
             Math.ceil(SELLING_PROPERTIES.length / 2)
@@ -258,7 +258,9 @@ export const Intro = ({ language }: { language: AvailableLanguages }) => {
             )
           )}
         </Marquee>
-        <Marquee className="h-1/2 w-screen">
+      </div>
+      <div className="h-1/3 w-screen">
+        <Marquee>
           {SELLING_PROPERTIES.slice(SELLING_PROPERTIES.length / 2).map(
             (
               { id, imgSrc, name, location, beds, baths, price, area },
