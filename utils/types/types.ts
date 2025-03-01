@@ -1,12 +1,5 @@
 import { ReactNode } from "react";
 
-export interface CustomButtonProps extends React.HTMLAttributes<HTMLDivElement> {
-    label?: string; // Testo del pulsante
-    icon?: React.ElementType; // Icona (componente React)
-    children?: ReactNode;
-    className?: string; // Classi CSS aggiuntive
-    handleClick?: () => void; // Callback quando viene cliccato il pulsante
-}
 
 export type Field = {
     id: string;
