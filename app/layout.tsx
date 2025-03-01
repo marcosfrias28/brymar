@@ -22,9 +22,10 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const user = await getUser();
+  const language = useLangStore((prev) => prev.language);
 
   return (
-    <html lang={navigator?.language} suppressHydrationWarning>
+    <html lang={language} suppressHydrationWarning>
       <body className={`${inter.className}`}>
         <ThemeProvider
           attribute="class"
