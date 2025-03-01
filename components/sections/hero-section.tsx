@@ -83,7 +83,7 @@ export function HeroSection() {
       ref={sectionRef}
       className={cn(
         "relative w-full flex justify-center items-center",
-        "h-[275vh] max-xl:h-[225vh] min-h-fit",
+        "min-h-fit",
         "bg-secondarybackground max-md:p-6 md:p-14"
       )}
     >
@@ -100,7 +100,7 @@ export function HeroSection() {
       <section
         className={cn(
           "grid grid-cols-1 md:grid-cols-3 grid-rows-4",
-          "w-full h-[calc(100%-120px)] max-w-screen-2xl",
+          "w-full h-[minmax(800px,_100%)] max-w-screen-2xl",
           "mx-auto gap-y-4 md:gap-8 p-6 xl:py-20",
           "bg-secondary-foreground rounded-xl"
         )}
