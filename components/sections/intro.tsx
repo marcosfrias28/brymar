@@ -1,24 +1,14 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import Marquee from "../ui/marquee";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-} from "../ui/card";
 import { useLangStore } from "@/utils/store/lang-store";
 import { HeroSectionTranslations } from "@/lib/translations";
-import { useTheme } from "next-themes";
 import { Italianno } from "next/font/google";
 import { WavyBackground } from "../ui/wavy-background";
-import ShineBorder from "../ui/shine-border";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "../ui/button";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { PropertyCard } from "../property/property-card";
 
@@ -155,7 +145,7 @@ export const Intro = () => {
 
   const WordsStyle = "bg-clip-text text-transparent bg-aurora bg-clip-text";
   return (
-    <section className="relative w-screen min-h-fit h-[150dvh] mt-36 text-center bg-black">
+    <section className="relative w-screen min-h-fit h-[150dvh] xl:mt-36 text-center bg-black">
       <div className="w-full h-fit text-center text-foreground px-4 z-10 pt-20 pb-10 bg-background">
         <motion.h1
           initial={{ opacity: 0, y: 100 }}

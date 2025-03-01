@@ -1,21 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
-  LucideLogIn,
   Languages,
   Home,
   Building2,
   Landmark,
   Users,
   Mail,
-  LayoutDashboard,
   UserCheck2,
-  Sun,
-  Moon,
-  Shield,
-  User as UserIcon,
   LogInIcon,
   LogOutIcon,
 } from "lucide-react";
