@@ -30,7 +30,7 @@ export async function addLand(prevState: any, formData: FormData) {
     images: imageUrls
   });
 
-  revalidatePath("/dashboard/lands")
+  revalidatePath("/dashboard")
 
   return { message: "Land added successfully!" }
 }

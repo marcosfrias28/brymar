@@ -19,14 +19,14 @@ export async function addBlogPost(prevState: any, formData: FormData) {
     imageUrl = url
   }
 
-  await db.insert(blogPosts).values({
-    title,
-    content,
-    author,
-    image: imageUrl
-  });
+  // await db.insert(blogPosts).values({
+  //   title,
+  //   content,
+  //   author,
+  //   image: imageUrl
+  // });
 
-  revalidatePath("/dashboard/blog")
+  revalidatePath("/dashboard")
 
   return { message: "Blog post published successfully!" }
 }

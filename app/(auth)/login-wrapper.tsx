@@ -16,13 +16,13 @@ export function LoginWrapper({
     "hsl(var(--color-4))",
   ];
   return (
-    <WavyBackground
+    <div
       className={cn(
-        "flex items-center justify-center w-screen min-h-screen h-auto bg-foreground dark:bg-foreground",
+        "flex items-center justify-center w-screen min-h-screen h-auto bg-foreground dark:bg-foreground text-black",
         className
       )}
     >
       {children}
-    </WavyBackground>
+    </div>
   );
 }

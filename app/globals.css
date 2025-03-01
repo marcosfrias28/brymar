@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-.property-card {
-  @apply relative rounded-lg max-lg:max-w-96 max-w-screen-md max-lg:max-h-96;
-}
-
 @layer base {
   /*
   --color-1: hsl(213, 12%, 25%);

@@ -271,7 +271,7 @@ export const addProperty = validatedAction(propertySchema, async (_: ActionState
   //   images: imageUrls,
   // });
 
-  revalidatePath("/dashboard/properties")
+  revalidatePath("/dashboard")
   return { message: "Property added successfully!", success: true }
 })
 
@@ -284,9 +284,6 @@ const propertySearchSchema = z.object({
 
 export const searchProperties = validatedAction(propertySearchSchema, async (_: ActionState, formData: FormData) => {
   try {
-    // Simulate a delay
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
     // Mock data - in real app, this would be a database query
     const mockProperties: Property[] = [
       {

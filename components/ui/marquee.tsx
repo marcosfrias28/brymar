@@ -23,8 +23,8 @@ export default function Marquee({
     <div
       {...props}
       className={cn(
-        "relative w-screen h-full bg-transparent",
-        "flex  p-3 group [--duration:30s] [--gap:1.5rem] [gap:var(--gap)]",
+        "relative w-screen h-full max-lg:h-96 bg-transparent",
+        "flex p-3 group [--duration:30s] [--gap:1.5rem] [gap:var(--gap)]",
         {
           "flex-row": !vertical,
           "flex-col": vertical,

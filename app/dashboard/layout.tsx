@@ -2,12 +2,12 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "@/components/dashboard-sidebar";
 import { getUser } from "@/lib/actions/user-actions";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const user = getUser();
+  const user = await getUser();
   return (
     <SidebarProvider>
       <div className="flex h-screen">

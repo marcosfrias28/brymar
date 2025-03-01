@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { getUser } from './actions/user-actions';
-import { User } from 'better-auth';
+import { User } from './db/schema';
 
 export type ActionState = {
     error?: string;

@@ -10,7 +10,7 @@ import { useEffect } from "react";
 const VerifyEmailPage = () => {
   const language = useLangStore((prev) => prev.language);
   const params = useSearchParams();
-  const email = params.get("email");
+  const email = params?.get("email");
 
   const { title, subtitle } = translations[language];
 
