@@ -6,7 +6,6 @@ import { Footer } from "@/components/sections/footer";
 import { Toaster } from "sonner";
 import { getUser } from "@/lib/actions/user-actions";
 import { ThemeProvider } from "@/components/theme-provider";
-import { useLangStore } from "@/utils/store/lang-store";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,10 +21,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const user = await getUser();
-  const language = useLangStore((prev) => prev.language);
-
   return (
-    <html lang={language} suppressHydrationWarning>
+    <html>
       <body className={`${inter.className}`}>
         <ThemeProvider
           attribute="class"
