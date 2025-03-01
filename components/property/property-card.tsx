@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 interface PropertyCardProps {

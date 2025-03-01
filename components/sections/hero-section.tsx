@@ -101,7 +101,7 @@ export function HeroSection() {
         className={cn(
           "grid grid-cols-1 md:grid-cols-3 grid-rows-4",
           "w-full h-[calc(100%-120px)] max-w-screen-2xl",
-          "mx-auto gap-y-4 md:gap-8 p-4 md:p-8 py-20",
+          "mx-auto gap-y-4 md:gap-8 p-6 xl:py-20",
           "bg-secondary-foreground rounded-xl"
         )}
       >
@@ -113,10 +113,14 @@ export function HeroSection() {
             title={article.title}
             description={article.description}
             className={cn(
-              index === 0 && "row-start-1 col-start-2 col-span-2 ml-40",
-              index === 1 && "row-start-2 col-start-1 col-span-2 -ml-40",
-              index === 2 && "row-start-3 col-start-2 col-span-2 ml-40",
-              index === 3 && "row-start-4 col-start-1 col-span-2 -ml-40"
+              index === 0 &&
+                "row-start-1 col-start-2 col-span-2 max-md:col-span-1",
+              index === 1 &&
+                "row-start-2 col-start-1 col-span-2 max-md:col-span-1",
+              index === 2 &&
+                "row-start-3 col-start-2 col-span-2 max-md:col-span-1",
+              index === 3 &&
+                "row-start-4 col-start-1 col-span-2 max-md:col-span-1"
             )}
             imageClassName="rounded-xl w-full h-full object-cover"
             imageRef={imageRefs[index] as React.RefObject<HTMLImageElement>}
