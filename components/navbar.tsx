@@ -23,12 +23,18 @@ import Link from "next/link";
 import { CustomButton } from "./custom-buttom";
 import { useLangStore } from "@/utils/store/lang-store";
 import { ModeToggle } from "./mode-toggle";
-import { SideBarTranslations as translations } from "@/lib/translations";
+import {
+  NavbarTranslations,
+  NavbarTranslations as translations,
+} from "@/lib/translations";
 import { User } from "@/lib/db/schema";
 import { Button } from "./ui/button";
 import { motion, AnimatePresence, useScroll } from "framer-motion";
 import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useTranslation } from "@/hooks/use-translation";
+import { usePathname } from "next/navigation";
+import { useAvoidRoutes } from "@/hooks/useAvoidRoutes";
 
 interface SideBarProps {
   className?: string;
@@ -51,13 +57,18 @@ const menuItems = [
 ];
 
 export function Navbar({ className, user }: SideBarProps) {
+  const shouldAvoid = useAvoidRoutes();
+  if (shouldAvoid) return null;
+
+  // Language
   const language = useLangStore((prev) => prev.language);
   const setLanguage = useLangStore((prev) => prev.setLanguage);
-  const currentTranslations = translations[language];
+  const t = useTranslation(NavbarTranslations);
+
+  // Scroll
   const { scrollY } = useScroll();
   const [active, setActive] = useState<boolean>(true);
   const isMobile = useIsMobile();
-
   useEffect(() => {
     window.addEventListener("scroll", () => {
       const prev = scrollY.getPrevious();
@@ -71,6 +82,7 @@ export function Navbar({ className, user }: SideBarProps) {
     return () => window.removeEventListener("scroll", () => {});
   }, []);
 
+  // Change Language
   const handleChangeLanguage = (code: "en" | "es" | "it") => {
     setLanguage(code);
   };
@@ -107,7 +119,7 @@ export function Navbar({ className, user }: SideBarProps) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <CustomButton className="w-fit" icon={UserCheck2}>
-                    Profilo
+                    {t.buttons.profile}
                   </CustomButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
@@ -120,7 +132,7 @@ export function Navbar({ className, user }: SideBarProps) {
                       >
                         <CustomButton
                           icon={icon}
-                          label="Dashboard"
+                          label={t.buttons.dashboard}
                           className="w-fit"
                         />
                       </Link>
@@ -132,10 +144,7 @@ export function Navbar({ className, user }: SideBarProps) {
             <div className="flex flex-row max-lg:flex-col max-lg:gap-0 gap-2 justify-center items-center">
               {menuItems.map((item, i) => (
                 <Link key={Math.random()} href={item.href}>
-                  <CustomButton
-                    icon={item.icon}
-                    label={currentTranslations.menuLabels[i]}
-                  />
+                  <CustomButton icon={item.icon} label={t.menuLabels[i]} />
                 </Link>
               ))}
             </div>
@@ -161,7 +170,7 @@ export function Navbar({ className, user }: SideBarProps) {
                   </CustomButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="flex">
-                  {Object.entries(translations).map(([code, t]) => (
+                  {Object.entries(translations).map(([code, trans]) => (
                     <DropdownMenuItem
                       key={Math.random()}
                       className="flex outline-none"
@@ -173,7 +182,7 @@ export function Navbar({ className, user }: SideBarProps) {
                           handleChangeLanguage(code as "en" | "es" | "it")
                         }
                       >
-                        {t.buttons.languages}
+                        {trans.buttons.languages}
                       </Button>
                     </DropdownMenuItem>
                   ))}
