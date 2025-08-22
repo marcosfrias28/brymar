@@ -1,10 +1,22 @@
 import { PropertyCard } from "../../property/property-card";
 import Marquee from "../../ui/marquee";
+import { FC } from "react";
+
+interface PropertyCardProps {
+  id: string;
+  sqm: number;
+  imageUrl: string;
+  title: string;
+  location: string;
+  bedrooms: number;
+  bathrooms: number;
+  price: number;
+}
 
 const SELLING_PROPERTIES = [
   {
     id: "sadlkjnfha",
-    imgSrc: "/villa/1.jpg",
+    imgSrc: "/optimized_villa/1.webp",
     baths: 3,
     beds: 3,
     area: 100,
@@ -14,7 +26,7 @@ const SELLING_PROPERTIES = [
   },
   {
     id: "4414safasd",
-    imgSrc: "/villa/2.jpg",
+    imgSrc: "/optimized_villa/2.webp",
     baths: 3,
     beds: 3,
     area: 100,
@@ -24,7 +36,7 @@ const SELLING_PROPERTIES = [
   },
   {
     id: "asffqwwer",
-    imgSrc: "/villa/3.jpg",
+    imgSrc: "/optimized_villa/3.webp",
     baths: 3,
     beds: 3,
     area: 100,
@@ -34,7 +46,7 @@ const SELLING_PROPERTIES = [
   },
   {
     id: "asdfas124qwer",
-    imgSrc: "/villa/4.jpg",
+    imgSrc: "/optimized_villa/4.webp",
     baths: 3,
     beds: 3,
     area: 100,
@@ -44,7 +56,7 @@ const SELLING_PROPERTIES = [
   },
   {
     id: "asdfqwer",
-    imgSrc: "/villa2/1.jpg",
+    imgSrc: "/optimized_villa2/1.webp",
     baths: 3,
     beds: 3,
     area: 100,
@@ -54,7 +66,7 @@ const SELLING_PROPERTIES = [
   },
   {
     id: "asdfqwer413rr",
-    imgSrc: "/villa2/2.jpg",
+    imgSrc: "/optimized_villa2/2.webp",
     baths: 3,
     beds: 3,
     area: 100,
@@ -64,7 +76,7 @@ const SELLING_PROPERTIES = [
   },
   {
     id: "fqwer413rr",
-    imgSrc: "/villa2/3.jpg",
+    imgSrc: "/optimized_villa2/3.webp",
     baths: 3,
     beds: 3,
     area: 100,
@@ -74,7 +86,7 @@ const SELLING_PROPERTIES = [
   },
   {
     id: "asd2313rr",
-    imgSrc: "/villa2/4.jpg",
+    imgSrc: "/optimized_villa2/4.webp",
     baths: 3,
     beds: 3,
     area: 100,
@@ -84,7 +96,7 @@ const SELLING_PROPERTIES = [
   },
   {
     id: "as23411134wer",
-    imgSrc: "/villa3/1.jpg",
+    imgSrc: "/optimized_villa3/1.webp",
     baths: 3,
     beds: 3,
     area: 100,
@@ -94,7 +106,7 @@ const SELLING_PROPERTIES = [
   },
   {
     id: "a534gfasdf2313rr",
-    imgSrc: "/villa3/2.jpg",
+    imgSrc: "/optimized_villa3/2.webp",
     baths: 3,
     beds: 3,
     area: 100,
@@ -104,7 +116,7 @@ const SELLING_PROPERTIES = [
   },
   {
     id: "sadfasdavc",
-    imgSrc: "/villa3/3.jpg",
+    imgSrc: "/optimized_villa3/3.webp",
     baths: 3,
     beds: 3,
     area: 100,
@@ -114,7 +126,7 @@ const SELLING_PROPERTIES = [
   },
   {
     id: "sdfaskku822",
-    imgSrc: "/villa3/4.jpg",
+    imgSrc: "/optimized_villa3/4.webp",
     baths: 3,
     beds: 3,
     area: 100,
@@ -124,7 +136,7 @@ const SELLING_PROPERTIES = [
   },
 ];
 
-export const IntroPropertiesMarquee = () => {
+export const IntroPropertiesMarquee: FC = () => {
   return (
     <div className="flex flex-col items-center justify-center w-screen mt-20">
       <div className="h-1/3">
