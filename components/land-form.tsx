@@ -1,18 +1,18 @@
 "use client";
 
-import { useState, useContext } from "react";
-import { useFormState } from "react-dom";
-import { addLand } from "@/lib/actions/land-actions";
+import { useState } from "react";
+import { payloadApi } from "@/lib/payload/api-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { translations } from "@/lib/translations";
 import { useLangStore } from "@/utils/store/lang-store";
+import { toast } from "sonner";
 
 export function LandForm() {
-  const [state, formAction] = useFormState(addLand, null);
   const [images, setImages] = useState<File[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const language = useLangStore((prev) => prev.language);
   const t = translations[language].landForm;
 
@@ -25,11 +25,75 @@ export function LandForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    images.forEach((img, index) => {
-      formData.append(`image${index}`, img);
-    });
-    formAction(formData);
+    setIsSubmitting(true);
+    
+    try {
+      const formData = new FormData(e.currentTarget);
+      const name = formData.get("name") as string;
+      const description = formData.get("description") as string;
+      const area = parseFloat(formData.get("area") as string);
+      const price = parseFloat(formData.get("price") as string);
+      const address = formData.get("address") as string || "";
+      const city = formData.get("city") as string || "";
+      const province = formData.get("province") as string || "";
+      
+      // Upload images first
+      const uploadedImages = [];
+      for (const image of images) {
+        const imageFormData = new FormData();
+        imageFormData.append("file", image);
+        const uploadedImage = await payloadApi.media.create(imageFormData);
+        uploadedImages.push({
+          image: uploadedImage.id,
+          alt: `${name} - Immagine`,
+          description: `Immagine del terreno ${name}`
+        });
+      }
+      
+      // Create land
+      const landData = {
+        name,
+        description,
+        area,
+        price,
+        landType: "residential", // Default value
+        topography: "flat", // Default value
+        utilities: {
+          electricity: false,
+          water: false,
+          sewage: false,
+          internet: false,
+          gas: false
+        },
+        access: {
+          roadType: "paved",
+          roadWidth: 0,
+          publicTransport: false
+        },
+        location: {
+          address,
+          city,
+          province,
+          country: "Dominican Republic"
+        },
+        images: uploadedImages,
+        status: "available",
+        featured: false
+      };
+      
+      await payloadApi.lands.create(landData);
+      toast.success(t.success);
+      
+      // Reset form
+      e.currentTarget.reset();
+      setImages([]);
+      
+    } catch (error) {
+      console.error("Error creating land:", error);
+      toast.error("Errore durante la creazione del terreno");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -64,8 +128,21 @@ export function LandForm() {
           {t.selectedImages}: {images.length}
         </p>
       </div>
-      <Button type="submit">{t.submit}</Button>
-      {state && <p className="text-green-600">{t.success}</p>}
+      <div>
+        <Label htmlFor="address">Indirizzo</Label>
+        <Input id="address" name="address" />
+      </div>
+      <div>
+        <Label htmlFor="city">Città</Label>
+        <Input id="city" name="city" />
+      </div>
+      <div>
+        <Label htmlFor="province">Provincia</Label>
+        <Input id="province" name="province" />
+      </div>
+      <Button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? "Creazione..." : t.submit}
+      </Button>
     </form>
   );
 }

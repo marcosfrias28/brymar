@@ -16,6 +16,10 @@ export async function middleware(request: NextRequest) {
             redirect: () => new URL(data?.user ? '/profile' : '/sign-in', request.url),
         },
         {
+            condition: () => pathname.startsWith('/admin') && (!data?.user || (data?.user.role !== 'admin' && data?.user.role !== 'agent')),
+            redirect: () => new URL('/sign-in', request.url),
+        },
+        {
             condition: () => pathname.startsWith('/profile'),
             redirect: () => new URL(data?.user ? '/profile' : '/sign-in', request.url),
         },
@@ -46,8 +50,12 @@ export const config = {
     matcher: [
         '/dashboard',
         '/dashboard/:path*',
+        '/admin',
+        '/admin/:path*',
         '/sign-in',
         '/sign-up',
+        '/profile',
+        '/verify-email',
         '/api/auth/:path*',
         '/api/auth/callback',
     ],

@@ -1,24 +1,20 @@
 "use client";
 
-import { addProperty } from "@/lib/actions/property-actions";
+import { payloadApi } from "@/lib/payload/api-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { translations } from "@/lib/translations";
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { useLangStore } from "@/utils/store/lang-store";
-import { ActionState } from "@/lib/validations";
+import { toast } from "sonner";
 
 export function PropertyForm() {
-  const [state, formAction] = useActionState<ActionState, FormData>(
-    addProperty,
-    { error: "" }
-  );
-
   const [type, setType] = useState("rent");
   const [images, setImages] = useState<File[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const language = useLangStore((prev) => prev.language);
   const {
@@ -42,12 +38,62 @@ export function PropertyForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    formData.append("type", type);
-    images.forEach((img, index) => {
-      formData.append(`image${index}`, img);
-    });
-    formAction(formData);
+    setIsSubmitting(true);
+    
+    try {
+      const formData = new FormData(e.currentTarget);
+      const title = formData.get("title") as string;
+      const description = formData.get("description") as string;
+      const price = parseFloat(formData.get("price") as string);
+      const bedrooms = parseInt(formData.get("bedrooms") as string) || 0;
+      const bathrooms = parseInt(formData.get("bathrooms") as string) || 0;
+      const area = parseFloat(formData.get("area") as string) || 0;
+      const address = formData.get("address") as string || "";
+      const city = formData.get("city") as string || "";
+      const province = formData.get("province") as string || "";
+      
+      // Upload images first
+      const uploadedImages = [];
+      for (const image of images) {
+        const imageFormData = new FormData();
+        imageFormData.append("file", image);
+        const uploadedImage = await payloadApi.media.create(imageFormData);
+        uploadedImages.push(uploadedImage.id);
+      }
+      
+      // Create property
+      const propertyData = {
+        title,
+        description,
+        price,
+        type,
+        propertyType: "villa", // Default value
+        bedrooms,
+        bathrooms,
+        area,
+        address,
+        city,
+        province,
+        country: "Dominican Republic",
+        images: uploadedImages,
+        status: "available",
+        featured: false
+      };
+      
+      await payloadApi.properties.create(propertyData);
+      toast.success(success);
+      
+      // Reset form
+      e.currentTarget.reset();
+      setImages([]);
+      setType("rent");
+      
+    } catch (error) {
+      console.error("Error creating property:", error);
+      toast.error("Errore durante la creazione della proprietà");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -91,12 +137,33 @@ export function PropertyForm() {
           {selectedImages}: {images.length}
         </p>
       </div>
-      <Button type="submit">{submit}</Button>
-      {state?.success ? (
-        <p className="text-sm text-green-500">{success}</p>
-      ) : (
-        <p className="text-sm text-red-500">{state.error}</p>
-      )}
+      <div>
+        <Label htmlFor="bedrooms">Camere da letto</Label>
+        <Input id="bedrooms" name="bedrooms" type="number" min="0" />
+      </div>
+      <div>
+        <Label htmlFor="bathrooms">Bagni</Label>
+        <Input id="bathrooms" name="bathrooms" type="number" min="0" />
+      </div>
+      <div>
+        <Label htmlFor="area">Area (m²)</Label>
+        <Input id="area" name="area" type="number" min="0" />
+      </div>
+      <div>
+        <Label htmlFor="address">Indirizzo</Label>
+        <Input id="address" name="address" />
+      </div>
+      <div>
+        <Label htmlFor="city">Città</Label>
+        <Input id="city" name="city" />
+      </div>
+      <div>
+        <Label htmlFor="province">Provincia</Label>
+        <Input id="province" name="province" />
+      </div>
+      <Button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? "Creazione..." : submit}
+      </Button>
     </form>
   );
 }

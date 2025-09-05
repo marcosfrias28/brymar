@@ -1,18 +1,18 @@
 "use client";
 
-import { useState, useContext } from "react";
-import { useFormState } from "react-dom";
-import { addBlogPost } from "@/lib/actions/blog-actions";
+import { useState } from "react";
+import { payloadApi } from "@/lib/payload/api-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { translations } from "@/lib/translations";
 import { useLangStore } from "@/utils/store/lang-store";
+import { toast } from "sonner";
 
 export function BlogForm() {
-  const [state, formAction] = useFormState(addBlogPost, null);
   const [image, setImage] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const language = useLangStore((prev) => prev.language);
   const t = translations[language].blogForm;
 
@@ -24,11 +24,49 @@ export function BlogForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    if (image) {
-      formData.append("image", image);
+    setIsSubmitting(true);
+    
+    try {
+      const formData = new FormData(e.currentTarget);
+      const title = formData.get("title") as string;
+      const content = formData.get("content") as string;
+      const author = formData.get("author") as string;
+      
+      // Upload featured image if provided
+      let featuredImageId = null;
+      if (image) {
+        const imageFormData = new FormData();
+        imageFormData.append("file", image);
+        const uploadedImage = await payloadApi.media.create(imageFormData);
+        featuredImageId = uploadedImage.id;
+      }
+      
+      // Create blog post
+      const blogPostData = {
+        title,
+        content,
+        excerpt: content.substring(0, 200) + "...", // Auto-generate excerpt
+        featuredImage: featuredImageId,
+        author: "1", // Default author ID - should be dynamic based on current user
+        categories: ["company-news"], // Default category
+        status: "published",
+        featured: false,
+        publishedDate: new Date().toISOString()
+      };
+      
+      await payloadApi.blogPosts.create(blogPostData);
+      toast.success(t.success);
+      
+      // Reset form
+      e.currentTarget.reset();
+      setImage(null);
+      
+    } catch (error) {
+      console.error("Error creating blog post:", error);
+      toast.error("Errore durante la creazione del post");
+    } finally {
+      setIsSubmitting(false);
     }
-    formAction(formData);
   };
 
   return (
@@ -55,8 +93,9 @@ export function BlogForm() {
           className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
         />
       </div>
-      <Button type="submit">{t.submit}</Button>
-      {state && <p className="text-green-600">{t.success}</p>}
+      <Button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? "Pubblicazione..." : t.submit}
+      </Button>
     </form>
   );
 }
