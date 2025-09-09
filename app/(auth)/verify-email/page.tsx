@@ -20,7 +20,7 @@ const VerifyEmailPage = () => {
       <div
         className={cn(
           "space-y-6 max-w-md p-10 rounded-lg shadow-2xl shadow-black/40 dark:shadow-white/10",
-          "backdrop-blur-sm backdrop-saturate-180 bg-white/50 dark:bg-black/50 border border-black/10 dark:border-white/10",
+          "backdrop-blur-xs backdrop-saturate-180 bg-white/50 dark:bg-black/50 border border-black/10 dark:border-white/10",
           "text-gray-800 dark:text-gray-100"
         )}
       >

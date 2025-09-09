@@ -11,7 +11,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 // user Table
-export const user = pgTable("user", {
+export const users = pgTable("users", {
   id: varchar("id", { length: 36 }).primaryKey(), // UUID for user ID
   name: varchar("name", { length: 100 }),
   email: varchar("email", { length: 255 }).notNull().unique(),
@@ -27,7 +27,7 @@ export const session = pgTable("session", {
   id: varchar("id", { length: 36 }).primaryKey(), // UUID for session ID
   userId: varchar("user_id", { length: 36 })
     .notNull()
-    .references(() => user.id), // FK to user.id
+    .references(() => users.id), // FK to user.id
   token: text("token").notNull().unique(),
   expiresAt: timestamp("expires_at").notNull(),
   ipAddress: text("ip_address"),
@@ -37,11 +37,11 @@ export const session = pgTable("session", {
 });
 
 // account Table
-export const account = pgTable("account", {
+export const accounts = pgTable("accounts", {
   id: varchar("id", { length: 36 }).primaryKey(), // UUID for account ID
   userId: varchar("user_id", { length: 36 })
     .notNull()
-    .references(() => user.id), // FK to user.id
+    .references(() => users.id), // FK to user.id
   accountId: varchar("account_id", { length: 100 }).notNull(),
   providerId: varchar("provider_id", { length: 100 }).notNull(),
   accessToken: text("access_token"),
@@ -72,26 +72,8 @@ export const posts = pgTable("posts", {
   content: text("content").notNull(),
   authorId: varchar("author_id", { length: 36 })
     .notNull()
-    .references(() => user.id), // FK to user.id
+    .references(() => users.id), // FK to user.id
   createdAt: timestamp("created_at").defaultNow(),
-});
-
-// Available Appointments Table
-export const availableAppointments = pgTable("available_appointments", {
-  id: serial("id").primaryKey(),
-  appointmentDate: timestamp("appointment_date").notNull(),
-  status: text("status").notNull(),
-});
-
-// Appointments Table
-export const appointments = pgTable("appointments", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id", { length: 36 })
-    .notNull()
-    .references(() => user.id), // FK to user.id
-  appointmentDate: timestamp("appointment_date").notNull(),
-  serviceType: text("service_type").notNull(),
-  status: text("status").notNull(),
 });
 
 // Services Table
@@ -111,7 +93,7 @@ export const reviews = pgTable("reviews", {
   body: varchar("body"),
   status: varchar("status"),
   created_at: timestamp("created_at").defaultNow(),
-  userId: varchar("user_id", { length: 36 }).references(() => user.id), // FK to user.id
+  userId: varchar("user_id", { length: 36 }).references(() => users.id), // FK to user.id
 });
 
 // Properties Table
@@ -148,28 +130,25 @@ export const blogPosts = pgTable("blog_posts", {
   content: text("content").notNull(),
   authorId: varchar("author_id", { length: 36 })
     .notNull()
-    .references(() => user.id), // FK to user.id
+    .references(() => users.id), // FK to user.id
   image: text("image").notNull(),
 });
 
 // Type Inference
-export type User = typeof user.$inferSelect;
-export type NewUser = typeof user.$inferInsert;
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
 
 export type Session = typeof session.$inferSelect;
 export type NewSession = typeof session.$inferInsert;
 
-export type Account = typeof account.$inferSelect;
-export type NewAccount = typeof account.$inferInsert;
+export type Account = typeof accounts.$inferSelect;
+export type NewAccount = typeof accounts.$inferInsert;
 
 export type Verification = typeof verification.$inferSelect;
 export type NewVerification = typeof verification.$inferInsert;
 
 export type Post = typeof posts.$inferSelect;
 export type NewPost = typeof posts.$inferInsert;
-
-export type Appointment = typeof appointments.$inferSelect;
-export type NewAppointment = typeof appointments.$inferInsert;
 
 export type Service = typeof services.$inferSelect;
 export type NewService = typeof services.$inferInsert;

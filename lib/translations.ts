@@ -1,5 +1,13 @@
 import { SignFormTranslationsType } from "@/utils/types/types";
-import { Search, Home, Key, TrendingUp, Globe, Shield, MapPin } from "lucide-react";
+import {
+  Search,
+  Home,
+  Key,
+  TrendingUp,
+  Globe,
+  Shield,
+  MapPin,
+} from "lucide-react";
 
 export const ForgotPasswordTranslations = {
   en: {
@@ -53,8 +61,7 @@ export const TestimonialsTranslations = {
   },
   es: {
     title: "Lo Que Dicen Nuestros Estimados Clientes",
-    subtitle:
-      "Escuche a quienes han experimentado nuestro servicio sin igual",
+    subtitle: "Escuche a quienes han experimentado nuestro servicio sin igual",
   },
   it: {
     title: "Cosa Dicono i Nostri Stimati Clienti",
@@ -75,7 +82,13 @@ export const NavbarTranslations = {
     },
   },
   es: {
-    menuLabels: ["Inicio", "Propiedades", "Terrenos", "Sobre Nosotros", "Contacto"],
+    menuLabels: [
+      "Inicio",
+      "Propiedades",
+      "Terrenos",
+      "Sobre Nosotros",
+      "Contacto",
+    ],
     buttons: {
       languages: "Español",
       theme: { dark: "Oscuro", light: "Claro" },
@@ -246,8 +259,7 @@ export const HeroSectionTranslations = {
   es: {
     name: "Marbry inmobiliaria",
     title: "Hacemos que sea fácil encontrar tu nueva casa.",
-    subtitle:
-      "Propiedades exclusivas en la República Dominicana.",
+    subtitle: "Propiedades exclusivas en la República Dominicana.",
     cta: "Explorar Listados",
     stats: [
       { icon: MapPin, value: "50+", label: "Ubicaciones Prime" },
@@ -633,6 +645,7 @@ export const SignFormTranslations: SignFormTranslationsType = {
           name: "image",
           type: "file",
           label: "Profile Image",
+          required: false,
           children: "Upload your profile image",
         },
       ],
@@ -723,7 +736,7 @@ export const SignFormTranslations: SignFormTranslationsType = {
       signIn: "Accedi",
       loading: "Creazione account...",
     },
-  }
+  },
 };
 
 export const PropertySearchTranslations = {
@@ -758,7 +771,8 @@ export const PropertySearchTranslations = {
   es: {
     title: "Propiedades en venta en la República Dominicana",
     filters: {
-      searchPlaceholder: "Ingrese calle, ciudad, código postal, ID de propiedad",
+      searchPlaceholder:
+        "Ingrese calle, ciudad, código postal, ID de propiedad",
       anyState: "Cualquier estado",
       allProvinces: "Todas las provincias",
       priceRange: "Precio: desde $ {min} hasta $ {max}",
@@ -821,7 +835,8 @@ export const FooterTranslations = {
     privacy: "Privacy Policy",
     terms: "Terms of Service",
     cookiesTitle: "Cookie Policy",
-    cookiesContent: "This website uses cookies to enhance the user experience...",
+    cookiesContent:
+      "This website uses cookies to enhance the user experience...",
     privacyTitle: "Privacy Policy",
     privacyContent: "At Luxury Real Estate, we take your privacy seriously...",
   },
@@ -832,9 +847,11 @@ export const FooterTranslations = {
     privacy: "Política de Privacidad",
     terms: "Términos de Servicio",
     cookiesTitle: "Política de Cookies",
-    cookiesContent: "Este sitio web utiliza cookies para mejorar la experiencia del usuario...",
+    cookiesContent:
+      "Este sitio web utiliza cookies para mejorar la experiencia del usuario...",
     privacyTitle: "Política de Privacidad",
-    privacyContent: "En Inmobiliaria de Lujo, nos tomamos su privacidad muy en serio...",
+    privacyContent:
+      "En Inmobiliaria de Lujo, nos tomamos su privacidad muy en serio...",
   },
   it: {
     companyName: "Immobiliare di Lusso",
@@ -843,9 +860,10 @@ export const FooterTranslations = {
     privacy: "Politica sulla Privacy",
     terms: "Termini di Servizio",
     cookiesTitle: "Politica dei Cookie",
-    cookiesContent: "Questo sito web utilizza i cookie per migliorare l'esperienza dell'utente...",
+    cookiesContent:
+      "Questo sito web utilizza i cookie per migliorare l'esperienza dell'utente...",
     privacyTitle: "Politica sulla Privacy",
-    privacyContent: "In Immobiliare di Lusso, prendiamo molto sul serio la tua privacy...",
+    privacyContent:
+      "In Immobiliare di Lusso, prendiamo molto sul serio la tua privacy...",
   },
 };
-

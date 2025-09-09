@@ -2,7 +2,6 @@ import { PropertyForm } from "@/components/property/property-form";
 import { PropertiesList } from "@/components/dashboard/properties-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export default function ProprietaPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Gestione Proprietà</h1>
@@ -22,5 +21,5 @@ export default function ProprietaPage() {
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }

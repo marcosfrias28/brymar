@@ -1,6 +1,165 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --breakpoint-smartphonexs: 320px;
+  --breakpoint-smartphone: 360px;
+  --breakpoint-tablet: 760px;
+  --breakpoint-laptop: 1024px;
+  --breakpoint-desktop: 1300px;
+  --breakpoint-ultrawide: 2440px;
+
+  --background-image-gradient-radial:
+    `radial-gradient(at center, hsl(var(--primary)) 0%, transparent 40%),
+    radial-gradient(at center, hsl(var(--secondary)) 0%, transparent 59%) `;
+  --background-image-aurora:
+    `radial-gradient(
+      circle at 30% 60%,
+      hsl(var(--color-3)) 0%,
+      hsl(var(--color-4)) 100%
+    ),
+    radial-gradient(
+        circle at 40% 80%,
+        hsl(var(--secondary)) 0%,
+        hsl(var(--color-3)) 80%
+      )
+      `;
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --color-white: #f7f7f7;
+  --color-arsenic: hsl(213, 12%, 25%);
+  --color-black-coral: hsl(220, 10%, 40%);
+  --color-dark-vanilla: hsl(24, 24%, 75%);
+  --color-azureish-white: hsl(162, 27%, 90%);
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-secondaybackground: hsl(var(--color-5));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  --animate-gradient: auroraMove 6s ease infinite;
+  --animate-gradient-shift: gradient-shift 15s ease infinite;
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-border-beam: border-beam calc(var(--duration) * 1s) infinite linear;
+  --animate-shine: shine var(--duration) infinite linear;
+  --animate-marquee: marquee var(--duration) infinite linear;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+
+  @keyframes auroraMove {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+  @keyframes border-beam {
+    100% {
+      offset-distance: 100%;
+    }
+  }
+  @keyframes shine {
+    0% {
+      background-position: 0% 0%;
+    }
+    50% {
+      background-position: 100% 100%;
+    }
+    to {
+      background-position: 0% 0%;
+    }
+  }
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+  @keyframes marquee-vertical {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(calc(-100% - var(--gap)));
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
 
 @layer base {
   /*
@@ -50,14 +209,14 @@
     --radius: 0.5rem;
 
     /* Sidebar-specific */
-    --sidebar-background: var(--color-1); /* Arsenic */
-    --sidebar-foreground: var(--color-3); /* Dark Vanilla */
-    --sidebar-primary: var(--color-2); /* Black Coral */
-    --sidebar-primary-foreground: var(--color-9); /* Almost white */
-    --sidebar-accent: var(--color-2); /* Black Coral */
-    --sidebar-accent-foreground: var(--color-4); /* Azureish White */
-    --sidebar-border: var(--color-3); /* Dark Vanilla */
-    --sidebar-ring: var(--color-2); /* Black Coral */
+    --sidebar-background: 0 0% 98%; /* Arsenic */
+    --sidebar-foreground: 240 5.3% 26.1%; /* Dark Vanilla */
+    --sidebar-primary: 240 5.9% 10%; /* Black Coral */
+    --sidebar-primary-foreground: 0 0% 98%; /* Almost white */
+    --sidebar-accent: 240 4.8% 95.9%; /* Black Coral */
+    --sidebar-accent-foreground: 240 5.9% 10%; /* Azureish White */
+    --sidebar-border: 220 13% 91%; /* Dark Vanilla */
+    --sidebar-ring: 217.2 91.2% 59.8%; /* Black Coral */
   }
 
   .dark {
@@ -81,15 +240,20 @@
     --input: var(--color-6);
     --ring: var(--color-2);
     --radius: 0.5rem;
-    --sidebar-background: var(--color-5);
-    --sidebar-foreground: var(--color-3);
-    --sidebar-primary: var(--color-2);
-    --sidebar-primary-foreground: var(--color-9);
-    --sidebar-accent: var(--color-1);
-    --sidebar-accent-foreground: var(--color-3);
-    --sidebar-border: var(--color-8);
-    --sidebar-ring: var(--color-2);
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
+}
+
+html,
+body {
+  height: 100%;
 }
 
 @layer base {

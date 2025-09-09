@@ -101,7 +101,7 @@ export function Navbar({ className, user }: SideBarProps) {
             // Posizione e layout
             "fixed inset-0 z-50 p-4 mx-auto mt-8",
             // Stili di dimensioni e forma
-            "w-screen max-w-screen-2xl h-fit rounded-xl shadow-xl shadow-black/50",
+            "w-screen max-w-(--breakpoint-2xl) h-fit rounded-xl shadow-xl shadow-black/50",
             // Stili visivi generali
             "bg-background text-foreground",
             // Stili per transizioni e animazioni
@@ -123,7 +123,7 @@ export function Navbar({ className, user }: SideBarProps) {
                   </CustomButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem className="flex outline-none">
+                  <DropdownMenuItem className="flex outline-hidden">
                     {profileItems.map(({ icon, href }) => (
                       <Link
                         key={Math.random()}
@@ -173,7 +173,7 @@ export function Navbar({ className, user }: SideBarProps) {
                   {Object.entries(translations).map(([code, trans]) => (
                     <DropdownMenuItem
                       key={Math.random()}
-                      className="flex outline-none"
+                      className="flex outline-hidden"
                     >
                       <Button
                         key={Math.random()}

@@ -100,7 +100,7 @@ export function HeroSection() {
       <section
         className={cn(
           "grid grid-cols-1 md:grid-cols-3 grid-rows-4",
-          "w-full h-[minmax(800px,_100%)] max-w-screen-2xl",
+          "w-full h-[minmax(800px,100%)] max-w-(--breakpoint-2xl)",
           "mx-auto gap-y-4 md:gap-8 p-6 xl:py-20",
           "bg-secondary-foreground rounded-xl"
         )}

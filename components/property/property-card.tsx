@@ -27,7 +27,7 @@ export function PropertyCard({
     <div
       className={cn(
         "relative rounded-xl border-0 overflow-hidden",
-        "max-lg:max-w-96 max-w-screen-sm mb-4 aspect-square",
+        "max-lg:max-w-96 max-w-(--breakpoint-sm) mb-4 aspect-square",
         className
       )}
     >
@@ -38,7 +38,7 @@ export function PropertyCard({
         width={600}
         className="w-full h-full object-cover hover:scale-110 transition-all duration-500"
       />
-      <div className="absolute bottom-0 left-0 w-full bg-gradient-to-b from-transparent from-10% to-black pointer-events-none">
+      <div className="absolute bottom-0 left-0 w-full bg-linear-to-b from-transparent from-10% to-black pointer-events-none">
         <h3>{title}</h3>
         <p>{location}</p>
         <p>{`${bedrooms} Beds, ${bathrooms} Baths, ${sqm} mt²`}</p>

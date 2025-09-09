@@ -35,7 +35,7 @@ export function Article({
         <div
           className={cn(
             "absolute inset-0",
-            "bg-gradient-to-t from-black/70 to-transparent",
+            "bg-linear-to-t from-black/70 to-transparent",
             "flex flex-col justify-end",
             "p-4 md:p-6",
             "rounded-2xl"

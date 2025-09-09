@@ -2,7 +2,6 @@ import { LandForm } from "@/components/land-form";
 import { LandsList } from "@/components/dashboard/lands-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export default function TerreniPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Gestione Terreni</h1>
@@ -22,5 +21,5 @@ export default function TerreniPage() {
         </TabsContent>
       </Tabs>
     </div>
-  );
+  )
 }

@@ -54,7 +54,7 @@ const LogOutButton = ({ user }: { user: User | null }) => {
     <form action={formAction}>
       <button
         className={cn(
-          "inline-flex items-center  justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+          "inline-flex items-center  justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
           "hover:bg-accent hover:text-accent-foreground",
           "h-10 w-10",
           "w-full justify-start flex items-center gap-2 pl-2"

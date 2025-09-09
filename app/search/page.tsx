@@ -64,13 +64,13 @@ export default function PropertySearch() {
           {/* Desktop Layout */}
           <div className="grid lg:grid-cols-2 gap-4">
             {/* Left Column - Map (Desktop Only) */}
-            <div className="hidden lg:block h-[calc(100vh-200px)] bg-white rounded-lg shadow-sm">
+            <div className="hidden lg:block h-[calc(100vh-200px)] bg-white rounded-lg shadow-xs">
               <PropertyMap />
             </div>
 
             {/* Right Column - Search and Results */}
             <div className="space-y-4">
-              <div className="bg-white p-4 rounded-lg shadow-sm">
+              <div className="bg-white p-4 rounded-lg shadow-xs">
                 <SearchFilters
                   translations={translations[language]}
                   onSubmit={formAction}

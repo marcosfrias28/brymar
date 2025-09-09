@@ -76,7 +76,7 @@ export function Testimonials() {
             transition={{ duration: 0.5 }}
           >
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="w-full flex-shrink-0">
+              <div key={index} className="w-full shrink-0">
                 <Card className="bg-white shadow-xl mx-auto max-w-4xl">
                   <CardContent className="p-12">
                     <Quote className="h-12 w-12 text-gray-400 mb-8" />

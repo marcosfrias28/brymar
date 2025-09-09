@@ -88,7 +88,7 @@ export function FeaturedProperties() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 * (index + 1) }}
             >
-              <Card className=" bg-white shadow-xl hover:shadow-2xl transition-shadow duration-300 aspect-[500/600]">
+              <Card className=" bg-white shadow-xl hover:shadow-2xl transition-shadow duration-300 aspect-500/600">
                 <AspectRatio ratio={16 / 9}>
                   <img
                     src={property.image}

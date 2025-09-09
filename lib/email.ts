@@ -1,16 +1,23 @@
-"use server"
-import { Resend } from 'resend';
+"use server";
+import { Resend } from "resend";
 
 const resend = new Resend(process?.env?.RESEND_API_KEY);
 
-export const sendVerificationEmail = async ({ to, subject, url }: { to: string; subject: string; url: string }) => {
-
-    try {
-        const res = await resend.emails.send({
-            from: 'Marbry Inmobiliaria <send@marbry.vip>',
-            to,
-            subject,
-            html: `<!DOCTYPE html>
+export const sendVerificationEmail = async ({
+  to,
+  subject,
+  url,
+}: {
+  to: string;
+  subject: string;
+  url: string;
+}) => {
+  try {
+    const res = await resend.emails.send({
+      from: "Marbry Inmobiliaria <send@brymar.vip>",
+      to,
+      subject,
+      html: `<!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -110,16 +117,18 @@ export const sendVerificationEmail = async ({ to, subject, url }: { to: string; 
     </table>
 </body>
 </html>
-`
-        });
-        if (res.error) {
-            console.log(res.error)
-            throw new Error('Errore durante l\'invio dell\'email')
-        } else {
-            console.log('Success Mail')
-        }
-    } catch (error) {
-        console.error('Errore durante l\'invio dell\'email:', error);
-        throw new Error('Impossibile inviare l\'email.');
+`,
+    });
+    if (res.error) {
+      console.log("Errore invio email:", res.error);
+      // Non bloccare la registrazione se l'email fallisce
+      return { success: false, error: res.error };
+    } else {
+      console.log("Success Mail");
+      return { success: true };
     }
+  } catch (error) {
+    console.error("Errore durante l'invio dell'email:", error);
+    return { success: false, error: "Impossibile inviare l'email." };
+  }
 };

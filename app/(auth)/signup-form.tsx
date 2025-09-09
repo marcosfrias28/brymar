@@ -29,8 +29,8 @@ export function SignUpForm() {
   );
 
   useEffect(() => {
-    if (state.error) toast.error(state.error);
-    else if (state.redirect) {
+    if (state?.error) toast.error(state.error);
+    else if (state?.redirect) {
       toast.success(state.message);
       setTimeout(() => {
         window.location.href = state.url;
@@ -43,7 +43,7 @@ export function SignUpForm() {
       action={formAction}
       className={cn(
         "space-y-6 w-4/5 max-w-md p-10 rounded-lg shadow-2xl shadow-black/40 dark:shadow-white/10",
-        "backdrop-blur-sm backdrop-saturate-180 bg-white/50 dark:bg-black/50 border border-black/10 dark:border-white/10",
+        "backdrop-blur-xs backdrop-saturate-180 bg-white/50 dark:bg-black/50 border border-black/10 dark:border-white/10",
         "text-gray-800 dark:text-gray-100"
       )}
     >
