@@ -16,7 +16,25 @@ interface PropertyFiltersProps {
     bedrooms: string
     location: string
   }
-  setFilters: (filters: any) => void
+  setFilters: (filters: {
+    type: string
+    minPrice: string
+    maxPrice: string
+    bedrooms: string
+    location: string
+  } | ((prev: {
+    type: string
+    minPrice: string
+    maxPrice: string
+    bedrooms: string
+    location: string
+  }) => {
+    type: string
+    minPrice: string
+    maxPrice: string
+    bedrooms: string
+    location: string
+  })) => void
 }
 
 export function PropertyFilters({ filters, setFilters }: PropertyFiltersProps) {
