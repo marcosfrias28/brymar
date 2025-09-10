@@ -44,7 +44,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
   }
 
   const getTypeLabel = (type: string) => {
-    return type === "sale" ? t.forSale : t.forRent
+    return type === "sale" ? t.propertyForm.forSale : t.propertyForm.forRent
   }
 
   const getTypeBadgeColor = (type: string) => {
@@ -77,18 +77,18 @@ export function PropertyCard({ property }: PropertyCardProps) {
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/properties/${property.id}`}>
                   <Eye className="h-4 w-4 mr-2" />
-                  {t.view}
+                  {t.propertyForm.view}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/properties/${property.id}/edit`}>
                   <Edit className="h-4 w-4 mr-2" />
-                  {t.edit}
+                  {t.propertyForm.edit}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem className="text-red-600">
                 <Trash2 className="h-4 w-4 mr-2" />
-                {t.delete}
+                {t.propertyForm.delete}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

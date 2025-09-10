@@ -86,18 +86,18 @@ export function BlogCard({ post }: BlogCardProps) {
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/blog/${post.id}`}>
                   <Eye className="h-4 w-4 mr-2" />
-                  {t.view}
+                  {t.blogForm.view}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/blog/${post.id}/edit`}>
                   <Edit className="h-4 w-4 mr-2" />
-                  {t.edit}
+                  {t.blogForm.edit}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem className="text-red-600">
                 <Trash2 className="h-4 w-4 mr-2" />
-                {t.delete}
+                {t.blogForm.delete}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

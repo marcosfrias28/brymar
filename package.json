@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "tailwindcss build -o app/globals.css && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
@@ -46,6 +46,12 @@
     "@radix-ui/react-toggle-group": "^1.1.2",
     "@radix-ui/react-tooltip": "^1.1.8",
     "@tailwindcss/cli": "^4.1.13",
+    "@tailwindcss/postcss": "^4.1.13",
+    "@tiptap/extension-image": "^3.4.2",
+    "@tiptap/extension-link": "^3.4.2",
+    "@tiptap/extension-text-align": "^3.4.2",
+    "@tiptap/react": "^3.4.2",
+    "@tiptap/starter-kit": "^3.4.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "22.10.7",
     "@types/react": "^19.0.10",

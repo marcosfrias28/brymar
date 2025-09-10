@@ -1,6 +1,6 @@
 "use client"
 
-import { Clock, Building2, MapPin, FileText, Eye } from "lucide-react"
+import { Building2, MapPin, FileText, Clock, Eye } from "lucide-react"
 import { useLangStore } from "@/utils/store/lang-store"
 import { translations } from "@/lib/translations"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,16 +11,16 @@ const recentActivities = [
   {
     id: 1,
     type: "property",
-    title: "Casa en Punta Cana",
-    action: "Agregada",
+    title: "Villa Oceanfront Paradise",
+    action: "Nueva propiedad añadida",
     time: "Hace 2 horas",
     status: "active",
   },
   {
     id: 2,
     type: "land",
-    title: "Terreno en Bávaro",
-    action: "Editada",
+    title: "Terreno Montañoso Premium",
+    action: "Terreno actualizado",
     time: "Hace 4 horas",
     status: "pending",
   },
@@ -28,23 +28,23 @@ const recentActivities = [
     id: 3,
     type: "blog",
     title: "Guía de Inversión Inmobiliaria 2024",
-    action: "Publicada",
+    action: "Artículo publicado",
     time: "Hace 1 día",
     status: "published",
   },
   {
     id: 4,
     type: "property",
-    title: "Apartamento en Santo Domingo",
-    action: "Vendida",
+    title: "Penthouse Downtown Elite",
+    action: "Propiedad vendida",
     time: "Hace 2 días",
     status: "sold",
   },
   {
     id: 5,
     type: "land",
-    title: "Lote en La Romana",
-    action: "Agregada",
+    title: "Lote Comercial Estratégico",
+    action: "Nuevo terreno listado",
     time: "Hace 3 días",
     status: "active",
   },
@@ -78,19 +78,28 @@ const getStatusColor = (status: string) => {
   }
 }
 
-const getStatusText = (status: string) => {
-  switch (status) {
-    case "active":
-      return "Activa"
-    case "pending":
-      return "Pendiente"
-    case "published":
-      return "Publicada"
-    case "sold":
-      return "Vendida"
-    default:
-      return "Desconocido"
+const getStatusText = (status: string, language: string) => {
+  const statusTranslations = {
+    en: {
+      active: "Active",
+      pending: "Pending",
+      published: "Published",
+      sold: "Sold",
+    },
+    es: {
+      active: "Activa",
+      pending: "Pendiente",
+      published: "Publicada",
+      sold: "Vendida",
+    },
+    it: {
+      active: "Attiva",
+      pending: "In Attesa",
+      published: "Pubblicata",
+      sold: "Venduta",
+    },
   }
+  return statusTranslations[language as keyof typeof statusTranslations]?.[status as keyof typeof statusTranslations.en] || "Unknown"
 }
 
 export function RecentActivity() {
@@ -98,19 +107,19 @@ export function RecentActivity() {
   const t = translations[language]
 
   return (
-    <Card className="border-black-coral shadow-lg">
+    <Card className="border-blackCoral shadow-lg">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-arsenic flex items-center gap-2">
           <Clock className="h-5 w-5" />
-          {t.recentActivity}
+          {t.dashboard.recentActivity || "Recent Activity"}
         </CardTitle>
         <Button
           variant="outline"
           size="sm"
-          className="border-black-coral text-black-coral hover:bg-black-coral hover:text-white bg-transparent"
+          className="border-blackCoral text-blackCoral hover:bg-blackCoral hover:text-white bg-transparent"
         >
           <Eye className="h-4 w-4 mr-2" />
-          Ver Todo
+          {language === "es" ? "Ver Todo" : language === "it" ? "Vedi Tutto" : "View All"}
         </Button>
       </CardHeader>
       <CardContent>
@@ -120,7 +129,7 @@ export function RecentActivity() {
             return (
               <div
                 key={activity.id}
-                className="flex items-center justify-between p-3 rounded-lg border border-black-coral/20 hover:bg-azureish-white/20 transition-colors"
+                className="flex items-center justify-between p-3 rounded-lg border border-blackCoral/20 hover:bg-azureishWhite/20 transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-arsenic">
@@ -128,12 +137,14 @@ export function RecentActivity() {
                   </div>
                   <div>
                     <p className="font-medium text-arsenic">{activity.title}</p>
-                    <p className="text-sm text-black-coral">
+                    <p className="text-sm text-blackCoral">
                       {activity.action} • {activity.time}
                     </p>
                   </div>
                 </div>
-                <Badge className={getStatusColor(activity.status)}>{getStatusText(activity.status)}</Badge>
+                <Badge className={getStatusColor(activity.status)}>
+                  {getStatusText(activity.status, language)}
+                </Badge>
               </div>
             )
           })}

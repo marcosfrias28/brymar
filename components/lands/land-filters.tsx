@@ -17,7 +17,7 @@ interface LandFiltersProps {
     maxSurface: string
     location: string
   }
-  setFilters: (filters: any) => void
+  setFilters: (filters: { type: string; minPrice: string; maxPrice: string; minSurface: string; maxSurface: string; location: string } | ((prev: { type: string; minPrice: string; maxPrice: string; minSurface: string; maxSurface: string; location: string }) => { type: string; minPrice: string; maxPrice: string; minSurface: string; maxSurface: string; location: string })) => void
 }
 
 export function LandFilters({ filters, setFilters }: LandFiltersProps) {
@@ -110,7 +110,7 @@ export function LandFilters({ filters, setFilters }: LandFiltersProps) {
 
           {/* Location */}
           <div className="space-y-2">
-            <Label className="text-arsenic">{t.location}</Label>
+            <Label className="text-arsenic">{t.landForm.location}</Label>
             <Input
               placeholder="Ciudad o zona"
               value={filters.location}

@@ -81,7 +81,13 @@ export function AppSidebar() {
                   >
                     <Link href={item.url}>
                       <item.icon className="w-4 h-4" />
-                      <span>{t[item.title as keyof typeof t]}</span>
+                      <span>
+                        {item.title === "dashboard" && t.dashboard.title}
+                        {item.title === "properties" && t.dashboard.properties}
+                        {item.title === "lands" && t.dashboard.lands}
+                        {item.title === "blog" && t.dashboard.blog}
+                        {item.title === "settings" && "Settings"}
+                      </span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

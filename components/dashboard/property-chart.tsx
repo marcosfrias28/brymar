@@ -3,6 +3,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
+import { useLangStore } from "@/utils/store/lang-store"
+import { translations } from "@/lib/translations"
 
 const chartData = [
   { month: "Ene", propiedades: 12, terrenos: 8 },
@@ -25,18 +27,23 @@ const chartConfig = {
 }
 
 export function PropertyChart() {
+  const { language } = useLangStore()
+  const t = translations[language].dashboard
+
   return (
-    <Card className="border-black-coral shadow-lg">
+    <Card className="border-blackCoral shadow-lg">
       <CardHeader>
-        <CardTitle className="text-arsenic">Actividad Mensual</CardTitle>
-        <CardDescription className="text-black-coral">Propiedades y terrenos agregados por mes</CardDescription>
+        <CardTitle className="text-arsenic">{t.monthlyActivity || "Actividad Mensual"}</CardTitle>
+        <CardDescription className="text-blackCoral">
+          {t.propertiesAndLandsAdded || "Propiedades y terrenos agregados por mes"}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={chartData}>
-              <XAxis dataKey="month" tickLine={false} axisLine={false} className="text-black-coral" />
-              <YAxis tickLine={false} axisLine={false} className="text-black-coral" />
+              <XAxis dataKey="month" tickLine={false} axisLine={false} className="text-blackCoral" />
+              <YAxis tickLine={false} axisLine={false} className="text-blackCoral" />
               <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
               <Bar dataKey="propiedades" fill="var(--color-propiedades)" radius={[4, 4, 0, 0]} />
               <Bar dataKey="terrenos" fill="var(--color-terrenos)" radius={[4, 4, 0, 0]} />

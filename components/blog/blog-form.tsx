@@ -123,7 +123,7 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="title" className="text-arsenic">
-              {t.title} *
+              {t.blogForm.title} *
             </Label>
             <Input
               id="title"
@@ -138,7 +138,7 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
           <div className="grid grid-cols-1 tablet:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="author" className="text-arsenic">
-                {t.author} *
+                {t.blogForm.author} *
               </Label>
               <Input
                 id="author"
@@ -228,7 +228,7 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="content" className="text-arsenic">
-              {t.content} *
+              {t.blogForm.content} *
             </Label>
             <Textarea
               id="content"
@@ -255,7 +255,7 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
           className="border-black-coral text-black-coral hover:bg-black-coral hover:text-white"
         >
           <X className="h-4 w-4 mr-2" />
-          {t.cancel}
+          {t.blogForm.cancel}
         </Button>
 
         <div className="flex gap-4">

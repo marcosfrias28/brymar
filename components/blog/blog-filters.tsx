@@ -16,7 +16,25 @@ interface BlogFiltersProps {
     dateFrom: string
     dateTo: string
   }
-  setFilters: (filters: any) => void
+  setFilters: (filters: {
+    status: string
+    category: string
+    author: string
+    dateFrom: string
+    dateTo: string
+  } | ((prev: {
+    status: string
+    category: string
+    author: string
+    dateFrom: string
+    dateTo: string
+  }) => {
+    status: string
+    category: string
+    author: string
+    dateFrom: string
+    dateTo: string
+  })) => void
 }
 
 export function BlogFilters({ filters, setFilters }: BlogFiltersProps) {
@@ -76,7 +94,7 @@ export function BlogFilters({ filters, setFilters }: BlogFiltersProps) {
 
           {/* Author */}
           <div className="space-y-2">
-            <Label className="text-arsenic">{t.author}</Label>
+            <Label className="text-arsenic">{t.blogForm.author}</Label>
             <Input
               placeholder="Buscar autor"
               value={filters.author}

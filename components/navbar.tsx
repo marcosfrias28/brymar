@@ -57,9 +57,6 @@ const menuItems = [
 ];
 
 export function Navbar({ className, user }: SideBarProps) {
-  const shouldAvoid = useAvoidRoutes();
-  if (shouldAvoid) return null;
-
   // Language
   const language = useLangStore((prev) => prev.language);
   const setLanguage = useLangStore((prev) => prev.setLanguage);
@@ -69,6 +66,9 @@ export function Navbar({ className, user }: SideBarProps) {
   const { scrollY } = useScroll();
   const [active, setActive] = useState<boolean>(true);
   const isMobile = useIsMobile();
+  
+  const shouldAvoid = useAvoidRoutes();
+  
   useEffect(() => {
     window.addEventListener("scroll", () => {
       const prev = scrollY.getPrevious();
@@ -80,7 +80,9 @@ export function Navbar({ className, user }: SideBarProps) {
     });
 
     return () => window.removeEventListener("scroll", () => {});
-  }, []);
+  }, [active, scrollY]);
+
+  if (shouldAvoid) return null;
 
   // Change Language
   const handleChangeLanguage = (code: "en" | "es" | "it") => {

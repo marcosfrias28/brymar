@@ -87,18 +87,18 @@ export function LandCard({ land }: LandCardProps) {
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/lands/${land.id}`}>
                   <Eye className="h-4 w-4 mr-2" />
-                  {t.view}
+                  {t.landForm.view}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/lands/${land.id}/edit`}>
                   <Edit className="h-4 w-4 mr-2" />
-                  {t.edit}
+                  {t.landForm.edit}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem className="text-red-600">
                 <Trash2 className="h-4 w-4 mr-2" />
-                {t.delete}
+                {t.landForm.delete}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

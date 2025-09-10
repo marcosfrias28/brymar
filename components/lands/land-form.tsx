@@ -101,7 +101,7 @@ export function LandForm({ initialData, isEditing = false }: LandFormProps) {
           <div className="grid grid-cols-1 tablet:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name" className="text-arsenic">
-                {t.landName} *
+                {t.landForm.landName} *
               </Label>
               <Input
                 id="name"
@@ -115,7 +115,7 @@ export function LandForm({ initialData, isEditing = false }: LandFormProps) {
 
             <div className="space-y-2">
               <Label htmlFor="type" className="text-arsenic">
-                Tipo de Terreno *
+                {t.landForm.type} *
               </Label>
               <Select value={formData.type} onValueChange={(value) => handleInputChange("type", value)}>
                 <SelectTrigger className="border-black-coral">
@@ -134,7 +134,7 @@ export function LandForm({ initialData, isEditing = false }: LandFormProps) {
           <div className="grid grid-cols-1 smartphone:grid-cols-2 tablet:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="price" className="text-arsenic">
-                {t.price} (USD) *
+                {t.landForm.price} (USD) *
               </Label>
               <Input
                 id="price"
@@ -149,7 +149,7 @@ export function LandForm({ initialData, isEditing = false }: LandFormProps) {
 
             <div className="space-y-2">
               <Label htmlFor="surface" className="text-arsenic">
-                {t.surface} *
+                {t.landForm.surface} *
               </Label>
               <Input
                 id="surface"
@@ -172,7 +172,7 @@ export function LandForm({ initialData, isEditing = false }: LandFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="location" className="text-arsenic">
-              {t.location}
+              {t.landForm.location}
             </Label>
             <Input
               id="location"
@@ -185,7 +185,7 @@ export function LandForm({ initialData, isEditing = false }: LandFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="description" className="text-arsenic">
-              {t.description}
+              {t.landForm.description}
             </Label>
             <Textarea
               id="description"
@@ -226,7 +226,7 @@ export function LandForm({ initialData, isEditing = false }: LandFormProps) {
       {/* Images */}
       <Card className="border-black-coral shadow-lg">
         <CardHeader>
-          <CardTitle className="text-arsenic">Imágenes</CardTitle>
+          <CardTitle className="text-arsenic">{t.landForm.images}</CardTitle>
         </CardHeader>
         <CardContent>
           <ImageUpload images={formData.images} onImagesChange={handleImagesChange} maxImages={10} />
@@ -242,11 +242,11 @@ export function LandForm({ initialData, isEditing = false }: LandFormProps) {
           className="border-black-coral text-black-coral hover:bg-black-coral hover:text-white"
         >
           <X className="h-4 w-4 mr-2" />
-          {t.cancel}
+          {t.landForm.cancel}
         </Button>
         <Button type="submit" disabled={isLoading} className="bg-arsenic hover:bg-black-coral text-white">
           <Save className="h-4 w-4 mr-2" />
-          {isLoading ? t.loading : t.save}
+          {isLoading ? t.landForm.loading : t.landForm.save}
         </Button>
       </div>
     </form>
