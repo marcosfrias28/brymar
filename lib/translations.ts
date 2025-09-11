@@ -36,6 +36,8 @@ export const ForgotPasswordTranslations = {
   },
 };
 
+export type TranslationKey = keyof typeof translations.es;
+
 export const VerifyEmailTranslations = {
   en: {
     title: "Verify your email",
@@ -116,6 +118,36 @@ export const translations = {
     dashboardPropertiesTitle: "Gestione Proprietà",
     dashboardLandsTitle: "Gestione Terreni",
     dashboardBlogTitle: "Gestione Blog",
+    
+    // Navigation
+    settings: "Settings",
+    
+    // Dashboard
+    totalProperties: "Total Properties",
+    totalLands: "Total Lands",
+    totalPosts: "Published Posts",
+    
+    // Properties
+    addProperty: "Add Property",
+    editProperty: "Edit Property",
+    propertyType: "Property Type",
+    bedrooms: "Bedrooms",
+    bathrooms: "Bathrooms",
+    
+    // Lands
+    editLand: "Edit Land",
+    
+    // Blog
+    editPost: "Edit Post",
+    publishedDate: "Published Date",
+    
+    // Actions
+    save: "Save",
+    cancel: "Cancel",
+    
+    // States
+    success: "Success",
+    
     dashboard: {
       title: "Real Estate Dashboard",
       properties: "Properties",
@@ -132,6 +164,9 @@ export const translations = {
       description: "Description",
       price: "Price",
       type: "Type",
+      propertyType: "Property Type",
+      bedrooms: "Bedrooms",
+      location: "Location",
       forRent: "For Rent",
       forSale: "For Sale",
       images: "Images (max 10)",
@@ -191,6 +226,36 @@ export const translations = {
     dashboardPropertiesTitle: "Gestión de Propiedades",
     dashboardLandsTitle: "Gestión de Terrenos",
     dashboardBlogTitle: "Gestión de Blog",
+    
+    // Navigation
+    settings: "Configuración",
+    
+    // Dashboard
+    totalProperties: "Total Propiedades",
+    totalLands: "Total Terrenos",
+    totalPosts: "Posts Publicados",
+    
+    // Properties
+    addProperty: "Agregar Propiedad",
+    editProperty: "Editar Propiedad",
+    propertyType: "Tipo de Propiedad",
+    bedrooms: "Habitaciones",
+    bathrooms: "Baños",
+    
+    // Lands
+    editLand: "Editar Terreno",
+    
+    // Blog
+    editPost: "Editar Post",
+    publishedDate: "Fecha de Publicación",
+    
+    // Actions
+    save: "Guardar",
+    cancel: "Cancelar",
+    
+    // States
+    success: "Éxito",
+    
     dashboard: {
       title: "Panel de Control Inmobiliario",
       properties: "Propiedades",
@@ -207,6 +272,9 @@ export const translations = {
       description: "Descripción",
       price: "Precio",
       type: "Tipo",
+      propertyType: "Tipo de Propiedad",
+      bedrooms: "Habitaciones",
+      location: "Ubicación",
       forRent: "En Alquiler",
       forSale: "En Venta",
       images: "Imágenes (máx. 10)",
@@ -266,6 +334,36 @@ export const translations = {
     dashboardPropertiesTitle: "Gestione Proprietà",
     dashboardLandsTitle: "Gestione Terreni",
     dashboardBlogTitle: "Gestione Blog",
+    
+    // Navigation
+    settings: "Impostazioni",
+    
+    // Dashboard
+    totalProperties: "Proprietà Totali",
+    totalLands: "Terreni Totali",
+    totalPosts: "Post Pubblicati",
+    
+    // Properties
+    addProperty: "Aggiungi Proprietà",
+    editProperty: "Modifica Proprietà",
+    propertyType: "Tipo di Proprietà",
+    bedrooms: "Camere da Letto",
+    bathrooms: "Bagni",
+    
+    // Lands
+    editLand: "Modifica Terreno",
+    
+    // Blog
+    editPost: "Modifica Post",
+    publishedDate: "Data di Pubblicazione",
+    
+    // Actions
+    save: "Salva",
+    cancel: "Annulla",
+    
+    // States
+    success: "Successo",
+    
     dashboard: {
       title: "Dashboard Immobiliare",
       properties: "Proprietà",
@@ -282,6 +380,9 @@ export const translations = {
       description: "Descrizione",
       price: "Prezzo",
       type: "Tipo",
+      propertyType: "Tipo di Proprietà",
+      bedrooms: "Camere da Letto",
+      location: "Posizione",
       forRent: "In Affitto",
       forSale: "In Vendita",
       images: "Immagini (max 10)",

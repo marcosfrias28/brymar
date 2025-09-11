@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useLangStore } from "@/utils/store/lang-store"
 import { translations } from "@/lib/translations"
@@ -10,11 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ImageUpload } from "@/components/properties/image-upload"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { Save, X } from "lucide-react"
 import { toast } from "sonner"
+import { useProperties } from "@/hooks/use-properties"
 
 interface PropertyFormData {
   title: string
@@ -60,6 +60,15 @@ export function PropertyForm({ initialData, isEditing = false }: PropertyFormPro
     setFormData((prev) => ({ ...prev, images }))
   }
 
+  const { createProperty, createState } = useProperties()
+
+  // Handle successful creation
+  useEffect(() => {
+    if (createState.success) {
+      router.push("/dashboard/properties")
+    }
+  }, [createState.success, router])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -71,11 +80,24 @@ export function PropertyForm({ initialData, isEditing = false }: PropertyFormPro
         return
       }
 
-      // Simular guardado (en una app real sería una llamada a API)
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Crear FormData para enviar al servidor
+      const submitData = new FormData()
+      submitData.append('title', formData.title)
+      submitData.append('type', formData.type)
+      submitData.append('price', formData.price)
+      submitData.append('bedrooms', formData.bedrooms)
+      submitData.append('bathrooms', formData.bathrooms)
+      submitData.append('area', formData.area)
+      submitData.append('location', formData.location)
+      submitData.append('description', formData.description)
+      submitData.append('status', formData.type === 'rent' ? 'rent' : 'sale')
+      
+      // Agregar imágenes si existen
+      formData.images.forEach((image, index) => {
+        submitData.append(`image_${index}`, image)
+      })
 
-      toast.success(isEditing ? "Propiedad actualizada exitosamente" : "Propiedad creada exitosamente")
-      router.push("/dashboard/properties")
+      createProperty(submitData)
     } catch (error) {
       toast.error("Error al guardar la propiedad")
     } finally {
@@ -84,167 +106,180 @@ export function PropertyForm({ initialData, isEditing = false }: PropertyFormPro
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Basic Information */}
-      <Card className="border-black-coral shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-arsenic">Información Básica</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 tablet:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="title" className="text-arsenic">
-                {t.title} *
-              </Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => handleInputChange("title", e.target.value)}
-                placeholder="Ej: Casa moderna en Punta Cana"
-                className="border-black-coral focus:ring-arsenic"
-                required
-              />
-            </div>
+    <div className="max-w-4xl mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Basic Info */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="border-blackCoral shadow-lg">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-arsenic text-lg">Información Básica</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="sm:col-span-2">
+                    <Label htmlFor="title" className="text-arsenic text-sm font-medium">
+                      {t.propertyForm.propertyTitle} *
+                    </Label>
+                    <Input
+                      id="title"
+                      value={formData.title}
+                      onChange={(e) => handleInputChange("title", e.target.value)}
+                      placeholder="Ej: Casa moderna en Punta Cana"
+                      className="mt-1 border-blackCoral focus:ring-arsenic"
+                      required
+                    />
+                  </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="type" className="text-arsenic">
-                {t.propertyType} *
-              </Label>
-              <Select value={formData.type} onValueChange={(value) => handleInputChange("type", value)}>
-                <SelectTrigger className="border-black-coral">
-                  <SelectValue placeholder="Selecciona el tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sale">{t.forSale}</SelectItem>
-                  <SelectItem value="rent">{t.forRent}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+                  <div>
+                    <Label htmlFor="type" className="text-arsenic text-sm font-medium">
+                      {t.propertyType} *
+                    </Label>
+                    <Select value={formData.type} onValueChange={(value) => handleInputChange("type", value)}>
+                      <SelectTrigger className="mt-1 border-blackCoral">
+                        <SelectValue placeholder="Tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sale">{t.propertyForm.forSale}</SelectItem>
+                        <SelectItem value="rent">{t.propertyForm.forRent}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="location" className="text-arsenic text-sm font-medium">
+                      Ubicación *
+                    </Label>
+                    <Input
+                      id="location"
+                      value={formData.location}
+                      onChange={(e) => handleInputChange("location", e.target.value)}
+                      placeholder="Punta Cana, La Altagracia"
+                      className="mt-1 border-blackCoral focus:ring-arsenic"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div>
+                    <Label htmlFor="price" className="text-arsenic text-sm font-medium">
+                      {t.propertyForm.price} (USD) *
+                    </Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      value={formData.price}
+                      onChange={(e) => handleInputChange("price", e.target.value)}
+                      placeholder="450000"
+                      className="mt-1 border-blackCoral focus:ring-arsenic"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="bedrooms" className="text-arsenic text-sm font-medium">
+                      Habitaciones
+                    </Label>
+                    <Select value={formData.bedrooms} onValueChange={(value) => handleInputChange("bedrooms", value)}>
+                      <SelectTrigger className="mt-1 border-blackCoral">
+                        <SelectValue placeholder="Hab." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1</SelectItem>
+                        <SelectItem value="2">2</SelectItem>
+                        <SelectItem value="3">3</SelectItem>
+                        <SelectItem value="4">4</SelectItem>
+                        <SelectItem value="5">5</SelectItem>
+                        <SelectItem value="6">6+</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="bathrooms" className="text-arsenic text-sm font-medium">
+                      Baños
+                    </Label>
+                    <Select value={formData.bathrooms} onValueChange={(value) => handleInputChange("bathrooms", value)}>
+                      <SelectTrigger className="mt-1 border-blackCoral">
+                        <SelectValue placeholder="Baños" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1</SelectItem>
+                        <SelectItem value="2">2</SelectItem>
+                        <SelectItem value="3">3</SelectItem>
+                        <SelectItem value="4">4</SelectItem>
+                        <SelectItem value="5">5+</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="area" className="text-arsenic text-sm font-medium">
+                      Área (m²)
+                    </Label>
+                    <Input
+                      id="area"
+                      type="number"
+                      value={formData.area}
+                      onChange={(e) => handleInputChange("area", e.target.value)}
+                      placeholder="280"
+                      className="mt-1 border-blackCoral focus:ring-arsenic"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-blackCoral shadow-lg">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-arsenic text-lg">Descripción</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <RichTextEditor
+                  content={formData.description}
+                  onChange={(content) => handleInputChange("description", content)}
+                  placeholder="Describe las características principales de la propiedad..."
+                  className="min-h-[200px]"
+                />
+              </CardContent>
+            </Card>
           </div>
 
-          <div className="grid grid-cols-1 smartphone:grid-cols-2 tablet:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="price" className="text-arsenic">
-                {t.price} (USD) *
-              </Label>
-              <Input
-                id="price"
-                type="number"
-                value={formData.price}
-                onChange={(e) => handleInputChange("price", e.target.value)}
-                placeholder="450000"
-                className="border-black-coral focus:ring-arsenic"
-                required
-              />
-            </div>
+          {/* Right Column - Images & Actions */}
+          <div className="space-y-6">
+            <Card className="border-blackCoral shadow-lg">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-arsenic text-lg">Imágenes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ImageUpload images={formData.images} onImagesChange={handleImagesChange} maxImages={10} />
+              </CardContent>
+            </Card>
 
-            <div className="space-y-2">
-              <Label htmlFor="bedrooms" className="text-arsenic">
-                {t.bedrooms}
-              </Label>
-              <Select value={formData.bedrooms} onValueChange={(value) => handleInputChange("bedrooms", value)}>
-                <SelectTrigger className="border-black-coral">
-                  <SelectValue placeholder="Habitaciones" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1</SelectItem>
-                  <SelectItem value="2">2</SelectItem>
-                  <SelectItem value="3">3</SelectItem>
-                  <SelectItem value="4">4</SelectItem>
-                  <SelectItem value="5">5</SelectItem>
-                  <SelectItem value="6">6+</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Card className="border-blackCoral shadow-lg">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-arsenic text-lg">Acciones</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button type="submit" disabled={isLoading} className="w-full bg-arsenic hover:bg-blackCoral text-white">
+                  <Save className="h-4 w-4 mr-2" />
+                  {isLoading ? "Guardando..." : "Guardar"}
+                </Button>
 
-            <div className="space-y-2">
-              <Label htmlFor="bathrooms" className="text-arsenic">
-                {t.bathrooms}
-              </Label>
-              <Select value={formData.bathrooms} onValueChange={(value) => handleInputChange("bathrooms", value)}>
-                <SelectTrigger className="border-black-coral">
-                  <SelectValue placeholder="Baños" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">1</SelectItem>
-                  <SelectItem value="2">2</SelectItem>
-                  <SelectItem value="3">3</SelectItem>
-                  <SelectItem value="4">4</SelectItem>
-                  <SelectItem value="5">5+</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="area" className="text-arsenic">
-                {t.area}
-              </Label>
-              <Input
-                id="area"
-                type="number"
-                value={formData.area}
-                onChange={(e) => handleInputChange("area", e.target.value)}
-                placeholder="280"
-                className="border-black-coral focus:ring-arsenic"
-              />
-            </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.back()}
+                  className="w-full border-blackCoral text-blackCoral hover:bg-blackCoral hover:text-white"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  {t.cancel}
+                </Button>
+              </CardContent>
+            </Card>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="location" className="text-arsenic">
-              {t.location}
-            </Label>
-            <Input
-              id="location"
-              value={formData.location}
-              onChange={(e) => handleInputChange("location", e.target.value)}
-              placeholder="Ej: Punta Cana, La Altagracia"
-              className="border-black-coral focus:ring-arsenic"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description" className="text-arsenic">
-              {t.description}
-            </Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              placeholder="Describe las características principales de la propiedad..."
-              rows={4}
-              className="border-black-coral focus:ring-arsenic"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Images */}
-      <Card className="border-black-coral shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-arsenic">Imágenes</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ImageUpload images={formData.images} onImagesChange={handleImagesChange} maxImages={10} />
-        </CardContent>
-      </Card>
-
-      {/* Actions */}
-      <div className="flex justify-end gap-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.back()}
-          className="border-black-coral text-black-coral hover:bg-black-coral hover:text-white"
-        >
-          <X className="h-4 w-4 mr-2" />
-          {t.cancel}
-        </Button>
-        <Button type="submit" disabled={isLoading} className="bg-arsenic hover:bg-black-coral text-white">
-          <Save className="h-4 w-4 mr-2" />
-          {isLoading ? t.loading : t.save}
-        </Button>
-      </div>
-    </form>
+        </div>
+      </form>
+    </div>
   )
 }

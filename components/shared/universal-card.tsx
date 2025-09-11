@@ -9,8 +9,21 @@ import Image from "next/image"
 import Link from "next/link"
 
 interface UniversalCardProps {
-  item: any
+  id: string
+  title: string
+  description?: string
+  image?: string
   type: "property" | "land" | "blog"
+  status?: string
+  price?: number
+  location?: string
+  area?: number
+  author?: string
+  date?: string
+  category?: string
+  readTime?: number
+  bedrooms?: number
+  bathrooms?: number
   viewMode: "grid" | "list" | "bento"
   onEdit?: () => void
   onDelete?: () => void
@@ -18,30 +31,27 @@ interface UniversalCardProps {
 }
 
 export function UniversalCard({
-  item,
+  id,
+  title,
+  description,
+  image,
   type,
+  status,
+  price,
+  location,
+  area,
+  author,
+  date,
+  category,
+  readTime,
+  bedrooms,
+  bathrooms,
   viewMode,
   onEdit,
   onDelete,
   onView,
 }: UniversalCardProps) {
   const [imageError, setImageError] = useState(false)
-
-  // Extract properties based on item type
-  const id = item.id
-  const title = type === "property" ? item.title : type === "land" ? item.name : item.title
-  const description = item.description
-  const image = item.images?.[0] || item.image
-  const status = item.status
-  const price = item.price
-  const location = item.location
-  const area = type === "land" ? item.surface : item.area
-  const author = item.author
-  const date = item.createdAt || item.date
-  const category = item.category
-  const readTime = item.readTime
-  const bedrooms = item.bedrooms
-  const bathrooms = item.bathrooms
 
   const getDetailUrl = () => {
     switch (type) {

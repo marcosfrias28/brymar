@@ -1,22 +1,19 @@
 "use client";
 
-import { payloadApi } from "@/lib/payload/api-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { translations } from "@/lib/translations";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLangStore } from "@/utils/store/lang-store";
-import { toast } from "sonner";
+import { useProperties } from "@/hooks/use-properties";
 
 export function PropertyForm() {
   const [type, setType] = useState("rent");
-  const [images, setImages] = useState<File[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const language = useLangStore((prev) => prev.language);
+  const { createProperty, createState, isCreating } = useProperties();
   const {
     propertyTitle,
     description,
@@ -29,71 +26,24 @@ export function PropertyForm() {
     success,
   } = translations[language].propertyForm;
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const fileList = Array.from(e.target.files);
-      setImages((prev) => [...prev, ...fileList].slice(0, 10));
+  useEffect(() => {
+    if (createState.success) {
+      // Reset form when property is created successfully
+      const form = document.querySelector('form') as HTMLFormElement;
+      if (form) form.reset();
+      setType('rent');
     }
+  }, [createState]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Handle image selection if needed
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    
-    try {
-      const formData = new FormData(e.currentTarget);
-      const title = formData.get("title") as string;
-      const description = formData.get("description") as string;
-      const price = parseFloat(formData.get("price") as string);
-      const bedrooms = parseInt(formData.get("bedrooms") as string) || 0;
-      const bathrooms = parseInt(formData.get("bathrooms") as string) || 0;
-      const area = parseFloat(formData.get("area") as string) || 0;
-      const address = formData.get("address") as string || "";
-      const city = formData.get("city") as string || "";
-      const province = formData.get("province") as string || "";
-      
-      // Upload images first
-      const uploadedImages = [];
-      for (const image of images) {
-        const imageFormData = new FormData();
-        imageFormData.append("file", image);
-        const uploadedImage = await payloadApi.media.create(imageFormData);
-        uploadedImages.push(uploadedImage.id);
-      }
-      
-      // Create property
-      const propertyData = {
-        title,
-        description,
-        price,
-        type,
-        propertyType: "villa", // Default value
-        bedrooms,
-        bathrooms,
-        area,
-        address,
-        city,
-        province,
-        country: "Dominican Republic",
-        images: uploadedImages,
-        status: "available",
-        featured: false
-      };
-      
-      await payloadApi.properties.create(propertyData);
-      toast.success(success);
-      
-      // Reset form
-      e.currentTarget.reset();
-      setImages([]);
-      setType("rent");
-      
-    } catch (error) {
-      console.error("Error creating property:", error);
-      toast.error("Errore durante la creazione della proprietà");
-    } finally {
-      setIsSubmitting(false);
-    }
+    const formData = new FormData(e.currentTarget);
+    formData.append('type', type);
+    createProperty(formData);
   };
 
   return (
@@ -134,7 +84,7 @@ export function PropertyForm() {
           className="file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
         />
         <p className="text-sm text-gray-500 mt-1">
-          {selectedImages}: {images.length}
+          {selectedImages}: 0
         </p>
       </div>
       <div>
@@ -161,8 +111,8 @@ export function PropertyForm() {
         <Label htmlFor="province">Provincia</Label>
         <Input id="province" name="province" />
       </div>
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Creazione..." : submit}
+      <Button type="submit" disabled={isCreating}>
+        {isCreating ? "Creando..." : submit}
       </Button>
     </form>
   );

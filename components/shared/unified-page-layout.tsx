@@ -111,7 +111,7 @@ export function UnifiedPageLayout({
       `}
       >
         {paginatedItems.map((item) => (
-          <UniversalCard key={item.id} item={item} type={itemType} viewMode={viewMode} />
+          <UniversalCard key={item.id} {...item} type={itemType} viewMode={viewMode} />
         ))}
       </div>
 

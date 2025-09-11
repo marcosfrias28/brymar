@@ -54,22 +54,22 @@ export function AppSidebar() {
   const pathname = usePathname()
 
   return (
-    <Sidebar className="bg-arsenic border-r border-black-coral">
+    <Sidebar className="bg-arsenic border-r border-blackCoral">
       <SidebarHeader className="p-6">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-aurora rounded-lg flex items-center justify-center">
             <Building2 className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-azureish-white font-italianno">Marbry</h2>
-            <p className="text-sm text-dark-vanilla">Inmobiliaria</p>
+            <h2 className="text-lg font-bold text-azureishWhite font-italianno">Marbry</h2>
+            <p className="text-sm text-darkVanilla">Inmobiliaria</p>
           </div>
         </div>
       </SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-dark-vanilla">Navegación Principal</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-darkVanilla">Navegación Principal</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
@@ -77,17 +77,11 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     isActive={pathname === item.url}
-                    className="text-azureish-white hover:bg-black-coral hover:text-white data-[active=true]:bg-aurora data-[active=true]:text-white"
+                    className="text-azureishWhite hover:bg-blackCoral hover:text-white data-[active=true]:bg-aurora data-[active=true]:text-white"
                   >
                     <Link href={item.url}>
                       <item.icon className="w-4 h-4" />
-                      <span>
-                        {item.title === "dashboard" && t.dashboard.title}
-                        {item.title === "properties" && t.dashboard.properties}
-                        {item.title === "lands" && t.dashboard.lands}
-                        {item.title === "blog" && t.dashboard.blog}
-                        {item.title === "settings" && "Settings"}
-                      </span>
+                      <span>{t[item.title as keyof typeof t] as string}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -100,19 +94,19 @@ export function AppSidebar() {
       <SidebarFooter className="p-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="w-full justify-start text-azureish-white hover:bg-black-coral">
+            <Button variant="ghost" className="w-full justify-start text-azureishWhite hover:bg-blackCoral">
               <Languages className="w-4 h-4 mr-2" />
               {language.toUpperCase()}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-arsenic border-black-coral">
-            <DropdownMenuItem onClick={() => setLanguage("es")} className="text-azureish-white hover:bg-black-coral">
+          <DropdownMenuContent align="end" className="bg-arsenic border-blackCoral">
+            <DropdownMenuItem onClick={() => setLanguage("es")} className="text-azureishWhite hover:bg-blackCoral">
               Español
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setLanguage("en")} className="text-azureish-white hover:bg-black-coral">
+            <DropdownMenuItem onClick={() => setLanguage("en")} className="text-azureishWhite hover:bg-blackCoral">
               English
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setLanguage("it")} className="text-azureish-white hover:bg-black-coral">
+            <DropdownMenuItem onClick={() => setLanguage("it")} className="text-azureishWhite hover:bg-blackCoral">
               Italiano
             </DropdownMenuItem>
           </DropdownMenuContent>

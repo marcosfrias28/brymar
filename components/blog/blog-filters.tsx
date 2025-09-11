@@ -8,41 +8,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
+interface BlogFilters {
+  status: string
+  category: string
+  author: string
+  dateFrom: string
+  dateTo: string
+}
+
 interface BlogFiltersProps {
-  filters: {
-    status: string
-    category: string
-    author: string
-    dateFrom: string
-    dateTo: string
-  }
-  setFilters: (filters: {
-    status: string
-    category: string
-    author: string
-    dateFrom: string
-    dateTo: string
-  } | ((prev: {
-    status: string
-    category: string
-    author: string
-    dateFrom: string
-    dateTo: string
-  }) => {
-    status: string
-    category: string
-    author: string
-    dateFrom: string
-    dateTo: string
-  })) => void
+  filters: BlogFilters
+  setFilters: (filters: BlogFilters | ((prev: BlogFilters) => BlogFilters)) => void
 }
 
 export function BlogFilters({ filters, setFilters }: BlogFiltersProps) {
   const { language } = useLangStore()
-  const t = translations[language]
+  const t = translations[language].blogForm
 
   const handleFilterChange = (key: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [key]: value }))
+    setFilters((prev: BlogFilters) => ({ ...prev, [key]: value }))
   }
 
   const clearFilters = () => {
@@ -56,14 +40,14 @@ export function BlogFilters({ filters, setFilters }: BlogFiltersProps) {
   }
 
   return (
-    <Card className="border-black-coral">
+    <Card className="border-blackCoral">
       <CardContent className="p-4">
         <div className="grid grid-cols-1 smartphone:grid-cols-2 tablet:grid-cols-3 laptop:grid-cols-5 gap-4">
           {/* Status */}
           <div className="space-y-2">
             <Label className="text-arsenic">Estado</Label>
             <Select value={filters.status} onValueChange={(value) => handleFilterChange("status", value)}>
-              <SelectTrigger className="border-black-coral">
+              <SelectTrigger className="border-blackCoral">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -78,7 +62,7 @@ export function BlogFilters({ filters, setFilters }: BlogFiltersProps) {
           <div className="space-y-2">
             <Label className="text-arsenic">Categoría</Label>
             <Select value={filters.category} onValueChange={(value) => handleFilterChange("category", value)}>
-              <SelectTrigger className="border-black-coral">
+              <SelectTrigger className="border-blackCoral">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -94,12 +78,12 @@ export function BlogFilters({ filters, setFilters }: BlogFiltersProps) {
 
           {/* Author */}
           <div className="space-y-2">
-            <Label className="text-arsenic">{t.blogForm.author}</Label>
+            <Label className="text-arsenic">{t.author}</Label>
             <Input
               placeholder="Buscar autor"
               value={filters.author}
               onChange={(e) => handleFilterChange("author", e.target.value)}
-              className="border-black-coral"
+              className="border-blackCoral"
             />
           </div>
 
@@ -110,7 +94,7 @@ export function BlogFilters({ filters, setFilters }: BlogFiltersProps) {
               type="date"
               value={filters.dateFrom}
               onChange={(e) => handleFilterChange("dateFrom", e.target.value)}
-              className="border-black-coral"
+              className="border-blackCoral"
             />
           </div>
 
@@ -121,7 +105,7 @@ export function BlogFilters({ filters, setFilters }: BlogFiltersProps) {
               type="date"
               value={filters.dateTo}
               onChange={(e) => handleFilterChange("dateTo", e.target.value)}
-              className="border-black-coral"
+              className="border-blackCoral"
             />
           </div>
         </div>
@@ -131,7 +115,7 @@ export function BlogFilters({ filters, setFilters }: BlogFiltersProps) {
           <Button
             variant="outline"
             onClick={clearFilters}
-            className="border-black-coral text-black-coral hover:bg-black-coral hover:text-white bg-transparent"
+            className="border-blackCoral text-blackCoral hover:bg-blackCoral hover:text-white bg-transparent"
           >
             Limpiar Filtros
           </Button>

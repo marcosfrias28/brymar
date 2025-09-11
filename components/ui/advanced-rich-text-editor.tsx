@@ -6,58 +6,59 @@ import Image from "@tiptap/extension-image"
 import Link from "@tiptap/extension-link"
 import TextAlign from "@tiptap/extension-text-align"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { 
-  Bold, 
-  Italic, 
-  List, 
-  ListOrdered, 
-  Quote, 
-  Undo, 
-  Redo, 
-  Heading2, 
-  Heading3,
+import { Separator } from "@/components/ui/separator"
+import {
+  Bold,
+  Italic,
+  Strikethrough,
   AlignLeft,
   AlignCenter,
   AlignRight,
-  AlignJustify,
+  List,
+  ListOrdered,
+  Quote,
+  Undo,
+  Redo,
+  LinkIcon,
   ImageIcon,
-  Link as LinkIcon
+  Save,
+  X,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
 import { useState } from "react"
 
 interface AdvancedRichTextEditorProps {
   content: string
   onChange: (content: string) => void
+  onSave: () => void
+  onCancel: () => void
   placeholder?: string
   className?: string
 }
 
-export function AdvancedRichTextEditor({ content, onChange, placeholder, className }: AdvancedRichTextEditorProps) {
-  const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false)
+export function AdvancedRichTextEditor({
+  content,
+  onChange,
+  onSave,
+  onCancel,
+  placeholder = "Escribe tu contenido aquí...",
+  className = "",
+}: AdvancedRichTextEditorProps) {
+  const [showLinkDialog, setShowLinkDialog] = useState(false)
   const [linkUrl, setLinkUrl] = useState("")
-  const [isImageDialogOpen, setIsImageDialogOpen] = useState(false)
-  const [imageUrl, setImageUrl] = useState("")
 
   const editor = useEditor({
     extensions: [
       StarterKit,
       Image.configure({
         HTMLAttributes: {
-          class: 'max-w-full h-auto rounded-lg',
+          class: "max-w-full h-auto rounded-lg",
         },
       }),
       Link.configure({
         openOnClick: false,
-        HTMLAttributes: {
-          class: 'text-blue-600 underline cursor-pointer',
-        },
       }),
       TextAlign.configure({
-        types: ['heading', 'paragraph'],
+        types: ["heading", "paragraph"],
       }),
     ],
     content,
@@ -66,259 +67,190 @@ export function AdvancedRichTextEditor({ content, onChange, placeholder, classNa
     },
     editorProps: {
       attributes: {
-        class: "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[120px] p-4",
+        class: "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[400px] p-6",
       },
     },
   })
-
-  const addLink = () => {
-    if (linkUrl && editor) {
-      editor.chain().focus().setLink({ href: linkUrl }).run()
-      setLinkUrl("")
-      setIsLinkDialogOpen(false)
-    }
-  }
-
-  const addImage = () => {
-    if (imageUrl && editor) {
-      editor.chain().focus().setImage({ src: imageUrl }).run()
-      setImageUrl("")
-      setIsImageDialogOpen(false)
-    }
-  }
 
   if (!editor) {
     return null
   }
 
+  const addLink = () => {
+    if (linkUrl) {
+      editor.chain().focus().setLink({ href: linkUrl }).run()
+      setLinkUrl("")
+      setShowLinkDialog(false)
+    }
+  }
+
+  const addImage = () => {
+    const url = window.prompt("URL de la imagen:")
+    if (url) {
+      editor.chain().focus().setImage({ src: url }).run()
+    }
+  }
+
   return (
-    <div className={cn("border border-gray-300 rounded-lg", className)}>
+    <div className={`border border-blackCoral rounded-lg bg-white ${className}`}>
       {/* Toolbar */}
-      <div className="border-b border-gray-300 p-2 flex flex-wrap gap-1">
-        {/* Text Formatting */}
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={cn("h-8 w-8 p-0", editor.isActive("bold") ? "bg-gray-700 text-white" : "")}
-        >
-          <Bold className="h-4 w-4" />
-        </Button>
+      <div className="border-b border-blackCoral/20 p-3">
+        <div className="flex flex-wrap items-center gap-1">
+          {/* Text formatting */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            className={editor.isActive("bold") ? "bg-arsenic text-white" : ""}
+          >
+            <Bold className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            className={editor.isActive("italic") ? "bg-arsenic text-white" : ""}
+          >
+            <Italic className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleStrike().run()}
+            className={editor.isActive("strike") ? "bg-arsenic text-white" : ""}
+          >
+            <Strikethrough className="h-4 w-4" />
+          </Button>
 
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={cn("h-8 w-8 p-0", editor.isActive("italic") ? "bg-gray-700 text-white" : "")}
-        >
-          <Italic className="h-4 w-4" />
-        </Button>
+          <Separator orientation="vertical" className="h-6 mx-1" />
 
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={cn("h-8 w-8 p-0", editor.isActive("heading", { level: 2 }) ? "bg-gray-700 text-white" : "")}
-        >
-          <Heading2 className="h-4 w-4" />
-        </Button>
+          {/* Alignment */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().setTextAlign("left").run()}
+            className={editor.isActive({ textAlign: "left" }) ? "bg-arsenic text-white" : ""}
+          >
+            <AlignLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().setTextAlign("center").run()}
+            className={editor.isActive({ textAlign: "center" }) ? "bg-arsenic text-white" : ""}
+          >
+            <AlignCenter className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().setTextAlign("right").run()}
+            className={editor.isActive({ textAlign: "right" }) ? "bg-arsenic text-white" : ""}
+          >
+            <AlignRight className="h-4 w-4" />
+          </Button>
 
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          className={cn("h-8 w-8 p-0", editor.isActive("heading", { level: 3 }) ? "bg-gray-700 text-white" : "")}
-        >
-          <Heading3 className="h-4 w-4" />
-        </Button>
+          <Separator orientation="vertical" className="h-6 mx-1" />
 
-        <div className="w-px h-6 bg-gray-300 mx-1" />
+          {/* Lists */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            className={editor.isActive("bulletList") ? "bg-arsenic text-white" : ""}
+          >
+            <List className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            className={editor.isActive("orderedList") ? "bg-arsenic text-white" : ""}
+          >
+            <ListOrdered className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().toggleBlockquote().run()}
+            className={editor.isActive("blockquote") ? "bg-arsenic text-white" : ""}
+          >
+            <Quote className="h-4 w-4" />
+          </Button>
 
-        {/* Text Alignment */}
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().setTextAlign('left').run()}
-          className={cn("h-8 w-8 p-0", editor.isActive({ textAlign: 'left' }) ? "bg-gray-700 text-white" : "")}
-        >
-          <AlignLeft className="h-4 w-4" />
-        </Button>
+          <Separator orientation="vertical" className="h-6 mx-1" />
 
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().setTextAlign('center').run()}
-          className={cn("h-8 w-8 p-0", editor.isActive({ textAlign: 'center' }) ? "bg-gray-700 text-white" : "")}
-        >
-          <AlignCenter className="h-4 w-4" />
-        </Button>
+          {/* Media */}
+          <Button variant="ghost" size="sm" onClick={() => setShowLinkDialog(true)}>
+            <LinkIcon className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={addImage}>
+            <ImageIcon className="h-4 w-4" />
+          </Button>
 
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().setTextAlign('right').run()}
-          className={cn("h-8 w-8 p-0", editor.isActive({ textAlign: 'right' }) ? "bg-gray-700 text-white" : "")}
-        >
-          <AlignRight className="h-4 w-4" />
-        </Button>
+          <Separator orientation="vertical" className="h-6 mx-1" />
 
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().setTextAlign('justify').run()}
-          className={cn("h-8 w-8 p-0", editor.isActive({ textAlign: 'justify' }) ? "bg-gray-700 text-white" : "")}
-        >
-          <AlignJustify className="h-4 w-4" />
-        </Button>
+          {/* Undo/Redo */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().undo().run()}
+            disabled={!editor.can().undo()}
+          >
+            <Undo className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => editor.chain().focus().redo().run()}
+            disabled={!editor.can().redo()}
+          >
+            <Redo className="h-4 w-4" />
+          </Button>
 
-        <div className="w-px h-6 bg-gray-300 mx-1" />
+          <div className="flex-1" />
 
-        {/* Lists */}
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={cn("h-8 w-8 p-0", editor.isActive("bulletList") ? "bg-gray-700 text-white" : "")}
-        >
-          <List className="h-4 w-4" />
-        </Button>
+          {/* Actions */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onCancel}
+            className="border-blackCoral text-blackCoral hover:bg-blackCoral hover:text-white bg-transparent"
+          >
+            <X className="h-4 w-4 mr-1" />
+            Cancelar
+          </Button>
+          <Button size="sm" onClick={onSave} className="bg-arsenic hover:bg-blackCoral text-white">
+            <Save className="h-4 w-4 mr-1" />
+            Guardar
+          </Button>
+        </div>
 
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={cn("h-8 w-8 p-0", editor.isActive("orderedList") ? "bg-gray-700 text-white" : "")}
-        >
-          <ListOrdered className="h-4 w-4" />
-        </Button>
-
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          className={cn("h-8 w-8 p-0", editor.isActive("blockquote") ? "bg-gray-700 text-white" : "")}
-        >
-          <Quote className="h-4 w-4" />
-        </Button>
-
-        <div className="w-px h-6 bg-gray-300 mx-1" />
-
-        {/* Link Dialog */}
-        <Dialog open={isLinkDialogOpen} onOpenChange={setIsLinkDialogOpen}>
-          <DialogTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className={cn("h-8 w-8 p-0", editor.isActive("link") ? "bg-gray-700 text-white" : "")}
-            >
-              <LinkIcon className="h-4 w-4" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Aggiungi Link</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="link-url">URL</Label>
-                <Input
-                  id="link-url"
-                  value={linkUrl}
-                  onChange={(e) => setLinkUrl(e.target.value)}
-                  placeholder="https://esempio.com"
-                />
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setIsLinkDialogOpen(false)}>
-                  Annulla
-                </Button>
-                <Button onClick={addLink}>Aggiungi</Button>
-              </div>
+        {/* Link dialog */}
+        {showLinkDialog && (
+          <div className="mt-3 p-3 border border-blackCoral/20 rounded-lg bg-azureishWhite">
+            <div className="flex items-center gap-2">
+              <input
+                type="url"
+                placeholder="https://ejemplo.com"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                className="flex-1 px-3 py-1 border border-blackCoral/20 rounded text-sm"
+                onKeyDown={(e) => e.key === "Enter" && addLink()}
+              />
+              <Button size="sm" onClick={addLink}>
+                Agregar
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setShowLinkDialog(false)}>
+                <X className="h-4 w-4" />
+              </Button>
             </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Image Dialog */}
-        <Dialog open={isImageDialogOpen} onOpenChange={setIsImageDialogOpen}>
-          <DialogTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-            >
-              <ImageIcon className="h-4 w-4" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Aggiungi Immagine</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="image-url">URL Immagine</Label>
-                <Input
-                  id="image-url"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="https://esempio.com/immagine.jpg"
-                />
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setIsImageDialogOpen(false)}>
-                  Annulla
-                </Button>
-                <Button onClick={addImage}>Aggiungi</Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        <div className="w-px h-6 bg-gray-300 mx-1" />
-
-        {/* Undo/Redo */}
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().undo().run()}
-          disabled={!editor.can().undo()}
-          className="h-8 w-8 p-0"
-        >
-          <Undo className="h-4 w-4" />
-        </Button>
-
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => editor.chain().focus().redo().run()}
-          disabled={!editor.can().redo()}
-          className="h-8 w-8 p-0"
-        >
-          <Redo className="h-4 w-4" />
-        </Button>
+          </div>
+        )}
       </div>
 
       {/* Editor */}
-      <div className="relative">
-        <EditorContent editor={editor} className="min-h-[120px] max-h-[400px] overflow-y-auto" />
-        {placeholder && !content && (
-          <div className="absolute top-4 left-4 text-gray-400 pointer-events-none">{placeholder}</div>
-        )}
-      </div>
+      <EditorContent editor={editor} className="min-h-[400px]" />
     </div>
   )
 }

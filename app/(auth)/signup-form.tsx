@@ -5,7 +5,7 @@ import { useActionState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { signUp } from "@/lib/actions/user-actions";
+import { signUp } from "@/lib/actions/auth-actions";
 import { ActionState } from "@/lib/validations";
 import { SignFormTranslations } from "@/lib/translations";
 import { CustomInput } from "../../components/custom-input";

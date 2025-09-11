@@ -30,7 +30,7 @@ interface BlogCardProps {
 
 export function BlogCard({ post }: BlogCardProps) {
   const { language } = useLangStore()
-  const t = translations[language]
+  const t = translations[language].blogForm
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("es-ES", {
@@ -62,7 +62,7 @@ export function BlogCard({ post }: BlogCardProps) {
   }
 
   return (
-    <Card className="border-black-coral shadow-lg hover:shadow-xl transition-all duration-300 group">
+    <Card className="border-blackCoral shadow-lg hover:shadow-xl transition-all duration-300 group">
       {/* Cover Image */}
       <div className="relative h-48 overflow-hidden rounded-t-lg">
         <Image
@@ -82,22 +82,22 @@ export function BlogCard({ post }: BlogCardProps) {
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white border-black-coral">
+            <DropdownMenuContent align="end" className="bg-white border-blackCoral">
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/blog/${post.id}`}>
                   <Eye className="h-4 w-4 mr-2" />
-                  {t.blogForm.view}
+                  {t.view}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/blog/${post.id}/edit`}>
                   <Edit className="h-4 w-4 mr-2" />
-                  {t.blogForm.edit}
+                  {t.edit}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem className="text-red-600">
                 <Trash2 className="h-4 w-4 mr-2" />
-                {t.blogForm.delete}
+                {t.delete}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -109,10 +109,10 @@ export function BlogCard({ post }: BlogCardProps) {
         <h3 className="font-semibold text-arsenic text-lg mb-2 line-clamp-2 leading-tight">{post.title}</h3>
 
         {/* Excerpt */}
-        <p className="text-black-coral/70 text-sm mb-3 line-clamp-3">{post.excerpt}</p>
+        <p className="text-blackCoral/70 text-sm mb-3 line-clamp-3">{post.excerpt}</p>
 
         {/* Meta Information */}
-        <div className="space-y-2 text-sm text-black-coral">
+        <div className="space-y-2 text-sm text-blackCoral">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
               <User className="h-4 w-4" />
@@ -132,7 +132,7 @@ export function BlogCard({ post }: BlogCardProps) {
       </CardContent>
 
       <CardFooter className="p-4 pt-0">
-        <Button asChild className="w-full bg-arsenic hover:bg-black-coral text-white">
+        <Button asChild className="w-full bg-arsenic hover:bg-blackCoral text-white">
           <Link href={`/dashboard/blog/${post.id}`}>Leer Más</Link>
         </Button>
       </CardFooter>

@@ -3,8 +3,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
-import { useLangStore } from "@/utils/store/lang-store"
-import { translations } from "@/lib/translations"
 
 const chartData = [
   { month: "Ene", propiedades: 12, terrenos: 8 },
@@ -27,16 +25,11 @@ const chartConfig = {
 }
 
 export function PropertyChart() {
-  const { language } = useLangStore()
-  const t = translations[language].dashboard
-
   return (
     <Card className="border-blackCoral shadow-lg">
       <CardHeader>
-        <CardTitle className="text-arsenic">{t.monthlyActivity || "Actividad Mensual"}</CardTitle>
-        <CardDescription className="text-blackCoral">
-          {t.propertiesAndLandsAdded || "Propiedades y terrenos agregados por mes"}
-        </CardDescription>
+        <CardTitle className="text-arsenic">Actividad Mensual</CardTitle>
+        <CardDescription className="text-blackCoral">Propiedades y terrenos agregados por mes</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>

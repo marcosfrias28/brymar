@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { searchProperties } from "@/lib/actions/property-actions";
+import { searchPropertiesAction } from "@/lib/actions/property-actions";
 import { ActionState } from "@/lib/validations";
 import { PropertyMap } from "@/components/property/property-map";
 import { SearchFilters } from "@/components/search-filters";
@@ -22,7 +22,7 @@ import { Property } from "@/utils/types/types";
 export default function PropertySearch() {
   const language = useLangStore((state) => state.language);
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
-    searchProperties,
+    searchPropertiesAction,
     {
       error: "",
     }

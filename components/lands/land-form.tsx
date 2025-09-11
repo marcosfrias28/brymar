@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useLangStore } from "@/utils/store/lang-store"
@@ -10,9 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ImageUpload } from "@/components/properties/image-upload"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { Save, X } from "lucide-react"
 import { toast } from "sonner"
 
@@ -34,7 +33,7 @@ interface LandFormProps {
 export function LandForm({ initialData, isEditing = false }: LandFormProps) {
   const router = useRouter()
   const { language } = useLangStore()
-  const t = translations[language]
+  const t = translations[language].landForm
 
   const [formData, setFormData] = useState<LandFormData>({
     name: initialData?.name || "",
@@ -91,164 +90,168 @@ export function LandForm({ initialData, isEditing = false }: LandFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Basic Information */}
-      <Card className="border-black-coral shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-arsenic">Información Básica</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 tablet:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-arsenic">
-                {t.landForm.landName} *
-              </Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleInputChange("name", e.target.value)}
-                placeholder="Ej: Terreno Comercial Bávaro"
-                className="border-black-coral focus:ring-arsenic"
-                required
-              />
-            </div>
+    <div className="max-w-4xl mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Basic Info */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="border-blackCoral shadow-lg">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-arsenic text-lg">Información Básica</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="sm:col-span-2">
+                    <Label htmlFor="name" className="text-arsenic text-sm font-medium">
+                      {t.landName} *
+                    </Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => handleInputChange("name", e.target.value)}
+                      placeholder="Ej: Terreno Comercial Bávaro"
+                      className="mt-1 border-blackCoral focus:ring-arsenic"
+                      required
+                    />
+                  </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="type" className="text-arsenic">
-                {t.landForm.type} *
-              </Label>
-              <Select value={formData.type} onValueChange={(value) => handleInputChange("type", value)}>
-                <SelectTrigger className="border-black-coral">
-                  <SelectValue placeholder="Selecciona el tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="commercial">Comercial</SelectItem>
-                  <SelectItem value="residential">Residencial</SelectItem>
-                  <SelectItem value="agricultural">Agrícola</SelectItem>
-                  <SelectItem value="beachfront">Frente al Mar</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+                  <div>
+                    <Label htmlFor="type" className="text-arsenic text-sm font-medium">
+                      Tipo de Terreno *
+                    </Label>
+                    <Select value={formData.type} onValueChange={(value) => handleInputChange("type", value)}>
+                      <SelectTrigger className="mt-1 border-blackCoral">
+                        <SelectValue placeholder="Tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="commercial">Comercial</SelectItem>
+                        <SelectItem value="residential">Residencial</SelectItem>
+                        <SelectItem value="agricultural">Agrícola</SelectItem>
+                        <SelectItem value="beachfront">Frente al Mar</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="location" className="text-arsenic text-sm font-medium">
+                      {t.location}
+                    </Label>
+                    <Input
+                      id="location"
+                      value={formData.location}
+                      onChange={(e) => handleInputChange("location", e.target.value)}
+                      placeholder="Bávaro, Punta Cana"
+                      className="mt-1 border-blackCoral focus:ring-arsenic"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <div>
+                    <Label htmlFor="price" className="text-arsenic text-sm font-medium">
+                      {t.price} (USD) *
+                    </Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      value={formData.price}
+                      onChange={(e) => handleInputChange("price", e.target.value)}
+                      placeholder="180000"
+                      className="mt-1 border-blackCoral focus:ring-arsenic"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="surface" className="text-arsenic text-sm font-medium">
+                      {t.surface} (m²) *
+                    </Label>
+                    <Input
+                      id="surface"
+                      type="number"
+                      value={formData.surface}
+                      onChange={(e) => handleInputChange("surface", e.target.value)}
+                      placeholder="2500"
+                      className="mt-1 border-blackCoral focus:ring-arsenic"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-arsenic text-sm font-medium">Precio por m²</Label>
+                    <div className="h-10 px-3 py-2 mt-1 border border-blackCoral rounded-md bg-muted flex items-center text-blackCoral text-sm">
+                      ${calculatePricePerM2().toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 pt-2 border-t border-blackCoral/20">
+                  <div>
+                    <Label className="text-arsenic text-xs font-medium">Hectáreas</Label>
+                    <div className="text-sm text-blackCoral">
+                      {formData.surface ? (Number.parseFloat(formData.surface) / 10000).toFixed(4) : "0"} ha
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-arsenic text-xs font-medium">Tareas</Label>
+                    <div className="text-sm text-blackCoral">
+                      {formData.surface ? (Number.parseFloat(formData.surface) / 629).toFixed(2) : "0"} tareas
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-blackCoral shadow-lg">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-arsenic text-lg">Descripción</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <RichTextEditor
+                  content={formData.description}
+                  onChange={(content) => handleInputChange("description", content)}
+                  placeholder="Describe las características principales del terreno..."
+                  className="min-h-[200px]"
+                />
+              </CardContent>
+            </Card>
           </div>
 
-          <div className="grid grid-cols-1 smartphone:grid-cols-2 tablet:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="price" className="text-arsenic">
-                {t.landForm.price} (USD) *
-              </Label>
-              <Input
-                id="price"
-                type="number"
-                value={formData.price}
-                onChange={(e) => handleInputChange("price", e.target.value)}
-                placeholder="180000"
-                className="border-black-coral focus:ring-arsenic"
-                required
-              />
-            </div>
+          {/* Right Column - Images & Actions */}
+          <div className="space-y-6">
+            <Card className="border-blackCoral shadow-lg">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-arsenic text-lg">Imágenes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ImageUpload images={formData.images} onImagesChange={handleImagesChange} maxImages={10} />
+              </CardContent>
+            </Card>
 
-            <div className="space-y-2">
-              <Label htmlFor="surface" className="text-arsenic">
-                {t.landForm.surface} *
-              </Label>
-              <Input
-                id="surface"
-                type="number"
-                value={formData.surface}
-                onChange={(e) => handleInputChange("surface", e.target.value)}
-                placeholder="2500"
-                className="border-black-coral focus:ring-arsenic"
-                required
-              />
-            </div>
+            <Card className="border-blackCoral shadow-lg">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-arsenic text-lg">Acciones</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button type="submit" disabled={isLoading} className="w-full bg-arsenic hover:bg-blackCoral text-white">
+                  <Save className="h-4 w-4 mr-2" />
+                  {isLoading ? t.loading : t.save}
+                </Button>
 
-            <div className="space-y-2">
-              <Label className="text-arsenic">Precio por m²</Label>
-              <div className="h-10 px-3 py-2 border border-black-coral rounded-md bg-muted flex items-center text-black-coral">
-                ${calculatePricePerM2().toLocaleString()}
-              </div>
-            </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.back()}
+                  className="w-full border-blackCoral text-blackCoral hover:bg-blackCoral hover:text-white"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  {t.cancel}
+                </Button>
+              </CardContent>
+            </Card>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="location" className="text-arsenic">
-              {t.landForm.location}
-            </Label>
-            <Input
-              id="location"
-              value={formData.location}
-              onChange={(e) => handleInputChange("location", e.target.value)}
-              placeholder="Ej: Bávaro, Punta Cana"
-              className="border-black-coral focus:ring-arsenic"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description" className="text-arsenic">
-              {t.landForm.description}
-            </Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              placeholder="Describe las características principales del terreno..."
-              rows={4}
-              className="border-black-coral focus:ring-arsenic"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Additional Information */}
-      <Card className="border-black-coral shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-arsenic">Información Adicional</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 smartphone:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-arsenic">Superficie en Hectáreas</Label>
-              <div className="h-10 px-3 py-2 border border-black-coral rounded-md bg-muted flex items-center text-black-coral">
-                {formData.surface ? (Number.parseFloat(formData.surface) / 10000).toFixed(4) : "0"} ha
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-arsenic">Superficie en Tareas</Label>
-              <div className="h-10 px-3 py-2 border border-black-coral rounded-md bg-muted flex items-center text-black-coral">
-                {formData.surface ? (Number.parseFloat(formData.surface) / 629).toFixed(2) : "0"} tareas
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Images */}
-      <Card className="border-black-coral shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-arsenic">{t.landForm.images}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ImageUpload images={formData.images} onImagesChange={handleImagesChange} maxImages={10} />
-        </CardContent>
-      </Card>
-
-      {/* Actions */}
-      <div className="flex justify-end gap-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.back()}
-          className="border-black-coral text-black-coral hover:bg-black-coral hover:text-white"
-        >
-          <X className="h-4 w-4 mr-2" />
-          {t.landForm.cancel}
-        </Button>
-        <Button type="submit" disabled={isLoading} className="bg-arsenic hover:bg-black-coral text-white">
-          <Save className="h-4 w-4 mr-2" />
-          {isLoading ? t.landForm.loading : t.landForm.save}
-        </Button>
-      </div>
-    </form>
+        </div>
+      </form>
+    </div>
   )
 }

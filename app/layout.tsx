@@ -4,7 +4,8 @@ import { Inter } from "next/font/google";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/sections/footer";
 import { Toaster } from "@/components/ui/sonner";
-import { getUser } from "@/lib/actions/user-actions";
+import { getUser } from "@/lib/actions/auth-actions";
+
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
@@ -22,8 +23,9 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const user = await getUser();
+
   return (
-    <html>
+    <html suppressHydrationWarning>
       <body className={`${inter.className} flex flex-col min-h-screen`}>
         <ThemeProvider
           attribute="class"

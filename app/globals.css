@@ -163,6 +163,42 @@
   }
 }
 
+/* Gradiente Aurora personalizado */
+.bg-aurora {
+  background: radial-gradient(
+      circle at 30% 60%,
+      var(--color-3) 0%,
+      var(--color-4) 100%
+    ),
+    radial-gradient(circle at 40% 80%, var(--secondary) 0%, var(--color-3) 80%);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Animaciones personalizadas */
+@keyframes auroraMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  animation: auroraMove 6s ease infinite;
+}
+
 @layer base {
   /*
   --color-1: hsl(213, 12%, 25%);
@@ -265,4 +301,31 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Marquee animations */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+  }
+}
+
+@keyframes marquee-vertical {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(calc(-100% - var(--gap)));
+  }
+}
+
+.animate-marquee {
+  animation: marquee var(--duration) linear infinite;
+}
+
+.animate-marquee-vertical {
+  animation: marquee-vertical var(--duration) linear infinite;
 }

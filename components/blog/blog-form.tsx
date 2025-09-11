@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useLangStore } from "@/utils/store/lang-store"
@@ -12,7 +11,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { X, FileText, Eye } from "lucide-react"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
+import { X, FileText, Eye, Upload } from "lucide-react"
 import { toast } from "sonner"
 import Image from "next/image"
 
@@ -35,7 +35,7 @@ interface BlogFormProps {
 export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
   const router = useRouter()
   const { language } = useLangStore()
-  const t = translations[language]
+  const t = translations[language].blogForm
 
   const [formData, setFormData] = useState<BlogFormData>({
     title: initialData?.title || "",
@@ -76,7 +76,7 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
 
   const calculateReadTime = () => {
     const wordsPerMinute = 200
-    const wordCount = formData.content.split(/\s+/).length
+    const wordCount = formData.content.replace(/<[^>]*>/g, "").split(/\s+/).length
     return Math.ceil(wordCount / wordsPerMinute)
   }
 
@@ -114,171 +114,184 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Basic Information */}
-      <Card className="border-black-coral shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-arsenic">Información del Post</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="title" className="text-arsenic">
-              {t.blogForm.title} *
-            </Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => handleInputChange("title", e.target.value)}
-              placeholder="Ej: Guía para Invertir en Bienes Raíces 2024"
-              className="border-black-coral focus:ring-arsenic text-lg"
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-1 tablet:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="author" className="text-arsenic">
-                {t.blogForm.author} *
-              </Label>
-              <Input
-                id="author"
-                value={formData.author}
-                onChange={(e) => handleInputChange("author", e.target.value)}
-                placeholder="Nombre del autor"
-                className="border-black-coral focus:ring-arsenic"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="category" className="text-arsenic">
-                Categoría
-              </Label>
-              <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
-                <SelectTrigger className="border-black-coral">
-                  <SelectValue placeholder="Selecciona categoría" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="inversiones">Inversiones</SelectItem>
-                  <SelectItem value="mercado">Mercado</SelectItem>
-                  <SelectItem value="consejos">Consejos</SelectItem>
-                  <SelectItem value="desarrollos">Desarrollos</SelectItem>
-                  <SelectItem value="noticias">Noticias</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-arsenic">Tiempo de Lectura</Label>
-              <div className="h-10 px-3 py-2 border border-black-coral rounded-md bg-muted flex items-center text-black-coral">
-                {calculateReadTime()} min
+    <div className="max-w-5xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Left Column - Main Content */}
+        <div className="lg:col-span-3 space-y-6">
+          <Card className="border-blackCoral shadow-lg">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-arsenic text-lg">Información del Post</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="title" className="text-arsenic text-sm font-medium">
+                  {t.postTitle} *
+                </Label>
+                <Input
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => handleInputChange("title", e.target.value)}
+                  placeholder="Ej: Guía para Invertir en Bienes Raíces 2024"
+                  className="mt-1 border-blackCoral focus:ring-arsenic text-lg"
+                  required
+                />
               </div>
-            </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="excerpt" className="text-arsenic">
-              Resumen
-            </Label>
-            <Textarea
-              id="excerpt"
-              value={formData.excerpt}
-              onChange={(e) => handleInputChange("excerpt", e.target.value)}
-              placeholder="Breve descripción del contenido del post..."
-              rows={3}
-              className="border-black-coral focus:ring-arsenic"
-            />
-          </div>
-        </CardContent>
-      </Card>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="author" className="text-arsenic text-sm font-medium">
+                    {t.author} *
+                  </Label>
+                  <Input
+                    id="author"
+                    value={formData.author}
+                    onChange={(e) => handleInputChange("author", e.target.value)}
+                    placeholder="Nombre del autor"
+                    className="mt-1 border-blackCoral focus:ring-arsenic"
+                    required
+                  />
+                </div>
 
-      {/* Cover Image */}
-      <Card className="border-black-coral shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-arsenic">Imagen de Portada</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="coverImage" className="text-arsenic">
-              Seleccionar Imagen
-            </Label>
-            <Input
-              id="coverImage"
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="border-black-coral focus:ring-arsenic"
-            />
-            <p className="text-sm text-black-coral/70">Tamaño recomendado: 1200x600px, máximo 5MB</p>
-          </div>
+                <div>
+                  <Label htmlFor="category" className="text-arsenic text-sm font-medium">
+                    Categoría
+                  </Label>
+                  <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
+                    <SelectTrigger className="mt-1 border-blackCoral">
+                      <SelectValue placeholder="Categoría" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="inversiones">Inversiones</SelectItem>
+                      <SelectItem value="mercado">Mercado</SelectItem>
+                      <SelectItem value="consejos">Consejos</SelectItem>
+                      <SelectItem value="desarrollos">Desarrollos</SelectItem>
+                      <SelectItem value="noticias">Noticias</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-          {coverImagePreview && (
-            <div className="relative w-full h-64 rounded-lg overflow-hidden border border-black-coral">
-              <Image src={coverImagePreview || "/placeholder.svg"} alt="Vista previa" fill className="object-cover" />
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                <div>
+                  <Label className="text-arsenic text-sm font-medium">Tiempo de Lectura</Label>
+                  <div className="h-10 px-3 py-2 mt-1 border border-blackCoral rounded-md bg-muted flex items-center text-blackCoral text-sm">
+                    {calculateReadTime()} min
+                  </div>
+                </div>
+              </div>
 
-      {/* Content */}
-      <Card className="border-black-coral shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-arsenic">Contenido del Post</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="content" className="text-arsenic">
-              {t.blogForm.content} *
-            </Label>
-            <Textarea
-              id="content"
-              value={formData.content}
-              onChange={(e) => handleInputChange("content", e.target.value)}
-              placeholder="Escribe el contenido completo del post aquí..."
-              rows={20}
-              className="border-black-coral focus:ring-arsenic font-mono text-sm"
-              required
-            />
-            <p className="text-sm text-black-coral/70">
-              Palabras: {formData.content.split(/\s+/).filter((word) => word.length > 0).length}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+              <div>
+                <Label htmlFor="excerpt" className="text-arsenic text-sm font-medium">
+                  Resumen
+                </Label>
+                <Textarea
+                  id="excerpt"
+                  value={formData.excerpt}
+                  onChange={(e) => handleInputChange("excerpt", e.target.value)}
+                  placeholder="Breve descripción del contenido del post..."
+                  rows={3}
+                  className="mt-1 border-blackCoral focus:ring-arsenic"
+                />
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Actions */}
-      <div className="flex justify-between items-center">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.back()}
-          className="border-black-coral text-black-coral hover:bg-black-coral hover:text-white"
-        >
-          <X className="h-4 w-4 mr-2" />
-          {t.blogForm.cancel}
-        </Button>
+          <Card className="border-blackCoral shadow-lg">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-arsenic text-lg">Contenido del Post</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <RichTextEditor
+                content={formData.content}
+                onChange={(content) => handleInputChange("content", content)}
+                placeholder="Escribe el contenido completo del post aquí..."
+                className="min-h-[400px]"
+              />
+              <p className="text-sm text-blackCoral/70 mt-2">
+                Palabras:{" "}
+                {
+                  formData.content
+                    .replace(/<[^>]*>/g, "")
+                    .split(/\s+/)
+                    .filter((word) => word.length > 0).length
+                }
+              </p>
+            </CardContent>
+          </Card>
+        </div>
 
-        <div className="flex gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={(e) => handleSubmit(e, "draft")}
-            disabled={isLoading}
-            className="border-yellow-600 text-yellow-600 hover:bg-yellow-600 hover:text-white"
-          >
-            <FileText className="h-4 w-4 mr-2" />
-            {isLoading ? "Guardando..." : "Guardar Borrador"}
-          </Button>
+        {/* Right Column - Image & Actions */}
+        <div className="space-y-6">
+          <Card className="border-blackCoral shadow-lg">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-arsenic text-lg">Imagen de Portada</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="coverImage" className="text-arsenic text-sm font-medium">
+                  Seleccionar Imagen
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="coverImage"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="border-blackCoral focus:ring-arsenic"
+                  />
+                  <Upload className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blackCoral pointer-events-none" />
+                </div>
+                <p className="text-xs text-blackCoral/70">1200x600px, máx. 5MB</p>
+              </div>
 
-          <Button
-            type="button"
-            onClick={(e) => handleSubmit(e, "published")}
-            disabled={isLoading}
-            className="bg-arsenic hover:bg-black-coral text-white"
-          >
-            <Eye className="h-4 w-4 mr-2" />
-            {isLoading ? "Publicando..." : "Publicar"}
-          </Button>
+              {coverImagePreview && (
+                <div className="relative w-full h-32 rounded-lg overflow-hidden border border-blackCoral">
+                  <Image
+                    src={coverImagePreview || "/placeholder.svg"}
+                    alt="Vista previa"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="border-blackCoral shadow-lg">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-arsenic text-lg">Acciones</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button
+                type="button"
+                onClick={(e) => handleSubmit(e, "published")}
+                disabled={isLoading}
+                className="w-full bg-arsenic hover:bg-blackCoral text-white"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                {isLoading ? "Publicando..." : "Publicar"}
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={(e) => handleSubmit(e, "draft")}
+                disabled={isLoading}
+                className="w-full border-yellow-600 text-yellow-600 hover:bg-yellow-600 hover:text-white"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                {isLoading ? "Guardando..." : "Guardar Borrador"}
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.back()}
+                className="w-full border-blackCoral text-blackCoral hover:bg-blackCoral hover:text-white"
+              >
+                <X className="h-4 w-4 mr-2" />
+                {t.cancel}
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

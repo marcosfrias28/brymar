@@ -29,7 +29,7 @@ interface LandCardProps {
 
 export function LandCard({ land }: LandCardProps) {
   const { language } = useLangStore()
-  const t = translations[language]
+  const t = translations[language].landForm
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("es-DO", {
@@ -64,7 +64,7 @@ export function LandCard({ land }: LandCardProps) {
   }
 
   return (
-    <Card className="border-black-coral shadow-lg hover:shadow-xl transition-all duration-300 group">
+    <Card className="border-blackCoral shadow-lg hover:shadow-xl transition-all duration-300 group">
       {/* Image */}
       <div className="relative h-48 overflow-hidden rounded-t-lg">
         <Image
@@ -83,22 +83,22 @@ export function LandCard({ land }: LandCardProps) {
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white border-black-coral">
+            <DropdownMenuContent align="end" className="bg-white border-blackCoral">
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/lands/${land.id}`}>
                   <Eye className="h-4 w-4 mr-2" />
-                  {t.landForm.view}
+                  {t.view}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/lands/${land.id}/edit`}>
                   <Edit className="h-4 w-4 mr-2" />
-                  {t.landForm.edit}
+                  {t.edit}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem className="text-red-600">
                 <Trash2 className="h-4 w-4 mr-2" />
-                {t.landForm.delete}
+                {t.delete}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -111,18 +111,18 @@ export function LandCard({ land }: LandCardProps) {
           <h3 className="font-semibold text-arsenic text-lg mb-1 line-clamp-1">{land.name}</h3>
           <div className="flex items-center justify-between">
             <p className="text-2xl font-bold text-arsenic">{formatPrice(land.price)}</p>
-            <p className="text-sm text-black-coral">${getPricePerM2()}/m²</p>
+            <p className="text-sm text-blackCoral">${getPricePerM2()}/m²</p>
           </div>
         </div>
 
         {/* Location */}
-        <div className="flex items-center text-black-coral mb-3">
+        <div className="flex items-center text-blackCoral mb-3">
           <MapPin className="h-4 w-4 mr-1" />
           <span className="text-sm line-clamp-1">{land.location}</span>
         </div>
 
         {/* Surface */}
-        <div className="flex items-center gap-4 text-black-coral text-sm mb-3">
+        <div className="flex items-center gap-4 text-blackCoral text-sm mb-3">
           <div className="flex items-center gap-1">
             <Square className="h-4 w-4" />
             <span>{land.surface.toLocaleString()} m²</span>
@@ -134,11 +134,11 @@ export function LandCard({ land }: LandCardProps) {
         </div>
 
         {/* Description */}
-        <p className="text-black-coral/70 text-sm line-clamp-2">{land.description}</p>
+        <p className="text-blackCoral/70 text-sm line-clamp-2">{land.description}</p>
       </CardContent>
 
       <CardFooter className="p-4 pt-0">
-        <Button asChild className="w-full bg-arsenic hover:bg-black-coral text-white">
+        <Button asChild className="w-full bg-arsenic hover:bg-blackCoral text-white">
           <Link href={`/dashboard/lands/${land.id}`}>Ver Detalles</Link>
         </Button>
       </CardFooter>

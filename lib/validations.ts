@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import { getUser } from './actions/user-actions';
 import { User } from './db/schema';
+import { getUser } from './actions/auth-actions';
 
 export type ActionState = {
     error?: string;
-    success?: string;
+    success?: boolean;
     [key: string]: any; // This allows for additional properties
 };
 

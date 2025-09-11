@@ -76,7 +76,7 @@ export function ImageUpload({ images, onImagesChange, maxImages = 10 }: ImageUpl
       {/* Upload Area */}
       <div
         className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-          dragActive ? "border-arsenic bg-azureish-white/20" : "border-black-coral hover:border-arsenic"
+          dragActive ? "border-arsenic bg-azureishWhite/20" : "border-blackCoral hover:border-arsenic"
         }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -89,12 +89,12 @@ export function ImageUpload({ images, onImagesChange, maxImages = 10 }: ImageUpl
           </div>
           <div>
             <p className="text-lg font-medium text-arsenic">Arrastra las imágenes aquí o haz clic para seleccionar</p>
-            <p className="text-sm text-black-coral mt-1">Máximo {maxImages} imágenes, hasta 5MB cada una</p>
+            <p className="text-sm text-blackCoral mt-1">Máximo {maxImages} imágenes, hasta 5MB cada una</p>
           </div>
           <Button
             type="button"
             variant="outline"
-            className="border-black-coral text-black-coral hover:bg-black-coral hover:text-white bg-transparent"
+            className="border-blackCoral text-blackCoral hover:bg-blackCoral hover:text-white bg-transparent"
             onClick={() => {
               const input = document.createElement("input")
               input.type = "file"
@@ -117,7 +117,7 @@ export function ImageUpload({ images, onImagesChange, maxImages = 10 }: ImageUpl
       {images.length > 0 && (
         <div className="grid grid-cols-2 smartphone:grid-cols-3 tablet:grid-cols-4 laptop:grid-cols-5 gap-4">
           {images.map((file, index) => (
-            <Card key={index} className="relative group border-black-coral">
+            <Card key={index} className="relative group border-blackCoral">
               <div className="aspect-square relative overflow-hidden rounded-lg">
                 <Image
                   src={URL.createObjectURL(file) || "/placeholder.svg"}
@@ -138,7 +138,7 @@ export function ImageUpload({ images, onImagesChange, maxImages = 10 }: ImageUpl
                 </div>
               </div>
               <div className="p-2">
-                <p className="text-xs text-black-coral truncate">{file.name}</p>
+                <p className="text-xs text-blackCoral truncate">{file.name}</p>
               </div>
             </Card>
           ))}
@@ -146,7 +146,7 @@ export function ImageUpload({ images, onImagesChange, maxImages = 10 }: ImageUpl
       )}
 
       {/* Images Counter */}
-      <div className="text-sm text-black-coral">
+      <div className="text-sm text-blackCoral">
         {images.length} de {maxImages} imágenes seleccionadas
       </div>
     </div>

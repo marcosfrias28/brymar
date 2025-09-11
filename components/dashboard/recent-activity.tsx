@@ -1,6 +1,6 @@
 "use client"
 
-import { Building2, MapPin, FileText, Clock, Eye } from "lucide-react"
+import { Clock, Building2, MapPin, FileText, Eye } from "lucide-react"
 import { useLangStore } from "@/utils/store/lang-store"
 import { translations } from "@/lib/translations"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,16 +11,16 @@ const recentActivities = [
   {
     id: 1,
     type: "property",
-    title: "Villa Oceanfront Paradise",
-    action: "Nueva propiedad añadida",
+    title: "Casa en Punta Cana",
+    action: "Agregada",
     time: "Hace 2 horas",
     status: "active",
   },
   {
     id: 2,
     type: "land",
-    title: "Terreno Montañoso Premium",
-    action: "Terreno actualizado",
+    title: "Terreno en Bávaro",
+    action: "Editada",
     time: "Hace 4 horas",
     status: "pending",
   },
@@ -28,23 +28,23 @@ const recentActivities = [
     id: 3,
     type: "blog",
     title: "Guía de Inversión Inmobiliaria 2024",
-    action: "Artículo publicado",
+    action: "Publicada",
     time: "Hace 1 día",
     status: "published",
   },
   {
     id: 4,
     type: "property",
-    title: "Penthouse Downtown Elite",
-    action: "Propiedad vendida",
+    title: "Apartamento en Santo Domingo",
+    action: "Vendida",
     time: "Hace 2 días",
     status: "sold",
   },
   {
     id: 5,
     type: "land",
-    title: "Lote Comercial Estratégico",
-    action: "Nuevo terreno listado",
+    title: "Lote en La Romana",
+    action: "Agregada",
     time: "Hace 3 días",
     status: "active",
   },
@@ -78,40 +78,31 @@ const getStatusColor = (status: string) => {
   }
 }
 
-const getStatusText = (status: string, language: string) => {
-  const statusTranslations = {
-    en: {
-      active: "Active",
-      pending: "Pending",
-      published: "Published",
-      sold: "Sold",
-    },
-    es: {
-      active: "Activa",
-      pending: "Pendiente",
-      published: "Publicada",
-      sold: "Vendida",
-    },
-    it: {
-      active: "Attiva",
-      pending: "In Attesa",
-      published: "Pubblicata",
-      sold: "Venduta",
-    },
+const getStatusText = (status: string) => {
+  switch (status) {
+    case "active":
+      return "Activa"
+    case "pending":
+      return "Pendiente"
+    case "published":
+      return "Publicada"
+    case "sold":
+      return "Vendida"
+    default:
+      return "Desconocido"
   }
-  return statusTranslations[language as keyof typeof statusTranslations]?.[status as keyof typeof statusTranslations.en] || "Unknown"
 }
 
 export function RecentActivity() {
   const { language } = useLangStore()
-  const t = translations[language]
+  const t = translations[language].dashboard
 
   return (
     <Card className="border-blackCoral shadow-lg">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-arsenic flex items-center gap-2">
           <Clock className="h-5 w-5" />
-          {t.dashboard.recentActivity || "Recent Activity"}
+          {t.recentActivity}
         </CardTitle>
         <Button
           variant="outline"
@@ -119,7 +110,7 @@ export function RecentActivity() {
           className="border-blackCoral text-blackCoral hover:bg-blackCoral hover:text-white bg-transparent"
         >
           <Eye className="h-4 w-4 mr-2" />
-          {language === "es" ? "Ver Todo" : language === "it" ? "Vedi Tutto" : "View All"}
+          Ver Todo
         </Button>
       </CardHeader>
       <CardContent>
@@ -142,9 +133,7 @@ export function RecentActivity() {
                     </p>
                   </div>
                 </div>
-                <Badge className={getStatusColor(activity.status)}>
-                  {getStatusText(activity.status, language)}
-                </Badge>
+                <Badge className={getStatusColor(activity.status)}>{getStatusText(activity.status)}</Badge>
               </div>
             )
           })}

@@ -1,99 +1,37 @@
 "use client";
 
-import { useState } from "react";
-import { payloadApi } from "@/lib/payload/api-client";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { translations } from "@/lib/translations";
 import { useLangStore } from "@/utils/store/lang-store";
-import { toast } from "sonner";
+import { useLands } from "@/hooks/use-lands";
 
 export function LandForm() {
-  const [images, setImages] = useState<File[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const language = useLangStore((prev) => prev.language);
   const t = translations[language].landForm;
+  const { createLand, createState, isCreating } = useLands();
+  const [images, setImages] = useState<File[]>([]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const fileList = Array.from(e.target.files);
-      setImages((prev) => [...prev, ...fileList].slice(0, 10));
-    }
+    const files = Array.from(e.target.files || []);
+    setImages(files);
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    try {
-      const formData = new FormData(e.currentTarget);
-      const name = formData.get("name") as string;
-      const description = formData.get("description") as string;
-      const area = parseFloat(formData.get("area") as string);
-      const price = parseFloat(formData.get("price") as string);
-      const address = formData.get("address") as string || "";
-      const city = formData.get("city") as string || "";
-      const province = formData.get("province") as string || "";
-      
-      // Upload images first
-      const uploadedImages = [];
-      for (const image of images) {
-        const imageFormData = new FormData();
-        imageFormData.append("file", image);
-        const uploadedImage = await payloadApi.media.create(imageFormData);
-        uploadedImages.push({
-          image: uploadedImage.id,
-          alt: `${name} - Immagine`,
-          description: `Immagine del terreno ${name}`
-        });
-      }
-      
-      // Create land
-      const landData = {
-        name,
-        description,
-        area,
-        price,
-        landType: "residential", // Default value
-        topography: "flat", // Default value
-        utilities: {
-          electricity: false,
-          water: false,
-          sewage: false,
-          internet: false,
-          gas: false
-        },
-        access: {
-          roadType: "paved",
-          roadWidth: 0,
-          publicTransport: false
-        },
-        location: {
-          address,
-          city,
-          province,
-          country: "Dominican Republic"
-        },
-        images: uploadedImages,
-        status: "available",
-        featured: false
-      };
-      
-      await payloadApi.lands.create(landData);
-      toast.success(t.success);
-      
-      // Reset form
-      e.currentTarget.reset();
-      setImages([]);
-      
-    } catch (error) {
-      console.error("Error creating land:", error);
-      toast.error("Errore durante la creazione del terreno");
-    } finally {
-      setIsSubmitting(false);
+  useEffect(() => {
+    if (createState.success) {
+      // Reset form or redirect as needed
+      const form = document.querySelector('form') as HTMLFormElement;
+      if (form) form.reset();
     }
+  }, [createState]);
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    createLand(formData);
   };
 
   return (
@@ -140,8 +78,8 @@ export function LandForm() {
         <Label htmlFor="province">Provincia</Label>
         <Input id="province" name="province" />
       </div>
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Creazione..." : t.submit}
+      <Button type="submit" disabled={isCreating}>
+        {isCreating ? "Creando..." : t.submit}
       </Button>
     </form>
   );
