@@ -12,8 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Bed, Bath, Square, MapPin, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
-import { useLangStore } from "@/utils/store/lang-store";
-import { FeaturedPropertiesTranslations as translations } from "@/lib/translations";
+
 
 const properties = [
   {
@@ -57,9 +56,7 @@ const properties = [
   },
 ];
 
-export function FeaturedProperties() {
-  const language = useLangStore((prev) => prev.language);
-  const { title, subtitle, viewDetails, viewAll } = translations[language];
+export default function FeaturedProperties() {
 
   return (
     <section className="py-24 px-4 bg-gray-50">
@@ -70,7 +67,7 @@ export function FeaturedProperties() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          {title}
+          Propiedades Destacadas
         </motion.h2>
         <motion.p
           className="text-xl text-gray-600 text-center mb-16 max-w-3xl mx-auto"
@@ -78,7 +75,7 @@ export function FeaturedProperties() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          {subtitle}
+          Descubre nuestra selección exclusiva de propiedades de lujo
         </motion.p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
           {properties.map((property, index) => (
@@ -132,7 +129,7 @@ export function FeaturedProperties() {
                     </div>
                   </div>
                   <Button className="w-full bg-gray-800 hover:bg-gray-700 text-white">
-                    {viewDetails}
+                    Ver Detalles
                   </Button>
                 </CardContent>
               </Card>
@@ -150,7 +147,7 @@ export function FeaturedProperties() {
             variant="outline"
             className="text-gray-800 dark:text-white border-gray-800 hover:bg-gray-100"
           >
-            {viewAll}
+            Ver Todas las Propiedades
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </motion.div>

@@ -11,8 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { ImageUpload } from "@/components/properties/image-upload"
-import { useLangStore } from "@/utils/store/lang-store"
-import { translations } from "@/lib/translations"
+
 import { useProperty, type Property } from "@/hooks/use-properties"
 import Link from "next/link"
 
@@ -21,8 +20,7 @@ import Link from "next/link"
 export default function PropertyDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const { language } = useLangStore()
-  const t = translations[language]
+
 
   const [isEditing, setIsEditing] = useState(false)
   const [editedProperty, setEditedProperty] = useState<Partial<Property> | null>(null)
@@ -35,7 +33,7 @@ export default function PropertyDetailPage() {
     deleteProperty,
     updateState,
     isUpdating
-  } = useProperty(params.id as string)
+  } = useProperty(Number(params.id))
 
   useEffect(() => {
     if (property) {
@@ -355,7 +353,7 @@ export default function PropertyDetailPage() {
               <div className="space-y-2">
                 <div>
                   <Label className="text-sm font-medium text-blackCoral">Fecha de Creación</Label>
-                  <p className="text-blackCoral">{currentData.created_at}</p>
+                  <p className="text-blackCoral">{currentData.createdAt ? new Date(currentData.createdAt).toLocaleDateString() : ''}</p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-blackCoral">ID de Propiedad</Label>

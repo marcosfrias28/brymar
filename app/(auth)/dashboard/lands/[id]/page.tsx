@@ -11,44 +11,88 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { ImageUpload } from "@/components/properties/image-upload"
-import { useLangStore } from "@/utils/store/lang-store"
-import { translations } from "@/lib/translations"
+
 import { useLand } from "@/hooks/use-lands"
 import Link from "next/link"
 
-
+type Land = {
+  id: number
+  name: string
+  type: string
+  price: number
+  location: string
+  area: number
+  description: string
+  images: string[]
+  createdAt: Date
+  updatedAt: Date | null
+}
 
 export default function LandDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const { language } = useLangStore()
-  const t = translations[language]
 
+  const { land, isLoading, error, updateLand, deleteLand } = useLand(Number(params.id))
+  
   const [isEditing, setIsEditing] = useState(false)
-  const [editedLand, setEditedLand] = useState<any>(null)
-
-  const { 
-    land, 
-    loading, 
-    error, 
-    updateLand, 
-    deleteLand,
-    updateState,
-    isUpdating
-  } = useLand(params.id as string)
+  const [editedLand, setEditedLand] = useState<Land | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     if (land) {
-      setEditedLand({ ...land })
+      setEditedLand(land)
     }
   }, [land])
 
-  if (loading) {
+  const handleSave = async () => {
+    if (!editedLand) return
+    
+    setIsSaving(true)
+    try {
+      const formData = new FormData()
+      formData.append('name', editedLand.name)
+      formData.append('type', editedLand.type)
+      formData.append('price', editedLand.price.toString())
+      formData.append('location', editedLand.location)
+      formData.append('area', editedLand.area.toString())
+      formData.append('description', editedLand.description)
+      
+      await updateLand(formData)
+      setIsEditing(false)
+    } catch (error) {
+      console.error('Error updating land:', error)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleCancel = () => {
+    setEditedLand(land)
+    setIsEditing(false)
+  }
+
+  const handleDelete = async () => {
+    if (!land) return
+    
+    setIsDeleting(true)
+    try {
+      await deleteLand()
+      router.push('/dashboard/lands')
+    } catch (error) {
+      console.error('Error deleting land:', error)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-arsenic mb-2">Cargando...</h2>
-          <p className="text-blackCoral mb-4">Cargando información del terreno.</p>
+      <div className="container mx-auto px-4 py-8">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-64 bg-gray-200 rounded"></div>
+          <div className="h-32 bg-gray-200 rounded"></div>
         </div>
       </div>
     )
@@ -56,122 +100,80 @@ export default function LandDetailPage() {
 
   if (error || !land) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="container mx-auto px-4 py-8">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-arsenic mb-2">Terreno no encontrado</h2>
-          <p className="text-blackCoral mb-4">El terreno que buscas no existe o ha sido eliminado.</p>
-          <Button asChild>
-            <Link href="/dashboard/lands">Volver a Terrenos</Link>
-          </Button>
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Error</h1>
+          <p className="text-gray-600 mb-4">No se pudo cargar el terreno</p>
+          <Button onClick={() => router.push('/dashboard/lands')}>Volver a Terrenos</Button>
         </div>
       </div>
     )
   }
 
-  const handleSave = () => {
-    if (editedLand && land) {
-      const formData = new FormData()
-      Object.entries(editedLand).forEach(([key, value]) => {
-        if (value !== null && value !== undefined) {
-          formData.append(key, value.toString())
-        }
-      })
-      updateLand(formData)
-    }
-  }
-
-  // Handle successful update
-  useEffect(() => {
-    if (updateState.success) {
-      setIsEditing(false)
-    }
-  }, [updateState.success])
-
-  const handleCancel = () => {
-    setEditedLand({ ...land })
-    setIsEditing(false)
-  }
-
-  const handleDelete = async () => {
-    if (confirm("¿Estás seguro de que quieres eliminar este terreno?")) {
-      try {
-        await deleteLand()
-        router.push("/dashboard/lands")
-      } catch (error) {
-        console.error("Error deleting land:", error)
-      }
-    }
-  }
-
-
-
   const currentData = isEditing ? editedLand : land
-  const pricePerM2 = (currentData?.price || 0) / (currentData?.surface || 1)
+  const pricePerM2 = currentData?.area ? (currentData.price / currentData.area) : 0
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/dashboard/lands">
+          <Link href="/dashboard/lands">
+            <Button variant="ghost" size="sm">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Volver a Terrenos
-            </Link>
-          </Button>
+              Volver
+            </Button>
+          </Link>
           <div>
-            <h1 className="text-2xl font-bold text-arsenic font-serif">
-              {isEditing ? "Editando Terreno" : currentData?.name || "Terreno"}
-            </h1>
-            <Badge variant="outline" className="mt-1">
-              {currentData?.type === "commercial"
-                ? "Comercial"
-                : currentData?.type === "residential"
-                  ? "Residencial"
-                  : currentData?.type === "agricultural"
-                    ? "Agrícola"
-                    : "Frente al Mar"}
-            </Badge>
+            <h1 className="text-3xl font-bold text-arsenic">{currentData?.name}</h1>
+            <div className="flex items-center gap-2 mt-2">
+              <Badge variant="secondary">{currentData?.type}</Badge>
+            </div>
           </div>
         </div>
-
-        <div className="flex gap-2">
-          {!isEditing ? (
+        
+        <div className="flex items-center gap-2">
+          {isEditing ? (
             <>
-              <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                <Edit3 className="h-4 w-4 mr-2" />
-                Editar
+              <Button
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isSaving}
+              >
+                <X className="h-4 w-4 mr-2" />
+                Cancelar
               </Button>
-              <Button variant="outline" size="sm">
-                <Eye className="h-4 w-4 mr-2" />
-                Vista Previa
-              </Button>
-              <Button variant="destructive" size="sm" onClick={handleDelete}>
-                <Trash2 className="h-4 w-4 mr-2" />
-                Eliminar
+              <Button
+                onClick={handleSave}
+                disabled={isSaving}
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {isSaving ? 'Guardando...' : 'Guardar'}
               </Button>
             </>
           ) : (
             <>
-              <Button variant="outline" size="sm" onClick={handleCancel}>
-                <X className="h-4 w-4 mr-2" />
-                Cancelar
-              </Button>
-              <Button 
-                size="sm" 
-                onClick={handleSave} 
-                disabled={isUpdating}
-                className="bg-arsenic hover:bg-blackCoral"
+              <Button
+                variant="outline"
+                onClick={() => setIsEditing(true)}
               >
-                <Save className="h-4 w-4 mr-2" />
-                {isUpdating ? 'Guardando...' : 'Guardar'}
+                <Edit3 className="h-4 w-4 mr-2" />
+                Editar
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                {isDeleting ? 'Eliminando...' : 'Eliminar'}
               </Button>
             </>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Images */}
@@ -181,21 +183,28 @@ export default function LandDetailPage() {
             </CardHeader>
             <CardContent>
               {isEditing ? (
-                <ImageUpload
-                  images={[]}
-                  onImagesChange={(images) => {
-                    if (editedLand) {
-                      setEditedLand({ ...editedLand, images: images.map(f => f.name) })
-                    }
-                  }}
-                  maxImages={10}
-                />
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Edición de imágenes disponible en el formulario principal
+                  </p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {editedLand?.images?.map((image, index) => (
+                      <div key={index} className="aspect-square relative rounded-lg overflow-hidden">
+                        <img
+                          src={image}
+                          alt={`Imagen ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               ) : (
-                <div className="grid grid-cols-2 gap-4">
-                  {currentData?.images?.map((image: string, index: number) => (
-                    <div key={index} className="aspect-video rounded-lg overflow-hidden">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {currentData?.images?.map((image, index) => (
+                    <div key={index} className="aspect-square relative rounded-lg overflow-hidden">
                       <img
-                        src={image || "/placeholder.svg"}
+                        src={image}
                         alt={`Imagen ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
@@ -327,32 +336,32 @@ export default function LandDetailPage() {
             <CardContent className="space-y-4">
               {isEditing ? (
                 <div>
-                  <Label htmlFor="surface">Superficie (m²)</Label>
-                  <Input
-                    id="surface"
-                    type="number"
-                    value={editedLand?.surface || 0}
-                    onChange={(e) => {
-                      if (editedLand) {
-                        setEditedLand({ ...editedLand, surface: Number(e.target.value) })
-                      }
-                    }}
-                  />
-                </div>
+                    <Label htmlFor="area">Superficie (m²)</Label>
+                    <Input
+                      id="area"
+                      type="number"
+                      value={editedLand?.area || 0}
+                      onChange={(e) => {
+                        if (editedLand) {
+                          setEditedLand({ ...editedLand, area: Number(e.target.value) })
+                        }
+                      }}
+                    />
+                  </div>
               ) : (
                 <div className="space-y-3">
                   <div>
                     <Label className="text-sm font-medium text-blackCoral">Superficie</Label>
-                    <p className="text-lg font-semibold text-arsenic">{currentData?.surface?.toLocaleString() || 0} m²</p>
+                    <p className="text-lg font-semibold text-arsenic">{currentData?.area?.toLocaleString() || 0} m²</p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-blackCoral">Hectáreas</Label>
-                    <p className="text-lg font-semibold text-arsenic">{((currentData?.surface || 0) / 10000).toFixed(2)} ha</p>
+                    <p className="text-lg font-semibold text-arsenic">{((currentData?.area || 0) / 10000).toFixed(2)} ha</p>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-blackCoral">Tareas</Label>
                     <p className="text-lg font-semibold text-arsenic">
-                      {((currentData?.surface || 0) / 628).toFixed(1)} tareas
+                      {((currentData?.area || 0) / 628).toFixed(1)} tareas
                     </p>
                   </div>
                 </div>
@@ -369,7 +378,7 @@ export default function LandDetailPage() {
               <div className="space-y-2">
                 <div>
                   <Label className="text-sm font-medium text-blackCoral">Fecha de Creación</Label>
-                  <p className="text-blackCoral">{currentData?.createdAt || ''}</p>
+                  <p className="text-blackCoral">{currentData?.createdAt ? new Date(currentData.createdAt).toLocaleDateString() : ''}</p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-blackCoral">ID de Terreno</Label>

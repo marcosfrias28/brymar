@@ -3,10 +3,10 @@
 import { revalidatePath } from "next/cache"
 import { put } from "@vercel/blob"
 import { z } from "zod"
-import { neon } from "@neondatabase/serverless"
+import { eq, desc, count, and, ilike, or } from "drizzle-orm"
 import { type ActionState, validatedAction } from "../validations"
-
-const sql = neon(process.env.DATABASE_URL!)
+import db from "../db/drizzle"
+import { properties } from "../db/schema"
 
 const propertySchema = z.object({
   title: z.string().min(3).max(100),
@@ -40,10 +40,19 @@ export const addProperty = validatedAction(
         }
       }
 
-      await sql`
-      INSERT INTO properties (title, description, price, type, bedrooms, bathrooms, area, location, status, images, created_at)
-      VALUES (${data.title}, ${data.description}, ${data.price}, ${data.type}, ${data.bedrooms}, ${data.bathrooms}, ${data.area}, ${data.location}, ${data.status}, ${JSON.stringify(imageUrls)}, NOW())
-    `
+      await db.insert(properties).values({
+        title: data.title,
+        description: data.description,
+        price: data.price,
+        type: data.type,
+        bedrooms: data.bedrooms,
+        bathrooms: data.bathrooms,
+        area: data.area,
+        location: data.location,
+        status: data.status,
+        images: imageUrls,
+        createdAt: new Date(),
+      })
 
       revalidatePath("/dashboard/properties")
       return { success: true, message: "Propiedad agregada exitosamente!" }
@@ -74,26 +83,23 @@ export const updateProperty = validatedAction(
         }
       }
 
-      const updateQuery =
-        imageUrls.length > 0
-          ? sql`
-          UPDATE properties 
-          SET title = ${data.title}, description = ${data.description}, price = ${data.price}, 
-              type = ${data.type}, bedrooms = ${data.bedrooms}, bathrooms = ${data.bathrooms}, 
-              area = ${data.area}, location = ${data.location}, status = ${data.status}, 
-              images = ${JSON.stringify(imageUrls)}, updated_at = NOW()
-          WHERE id = ${data.id}
-        `
-          : sql`
-          UPDATE properties 
-          SET title = ${data.title}, description = ${data.description}, price = ${data.price}, 
-              type = ${data.type}, bedrooms = ${data.bedrooms}, bathrooms = ${data.bathrooms}, 
-              area = ${data.area}, location = ${data.location}, status = ${data.status}, 
-              updated_at = NOW()
-          WHERE id = ${data.id}
-        `
+      const updateData: any = {
+        title: data.title,
+        description: data.description,
+        price: data.price,
+        type: data.type,
+        bedrooms: data.bedrooms,
+        bathrooms: data.bathrooms,
+        area: data.area,
+        location: data.location,
+        status: data.status,
+      }
 
-      await updateQuery
+      if (imageUrls.length > 0) {
+        updateData.images = imageUrls
+      }
+
+      await db.update(properties).set(updateData).where(eq(properties.id, parseInt(data.id)))
 
       revalidatePath("/dashboard/properties")
       return { success: true, message: "Propiedad actualizada exitosamente!" }
@@ -106,7 +112,7 @@ export const updateProperty = validatedAction(
 
 export const deleteProperty = async (id: string): Promise<ActionState> => {
   try {
-    await sql`DELETE FROM properties WHERE id = ${id}`
+    await db.delete(properties).where(eq(properties.id, parseInt(id)))
     revalidatePath("/dashboard/properties")
     return { success: true, message: "Propiedad eliminada exitosamente!" }
   } catch (error) {
@@ -119,35 +125,38 @@ export const getProperties = async (page = 1, limit = 12, filters?: any) => {
   try {
     const offset = (page - 1) * limit
 
-    let whereClause = ""
-    const params: any[] = []
-
+    // Build where conditions
+    const whereConditions = []
+    
     if (filters?.status && filters.status !== "all") {
-      whereClause += " WHERE status = $" + (params.length + 1)
-      params.push(filters.status)
+      whereConditions.push(eq(properties.status, filters.status))
     }
 
     if (filters?.type && filters.type !== "all") {
-      whereClause += (whereClause ? " AND" : " WHERE") + " type = $" + (params.length + 1)
-      params.push(filters.type)
+      whereConditions.push(eq(properties.type, filters.type))
     }
 
-    const properties = await sql`
-      SELECT * FROM properties 
-      ${whereClause ? sql.unsafe(whereClause) : sql``}
-      ORDER BY created_at DESC 
-      LIMIT ${limit} OFFSET ${offset}
-    `
+    // Get properties with pagination
+    const propertiesQuery = db.select().from(properties)
+    if (whereConditions.length > 0) {
+      propertiesQuery.where(whereConditions.length === 1 ? whereConditions[0] : and(...whereConditions))
+    }
+    const propertiesResult = await propertiesQuery
+      .orderBy(desc(properties.createdAt))
+      .limit(limit)
+      .offset(offset)
 
-    const totalResult = await sql`
-      SELECT COUNT(*) as count FROM properties 
-      ${whereClause ? sql.unsafe(whereClause) : sql``}
-    `
+    // Get total count
+    const totalQuery = db.select({ count: count() }).from(properties)
+    if (whereConditions.length > 0) {
+      totalQuery.where(whereConditions.length === 1 ? whereConditions[0] : and(...whereConditions))
+    }
+    const totalResult = await totalQuery
 
     return {
-      properties,
-      total: Number.parseInt(totalResult[0].count),
-      totalPages: Math.ceil(Number.parseInt(totalResult[0].count) / limit),
+      properties: propertiesResult,
+      total: totalResult[0].count,
+      totalPages: Math.ceil(totalResult[0].count / limit),
     }
   } catch (error) {
     console.error("Error fetching properties:", error)
@@ -157,7 +166,7 @@ export const getProperties = async (page = 1, limit = 12, filters?: any) => {
 
 export const getPropertyById = async (id: string) => {
   try {
-    const result = await sql`SELECT * FROM properties WHERE id = ${id}`
+    const result = await db.select().from(properties).where(eq(properties.id, parseInt(id)))
     return result[0] || null
   } catch (error) {
     console.error("Error fetching property:", error)
@@ -168,30 +177,32 @@ export const getPropertyById = async (id: string) => {
 export const searchProperties = async (query: string, page = 1, limit = 12) => {
   try {
     const offset = (page - 1) * limit
-    const searchQuery = `%${query}%`
-    
-    const result = await sql`
-      SELECT * FROM properties 
-      WHERE title ILIKE ${searchQuery} 
-         OR description ILIKE ${searchQuery}
-         OR location ILIKE ${searchQuery}
-         OR type ILIKE ${searchQuery}
-      ORDER BY created_at DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `
-    
-    const countResult = await sql`
-      SELECT COUNT(*) as total FROM properties 
-      WHERE title ILIKE ${searchQuery} 
-         OR description ILIKE ${searchQuery}
-         OR location ILIKE ${searchQuery}
-         OR type ILIKE ${searchQuery}
-    `
-    
+    const whereConditions = [
+      or(
+        ilike(properties.title, `%${query}%`),
+        ilike(properties.description, `%${query}%`),
+        ilike(properties.location, `%${query}%`),
+        ilike(properties.type, `%${query}%`),
+      ),
+    ]
+
+    const propertiesResult = await db
+      .select()
+      .from(properties)
+      .where(and(...whereConditions))
+      .orderBy(desc(properties.createdAt))
+      .limit(limit)
+      .offset(offset)
+
+    const totalResult = await db
+      .select({ count: count() })
+      .from(properties)
+      .where(and(...whereConditions))
+
     return {
-      properties: result,
-      total: parseInt(countResult[0].total),
-      totalPages: Math.ceil(parseInt(countResult[0].total) / limit),
+      properties: propertiesResult,
+      total: totalResult[0].count,
+      totalPages: Math.ceil(totalResult[0].count / limit),
       currentPage: page,
     }
   } catch (error) {

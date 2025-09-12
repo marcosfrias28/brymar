@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { useLangStore } from "@/utils/store/lang-store";
-import { HeroSectionTranslations } from "@/lib/translations";
+
 import { Italianno } from "next/font/google";
 import { WavyBackground } from "../../ui/wavy-background";
 import { IntroPropertiesMarquee } from "./intro-properties-marquee";
@@ -12,8 +11,10 @@ import { IntroCTA } from "./intro-cta";
 const italianno = Italianno({ subsets: ["latin"], weight: ["400"] });
 
 export const Intro = () => {
-  const language = useLangStore((prev) => prev.language);
-  const { title, name, subtitle, cta } = HeroSectionTranslations[language];
+  const title = "Encuentra tu hogar perfecto";
+  const name = "BRYMAR";
+  const subtitle = "Propiedades de lujo y exclusivas";
+  const cta = "Explorar Propiedades";
 
   const WordsStyle = "bg-clip-text text-transparent bg-aurora bg-clip-text";
   return (

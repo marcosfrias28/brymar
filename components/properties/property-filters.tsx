@@ -1,7 +1,6 @@
 "use client"
 
-import { useLangStore } from "@/utils/store/lang-store"
-import { translations } from "@/lib/translations"
+
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -22,8 +21,8 @@ interface PropertyFiltersProps {
 }
 
 export function PropertyFilters({ filters, setFilters }: PropertyFiltersProps) {
-  const { language } = useLangStore()
-  const t = translations[language].propertyForm
+
+
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }))
@@ -45,15 +44,15 @@ export function PropertyFilters({ filters, setFilters }: PropertyFiltersProps) {
         <div className="grid grid-cols-1 smartphone:grid-cols-2 tablet:grid-cols-3 laptop:grid-cols-5 gap-4">
           {/* Property Type */}
           <div className="space-y-2">
-            <Label className="text-arsenic">{t.propertyType}</Label>
+            <Label className="text-arsenic">Tipo de Propiedad</Label>
             <Select value={filters.type} onValueChange={(value) => handleFilterChange("type", value)}>
               <SelectTrigger className="border-blackCoral">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="sale">{t.forSale}</SelectItem>
-                <SelectItem value="rent">{t.forRent}</SelectItem>
+                <SelectItem value="sale">En Venta</SelectItem>
+              <SelectItem value="rent">En Alquiler</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -84,7 +83,7 @@ export function PropertyFilters({ filters, setFilters }: PropertyFiltersProps) {
 
           {/* Bedrooms */}
           <div className="space-y-2">
-            <Label className="text-arsenic">{t.bedrooms}</Label>
+            <Label className="text-arsenic">Habitaciones</Label>
             <Select value={filters.bedrooms} onValueChange={(value) => handleFilterChange("bedrooms", value)}>
               <SelectTrigger className="border-blackCoral">
                 <SelectValue />
@@ -102,7 +101,7 @@ export function PropertyFilters({ filters, setFilters }: PropertyFiltersProps) {
 
           {/* Location */}
           <div className="space-y-2">
-            <Label className="text-arsenic">{t.location}</Label>
+            <Label className="text-arsenic">Ubicación</Label>
             <Input
               placeholder="Ciudad o zona"
               value={filters.location}

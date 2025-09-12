@@ -5,8 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Quote } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { useLangStore } from "@/utils/store/lang-store";
-import { TestimonialsTranslations as translations } from "@/lib/translations";
+
 
 const testimonials = [
   {
@@ -45,10 +44,10 @@ const testimonials = [
 ];
 
 export function Testimonials() {
-  const language = useLangStore((prev) => prev.language);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const { title, subtitle } = translations[language];
+  const title = "Lo que dicen nuestros clientes";
+  const subtitle = "Testimonios de clientes satisfechos con nuestros servicios";
 
   return (
     <section className="py-24 px-4 bg-gray-50">
@@ -81,7 +80,7 @@ export function Testimonials() {
                   <CardContent className="p-12">
                     <Quote className="h-12 w-12 text-gray-400 mb-8" />
                     <p className="text-2xl text-gray-700 italic mb-8">
-                      {testimonial.quote[language]}
+                      {testimonial.quote.es}
                     </p>
                     <div className="flex items-center">
                       <Avatar className="h-16 w-16 mr-4">

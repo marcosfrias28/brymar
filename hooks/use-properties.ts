@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { ActionState } from '@/lib/validations'
 
 export interface Property {
-  id: string
+  id: number
   title: string
   description: string
   price: number
@@ -17,7 +17,8 @@ export interface Property {
   location: string
   status: 'sale' | 'rent'
   images: string[]
-  created_at: string
+  createdAt: Date
+  updatedAt: Date | null
 }
 
 export interface UsePropertiesReturn {
@@ -30,8 +31,8 @@ export interface UsePropertiesReturn {
   fetchProperties: (page?: number, filters?: any) => Promise<void>
   searchPropertiesData: (query: string, page?: number) => Promise<void>
   createProperty: (formData: FormData) => void
-  updatePropertyById: (id: string, formData: FormData) => void
-  deletePropertyById: (id: string) => Promise<boolean>
+  updatePropertyById: (id: number, formData: FormData) => void
+  deletePropertyById: (id: number) => Promise<boolean>
   refreshProperties: () => Promise<void>
   // Action states for form submissions
   createState: ActionState
@@ -101,8 +102,8 @@ export const useProperties = (initialPage = 1, initialFilters?: any): UsePropert
     createAction(formData)
   }
 
-  const updatePropertyById = (id: string, formData: FormData) => {
-    formData.append('id', id)
+  const updatePropertyById = (id: number, formData: FormData) => {
+    formData.append('id', id.toString())
     updateAction(formData)
   }
 
@@ -125,10 +126,10 @@ export const useProperties = (initialPage = 1, initialFilters?: any): UsePropert
     }
   }, [updateState])
 
-  const deletePropertyById = async (id: string): Promise<boolean> => {
+  const deletePropertyById = async (id: number): Promise<boolean> => {
     try {
       setError(null)
-      const result = await deleteProperty(id)
+      const result = await deleteProperty(id.toString())
 
       if (result.success) {
         toast.success(result.message || 'Propiedad eliminada exitosamente')
@@ -180,14 +181,14 @@ export interface UsePropertyReturn {
   property: Property | null
   loading: boolean
   error: string | null
-  fetchProperty: (id: string) => Promise<void>
+  fetchProperty: (id: number) => Promise<void>
   updateProperty: (formData: FormData) => void
   deleteProperty: () => Promise<boolean>
   updateState: ActionState
   isUpdating: boolean
 }
 
-export const useProperty = (id?: string): UsePropertyReturn => {
+export const useProperty = (id?: number): UsePropertyReturn => {
   const [property, setProperty] = useState<Property | null>(null)
   const [loading, setLoading] = useState(!!id)
   const [error, setError] = useState<string | null>(null)
@@ -196,12 +197,12 @@ export const useProperty = (id?: string): UsePropertyReturn => {
   const [updateState, updateAction] = useActionState(updateProperty, { success: false })
   const isUpdating = updateState.success === undefined && Object.keys(updateState).length > 1
 
-  const fetchProperty = async (propertyId: string) => {
+  const fetchProperty = async (propertyId: number) => {
     try {
       setLoading(true)
       setError(null)
 
-      const result = await getPropertyById(propertyId)
+      const result = await getPropertyById(propertyId.toString())
       setProperty(result as Property)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al cargar propiedad'
@@ -214,7 +215,7 @@ export const useProperty = (id?: string): UsePropertyReturn => {
 
   const updatePropertyData = (formData: FormData) => {
     if (!property?.id) return
-    formData.append('id', property.id)
+    formData.append('id', property.id.toString())
     updateAction(formData)
   }
 
@@ -235,7 +236,7 @@ export const useProperty = (id?: string): UsePropertyReturn => {
 
     try {
       setError(null)
-      const result = await deleteProperty(property.id)
+      const result = await deleteProperty(property.id.toString())
 
       if (result.success) {
         toast.success(result.message || 'Propiedad eliminada exitosamente')

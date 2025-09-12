@@ -1,7 +1,6 @@
 "use client"
 
-import { useLangStore } from "@/utils/store/lang-store"
-import { translations } from "@/lib/translations"
+
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -22,8 +21,8 @@ interface BlogFiltersProps {
 }
 
 export function BlogFilters({ filters, setFilters }: BlogFiltersProps) {
-  const { language } = useLangStore()
-  const t = translations[language].blogForm
+
+
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters((prev: BlogFilters) => ({ ...prev, [key]: value }))
@@ -78,7 +77,7 @@ export function BlogFilters({ filters, setFilters }: BlogFiltersProps) {
 
           {/* Author */}
           <div className="space-y-2">
-            <Label className="text-arsenic">{t.author}</Label>
+            <Label className="text-arsenic">Autor</Label>
             <Input
               placeholder="Buscar autor"
               value={filters.author}

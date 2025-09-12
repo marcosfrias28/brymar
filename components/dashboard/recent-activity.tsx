@@ -1,8 +1,7 @@
 "use client"
 
 import { Clock, Building2, MapPin, FileText, Eye } from "lucide-react"
-import { useLangStore } from "@/utils/store/lang-store"
-import { translations } from "@/lib/translations"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -94,15 +93,13 @@ const getStatusText = (status: string) => {
 }
 
 export function RecentActivity() {
-  const { language } = useLangStore()
-  const t = translations[language].dashboard
 
   return (
     <Card className="border-blackCoral shadow-lg">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-arsenic flex items-center gap-2">
           <Clock className="h-5 w-5" />
-          {t.recentActivity}
+          Actividad Reciente
         </CardTitle>
         <Button
           variant="outline"

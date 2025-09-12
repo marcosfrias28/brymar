@@ -10,57 +10,54 @@ import {
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Globe, Home, Key, Search, Shield, TrendingUp } from "lucide-react";
-import { useLangStore } from "@/utils/store/lang-store";
-import { translations } from "@/lib/translations";
+
 
 const services = [
   {
-    title: "Global Property Search",
+    title: "Búsqueda Global de Propiedades",
     description:
-      "Access our curated portfolio of the world's most prestigious properties, from beachfront villas to urban penthouses.",
+      "Accede a nuestro portafolio curado de las propiedades más prestigiosas del mundo, desde villas frente al mar hasta áticos urbanos.",
     icon: Search,
     color: "bg-blue-500",
   },
   {
-    title: "Luxury Property Management",
+    title: "Gestión de Propiedades de Lujo",
     description:
-      "Comprehensive management services to maintain and enhance the value of your high-end properties.",
+      "Servicios integrales de gestión para mantener y mejorar el valor de tus propiedades de alta gama.",
     icon: Home,
     color: "bg-green-500",
   },
   {
-    title: "VIP Buying Experience",
+    title: "Experiencia VIP de Compra",
     description:
-      "Personalized guidance throughout your luxury property acquisition, including private viewings and negotiations.",
+      "Orientación personalizada durante tu adquisición de propiedades de lujo, incluyendo visitas privadas y negociaciones.",
     icon: Key,
     color: "bg-purple-500",
   },
   {
-    title: "Investment Advisory",
+    title: "Asesoría de Inversión",
     description:
-      "Expert advice on prime real estate investment opportunities and portfolio diversification strategies.",
+      "Consejos expertos sobre oportunidades de inversión inmobiliaria premium y estrategias de diversificación de portafolio.",
     icon: TrendingUp,
     color: "bg-red-500",
   },
   {
-    title: "International Relocation",
+    title: "Reubicación Internacional",
     description:
-      "Seamless relocation services for global clients, including visa assistance and local orientation.",
+      "Servicios de reubicación sin problemas para clientes globales, incluyendo asistencia con visas y orientación local.",
     icon: Globe,
     color: "bg-yellow-500",
   },
   {
-    title: "Secure Transactions",
+    title: "Transacciones Seguras",
     description:
-      "Ensure the confidentiality and security of your high-value property transactions with our specialized legal team.",
+      "Garantiza la confidencialidad y seguridad de tus transacciones inmobiliarias de alto valor con nuestro equipo legal especializado.",
     icon: Shield,
     color: "bg-indigo-500",
   },
 ];
 
 export function Services() {
-  const language = useLangStore((prev) => prev.language);
-  // const { title, subtitle, learnMore, services } = translations[language].;
 
   return (
     <section className="py-24 px-4 bg-white">
@@ -71,7 +68,7 @@ export function Services() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          {/* {title} */}
+          Nuestros Servicios
         </motion.h2>
         <motion.p
           className="text-xl text-gray-600 text-center mb-16 max-w-3xl mx-auto"
@@ -79,7 +76,7 @@ export function Services() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          {/* {t("subtitle")} */}
+          Servicios exclusivos diseñados para satisfacer todas tus necesidades inmobiliarias de lujo
         </motion.p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
           {services.map(({ title, description, icon: Icon, color }, index) => (
@@ -108,7 +105,7 @@ export function Services() {
                     variant="outline"
                     className="text-gray-800 border-gray-300 hover:bg-gray-100"
                   >
-                    {/* {t("learnMore")} */}
+                    Saber Más
                   </Button>
                 </CardContent>
               </Card>

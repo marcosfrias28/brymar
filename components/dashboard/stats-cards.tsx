@@ -1,16 +1,13 @@
 "use client";
 
 import { Building2, MapPin, FileText, TrendingUp } from "lucide-react";
-import { useLangStore } from "@/utils/store/lang-store";
-import { translations } from "@/lib/translations";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useProperties } from "@/hooks/use-properties";
 import { useLands } from "@/hooks/use-lands";
 import { useBlogPosts } from "@/hooks/use-blog";
 
 export function StatsCards() {
-  const { language } = useLangStore();
-  const t = translations[language];
 
   const { properties, loading: propertiesLoading } = useProperties();
   const { lands, loading: landsLoading } = useLands();
@@ -20,21 +17,21 @@ export function StatsCards() {
 
   const statsData = [
     {
-      title: "totalProperties",
+      title: "Total Propiedades",
       value: properties.length.toString(),
       change: "+12%",
       icon: Building2,
       color: "bg-aurora",
     },
     {
-      title: "totalLands",
+      title: "Total Terrenos",
       value: lands.length.toString(),
       change: "+8%",
       icon: MapPin,
       color: "bg-arsenic",
     },
     {
-      title: "totalPosts",
+      title: "Total Posts",
       value: blogPosts.length.toString(),
       change: "+15%",
       icon: FileText,
@@ -77,15 +74,7 @@ export function StatsCards() {
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-blackCoral">
-              {stat.title === "Ventas del Mes"
-                ? stat.title
-                : stat.title === "totalProperties"
-                ? "Total Propiedades"
-                : stat.title === "totalLands"
-                ? "Total Terrenos"
-                : stat.title === "totalPosts"
-                ? "Total Posts"
-                : stat.title}
+              {stat.title}
             </CardTitle>
             <div className={`p-2 rounded-lg ${stat.color}`}>
               <stat.icon className="h-4 w-4 text-white" />

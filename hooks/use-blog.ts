@@ -6,15 +6,16 @@ import { toast } from 'sonner'
 import { ActionState } from '@/lib/validations'
 
 export interface BlogPost {
-  id: string
+  id: number
   title: string
   content: string
   author: string
   category: 'market-analysis' | 'investment-tips' | 'property-news' | 'legal-advice' | 'lifestyle'
   status: 'draft' | 'published'
-  image: string
-  reading_time: number
-  created_at: string
+  image: string | null
+  readingTime: number
+  createdAt: Date
+  updatedAt: Date | null
 }
 
 export interface UseBlogPostsReturn {
@@ -191,7 +192,7 @@ export const useBlogPost = (id?: string): UseBlogPostReturn => {
 
   const updateBlogPostData = (formData: FormData) => {
     if (!blogPost?.id) return
-    formData.append('id', blogPost.id)
+    formData.append('id', blogPost.id.toString())
     updateAction(formData)
   }
 
@@ -200,7 +201,7 @@ export const useBlogPost = (id?: string): UseBlogPostReturn => {
     if (updateState.success) {
       toast.success(updateState.message || 'Post actualizado exitosamente')
       if (blogPost?.id) {
-        fetchBlogPost(blogPost.id)
+        fetchBlogPost(blogPost.id.toString())
       }
     } else if (updateState.message && !updateState.success) {
       setError(updateState.message)
@@ -213,7 +214,7 @@ export const useBlogPost = (id?: string): UseBlogPostReturn => {
     
     try {
       setError(null)
-      const result = await deleteBlogPost(blogPost.id)
+      const result = await deleteBlogPost(blogPost.id.toString())
       
       if (result.success) {
         toast.success(result.message || 'Post eliminado exitosamente')

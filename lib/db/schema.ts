@@ -105,12 +105,12 @@ export const properties = pgTable("properties", {
   type: text("type").notNull(),
   bedrooms: integer("bedrooms").notNull(),
   bathrooms: integer("bathrooms").notNull(),
-  city: text("city").notNull(),
-  province: text("province").notNull(),
-  country: text("country").notNull(),
-  position: text("position").notNull(),
-  garage: boolean("garage").notNull(),
+  area: integer("area").notNull(),
+  location: text("location").notNull(),
+  status: text("status").notNull(),
   images: jsonb("images").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Lands Table
@@ -120,7 +120,11 @@ export const lands = pgTable("lands", {
   description: text("description").notNull(),
   area: integer("area").notNull(),
   price: integer("price").notNull(),
+  location: text("location").notNull(),
+  type: text("type").notNull(),
   images: jsonb("images").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Blog Posts Table
@@ -128,10 +132,13 @@ export const blogPosts = pgTable("blog_posts", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   content: text("content").notNull(),
-  authorId: varchar("author_id", { length: 36 })
-    .notNull()
-    .references(() => users.id), // FK to user.id
-  image: text("image").notNull(),
+  author: text("author").notNull(),
+  category: text("category").notNull().default("property-news"),
+  status: text("status").notNull().default("draft"),
+  image: text("image"),
+  readingTime: integer("reading_time").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Type Inference

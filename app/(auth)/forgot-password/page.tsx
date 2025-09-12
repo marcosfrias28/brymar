@@ -1,16 +1,14 @@
 "use client";
 
 import React, { useActionState, useEffect } from "react";
-import { LoginWrapper } from "../login-wrapper";
-import { ForgotPasswordTranslations as translations } from "@/lib/translations";
 import { ActionState } from "@/lib/validations";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CustomInput } from "@/components/custom-input";
-import { forgotPassword } from "@/lib/actions/user-actions";
-import { useTranslation } from "@/hooks/use-translation";
+import { forgotPassword } from "@/lib/actions/auth-actions";
+import { LoginWrapper } from "@/components/auth/login-wrapper";
 
 const ForgotPasswordPage = () => {
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
@@ -28,16 +26,12 @@ const ForgotPasswordPage = () => {
     }
   }, [state]);
 
-  const {
-    title,
-    subtitle,
-    verify: verifyText,
-    loading,
-    alreadyVerified,
-    signIn: signInLinkText,
-  } = useTranslation(translations);
-
-  if (!translations) return null;
+  const title = "Recuperar Contraseña";
+  const subtitle = "Ingresa tu correo para recibir un enlace de recuperación";
+  const verifyText = "Enviar enlace";
+  const loading = "Enviando...";
+  const alreadyVerified = "¿Ya tienes cuenta?";
+  const signInLinkText = "Iniciar sesión";
 
   return (
     <LoginWrapper>

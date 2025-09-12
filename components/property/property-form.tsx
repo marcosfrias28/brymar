@@ -5,26 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
-import { translations } from "@/lib/translations";
 import { useState, useEffect } from "react";
-import { useLangStore } from "@/utils/store/lang-store";
 import { useProperties } from "@/hooks/use-properties";
 
 export function PropertyForm() {
   const [type, setType] = useState("rent");
-  const language = useLangStore((prev) => prev.language);
+
   const { createProperty, createState, isCreating } = useProperties();
-  const {
-    propertyTitle,
-    description,
-    price,
-    forRent,
-    forSale,
-    images: imagesText,
-    selectedImages,
-    submit,
-    success,
-  } = translations[language].propertyForm;
 
   useEffect(() => {
     if (createState.success) {
@@ -49,32 +36,32 @@ export function PropertyForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label htmlFor="title">{propertyTitle}</Label>
+        <Label htmlFor="title">Titolo</Label>
         <Input id="title" name="title" required />
       </div>
       <div>
-        <Label htmlFor="description">{description}</Label>
+        <Label htmlFor="description">Descrizione</Label>
         <Textarea id="description" name="description" required />
       </div>
       <div>
-        <Label htmlFor="price">{price}</Label>
+        <Label htmlFor="price">Prezzo</Label>
         <Input id="price" name="price" type="number" required />
       </div>
       <div>
-        <Label>{type}</Label>
+        <Label>Tipo</Label>
         <RadioGroup value={type} onValueChange={setType}>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="rent" id="rent" />
-            <Label htmlFor="rent">{forRent}</Label>
+            <Label htmlFor="rent">In Affitto</Label>
           </div>
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="sale" id="sale" />
-            <Label htmlFor="sale">{forSale}</Label>
+            <Label htmlFor="sale">In Vendita</Label>
           </div>
         </RadioGroup>
       </div>
       <div>
-        <Label htmlFor="images">{imagesText}</Label>
+        <Label htmlFor="images">Immagini</Label>
         <Input
           id="images"
           type="file"
@@ -84,7 +71,7 @@ export function PropertyForm() {
           className="file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
         />
         <p className="text-sm text-gray-500 mt-1">
-          {selectedImages}: 0
+          Immagini selezionate: 0
         </p>
       </div>
       <div>
@@ -112,7 +99,7 @@ export function PropertyForm() {
         <Input id="province" name="province" />
       </div>
       <Button type="submit" disabled={isCreating}>
-        {isCreating ? "Creando..." : submit}
+        {isCreating ? "Creando..." : "Crea Proprietà"}
       </Button>
     </form>
   );

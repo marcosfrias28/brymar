@@ -3,10 +3,10 @@
 import { revalidatePath } from "next/cache"
 import { put } from "@vercel/blob"
 import { z } from "zod"
-import { neon } from "@neondatabase/serverless"
+import { eq, desc, count, and } from "drizzle-orm"
 import { type ActionState, validatedAction } from "../validations"
-
-const sql = neon(process.env.DATABASE_URL!)
+import db from "../db/drizzle"
+import { lands } from "../db/schema"
 
 const landSchema = z.object({
   name: z.string().min(3).max(100),
@@ -34,11 +34,16 @@ export const addLand = validatedAction(landSchema, async (data: any, formData: F
         }
       }
     }
-
-    await sql`
-      INSERT INTO lands (name, description, area, price, location, type, images, created_at)
-      VALUES (${data.name}, ${data.description}, ${data.area}, ${data.price}, ${data.location}, ${data.type}, ${JSON.stringify(imageUrls)}, NOW())
-    `
+    await db.insert(lands).values({
+      name: data.name,
+      description: data.description,
+      area: data.area,
+      price: data.price,
+      location: data.location,
+      type: data.type,
+      images: imageUrls,
+      createdAt: new Date(),
+    })
 
     revalidatePath("/dashboard/lands")
     return { success: true, message: "Terreno agregado exitosamente!" }
@@ -68,24 +73,21 @@ export const updateLand = validatedAction(
         }
       }
 
-      const updateQuery =
-        imageUrls.length > 0
-          ? sql`
-          UPDATE lands 
-          SET name = ${data.name}, description = ${data.description}, area = ${data.area}, 
-              price = ${data.price}, location = ${data.location}, type = ${data.type}, 
-              images = ${JSON.stringify(imageUrls)}, updated_at = NOW()
-          WHERE id = ${data.id}
-        `
-          : sql`
-          UPDATE lands 
-          SET name = ${data.name}, description = ${data.description}, area = ${data.area}, 
-              price = ${data.price}, location = ${data.location}, type = ${data.type}, 
-              updated_at = NOW()
-          WHERE id = ${data.id}
-        `
+      const updateData: any = {
+        name: data.name,
+        description: data.description,
+        area: data.area,
+        price: data.price,
+        location: data.location,
+        type: data.type,
+        updatedAt: new Date(),
+      }
 
-      await updateQuery
+      if (imageUrls.length > 0) {
+        updateData.images = imageUrls
+      }
+
+      await db.update(lands).set(updateData).where(eq(lands.id, parseInt(data.id)))
 
       revalidatePath("/dashboard/lands")
       return { success: true, message: "Terreno actualizado exitosamente!" }
@@ -98,7 +100,7 @@ export const updateLand = validatedAction(
 
 export const deleteLand = async (id: string): Promise<ActionState> => {
   try {
-    await sql`DELETE FROM lands WHERE id = ${id}`
+    await db.delete(lands).where(eq(lands.id, parseInt(id)))
     revalidatePath("/dashboard/lands")
     return { success: true, message: "Terreno eliminado exitosamente!" }
   } catch (error) {
@@ -111,30 +113,33 @@ export const getLands = async (page = 1, limit = 12, filters?: any) => {
   try {
     const offset = (page - 1) * limit
 
-    let whereClause = ""
-    const params: any[] = []
-
+    // Build where conditions
+    const whereConditions = []
     if (filters?.type && filters.type !== "all") {
-      whereClause += " WHERE type = $" + (params.length + 1)
-      params.push(filters.type)
+      whereConditions.push(eq(lands.type, filters.type))
     }
 
-    const lands = await sql`
-      SELECT * FROM lands 
-      ${whereClause ? sql.unsafe(whereClause) : sql``}
-      ORDER BY created_at DESC 
-      LIMIT ${limit} OFFSET ${offset}
-    `
+    // Get lands with pagination
+    const landsQuery = db.select().from(lands)
+    if (whereConditions.length > 0) {
+      landsQuery.where(whereConditions[0])
+    }
+    const landsResult = await landsQuery
+      .orderBy(desc(lands.createdAt))
+      .limit(limit)
+      .offset(offset)
 
-    const totalResult = await sql`
-      SELECT COUNT(*) as count FROM lands 
-      ${whereClause ? sql.unsafe(whereClause) : sql``}
-    `
+    // Get total count
+    const totalQuery = db.select({ count: count() }).from(lands)
+    if (whereConditions.length > 0) {
+      totalQuery.where(whereConditions[0])
+    }
+    const totalResult = await totalQuery
 
     return {
-      lands,
-      total: Number.parseInt(totalResult[0].count),
-      totalPages: Math.ceil(Number.parseInt(totalResult[0].count) / limit),
+      lands: landsResult,
+      total: totalResult[0].count,
+      totalPages: Math.ceil(totalResult[0].count / limit),
     }
   } catch (error) {
     console.error("Error fetching lands:", error)
@@ -144,7 +149,7 @@ export const getLands = async (page = 1, limit = 12, filters?: any) => {
 
 export const getLandById = async (id: string) => {
   try {
-    const result = await sql`SELECT * FROM lands WHERE id = ${id}`
+    const result = await db.select().from(lands).where(eq(lands.id, parseInt(id)))
     return result[0] || null
   } catch (error) {
     console.error("Error fetching land:", error)

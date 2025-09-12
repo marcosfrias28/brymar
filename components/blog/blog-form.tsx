@@ -3,8 +3,7 @@
 import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useLangStore } from "@/utils/store/lang-store"
-import { translations } from "@/lib/translations"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -34,8 +33,7 @@ interface BlogFormProps {
 
 export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
   const router = useRouter()
-  const { language } = useLangStore()
-  const t = translations[language].blogForm
+
 
   const [formData, setFormData] = useState<BlogFormData>({
     title: initialData?.title || "",
@@ -125,7 +123,7 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="title" className="text-arsenic text-sm font-medium">
-                  {t.postTitle} *
+                  Título del Post *
                 </Label>
                 <Input
                   id="title"
@@ -140,7 +138,7 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="author" className="text-arsenic text-sm font-medium">
-                    {t.author} *
+                    Autor *
                   </Label>
                   <Input
                     id="author"
@@ -288,7 +286,7 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
                 className="w-full border-blackCoral text-blackCoral hover:bg-blackCoral hover:text-white"
               >
                 <X className="h-4 w-4 mr-2" />
-                {t.cancel}
+                Cancelar
               </Button>
             </CardContent>
           </Card>

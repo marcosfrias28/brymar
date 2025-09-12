@@ -91,4 +91,5 @@ export interface Property {
   bathrooms: number;
   imageUrl: string;
   type: "residential" | "commercial" | "land";
+  description: string;
 }

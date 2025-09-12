@@ -1,15 +1,12 @@
 "use client"
 
-import { useLangStore } from "@/utils/store/lang-store"
-import { translations } from "@/lib/translations"
+
 import { StatsCards } from "@/components/dashboard/stats-cards"
 import { RecentActivity } from "@/components/dashboard/recent-activity"
 import { PropertyChart } from "@/components/dashboard/property-chart"
 import { QuickActions } from "@/components/dashboard/quick-actions"
 
 export default function DashboardPage() {
-  const { language } = useLangStore()
-  const t = translations[language]
 
   return (
     <div className="space-y-6">

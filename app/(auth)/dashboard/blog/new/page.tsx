@@ -5,7 +5,9 @@ import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
+
 export default function NewBlogPage() {
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -17,8 +19,8 @@ export default function NewBlogPage() {
           </Link>
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-arsenic font-serif">Crear Post</h1>
-          <p className="text-blackCoral">Escribe un nuevo artículo para el blog</p>
+          <h1 className="text-3xl font-bold text-arsenic font-serif">Crear Nueva Entrada</h1>
+          <p className="text-blackCoral">Crea y publica una nueva entrada en el blog</p>
         </div>
       </div>
 

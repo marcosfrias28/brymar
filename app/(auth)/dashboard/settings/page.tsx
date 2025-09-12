@@ -1,9 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useLangStore } from "@/utils/store/lang-store"
 import { useUser } from "@/hooks/use-user"
-import { translations } from "@/lib/translations"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -40,8 +38,7 @@ const rolePermissions = {
 }
 
 export default function SettingsPage() {
-  const { language, setLanguage } = useLangStore()
-  const t = translations[language]
+  const [language, setLanguage] = useState("es")
 
   const { user, loading: userLoading, error: userError, updateUser } = useUser()
   const [formData, setFormData] = useState({ name: "", email: "" })
@@ -57,7 +54,7 @@ export default function SettingsPage() {
   // Update form data when user loads
   useEffect(() => {
     if (user) {
-      setFormData({ name: user.name, email: user.email })
+      setFormData({ name: user.name || "", email: user.email })
     }
   }, [user])
 
@@ -126,9 +123,9 @@ export default function SettingsPage() {
               {/* Profile Picture */}
               <div className="flex items-center gap-4">
                 <Avatar className="h-20 w-20">
-                  <AvatarImage src={user.image || "/placeholder.svg"} alt={user.name} />
+                  <AvatarImage src={user.image || "/placeholder.svg"} alt={user.name || "Usuario"} />
                   <AvatarFallback className="text-lg">
-                    {user.name
+                    {(user.name || "Usuario")
                       .split(" ")
                       .map((n) => n[0])
                       .join("")}
@@ -208,7 +205,8 @@ export default function SettingsPage() {
 
               <Separator />
 
-              {/* Permissions List */}
+              {/* Permissions List - Commented out as permissions are not available in current User model */}
+              {/* 
               <div className="space-y-4">
                 <h4 className="font-semibold">Permisos Actuales</h4>
                 <div className="grid grid-cols-1 tablet:grid-cols-2 gap-4">
@@ -220,6 +218,7 @@ export default function SettingsPage() {
                   ))}
                 </div>
               </div>
+              */}
 
               {/* Role Comparison */}
               <div className="space-y-4">

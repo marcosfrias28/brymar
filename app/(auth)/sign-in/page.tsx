@@ -1,7 +1,7 @@
-import { LoginWrapper } from "../login-wrapper";
-import { SignInForm } from "../signin-form";
+import { LoginWrapper } from "@/components/auth/login-wrapper";
+import { SignInForm } from "@/components/auth/signin-form";
 
-export default function SignUpPage() {
+export default function SignInPage() {
   return (
     <LoginWrapper>
       <SignInForm />

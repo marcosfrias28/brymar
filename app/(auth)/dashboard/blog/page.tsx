@@ -2,14 +2,12 @@
 
 import { useState, useMemo } from "react"
 import { FileText, Calendar, User, PenTool } from "lucide-react"
-import { useLangStore } from "@/utils/store/lang-store"
-import { translations } from "@/lib/translations"
+
 import { UnifiedPageLayout } from "@/components/shared/unified-page-layout"
 import { useBlogPosts } from "@/hooks/use-blog"
 
+
 export default function BlogPage() {
-  const { language } = useLangStore()
-  const t = translations[language]
   const { blogPosts, loading, error, refreshBlogPosts } = useBlogPosts()
 
   const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">("all")
@@ -106,13 +104,13 @@ export default function BlogPage() {
 
   return (
     <UnifiedPageLayout
-      title={t.dashboard.blog}
+      title="Gestión del Blog"
       stats={stats}
       items={filteredByStatus}
       itemType="blog"
-      searchPlaceholder={`${t.blogForm.search} posts...`}
+      searchPlaceholder="Buscar posts..."
       addNewHref="/dashboard/blog/new"
-      addNewLabel={t.blogForm.addPost}
+      addNewLabel="Agregar Post"
       quickFilters={quickFilters}
       statusFilters={statusFilters}
     />

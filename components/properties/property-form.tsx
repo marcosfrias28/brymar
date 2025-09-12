@@ -3,8 +3,7 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useLangStore } from "@/utils/store/lang-store"
-import { translations } from "@/lib/translations"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -35,8 +34,7 @@ interface PropertyFormProps {
 
 export function PropertyForm({ initialData, isEditing = false }: PropertyFormProps) {
   const router = useRouter()
-  const { language } = useLangStore()
-  const t = translations[language]
+
 
   const [formData, setFormData] = useState<PropertyFormData>({
     title: initialData?.title || "",
@@ -119,7 +117,7 @@ export function PropertyForm({ initialData, isEditing = false }: PropertyFormPro
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
                     <Label htmlFor="title" className="text-arsenic text-sm font-medium">
-                      {t.propertyForm.propertyTitle} *
+                      Título de la Propiedad *
                     </Label>
                     <Input
                       id="title"
@@ -133,15 +131,15 @@ export function PropertyForm({ initialData, isEditing = false }: PropertyFormPro
 
                   <div>
                     <Label htmlFor="type" className="text-arsenic text-sm font-medium">
-                      {t.propertyType} *
+                      Tipo de Propiedad *
                     </Label>
                     <Select value={formData.type} onValueChange={(value) => handleInputChange("type", value)}>
                       <SelectTrigger className="mt-1 border-blackCoral">
                         <SelectValue placeholder="Tipo" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="sale">{t.propertyForm.forSale}</SelectItem>
-                        <SelectItem value="rent">{t.propertyForm.forRent}</SelectItem>
+                        <SelectItem value="sale">En Venta</SelectItem>
+                        <SelectItem value="rent">En Alquiler</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -163,7 +161,7 @@ export function PropertyForm({ initialData, isEditing = false }: PropertyFormPro
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div>
                     <Label htmlFor="price" className="text-arsenic text-sm font-medium">
-                      {t.propertyForm.price} (USD) *
+                      Precio (USD) *
                     </Label>
                     <Input
                       id="price"
@@ -273,7 +271,7 @@ export function PropertyForm({ initialData, isEditing = false }: PropertyFormPro
                   className="w-full border-blackCoral text-blackCoral hover:bg-blackCoral hover:text-white"
                 >
                   <X className="h-4 w-4 mr-2" />
-                  {t.cancel}
+                  Cancelar
                 </Button>
               </CardContent>
             </Card>

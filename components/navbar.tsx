@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 
 import {
-  Languages,
   Home,
   Building2,
   Landmark,
@@ -21,20 +20,13 @@ import {
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { CustomButton } from "./custom-buttom";
-import { useLangStore } from "@/utils/store/lang-store";
 import { ModeToggle } from "./mode-toggle";
-import {
-  NavbarTranslations,
-  NavbarTranslations as translations,
-} from "@/lib/translations";
 import { User } from "@/lib/db/schema";
 import { Button } from "./ui/button";
 import { motion, AnimatePresence, useScroll } from "framer-motion";
 import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useTranslation } from "@/hooks/use-translation";
-import { usePathname } from "next/navigation";
 import { useAvoidRoutes } from "@/hooks/useAvoidRoutes";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SideBarProps {
   className?: string;
@@ -56,11 +48,12 @@ const menuItems = [
   { icon: Mail, href: "/contact" },
 ];
 
+const getMenuLabel = (index: number): string => {
+  const labels = ["Inicio", "Buscar Propiedad", "Terrenos", "Nosotros", "Contacto"];
+  return labels[index] || "";
+};
+
 export function Navbar({ className, user }: SideBarProps) {
-  // Language
-  const language = useLangStore((prev) => prev.language);
-  const setLanguage = useLangStore((prev) => prev.setLanguage);
-  const t = useTranslation(NavbarTranslations);
 
   // Scroll
   const { scrollY } = useScroll();
@@ -84,10 +77,7 @@ export function Navbar({ className, user }: SideBarProps) {
 
   if (shouldAvoid) return null;
 
-  // Change Language
-  const handleChangeLanguage = (code: "en" | "es" | "it") => {
-    setLanguage(code);
-  };
+
 
   return (
     <AnimatePresence>
@@ -121,7 +111,7 @@ export function Navbar({ className, user }: SideBarProps) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <CustomButton className="w-fit" icon={UserCheck2}>
-                    {t.buttons.profile}
+                    Perfil
                   </CustomButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
@@ -130,11 +120,11 @@ export function Navbar({ className, user }: SideBarProps) {
                       <Link
                         key={Math.random()}
                         href={href}
-                        onClick={() => handleChangeLanguage("en")}
+
                       >
                         <CustomButton
                           icon={icon}
-                          label={t.buttons.dashboard}
+                          label="Panel"
                           className="w-fit"
                         />
                       </Link>
@@ -146,50 +136,12 @@ export function Navbar({ className, user }: SideBarProps) {
             <div className="flex flex-row max-lg:flex-col max-lg:gap-0 gap-2 justify-center items-center">
               {menuItems.map((item, i) => (
                 <Link key={Math.random()} href={item.href}>
-                  <CustomButton icon={item.icon} label={t.menuLabels[i]} />
+                  <CustomButton icon={item.icon} label={getMenuLabel(i)} />
                 </Link>
               ))}
             </div>
             <section className="flex flex-row items-center max-lg:gap-0 gap-2 lg:justify-end">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <CustomButton
-                    className="w-fit"
-                    icon={Languages}
-                    label={language}
-                  >
-                    {Object.entries(translations).map(([code, t]) => (
-                      <Button
-                        key={Math.random()}
-                        variant="ghost"
-                        onClick={() =>
-                          handleChangeLanguage(code as "en" | "es" | "it")
-                        }
-                      >
-                        {t.buttons.languages}
-                      </Button>
-                    ))}
-                  </CustomButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="flex">
-                  {Object.entries(translations).map(([code, trans]) => (
-                    <DropdownMenuItem
-                      key={Math.random()}
-                      className="flex outline-hidden"
-                    >
-                      <Button
-                        key={Math.random()}
-                        variant="ghost"
-                        onClick={() =>
-                          handleChangeLanguage(code as "en" | "es" | "it")
-                        }
-                      >
-                        {trans.buttons.languages}
-                      </Button>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+
               <ModeToggle />
             </section>
           </div>

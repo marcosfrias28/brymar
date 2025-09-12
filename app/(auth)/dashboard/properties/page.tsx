@@ -2,15 +2,11 @@
 
 import { useState } from "react";
 import { Home, DollarSign, Key, TrendingUp } from "lucide-react";
-import { useLangStore } from "@/utils/store/lang-store";
-import { translations } from "@/lib/translations";
 import { UnifiedPageLayout } from "@/components/shared/unified-page-layout";
 import { useProperties } from "@/hooks/use-properties";
 import { Button } from "@/components/ui/button";
 
 export default function PropertiesPage() {
-  const { language } = useLangStore();
-  const t = translations[language];
 
   const [statusFilter, setStatusFilter] = useState<"all" | "sale" | "rent">(
     "all"
@@ -71,7 +67,7 @@ export default function PropertiesPage() {
     },
     {
       label: "Destacadas",
-      value: properties.filter((p) => parseInt(p.id) % 7 === 0).length,
+      value: properties.filter((p) => p.id % 7 === 0).length,
       icon: <TrendingUp className="h-5 w-5" />,
       color: "text-orange-600",
     },
@@ -99,7 +95,7 @@ export default function PropertiesPage() {
     },
     {
       label: "Destacadas",
-      count: properties.filter((p) => parseInt(p.id) % 7 === 0).length,
+      count: properties.filter((p) => p.id % 7 === 0).length,
       active: false,
       onClick: () => {},
     },
@@ -128,7 +124,7 @@ export default function PropertiesPage() {
 
   return (
     <UnifiedPageLayout
-      title={t.dashboardPropertiesTitle}
+      title="Gestión de Propiedades"
       stats={stats}
       items={filteredByStatus}
       itemType="property"

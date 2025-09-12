@@ -6,15 +6,16 @@ import { toast } from 'sonner'
 import { ActionState } from '@/lib/validations'
 
 export interface Land {
-  id: string
+  id: number
   name: string
   description: string
   area: number
   price: number
   location: string
-  type: 'commercial' | 'residential' | 'agricultural' | 'beachfront'
+  type: string
   images: string[]
-  created_at: string
+  createdAt: Date
+  updatedAt: Date | null
 }
 
 export interface UseLandsReturn {
@@ -26,8 +27,8 @@ export interface UseLandsReturn {
   currentPage: number
   fetchLands: (page?: number, filters?: any) => Promise<void>
   createLand: (formData: FormData) => void
-  updateLandById: (id: string, formData: FormData) => void
-  deleteLandById: (id: string) => Promise<boolean>
+  updateLandById: (id: number, formData: FormData) => void
+  deleteLandById: (id: number) => Promise<boolean>
   refreshLands: () => Promise<void>
   // Action states for form submissions
   createState: ActionState
@@ -77,8 +78,8 @@ export const useLands = (initialPage = 1, initialFilters?: any): UseLandsReturn 
     createAction(formData)
   }
 
-  const updateLandById = (id: string, formData: FormData): void => {
-    formData.append('id', id)
+  const updateLandById = (id: number, formData: FormData): void => {
+    formData.append('id', id.toString())
     updateAction(formData)
   }
 
@@ -103,10 +104,10 @@ export const useLands = (initialPage = 1, initialFilters?: any): UseLandsReturn 
     }
   }, [updateState])
 
-  const deleteLandById = async (id: string): Promise<boolean> => {
+  const deleteLandById = async (id: number): Promise<boolean> => {
     try {
       setError(null)
-      const result = await deleteLand(id)
+      const result = await deleteLand(id.toString())
       
       if (result.success) {
         toast.success(result.message || 'Terreno eliminado exitosamente')
@@ -156,15 +157,16 @@ export const useLands = (initialPage = 1, initialFilters?: any): UseLandsReturn 
 export interface UseLandReturn {
   land: Land | null
   loading: boolean
+  isLoading: boolean
   error: string | null
-  fetchLand: (id: string) => Promise<void>
+  fetchLand: (id: number) => Promise<void>
   updateLand: (formData: FormData) => void
   deleteLand: () => Promise<boolean>
   updateState: ActionState
   isUpdating: boolean
 }
 
-export const useLand = (id?: string): UseLandReturn => {
+export const useLand = (id?: number): UseLandReturn => {
   const [land, setLand] = useState<Land | null>(null)
   const [loading, setLoading] = useState(!!id)
   const [error, setError] = useState<string | null>(null)
@@ -173,12 +175,12 @@ export const useLand = (id?: string): UseLandReturn => {
   const [updateState, updateAction] = useActionState(updateLand, { success: false, message: '', errors: {} })
   const isUpdating = updateState.success === false && Object.keys(updateState.errors || {}).length === 0 && updateState.message === ''
 
-  const fetchLand = async (landId: string) => {
+  const fetchLand = async (landId: number) => {
     try {
       setLoading(true)
       setError(null)
       
-      const result = await getLandById(landId)
+      const result = await getLandById(landId.toString())
       setLand(result as Land)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al cargar terreno'
@@ -191,7 +193,7 @@ export const useLand = (id?: string): UseLandReturn => {
 
   const updateLandData = (formData: FormData): void => {
     if (!land?.id) return
-    formData.append('id', land.id)
+    formData.append('id', land.id.toString())
     updateAction(formData)
   }
 
@@ -211,7 +213,7 @@ export const useLand = (id?: string): UseLandReturn => {
     
     try {
       setError(null)
-      const result = await deleteLand(land.id)
+      const result = await deleteLand(land.id.toString())
       
       if (result.success) {
         toast.success(result.message || 'Terreno eliminado exitosamente')
@@ -239,6 +241,7 @@ export const useLand = (id?: string): UseLandReturn => {
   return {
     land,
     loading,
+    isLoading: loading,
     error,
     fetchLand,
     updateLand: updateLandData,

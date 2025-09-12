@@ -1,7 +1,6 @@
 "use client"
 
-import { useLangStore } from "@/utils/store/lang-store"
-import { translations } from "@/lib/translations"
+
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -23,8 +22,8 @@ interface LandFiltersProps {
 }
 
 export function LandFilters({ filters, setFilters }: LandFiltersProps) {
-  const { language } = useLangStore()
-  const t = translations[language].landForm
+
+
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }))
@@ -112,7 +111,7 @@ export function LandFilters({ filters, setFilters }: LandFiltersProps) {
 
           {/* Location */}
           <div className="space-y-2">
-            <Label className="text-arsenic">{t.location}</Label>
+            <Label className="text-arsenic">Ubicación</Label>
             <Input
               placeholder="Ciudad o zona"
               value={filters.location}

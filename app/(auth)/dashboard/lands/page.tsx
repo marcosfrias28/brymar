@@ -2,14 +2,11 @@
 
 import { useState, useMemo } from "react"
 import { MapPin, DollarSign, Ruler, TreePine } from "lucide-react"
-import { useLangStore } from "@/utils/store/lang-store"
-import { translations } from "@/lib/translations"
+
 import { UnifiedPageLayout } from "@/components/shared/unified-page-layout"
 import { useLands } from "@/hooks/use-lands"
 
 export default function LandsPage() {
-  const { language } = useLangStore()
-  const t = translations[language]
 
   const [typeFilter, setTypeFilter] = useState<"all" | "commercial" | "residential" | "agricultural" | "beachfront">(
     "all",
@@ -141,13 +138,13 @@ export default function LandsPage() {
 
   return (
     <UnifiedPageLayout
-      title={t.dashboard.lands}
+      title="Gestión de Terrenos"
       stats={stats}
       items={filteredByType}
       itemType="land"
-      searchPlaceholder={t.landForm.search}
+      searchPlaceholder="Buscar terrenos..."
       addNewHref="/dashboard/lands/new"
-      addNewLabel={t.landForm.addLand}
+      addNewLabel="Agregar Terreno"
       quickFilters={quickFilters}
       statusFilters={statusFilters}
     />

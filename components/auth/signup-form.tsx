@@ -7,21 +7,47 @@ import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signUp } from "@/lib/actions/auth-actions";
 import { ActionState } from "@/lib/validations";
-import { SignFormTranslations } from "@/lib/translations";
-import { CustomInput } from "../../components/custom-input";
+import { CustomInput } from "@/components/custom-input";
 import { toast } from "sonner";
-import { useTranslation } from "@/hooks/use-translation";
+
 
 export function SignUpForm() {
-  const {
-    title,
-    subtitle,
-    fields,
-    signUp: signUpText,
-    loading,
-    alreadyHaveAccount,
-    signIn: signInLinkText,
-  } = useTranslation(SignFormTranslations.signup);
+  const title = "Crear Cuenta";
+  const subtitle = "Completa los datos para registrarte";
+  const fields = [
+    {
+      id: "name",
+      name: "name",
+      type: "text",
+      placeholder: "Nombre completo",
+      label: "Nombre completo",
+      children: "Nombre completo",
+      required: true
+    },
+    {
+      id: "email",
+      name: "email",
+      type: "email",
+      placeholder: "Correo electrónico",
+      label: "Correo electrónico",
+      children: "Correo electrónico",
+      required: true
+    },
+    {
+      id: "password",
+      name: "password",
+      type: "password",
+      placeholder: "Contraseña",
+      label: "Contraseña",
+      children: "Contraseña",
+      required: true
+    }
+  ];
+  const signUpText = "Crear Cuenta";
+  const loading = "Creando cuenta...";
+  const alreadyHaveAccount = "¿Ya tienes cuenta?";
+  const signInLinkText = "Iniciar sesión";
+
 
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     signUp,

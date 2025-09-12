@@ -1,1 +1,0 @@
-type AvailableLanguages = "en" | "es" | "it";

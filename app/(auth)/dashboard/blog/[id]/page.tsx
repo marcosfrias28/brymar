@@ -10,16 +10,16 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
-import { useLangStore } from "@/utils/store/lang-store"
-import { translations } from "@/lib/translations"
+
 import { useBlogPost, BlogPost } from "@/hooks/use-blog"
 import Link from "next/link"
+
 
 export default function BlogDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const { language } = useLangStore()
-  const t = translations[language]
+
+
   const { blogPost, loading, error, updateBlogPost, deleteBlogPost, updateState, isUpdating } = useBlogPost(params.id as string)
 
   const [isEditing, setIsEditing] = useState(false)
@@ -83,7 +83,7 @@ export default function BlogDetailPage() {
     if (confirm("¿Estás seguro de que quieres eliminar este post?")) {
       const success = await deleteBlogPost()
       if (success) {
-        router.push("/dashboard/blog")
+        router.push('/dashboard/blog')
       }
     }
   }
@@ -275,11 +275,11 @@ export default function BlogDetailPage() {
                   </div>
                   <div className="flex items-center gap-2 text-sm text-blackCoral">
                     <Calendar className="h-4 w-4" />
-                    <span>{new Date(currentData.created_at || '').toLocaleDateString()}</span>
+                    <span>{new Date(currentData.createdAt || '').toLocaleDateString()}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-blackCoral">
                     <Clock className="h-4 w-4" />
-                    <span>{currentData.reading_time} min de lectura</span>
+                    <span>{currentData.readingTime} min de lectura</span>
                   </div>
                 </>
               )}
@@ -307,8 +307,8 @@ export default function BlogDetailPage() {
                     <Input
                       id="publishedDate"
                       type="date"
-                      value={editedPost?.created_at?.split('T')[0] || ''}
-                      onChange={(e) => editedPost && setEditedPost({ ...editedPost, created_at: e.target.value })}
+                      value={editedPost?.createdAt ? new Date(editedPost.createdAt).toISOString().split('T')[0] : ''}
+                  onChange={(e) => editedPost && setEditedPost({ ...editedPost, createdAt: new Date(e.target.value) })}
                     />
                   </div>
                   <div>
@@ -316,8 +316,8 @@ export default function BlogDetailPage() {
                     <Input
                       id="readTime"
                       type="number"
-                      value={editedPost?.reading_time || 0}
-                      onChange={(e) => editedPost && setEditedPost({ ...editedPost, reading_time: Number(e.target.value) })}
+                      value={editedPost?.readingTime || 0}
+                  onChange={(e) => editedPost && setEditedPost({ ...editedPost, readingTime: Number(e.target.value) })}
                     />
                   </div>
                 </>
@@ -325,7 +325,7 @@ export default function BlogDetailPage() {
 <div className="space-y-2">
                   <div>
                     <Label className="text-sm font-medium text-blackCoral">Fecha de creación</Label>
-                    <p className="text-sm text-blackCoral leading-relaxed">{new Date(currentData.created_at || '').toLocaleDateString()}</p>
+                    <p className="text-sm text-blackCoral leading-relaxed">{new Date(currentData.createdAt || '').toLocaleDateString()}</p>
                   </div>
                 </div>
               )}

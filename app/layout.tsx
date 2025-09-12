@@ -6,6 +6,7 @@ import { Footer } from "@/components/sections/footer";
 import { Toaster } from "@/components/ui/sonner";
 import { getUser } from "@/lib/actions/auth-actions";
 
+
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
@@ -17,15 +18,18 @@ export const metadata: Metadata = {
     "Find your dream property with our exclusive real estate listings",
 };
 
-export default async function RootLayout({
+export default async function LocaleLayout({
   children,
+  params
 }: {
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
   const user = await getUser();
 
   return (
-    <html suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning>
       <body className={`${inter.className} flex flex-col min-h-screen`}>
         <ThemeProvider
           attribute="class"

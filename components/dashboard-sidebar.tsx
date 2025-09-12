@@ -15,29 +15,26 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { translations } from "@/lib/translations";
-import { useLangStore } from "@/utils/store/lang-store";
+
 
 export function DashboardSidebar() {
   const pathname = usePathname();
-  const language = useLangStore((prev) => prev.language);
-  const t = translations[language].dashboard;
 
   const menuItems = [
-    { title: t.properties, icon: Home, href: "/dashboard/properties" },
-    { title: t.lands, icon: Landmark, href: "/dashboard/lands" },
-    { title: t.blog, icon: FileText, href: "/dashboard/blog" },
+    { title: "Propiedades", icon: Home, href: "/dashboard/properties" },
+    { title: "Terrenos", icon: Landmark, href: "/dashboard/lands" },
+    { title: "Blog", icon: FileText, href: "/dashboard/blog" },
   ];
 
   return (
     <Sidebar>
       <SidebarHeader className="flex items-center justify-between px-4 py-2">
-        <h2 className="text-lg font-semibold">{t.title}</h2>
+        <h2 className="text-lg font-semibold">Panel de Control</h2>
         <SidebarTrigger />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Management</SidebarGroupLabel>
+          <SidebarGroupLabel>Gestión</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (

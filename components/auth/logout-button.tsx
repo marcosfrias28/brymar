@@ -1,6 +1,6 @@
 "use client";
 
-import { signOut } from "@/lib/actions/user-actions";
+import { signOut } from "@/lib/actions/auth-actions";
 import { ActionState } from "@/lib/validations";
 import { LucideLogOut } from "lucide-react";
 import { useActionState, useEffect } from "react";
@@ -8,22 +8,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { CustomButton } from "@/components/custom-buttom";
 import { User } from "@/lib/db/schema";
-import { useTranslation } from "@/hooks/use-translation";
 
-const translations = {
-  en: {
-    logout: "Logout",
-    pending: "Logging out...",
-  },
-  es: {
-    logout: "Cerrar Sesión",
-    pending: "Cerrando sesión...",
-  },
-  it: {
-    logout: "Esci",
-    pending: "Disconnessione...",
-  },
-};
 
 const LogOutButton = ({ user }: { user: User | null }) => {
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
@@ -31,8 +16,8 @@ const LogOutButton = ({ user }: { user: User | null }) => {
     { error: "" }
   );
 
-  const { logout: logoutText, pending: pendingText } =
-    useTranslation(translations);
+  const logoutText = "Cerrar Sesión";
+  const pendingText = "Cerrando sesión...";
 
   useEffect(() => {
     if (state?.error) toast.error(state?.error);

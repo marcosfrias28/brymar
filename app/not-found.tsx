@@ -1,14 +1,14 @@
 "use client";
 
-import { LoginWrapper } from "./(auth)/login-wrapper";
-
 export default function NotFound() {
   return (
-    <LoginWrapper>
-      <div className="text-black dark:text-white text-9xl font-black [&>:h1]:italic">
-        <h1>404...</h1>
-        <p className="text-3xl">Oops, something went wrong.</p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <div className="text-black text-9xl font-black">
+          <h1 className="italic">404...</h1>
+          <p className="text-3xl mt-4">Página no encontrada.</p>
+        </div>
       </div>
-    </LoginWrapper>
+    </div>
   );
 }

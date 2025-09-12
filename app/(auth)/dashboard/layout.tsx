@@ -1,3 +1,5 @@
+"use client";
+
 import type React from "react"
 import { AppSidebar } from "@/components/layout/app-sidebar"
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
@@ -11,11 +13,13 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 
+
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const dashboardPath = "/dashboard";
   return (
     <>
       <AppSidebar />
@@ -26,7 +30,7 @@ export default function DashboardLayout({
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+                <BreadcrumbLink href={dashboardPath}>Panel de Control</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>

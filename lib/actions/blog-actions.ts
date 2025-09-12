@@ -3,10 +3,10 @@
 import { revalidatePath } from "next/cache"
 import { put } from "@vercel/blob"
 import { z } from "zod"
-import { neon } from "@neondatabase/serverless"
+import { eq, desc, count, and } from "drizzle-orm"
+import db from "../db/drizzle"
+import { blogPosts } from "../db/schema"
 import { type ActionState, validatedAction } from "../validations"
-
-const sql = neon(process.env.DATABASE_URL!)
 
 const blogPostSchema = z.object({
   title: z.string().min(3).max(200),
@@ -40,10 +40,16 @@ export const addBlogPost = validatedAction(
       const wordCount = data.content.split(" ").length
       const readingTime = Math.ceil(wordCount / wordsPerMinute)
 
-      await sql`
-      INSERT INTO blog_posts (title, content, author, category, status, image, reading_time, created_at)
-      VALUES (${data.title}, ${data.content}, ${data.author}, ${data.category}, ${data.status}, ${imageUrl}, ${readingTime}, NOW())
-    `
+      await db.insert(blogPosts).values({
+        title: data.title,
+        content: data.content,
+        author: data.author,
+        category: data.category,
+        status: data.status,
+        image: imageUrl,
+        readingTime: readingTime,
+        createdAt: new Date(),
+      })
 
       revalidatePath("/dashboard/blog")
       return { success: true, message: "Post de blog agregado exitosamente!" }
@@ -76,23 +82,20 @@ export const updateBlogPost = validatedAction(
       const wordCount = data.content.split(" ").length
       const readingTime = Math.ceil(wordCount / wordsPerMinute)
 
-      const updateQuery = imageUrl
-        ? sql`
-          UPDATE blog_posts 
-          SET title = ${data.title}, content = ${data.content}, author = ${data.author}, 
-              category = ${data.category}, status = ${data.status}, image = ${imageUrl}, 
-              reading_time = ${readingTime}, updated_at = NOW()
-          WHERE id = ${data.id}
-        `
-        : sql`
-          UPDATE blog_posts 
-          SET title = ${data.title}, content = ${data.content}, author = ${data.author}, 
-              category = ${data.category}, status = ${data.status}, reading_time = ${readingTime}, 
-              updated_at = NOW()
-          WHERE id = ${data.id}
-        `
+      const updateData = {
+        title: data.title,
+        content: data.content,
+        author: data.author,
+        category: data.category,
+        status: data.status,
+        readingTime: readingTime,
+        updatedAt: new Date(),
+        ...(imageUrl && { image: imageUrl }),
+      }
 
-      await updateQuery
+      await db.update(blogPosts)
+        .set(updateData)
+        .where(eq(blogPosts.id, parseInt(data.id)))
 
       revalidatePath("/dashboard/blog")
       return { success: true, message: "Post de blog actualizado exitosamente!" }
@@ -105,7 +108,7 @@ export const updateBlogPost = validatedAction(
 
 export const deleteBlogPost = async (id: string): Promise<ActionState> => {
   try {
-    await sql`DELETE FROM blog_posts WHERE id = ${id}`
+    await db.delete(blogPosts).where(eq(blogPosts.id, parseInt(id)))
     revalidatePath("/dashboard/blog")
     return { success: true, message: "Post de blog eliminado exitosamente!" }
   } catch (error) {
@@ -118,35 +121,36 @@ export const getBlogPosts = async (page = 1, limit = 12, filters?: any) => {
   try {
     const offset = (page - 1) * limit
 
-    let whereClause = ""
-    const params: any[] = []
-
+    // Build where conditions
+    const whereConditions = []
     if (filters?.status && filters.status !== "all") {
-      whereClause += " WHERE status = $" + (params.length + 1)
-      params.push(filters.status)
+      whereConditions.push(eq(blogPosts.status, filters.status))
     }
-
     if (filters?.category && filters.category !== "all") {
-      whereClause += (whereClause ? " AND" : " WHERE") + " category = $" + (params.length + 1)
-      params.push(filters.category)
+      whereConditions.push(eq(blogPosts.category, filters.category))
     }
 
-    const blogPosts = await sql`
-      SELECT * FROM blog_posts 
-      ${whereClause ? sql.unsafe(whereClause) : sql``}
-      ORDER BY created_at DESC 
-      LIMIT ${limit} OFFSET ${offset}
-    `
+    // Get blog posts with pagination
+    const blogPostsQuery = db.select().from(blogPosts)
+    if (whereConditions.length > 0) {
+      blogPostsQuery.where(whereConditions.length === 1 ? whereConditions[0] : and(...whereConditions))
+    }
+    const blogPostsResult = await blogPostsQuery
+      .orderBy(desc(blogPosts.createdAt))
+      .limit(limit)
+      .offset(offset)
 
-    const totalResult = await sql`
-      SELECT COUNT(*) as count FROM blog_posts 
-      ${whereClause ? sql.unsafe(whereClause) : sql``}
-    `
+    // Get total count
+    const totalQuery = db.select({ count: count() }).from(blogPosts)
+    if (whereConditions.length > 0) {
+      totalQuery.where(whereConditions.length === 1 ? whereConditions[0] : and(...whereConditions))
+    }
+    const totalResult = await totalQuery
 
     return {
-      blogPosts,
-      total: Number.parseInt(totalResult[0].count),
-      totalPages: Math.ceil(Number.parseInt(totalResult[0].count) / limit),
+      blogPosts: blogPostsResult,
+      total: totalResult[0].count,
+      totalPages: Math.ceil(totalResult[0].count / limit),
     }
   } catch (error) {
     console.error("Error fetching blog posts:", error)
@@ -156,7 +160,7 @@ export const getBlogPosts = async (page = 1, limit = 12, filters?: any) => {
 
 export const getBlogPostById = async (id: string) => {
   try {
-    const result = await sql`SELECT * FROM blog_posts WHERE id = ${id}`
+    const result = await db.select().from(blogPosts).where(eq(blogPosts.id, parseInt(id)))
     return result[0] || null
   } catch (error) {
     console.error("Error fetching blog post:", error)

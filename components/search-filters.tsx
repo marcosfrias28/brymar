@@ -22,16 +22,18 @@ import { Slider } from "@/components/ui/slider";
 import { useState } from "react";
 
 interface SearchFiltersProps {
-  translations: any;
-  onSubmit: (formData: FormData) => void;
+  translations?: any;
+  onSubmit?: (formData: FormData) => void;
+  formAction?: (formData: FormData) => void;
   isPending: boolean;
-  onViewChange: (view: "grid" | "list") => void;
-  view: "grid" | "list";
+  onViewChange?: (view: "grid" | "list") => void;
+  view?: "grid" | "list";
 }
 
 export function SearchFilters({
   translations: t,
   onSubmit,
+  formAction,
   isPending,
   onViewChange,
   view,
@@ -40,23 +42,23 @@ export function SearchFilters({
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   return (
-    <form action={onSubmit} className="space-y-4">
+    <form action={formAction || onSubmit} className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2">
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
             name="search"
-            placeholder={t.filters.searchPlaceholder}
+            placeholder="Buscar propiedades..."
             className="pl-10"
           />
         </div>
         <Select name="province">
           <SelectTrigger>
             <MapPin className="mr-2 h-4 w-4" />
-            <SelectValue placeholder={t.filters.allProvinces} />
+            <SelectValue placeholder="Todas las provincias" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">{t.filters.allProvinces}</SelectItem>
+            <SelectItem value="all">Todas las provincias</SelectItem>
             {/* Add provinces as needed */}
           </SelectContent>
         </Select>
@@ -66,10 +68,10 @@ export function SearchFilters({
         <Select name="state">
           <SelectTrigger>
             <Building2 className="mr-2 h-4 w-4" />
-            <SelectValue placeholder={t.filters.anyState} />
+            <SelectValue placeholder="Cualquier estado" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="any">{t.filters.anyState}</SelectItem>
+            <SelectItem value="any">Cualquier estado</SelectItem>
             {/* Add states as needed */}
           </SelectContent>
         </Select>
@@ -81,7 +83,7 @@ export function SearchFilters({
             onClick={() => setShowAdvanced(!showAdvanced)}
           >
             <Plus className="mr-2 h-4 w-4" />
-            {t.filters.advancedSearch}
+            Búsqueda Avanzada
           </Button>
           <div className="flex gap-1 border rounded-lg">
             <Button
@@ -89,7 +91,7 @@ export function SearchFilters({
               variant="ghost"
               size="icon"
               className={view === "grid" ? "bg-muted" : ""}
-              onClick={() => onViewChange("grid")}
+              onClick={() => onViewChange?.("grid")}
             >
               <LayoutGrid className="h-4 w-4" />
             </Button>
@@ -98,7 +100,7 @@ export function SearchFilters({
               variant="ghost"
               size="icon"
               className={view === "list" ? "bg-muted" : ""}
-              onClick={() => onViewChange("list")}
+              onClick={() => onViewChange?.("list")}
             >
               <List className="h-4 w-4" />
             </Button>
@@ -110,9 +112,7 @@ export function SearchFilters({
         <div className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">
-              {t.filters.priceRange
-                .replace("{min}", priceRange[0])
-                .replace("{max}", priceRange[1])}
+              Rango de Precio: ${priceRange[0].toLocaleString()} - ${priceRange[1].toLocaleString()}
             </label>
             <Slider
               min={30}
@@ -139,14 +139,14 @@ export function SearchFilters({
           }}
         >
           <RotateCcw className="mr-2 h-4 w-4" />
-          {t.filters.reset}
+          Limpiar
         </Button>
         <Button
           type="submit"
           className="flex-1 bg-blue-600 hover:bg-blue-700"
           disabled={isPending}
         >
-          {isPending ? t.filters.searching : t.filters.search}
+          {isPending ? "Buscando..." : "Buscar"}
         </Button>
       </div>
     </form>

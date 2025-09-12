@@ -1,85 +1,94 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { translations } from "@/lib/translations";
-import { useLangStore } from "@/utils/store/lang-store";
-import { useLands } from "@/hooks/use-lands";
+import { toast } from "sonner";
+import { addLand } from "@/lib/actions/land-actions";
 
 export function LandForm() {
-  const language = useLangStore((prev) => prev.language);
-  const t = translations[language].landForm;
-  const { createLand, createState, isCreating } = useLands();
   const [images, setImages] = useState<File[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    setImages(files);
+    if (e.target.files) {
+      const fileList = Array.from(e.target.files);
+      setImages((prev) => [...prev, ...fileList].slice(0, 10));
+    }
   };
 
-  useEffect(() => {
-    if (createState.success) {
-      // Reset form or redirect as needed
-      const form = document.querySelector('form') as HTMLFormElement;
-      if (form) form.reset();
-    }
-  }, [createState]);
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    createLand(formData);
+    setIsSubmitting(true);
+    
+    try {
+      const formData = new FormData(e.currentTarget);
+      const name = formData.get("name") as string;
+      const description = formData.get("description") as string;
+      const area = parseFloat(formData.get("area") as string);
+      const price = parseFloat(formData.get("price") as string);
+      const address = formData.get("address") as string || "";
+      const city = formData.get("city") as string || "";
+      const province = formData.get("province") as string || "";
+
+      // Add required fields for the schema
+      formData.append('location', `${address}, ${city}, ${province}`);
+      formData.append('type', 'residential');
+      
+      await addLand({}, formData);
+      toast.success("Terreno creado exitosamente");
+      // Reset form
+      e.currentTarget.reset();
+      setImages([]);
+    } catch (error) {
+      console.error("Error creating land:", error);
+      toast.error("Error al crear el terreno");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <Label htmlFor="name">{t.landName}</Label>
+        <Label htmlFor="name">Nombre del Terreno</Label>
         <Input id="name" name="name" required />
       </div>
+      
       <div>
-        <Label htmlFor="description">{t.description}</Label>
+        <Label htmlFor="description">Descripción</Label>
         <Textarea id="description" name="description" required />
       </div>
+      
       <div>
-        <Label htmlFor="area">{t.area}</Label>
-        <Input id="area" name="area" type="number" required />
+        <Label htmlFor="area">Área (m²)</Label>
+        <Input id="area" name="area" type="number" step="0.01" required />
       </div>
+      
       <div>
-        <Label htmlFor="price">{t.price}</Label>
-        <Input id="price" name="price" type="number" required />
+        <Label htmlFor="price">Precio (USD)</Label>
+        <Input id="price" name="price" type="number" step="0.01" required />
       </div>
+      
       <div>
-        <Label htmlFor="images">{t.images}</Label>
-        <Input
-          id="images"
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleImageChange}
-          className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
-        />
-        <p className="text-sm text-gray-500 mt-1">
-          {t.selectedImages}: {images.length}
-        </p>
-      </div>
-      <div>
-        <Label htmlFor="address">Indirizzo</Label>
+        <Label htmlFor="address">Dirección</Label>
         <Input id="address" name="address" />
       </div>
+      
       <div>
-        <Label htmlFor="city">Città</Label>
+        <Label htmlFor="city">Ciudad</Label>
         <Input id="city" name="city" />
       </div>
+      
       <div>
         <Label htmlFor="province">Provincia</Label>
         <Input id="province" name="province" />
       </div>
-      <Button type="submit" disabled={isCreating}>
-        {isCreating ? "Creando..." : t.submit}
+      
+      <Button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? "Creando..." : "Crear Terreno"}
       </Button>
     </form>
   );

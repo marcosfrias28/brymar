@@ -1,5 +1,5 @@
-import { LoginWrapper } from "../login-wrapper";
-import { SignUpForm } from "../signup-form";
+import { LoginWrapper } from "@/components/auth/login-wrapper";
+import { SignUpForm } from "@/components/auth/signup-form";
 
 export default function SignUpPage() {
   return (

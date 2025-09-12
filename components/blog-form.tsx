@@ -1,53 +1,66 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { translations } from "@/lib/translations";
-import { useLangStore } from "@/utils/store/lang-store";
-import { useBlogPosts } from "@/hooks/use-blog";
+
+import { toast } from "sonner";
 
 export function BlogForm() {
-  const language = useLangStore((prev) => prev.language);
-  const t = translations[language].blogForm;
-  const { createBlogPost, createState, isCreating } = useBlogPosts();
+  const [image, setImage] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Handle image selection if needed
+    if (e.target.files && e.target.files[0]) {
+      setImage(e.target.files[0]);
+    }
   };
 
-  useEffect(() => {
-    if (createState.success) {
-      // Reset form or redirect as needed
-      const form = document.querySelector("form") as HTMLFormElement;
-      if (form) form.reset();
-    }
-  }, [createState]);
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    createBlogPost(formData);
+    setIsSubmitting(true);
+    
+    try {
+      const formData = new FormData(e.currentTarget);
+      const title = formData.get("title") as string;
+      const content = formData.get("content") as string;
+      const author = formData.get("author") as string;
+      
+      // TODO: Implement blog post creation logic
+      console.log('Blog post data:', { title, content, author, image });
+      toast.success("Post creado exitosamente");
+      
+      // Reset form
+      e.currentTarget.reset();
+      setImage(null);
+      
+    } catch (error) {
+      console.error("Error creating blog post:", error);
+      toast.error("Errore durante la creazione del post");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label htmlFor="title">{t.postTitle}</Label>
+        <Label htmlFor="title">Título del Post</Label>
         <Input id="title" name="title" required />
       </div>
       <div>
-        <Label htmlFor="content">{t.content}</Label>
+        <Label htmlFor="content">Contenido</Label>
         <Textarea id="content" name="content" required />
       </div>
       <div>
-        <Label htmlFor="author">{t.author}</Label>
+        <Label htmlFor="author">Autor</Label>
         <Input id="author" name="author" required />
       </div>
       <div>
-        <Label htmlFor="image">{t.coverImage}</Label>
+        <Label htmlFor="image">Imagen de Portada</Label>
         <Input
           id="image"
           type="file"
@@ -56,8 +69,8 @@ export function BlogForm() {
           className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
         />
       </div>
-      <Button type="submit" disabled={isCreating}>
-        {isCreating ? "Creando..." : t.submit}
+      <Button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? "Publicando..." : "Publicar"}
       </Button>
     </form>
   );

@@ -1,17 +1,16 @@
 "use client";
 
-import Link from "next/link";
-import { JSX, useActionState, useEffect } from "react";
+import { useActionState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { signIn } from "@/lib/actions/user-actions";
+import { signIn } from "@/lib/actions/auth-actions";
 import { ActionState } from "@/lib/validations";
-import { SignFormTranslations } from "@/lib/translations";
-import { CustomInput } from "../../components/custom-input";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { useTranslation } from "@/hooks/use-translation";
+import { CustomInput } from "@/components/custom-input";
+
+import Link from "next/link";
 
 export function SignInForm() {
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
@@ -35,16 +34,35 @@ export function SignInForm() {
     }
   }, [state]);
 
-  const {
-    title,
-    subtitle,
-    fields,
-    signIn: signInText,
-    forgotPassword,
-    noAccount,
-    createAccount,
-    loading,
-  } = useTranslation(SignFormTranslations.signin);
+  const title = "Iniciar Sesión";
+  const subtitle = "Ingresa tus credenciales para acceder";
+  const fields = [
+    {
+      id: "email",
+      name: "email",
+      type: "email",
+      placeholder: "Correo electrónico",
+      label: "Correo electrónico",
+      children: "Correo electrónico",
+      required: true
+    },
+    {
+      id: "password",
+      name: "password",
+      type: "password",
+      placeholder: "Contraseña",
+      label: "Contraseña",
+      children: "Contraseña",
+      required: true
+    }
+  ];
+  const signInText = "Iniciar Sesión";
+  const forgotPassword = "¿Olvidaste tu contraseña?";
+  const noAccount = "¿No tienes cuenta?";
+  const createAccount = "Crear cuenta";
+  const loading = "Iniciando sesión...";
+
+
 
   return (
     <form

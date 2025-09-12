@@ -1,8 +1,6 @@
 "use client"
 
-import { Home, Building2, MapPin, FileText, Settings, Languages } from "lucide-react"
-import { useLangStore } from "@/utils/store/lang-store"
-import { translations } from "@/lib/translations"
+import { Home, Building2, MapPin, FileText, Settings } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -15,8 +13,7 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
+
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
@@ -48,9 +45,18 @@ const menuItems = [
   },
 ]
 
+const getMenuTitle = (title: string) => {
+  const titles: Record<string, string> = {
+    dashboard: "Panel de Control",
+    properties: "Propiedades",
+    lands: "Terrenos",
+    blog: "Blog",
+    settings: "Configuración"
+  };
+  return titles[title] || title;
+};
+
 export function AppSidebar() {
-  const { language, setLanguage } = useLangStore()
-  const t = translations[language]
   const pathname = usePathname()
 
   return (
@@ -81,7 +87,7 @@ export function AppSidebar() {
                   >
                     <Link href={item.url}>
                       <item.icon className="w-4 h-4" />
-                      <span>{t[item.title as keyof typeof t] as string}</span>
+                      <span>{getMenuTitle(item.title)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -92,25 +98,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="w-full justify-start text-azureishWhite hover:bg-blackCoral">
-              <Languages className="w-4 h-4 mr-2" />
-              {language.toUpperCase()}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-arsenic border-blackCoral">
-            <DropdownMenuItem onClick={() => setLanguage("es")} className="text-azureishWhite hover:bg-blackCoral">
-              Español
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setLanguage("en")} className="text-azureishWhite hover:bg-blackCoral">
-              English
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setLanguage("it")} className="text-azureishWhite hover:bg-blackCoral">
-              Italiano
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Language selector removed - Spanish only */}
       </SidebarFooter>
     </Sidebar>
   )

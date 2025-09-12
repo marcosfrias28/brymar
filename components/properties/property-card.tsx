@@ -1,8 +1,6 @@
 "use client"
 
 import { Bed, Bath, Square, MapPin, Eye, Edit, Trash2 } from "lucide-react"
-import { useLangStore } from "@/utils/store/lang-store"
-import { translations } from "@/lib/translations"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -10,47 +8,22 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { MoreVertical } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import { Property } from "@/utils/types/types"
 
-interface Property {
-  id: string
-  title: string
-  type: "sale" | "rent"
-  price: number
-  bedrooms: number
-  bathrooms: number
-  area: number
-  location: string
-  description: string
-  images: string[]
-  createdAt: string
-}
+
 
 interface PropertyCardProps {
   property: Property
+  variant?: "horizontal" | "vertical"
 }
 
 export function PropertyCard({ property }: PropertyCardProps) {
-  const { language } = useLangStore()
-  const t = translations[language].propertyForm
 
-  const formatPrice = (price: number, type: string) => {
-    const formatted = new Intl.NumberFormat("es-DO", {
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("es-DO", {
       style: "currency",
       currency: "USD",
-      minimumFractionDigits: 0,
     }).format(price)
-
-    return type === "rent" ? `${formatted}/mes` : formatted
-  }
-
-  const getTypeLabel = (type: string) => {
-    return type === "sale" ? t.forSale : t.forRent
-  }
-
-  const getTypeBadgeColor = (type: string) => {
-    return type === "sale"
-      ? "bg-green-100 text-green-800 border-green-200"
-      : "bg-blue-100 text-blue-800 border-blue-200"
   }
 
   return (
@@ -58,13 +31,16 @@ export function PropertyCard({ property }: PropertyCardProps) {
       {/* Image */}
       <div className="relative h-48 overflow-hidden rounded-t-lg">
         <Image
-          src={property.images[0] || "/placeholder.svg"}
+          src={property.imageUrl || "/placeholder.jpg"}
           alt={property.title}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
+          width={400}
+          height={200}
+          className="w-full h-48 object-cover"
         />
         <div className="absolute top-3 left-3">
-          <Badge className={getTypeBadgeColor(property.type)}>{getTypeLabel(property.type)}</Badge>
+          <Badge variant="secondary" className="mb-2">
+            {property.type === "residential" ? "Residencial" : property.type === "commercial" ? "Comercial" : "Terreno"}
+          </Badge>
         </div>
         <div className="absolute top-3 right-3">
           <DropdownMenu>
@@ -77,18 +53,18 @@ export function PropertyCard({ property }: PropertyCardProps) {
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/properties/${property.id}`}>
                   <Eye className="h-4 w-4 mr-2" />
-                  {t.view}
+                  Ver
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/properties/${property.id}/edit`}>
                   <Edit className="h-4 w-4 mr-2" />
-                  {t.edit}
+                  Editar
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem className="text-red-600">
                 <Trash2 className="h-4 w-4 mr-2" />
-                {t.delete}
+                Eliminar
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -99,7 +75,9 @@ export function PropertyCard({ property }: PropertyCardProps) {
         {/* Title and Price */}
         <div className="mb-3">
           <h3 className="font-semibold text-arsenic text-lg mb-1 line-clamp-1">{property.title}</h3>
-          <p className="text-2xl font-bold text-arsenic">{formatPrice(property.price, property.type)}</p>
+          <p className="text-lg font-semibold text-primary mb-2">
+            {formatPrice(property.price)}
+          </p>
         </div>
 
         {/* Location */}
@@ -118,9 +96,9 @@ export function PropertyCard({ property }: PropertyCardProps) {
             <Bath className="h-4 w-4" />
             <span>{property.bathrooms}</span>
           </div>
-          <div className="flex items-center gap-1">
-            <Square className="h-4 w-4" />
-            <span>{property.area}m²</span>
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Square className="h-4 w-4 mr-1" />
+            {property.sqm} m²
           </div>
         </div>
 

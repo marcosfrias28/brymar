@@ -1,8 +1,7 @@
 "use client"
 
 import { Calendar, User, Clock, Eye, Edit, Trash2 } from "lucide-react"
-import { useLangStore } from "@/utils/store/lang-store"
-import { translations } from "@/lib/translations"
+
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -29,8 +28,7 @@ interface BlogCardProps {
 }
 
 export function BlogCard({ post }: BlogCardProps) {
-  const { language } = useLangStore()
-  const t = translations[language].blogForm
+
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("es-ES", {
@@ -86,18 +84,18 @@ export function BlogCard({ post }: BlogCardProps) {
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/blog/${post.id}`}>
                   <Eye className="h-4 w-4 mr-2" />
-                  {t.view}
+                  Ver
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/blog/${post.id}/edit`}>
                   <Edit className="h-4 w-4 mr-2" />
-                  {t.edit}
+                  Editar
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem className="text-red-600">
                 <Trash2 className="h-4 w-4 mr-2" />
-                {t.delete}
+                Eliminar
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

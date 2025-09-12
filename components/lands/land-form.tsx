@@ -3,8 +3,7 @@
 import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useLangStore } from "@/utils/store/lang-store"
-import { translations } from "@/lib/translations"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -32,8 +31,7 @@ interface LandFormProps {
 
 export function LandForm({ initialData, isEditing = false }: LandFormProps) {
   const router = useRouter()
-  const { language } = useLangStore()
-  const t = translations[language].landForm
+
 
   const [formData, setFormData] = useState<LandFormData>({
     name: initialData?.name || "",
@@ -103,7 +101,7 @@ export function LandForm({ initialData, isEditing = false }: LandFormProps) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
                     <Label htmlFor="name" className="text-arsenic text-sm font-medium">
-                      {t.landName} *
+                      Nombre del Terreno *
                     </Label>
                     <Input
                       id="name"
@@ -134,7 +132,7 @@ export function LandForm({ initialData, isEditing = false }: LandFormProps) {
 
                   <div>
                     <Label htmlFor="location" className="text-arsenic text-sm font-medium">
-                      {t.location}
+                      Ubicación
                     </Label>
                     <Input
                       id="location"
@@ -149,7 +147,7 @@ export function LandForm({ initialData, isEditing = false }: LandFormProps) {
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   <div>
                     <Label htmlFor="price" className="text-arsenic text-sm font-medium">
-                      {t.price} (USD) *
+                      Precio (USD) *
                     </Label>
                     <Input
                       id="price"
@@ -164,7 +162,7 @@ export function LandForm({ initialData, isEditing = false }: LandFormProps) {
 
                   <div>
                     <Label htmlFor="surface" className="text-arsenic text-sm font-medium">
-                      {t.surface} (m²) *
+                      Superficie (m²) *
                     </Label>
                     <Input
                       id="surface"
@@ -235,7 +233,7 @@ export function LandForm({ initialData, isEditing = false }: LandFormProps) {
               <CardContent className="space-y-3">
                 <Button type="submit" disabled={isLoading} className="w-full bg-arsenic hover:bg-blackCoral text-white">
                   <Save className="h-4 w-4 mr-2" />
-                  {isLoading ? t.loading : t.save}
+                  {isLoading ? "Guardando..." : "Guardar"}
                 </Button>
 
                 <Button
@@ -245,7 +243,7 @@ export function LandForm({ initialData, isEditing = false }: LandFormProps) {
                   className="w-full border-blackCoral text-blackCoral hover:bg-blackCoral hover:text-white"
                 >
                   <X className="h-4 w-4 mr-2" />
-                  {t.cancel}
+                  Cancelar
                 </Button>
               </CardContent>
             </Card>

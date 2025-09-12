@@ -1,6 +1,7 @@
 "use client";
 
-import { LoginWrapper } from "./login-wrapper";
+import { LoginWrapper } from "@/components/auth/login-wrapper";
+
 
 export default function Error() {
   return (

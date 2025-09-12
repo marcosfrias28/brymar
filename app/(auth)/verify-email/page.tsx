@@ -1,17 +1,14 @@
 "use client";
 
-import { LoginWrapper } from "../login-wrapper";
-import { useLangStore } from "@/utils/store/lang-store";
-import { VerifyEmailTranslations as translations } from "@/lib/translations";
 import { cn } from "@/lib/utils";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth/auth-client";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
+import { LoginWrapper } from "@/components/auth/login-wrapper";
 
 const VerifyEmailPage = () => {
-  const language = useLangStore((prev) => prev.language);
   const params = useSearchParams();
   const router = useRouter();
   const [verificationStatus, setVerificationStatus] = useState<'loading' | 'success' | 'error' | 'idle'>('idle');
@@ -21,7 +18,8 @@ const VerifyEmailPage = () => {
   const callbackURL = params?.get("callbackURL");
   const email = params?.get("email");
 
-  const { title, subtitle } = translations[language];
+  const title = "Verificar Email";
+  const subtitle = "Verificando tu dirección de correo electrónico...";
 
   useEffect(() => {
     if (token) {
@@ -50,15 +48,13 @@ const VerifyEmailPage = () => {
       } else {
         const errorData = await response.json().catch(() => ({}));
         setVerificationStatus('error');
-        setErrorMessage(errorData.message || 'Verification failed');
+        setErrorMessage(errorData.message || 'Error de verificación');
       }
     } catch (error: any) {
       setVerificationStatus('error');
-      setErrorMessage(error?.message || 'Network error occurred');
+      setErrorMessage(error?.message || 'Error de red');
     }
   };
-
-  if (!language || !translations[language]) return null;
 
   const renderContent = () => {
     if (token) {
@@ -69,8 +65,8 @@ const VerifyEmailPage = () => {
               <div className="flex items-center justify-center mb-4">
                 <Loader2 className="animate-spin h-12 w-12 text-blue-500" />
               </div>
-              <h1 className="text-4xl font-black text-center">Verifying...</h1>
-              <p className="text-lg text-pretty text-center">Please wait while we verify your email address.</p>
+              <h1 className="text-4xl font-black text-center">Verificando...</h1>
+              <p className="text-lg text-pretty text-center">Por favor espera mientras verificamos tu dirección de correo electrónico.</p>
             </>
           );
         case 'success':
@@ -79,8 +75,8 @@ const VerifyEmailPage = () => {
               <div className="flex items-center justify-center mb-4">
                 <CheckCircle className="h-12 w-12 text-green-500" />
               </div>
-              <h1 className="text-4xl font-black text-center text-green-600">Email Verified!</h1>
-              <p className="text-lg text-pretty text-center">Your email has been successfully verified. Redirecting you to the dashboard...</p>
+              <h1 className="text-4xl font-black text-center text-green-600">¡Email Verificado!</h1>
+              <p className="text-lg text-pretty text-center">Tu email ha sido verificado exitosamente. Redirigiendo al panel de control...</p>
             </>
           );
         case 'error':
@@ -89,13 +85,13 @@ const VerifyEmailPage = () => {
               <div className="flex items-center justify-center mb-4">
                 <XCircle className="h-12 w-12 text-red-500" />
               </div>
-              <h1 className="text-4xl font-black text-center text-red-600">Verification Failed</h1>
+              <h1 className="text-4xl font-black text-center text-red-600">Verificación Fallida</h1>
               <p className="text-lg text-pretty text-center text-red-500">{errorMessage}</p>
               <Button 
                 onClick={() => router.push('/sign-in')} 
                 className="w-full mt-4"
               >
-                Go to Sign In
+                Ir a Iniciar Sesión
               </Button>
             </>
           );
@@ -115,7 +111,7 @@ const VerifyEmailPage = () => {
         <p className="text-lg text-pretty">{subtitle}</p>
         {email && (
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Verification email sent to: <strong>{email}</strong>
+            Email de verificación enviado a: <strong>{email}</strong>
           </p>
         )}
       </>

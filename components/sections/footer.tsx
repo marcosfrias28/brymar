@@ -9,15 +9,25 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
-import { useTranslation } from "@/hooks/use-translation";
-import { FooterTranslations } from "@/lib/translations";
+
 import { useAvoidRoutes } from "@/hooks/useAvoidRoutes";
 
 export function Footer() {
   const shouldAvoid = useAvoidRoutes();
   const [cookiesDialogOpen, setCookiesDialogOpen] = useState(false);
   const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);
-  const t = useTranslation(FooterTranslations);
+  const t = {
+    companyName: "Brymar Inmobiliaria",
+    rights: "Todos los derechos reservados",
+    cookies: "Política de Cookies",
+    privacy: "Política de Privacidad",
+    followUs: "Síguenos",
+    cookiesTitle: "Política de Cookies",
+    cookiesContent: "Utilizamos cookies para mejorar tu experiencia en nuestro sitio web. Al continuar navegando, aceptas nuestro uso de cookies.",
+    privacyTitle: "Política de Privacidad",
+    privacyContent: "Tu privacidad es importante para nosotros. Esta política describe cómo recopilamos, usamos y protegemos tu información personal.",
+    close: "Cerrar"
+  };
 
   if (shouldAvoid) return null;
 
@@ -26,9 +36,9 @@ export function Footer() {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
-            <h2 className="text-2xl font-bold mb-4">{t.companyName}</h2>
+            <h2 className="text-2xl font-bold mb-4">Brymar Inmobiliaria</h2>
             <p className="text-gray-400">
-              &copy; {new Date().getFullYear()} {t.companyName}. {t.rights}.
+              &copy; {new Date().getFullYear()} Brymar Inmobiliaria. Todos los derechos reservados.
             </p>
           </div>
           <div>
@@ -40,7 +50,7 @@ export function Footer() {
                   className="text-gray-400 hover:text-white p-0"
                   onClick={() => setCookiesDialogOpen(true)}
                 >
-                  {t.cookies}
+                  Cookies
                 </Button>
               </li>
               <li>
@@ -49,7 +59,7 @@ export function Footer() {
                   className="text-gray-400 hover:text-white p-0"
                   onClick={() => setPrivacyDialogOpen(true)}
                 >
-                  {t.privacy}
+                  Privacidad
                 </Button>
               </li>
               <li>
@@ -57,7 +67,7 @@ export function Footer() {
                   variant="link"
                   className="text-gray-400 hover:text-white p-0"
                 >
-                  {t.terms}
+                  Términos
                 </Button>
               </li>
             </ul>
@@ -101,18 +111,18 @@ export function Footer() {
       <Dialog open={cookiesDialogOpen} onOpenChange={setCookiesDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t.cookiesTitle}</DialogTitle>
+            <DialogTitle>Política de Cookies</DialogTitle>
           </DialogHeader>
-          <p>{t.cookiesContent}</p>
+          <p>Utilizamos cookies para mejorar su experiencia en nuestro sitio web.</p>
         </DialogContent>
       </Dialog>
 
       <Dialog open={privacyDialogOpen} onOpenChange={setPrivacyDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t.privacyTitle}</DialogTitle>
+            <DialogTitle>Política de Privacidad</DialogTitle>
           </DialogHeader>
-          <p>{t.privacyContent}</p>
+          <p>Respetamos su privacidad y protegemos sus datos personales.</p>
         </DialogContent>
       </Dialog>
     </footer>
