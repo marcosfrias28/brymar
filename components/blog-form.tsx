@@ -5,13 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
 import { toast } from "sonner";
 
 export function BlogForm() {
   const [image, setImage] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -22,21 +20,15 @@ export function BlogForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
-      const formData = new FormData(e.currentTarget);
-      const title = formData.get("title") as string;
-      const content = formData.get("content") as string;
-      const author = formData.get("author") as string;
-      
       // TODO: Implement blog post creation logic
-      console.log('Blog post data:', { title, content, author, image });
+      // Log removido por seguridad - usar sistema de logging estructurado si es necesario
       toast.success("Post creado exitosamente");
-      
+
       // Reset form
       e.currentTarget.reset();
       setImage(null);
-      
     } catch (error) {
       console.error("Error creating blog post:", error);
       toast.error("Errore durante la creazione del post");

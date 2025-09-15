@@ -2,11 +2,11 @@
 
 import { signOut } from "@/lib/actions/auth-actions";
 import { ActionState } from "@/lib/validations";
-import { LucideLogOut } from "lucide-react";
+import { LogOut, Loader2 } from "lucide-react";
 import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { CustomButton } from "@/components/custom-buttom";
+import { Button } from "@/components/ui/button";
 import { User } from "@/lib/db/schema";
 
 
@@ -37,20 +37,29 @@ const LogOutButton = ({ user }: { user: User | null }) => {
 
   return (
     <form action={formAction}>
-      <button
+      <Button
+        type="submit"
+        variant="ghost"
         className={cn(
-          "inline-flex items-center  justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
-          "hover:bg-accent hover:text-accent-foreground",
-          "h-10 w-10",
-          "w-full justify-start flex items-center gap-2 pl-2"
+          "w-full justify-start flex items-center gap-2",
+          "hover:bg-red-50 hover:text-red-600",
+          "dark:hover:bg-red-900/20 dark:hover:text-red-400",
+          "transition-colors duration-200"
         )}
+        disabled={pending}
       >
-        <CustomButton
-          className="m-0 px-4"
-          icon={LucideLogOut}
-          label={pending ? pendingText : logoutText}
-        />
-      </button>
+        {pending ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {pendingText}
+          </>
+        ) : (
+          <>
+            <LogOut className="h-4 w-4" />
+            {logoutText}
+          </>
+        )}
+      </Button>
     </form>
   );
 };

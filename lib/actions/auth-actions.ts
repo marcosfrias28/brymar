@@ -7,6 +7,7 @@ import { z } from "zod"
 import type { BetterCallAPIError } from "@/utils/types/types"
 import { headers } from "next/headers"
 import type { User } from "../db/schema"
+import { info, warning, error as logError, getSafeUserMessage } from "../logger"
 
 const signInSchema = z.object({
   email: z.string().email().min(3).max(255).describe("Email must be valid"),
@@ -18,7 +19,7 @@ export const signIn = validatedAction(signInSchema, async (_: any, formData: For
   const password = formData.get("password") as string | null
 
   if (!email || !password) {
-    return { error: "All fields are required" }
+    return { error: await getSafeUserMessage('VALIDATION_ERROR') }
   }
 
   try {
@@ -28,23 +29,31 @@ export const signIn = validatedAction(signInSchema, async (_: any, formData: For
         email,
         password,
       },
-    }) 
+    })
 
     const session = await auth.api.getSession({
       headers: await headers(),
     })
+    if (!data?.user) {
+      await warning('Authentication failed - no user data returned', { email });
+      return { error: await getSafeUserMessage('AUTH_ERROR') }
+    }
 
-    console.log(session)
-    if (!session?.user) return { error: "Error during authentication" }
+    await info('User signed in successfully', { email });
     return {
       success: true,
       redirect: true,
-      url: session.user.role === "user" ? "/" : "/dashboard",
-      message: "You has been logged in successfully",
+      url: "/dashboard/properties",
+      message: "Has iniciado sesión exitosamente",
     }
   } catch (error) {
     const Error = error as BetterCallAPIError
-    return { error: Error?.body?.message || "Error during authentication" }
+
+    // Log seguro del error para el servidor
+    await logError('Sign in failed', Error, { email });
+
+    // Mensaje genérico para el usuario
+    return { error: await getSafeUserMessage('AUTH_ERROR') }
   }
 })
 
@@ -61,11 +70,9 @@ export const signUp = validatedAction(signUpSchema, async (_: any, formData: For
   const name = formData.get("name") as string | null
   const image = formData.get("image") as File | null
 
-  console.log(image, email, password, name)
-
   let imageUrl = null
   if (!email || !password || !name) {
-    return { error: "All fields are required" }
+    return { error: await getSafeUserMessage('VALIDATION_ERROR') }
   }
 
   if (image?.type?.startsWith("image/")) {
@@ -75,7 +82,8 @@ export const signUp = validatedAction(signUpSchema, async (_: any, formData: For
       })
       imageUrl = url
     } catch (error) {
-      return { error: "Error during image upload" }
+      await logError('Image upload failed during signup', error, { email });
+      return { error: "Error al subir la imagen" }
     }
   }
 
@@ -89,15 +97,21 @@ export const signUp = validatedAction(signUpSchema, async (_: any, formData: For
         image: imageUrl,
       },
     })
+    await info('User signed up successfully', { email, name });
     return {
       success: true,
       redirect: true,
       url: `/verify-email?email=${email}`,
-      message: "Verification email sent successfully",
+      message: "Cuenta creada exitosamente. Revisa tu email para verificar tu cuenta.",
     }
   } catch (error) {
     const Error = error as BetterCallAPIError
-    return { error: Error.body?.message || "Error during authentication" }
+
+    // Log seguro del error para el servidor
+    await logError('Sign up failed', Error, { email, name });
+
+    // Mensaje genérico para el usuario
+    return { error: await getSafeUserMessage('AUTH_ERROR') }
   }
 })
 
@@ -146,15 +160,21 @@ export const signOut = validatedAction(signOutSchema, async (_: any, formData: F
       headers: await headers(),
     })
 
+    await info('User signed out successfully');
     return {
       success: true,
       redirect: true,
       url: `/`,
-      message: "You have been logged out successfully",
+      message: "Has cerrado sesión exitosamente",
     }
   } catch (error) {
     const Error = error as BetterCallAPIError
-    return { error: Error.body?.message || "Error during authentication" }
+
+    // Log seguro del error para el servidor
+    await logError('Sign out failed', Error);
+
+    // Mensaje genérico para el usuario
+    return { error: await getSafeUserMessage('AUTH_ERROR') }
   }
 })
 
@@ -166,7 +186,7 @@ export const forgotPassword = validatedAction(forgotPasswordScherma, async (_: a
   const email = formData.get("email") as string | null
 
   if (!email) {
-    return { error: "All fields are required" }
+    return { error: await getSafeUserMessage('VALIDATION_ERROR') }
   }
 
   try {
@@ -177,12 +197,89 @@ export const forgotPassword = validatedAction(forgotPasswordScherma, async (_: a
         redirectTo: "/dashboard/properties",
       },
     })
+    await info('Password reset requested', { email });
     return {
       success: true,
-      message: "Reset password link sent successfully",
+      message: "Si el email existe, recibirás un enlace para restablecer tu contraseña.",
     }
   } catch (error) {
     const Error = error as BetterCallAPIError
-    return { error: Error.body?.message || "Error during authentication" }
+
+    // Log seguro del error para el servidor
+    await logError('Password reset failed', Error, { email });
+
+    // Mensaje genérico para el usuario (no revelar si el email existe)
+    return { error: "Si el email existe, recibirás un enlace para restablecer tu contraseña." }
+  }
+})
+
+const sendVerificationOTPSchema = z.object({
+  email: z.string().email().min(3).max(255).describe("Email must be valid"),
+})
+
+export const sendVerificationOTP = validatedAction(sendVerificationOTPSchema, async (_: any, formData: FormData) => {
+  const email = formData.get("email") as string | null
+
+  if (!email) {
+    return { error: "Email is required" }
+  }
+
+  try {
+    await auth.api.sendVerificationOTP({
+      method: "POST",
+      body: {
+        email,
+        type: "email-verification",
+      },
+    })
+    return {
+      success: true,
+      message: "Código de verificación enviado exitosamente",
+    }
+  } catch (error) {
+    const Error = error as BetterCallAPIError
+
+    // Log seguro del error para el servidor
+    await logError('Failed to send verification OTP', Error, { email });
+
+    // Mensaje genérico para el usuario
+    return { error: await getSafeUserMessage('EMAIL_SEND_ERROR') }
+  }
+})
+
+const verifyEmailOTPSchema = z.object({
+  email: z.string().email().min(3).max(255).describe("Email must be valid"),
+  otp: z.string().min(6).max(6).describe("OTP must be 6 digits"),
+})
+
+export const verifyEmailOTP = validatedAction(verifyEmailOTPSchema, async (_: any, formData: FormData) => {
+  const email = formData.get("email") as string | null
+  const otp = formData.get("otp") as string | null
+
+  if (!email || !otp) {
+    return { error: "Email y código OTP son requeridos" }
+  }
+
+  try {
+    await auth.api.verifyEmailOTP({
+      body: {
+        email,
+        otp,
+      },
+    })
+    return {
+      success: true,
+      redirect: true,
+      url: "/dashboard/properties",
+      message: "Email verificado exitosamente",
+    }
+  } catch (error) {
+    const Error = error as BetterCallAPIError
+
+    // Log seguro del error para el servidor
+    await logError('Failed to verify email OTP', Error, { email });
+
+    // Mensaje genérico para el usuario
+    return { error: await getSafeUserMessage('EMAIL_VERIFICATION_ERROR') }
   }
 })

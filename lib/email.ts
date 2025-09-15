@@ -1,5 +1,6 @@
 "use server";
 import { Resend } from "resend";
+import { info, error as logError, critical, getSafeUserMessage } from "./logger";
 
 const resend = new Resend(process?.env?.RESEND_API_KEY);
 
@@ -120,15 +121,20 @@ export const sendVerificationEmail = async ({
 `,
     });
     if (res.error) {
-      console.log("Errore invio email:", res.error);
-      // Non bloccare la registrazione se l'email fallisce
-      return { success: false, error: res.error };
+      // Log seguro para el servidor (sin exponer detalles de Resend)
+      await logError('Email sending failed', res.error, { to, subject });
+      
+      // Retornar mensaje genérico sin exponer detalles técnicos
+      return { success: false, error: await getSafeUserMessage('EMAIL_SEND_ERROR') };
     } else {
-      console.log("Success Mail");
+      await info('Email sent successfully', { to, subject });
       return { success: true };
     }
   } catch (error) {
-    console.error("Errore durante l'invio dell'email:", error);
-    return { success: false, error: "Impossibile inviare l'email." };
+    // Log crítico para errores inesperados
+    await critical('Unexpected error during email sending', error, { to, subject });
+    
+    // Mensaje genérico para el usuario
+    return { success: false, error: await getSafeUserMessage('EMAIL_SEND_ERROR') };
   }
 };

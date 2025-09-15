@@ -4,7 +4,8 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import db from "../db/drizzle";
 import { accounts, session, users, verification, organization, member, invitation } from "../db/schema";
 import { nextCookies } from "better-auth/next-js";
-import { organization as organizationPlugin } from "better-auth/plugins/organization";
+import { emailOTP } from "better-auth/plugins";
+import { error as logError, getSafeUserMessage } from "../logger";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -29,25 +30,24 @@ export const auth = betterAuth({
       },
     },
   },
-  session: {
-    updateAge: 24 * 60 * 60, // 24 hours
-    expiresIn: 60 * 60 * 24 * 7, // 7 days
-  },
   plugins: [
     nextCookies(),
-    organizationPlugin({
-      allowUserToCreateOrganization: true,
-      organizationLimit: 5,
-      roles: {
-        admin: {
-          permissions: ["create", "read", "update", "delete", "invite", "remove"],
-        },
-        agent: {
-          permissions: ["read", "update"],
-        },
-        viewer: {
-          permissions: ["read"],
-        },
+    emailOTP({
+      async sendVerificationOTP({ email, otp, type }) {
+        if (type === "email-verification") {
+          const result = await sendVerificationEmail({
+            to: email,
+            subject: "Código de verificación",
+            url: `Tu código de verificación es: ${otp}`,
+          });
+          if (!result.success) {
+            // Log seguro para el servidor (sin exponer detalles técnicos)
+            await logError('Failed to send email OTP', result.error, { email, type });
+            
+            // Mensaje genérico y seguro para el usuario
+            throw new Error(await getSafeUserMessage('EMAIL_SEND_ERROR'));
+          }
+        }
       },
     }),
   ],
@@ -55,7 +55,6 @@ export const auth = betterAuth({
     enabled: true,
     autoSignIn: true,
     requireEmailVerification: true,
-    sendVerificationEmail: true,
     sendResetPassword: async ({ user, url }, request) => {
       const result = await sendVerificationEmail({
         to: user.email,
@@ -63,21 +62,7 @@ export const auth = betterAuth({
         url,
       });
       if (!result.success) {
-        console.log("Email reset password non inviata:", result.error);
-      }
-    },
-  },
-  emailVerification: {
-    sendOnSignUp: true,
-    autoSignInAfterVerification: true,
-    sendVerificationEmail: async ({ user, url }, request) => {
-      const result = await sendVerificationEmail({
-        to: user.email,
-        subject: "Verifica il tuo indirizzo email",
-        url,
-      });
-      if (!result.success) {
-        console.log("Email verification non inviata:", result.error);
+        await logError('Password reset email failed to send', result.error, { email: user.email });
       }
     },
   },
