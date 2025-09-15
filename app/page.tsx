@@ -1,19 +1,25 @@
-import { HeroSection } from "@/components/sections/hero-section";
-import FeaturedProperties from "@/components/sections/featured-properties";
-import { Services } from "@/components/sections/services";
-import { NewsSection } from "@/components/sections/news-section";
-import { ContactForm } from "@/components/sections/contact-form";
-import { Intro } from "@/components/sections/intro/intro";
+import { FigmaHeroSection } from "@/components/sections/figma-hero-section";
+import { FigmaAboutSection } from "@/components/sections/figma-about-section";
+import { 
+  FigmaDreamHouseSection, 
+  FigmaProjectSection, 
+  FigmaQualitySection 
+} from "@/components/sections/figma-property-sections";
+import { 
+  FigmaCombineSection, 
+  FigmaFooterSection 
+} from "@/components/sections/figma-footer-section";
 
 export default function Home() {
   return (
     <>
-      <Intro />
-      <HeroSection />
-      <FeaturedProperties />
-      <Services />
-      <NewsSection />
-      <ContactForm />
+      <FigmaHeroSection />
+      <FigmaAboutSection />
+      <FigmaDreamHouseSection />
+      <FigmaProjectSection />
+      <FigmaQualitySection />
+      <FigmaCombineSection />
+      <FigmaFooterSection />
     </>
   );
 }
