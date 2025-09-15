@@ -1,8 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/sections/footer";
+import { FigmaNavbar } from "@/components/figma-navbar";
 import { Toaster } from "@/components/ui/sonner";
 import { getUser } from "@/lib/actions/auth-actions";
 
