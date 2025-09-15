@@ -10,6 +10,15 @@
   --breakpoint-desktop: 1300px;
   --breakpoint-ultrawide: 2440px;
 
+  /* New Design System Colors - Based on Figma */
+  --color-figma-dark-green: #1D4734;
+  --color-figma-orange: #E09B6B;
+  --color-figma-black: #000000;
+  --color-figma-white: #FFFFFF;
+  --color-figma-light-gray: rgba(255, 255, 255, 0.60);
+  --color-figma-medium-gray: #A0A0A0;
+  --color-figma-text-gradient: linear-gradient(113deg, #FFF 55.43%, rgba(255, 255, 255, 0.00) 87.88%);
+
   --background-image-gradient-radial: `radial-gradient(
       at center,
       hsl(var(--primary)) 0%,
@@ -163,6 +172,143 @@
   }
 }
 
+/* Figma Design System Base Styles */
+.bg-figma-dark-green {
+  background-color: var(--color-figma-dark-green);
+}
+
+.bg-figma-orange {
+  background-color: var(--color-figma-orange);
+}
+
+.bg-figma-black {
+  background-color: var(--color-figma-black);
+}
+
+.text-figma-white {
+  color: var(--color-figma-white);
+}
+
+.text-figma-light-gray {
+  color: var(--color-figma-light-gray);
+}
+
+.text-figma-medium-gray {
+  color: var(--color-figma-medium-gray);
+}
+
+.text-figma-orange {
+  color: var(--color-figma-orange);
+}
+
+/* Figma Hero Text Gradient */
+.text-figma-hero-gradient {
+  background: linear-gradient(113deg, #FFF 55.43%, rgba(255, 255, 255, 0.00) 87.88%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-figma-about-gradient {
+  background: linear-gradient(100deg, #FFF 42.68%, rgba(255, 255, 255, 0.00) 103.89%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-figma-quality-gradient {
+  background: linear-gradient(102deg, #FFF 41.18%, rgba(255, 255, 255, 0.00) 142.16%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-figma-combine-gradient {
+  background: linear-gradient(180deg, #FFF 40.97%, #000 193.92%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Figma Typography Utilities */
+.font-satoshi {
+  font-family: 'Satoshi', -apple-system, Roboto, Helvetica, sans-serif;
+}
+
+.font-sofia-pro {
+  font-family: 'Sofia Pro', -apple-system, Roboto, Helvetica, sans-serif;
+}
+
+.font-encode-sans {
+  font-family: 'Encode Sans', -apple-system, Roboto, Helvetica, sans-serif;
+}
+
+.font-helvetica-neue {
+  font-family: 'Helvetica Neue', -apple-system, Roboto, Helvetica, sans-serif;
+}
+
+/* Figma Circular Button */
+.figma-circular-button {
+  width: 153px;
+  height: 153px;
+  border-radius: 50%;
+  background-color: var(--color-figma-orange);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 30.667px 76.667px rgba(0, 0, 0, 0.40));
+  transition: all 0.3s ease;
+}
+
+.figma-circular-button:hover {
+  transform: scale(1.05);
+}
+
+.figma-circular-button svg {
+  width: 107px;
+  height: 107px;
+}
+
+/* Figma Navigation Pills */
+.figma-nav-pill {
+  padding: 13.333px 0;
+  border-radius: 111.111px;
+  background: #E6E8EE;
+  color: #050505;
+  text-align: center;
+  font-family: 'Sofia Pro', -apple-system, Roboto, Helvetica, sans-serif;
+  font-size: 17.778px;
+  font-weight: 500;
+  line-height: 120%;
+  transition: all 0.3s ease;
+}
+
+.figma-nav-pill.active {
+  border: 1.111px solid #050505;
+}
+
+.figma-nav-pill:hover {
+  background: #d1d5db;
+}
+
+/* Figma Rounded Image Container */
+.figma-image-container {
+  border-radius: 297.222px;
+  border: 1.111px solid #FFF;
+  overflow: hidden;
+  position: relative;
+}
+
+.figma-image-overlay {
+  border-radius: 216.561px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.00) 38.54%, rgba(18, 18, 18, 0.81) 100%);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60%;
+}
+
 /* Gradiente Aurora personalizado */
 .bg-aurora {
   background: radial-gradient(
@@ -200,98 +346,88 @@
 }
 
 @layer base {
-  /*
-  --color-1: hsl(213, 12%, 25%);
-  --color-2: hsl(220, 10%, 40%);
-  --color-3: hsl(24, 24%, 75%);
-  --color-4: hsl(162, 27%, 70%);
-  --color-5: hsl(0, 0%, 12%);
-  --color-6: hsl(0, 0%, 15%);
-  --color-7: hsl(0, 0%, 55%);
-  --color-8: hsl(0, 0%, 25%);
-  --color-9: hsl(0, 0%, 98%);
-  --color-10: hsl(0, 62%, 30%);
-  */
   :root {
-    --color-1: 213, 12%, 25%; /* Arsenic */
-    --color-2: 220, 10%, 40%; /* Black Coral */
-    --color-3: 24, 24%, 75%; /* Dark Vanilla */
-    --color-4: 162, 27%, 70%; /* Azureish White */
-    --color-5: 0, 0%, 12%; /* Very dark gray */
-    --color-6: 0, 0%, 15%; /* Dark gray */
-    --color-7: 0, 0%, 55%; /* Medium gray */
-    --color-8: 0, 0%, 25%; /* Dark gray */
-    --color-9: 0, 0%, 98%; /* Almost white */
-    --color-10: 0, 62%, 30%; /* Dark red */
+    /* Updated color system to match Figma design */
+    --color-1: 29, 71, 52; /* Figma Dark Green #1D4734 */
+    --color-2: 224, 155, 107; /* Figma Orange #E09B6B */
+    --color-3: 255, 255, 255; /* White */
+    --color-4: 0, 0, 0; /* Black */
+    --color-5: 29, 71, 52; /* Dark Green for backgrounds */
+    --color-6: 0, 0, 0; /* Black for cards */
+    --color-7: 160, 160, 160; /* Medium gray */
+    --color-8: 18, 18, 18; /* Very dark gray */
+    --color-9: 255, 255, 255; /* White */
+    --color-10: 224, 155, 107; /* Orange accent */
 
-    /* Main usage */
-    --background: var(--color-2); /* Light Azureish White */
-    --foreground: var(--color-3); /* Arsenic */
-    --card: var(--color-3); /* Dark Vanilla */
-    --card-foreground: var(--color-5); /* Very dark gray */
-    --popover: var(--color-3); /* Dark Vanilla */
-    --popover-foreground: var(--color-1); /* Arsenic */
-    --primary: var(--color-2); /* Black Coral */
-    --primary-foreground: var(--color-9); /* Almost white */
-    --secondary: var(--color-1); /* Arsenic */
-    --secondary-foreground: var(--color-3); /* Dark Vanilla */
-    --accent: var(--color-2); /* Black Coral */
-    --accent-foreground: var(--color-4); /* Azureish White */
-    --muted: var(--color-3); /* Dark Vanilla */
-    --muted-foreground: var(--color-7); /* Medium gray */
-    --destructive: var(--color-10); /* Dark red */
-    --destructive-foreground: var(--color-9); /* Almost white */
-    --border: var(--color-2); /* Black Coral */
-    --input: hsl(210, 5%, 90%); /* Light gray */
-    --ring: var(--color-2); /* Black Coral */
+    /* Main theme matching Figma */
+    --background: var(--color-1); /* Dark Green background */
+    --foreground: var(--color-3); /* White text */
+    --card: var(--color-8); /* Dark card background */
+    --card-foreground: var(--color-3); /* White text on cards */
+    --popover: var(--color-8); /* Dark popover */
+    --popover-foreground: var(--color-3); /* White text */
+    --primary: var(--color-2); /* Orange primary */
+    --primary-foreground: var(--color-4); /* Black text on orange */
+    --secondary: var(--color-8); /* Dark secondary */
+    --secondary-foreground: var(--color-3); /* White text */
+    --accent: var(--color-2); /* Orange accent */
+    --accent-foreground: var(--color-4); /* Black text on orange */
+    --muted: var(--color-7); /* Medium gray */
+    --muted-foreground: var(--color-3); /* White text */
+    --destructive: 239, 68, 68; /* Red for destructive actions */
+    --destructive-foreground: var(--color-3); /* White text */
+    --border: var(--color-7); /* Medium gray borders */
+    --input: var(--color-8); /* Dark input background */
+    --ring: var(--color-2); /* Orange focus ring */
     --radius: 0.5rem;
 
-    /* Sidebar-specific */
-    --sidebar-background: 0 0% 98%; /* Arsenic */
-    --sidebar-foreground: 240 5.3% 26.1%; /* Dark Vanilla */
-    --sidebar-primary: 240 5.9% 10%; /* Black Coral */
-    --sidebar-primary-foreground: 0 0% 98%; /* Almost white */
-    --sidebar-accent: 240 4.8% 95.9%; /* Black Coral */
-    --sidebar-accent-foreground: 240 5.9% 10%; /* Azureish White */
-    --sidebar-border: 220 13% 91%; /* Dark Vanilla */
-    --sidebar-ring: 217.2 91.2% 59.8%; /* Black Coral */
+    /* Sidebar-specific colors */
+    --sidebar-background: var(--color-1); /* Dark green */
+    --sidebar-foreground: var(--color-3); /* White */
+    --sidebar-primary: var(--color-2); /* Orange */
+    --sidebar-primary-foreground: var(--color-4); /* Black */
+    --sidebar-accent: var(--color-8); /* Dark accent */
+    --sidebar-accent-foreground: var(--color-3); /* White */
+    --sidebar-border: var(--color-7); /* Medium gray */
+    --sidebar-ring: var(--color-2); /* Orange */
   }
 
   .dark {
+    /* Dark mode uses the same colors as the Figma design is already dark */
     --background: var(--color-1);
     --foreground: var(--color-3);
-    --card: var(--color-6);
+    --card: var(--color-8);
     --card-foreground: var(--color-3);
-    --popover: var(--color-6);
+    --popover: var(--color-8);
     --popover-foreground: var(--color-3);
     --primary: var(--color-2);
-    --primary-foreground: var(--color-9);
-    --secondary: var(--color-1);
+    --primary-foreground: var(--color-4);
+    --secondary: var(--color-8);
     --secondary-foreground: var(--color-3);
     --accent: var(--color-2);
-    --accent-foreground: var(--color-9);
-    --muted: var(--color-6);
-    --muted-foreground: var(--color-7);
-    --destructive: var(--color-10);
-    --destructive-foreground: var(--color-9);
-    --border: var(--color-8);
-    --input: var(--color-6);
+    --accent-foreground: var(--color-4);
+    --muted: var(--color-7);
+    --muted-foreground: var(--color-3);
+    --destructive: 239, 68, 68;
+    --destructive-foreground: var(--color-3);
+    --border: var(--color-7);
+    --input: var(--color-8);
     --ring: var(--color-2);
-    --radius: 0.5rem;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: var(--color-1);
+    --sidebar-foreground: var(--color-3);
+    --sidebar-primary: var(--color-2);
+    --sidebar-primary-foreground: var(--color-4);
+    --sidebar-accent: var(--color-8);
+    --sidebar-accent-foreground: var(--color-3);
+    --sidebar-border: var(--color-7);
+    --sidebar-ring: var(--color-2);
   }
 }
 
 html,
 body {
   height: 100%;
+  background-color: var(--color-figma-dark-green);
 }
 
 @layer base {
@@ -299,7 +435,7 @@ body {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-figma-dark-green text-figma-white;
   }
 }
 
@@ -328,4 +464,22 @@ body {
 
 .animate-marquee-vertical {
   animation: marquee-vertical var(--duration) linear infinite;
+}
+
+/* Custom scrollbar to match design */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-figma-dark-green);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-figma-orange);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d1851e;
 }
