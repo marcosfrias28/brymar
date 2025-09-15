@@ -12,9 +12,9 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Marbry Immobiliaria",
+  title: "SK BUILDERS - Experience the Epitome of Home Comfort",
   description:
-    "Find your dream property with our exclusive real estate listings",
+    "Our international brand specializes in property appraisal, sales, purchases, and investments. Trust us to deliver exceptional service and help you find your perfect real estate opportunity.",
 };
 
 export default async function LocaleLayout({
