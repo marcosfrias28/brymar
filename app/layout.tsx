@@ -32,16 +32,15 @@ export default async function LocaleLayout({
       <body className={`${inter.className} flex flex-col min-h-screen`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="dark"
+          enableSystem={false}
           disableTransitionOnChange
         >
           <SidebarProvider>
-            <Navbar user={user} />
-            <main className="flex-1 overflow-y-auto overflow-x-hidden bg-[hsl(var(--color-5))] grow">
+            <FigmaNavbar user={user} />
+            <main className="flex-1 overflow-y-auto overflow-x-hidden bg-figma-dark-green">
               {children}
             </main>
-            <Footer />
             <Toaster richColors={true} position="bottom-center" />
           </SidebarProvider>
         </ThemeProvider>
