@@ -1,12 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
-import { headers } from "next/headers";
 import {
   isPublicRoute,
   hasPermissionForRoute,
   isValidRole,
-  type UserRole
 } from "@/lib/auth/permissions";
+import { headers } from "next/headers";
+import { NextResponse, NextRequest } from "next/server";
 
 /**
  * Crea una risposta di errore per accesso non autorizzato
@@ -45,6 +44,10 @@ export async function middleware(request: NextRequest) {
     }
 
     const { user } = session;
+
+    if (user.id && (pathname.includes('sign') || pathname.includes('password'))) {
+      return NextResponse.redirect(new URL("/dashboard", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"));
+    }
 
     // Verifica che l'utente abbia un ruolo valido
     if (!user.role || !isValidRole(user.role)) {
