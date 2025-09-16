@@ -21,28 +21,28 @@ export function StatsCards() {
       value: properties.length.toString(),
       change: "+12%",
       icon: Building2,
-      color: "bg-aurora",
+      color: "bg-primary",
     },
     {
       title: "Total Terrenos",
       value: lands.length.toString(),
       change: "+8%",
       icon: MapPin,
-      color: "bg-arsenic",
+      color: "bg-secondary",
     },
     {
       title: "Total Posts",
       value: blogPosts.length.toString(),
       change: "+15%",
       icon: FileText,
-      color: "bg-blackCoral",
+      color: "bg-accent",
     },
     {
       title: "Ventas del Mes",
       value: properties.filter((p) => p.status === "sale").length.toString(),
       change: "+23%",
       icon: TrendingUp,
-      color: "bg-gradient-to-r from-darkVanilla to-azureishWhite",
+      color: "bg-gradient-to-r from-muted to-accent",
     },
   ];
 
@@ -52,12 +52,12 @@ export function StatsCards() {
         {[1, 2, 3, 4].map((index) => (
           <Card key={index} className="border-blackCoral shadow-lg">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <div className="h-4 w-20 bg-gray-200 rounded animate-pulse" />
-              <div className="h-8 w-8 bg-gray-200 rounded-lg animate-pulse" />
+              <div className="h-4 w-20 bg-muted rounded animate-pulse" />
+              <div className="h-8 w-8 bg-muted rounded-lg animate-pulse" />
             </CardHeader>
             <CardContent>
-              <div className="h-8 w-16 bg-gray-200 rounded animate-pulse mb-2" />
-              <div className="h-3 w-24 bg-gray-200 rounded animate-pulse" />
+              <div className="h-8 w-16 bg-muted rounded animate-pulse mb-2" />
+              <div className="h-3 w-24 bg-muted rounded animate-pulse" />
             </CardContent>
           </Card>
         ))}
@@ -70,10 +70,10 @@ export function StatsCards() {
       {statsData.map((stat, index) => (
         <Card
           key={index}
-          className="border-blackCoral shadow-lg hover:shadow-xl transition-shadow"
+          className="border-border shadow-lg hover:shadow-xl transition-shadow"
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-blackCoral">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
               {stat.title}
             </CardTitle>
             <div className={`p-2 rounded-lg ${stat.color}`}>
@@ -81,9 +81,9 @@ export function StatsCards() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-arsenic">{stat.value}</div>
-            <p className="text-xs text-blackCoral">
-              <span className="text-green-600">{stat.change}</span> desde el mes
+            <div className="text-2xl font-bold text-foreground">{stat.value}</div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-primary">{stat.change}</span> desde el mes
               pasado
             </p>
           </CardContent>

@@ -39,14 +39,14 @@ export function BlogFilters({ filters, setFilters }: BlogFiltersProps) {
   }
 
   return (
-    <Card className="border-blackCoral">
+    <Card className="border-border">
       <CardContent className="p-4">
         <div className="grid grid-cols-1 smartphone:grid-cols-2 tablet:grid-cols-3 laptop:grid-cols-5 gap-4">
           {/* Status */}
           <div className="space-y-2">
-            <Label className="text-arsenic">Estado</Label>
+            <Label className="text-foreground">Estado</Label>
             <Select value={filters.status} onValueChange={(value) => handleFilterChange("status", value)}>
-              <SelectTrigger className="border-blackCoral">
+              <SelectTrigger className="border-border">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -59,9 +59,9 @@ export function BlogFilters({ filters, setFilters }: BlogFiltersProps) {
 
           {/* Category */}
           <div className="space-y-2">
-            <Label className="text-arsenic">Categoría</Label>
+            <Label className="text-foreground">Categoría</Label>
             <Select value={filters.category} onValueChange={(value) => handleFilterChange("category", value)}>
-              <SelectTrigger className="border-blackCoral">
+              <SelectTrigger className="border-border">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

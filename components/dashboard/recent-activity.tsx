@@ -1,10 +1,17 @@
 "use client"
 
-import { Clock, Building2, MapPin, FileText, Eye } from "lucide-react"
+import { Clock, Building2, MapPin, FileText, Eye, MoreHorizontal } from "lucide-react"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const recentActivities = [
   {
@@ -65,15 +72,15 @@ const getIcon = (type: string) => {
 const getStatusColor = (status: string) => {
   switch (status) {
     case "active":
-      return "bg-green-100 text-green-800 border-green-200"
+      return "bg-primary/10 text-primary border-primary/20"
     case "pending":
-      return "bg-yellow-100 text-yellow-800 border-yellow-200"
+      return "bg-secondary/10 text-secondary-foreground border-secondary/20"
     case "published":
-      return "bg-blue-100 text-blue-800 border-blue-200"
+      return "bg-accent/10 text-accent-foreground border-accent/20"
     case "sold":
-      return "bg-purple-100 text-purple-800 border-purple-200"
+      return "bg-muted/10 text-muted-foreground border-muted/20"
     default:
-      return "bg-gray-100 text-gray-800 border-gray-200"
+      return "bg-muted/10 text-muted-foreground border-muted/20"
   }
 }
 
@@ -93,44 +100,55 @@ const getStatusText = (status: string) => {
 }
 
 export function RecentActivity() {
-
   return (
-    <Card className="border-blackCoral shadow-lg">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-arsenic flex items-center gap-2">
-          <Clock className="h-5 w-5" />
-          Actividad Reciente
-        </CardTitle>
-        <Button
-          variant="outline"
-          size="sm"
-          className="border-blackCoral text-blackCoral hover:bg-blackCoral hover:text-white bg-transparent"
-        >
-          <Eye className="h-4 w-4 mr-2" />
-          Ver Todo
+    <Card>
+      <CardHeader className="flex flex-row items-center">
+        <div className="grid gap-2">
+          <CardTitle>Actividad Reciente</CardTitle>
+        </div>
+        <Button asChild size="sm" className="ml-auto gap-1">
+          <a href="#">
+            Ver Todo
+            <Eye className="h-4 w-4" />
+          </a>
         </Button>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-8">
           {recentActivities.map((activity) => {
             const Icon = getIcon(activity.type)
             return (
-              <div
-                key={activity.id}
-                className="flex items-center justify-between p-3 rounded-lg border border-blackCoral/20 hover:bg-azureishWhite/20 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-arsenic">
-                    <Icon className="h-4 w-4 text-white" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-arsenic">{activity.title}</p>
-                    <p className="text-sm text-blackCoral">
-                      {activity.action} • {activity.time}
-                    </p>
-                  </div>
+              <div key={activity.id} className="flex items-center">
+                <Avatar className="h-9 w-9">
+                  <AvatarFallback>
+                    <Icon className="h-4 w-4" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="ml-4 space-y-1">
+                  <p className="text-sm font-medium leading-none">
+                    {activity.title}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {activity.action} • {activity.time}
+                  </p>
                 </div>
-                <Badge className={getStatusColor(activity.status)}>{getStatusText(activity.status)}</Badge>
+                <div className="ml-auto flex items-center gap-2">
+                  <Badge variant="outline" className={getStatusColor(activity.status)}>
+                    {getStatusText(activity.status)}
+                  </Badge>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Abrir menú</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>Ver detalles</DropdownMenuItem>
+                      <DropdownMenuItem>Editar</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
             )
           })}

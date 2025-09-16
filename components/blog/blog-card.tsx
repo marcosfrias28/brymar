@@ -44,8 +44,8 @@ export function BlogCard({ post }: BlogCardProps) {
 
   const getStatusBadgeColor = (status: string) => {
     return status === "published"
-      ? "bg-green-100 text-green-800 border-green-200"
-      : "bg-yellow-100 text-yellow-800 border-yellow-200"
+      ? "bg-chart-2/20 text-chart-2 border-chart-2/30"
+      : "bg-chart-3/20 text-chart-3 border-chart-3/30"
   }
 
   const getCategoryLabel = (category: string) => {

@@ -218,13 +218,13 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
 
         {/* Right Column - Image & Actions */}
         <div className="space-y-6">
-          <Card className="border-blackCoral shadow-lg">
+          <Card className="border-border shadow-lg">
             <CardHeader className="pb-4">
-              <CardTitle className="text-arsenic text-lg">Imagen de Portada</CardTitle>
+              <CardTitle className="text-foreground text-lg">Imagen de Portada</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="coverImage" className="text-arsenic text-sm font-medium">
+                <Label htmlFor="coverImage" className="text-foreground text-sm font-medium">
                   Seleccionar Imagen
                 </Label>
                 <div className="relative">
@@ -233,15 +233,15 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
                     type="file"
                     accept="image/*"
                     onChange={handleImageChange}
-                    className="border-blackCoral focus:ring-arsenic"
+                    className="border-border focus:ring-ring"
                   />
-                  <Upload className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-blackCoral pointer-events-none" />
+                  <Upload className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 </div>
-                <p className="text-xs text-blackCoral/70">1200x600px, máx. 5MB</p>
+                <p className="text-xs text-muted-foreground">1200x600px, máx. 5MB</p>
               </div>
 
               {coverImagePreview && (
-                <div className="relative w-full h-32 rounded-lg overflow-hidden border border-blackCoral">
+                <div className="relative w-full h-32 rounded-lg overflow-hidden border border-border">
                   <Image
                     src={coverImagePreview || "/placeholder.svg"}
                     alt="Vista previa"
@@ -253,16 +253,16 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
             </CardContent>
           </Card>
 
-          <Card className="border-blackCoral shadow-lg">
+          <Card className="border-border shadow-lg">
             <CardHeader className="pb-4">
-              <CardTitle className="text-arsenic text-lg">Acciones</CardTitle>
+              <CardTitle className="text-foreground text-lg">Acciones</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <Button
                 type="button"
                 onClick={(e) => handleSubmit(e, "published")}
                 disabled={isLoading}
-                className="w-full bg-arsenic hover:bg-blackCoral text-white"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 <Eye className="h-4 w-4 mr-2" />
                 {isLoading ? "Publicando..." : "Publicar"}
