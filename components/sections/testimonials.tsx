@@ -50,10 +50,10 @@ export function Testimonials() {
   const subtitle = "Testimonios de clientes satisfechos con nuestros servicios";
 
   return (
-    <section className="py-24 px-4 bg-gray-50">
+    <section className="py-24 px-4 bg-muted">
       <div className="container mx-auto">
         <motion.h2
-          className="text-4xl md:text-5xl font-bold text-center mb-4 text-gray-800"
+          className="text-4xl md:text-5xl font-bold text-center mb-4 text-foreground"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -61,7 +61,7 @@ export function Testimonials() {
           {title}
         </motion.h2>
         <motion.p
-          className="text-xl text-gray-600 text-center mb-16 max-w-3xl mx-auto"
+          className="text-xl text-muted-foreground text-center mb-16 max-w-3xl mx-auto"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
@@ -76,10 +76,10 @@ export function Testimonials() {
           >
             {testimonials.map((testimonial, index) => (
               <div key={index} className="w-full shrink-0">
-                <Card className="bg-white shadow-xl mx-auto max-w-4xl">
+                <Card className="bg-background shadow-xl mx-auto max-w-4xl">
                   <CardContent className="p-12">
-                    <Quote className="h-12 w-12 text-gray-400 mb-8" />
-                    <p className="text-2xl text-gray-700 italic mb-8">
+                    <Quote className="h-12 w-12 text-muted-foreground mb-8" />
+                    <p className="text-2xl text-foreground italic mb-8">
                       {testimonial.quote.es}
                     </p>
                     <div className="flex items-center">
@@ -91,10 +91,10 @@ export function Testimonials() {
                         <AvatarFallback>{testimonial.name[0]}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-semibold text-xl text-gray-800">
+                        <p className="font-semibold text-xl text-foreground">
                           {testimonial.name}
                         </p>
-                        <p className="text-gray-600">{testimonial.role}</p>
+                        <p className="text-muted-foreground">{testimonial.role}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -107,7 +107,7 @@ export function Testimonials() {
               <button
                 key={index}
                 className={`h-3 w-3 rounded-full mx-2 ${
-                  index === activeIndex ? "bg-gray-800" : "bg-gray-300"
+                  index === activeIndex ? "bg-foreground" : "bg-muted-foreground/30"
                 }`}
                 onClick={() => setActiveIndex(index)}
               />

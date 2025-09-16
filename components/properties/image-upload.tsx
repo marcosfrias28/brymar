@@ -76,7 +76,7 @@ export function ImageUpload({ images, onImagesChange, maxImages = 10 }: ImageUpl
       {/* Upload Area */}
       <div
         className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-          dragActive ? "border-arsenic bg-azureishWhite/20" : "border-blackCoral hover:border-arsenic"
+          dragActive ? "border-primary bg-primary/5" : "border-border hover:border-primary"
         }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -84,17 +84,17 @@ export function ImageUpload({ images, onImagesChange, maxImages = 10 }: ImageUpl
         onDrop={handleDrop}
       >
         <div className="flex flex-col items-center gap-4">
-          <div className="p-4 rounded-full bg-arsenic/10">
-            <Upload className="h-8 w-8 text-arsenic" />
+          <div className="p-4 rounded-full bg-primary/10">
+            <Upload className="h-8 w-8 text-primary" />
           </div>
           <div>
-            <p className="text-lg font-medium text-arsenic">Arrastra las imágenes aquí o haz clic para seleccionar</p>
-            <p className="text-sm text-blackCoral mt-1">Máximo {maxImages} imágenes, hasta 5MB cada una</p>
+            <p className="text-lg font-medium text-foreground">Arrastra las imágenes aquí o haz clic para seleccionar</p>
+            <p className="text-sm text-muted-foreground mt-1">Máximo {maxImages} imágenes, hasta 5MB cada una</p>
           </div>
           <Button
             type="button"
             variant="outline"
-            className="border-blackCoral text-blackCoral hover:bg-blackCoral hover:text-white bg-transparent"
+            className="border-border text-foreground hover:bg-primary hover:text-primary-foreground bg-transparent"
             onClick={() => {
               const input = document.createElement("input")
               input.type = "file"

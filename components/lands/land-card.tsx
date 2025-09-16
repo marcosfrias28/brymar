@@ -50,12 +50,12 @@ export function LandCard({ land }: LandCardProps) {
 
   const getTypeBadgeColor = (type: string) => {
     const colors = {
-      commercial: "bg-blue-100 text-blue-800 border-blue-200",
-      residential: "bg-green-100 text-green-800 border-green-200",
-      agricultural: "bg-yellow-100 text-yellow-800 border-yellow-200",
-      beachfront: "bg-cyan-100 text-cyan-800 border-cyan-200",
+      commercial: "bg-chart-1/20 text-chart-1 border-chart-1/30",
+      residential: "bg-chart-2/20 text-chart-2 border-chart-2/30",
+      agricultural: "bg-chart-3/20 text-chart-3 border-chart-3/30",
+      beachfront: "bg-chart-4/20 text-chart-4 border-chart-4/30",
     }
-    return colors[type as keyof typeof colors] || "bg-gray-100 text-gray-800 border-gray-200"
+    return colors[type as keyof typeof colors] || "bg-muted text-muted-foreground border-border"
   }
 
   const getPricePerM2 = () => {
@@ -78,7 +78,7 @@ export function LandCard({ land }: LandCardProps) {
         <div className="absolute top-3 right-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="bg-white/80 hover:bg-white text-arsenic">
+              <Button variant="ghost" size="sm" className="bg-white/80 hover:bg-white text-foreground">
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -95,7 +95,7 @@ export function LandCard({ land }: LandCardProps) {
                   Editar
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-red-600">
+              <DropdownMenuItem className="text-destructive">
                 <Trash2 className="h-4 w-4 mr-2" />
                 Eliminar
               </DropdownMenuItem>
@@ -107,21 +107,21 @@ export function LandCard({ land }: LandCardProps) {
       <CardContent className="p-4">
         {/* Title and Price */}
         <div className="mb-3">
-          <h3 className="font-semibold text-arsenic text-lg mb-1 line-clamp-1">{land.name}</h3>
+          <h3 className="font-semibold text-foreground text-lg mb-1 line-clamp-1">{land.name}</h3>
           <div className="flex items-center justify-between">
-            <p className="text-2xl font-bold text-arsenic">{formatPrice(land.price)}</p>
-            <p className="text-sm text-blackCoral">${getPricePerM2()}/m²</p>
+            <p className="text-2xl font-bold text-foreground">{formatPrice(land.price)}</p>
+            <p className="text-sm text-muted-foreground">${getPricePerM2()}/m²</p>
           </div>
         </div>
 
         {/* Location */}
-        <div className="flex items-center text-blackCoral mb-3">
+        <div className="flex items-center text-muted-foreground mb-3">
           <MapPin className="h-4 w-4 mr-1" />
           <span className="text-sm line-clamp-1">{land.location}</span>
         </div>
 
         {/* Surface */}
-        <div className="flex items-center gap-4 text-blackCoral text-sm mb-3">
+        <div className="flex items-center gap-4 text-muted-foreground text-sm mb-3">
           <div className="flex items-center gap-1">
             <Square className="h-4 w-4" />
             <span>{land.surface.toLocaleString()} m²</span>
@@ -133,11 +133,11 @@ export function LandCard({ land }: LandCardProps) {
         </div>
 
         {/* Description */}
-        <p className="text-blackCoral/70 text-sm line-clamp-2">{land.description}</p>
+        <p className="text-muted-foreground text-sm line-clamp-2">{land.description}</p>
       </CardContent>
 
       <CardFooter className="p-4 pt-0">
-        <Button asChild className="w-full bg-arsenic hover:bg-blackCoral text-white">
+        <Button asChild className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
           <Link href={`/dashboard/lands/${land.id}`}>Ver Detalles</Link>
         </Button>
       </CardFooter>

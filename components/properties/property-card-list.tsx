@@ -27,7 +27,7 @@ interface PropertyCardListProps {
 
 export function PropertyCardList({ property }: PropertyCardListProps) {
   return (
-    <Card className="border-blackCoral shadow-sm hover:shadow-md transition-shadow">
+    <Card className="border-border shadow-sm hover:shadow-md transition-shadow">
       <CardContent className="p-0">
         <div className="flex flex-col sm:flex-row">
           {/* Image */}
@@ -39,7 +39,7 @@ export function PropertyCardList({ property }: PropertyCardListProps) {
               className="object-cover rounded-l-lg"
             />
             {property.featured && (
-              <Badge className="absolute top-2 left-2 bg-arsenic text-white text-xs">Destacada</Badge>
+              <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs">Destacada</Badge>
             )}
           </div>
 
@@ -47,14 +47,14 @@ export function PropertyCardList({ property }: PropertyCardListProps) {
           <div className="flex-1 p-4 flex flex-col justify-between">
             <div className="flex justify-between items-start gap-4">
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-arsenic text-sm line-clamp-1 mb-1">{property.title}</h3>
+                <h3 className="font-semibold text-card-foreground text-sm line-clamp-1 mb-1">{property.title}</h3>
 
-                <div className="flex items-center gap-2 text-xs text-blackCoral mb-2">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
                   <MapPin className="h-3 w-3" />
                   <span className="line-clamp-1">{property.location}</span>
                 </div>
 
-                <div className="flex items-center gap-4 text-xs text-blackCoral">
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Bed className="h-3 w-3" />
                     <span>{property.bedrooms}</span>
@@ -71,7 +71,7 @@ export function PropertyCardList({ property }: PropertyCardListProps) {
               </div>
 
               <div className="text-right flex-shrink-0">
-                <div className="text-lg font-bold text-arsenic">${property.price.toLocaleString()}</div>
+                <div className="text-lg font-bold text-primary">${property.price.toLocaleString()}</div>
                 <Badge variant={property.type === "sale" ? "default" : "secondary"} className="text-xs">
                   {property.type === "sale" ? "Venta" : "Alquiler"}
                 </Badge>

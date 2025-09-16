@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { addLand } from "@/lib/actions/land-actions";
 
@@ -51,7 +52,17 @@ export function LandForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <Card className="w-full max-w-2xl mx-auto bg-card shadow-lg border-border">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold text-card-foreground">
+          Crear Nuevo Terreno
+        </CardTitle>
+        <CardDescription className="text-muted-foreground">
+          Complete la información del terreno que desea agregar
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <Label htmlFor="name">Nombre del Terreno</Label>
         <Input id="name" name="name" required />
@@ -87,9 +98,29 @@ export function LandForm() {
         <Input id="province" name="province" />
       </div>
       
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Creando..." : "Crear Terreno"}
-      </Button>
-    </form>
+          <div className="flex gap-4 pt-4">
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              {isSubmitting ? "Creando..." : "Crear Terreno"}
+            </Button>
+            <Button 
+              type="button" 
+              variant="outline"
+              className="border-border text-foreground hover:bg-muted hover:text-muted-foreground"
+              onClick={() => {
+                const form = document.querySelector('form') as HTMLFormElement;
+                form?.reset();
+                setImages([]);
+              }}
+            >
+              Cancelar
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

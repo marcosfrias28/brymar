@@ -46,14 +46,14 @@ const services = [
     description:
       "Servicios de reubicación sin problemas para clientes globales, incluyendo asistencia con visas y orientación local.",
     icon: Globe,
-    color: "bg-yellow-500",
+    color: "bg-chart-3",
   },
   {
     title: "Transacciones Seguras",
     description:
       "Garantiza la confidencialidad y seguridad de tus transacciones inmobiliarias de alto valor con nuestro equipo legal especializado.",
     icon: Shield,
-    color: "bg-indigo-500",
+    color: "bg-chart-4",
   },
 ];
 
@@ -93,12 +93,12 @@ export function Services() {
                   >
                     <Icon />
                   </div>
-                  <CardTitle className="text-2xl font-bold text-gray-800">
+                  <CardTitle className="text-2xl font-bold text-foreground">
                     {title}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="text-gray-600 mb-6">
+                  <CardDescription className="text-muted-foreground mb-6">
                     {description}
                   </CardDescription>
                   <Button

@@ -16,7 +16,7 @@ export const Intro = () => {
   const subtitle = "Propiedades de lujo y exclusivas";
   const cta = "Explorar Propiedades";
 
-  const WordsStyle = "bg-clip-text text-transparent bg-aurora bg-clip-text";
+  const WordsStyle = "bg-clip-text text-transparent bg-primary bg-clip-text";
   return (
     <section className="relative w-screen min-h-fit h-[150dvh] xl:mt-36 text-center bg-black">
       <IntroTitle name={name} subtitle={subtitle} />

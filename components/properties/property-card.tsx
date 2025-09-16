@@ -62,7 +62,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
                   Editar
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-red-600">
+              <DropdownMenuItem className="text-destructive">
                 <Trash2 className="h-4 w-4 mr-2" />
                 Eliminar
               </DropdownMenuItem>
@@ -74,20 +74,20 @@ export function PropertyCard({ property }: PropertyCardProps) {
       <CardContent className="p-4">
         {/* Title and Price */}
         <div className="mb-3">
-          <h3 className="font-semibold text-arsenic text-lg mb-1 line-clamp-1">{property.title}</h3>
+          <h3 className="font-semibold text-foreground text-lg mb-1 line-clamp-1">{property.title}</h3>
           <p className="text-lg font-semibold text-primary mb-2">
             {formatPrice(property.price)}
           </p>
         </div>
 
         {/* Location */}
-        <div className="flex items-center text-blackCoral mb-3">
+        <div className="flex items-center text-muted-foreground mb-3">
           <MapPin className="h-4 w-4 mr-1" />
           <span className="text-sm line-clamp-1">{property.location}</span>
         </div>
 
         {/* Features */}
-        <div className="flex items-center gap-4 text-blackCoral text-sm">
+        <div className="flex items-center gap-4 text-muted-foreground text-sm">
           <div className="flex items-center gap-1">
             <Bed className="h-4 w-4" />
             <span>{property.bedrooms}</span>
@@ -103,11 +103,11 @@ export function PropertyCard({ property }: PropertyCardProps) {
         </div>
 
         {/* Description */}
-        <p className="text-blackCoral/70 text-sm mt-3 line-clamp-2">{property.description}</p>
+        <p className="text-muted-foreground/70 text-sm mt-3 line-clamp-2">{property.description}</p>
       </CardContent>
 
       <CardFooter className="p-4 pt-0">
-        <Button asChild className="w-full bg-arsenic hover:bg-blackCoral text-white">
+        <Button asChild className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
           <Link href={`/dashboard/properties/${property.id}`}>Ver Detalles</Link>
         </Button>
       </CardFooter>

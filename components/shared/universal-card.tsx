@@ -98,7 +98,7 @@ export function UniversalCard({
 
   if (viewMode === "list") {
     return (
-      <div className="bg-white border border-blackCoral rounded-lg p-4 hover:shadow-md transition-shadow">
+      <div className="bg-background border border-border rounded-lg p-4 hover:shadow-md transition-shadow">
         <div className="flex gap-4">
           {/* Image */}
           <Link href={getDetailUrl()} className="w-24 h-24 flex-shrink-0">
@@ -112,8 +112,8 @@ export function UniversalCard({
                 onError={() => setImageError(true)}
               />
             ) : (
-              <div className="w-full h-full bg-blackCoral rounded-lg flex items-center justify-center hover:bg-arsenic transition-colors">
-                <span className="text-white text-xs font-medium">Sin imagen</span>
+              <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center hover:bg-muted/80 transition-colors">
+                <span className="text-muted-foreground text-xs font-medium">Sin imagen</span>
               </div>
             )}
           </Link>
@@ -123,7 +123,7 @@ export function UniversalCard({
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
                 <Link href={getDetailUrl()}>
-                  <h3 className="font-semibold text-arsenic truncate hover:text-blackCoral transition-colors cursor-pointer">
+                  <h3 className="font-semibold text-foreground truncate hover:text-primary transition-colors cursor-pointer">
                     {title}
                   </h3>
                 </Link>

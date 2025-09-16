@@ -96,26 +96,26 @@ export default function FeaturedProperties() {
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <div>
-                      <CardTitle className="text-2xl text-gray-800 mb-2">
+                      <CardTitle className="text-2xl text-foreground mb-2">
                         {property.title}
                       </CardTitle>
-                      <CardDescription className="flex items-center text-gray-600 mb-4">
+                      <CardDescription className="flex items-center text-muted-foreground mb-4">
                         <MapPin className="h-4 w-4 mr-1" />
                         {property.location}
                       </CardDescription>
                     </div>
                     <Badge
                       variant="secondary"
-                      className="text-lg font-semibold bg-gold text-white px-3 py-1"
+                      className="text-lg font-semibold bg-primary text-primary-foreground px-3 py-1"
                     >
                       {property.price}
                     </Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-700 mb-6">{property.description}</p>
+                  <p className="text-muted-foreground mb-6">{property.description}</p>
                   <div className="flex justify-between items-center mb-6">
-                    <div className="flex items-center text-gray-600">
+                    <div className="flex items-center text-muted-foreground">
                       <Bed className="h-5 w-5 mr-2" />
                       <span>{property.beds} Beds</span>
                     </div>
@@ -128,7 +128,7 @@ export default function FeaturedProperties() {
                       <span>{property.area}</span>
                     </div>
                   </div>
-                  <Button className="w-full bg-gray-800 hover:bg-gray-700 text-white">
+                  <Button className="w-full bg-foreground hover:bg-foreground/90 text-background">
                     Ver Detalles
                   </Button>
                 </CardContent>
