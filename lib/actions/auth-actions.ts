@@ -22,18 +22,24 @@ export const signIn = validatedAction(signInSchema, async (_: any, formData: For
   }
 
   try {
-    const data = await auth.api.signInEmail({
+    await auth.api.signInEmail({
       method: "POST",
       body: {
         email,
         password,
       },
+    }) 
+
+    const session = await auth.api.getSession({
+      headers: await headers(),
     })
-    if (!data?.user) return { error: "Error during authentication" }
+
+    console.log(session)
+    if (!session?.user) return { error: "Error during authentication" }
     return {
       success: true,
       redirect: true,
-      url: "/dashboard/properties",
+      url: session.user.role === "user" ? "/" : "/dashboard",
       message: "You has been logged in successfully",
     }
   } catch (error) {

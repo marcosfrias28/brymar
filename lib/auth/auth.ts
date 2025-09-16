@@ -19,11 +19,15 @@ export const auth = betterAuth({
     additionalFields: {
       role: {
         type: "string",
-        required: false,
+        required: true,
         defaultValue: "user",
         input: false,
       },
     },
+  },
+  session: {
+    updateAge: 24 * 60 * 60, // 24 hours
+    expiresIn: 60 * 60 * 24 * 7, // 7 days
   },
   plugins: [nextCookies()],
   emailAndPassword: {
