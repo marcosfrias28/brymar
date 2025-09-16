@@ -15,6 +15,13 @@
       "when": 1757636829711,
       "tag": "0001_flat_chimera",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1757984660351,
+      "tag": "0002_wet_wendell_vaughn",
+      "breakpoints": true
     }
   ]
 }
