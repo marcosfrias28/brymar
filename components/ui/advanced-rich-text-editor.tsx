@@ -92,16 +92,16 @@ export function AdvancedRichTextEditor({
   }
 
   return (
-    <div className={`border border-blackCoral rounded-lg bg-white ${className}`}>
+    <div className={`border border-border rounded-lg bg-background ${className}`}>
       {/* Toolbar */}
-      <div className="border-b border-blackCoral/20 p-3">
+      <div className="border-b border-border/20 p-3">
         <div className="flex flex-wrap items-center gap-1">
           {/* Text formatting */}
           <Button
             variant="ghost"
             size="sm"
             onClick={() => editor.chain().focus().toggleBold().run()}
-            className={editor.isActive("bold") ? "bg-arsenic text-white" : ""}
+            className={editor.isActive("bold") ? "bg-primary text-primary-foreground" : ""}
           >
             <Bold className="h-4 w-4" />
           </Button>
@@ -109,7 +109,7 @@ export function AdvancedRichTextEditor({
             variant="ghost"
             size="sm"
             onClick={() => editor.chain().focus().toggleItalic().run()}
-            className={editor.isActive("italic") ? "bg-arsenic text-white" : ""}
+            className={editor.isActive("italic") ? "bg-primary text-primary-foreground" : ""}
           >
             <Italic className="h-4 w-4" />
           </Button>
@@ -117,7 +117,7 @@ export function AdvancedRichTextEditor({
             variant="ghost"
             size="sm"
             onClick={() => editor.chain().focus().toggleStrike().run()}
-            className={editor.isActive("strike") ? "bg-arsenic text-white" : ""}
+            className={editor.isActive("strike") ? "bg-primary text-primary-foreground" : ""}
           >
             <Strikethrough className="h-4 w-4" />
           </Button>
