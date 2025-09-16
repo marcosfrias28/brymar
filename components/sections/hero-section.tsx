@@ -120,14 +120,13 @@ export function HeroSection() {
             </h1>
 
             {/* Circular text element */}
-            <div className="relative w-44 h-44 mb-8">
+            <div className="relative mb-8 flex justify-center gap-8 ">
               <CircularText text="Propiedades en todo el terreno Nacional" />
-            </div>
-
-            {/* Description text */}
+              {/* Description text */}
             <p className="text-muted-foreground font-sofia-pro text-xl leading-relaxed max-w-lg mb-12">
               Nuestra marca internacional se especializa en tasación, ventas, compras e inversiones inmobiliarias. Confía en nosotros para brindarte un servicio excepcional y ayudarte a encontrar tu oportunidad inmobiliaria perfecta.
             </p>
+            </div>
 
             {/* CTA Button */}
             <button

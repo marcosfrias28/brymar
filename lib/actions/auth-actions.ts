@@ -109,6 +109,32 @@ export const getUser = async () => {
   return data.user
 }
 
+/**
+ * Obtener usuario con información de organizaciones
+ */
+export const getUserWithOrganizations = async () => {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    })
+
+    if (!session?.user) return null
+
+    // Obtener organizaciones del usuario
+    const organizations = await auth.api.listUserOrganizations({
+      headers: await headers(),
+    })
+
+    return {
+      ...session.user,
+      organizations: organizations || [],
+    }
+  } catch (error) {
+    console.error("Error fetching user with organizations:", error)
+    return null
+  }
+}
+
 const signOutSchema = z.object({
   redirect: z.string().optional(),
 })

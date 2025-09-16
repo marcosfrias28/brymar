@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Landmark, FileText } from "lucide-react";
+import { Home, Landmark, FileText, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -24,6 +24,7 @@ export function DashboardSidebar() {
     { title: "Propiedades", icon: Home, href: "/dashboard/properties" },
     { title: "Terrenos", icon: Landmark, href: "/dashboard/lands" },
     { title: "Blog", icon: FileText, href: "/dashboard/blog" },
+    { title: "Organizaciones", icon: Users, href: "/dashboard/organizations" },
   ];
 
   return (

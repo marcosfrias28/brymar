@@ -2,8 +2,9 @@ import { betterAuth } from "better-auth";
 import { sendVerificationEmail } from "../email";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import db from "../db/drizzle";
-import { accounts, session, users, verification } from "../db/schema";
+import { accounts, session, users, verification, organization, member, invitation } from "../db/schema";
 import { nextCookies } from "better-auth/next-js";
+import { organization as organizationPlugin } from "better-auth/plugins/organization";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -13,6 +14,9 @@ export const auth = betterAuth({
       session,
       account: accounts,
       verification,
+      organization,
+      member,
+      invitation,
     },
   }),
   user: {
@@ -29,7 +33,24 @@ export const auth = betterAuth({
     updateAge: 24 * 60 * 60, // 24 hours
     expiresIn: 60 * 60 * 24 * 7, // 7 days
   },
-  plugins: [nextCookies()],
+  plugins: [
+    nextCookies(),
+    organizationPlugin({
+      allowUserToCreateOrganization: true,
+      organizationLimit: 5,
+      roles: {
+        admin: {
+          permissions: ["create", "read", "update", "delete", "invite", "remove"],
+        },
+        agent: {
+          permissions: ["read", "update"],
+        },
+        viewer: {
+          permissions: ["read"],
+        },
+      },
+    }),
+  ],
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,

@@ -36,7 +36,7 @@ export function ImageContainer({
   return (
     <div 
       className={cn(
-        "relative overflow-hidden border border-white",
+        "relative overflow-hidden border-4 border-white",
         "rounded-[297px]", // 's large border radius
         sizes[size],
         className

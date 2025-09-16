@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, Building2, MapPin, FileText, Settings } from "lucide-react"
+import { Home, Building2, MapPin, FileText, Settings, Users } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -39,6 +39,11 @@ const menuItems = [
     icon: FileText,
   },
   {
+    title: "organizations",
+    url: "/dashboard/organizations",
+    icon: Users,
+  },
+  {
     title: "settings",
     url: "/dashboard/settings",
     icon: Settings,
@@ -51,6 +56,7 @@ const getMenuTitle = (title: string) => {
     properties: "Propiedades",
     lands: "Terrenos",
     blog: "Blog",
+    organizations: "Organizaciones",
     settings: "Configuración"
   };
   return titles[title] || title;
