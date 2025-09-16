@@ -1,25 +1,11 @@
-import { FigmaHeroSection } from "@/components/sections/figma-hero-section";
-import { FigmaAboutSection } from "@/components/sections/figma-about-section";
-import { 
-  FigmaDreamHouseSection, 
-  FigmaProjectSection, 
-  FigmaQualitySection 
-} from "@/components/sections/figma-property-sections";
-import { 
-  FigmaCombineSection, 
-  FigmaFooterSection 
-} from "@/components/sections/figma-footer-section";
+import { HeroSection } from "@/components/sections/hero-section";
+import { Footer } from "@/components/sections/footer";
 
 export default function Home() {
   return (
     <>
-      <FigmaHeroSection />
-      <FigmaAboutSection />
-      <FigmaDreamHouseSection />
-      <FigmaProjectSection />
-      <FigmaQualitySection />
-      <FigmaCombineSection />
-      <FigmaFooterSection />
+      <HeroSection />
+      <Footer />
     </>
   );
 }

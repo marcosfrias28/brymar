@@ -1,7 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { FigmaNavbar } from "@/components/figma-navbar";
+import { Navbar } from "@/components/navbar";
 import { Toaster } from "@/components/ui/sonner";
 import { getUser } from "@/lib/actions/auth-actions";
 
@@ -37,8 +37,8 @@ export default async function LocaleLayout({
           disableTransitionOnChange
         >
           <SidebarProvider>
-            <FigmaNavbar user={user} />
-            <main className="flex-1 overflow-y-auto overflow-x-hidden bg-figma-dark-green">
+            <Navbar user={user} />
+            <main className="flex-1 overflow-y-auto overflow-x-hidden bg-background">
               {children}
             </main>
             <Toaster richColors={true} position="bottom-center" />

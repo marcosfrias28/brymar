@@ -1,322 +1,164 @@
 @import "tailwindcss";
-
 @custom-variant dark (&:is(.dark *));
 
-@theme {
-  --breakpoint-smartphonexs: 320px;
-  --breakpoint-smartphone: 360px;
-  --breakpoint-tablet: 760px;
-  --breakpoint-laptop: 1024px;
-  --breakpoint-desktop: 1300px;
-  --breakpoint-ultrawide: 2440px;
+:root {
+  --background: rgb(255, 255, 255);
+  --foreground: rgb(13, 27, 42);
+  --card: rgb(248, 249, 250);
+  --card-foreground: rgb(13, 27, 42);
+  --popover: rgb(255, 255, 255);
+  --popover-foreground: rgb(13, 27, 42);
+  --primary: rgb(148, 210, 189);
+  --primary-foreground: rgb(0, 0, 0);
+  --secondary: rgb(240, 229, 193);
+  --secondary-foreground: rgb(13, 27, 42);
+  --muted: rgb(241, 243, 245);
+  --muted-foreground: rgb(108, 117, 125);
+  --accent: rgb(0, 95, 115);
+  --accent-foreground: rgb(255, 255, 255);
+  --destructive: rgb(174, 32, 18);
+  --destructive-foreground: rgb(255, 255, 255);
+  --border: rgb(233, 236, 239);
+  --input: rgb(241, 243, 245);
+  --ring: rgb(0, 95, 115);
+  --chart-1: rgb(0, 95, 115);
+  --chart-2: rgb(10, 147, 150);
+  --chart-3: rgb(148, 210, 189);
+  --chart-4: rgb(233, 216, 166);
+  --chart-5: rgb(238, 155, 0);
+  --sidebar: rgb(248, 249, 250);
+  --sidebar-foreground: rgb(13, 27, 42);
+  --sidebar-primary: rgb(0, 95, 115);
+  --sidebar-primary-foreground: rgb(255, 255, 255);
+  --sidebar-accent: rgb(255, 255, 255);
+  --sidebar-accent-foreground: rgb(13, 27, 42);
+  --sidebar-border: rgb(233, 236, 239);
+  --sidebar-ring: rgb(0, 95, 115);
+  --font-sans: Poppins;
+  --font-serif: Lora;
+  --font-mono: Fira Code;
+  --radius: 0.5rem;
+  --shadow-2xs: 0px 4px 10px 0px hsl(0 0% 0% / 0.05);
+  --shadow-xs: 0px 4px 10px 0px hsl(0 0% 0% / 0.05);
+  --shadow-sm: 0px 4px 10px 0px hsl(0 0% 0% / 0.10), 0px 1px 2px -1px hsl(0 0% 0% / 0.10);
+  --shadow: 0px 4px 10px 0px hsl(0 0% 0% / 0.10), 0px 1px 2px -1px hsl(0 0% 0% / 0.10);
+  --shadow-md: 0px 4px 10px 0px hsl(0 0% 0% / 0.10), 0px 2px 4px -1px hsl(0 0% 0% / 0.10);
+  --shadow-lg: 0px 4px 10px 0px hsl(0 0% 0% / 0.10), 0px 4px 6px -1px hsl(0 0% 0% / 0.10);
+  --shadow-xl: 0px 4px 10px 0px hsl(0 0% 0% / 0.10), 0px 8px 10px -1px hsl(0 0% 0% / 0.10);
+  --shadow-2xl: 0px 4px 10px 0px hsl(0 0% 0% / 0.25);
+  --tracking-normal: normal;
+  --spacing: 0.25rem;
+}
 
-  /* New Design System Colors - Based on Figma */
-  --color-figma-dark-green: #1D4734;
-  --color-figma-orange: #E09B6B;
-  --color-figma-black: #000000;
-  --color-figma-white: #FFFFFF;
-  --color-figma-light-gray: rgba(255, 255, 255, 0.60);
-  --color-figma-medium-gray: #A0A0A0;
-  --color-figma-text-gradient: linear-gradient(113deg, #FFF 55.43%, rgba(255, 255, 255, 0.00) 87.88%);
+.dark {
+  --background: rgb(2, 12, 27);
+  --foreground: rgb(248, 249, 250);
+  --card: rgb(10, 20, 40);
+  --card-foreground: rgb(248, 249, 250);
+  --popover: rgb(2, 12, 27);
+  --popover-foreground: rgb(248, 249, 250);
+  --primary: rgb(148, 210, 189);
+  --primary-foreground: rgb(13, 27, 42);
+  --secondary: rgb(233, 216, 166);
+  --secondary-foreground: rgb(13, 27, 42);
+  --muted: rgb(27, 38, 59);
+  --muted-foreground: rgb(173, 181, 189);
+  --accent: rgb(0, 95, 115);
+  --accent-foreground: rgb(248, 249, 250);
+  --destructive: rgb(187, 62, 3);
+  --destructive-foreground: rgb(255, 255, 255);
+  --border: rgb(27, 38, 59);
+  --input: rgb(27, 38, 59);
+  --ring: rgb(148, 210, 189);
+  --chart-1: rgb(148, 210, 189);
+  --chart-2: rgb(10, 147, 150);
+  --chart-3: rgb(0, 95, 115);
+  --chart-4: rgb(233, 216, 166);
+  --chart-5: rgb(238, 155, 0);
+  --sidebar: rgb(10, 20, 40);
+  --sidebar-foreground: rgb(248, 249, 250);
+  --sidebar-primary: rgb(148, 210, 189);
+  --sidebar-primary-foreground: rgb(13, 27, 42);
+  --sidebar-accent: rgb(27, 38, 59);
+  --sidebar-accent-foreground: rgb(248, 249, 250);
+  --sidebar-border: rgb(27, 38, 59);
+  --sidebar-ring: rgb(148, 210, 189);
+  --font-sans: Poppins;
+  --font-serif: Lora;
+  --font-mono: Fira Code;
+  --radius: 0.5rem;
+  --shadow-2xs: 0px 5px 15px 0px hsl(0 0% 0% / 0.13);
+  --shadow-xs: 0px 5px 15px 0px hsl(0 0% 0% / 0.13);
+  --shadow-sm: 0px 5px 15px 0px hsl(0 0% 0% / 0.25), 0px 1px 2px -1px hsl(0 0% 0% / 0.25);
+  --shadow: 0px 5px 15px 0px hsl(0 0% 0% / 0.25), 0px 1px 2px -1px hsl(0 0% 0% / 0.25);
+  --shadow-md: 0px 5px 15px 0px hsl(0 0% 0% / 0.25), 0px 2px 4px -1px hsl(0 0% 0% / 0.25);
+  --shadow-lg: 0px 5px 15px 0px hsl(0 0% 0% / 0.25), 0px 4px 6px -1px hsl(0 0% 0% / 0.25);
+  --shadow-xl: 0px 5px 15px 0px hsl(0 0% 0% / 0.25), 0px 8px 10px -1px hsl(0 0% 0% / 0.25);
+  --shadow-2xl: 0px 5px 15px 0px hsl(0 0% 0% / 0.63);
+}
 
-  --background-image-gradient-radial: `radial-gradient(
-      at center,
-      hsl(var(--primary)) 0%,
-      transparent 40%
-    ),
-    radial-gradient(at center, hsl(var(--secondary)) 0%, transparent 59%) `;
-  --background-image-aurora: `radial-gradient(
-      circle at 30% 60%,
-      hsl(var(--color-3)) 0%,
-      hsl(var(--color-4)) 100%
-    ),
-    radial-gradient(
-        circle at 40% 80%,
-        hsl(var(--secondary)) 0%,
-        hsl(var(--color-3)) 80%
-      )
-      `;
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-serif: var(--font-serif);
+
   --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 
-  --color-white: #f7f7f7;
-  --color-arsenic: hsl(213, 12%, 25%);
-  --color-black-coral: hsl(220, 10%, 40%);
-  --color-dark-vanilla: hsl(24, 24%, 75%);
-  --color-azureish-white: hsl(162, 27%, 90%);
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-secondaybackground: hsl(var(--color-5));
+  --shadow-2xs: var(--shadow-2xs);
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow: var(--shadow);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+  --shadow-2xl: var(--shadow-2xl);
 
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-
-  --color-sidebar: hsl(var(--sidebar-background));
-  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
-  --color-sidebar-primary: hsl(var(--sidebar-primary));
-  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
-  --color-sidebar-accent: hsl(var(--sidebar-accent));
-  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
-  --color-sidebar-border: hsl(var(--sidebar-border));
-  --color-sidebar-ring: hsl(var(--sidebar-ring));
-
-  --animate-gradient: auroraMove 6s ease infinite;
-  --animate-gradient-shift: gradient-shift 15s ease infinite;
-  --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
-  --animate-border-beam: border-beam calc(var(--duration) * 1s) infinite linear;
-  --animate-shine: shine var(--duration) infinite linear;
-  --animate-marquee: marquee var(--duration) infinite linear;
-  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
-
-  @keyframes auroraMove {
-    0% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-    100% {
-      background-position: 0% 50%;
-    }
-  }
-  @keyframes accordion-down {
-    from {
-      height: 0;
-    }
-    to {
-      height: var(--radix-accordion-content-height);
-    }
-  }
-  @keyframes accordion-up {
-    from {
-      height: var(--radix-accordion-content-height);
-    }
-    to {
-      height: 0;
-    }
-  }
-  @keyframes border-beam {
-    100% {
-      offset-distance: 100%;
-    }
-  }
-  @keyframes shine {
-    0% {
-      background-position: 0% 0%;
-    }
-    50% {
-      background-position: 100% 100%;
-    }
-    to {
-      background-position: 0% 0%;
-    }
-  }
-  @keyframes marquee {
-    from {
-      transform: translateX(0);
-    }
-    to {
-      transform: translateX(calc(-100% - var(--gap)));
-    }
-  }
-  @keyframes marquee-vertical {
-    from {
-      transform: translateY(0);
-    }
-    to {
-      transform: translateY(calc(-100% - var(--gap)));
-    }
-  }
+  --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
+  --tracking-tight: calc(var(--tracking-normal) - 0.025em);
+  --tracking-normal: var(--tracking-normal);
+  --tracking-wide: calc(var(--tracking-normal) + 0.025em);
+  --tracking-wider: calc(var(--tracking-normal) + 0.05em);
+  --tracking-widest: calc(var(--tracking-normal) + 0.1em);
 }
 
-/*
-  The default border color has changed to `currentcolor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
-@layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
-  }
-}
-
-/* Figma Design System Base Styles */
-.bg-figma-dark-green {
-  background-color: var(--color-figma-dark-green);
-}
-
-.bg-figma-orange {
-  background-color: var(--color-figma-orange);
-}
-
-.bg-figma-black {
-  background-color: var(--color-figma-black);
-}
-
-.text-figma-white {
-  color: var(--color-figma-white);
-}
-
-.text-figma-light-gray {
-  color: var(--color-figma-light-gray);
-}
-
-.text-figma-medium-gray {
-  color: var(--color-figma-medium-gray);
-}
-
-.text-figma-orange {
-  color: var(--color-figma-orange);
-}
-
-/* Figma Hero Text Gradient */
-.text-figma-hero-gradient {
-  background: linear-gradient(113deg, #FFF 55.43%, rgba(255, 255, 255, 0.00) 87.88%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.text-figma-about-gradient {
-  background: linear-gradient(100deg, #FFF 42.68%, rgba(255, 255, 255, 0.00) 103.89%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.text-figma-quality-gradient {
-  background: linear-gradient(102deg, #FFF 41.18%, rgba(255, 255, 255, 0.00) 142.16%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.text-figma-combine-gradient {
-  background: linear-gradient(180deg, #FFF 40.97%, #000 193.92%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Figma Typography Utilities */
-.font-satoshi {
-  font-family: 'Satoshi', -apple-system, Roboto, Helvetica, sans-serif;
-}
-
-.font-sofia-pro {
-  font-family: 'Sofia Pro', -apple-system, Roboto, Helvetica, sans-serif;
-}
-
-.font-encode-sans {
-  font-family: 'Encode Sans', -apple-system, Roboto, Helvetica, sans-serif;
-}
-
-.font-helvetica-neue {
-  font-family: 'Helvetica Neue', -apple-system, Roboto, Helvetica, sans-serif;
-}
-
-/* Figma Circular Button */
-.figma-circular-button {
-  width: 153px;
-  height: 153px;
-  border-radius: 50%;
-  background-color: var(--color-figma-orange);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  filter: drop-shadow(0 30.667px 76.667px rgba(0, 0, 0, 0.40));
-  transition: all 0.3s ease;
-}
-
-.figma-circular-button:hover {
-  transform: scale(1.05);
-}
-
-.figma-circular-button svg {
-  width: 107px;
-  height: 107px;
-}
-
-/* Figma Navigation Pills */
-.figma-nav-pill {
-  padding: 13.333px 0;
-  border-radius: 111.111px;
-  background: #E6E8EE;
-  color: #050505;
-  text-align: center;
-  font-family: 'Sofia Pro', -apple-system, Roboto, Helvetica, sans-serif;
-  font-size: 17.778px;
-  font-weight: 500;
-  line-height: 120%;
-  transition: all 0.3s ease;
-}
-
-.figma-nav-pill.active {
-  border: 1.111px solid #050505;
-}
-
-.figma-nav-pill:hover {
-  background: #d1d5db;
-}
-
-/* Figma Rounded Image Container */
-.figma-image-container {
-  border-radius: 297.222px;
-  border: 1.111px solid #FFF;
-  overflow: hidden;
-  position: relative;
-}
-
-.figma-image-overlay {
-  border-radius: 216.561px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.00) 38.54%, rgba(18, 18, 18, 0.81) 100%);
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 60%;
-}
-
-/* Gradiente Aurora personalizado */
-.bg-aurora {
-  background: radial-gradient(
-      circle at 30% 60%,
-      var(--color-3) 0%,
-      var(--color-4) 100%
-    ),
-    radial-gradient(circle at 40% 80%, var(--secondary) 0%, var(--color-3) 80%);
+body {
+  letter-spacing: var(--tracking-normal);
 }
 
 @layer base {
@@ -325,161 +167,6 @@
   }
   body {
     @apply bg-background text-foreground;
+    letter-spacing: var(--tracking-normal);
   }
-}
-
-/* Animaciones personalizadas */
-@keyframes auroraMove {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.animate-gradient {
-  animation: auroraMove 6s ease infinite;
-}
-
-@layer base {
-  :root {
-    /* Updated color system to match Figma design */
-    --color-1: 29, 71, 52; /* Figma Dark Green #1D4734 */
-    --color-2: 224, 155, 107; /* Figma Orange #E09B6B */
-    --color-3: 255, 255, 255; /* White */
-    --color-4: 0, 0, 0; /* Black */
-    --color-5: 29, 71, 52; /* Dark Green for backgrounds */
-    --color-6: 0, 0, 0; /* Black for cards */
-    --color-7: 160, 160, 160; /* Medium gray */
-    --color-8: 18, 18, 18; /* Very dark gray */
-    --color-9: 255, 255, 255; /* White */
-    --color-10: 224, 155, 107; /* Orange accent */
-
-    /* Main theme matching Figma */
-    --background: var(--color-1); /* Dark Green background */
-    --foreground: var(--color-3); /* White text */
-    --card: var(--color-8); /* Dark card background */
-    --card-foreground: var(--color-3); /* White text on cards */
-    --popover: var(--color-8); /* Dark popover */
-    --popover-foreground: var(--color-3); /* White text */
-    --primary: var(--color-2); /* Orange primary */
-    --primary-foreground: var(--color-4); /* Black text on orange */
-    --secondary: var(--color-8); /* Dark secondary */
-    --secondary-foreground: var(--color-3); /* White text */
-    --accent: var(--color-2); /* Orange accent */
-    --accent-foreground: var(--color-4); /* Black text on orange */
-    --muted: var(--color-7); /* Medium gray */
-    --muted-foreground: var(--color-3); /* White text */
-    --destructive: 239, 68, 68; /* Red for destructive actions */
-    --destructive-foreground: var(--color-3); /* White text */
-    --border: var(--color-7); /* Medium gray borders */
-    --input: var(--color-8); /* Dark input background */
-    --ring: var(--color-2); /* Orange focus ring */
-    --radius: 0.5rem;
-
-    /* Sidebar-specific colors */
-    --sidebar-background: var(--color-1); /* Dark green */
-    --sidebar-foreground: var(--color-3); /* White */
-    --sidebar-primary: var(--color-2); /* Orange */
-    --sidebar-primary-foreground: var(--color-4); /* Black */
-    --sidebar-accent: var(--color-8); /* Dark accent */
-    --sidebar-accent-foreground: var(--color-3); /* White */
-    --sidebar-border: var(--color-7); /* Medium gray */
-    --sidebar-ring: var(--color-2); /* Orange */
-  }
-
-  .dark {
-    /* Dark mode uses the same colors as the Figma design is already dark */
-    --background: var(--color-1);
-    --foreground: var(--color-3);
-    --card: var(--color-8);
-    --card-foreground: var(--color-3);
-    --popover: var(--color-8);
-    --popover-foreground: var(--color-3);
-    --primary: var(--color-2);
-    --primary-foreground: var(--color-4);
-    --secondary: var(--color-8);
-    --secondary-foreground: var(--color-3);
-    --accent: var(--color-2);
-    --accent-foreground: var(--color-4);
-    --muted: var(--color-7);
-    --muted-foreground: var(--color-3);
-    --destructive: 239, 68, 68;
-    --destructive-foreground: var(--color-3);
-    --border: var(--color-7);
-    --input: var(--color-8);
-    --ring: var(--color-2);
-    --sidebar-background: var(--color-1);
-    --sidebar-foreground: var(--color-3);
-    --sidebar-primary: var(--color-2);
-    --sidebar-primary-foreground: var(--color-4);
-    --sidebar-accent: var(--color-8);
-    --sidebar-accent-foreground: var(--color-3);
-    --sidebar-border: var(--color-7);
-    --sidebar-ring: var(--color-2);
-  }
-}
-
-html,
-body {
-  height: 100%;
-  background-color: var(--color-figma-dark-green);
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-figma-dark-green text-figma-white;
-  }
-}
-
-/* Marquee animations */
-@keyframes marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(calc(-100% - var(--gap)));
-  }
-}
-
-@keyframes marquee-vertical {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(calc(-100% - var(--gap)));
-  }
-}
-
-.animate-marquee {
-  animation: marquee var(--duration) linear infinite;
-}
-
-.animate-marquee-vertical {
-  animation: marquee-vertical var(--duration) linear infinite;
-}
-
-/* Custom scrollbar to match design */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-figma-dark-green);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-figma-orange);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #d1851e;
 }
