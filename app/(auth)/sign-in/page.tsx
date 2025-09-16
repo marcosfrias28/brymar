@@ -1,10 +1,10 @@
-import { LoginWrapper } from "@/components/auth/login-wrapper";
 import { SignInForm } from "@/components/auth/signin-form";
+import { AuthWrapperLayout } from "@/components/auth/auth-wrapper-layout";
 
 export default function SignInPage() {
   return (
-    <LoginWrapper>
+    <AuthWrapperLayout>
       <SignInForm />
-    </LoginWrapper>
+    </AuthWrapperLayout>
   );
 }

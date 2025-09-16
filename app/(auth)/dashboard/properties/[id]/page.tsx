@@ -21,6 +21,10 @@ export default function PropertyDetailPage() {
   const params = useParams()
   const router = useRouter()
 
+  // Verificar que params y params.id existan
+  if (!params || !params.id) {
+    return <div>Error: ID de propiedad no encontrado</div>
+  }
 
   const [isEditing, setIsEditing] = useState(false)
   const [editedProperty, setEditedProperty] = useState<Partial<Property> | null>(null)

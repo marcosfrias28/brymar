@@ -6,9 +6,11 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CustomInput } from "@/components/custom-input";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { forgotPassword } from "@/lib/actions/auth-actions";
-import { LoginWrapper } from "@/components/auth/login-wrapper";
+import { AuthWrapperLayout } from "@/components/auth/auth-wrapper-layout";
+import Link from "next/link";
 
 const ForgotPasswordPage = () => {
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
@@ -34,35 +36,31 @@ const ForgotPasswordPage = () => {
   const signInLinkText = "Iniciar sesión";
 
   return (
-    <LoginWrapper>
-      <div
-        className={cn(
-          "space-y-6 max-w-md p-10 rounded-lg shadow-2xl shadow-black/40 dark:shadow-white/10",
-          "backdrop-blur-xs backdrop-saturate-180 bg-white/50 dark:bg-black/50 border border-black/10 dark:border-white/10",
-          "text-gray-800 dark:text-gray-100"
-        )}
-      >
-        <h1 className="text-4xl font-black">{title}</h1>
-        <p className="text-lg text-pretty">{subtitle}</p>
-        <form action={formAction} className="flex flex-col gap-4">
-          <CustomInput
-            type="email"
-            name="email"
-            id="email"
-            placeholder="example@example.com"
-            required
-            label="Email"
-          />
-          <Button
-            type="submit"
-            variant="outline"
-            className={cn(
-              "w-full py-2 px-4 rounded-lg text-sm font-medium",
-              "bg-green-600/50 hover:bg-green-600/70",
-              "dark:bg-green-950/50 dark:hover:bg-green-950"
-            )}
-            disabled={pending}
-          >
+    <AuthWrapperLayout>
+      <form action={formAction} className={cn("flex flex-col gap-6")}>
+        <div className="flex flex-col items-center gap-2 text-center">
+          <h1 className="text-2xl font-bold">{title}</h1>
+          <p className="text-balance text-sm text-muted-foreground">
+            {subtitle}
+          </p>
+        </div>
+        <div className="grid gap-6">
+          <div className="grid gap-2">
+            <Label htmlFor="email">Email</Label>
+            <Input 
+              id="email" 
+              name="email"
+              type="email" 
+              placeholder="m@example.com" 
+              required 
+            />
+          </div>
+          
+          {state?.error && (
+            <div className="text-destructive text-sm text-center">{state.error}</div>
+          )}
+          
+          <Button type="submit" className="w-full" disabled={pending}>
             {pending ? (
               <>
                 <Loader2 className="animate-spin mr-2 h-4 w-4" />
@@ -72,14 +70,15 @@ const ForgotPasswordPage = () => {
               verifyText
             )}
           </Button>
-          {state?.success ? (
-            <p className="text-sm text-gray-500">{alreadyVerified}</p>
-          ) : (
-            <p className="text-sm text-red-500">{state.error}</p>
-          )}
-        </form>
-      </div>
-    </LoginWrapper>
+        </div>
+        <div className="text-center text-sm">
+          {alreadyVerified}{" "}
+          <Link href="/sign-in" className="underline underline-offset-4">
+            {signInLinkText}
+          </Link>
+        </div>
+      </form>
+    </AuthWrapperLayout>
   );
 };
 

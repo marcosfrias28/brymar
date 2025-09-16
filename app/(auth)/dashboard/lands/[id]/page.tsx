@@ -32,6 +32,11 @@ export default function LandDetailPage() {
   const params = useParams()
   const router = useRouter()
 
+  // Verificar que params y params.id existan
+  if (!params || !params.id) {
+    return <div>Error: ID de terreno no encontrado</div>
+  }
+
   const { land, isLoading, error, updateLand, deleteLand } = useLand(Number(params.id))
   
   const [isEditing, setIsEditing] = useState(false)

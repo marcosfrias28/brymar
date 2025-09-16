@@ -19,6 +19,10 @@ export default function BlogDetailPage() {
   const params = useParams()
   const router = useRouter()
 
+  // Verificar que params y params.id existan
+  if (!params || !params.id) {
+    return <div>Error: ID de blog no encontrado</div>
+  }
 
   const { blogPost, loading, error, updateBlogPost, deleteBlogPost, updateState, isUpdating } = useBlogPost(params.id as string)
 
