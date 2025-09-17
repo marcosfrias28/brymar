@@ -100,18 +100,9 @@ export function Navbar({ className, user }: NavbarProps) {
   const { permissions, userRole, canAccessDashboard } = usePermissions();
 
   useEffect(() => {
-    const handleScroll = () => {
-      const prev = scrollY.getPrevious();
-      const curr = scrollY.get();
-      if (prev! > curr) setActive(true);
-      else {
-        if (active) setActive(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [active, scrollY]);
+    // Navbar sempre visibile - rimuovo il comportamento di nascondere durante lo scroll
+    setActive(true);
+  }, []);
 
   if (shouldAvoid) return null;
 

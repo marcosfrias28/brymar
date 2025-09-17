@@ -12,17 +12,25 @@ const createOrganizationSchema = z.object({
   slug: z.string().min(3).max(50).describe("Organization slug must be between 3-50 characters"),
 })
 
+// Mapeo de roles personalizados a roles de better-auth
+const roleMapping = {
+  user: "member",
+  agent: "admin", 
+  admin: "owner"
+} as const
+
 // Schema para invitar miembro
 const inviteMemberSchema = z.object({
   email: z.string().email().describe("Valid email required"),
-  role: z.enum(["admin", "agent", "viewer"]).describe("Valid role required"),
+  role: z.enum(["user", "agent", "admin"]).describe("Valid role required"),
   organizationId: z.string().describe("Organization ID required"),
 })
 
 // Schema para actualizar rol de miembro
 const updateMemberRoleSchema = z.object({
   memberId: z.string().describe("Member ID required"),
-  role: z.enum(["admin", "agent", "viewer"]).describe("Valid role required"),
+  role: z.enum(["user", "agent", "admin"]).describe("Valid role required"),
+  organizationId: z.string().describe("Organization ID required"),
 })
 
 /**
@@ -65,22 +73,16 @@ export const createOrganization = validatedAction(
  */
 export const inviteMember = validatedAction(
   inviteMemberSchema,
-  async (_, formData: FormData) => {
-    const email = formData.get("email") as string
-    const role = formData.get("role") as string
-    const organizationId = formData.get("organizationId") as string
-
-    if (!email || !role || !organizationId) {
-      return { error: "All fields are required" }
-    }
+  async (data, formData: FormData) => {
+    const { email, role, organizationId } = data
+    const mappedRole = roleMapping[role as keyof typeof roleMapping]
 
     try {
-      const result = await auth.api.inviteUser({
-        method: "POST",
+      const result = await auth.api.createInvitation({
         headers: await headers(),
         body: {
           email,
-          role,
+          role: mappedRole,
           organizationId,
         },
       })
@@ -102,7 +104,7 @@ export const inviteMember = validatedAction(
  */
 export const getUserOrganizations = async () => {
   try {
-    const result = await auth.api.listUserOrganizations({
+    const result = await auth.api.listOrganizations({
       headers: await headers(),
     })
 
@@ -118,7 +120,7 @@ export const getUserOrganizations = async () => {
  */
 export const getOrganizationMembers = async (organizationId: string) => {
   try {
-    const result = await auth.api.listOrganizationMembers({
+    const result = await auth.api.getFullOrganization({
       headers: await headers(),
       query: {
         organizationId,
@@ -137,21 +139,17 @@ export const getOrganizationMembers = async (organizationId: string) => {
  */
 export const updateMemberRole = validatedAction(
   updateMemberRoleSchema,
-  async (_, formData: FormData) => {
-    const memberId = formData.get("memberId") as string
-    const role = formData.get("role") as string
-
-    if (!memberId || !role) {
-      return { error: "Member ID and role are required" }
-    }
+  async (data, formData: FormData) => {
+    const { memberId, role, organizationId } = data
+    const mappedRole = roleMapping[role as keyof typeof roleMapping]
 
     try {
       const result = await auth.api.updateMemberRole({
-        method: "PATCH",
         headers: await headers(),
         body: {
           memberId,
-          role,
+          role: mappedRole,
+          organizationId,
         },
       })
 
@@ -173,10 +171,9 @@ export const updateMemberRole = validatedAction(
 export const removeMember = async (memberId: string) => {
   try {
     const result = await auth.api.removeMember({
-      method: "DELETE",
       headers: await headers(),
       body: {
-        memberId,
+        memberIdOrEmail: memberId,
       },
     })
 

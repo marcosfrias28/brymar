@@ -52,7 +52,20 @@ export const PROTECTED_ROUTES = {
   "/dashboard/lands": "canManageLands",
   "/dashboard/blog": "canManageBlog",
   "/dashboard/settings": "canViewSettings",
+  "/dashboard/users": "canManageUsers",
+  "/dashboard/analytics": "canAccessDashboard",
+  "/dashboard/admin": "canManageUsers",
 } as const;
+
+// Rutas específicas para usuarios (requieren autenticación pero no permisos especiales)
+export const USER_ROUTES = [
+  "/profile",
+  "/profile/settings",
+  "/profile/favorites",
+  "/profile/activity",
+  "/profile/notifications",
+  "/profile/messages",
+];
 
 // Route pubbliche che non richiedono autenticazione
 export const PUBLIC_ROUTES = [
@@ -69,6 +82,8 @@ export const PUBLIC_ROUTES = [
   "/contact",
   "/search",
   "/robots.txt",
+  "/guides",
+  "/help",
 ];
 
 /**
@@ -102,19 +117,30 @@ export function getRolePermissions(role: string): RolePermissions {
  * @returns true se l'utente ha il permesso, false altrimenti
  */
 export function hasPermissionForRoute(pathname: string, userRole: string): boolean {
-  // Trova la route protetta più specifica che corrisponde al pathname
+  // Verifica se è una rotta per utenti (solo autenticazione richiesta)
+  const isUserRoute = USER_ROUTES.some(route => pathname.startsWith(route));
+  if (isUserRoute) {
+    // Gli utenti possono accedere alle loro rotte, admin/agent no (devono usare dashboard)
+    return userRole === 'user';
+  }
+
+  // Verifica se è una rotta protetta per admin/agent
   const matchingRoute = Object.keys(PROTECTED_ROUTES)
     .sort((a, b) => b.length - a.length) // Ordina per lunghezza decrescente per match più specifici
     .find(route => pathname.startsWith(route));
 
-  if (!matchingRoute) {
-    return true; // Se non è una route protetta, permetti l'accesso
+  if (matchingRoute) {
+    // Solo admin/agent possono accedere alle rotte del dashboard
+    if (userRole === 'user') {
+      return false;
+    }
+    
+    const requiredPermission = PROTECTED_ROUTES[matchingRoute as keyof typeof PROTECTED_ROUTES];
+    const permissions = getRolePermissions(userRole);
+    return permissions[requiredPermission as keyof RolePermissions];
   }
 
-  const requiredPermission = PROTECTED_ROUTES[matchingRoute as keyof typeof PROTECTED_ROUTES];
-  const permissions = getRolePermissions(userRole);
-  
-  return permissions[requiredPermission as keyof RolePermissions];
+  return true; // Se non è una route protetta, permetti l'accesso
 }
 
 /**

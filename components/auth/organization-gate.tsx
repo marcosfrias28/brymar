@@ -160,7 +160,7 @@ export const organizationUtils = {
    * Obtiene todos los permisos de un rol
    */
   getRolePermissions: (role: string): string[] => {
-    return ORGANIZATION_ROLE_PERMISSIONS[role as keyof typeof ORGANIZATION_ROLE_PERMISSIONS] || [];
+    return [...(ORGANIZATION_ROLE_PERMISSIONS[role as keyof typeof ORGANIZATION_ROLE_PERMISSIONS] || [])];
   },
 
   /**

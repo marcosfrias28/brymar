@@ -85,6 +85,21 @@ export const services = pgTable("services", {
   price: numeric("price", { precision: 10, scale: 2 }).notNull(),
 });
 
+// Categories Table
+export const categories = pgTable("categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  image: text("image").notNull(),
+  href: text("href").notNull(),
+  status: text("status").notNull().default("active"),
+  order: integer("order").default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Reviews Table
 export const reviews = pgTable("reviews", {
   id: serial("id").primaryKey(),
@@ -212,6 +227,9 @@ export type NewLand = typeof lands.$inferInsert;
 
 export type BlogPost = typeof blogPosts.$inferSelect;
 export type NewBlogPost = typeof blogPosts.$inferInsert;
+
+export type Category = typeof categories.$inferSelect;
+export type NewCategory = typeof categories.$inferInsert;
 
 // Organization Types
 export type Organization = typeof organization.$inferSelect;

@@ -12,12 +12,12 @@ import { NextResponse, NextRequest } from "next/server";
  */
 function createUnauthorizedResponse(reason: string): NextResponse {
   const response = NextResponse.redirect(new URL("/sign-in", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"));
-  
+
   // Aggiungi header per debugging (solo in development)
   if (process.env.NODE_ENV === "development") {
     response.headers.set("X-Middleware-Reason", reason);
   }
-  
+
   return response;
 }
 
@@ -26,7 +26,7 @@ function createUnauthorizedResponse(reason: string): NextResponse {
  */
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
+
   // Permetti l'accesso alle route pubbliche
   if (isPublicRoute(pathname)) {
     return NextResponse.next();
@@ -46,7 +46,9 @@ export async function middleware(request: NextRequest) {
     const { user } = session;
 
     if (user.id && (pathname.includes('sign') || pathname.includes('password'))) {
-      return NextResponse.redirect(new URL("/dashboard", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"));
+      // Redirigir según el rol del usuario
+      const redirectUrl = user.role === "user" ? "/profile" : "/dashboard";
+      return NextResponse.redirect(new URL(redirectUrl, process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"));
     }
 
     // Verifica che l'utente abbia un ruolo valido
@@ -63,7 +65,7 @@ export async function middleware(request: NextRequest) {
     const response = NextResponse.next();
     response.headers.set("X-User-ID", user.id);
     response.headers.set("X-User-Role", user.role);
-    
+
     return response;
 
   } catch (error) {

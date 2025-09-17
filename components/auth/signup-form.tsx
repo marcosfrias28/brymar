@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useActionState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Link2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { signUp } from "@/lib/actions/auth-actions";
@@ -48,43 +50,6 @@ export function SignUpForm() {
         {subtitle}
       </p>
 
-      {fields.map((field) => (
-        <CustomInput key={field.id} {...field} />
-      ))}
-
-      {state?.error && (
-        <div className="text-red-500 text-sm">{state.error}</div>
-      )}
-
-      <Button
-        type="submit"
-        variant="outline"
-        className={cn(
-          "w-full py-2 px-4 rounded-lg text-sm font-medium",
-          "bg-green-600/50 hover:bg-green-600/70",
-          "dark:bg-green-950/50 dark:hover:bg-green-950"
-        )}
-        disabled={pending}
-      >
-        {pending ? (
-          <>
-            <Loader2 className="animate-spin mr-2 h-4 w-4" />
-            {loading}
-          </>
-        ) : (
-          signUpText
-        )}
-      </Button>
-
-      <div className="text-center mt-6">
-        <p className="text-sm">
-          <span className="pointer-events-none">{`${alreadyHaveAccount} `}</span>
-          <Link href="/sign-in" className="text-blue-500 group hover:underline">
-            {signInLinkText}
-            <Link2 className="inline-block h-4 w-4 ml-1 group-hover:-rotate-45 transition-all duration-500" />
-          </Link>
-        </p>
-      </div>
       <div className="grid gap-6">
         <div className="grid gap-2">
           <Label htmlFor="name">Nombre completo</Label>
@@ -116,18 +81,28 @@ export function SignUpForm() {
             {state.error}
           </div>
         )}
-
-        <Button type="submit" className="w-full" disabled={pending}>
-          {pending ? (
-            <>
-              <Loader2 className="animate-spin mr-2 h-4 w-4" />
-              {loading}
-            </>
-          ) : (
-            signUpText
-          )}
-        </Button>
       </div>
+
+      <Button
+        type="submit"
+        variant="outline"
+        className={cn(
+          "w-full py-2 px-4 rounded-lg text-sm font-medium",
+          "bg-green-600/50 hover:bg-green-600/70",
+          "dark:bg-green-950/50 dark:hover:bg-green-950"
+        )}
+        disabled={pending}
+      >
+        {pending ? (
+          <>
+            <Loader2 className="animate-spin mr-2 h-4 w-4" />
+            {loading}
+          </>
+        ) : (
+          signUpText
+        )}
+      </Button>
+
       <div className="text-center text-sm">
         {alreadyHaveAccount}{" "}
         <Link href="/sign-in" className="underline underline-offset-4">

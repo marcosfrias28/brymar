@@ -4,7 +4,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import db from "../db/drizzle";
 import { accounts, session, users, verification, organization, member, invitation } from "../db/schema";
 import { nextCookies } from "better-auth/next-js";
-import { emailOTP } from "better-auth/plugins";
+import { emailOTP, organization as organizationPlugin } from "better-auth/plugins";
 import { error as logError, getSafeUserMessage } from "../logger";
 
 export const auth = betterAuth({
@@ -32,6 +32,7 @@ export const auth = betterAuth({
   },
   plugins: [
     nextCookies(),
+    organizationPlugin(),
     emailOTP({
       async sendVerificationOTP({ email, otp, type }) {
         if (type === "email-verification") {
@@ -43,7 +44,7 @@ export const auth = betterAuth({
           if (!result.success) {
             // Log seguro para el servidor (sin exponer detalles técnicos)
             await logError('Failed to send email OTP', result.error, { email, type });
-            
+
             // Mensaje genérico y seguro para el usuario
             throw new Error(await getSafeUserMessage('EMAIL_SEND_ERROR'));
           }

@@ -1,11 +1,6 @@
 "use client"
 
-import { Bed, Bath, Square, MapPin, Eye, Edit, Trash2 } from "lucide-react"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreVertical } from "lucide-react"
+import { Bed, Bath, Square, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { Property } from "@/utils/types/types"
@@ -18,99 +13,71 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property }: PropertyCardProps) {
-
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("es-DO", {
+    return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
     }).format(price)
   }
 
   return (
-    <Card className="border-blackCoral shadow-lg hover:shadow-xl transition-all duration-300 group">
-      {/* Image */}
-      <div className="relative h-48 overflow-hidden rounded-t-lg">
-        <Image
-          src={property.imageUrl || "/placeholder.jpg"}
-          alt={property.title}
-          width={400}
-          height={200}
-          className="w-full h-48 object-cover"
-        />
-        <div className="absolute top-3 left-3">
-          <Badge variant="secondary" className="mb-2">
-            {property.type === "residential" ? "Residencial" : property.type === "commercial" ? "Comercial" : "Terreno"}
-          </Badge>
-        </div>
-        <div className="absolute top-3 right-3">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="bg-white/80 hover:bg-white text-arsenic">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white border-blackCoral">
-              <DropdownMenuItem asChild>
-                <Link href={`/dashboard/properties/${property.id}`}>
-                  <Eye className="h-4 w-4 mr-2" />
-                  Ver
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href={`/dashboard/properties/${property.id}/edit`}>
-                  <Edit className="h-4 w-4 mr-2" />
-                  Editar
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive">
-                <Trash2 className="h-4 w-4 mr-2" />
-                Eliminar
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+    <div className="relative rounded-2xl border border-dark/10 dark:border-white/10 group hover:shadow-3xl duration-300 dark:hover:shadow-white/20">
+      <div className="overflow-hidden rounded-t-2xl">
+        <Link href={`/properties/${property.id}`}>
+          <div className="w-full h-[300px]">
+            <Image
+              alt={property.title}
+              loading="lazy"
+              width={440}
+              height={300}
+              className="w-full h-full object-cover rounded-t-2xl group-hover:brightness-50 group-hover:scale-125 transition duration-300 delay-75"
+              src={property.imageUrl || "/placeholder.jpg"}
+            />
+          </div>
+        </Link>
+        <div className="absolute top-6 right-6 p-4 bg-secondary/90 backdrop-blur-sm rounded-full hidden group-hover:block border border-secondary">
+          <ArrowRight className="w-6 h-6 text-secondary-foreground" />
         </div>
       </div>
-
-      <CardContent className="p-4">
-        {/* Title and Price */}
-        <div className="mb-3">
-          <h3 className="font-semibold text-foreground text-lg mb-1 line-clamp-1">{property.title}</h3>
-          <p className="text-lg font-semibold text-primary mb-2">
-            {formatPrice(property.price)}
-          </p>
-        </div>
-
-        {/* Location */}
-        <div className="flex items-center text-muted-foreground mb-3">
-          <MapPin className="h-4 w-4 mr-1" />
-          <span className="text-sm line-clamp-1">{property.location}</span>
-        </div>
-
-        {/* Features */}
-        <div className="flex items-center gap-4 text-muted-foreground text-sm">
-          <div className="flex items-center gap-1">
-            <Bed className="h-4 w-4" />
-            <span>{property.bedrooms}</span>
+      <div className="p-6">
+        <div className="flex flex-col mobile:flex-row gap-5 mobile:gap-0 justify-between mb-6">
+          <div>
+            <Link href={`/properties/${property.id}`}>
+              <h3 className="text-xl font-medium text-black dark:text-white duration-300 group-hover:text-primary">
+                {property.title}
+              </h3>
+            </Link>
+            <p className="text-base font-normal text-black/50 dark:text-white/50">
+              {property.location}
+            </p>
           </div>
-          <div className="flex items-center gap-1">
-            <Bath className="h-4 w-4" />
-            <span>{property.bathrooms}</span>
-          </div>
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Square className="h-4 w-4 mr-1" />
-            {property.sqm} m²
+          <div>
+            <button className="text-base font-normal text-primary px-5 py-2 rounded-full bg-secondary/20 border border-secondary/30">
+              {formatPrice(property.price)}
+            </button>
           </div>
         </div>
-
-        {/* Description */}
-        <p className="text-muted-foreground/70 text-sm mt-3 line-clamp-2">{property.description}</p>
-      </CardContent>
-
-      <CardFooter className="p-4 pt-0">
-        <Button asChild className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-          <Link href={`/dashboard/properties/${property.id}`}>Ver Detalles</Link>
-        </Button>
-      </CardFooter>
-    </Card>
+        <div className="flex">
+          <div className="flex flex-col gap-2 border-e border-black/10 dark:border-white/20 pr-2 xs:pr-4 mobile:pr-8">
+            <Bed className="w-5 h-5 text-secondary" />
+            <p className="text-sm mobile:text-base font-normal text-black dark:text-white">
+              {property.bedrooms} Bedrooms
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 border-e border-black/10 dark:border-white/20 px-2 xs:px-4 mobile:px-8">
+            <Bath className="w-5 h-5 text-secondary" />
+            <p className="text-sm mobile:text-base font-normal text-black dark:text-white">
+              {property.bathrooms} Bathrooms
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 pl-2 xs:pl-4 mobile:pl-8">
+            <Square className="w-5 h-5 text-secondary" />
+            <p className="text-sm mobile:text-base font-normal text-black dark:text-white">
+              {property.sqm}m<sup>2</sup>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

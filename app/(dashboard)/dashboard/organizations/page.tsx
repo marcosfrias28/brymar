@@ -38,9 +38,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   createOrganization,
-  inviteToOrganization,
+  inviteMember,
   updateMemberRole,
-  removeFromOrganization,
+  removeMember,
 } from "@/lib/actions/organization-actions";
 
 const roleIcons = {
@@ -79,11 +79,11 @@ export default function OrganizationsPage() {
 
     setLoading(true);
     try {
-      const result = await createOrganization({
-        name: createForm.name,
-        slug: createForm.name.toLowerCase().replace(/\s+/g, "-"),
-        description: createForm.description,
-      });
+      const formData = new FormData();
+      formData.append("name", createForm.name);
+      formData.append("slug", createForm.name.toLowerCase().replace(/\s+/g, "-"));
+      
+      const result = await createOrganization({}, formData);
 
       if (result) {
         toast.success("Organización creada exitosamente");
@@ -109,11 +109,12 @@ export default function OrganizationsPage() {
 
     setLoading(true);
     try {
-      const result = await inviteToOrganization({
-        organizationId: selectedOrg,
-        email: inviteForm.email,
-        role: inviteForm.role,
-      });
+      const formData = new FormData();
+      formData.append("organizationId", selectedOrg);
+      formData.append("email", inviteForm.email);
+      formData.append("role", inviteForm.role);
+      
+      const result = await inviteMember({}, formData);
 
       if (result) {
         toast.success("Invitación enviada exitosamente");

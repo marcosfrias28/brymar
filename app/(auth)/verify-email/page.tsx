@@ -1,8 +1,8 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,6 +23,7 @@ import {
   sendVerificationOTP,
   verifyEmailOTP,
 } from "@/lib/actions/auth-actions";
+import { authClient } from "@/lib/auth/auth-client";
 
 const VerifyEmailPage = () => {
   const router = useRouter();
@@ -256,7 +257,7 @@ const VerifyEmailPage = () => {
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <div className="w-full max-w-md space-y-6">{renderContent()}</div>
       </div>
-    </AuthWrapperLayout>
+    </LoginWrapper>
   );
 };
 

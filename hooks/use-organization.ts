@@ -96,8 +96,8 @@ export function useOrganizationMembers(organizationId: string) {
       setLoading(true)
       setError(null)
       const result = await getOrganizationMembers(organizationId)
-      if (result) {
-        setMembers(result as Member[])
+      if (result && result.members) {
+        setMembers(result.members as Member[])
       }
     } catch (err) {
       setError("Error fetching members")

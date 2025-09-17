@@ -34,16 +34,24 @@ export const signIn = validatedAction(signInSchema, async (_: any, formData: For
     const session = await auth.api.getSession({
       headers: await headers(),
     })
-    if (!data?.user) {
+    if (!session?.user) {
       await warning('Authentication failed - no user data returned', { email });
       return { error: await getSafeUserMessage('AUTH_ERROR') }
     }
 
-    await info('User signed in successfully', { email });
+    // Determinar URL de redirección basada en el rol del usuario
+    const userRole = session.user.role;
+    let redirectUrl = "/dashboard/properties"; // Default para admin y agent
+    
+    if (userRole === "user") {
+      redirectUrl = "/profile";
+    }
+
+    await info('User signed in successfully', { email, role: userRole });
     return {
       success: true,
       redirect: true,
-      url: "/dashboard/properties",
+      url: redirectUrl,
       message: "Has iniciado sesión exitosamente",
     }
   } catch (error) {
@@ -135,7 +143,7 @@ export const getUserWithOrganizations = async () => {
     if (!session?.user) return null
 
     // Obtener organizaciones del usuario
-    const organizations = await auth.api.listUserOrganizations({
+    const organizations = await auth.api.listOrganizations({
       headers: await headers(),
     })
 

@@ -1,22 +1,22 @@
 "use client"
 
 import * as React from "react"
+import { usePathname } from "next/navigation"
 import {
-  ArrowUpCircleIcon,
   BarChartIcon,
-  CameraIcon,
-  ClipboardListIcon,
-  DatabaseIcon,
-  FileCodeIcon,
-  FileIcon,
+  BuildingIcon,
   FileTextIcon,
-  FolderIcon,
   HelpCircleIcon,
+  HomeIcon,
   LayoutDashboardIcon,
-  ListIcon,
+  MapPinIcon,
   SearchIcon,
   SettingsIcon,
   UsersIcon,
+  HeartIcon,
+  UserIcon,
+  BookOpenIcon,
+  TrendingUpIcon,
 } from "lucide-react"
 
 import { NavDocuments } from "@/components/nav-documents"
@@ -33,147 +33,125 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import Logo from "./ui/logo"
+import { usePermissions } from "@/hooks/use-permissions"
+import { useUser } from "@/hooks/use-user"
+import { AdminSidebar } from "@/components/admin-sidebar"
+import { UserSidebar } from "@/components/user-sidebar"
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
+// Configuración base del menú para todos los usuarios
+const getNavigationData = (userRole: string | null, permissions: any) => {
+  // Menú principal - mismo para todos los usuarios
+  const navMain = [
     {
-      title: "Dashboard",
-      url: "#",
-      icon: LayoutDashboardIcon,
+      title: userRole === "user" ? "Mi Perfil" : "Dashboard",
+      url: userRole === "user" ? "/profile" : "/dashboard",
+      icon: userRole === "user" ? UserIcon : LayoutDashboardIcon,
     },
     {
-      title: "Lifecycle",
-      url: "#",
-      icon: ListIcon,
+      title: "Propiedades",
+      url: userRole === "user" ? "/search?type=properties" : "/dashboard/properties",
+      icon: BuildingIcon,
     },
     {
-      title: "Analytics",
-      url: "#",
-      icon: BarChartIcon,
+      title: "Terrenos",
+      url: userRole === "user" ? "/search?type=lands" : "/dashboard/lands",
+      icon: MapPinIcon,
     },
     {
-      title: "Projects",
-      url: "#",
-      icon: FolderIcon,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: UsersIcon,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: CameraIcon,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
+      title: "Blog",
+      url: userRole === "user" ? "/blog" : "/dashboard/blog",
       icon: FileTextIcon,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+    },
+  ];
+
+  // Sección de gestión - solo para admin/agent
+  const managementItems = [];
+  if (permissions?.canManageUsers) {
+    managementItems.push({
+      name: "Gestión de Usuarios",
+      url: "/dashboard/users",
+      icon: UsersIcon,
+    });
+  }
+  if (permissions?.canAccessDashboard) {
+    managementItems.push({
+      name: "Análisis",
+      url: "/dashboard/analytics",
+      icon: TrendingUpIcon,
+    });
+  }
+
+  // Sección de usuario - solo para users
+  const userItems = [];
+  if (userRole === "user") {
+    userItems.push(
+      {
+        name: "Mis Favoritos",
+        url: "/profile/favorites",
+        icon: HeartIcon,
+      },
+      {
+        name: "Mi Actividad",
+        url: "/profile/activity",
+        icon: BarChartIcon,
+      },
+      {
+        name: "Guías",
+        url: "/guides",
+        icon: BookOpenIcon,
+      }
+    );
+  }
+
+  // Menú secundario - mismo para todos
+  const navSecondary = [
+    {
+      title: "Buscar",
+      url: "/search",
+      icon: SearchIcon,
     },
     {
-      title: "Prompts",
-      icon: FileCodeIcon,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
+      title: "Configuración",
+      url: userRole === "user" ? "/profile/settings" : "/dashboard/settings",
       icon: SettingsIcon,
     },
     {
-      title: "Get Help",
-      url: "#",
+      title: "Ayuda",
+      url: "/help",
       icon: HelpCircleIcon,
     },
-    {
-      title: "Search",
-      url: "#",
-      icon: SearchIcon,
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: DatabaseIcon,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: ClipboardListIcon,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: FileIcon,
-    },
-  ],
-}
+  ];
+
+  return {
+    navMain,
+    documents: [...managementItems, ...userItems],
+    navSecondary,
+  };
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  return (
-    <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
-            >
-              <Logo />
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
-      </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
-    </Sidebar>
-  )
+  const pathname = usePathname()
+  const { user } = useUser()
+  
+  // Determinar qué sidebar mostrar basado en la ruta actual
+  const isAdminRoute = pathname.startsWith('/dashboard')
+  const isUserRoute = pathname.startsWith('/profile')
+  
+  // Si es una ruta de admin/agent, usar AdminSidebar
+  if (isAdminRoute) {
+    return <AdminSidebar {...props} />
+  }
+  
+  // Si es una ruta de usuario, usar UserSidebar
+  if (isUserRoute) {
+    return <UserSidebar {...props} />
+  }
+  
+  // Fallback: determinar por rol del usuario
+  if (user?.role === 'admin' || user?.role === 'agent') {
+    return <AdminSidebar {...props} />
+  }
+  
+  // Por defecto, usar UserSidebar
+  return <UserSidebar {...props} />
 }
