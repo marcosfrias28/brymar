@@ -33,7 +33,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useProfileFavorites } from "@/hooks/use-profile";
-import { removeFavoriteAction } from "@/lib/actions/profile-actions";
+import { removeFavoriteAction } from "@/app/actions/profile-actions";
 import { useUser } from "@/hooks/use-user";
 
 type FilterType = "all" | "property" | "search";

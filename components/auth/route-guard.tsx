@@ -118,32 +118,20 @@ export function PermissionGate({ children, permission, fallback }: PermissionGat
 
 /**
  * Componente per mostrare contenuto solo per ruoli specifici
- * Supporta sia ruoli globali che ruoli specifici di organizzazione
  */
 interface RoleGateProps {
   children: React.ReactNode;
   allowedRoles: string[];
-  organizationId?: string; // Per verificare ruoli specifici di organizzazione
   fallback?: React.ReactNode;
 }
 
-export function RoleGate({ children, allowedRoles, organizationId, fallback }: RoleGateProps) {
+export function RoleGate({ children, allowedRoles, fallback }: RoleGateProps) {
   const { userRole, isLoading } = usePermissions();
 
   if (isLoading) {
     return null;
   }
 
-  // Verifica ruolo globale se non è specificata un'organizzazione
-  if (!organizationId) {
-    if (!userRole || !allowedRoles.includes(userRole)) {
-      return fallback || null;
-    }
-    return <>{children}</>;
-  }
-
-  // TODO: Implementare verifica ruolo specifico di organizzazione
-  // Per ora, usa il ruolo globale come fallback
   if (!userRole || !allowedRoles.includes(userRole)) {
     return fallback || null;
   }

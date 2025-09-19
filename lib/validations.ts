@@ -1,43 +1,74 @@
 import { z } from 'zod';
 import { User } from './db/schema';
-import { getUser } from './actions/auth-actions';
+import { getUser } from '../app/actions/auth-actions';
 
-export type ActionState = {
+// Base ActionState
+export type BaseActionState = {
     error?: string;
     success?: boolean;
-    [key: string]: any; // This allows for additional properties
+    message?: string;
 };
 
-type ValidatedActionFunction<S extends z.ZodType<any, any>, T> = (
-    data: z.infer<S>,
+// Specific action states
+export type SignInActionState = BaseActionState & {
+    user?: User;
+    redirect?: boolean;
+    url?: string;
+};
+
+export type SignUpActionState = BaseActionState & {
+    user?: User;
+    redirect?: boolean;
+    url?: string;
+};
+
+export type ForgotPasswordActionState = BaseActionState;
+
+export type ResetPasswordActionState = BaseActionState & {
+    redirect?: boolean;
+    url?: string;
+};
+
+export type VerifyEmailActionState = BaseActionState & {
+    redirect?: boolean;
+    url?: string;
+};
+
+export type SendVerificationActionState = BaseActionState;
+
+// Legacy type for backward compatibility
+export type ActionState = BaseActionState & {
+    [key: string]: any;
+};
+
+type ValidatedActionFunction<T> = (
     formData: FormData
 ) => Promise<T>;
 
-export function validatedAction<S extends z.ZodType<any, any>, T>(
-    schema: S,
-    action: ValidatedActionFunction<S, T>
+export function validatedAction<T>(
+    schema: z.ZodType<any, any>,
+    action: ValidatedActionFunction<T>
 ) {
-    return async (prevState: ActionState, formData: FormData): Promise<T> => {
+    return async (formData: FormData): Promise<T> => {
         const result = schema.safeParse(Object.fromEntries(formData));
         if (!result.success) {
             return { error: result.error.errors[0].message } as T;
         }
 
-        return action(result.data, formData);
+        return action(formData);
     };
 }
 
-type ValidatedActionWithUserFunction<S extends z.ZodType<any, any>, T> = (
-    data: z.infer<S>,
+type ValidatedActionWithUserFunction<T> = (
     formData: FormData,
     user: User
 ) => Promise<T>;
 
-export function validatedActionWithUser<S extends z.ZodType<any, any>, T>(
-    schema: S,
-    action: ValidatedActionWithUserFunction<S, T>
+export function validatedActionWithUser<T>(
+    schema: z.ZodType<any, any>,
+    action: ValidatedActionWithUserFunction<T>
 ) {
-    return async (prevState: ActionState, formData: FormData): Promise<T> => {
+    return async (formData: FormData): Promise<T> => {
         const user = await getUser();
         if (!user) {
             throw new Error('User is not authenticated');
@@ -48,6 +79,6 @@ export function validatedActionWithUser<S extends z.ZodType<any, any>, T>(
             return { error: result.error.errors[0].message } as T;
         }
 
-        return action(result.data, formData, user);
+        return action(formData, user);
     };
 }

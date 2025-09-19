@@ -5,6 +5,7 @@ import { Home, DollarSign, Key, TrendingUp } from "lucide-react";
 import { UnifiedPageLayout } from "@/components/shared/unified-page-layout";
 import { useProperties } from "@/hooks/use-properties";
 import { Button } from "@/components/ui/button";
+import { RouteGuard } from "@/components/auth/route-guard";
 
 export default function PropertiesPage() {
 
@@ -123,16 +124,18 @@ export default function PropertiesPage() {
   ];
 
   return (
-    <UnifiedPageLayout
-      title="Gestión de Propiedades"
-      stats={stats}
-      items={filteredByStatus}
-      itemType="property"
-      searchPlaceholder="Buscar propiedades..."
-      addNewHref="/dashboard/properties/new"
-      addNewLabel="Agregar Propiedad"
-      quickFilters={quickFilters}
-      statusFilters={statusFilters}
-    />
+    <RouteGuard requiredPermission="canManageProperties">
+      <UnifiedPageLayout
+        title="Gestión de Propiedades"
+        stats={stats}
+        items={filteredByStatus}
+        itemType="property"
+        searchPlaceholder="Buscar propiedades..."
+        addNewHref="/dashboard/properties/new"
+        addNewLabel="Agregar Propiedad"
+        quickFilters={quickFilters}
+        statusFilters={statusFilters}
+      />
+    </RouteGuard>
   );
 }

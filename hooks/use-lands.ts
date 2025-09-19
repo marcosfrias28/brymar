@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useActionState } from 'react'
-import { getLands, getLandById, addLand, updateLand, deleteLand } from '@/lib/actions/land-actions'
+import { getLands, getLandById, addLand, updateLand, deleteLand } from '@/app/actions/land-actions'
 import { toast } from 'sonner'
 import { ActionState } from '@/lib/validations'
 

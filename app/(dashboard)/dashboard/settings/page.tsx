@@ -1,7 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useActionState } from "react"
 import { useUser } from "@/hooks/use-user"
+import { updateUserAction } from "@/app/actions/auth-actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -12,9 +14,10 @@ import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { User, Shield, Bell, Globe, Palette, Database, Key } from "lucide-react"
-
-
+import { User as UserIcon, Shield, Bell, Globe, Palette, Database, Key } from "lucide-react"
+import { RouteGuard } from "@/components/auth/route-guard"
+import { User } from "@/lib/db/schema"
+import { toast } from "sonner"
 
 const rolePermissions = {
   admin: {
@@ -40,8 +43,17 @@ const rolePermissions = {
 export default function SettingsPage() {
   const [language, setLanguage] = useState("es")
 
-  const { user, loading: userLoading, error: userError, updateUser } = useUser()
-  const [formData, setFormData] = useState({ name: "", email: "" })
+  const { user, loading: userLoading, error: userError } = useUser()
+  const [updateState, updateUserFormAction] = useActionState(updateUserAction, {
+    success: false,
+    error: undefined,
+    message: undefined,
+  })
+  const [formData, setFormData] = useState<Partial<User>>({
+    name: user?.name || "",
+    email: user?.email || "",
+    role: user?.role || "user",
+  })
   const [notifications, setNotifications] = useState({
     email: true,
     push: false,
@@ -49,14 +61,22 @@ export default function SettingsPage() {
     security: true,
   })
   const [theme, setTheme] = useState("light")
-  const [saving, setSaving] = useState(false)
 
   // Update form data when user loads
   useEffect(() => {
     if (user) {
-      setFormData({ name: user.name || "", email: user.email })
+      setFormData({ ...user })
     }
   }, [user])
+
+  // Handle update action state
+  useEffect(() => {
+    if (updateState.success) {
+      toast.success(updateState.message || "Usuario actualizado")
+    } else if (updateState.error) {
+      toast.error(updateState.error)
+    }
+  }, [updateState])
 
   if (userLoading) {
     return (
@@ -82,6 +102,7 @@ export default function SettingsPage() {
   const currentRole = rolePermissions[user.role as keyof typeof rolePermissions]
 
   return (
+  <RouteGuard requiredPermission="canViewSettings">
     <div className="space-y-6">
       {/* Header */}
       <div>
@@ -92,7 +113,7 @@ export default function SettingsPage() {
       <Tabs defaultValue="profile" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2 tablet:grid-cols-4">
           <TabsTrigger value="profile" className="flex items-center gap-2">
-            <User className="h-4 w-4" />
+            <UserIcon className="h-4 w-4" />
             Perfil
           </TabsTrigger>
           <TabsTrigger value="permissions" className="flex items-center gap-2">
@@ -114,7 +135,7 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
+                <UserIcon className="h-5 w-5" />
                 Información Personal
               </CardTitle>
               <CardDescription>Actualiza tu información de perfil y datos de contacto</CardDescription>
@@ -142,38 +163,38 @@ export default function SettingsPage() {
               <Separator />
 
               {/* Form Fields */}
-              <div className="grid grid-cols-1 tablet:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Nombre Completo</Label>
-                  <Input id="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+              <form id="profile-form" action={updateUserFormAction}>
+                <div className="grid grid-cols-1 tablet:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Nombre Completo</Label>
+                    <Input 
+                      id="name" 
+                      name="name"
+                      value={formData.name || ""} 
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Correo Electrónico</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Correo Electrónico</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
-                </div>
-              </div>
+              </form>
 
               <div className="flex justify-end">
                 <Button 
+                  type="submit"
+                  form="profile-form"
                   className="bg-arsenic hover:bg-blackCoral" 
-                  onClick={async () => {
-                    try {
-                      setSaving(true)
-                      await updateUser(formData)
-                    } catch (error) {
-                      console.error('Error updating user:', error)
-                    } finally {
-                      setSaving(false)
-                    }
-                  }}
-                  disabled={saving}
+                  disabled={updateState.success === undefined ? false : !updateState.success && !updateState.error}
                 >
-                  {saving ? "Guardando..." : "Guardar Cambios"}
+                  Guardar Cambios
                 </Button>
               </div>
             </CardContent>
@@ -378,5 +399,6 @@ export default function SettingsPage() {
         </TabsContent>
       </Tabs>
     </div>
+    </RouteGuard>
   )
 }

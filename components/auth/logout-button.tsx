@@ -1,44 +1,27 @@
 "use client";
 
-import { signOut } from "@/lib/actions/auth-actions";
-import { ActionState } from "@/lib/validations";
 import { LogOut, Loader2 } from "lucide-react";
-import { useActionState, useEffect } from "react";
-import { toast } from "sonner";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { User } from "@/lib/db/schema";
+import { useUser } from "@/hooks/use-user";
 
+const logoutText = "Cerrar Sesión";
+const pendingText = "Cerrando sesión...";
 
 const LogOutButton = ({ user }: { user: User | null }) => {
-  const [state, formAction, pending] = useActionState<ActionState, FormData>(
-    signOut,
-    { error: "" }
-  );
-
-  const logoutText = "Cerrar Sesión";
-  const pendingText = "Cerrando sesión...";
-
-  useEffect(() => {
-    if (state?.error) toast.error(state?.error);
-    if (state?.success) {
-      toast.success(state?.message);
-      if (state?.redirect) {
-        setTimeout(() => {
-          window.location.reload();
-        }, 200);
-      }
-    }
-  }, [pending]);
+  const { signOut, loading: pending  } = useUser();
 
   if (!user) {
     return null;
   }
 
+  const text = pending ? pendingText : logoutText;
+
   return (
-    <form action={formAction}>
       <Button
-        type="submit"
+        onClick={signOut}
         variant="ghost"
         className={cn(
           "w-full justify-start flex items-center gap-2",
@@ -51,16 +34,15 @@ const LogOutButton = ({ user }: { user: User | null }) => {
         {pending ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            {pendingText}
+            {text}
           </>
         ) : (
           <>
             <LogOut className="h-4 w-4" />
-            {logoutText}
+            {text}
           </>
         )}
       </Button>
-    </form>
   );
 };
 

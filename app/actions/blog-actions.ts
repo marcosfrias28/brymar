@@ -4,9 +4,9 @@ import { revalidatePath } from "next/cache"
 import { put } from "@vercel/blob"
 import { z } from "zod"
 import { eq, desc, count, and } from "drizzle-orm"
-import db from "../db/drizzle"
-import { blogPosts } from "../db/schema"
-import { type ActionState, validatedAction } from "../validations"
+import db from "../../lib/db/drizzle"
+import { BlogPost, blogPosts } from "../../lib/db/schema"
+import { type ActionState, validatedAction } from "../../lib/validations"
 
 const blogPostSchema = z.object({
   title: z.string().min(3).max(200),
@@ -20,12 +20,26 @@ const blogPostSchema = z.object({
 
 export const addBlogPost = validatedAction(
   blogPostSchema,
-  async (data: any, formData: FormData): Promise<ActionState> => {
+  async (formData: FormData): Promise<ActionState> => {
+    const title = formData?.get('title') as string;
+    const content = formData?.get('content') as string;
+    const author = formData?.get('author') as string;
+    const category = formData?.get('category') as string;
+    const status = formData?.get('status') as string;
+    const data = {
+      title,
+      content,
+      author,
+      category,
+      status,
+    }
     try {
       let imageUrl = ""
 
       const image = formData.get("image") as File
-      if (image && image.size > 0) {
+
+      if (image && image.size > 0 && image.type.startsWith('image/')
+      ) {
         try {
           const { url } = await put(`blog/${Date.now()}-${image.name}`, image, {
             access: "public",
@@ -62,12 +76,27 @@ export const addBlogPost = validatedAction(
 
 export const updateBlogPost = validatedAction(
   blogPostSchema.extend({ id: z.string() }),
-  async (data: any, formData: FormData): Promise<ActionState> => {
+  async (formData: FormData): Promise<ActionState> => {
+    const id = formData?.get('id') as string;
+    const title = formData?.get('title') as string;
+    const content = formData?.get('content') as string;
+    const author = formData?.get('author') as string;
+    const category = formData?.get('category') as string;
+    const status = formData?.get('status') as string;
+    const data = {
+      id,
+      title,
+      content,
+      author,
+      category,
+      status,
+    }
+
     try {
       let imageUrl = ""
 
       const image = formData.get("image") as File
-      if (image && image.size > 0) {
+      if (image && image.size > 0 && image.type.startsWith('image/')) {
         try {
           const { url } = await put(`blog/${Date.now()}-${image.name}`, image, {
             access: "public",
@@ -98,6 +127,7 @@ export const updateBlogPost = validatedAction(
         .where(eq(blogPosts.id, parseInt(data.id)))
 
       revalidatePath("/dashboard/blog")
+      revalidatePath(`/blog/${id}`)
       return { success: true, message: "Post de blog actualizado exitosamente!" }
     } catch (error) {
       console.error("Error updating blog post:", error)
@@ -106,16 +136,21 @@ export const updateBlogPost = validatedAction(
   },
 )
 
-export const deleteBlogPost = async (id: string): Promise<ActionState> => {
-  try {
-    await db.delete(blogPosts).where(eq(blogPosts.id, parseInt(id)))
-    revalidatePath("/dashboard/blog")
-    return { success: true, message: "Post de blog eliminado exitosamente!" }
-  } catch (error) {
-    console.error("Error deleting blog post:", error)
-    return { error: "Error al eliminar el post de blog" }
-  }
-}
+export const deleteBlogPost = validatedAction(
+  z.object({ id: z.string() }),
+  async (formData: FormData): Promise<ActionState> => {
+    const id = formData?.get('id') as string;
+    try {
+      await db.delete(blogPosts).where(eq(blogPosts.id, parseInt(id)))
+      revalidatePath("/dashboard/blog")
+      revalidatePath(`/blog/${id}`)
+      return { success: true, message: "Post de blog eliminado exitosamente!" }
+    } catch (error) {
+      console.error("Error deleting blog post:", error)
+      return { error: "Error al eliminar el post de blog" }
+    }
+  },
+)
 
 export const getBlogPosts = async (page = 1, limit = 12, filters?: any) => {
   try {
@@ -158,12 +193,15 @@ export const getBlogPosts = async (page = 1, limit = 12, filters?: any) => {
   }
 }
 
-export const getBlogPostById = async (id: string) => {
-  try {
-    const result = await db.select().from(blogPosts).where(eq(blogPosts.id, parseInt(id)))
-    return result[0] || null
-  } catch (error) {
-    console.error("Error fetching blog post:", error)
-    return null
-  }
-}
+export const getBlogPostById = validatedAction(
+  z.object({ id: z.string() }),
+  async (formData: FormData): Promise<BlogPost | null> => {
+    const id = formData?.get('id') as string;
+    try {
+      const result = await db.select().from(blogPosts).where(eq(blogPosts.id, parseInt(id)))
+      return result[0] || null
+    } catch (error) {
+      console.error("Error fetching blog post:", error)
+      return null
+    }
+  })

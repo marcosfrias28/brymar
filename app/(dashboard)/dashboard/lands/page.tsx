@@ -5,6 +5,7 @@ import { MapPin, DollarSign, Ruler, TreePine } from "lucide-react"
 
 import { UnifiedPageLayout } from "@/components/shared/unified-page-layout"
 import { useLands } from "@/hooks/use-lands"
+import { RouteGuard } from "@/components/auth/route-guard"
 
 export default function LandsPage() {
 
@@ -137,16 +138,18 @@ export default function LandsPage() {
   }
 
   return (
-    <UnifiedPageLayout
-      title="Gestión de Terrenos"
-      stats={stats}
-      items={filteredByType}
-      itemType="land"
-      searchPlaceholder="Buscar terrenos..."
-      addNewHref="/dashboard/lands/new"
-      addNewLabel="Agregar Terreno"
-      quickFilters={quickFilters}
-      statusFilters={statusFilters}
-    />
+    <RouteGuard requiredPermission="canManageLands">
+      <UnifiedPageLayout
+        title="Gestión de Terrenos"
+        stats={stats}
+        items={filteredByType}
+        itemType="land"
+        searchPlaceholder="Buscar terrenos..."
+        addNewHref="/dashboard/lands/new"
+        addNewLabel="Agregar Terreno"
+        quickFilters={quickFilters}
+        statusFilters={statusFilters}
+      />
+    </RouteGuard>
   )
 }

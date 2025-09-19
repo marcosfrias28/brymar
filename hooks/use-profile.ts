@@ -3,30 +3,7 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@/hooks/use-user";
 import { toast } from "sonner";
-
-// Tipi per il profilo utente
-export interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  bio?: string;
-  avatar?: string;
-  location?: string;
-  website?: string;
-  preferences: {
-    notifications: {
-      email: boolean;
-      push: boolean;
-      marketing: boolean;
-    };
-    privacy: {
-      profileVisible: boolean;
-      showEmail: boolean;
-      showPhone: boolean;
-    };
-  };
-}
+import { User } from "@/lib/db/schema";
 
 export interface ProfileActivity {
   id: string;
@@ -90,48 +67,52 @@ export interface ProfileMessage {
  */
 export function useProfile() {
   const { user } = useUser();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<User | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  
   useEffect(() => {
     if (user) {
-      // Simula il caricamento del profilo
-      setLoading(true);
-      setTimeout(() => {
-        setProfile({
-          id: user.id,
-          name: user.name || '',
-          email: user.email || '',
-          phone: '',
-          bio: '',
-          avatar: user.image || '',
-          location: '',
-          website: '',
-          preferences: {
-            notifications: {
-              email: true,
-              push: true,
-              marketing: false,
-            },
-            privacy: {
-              profileVisible: true,
-              showEmail: false,
-              showPhone: false,
-            },
+      setProfile({
+        id: user.id,
+        name: user.name || '',
+        email: user.email || '',
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        phone: user.phone || '',
+        bio: user.bio || '',
+        location: user.location || '',
+        website: user.website || '',
+        image: user.image || '',
+        role: user.role || '',
+        emailVerified: user.emailVerified || null,
+        createdAt: user.createdAt || null,
+        updatedAt: user.updatedAt || null,
+        preferences: {
+          notifications: {
+            email: true,
+            push: true,
+            marketing: false,
           },
-        });
-        setLoading(false);
-      }, 1000);
+          privacy: {
+            profileVisible: true,
+            showEmail: false,
+            showPhone: false,
+          },
+          display: {
+            theme: 'system' as const,
+            language: 'es',
+          },
+        },
+      });
+    } else {
+      setProfile(null);
     }
   }, [user]);
 
-  const updateProfile = async (data: Partial<UserProfile>) => {
+  const updateProfile = async (data: Partial<User>) => {
     try {
       setLoading(true);
-      // Simula l'aggiornamento del profilo
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
       setProfile(prev => prev ? { ...prev, ...data } : null);
       toast.success('Profilo aggiornato con successo');
     } catch (err) {

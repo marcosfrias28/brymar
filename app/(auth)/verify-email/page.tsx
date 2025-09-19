@@ -1,263 +1,159 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
-import { Loader2, CheckCircle, XCircle, Mail } from "lucide-react";
-import { LoginWrapper } from "@/components/auth/login-wrapper";
-import { toast } from "sonner";
-import {
-  sendVerificationOTP,
-  verifyEmailOTP,
-} from "@/lib/actions/auth-actions";
+import React, { useEffect, useState } from "react";
+import { AuthFormWrapper } from "@/components/auth/auth-form-wrapper";
+import { useSearchParams, useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth/auth-client";
+import { toast } from "sonner";
+import { sendVerificationOTPAction, verifyOTPAction } from "@/app/actions/verify-email-actions";
 
 const VerifyEmailPage = () => {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const [verificationState, setVerificationState] = useState<
-    "idle" | "loading" | "success" | "error"
-  >("idle");
-  const [otpValue, setOtpValue] = useState("");
-  const [email, setEmail] = useState("");
+  const router = useRouter();
+  const [email, setEmail] = useState<string | null>(null);
   const [isResending, setIsResending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [session, setSession] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Verificar sesión activa y obtener email
   useEffect(() => {
-    // Get email from URL params or session
-    const emailParam = searchParams.get("email");
-    if (emailParam) {
-      setEmail(decodeURIComponent(emailParam));
-    } else {
-      // Try to get email from session or redirect to sign-in
-      authClient.getSession().then(({ data }) => {
-        if (data?.user?.email) {
-          setEmail(data.user.email);
-        } else {
-          router.push("/sign-in");
+    const checkSession = async () => {
+      try {
+        const sessionData = await authClient.getSession();
+        
+        if (!sessionData?.data?.user) {
+          router.push('/sign-in');
+          return;
         }
-      });
-    }
+
+        setSession(sessionData);
+        
+        // Obtener email de la URL o de la sesión
+        const urlEmail = searchParams?.get("email");
+        const userEmail = sessionData?.data?.user.email;
+        
+        if (urlEmail && urlEmail === userEmail) {
+          setEmail(urlEmail);
+        } else if (userEmail) {
+          setEmail(userEmail);
+          // Actualizar URL con el email correcto
+          const newUrl = new URL(window.location.href);
+          newUrl.searchParams.set('email', userEmail);
+          window.history.replaceState({}, '', newUrl.toString());
+        } else {
+          toast.error('No se pudo obtener el email del usuario');
+          router.push('/sign-in');
+          return;
+        }
+        
+      } catch (error) {
+        console.error('Error checking session:', error);
+        router.push('/sign-in');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkSession();
   }, [searchParams, router]);
 
-  const handleVerifyOTP = async () => {
-    if (!email || !otpValue || otpValue.length !== 6) {
-      setError("Por favor ingresa un código válido de 6 dígitos");
-      return;
-    }
-
-    setVerificationState("loading");
-    setError(null);
-
-    try {
-      const formData = new FormData();
-      formData.append("email", email);
-      formData.append("otp", otpValue);
-
-      const result = await verifyEmailOTP({}, formData);
-
-      if (result.error) {
-        setError(result.error);
-        setVerificationState("error");
-        return;
-      }
-
-      setVerificationState("success");
-      toast.success("Email verificado exitosamente");
-
-      // Redirect after a short delay
-      setTimeout(() => {
-        router.push(result.url || "/dashboard/properties");
-      }, 1500);
-    } catch (err) {
-      console.error("Verification error:", err);
-      setError("Error inesperado al verificar el código");
-      setVerificationState("error");
-    }
-  };
-
-  const handleResendOTP = async () => {
-    if (!email) {
-      setError("Email no disponible");
-      return;
-    }
-
+  // Función para reenviar código OTP
+  const handleResendCode = async () => {
+    if (!email || isResending) return;
+    
     setIsResending(true);
-    setError(null);
-
     try {
       const formData = new FormData();
-      formData.append("email", email);
-
-      const result = await sendVerificationOTP({}, formData);
-
-      if (result.error) {
-        setError(result.error);
+      formData.append('email', email);
+      
+      const result = await sendVerificationOTPAction(formData);
+      
+      if (result.success) {
+        toast.success('Código reenviado exitosamente');
       } else {
-        toast.success("Nuevo código enviado a tu email");
-        setOtpValue(""); // Clear current OTP
+        toast.error(result.error || 'Error al reenviar el código');
       }
-    } catch (err) {
-      console.error("Resend error:", err);
-      setError("Error al reenviar el código");
+    } catch (error) {
+      toast.error('Error al reenviar el código');
     } finally {
       setIsResending(false);
     }
   };
 
-  const renderContent = () => {
-    switch (verificationState) {
-      case "loading":
-        return (
-          <>
-            <div className="flex items-center justify-center mb-4">
-              <Loader2 className="animate-spin h-12 w-12 text-blue-500" />
-            </div>
-            <h1 className="text-4xl font-black text-center">Verificando...</h1>
-            <p className="text-lg text-pretty text-center">
-              Por favor espera mientras verificamos tu código.
-            </p>
-          </>
-        );
-      case "success":
-        return (
-          <>
-            <div className="flex items-center justify-center mb-4">
-              <CheckCircle className="h-12 w-12 text-green-500" />
-            </div>
-            <h1 className="text-4xl font-black text-center text-green-600">
-              ¡Email Verificado!
-            </h1>
-            <p className="text-lg text-pretty text-center">
-              Tu email ha sido verificado exitosamente. Redirigiendo al panel de
-              control...
-            </p>
-          </>
-        );
-      case "error":
-        return (
-          <>
-            <div className="flex items-center justify-center mb-4">
-              <XCircle className="h-12 w-12 text-red-500" />
-            </div>
-            <h1 className="text-4xl font-black text-center text-red-600">
-              Verificación Fallida
-            </h1>
-            <p className="text-lg text-pretty text-center text-red-500">
-              {error}
-            </p>
-            <Button
-              onClick={() => router.push("/sign-in")}
-              className="w-full mt-4"
-            >
-              Ir a Iniciar Sesión
-            </Button>
-          </>
-        );
-      default:
-        return (
-          <Card className="w-full max-w-md">
-            <CardHeader className="text-center">
-              <div className="flex items-center justify-center mb-4">
-                <Mail className="h-12 w-12 text-blue-500" />
-              </div>
-              <CardTitle className="text-2xl font-bold">
-                Verificar Email
-              </CardTitle>
-              <CardDescription>
-                Ingresa el código de 6 dígitos que enviamos a tu email
-                {email && (
-                  <div className="mt-2">
-                    <strong>{email}</strong>
-                  </div>
-                )}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-center">
-                <InputOTP
-                  maxLength={6}
-                  value={otpValue}
-                  onChange={(value) => {
-                    setOtpValue(value);
-                    setError(null);
-                  }}
-                >
-                  <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
-                    <InputOTPSlot index={2} />
-                    <InputOTPSlot index={3} />
-                    <InputOTPSlot index={4} />
-                    <InputOTPSlot index={5} />
-                  </InputOTPGroup>
-                </InputOTP>
-              </div>
-
-              {error && (
-                <p className="text-sm text-red-500 text-center">{error}</p>
-              )}
-
-              <Button
-                onClick={handleVerifyOTP}
-                disabled={
-                  otpValue.length !== 6 ||
-                  (verificationState as string) === "loading"
-                }
-                className="w-full"
-              >
-                {(verificationState as string) === "loading" ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Verificando...
-                  </>
-                ) : (
-                  "Verificar Código"
-                )}
-              </Button>
-
-              <div className="text-center">
-                <Button
-                  variant="ghost"
-                  onClick={handleResendOTP}
-                  disabled={isResending || !email}
-                  className="text-sm"
-                >
-                  {isResending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Reenviando...
-                    </>
-                  ) : (
-                    "¿No recibiste el código? Reenviar"
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        );
+  // Función personalizada para manejar la verificación
+  const handleVerifyOTP = async (formData: FormData) => {
+    if (!email) {
+      return { error: "Email no disponible" };
     }
+    
+    // Agregar email al formData
+    formData.append('email', email);
+    
+    const result = await verifyOTPAction(formData);
+    
+    if (result.success) {
+      toast.success('Email verificado exitosamente');
+      // Refrescar la sesión
+      try {
+        await authClient.getSession();
+      } catch (error) {
+        console.error('Error refreshing session:', error);
+      }
+    }
+    
+    return result;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Verificando sesión...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!email || !session) {
+    return null; // El useEffect manejará la redirección
+  }
+
+  const otpField = {
+    id: 'otp',
+    name: "otp",
+    type: "text" as const,
+    label: "Código de Verificación",
+    placeholder: "Ingresa el código de 6 dígitos",
+    required: true,
+    maxLength: 6,
+    minLength: 6,
+    pattern: "[0-9]{6}",
+    autoComplete: "one-time-code"
   };
 
   return (
-    <LoginWrapper>
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <div className="w-full max-w-md space-y-6">{renderContent()}</div>
-      </div>
-    </LoginWrapper>
+    <AuthFormWrapper
+      title="Verificar Email"
+      subtitle={`Ingresa el código de 6 dígitos que enviamos a ${email}`}
+      action={handleVerifyOTP}
+      fields={[otpField]}
+      submitText="Verificar Código"
+      loadingText="Verificando código..."
+      footerContent={
+        <p className="text-sm text-muted-foreground text-center">
+          ¿No recibiste el código?{" "}
+          <button
+            type="button"
+            className="text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleResendCode}
+            disabled={isResending}
+          >
+            {isResending ? 'Reenviando...' : 'Reenviar código'}
+          </button>
+        </p>
+      }
+    />
   );
 };
 

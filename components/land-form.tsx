@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { addLand } from "@/lib/actions/land-actions";
+import { addLand } from "@/app/actions/land-actions";
 
 export function LandForm() {
   const [images, setImages] = useState<File[]>([]);

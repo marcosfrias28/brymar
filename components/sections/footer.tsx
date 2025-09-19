@@ -10,10 +10,10 @@ import {
 } from "@/components/ui/dialog";
 import { Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
 
-import { useAvoidRoutes } from "@/hooks/useAvoidRoutes";
+import { useAvoidRoutes } from "@/hooks/use-avoid-routes";
 import Logo from "../ui/logo";
 
-export function Footer() {
+export function Footer() { 
   const shouldAvoid = useAvoidRoutes();
   const [cookiesDialogOpen, setCookiesDialogOpen] = useState(false);
   const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);

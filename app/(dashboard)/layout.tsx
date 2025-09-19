@@ -5,18 +5,16 @@ import { UserSidebar } from "@/components/user-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
+import { useUser } from "@/hooks/use-user";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const pathname = usePathname();
-  
-  // Determina quale sidebar utilizzare in base alla route
-  const isAdminRoute = pathname.startsWith('/dashboard');
-  const SidebarComponent = isAdminRoute ? AdminSidebar : UserSidebar;
-
+  const { user } = useUser();
+  const isAdminOrAgent = user?.role === 'admin' || user?.role === 'agent';
+  const SidebarComponent = isAdminOrAgent ? AdminSidebar : UserSidebar;
   return (
     <SidebarProvider>
       <SidebarComponent variant="inset" />

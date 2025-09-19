@@ -18,22 +18,9 @@ import {
   BookOpenIcon,
   TrendingUpIcon,
 } from "lucide-react"
-
-import { NavDocuments } from "@/components/nav-documents"
-import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
-import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import Logo from "./ui/logo"
-import { usePermissions } from "@/hooks/use-permissions"
 import { useUser } from "@/hooks/use-user"
 import { AdminSidebar } from "@/components/admin-sidebar"
 import { UserSidebar } from "@/components/user-sidebar"
@@ -134,8 +121,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useUser()
   
   // Determinar qué sidebar mostrar basado en la ruta actual
-  const isAdminRoute = pathname.startsWith('/dashboard')
-  const isUserRoute = pathname.startsWith('/profile')
+  const isAdminRoute = pathname?.startsWith('/dashboard') || false
+  const isUserRoute = pathname?.startsWith('/profile') || false
   
   // Si es una ruta de admin/agent, usar AdminSidebar
   if (isAdminRoute) {

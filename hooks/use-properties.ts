@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useActionState } from 'react'
-import { getProperties, getPropertyById, addProperty, updateProperty, deleteProperty, searchProperties } from '@/lib/actions/property-actions'
+import { getProperties, getPropertyById, addProperty, updateProperty, deleteProperty, searchProperties } from '@/app/actions/property-actions'
 import { toast } from 'sonner'
 import { ActionState } from '@/lib/validations'
 

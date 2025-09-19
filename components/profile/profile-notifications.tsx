@@ -39,7 +39,7 @@ import { useProfileNotifications } from "@/hooks/use-profile";
 import {
   markNotificationAsReadAction,
   markAllNotificationsAsReadAction,
-} from "@/lib/actions/profile-actions";
+} from "@/app/actions/profile-actions";
 import { useUser } from "@/hooks/use-user";
 
 type FilterType = "all" | "unread" | "read";

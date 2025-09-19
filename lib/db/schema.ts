@@ -18,6 +18,31 @@ export const users = pgTable("users", {
   emailVerified: boolean("email_verified").default(false),
   image: text("image"),
   role: text("role").notNull(),
+  // Campos adicionales del perfil
+  firstName: varchar("first_name", { length: 50 }),
+  lastName: varchar("last_name", { length: 50 }),
+  phone: varchar("phone", { length: 20 }),
+  bio: text("bio"),
+  location: varchar("location", { length: 100 }),
+  website: varchar("website", { length: 255 }),
+  // Preferencias del usuario (JSON)
+  preferences: jsonb("preferences").default({
+    notifications: {
+      email: true,
+      push: true,
+      marketing: false
+    },
+    privacy: {
+      profileVisible: true,
+      showEmail: false,
+      showPhone: false
+    },
+    display: {
+      theme: "light",
+      language: "es",
+      currency: "USD"
+    }
+  }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -85,20 +110,7 @@ export const services = pgTable("services", {
   price: numeric("price", { precision: 10, scale: 2 }).notNull(),
 });
 
-// Categories Table
-export const categories = pgTable("categories", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  slug: text("slug").notNull().unique(),
-  title: text("title").notNull(),
-  description: text("description").notNull(),
-  image: text("image").notNull(),
-  href: text("href").notNull(),
-  status: text("status").notNull().default("active"),
-  order: integer("order").default(0),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+
 
 // Reviews Table
 export const reviews = pgTable("reviews", {
@@ -156,44 +168,33 @@ export const blogPosts = pgTable("blog_posts", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-
-// Organization Tables for Better Auth Organization Plugin
-export const organization = pgTable("organization", {
-  id: varchar("id", { length: 36 }).primaryKey(),
+// Categories Table
+export const categories = pgTable("categories", {
+  id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  slug: text("slug").unique(),
-  logo: text("logo"),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  image: text("image").notNull(),
+  href: text("href").notNull(),
+  status: text("status").notNull().default("active"),
+  order: integer("order").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const member = pgTable("member", {
-  id: varchar("id", { length: 36 }).primaryKey(),
-  organizationId: varchar("organization_id", { length: 36 })
-    .notNull()
-    .references(() => organization.id),
+// User Favorites Table - Relación entre usuarios y propiedades/terrenos favoritos
+export const userFavorites = pgTable("user_favorites", {
+  id: serial("id").primaryKey(),
   userId: varchar("user_id", { length: 36 })
     .notNull()
-    .references(() => users.id),
-  role: text("role").notNull(),
+    .references(() => users.id, { onDelete: "cascade" }), // FK to user.id
+  itemType: text("item_type").notNull(), // "property" o "land"
+  propertyId: integer("property_id")
+    .references(() => properties.id, { onDelete: "cascade" }), // FK to property.id (opcional)
+  landId: integer("land_id")
+    .references(() => lands.id, { onDelete: "cascade" }), // FK to land.id (opcional)
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
-
-export const invitation = pgTable("invitation", {
-  id: varchar("id", { length: 36 }).primaryKey(),
-  organizationId: varchar("organization_id", { length: 36 })
-    .notNull()
-    .references(() => organization.id),
-  email: text("email").notNull(),
-  role: text("role").notNull(),
-  status: text("status").notNull().default("pending"),
-  expiresAt: timestamp("expires_at").notNull(),
-  inviterId: varchar("inviter_id", { length: 36 })
-    .notNull()
-    .references(() => users.id),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // Type Inference
@@ -231,12 +232,5 @@ export type NewBlogPost = typeof blogPosts.$inferInsert;
 export type Category = typeof categories.$inferSelect;
 export type NewCategory = typeof categories.$inferInsert;
 
-// Organization Types
-export type Organization = typeof organization.$inferSelect;
-export type NewOrganization = typeof organization.$inferInsert;
-
-export type Member = typeof member.$inferSelect;
-export type NewMember = typeof member.$inferInsert;
-
-export type Invitation = typeof invitation.$inferSelect;
-export type NewInvitation = typeof invitation.$inferInsert;
+export type UserFavorite = typeof userFavorites.$inferSelect;
+export type NewUserFavorite = typeof userFavorites.$inferInsert;

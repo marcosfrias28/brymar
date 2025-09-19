@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useActionState } from 'react'
-import { getBlogPosts, getBlogPostById, addBlogPost, updateBlogPost, deleteBlogPost } from '@/lib/actions/blog-actions'
+import { getBlogPosts, getBlogPostById, addBlogPost, updateBlogPost, deleteBlogPost } from '@/app/actions/blog-actions'
 import { toast } from 'sonner'
 import { ActionState } from '@/lib/validations'
 

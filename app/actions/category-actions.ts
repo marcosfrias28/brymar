@@ -3,7 +3,7 @@
 import { categories, type Category, type NewCategory } from "@/lib/db/schema";
 import { eq, asc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import db from "../db/drizzle";
+import db from "../../lib/db/drizzle";
 
 // Ottieni tutte le categorie
 export async function getCategories(): Promise<Category[]> {

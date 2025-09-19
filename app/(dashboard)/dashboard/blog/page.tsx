@@ -5,6 +5,7 @@ import { FileText, Calendar, User, PenTool } from "lucide-react"
 
 import { UnifiedPageLayout } from "@/components/shared/unified-page-layout"
 import { useBlogPosts } from "@/hooks/use-blog"
+import { RouteGuard } from "@/components/auth/route-guard"
 
 
 export default function BlogPage() {
@@ -103,16 +104,18 @@ export default function BlogPage() {
   }
 
   return (
-    <UnifiedPageLayout
-      title="Gestión del Blog"
-      stats={stats}
-      items={filteredByStatus}
-      itemType="blog"
-      searchPlaceholder="Buscar posts..."
-      addNewHref="/dashboard/blog/new"
-      addNewLabel="Agregar Post"
-      quickFilters={quickFilters}
-      statusFilters={statusFilters}
-    />
+    <RouteGuard requiredPermission="canManageBlog">
+      <UnifiedPageLayout
+        title="Gestión del Blog"
+        stats={stats}
+        items={filteredByStatus}
+        itemType="blog"
+        searchPlaceholder="Buscar posts..."
+        addNewHref="/dashboard/blog/new"
+        addNewLabel="Agregar Post"
+        quickFilters={quickFilters}
+        statusFilters={statusFilters}
+      />
+    </RouteGuard>
   )
 }

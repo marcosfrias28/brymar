@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { searchPropertiesAction } from "@/lib/actions/property-actions";
+import { searchPropertiesAction } from "@/app/actions/property-actions";
 import { ActionState } from "@/lib/validations";
 import { PropertyMap } from "@/components/property/property-map";
 import { SearchFilters } from "@/components/search-filters";

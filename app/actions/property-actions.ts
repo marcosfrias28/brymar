@@ -4,9 +4,9 @@ import { revalidatePath } from "next/cache"
 import { put } from "@vercel/blob"
 import { z } from "zod"
 import { eq, desc, count, and, ilike, or } from "drizzle-orm"
-import { type ActionState, validatedAction } from "../validations"
-import db from "../db/drizzle"
-import { properties } from "../db/schema"
+import { type ActionState, validatedAction } from "../../lib/validations"
+import db from "../../lib/db/drizzle"
+import { properties } from "../../lib/db/schema"
 
 const propertySchema = z.object({
   title: z.string().min(3).max(100),

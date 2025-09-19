@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Navbar } from "@/components/navbar";
 import { Toaster } from "@/components/ui/sonner";
-import { getUser } from "@/lib/actions/auth-actions";
+import { getUser } from "@/app/actions/auth-actions";
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -11,7 +11,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "SK BUILDERS - Experience the Epitome of Home Comfort",
+  title: "Marbry Inmobiliaria - Experience the Epitome of Home Comfort",
   description:
     "Our international brand specializes in property appraisal, sales, purchases, and investments. Trust us to deliver exceptional service and help you find your perfect real estate opportunity.",
 };

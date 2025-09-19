@@ -38,11 +38,7 @@ const menuItems = [
     url: "/dashboard/blog",
     icon: FileText,
   },
-  {
-    title: "organizations",
-    url: "/dashboard/organizations",
-    icon: Users,
-  },
+
   {
     title: "settings",
     url: "/dashboard/settings",
@@ -56,7 +52,7 @@ const getMenuTitle = (title: string) => {
     properties: "Propiedades",
     lands: "Terrenos",
     blog: "Blog",
-    organizations: "Organizaciones",
+
     settings: "Configuración"
   };
   return titles[title] || title;

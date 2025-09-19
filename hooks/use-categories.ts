@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Category } from "@/lib/db/schema";
-import { getCategories } from "@/lib/actions/category-actions";
+import { getCategories } from "@/app/actions/category-actions";
 
 interface UseCategoriesReturn {
   categories: Category[];

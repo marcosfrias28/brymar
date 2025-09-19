@@ -1,11 +1,11 @@
 import { betterAuth } from "better-auth";
-import { sendVerificationEmail } from "../email";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import db from "../db/drizzle";
-import { accounts, session, users, verification, organization, member, invitation } from "../db/schema";
+import { accounts, session, users, verification } from "../db/schema";
 import { nextCookies } from "better-auth/next-js";
-import { emailOTP, organization as organizationPlugin } from "better-auth/plugins";
+import { emailOTP } from "better-auth/plugins";
 import { error as logError, getSafeUserMessage } from "../logger";
+import { sendVerificationOTP } from "../email";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -15,11 +15,16 @@ export const auth = betterAuth({
       session,
       account: accounts,
       verification,
-      organization,
-      member,
-      invitation,
     },
   }),
+  session: {
+    expiresIn: 60 * 60 * 24 * 7, // 7 días
+    updateAge: 60 * 60 * 24, // 1 día
+    cookieCache: {
+      enabled: true,
+      maxAge: 60 * 5 // 5 minutos
+    }
+  },
   user: {
     additionalFields: {
       role: {
@@ -32,11 +37,10 @@ export const auth = betterAuth({
   },
   plugins: [
     nextCookies(),
-    organizationPlugin(),
     emailOTP({
       async sendVerificationOTP({ email, otp, type }) {
         if (type === "email-verification") {
-          const result = await sendVerificationEmail({
+          const result = await sendVerificationOTP({
             to: email,
             subject: "Código de verificación",
             url: `Tu código de verificación es: ${otp}`,
@@ -55,9 +59,9 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
-    requireEmailVerification: true,
+    requireEmailVerification: false, // Permitir inicio de sesión sin verificación
     sendResetPassword: async ({ user, url }, request) => {
-      const result = await sendVerificationEmail({
+      const result = await sendVerificationOTP({
         to: user.email,
         subject: "Reset della password",
         url,
