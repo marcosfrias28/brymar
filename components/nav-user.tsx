@@ -50,7 +50,9 @@ export function NavUser({
                   src={user?.avatar || "/avatars/admin.jpg"}
                   alt={user?.name || "Administrador"}
                 />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {user?.name?.charAt(0).toUpperCase()}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">
@@ -76,8 +78,9 @@ export function NavUser({
                     src={user?.avatar}
                     alt={user?.name || "Administrador"}
                   />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-                </Avatar>
+                  <AvatarFallback className="rounded-lg">
+                    {user?.name?.charAt(0).toUpperCase()}
+                  </AvatarFallback>                </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">
                     {user?.name || "Administrador"}
@@ -92,15 +95,7 @@ export function NavUser({
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <UserCircleIcon />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCardIcon />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <BellIcon />
-                Notifications
+                Profile
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
