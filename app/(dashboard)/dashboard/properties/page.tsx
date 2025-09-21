@@ -124,7 +124,7 @@ export default function PropertiesPage() {
   ];
 
   return (
-    <RouteGuard requiredPermission="canManageProperties">
+    <RouteGuard requiredPermission="properties.manage">
       <UnifiedPageLayout
         title="Gestión de Propiedades"
         stats={stats}

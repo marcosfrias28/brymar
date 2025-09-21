@@ -2,7 +2,7 @@ import { ProfileForm } from "@/components/profile/profile-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileActivity } from "@/components/profile/profile-activity";
-import { User, Settings, Activity } from "lucide-react";
+import { User, Activity } from "lucide-react";
 
 export default function ProfilePage() {
   return (
@@ -12,7 +12,7 @@ export default function ProfilePage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Il Mio Profilo</h1>
           <p className="text-muted-foreground">
-            Gestisci le tue informazioni personali e le impostazioni dell'account
+            Gestisci le tue informazioni personali e le impostazioni dell&apos;account
           </p>
         </div>
       </div>
@@ -36,7 +36,7 @@ export default function ProfilePage() {
               <CardHeader>
                 <CardTitle>Profilo Utente</CardTitle>
                 <CardDescription>
-                  Aggiorna le tue informazioni personali e l'immagine del profilo
+                  Aggiorna le tue informazioni personali e l&apos;immagine del profilo
                 </CardDescription>
               </CardHeader>
               <CardContent>

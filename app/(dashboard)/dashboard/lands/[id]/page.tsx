@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { ArrowLeft, Edit3, Save, X, Eye, Trash2 } from "lucide-react"
+import { ArrowLeft, Edit3, Save, X, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
-import { ImageUpload } from "@/components/properties/image-upload"
+// import { ImageUpload } from "@/components/properties/image-upload" // Unused
 
 import { useLand } from "@/hooks/use-lands"
 import Link from "next/link"
@@ -32,13 +32,8 @@ export default function LandDetailPage() {
   const params = useParams()
   const router = useRouter()
 
-  // Verificar que params y params.id existan
-  if (!params || !params.id) {
-    return <div>Error: ID de terreno no encontrado</div>
-  }
-
-  const { land, isLoading, error, updateLand, deleteLand } = useLand(Number(params.id))
-  
+  // Sempre chiamare gli hooks prima di qualsiasi early return
+  const { land, isLoading, error, updateLand, deleteLand } = useLand(Number(params?.id))
   const [isEditing, setIsEditing] = useState(false)
   const [editedLand, setEditedLand] = useState<Land | null>(null)
   const [isSaving, setIsSaving] = useState(false)
@@ -49,6 +44,11 @@ export default function LandDetailPage() {
       setEditedLand(land)
     }
   }, [land])
+
+  // Verificar que params y params.id existan dopo gli hooks
+  if (!params || !params.id) {
+    return <div>Error: ID de terreno no encontrado</div>
+  }
 
   const handleSave = async () => {
     if (!editedLand) return

@@ -30,11 +30,11 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import Logo from "./ui/logo"
-import { usePermissions } from "@/hooks/use-permissions"
+import { useAdmin } from "@/hooks/use-admin"
 import { useUser } from "@/hooks/use-user"
 
 // Configuración del menú para admin/agent
-const getAdminNavigationData = (userRole: string | null, permissions: any) => {
+const getAdminNavigationData = (userRole: string | null, adminPermissions: any) => {
   // Menú principal - funcionalidades de gestión
   const navMain = [
     {
@@ -62,7 +62,7 @@ const getAdminNavigationData = (userRole: string | null, permissions: any) => {
   // Sección de gestión avanzada
   const managementItems = [];
   
-  if (permissions?.canManageUsers) {
+  if (adminPermissions?.canManageUsers) {
     managementItems.push({
       name: "Gestión de Usuarios",
       url: "/dashboard/users",
@@ -70,7 +70,7 @@ const getAdminNavigationData = (userRole: string | null, permissions: any) => {
     });
   }
   
-  if (permissions?.canAccessDashboard) {
+  if (adminPermissions?.canAccessDashboard) {
     managementItems.push(
       {
         name: "Análisis y Reportes",
@@ -83,6 +83,10 @@ const getAdminNavigationData = (userRole: string | null, permissions: any) => {
         icon: DatabaseIcon,
       }
     );
+  }
+  
+  if (adminPermissions?.canViewAnalytics) {
+    // Ya incluido en el bloque anterior
   }
   
   if (userRole === 'admin') {
@@ -120,16 +124,26 @@ const getAdminNavigationData = (userRole: string | null, permissions: any) => {
 };
 
 export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { permissions, userRole } = usePermissions();
+  const { 
+    canManageUsers, 
+    canAccessDashboard, 
+    canViewAnalytics,
+    isAdmin,
+    user: adminUser 
+  } = useAdmin();
   const { user } = useUser();
   
-  const navigationData = getAdminNavigationData(userRole, permissions);
+  const navigationData = getAdminNavigationData(user?.role || null, {
+    canManageUsers,
+    canAccessDashboard,
+    canViewAnalytics
+  });
   
-  // Map user data to expected format
+  // Map user data to expected format - NO hardcodear valores por defecto
   const userData = {
-    name: user?.name || "Administrador",
-    email: user?.email || "admin@brymar.com",
-    avatar: user?.image || "/avatars/admin.jpg"
+    name: user?.name || "Usuario",
+    email: user?.email || "usuario@brymar.com", 
+    avatar: user?.image || "/avatars/default.jpg"
   };
   
   return (

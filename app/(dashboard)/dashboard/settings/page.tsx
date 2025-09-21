@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react"
 import { useActionState } from "react"
 import { useUser } from "@/hooks/use-user"
-import { updateUserAction } from "@/app/actions/auth-actions"
+import { updateUserAction } from "@/lib/actions/auth-actions"
+import { ActionState } from "@/lib/validations"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -43,12 +44,17 @@ const rolePermissions = {
 export default function SettingsPage() {
   const [language, setLanguage] = useState("es")
 
-  const { user, loading: userLoading, error: userError } = useUser()
-  const [updateState, updateUserFormAction] = useActionState(updateUserAction, {
-    success: false,
-    error: undefined,
-    message: undefined,
-  })
+  const { user, loading: userLoading } = useUser()
+  const [updateState, updateUserFormAction] = useActionState(
+    async (prevState: ActionState, formData: FormData) => {
+      return await updateUserAction(formData);
+    },
+    {
+      success: false,
+      error: undefined,
+      message: undefined,
+    }
+  )
   const [formData, setFormData] = useState<Partial<User>>({
     name: user?.name || "",
     email: user?.email || "",
@@ -89,20 +95,20 @@ export default function SettingsPage() {
     )
   }
 
-  if (userError || !user) {
+  if (!user && !userLoading) {
     return (
       <div className="space-y-6">
         <div className="text-red-600">
-          Error: {userError || "No se pudo cargar el usuario"}
+          Error: No se pudo cargar el usuario
         </div>
       </div>
     )
   }
 
-  const currentRole = rolePermissions[user.role as keyof typeof rolePermissions]
+  const currentRole = user ? rolePermissions[user.role as keyof typeof rolePermissions] : null
 
   return (
-  <RouteGuard requiredPermission="canViewSettings">
+  <RouteGuard requiredPermission="settings.view">
     <div className="space-y-6">
       {/* Header */}
       <div>
@@ -144,9 +150,9 @@ export default function SettingsPage() {
               {/* Profile Picture */}
               <div className="flex items-center gap-4">
                 <Avatar className="h-20 w-20">
-                  <AvatarImage src={user.image || "/placeholder.svg"} alt={user.name || "Usuario"} />
+                  <AvatarImage src={user?.image || "/placeholder.svg"} alt={user?.name || "Usuario"} />
                   <AvatarFallback className="text-lg">
-                    {(user.name || "Usuario")
+                    {(user?.name || "Usuario")
                       .split(" ")
                       .map((n) => n[0])
                       .join("")}
@@ -215,10 +221,10 @@ export default function SettingsPage() {
               {/* Current Role */}
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${currentRole.color}`} />
+                  <div className={`w-3 h-3 rounded-full ${currentRole?.color || 'bg-gray-400'}`} />
                   <div>
-                    <h3 className="font-semibold">{currentRole.label}</h3>
-                    <p className="text-sm text-blackCoral/70">{currentRole.description}</p>
+                    <h3 className="font-semibold">{currentRole?.label || 'Rol desconocido'}</h3>
+                    <p className="text-sm text-blackCoral/70">{currentRole?.description || 'Sin descripción'}</p>
                   </div>
                 </div>
                 <Badge variant="secondary">Rol Actual</Badge>
@@ -231,7 +237,7 @@ export default function SettingsPage() {
               <div className="space-y-4">
                 <h4 className="font-semibold">Permisos Actuales</h4>
                 <div className="grid grid-cols-1 tablet:grid-cols-2 gap-4">
-                  {Object.entries(user.permissions).map(([key, value]) => (
+                  {user && Object.entries(user.permissions).map(([key, value]) => (
                     <div key={key} className="flex items-center justify-between p-3 border rounded">
                       <span className="text-sm capitalize">{key.replace(/([A-Z])/g, " $1").toLowerCase()}</span>
                       <Badge variant={value ? "default" : "secondary"}>{value ? "Permitido" : "Denegado"}</Badge>
@@ -246,7 +252,7 @@ export default function SettingsPage() {
                 <h4 className="font-semibold">Comparación de Roles</h4>
                 <div className="grid grid-cols-1 tablet:grid-cols-3 gap-4">
                   {Object.entries(rolePermissions).map(([roleKey, role]) => (
-                    <Card key={roleKey} className={user.role === roleKey ? "ring-2 ring-arsenic" : ""}>
+                    <Card key={roleKey} className={user?.role === roleKey ? "ring-2 ring-arsenic" : ""}>
                       <CardContent className="p-4">
                         <div className="flex items-center gap-2 mb-2">
                           <div className={`w-3 h-3 rounded-full ${role.color}`} />

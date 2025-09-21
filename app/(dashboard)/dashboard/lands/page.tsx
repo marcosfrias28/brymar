@@ -138,7 +138,7 @@ export default function LandsPage() {
   }
 
   return (
-    <RouteGuard requiredPermission="canManageLands">
+    <RouteGuard requiredPermission="lands.manage">
       <UnifiedPageLayout
         title="Gestión de Terrenos"
         stats={stats}

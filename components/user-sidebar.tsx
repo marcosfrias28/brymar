@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/sidebar";
 import Logo from "./ui/logo";
 import { useUser } from "@/hooks/use-user";
+import { useAdmin } from "@/hooks/use-admin";
 
 // Configuración del menú para usuarios
 const getUserNavigationData = () => {
@@ -117,6 +118,7 @@ export function UserSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useUser();
+  const { canAccessDashboard } = useAdmin();
 
   const navigationData = getUserNavigationData();
 

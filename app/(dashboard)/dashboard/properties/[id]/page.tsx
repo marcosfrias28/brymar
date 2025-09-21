@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
-import { ImageUpload } from "@/components/properties/image-upload"
+// import { ImageUpload } from "@/components/properties/image-upload" // Unused
 
 import { useProperty, type Property } from "@/hooks/use-properties"
 import Link from "next/link"
@@ -21,11 +21,7 @@ export default function PropertyDetailPage() {
   const params = useParams()
   const router = useRouter()
 
-  // Verificar que params y params.id existan
-  if (!params || !params.id) {
-    return <div>Error: ID de propiedad no encontrado</div>
-  }
-
+  // Sempre chiamare gli hooks prima di qualsiasi early return
   const [isEditing, setIsEditing] = useState(false)
   const [editedProperty, setEditedProperty] = useState<Partial<Property> | null>(null)
 
@@ -37,13 +33,24 @@ export default function PropertyDetailPage() {
     deleteProperty,
     updateState,
     isUpdating
-  } = useProperty(Number(params.id))
+  } = useProperty(Number(params?.id))
 
   useEffect(() => {
     if (property) {
       setEditedProperty({ ...property })
     }
   }, [property])
+
+  useEffect(() => {
+    if (updateState?.success) {
+      setIsEditing(false)
+    }
+  }, [updateState])
+
+  // Verificar que params y params.id existan dopo gli hooks
+  if (!params || !params.id) {
+    return <div>Error: ID de propiedad no encontrado</div>
+  }
 
   if (loading) {
     return (
@@ -87,11 +94,7 @@ export default function PropertyDetailPage() {
     }
   }
 
-  useEffect(() => {
-    if (updateState?.success) {
-      setIsEditing(false)
-    }
-  }, [updateState])
+  // useEffect duplicato rimosso
 
   const handleCancel = () => {
     setEditedProperty({ ...property })

@@ -104,7 +104,7 @@ export default function BlogPage() {
   }
 
   return (
-    <RouteGuard requiredPermission="canManageBlog">
+    <RouteGuard requiredPermission="blog.manage">
       <UnifiedPageLayout
         title="Gestión del Blog"
         stats={stats}

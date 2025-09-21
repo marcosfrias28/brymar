@@ -19,13 +19,8 @@ export default function BlogDetailPage() {
   const params = useParams()
   const router = useRouter()
 
-  // Verificar que params y params.id existan
-  if (!params || !params.id) {
-    return <div>Error: ID de blog no encontrado</div>
-  }
-
-  const { blogPost, loading, error, updateBlogPost, deleteBlogPost, updateState, isUpdating } = useBlogPost(params.id as string)
-
+  // Sempre chiamare gli hooks prima di qualsiasi early return
+  const { blogPost, loading, error, updateBlogPost, deleteBlogPost, updateState, isUpdating } = useBlogPost(params?.id as string)
   const [isEditing, setIsEditing] = useState(false)
   const [editedPost, setEditedPost] = useState<Partial<BlogPost> | null>(null)
 
@@ -34,6 +29,17 @@ export default function BlogDetailPage() {
       setEditedPost({ ...blogPost })
     }
   }, [blogPost])
+
+  useEffect(() => {
+    if (updateState?.success) {
+      setIsEditing(false)
+    }
+  }, [updateState])
+
+  // Verificar que params y params.id existan dopo gli hooks
+  if (!params || !params.id) {
+    return <div>Error: ID de blog no encontrado</div>
+  }
 
   if (loading) {
     return (
@@ -72,11 +78,7 @@ export default function BlogDetailPage() {
     }
   }
 
-  useEffect(() => {
-    if (updateState?.success) {
-      setIsEditing(false)
-    }
-  }, [updateState])
+  // useEffect duplicato rimosso
 
   const handleCancel = () => {
     setEditedPost({ ...blogPost })

@@ -40,7 +40,7 @@ const mockData = [
 
 export default function DashboardPage() {
   return (
-    <RouteGuard requiredPermission="canAccessDashboard">
+    <RouteGuard requiredPermission="dashboard.access">
       <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
         {/* Header Section */}
         <div className="flex items-center justify-between space-y-2 px-4 lg:px-6">
