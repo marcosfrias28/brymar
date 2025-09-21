@@ -4,9 +4,14 @@ import { revalidatePath } from "next/cache"
 import { put } from "@vercel/blob"
 import { z } from "zod"
 import { eq, desc, count, and } from "drizzle-orm"
-import db from "../../lib/db/drizzle"
-import { BlogPost, blogPosts } from "../../lib/db/schema"
-import { type ActionState, validatedAction } from "../../lib/validations"
+import db from "@/lib/db/drizzle"
+import { BlogPost, blogPosts } from "@/lib/db/schema"
+import { 
+  type ActionState, 
+  createValidatedAction, 
+  handleAPIError, 
+  createSuccessResponse
+} from "@/lib/validations"
 
 const blogPostSchema = z.object({
   title: z.string().min(3).max(200),
@@ -18,30 +23,16 @@ const blogPostSchema = z.object({
   status: z.enum(["draft", "published"]).default("draft"),
 })
 
-export const addBlogPost = validatedAction(
-  blogPostSchema,
-  async (formData: FormData): Promise<ActionState> => {
-    const title = formData?.get('title') as string;
-    const content = formData?.get('content') as string;
-    const author = formData?.get('author') as string;
-    const category = formData?.get('category') as string;
-    const status = formData?.get('status') as string;
-    const data = {
-      title,
-      content,
-      author,
-      category,
-      status,
-    }
+export const addBlogPost = createValidatedAction(
+  blogPostSchema.extend({ image: z.instanceof(File).optional() }),
+  async (data): Promise<ActionState<{ blogPost: BlogPost }>> => {
     try {
       let imageUrl = ""
 
-      const image = formData.get("image") as File
-
-      if (image && image.size > 0 && image.type.startsWith('image/')
-      ) {
+      // Handle image upload if present
+      if (data.image && data.image.size > 0 && data.image.type.startsWith('image/')) {
         try {
-          const { url } = await put(`blog/${Date.now()}-${image.name}`, image, {
+          const { url } = await put(`blog/${Date.now()}-${data.image.name}`, data.image, {
             access: "public",
           })
           imageUrl = url
@@ -49,12 +40,12 @@ export const addBlogPost = validatedAction(
           console.error("Error uploading image:", error)
         }
       }
-
+      
       const wordsPerMinute = 200
       const wordCount = data.content.split(" ").length
       const readingTime = Math.ceil(wordCount / wordsPerMinute)
 
-      await db.insert(blogPosts).values({
+      const [newBlogPost] = await db.insert(blogPosts).values({
         title: data.title,
         content: data.content,
         author: data.author,
@@ -63,42 +54,33 @@ export const addBlogPost = validatedAction(
         image: imageUrl,
         readingTime: readingTime,
         createdAt: new Date(),
-      })
+      }).returning()
 
       revalidatePath("/dashboard/blog")
-      return { success: true, message: "Post de blog agregado exitosamente!" }
+      return createSuccessResponse(
+        { blogPost: newBlogPost },
+        "Post de blog agregado exitosamente!"
+      )
     } catch (error) {
       console.error("Error adding blog post:", error)
-      return { error: "Error al agregar el post de blog" }
+      return handleAPIError(error, "Error al agregar el post de blog")
     }
-  },
+  }
 )
 
-export const updateBlogPost = validatedAction(
-  blogPostSchema.extend({ id: z.string() }),
-  async (formData: FormData): Promise<ActionState> => {
-    const id = formData?.get('id') as string;
-    const title = formData?.get('title') as string;
-    const content = formData?.get('content') as string;
-    const author = formData?.get('author') as string;
-    const category = formData?.get('category') as string;
-    const status = formData?.get('status') as string;
-    const data = {
-      id,
-      title,
-      content,
-      author,
-      category,
-      status,
-    }
-
+export const updateBlogPost = createValidatedAction(
+  blogPostSchema.extend({ 
+    id: z.string(),
+    image: z.instanceof(File).optional()
+  }),
+  async (data): Promise<ActionState<{ blogPost: BlogPost }>> => {
     try {
       let imageUrl = ""
 
-      const image = formData.get("image") as File
-      if (image && image.size > 0 && image.type.startsWith('image/')) {
+      // Handle image upload if present
+      if (data.image && data.image.size > 0 && data.image.type.startsWith('image/')) {
         try {
-          const { url } = await put(`blog/${Date.now()}-${image.name}`, image, {
+          const { url } = await put(`blog/${Date.now()}-${data.image.name}`, data.image, {
             access: "public",
           })
           imageUrl = url
@@ -122,35 +104,48 @@ export const updateBlogPost = validatedAction(
         ...(imageUrl && { image: imageUrl }),
       }
 
-      await db.update(blogPosts)
+      const [updatedBlogPost] = await db.update(blogPosts)
         .set(updateData)
         .where(eq(blogPosts.id, parseInt(data.id)))
+        .returning()
 
       revalidatePath("/dashboard/blog")
-      revalidatePath(`/blog/${id}`)
-      return { success: true, message: "Post de blog actualizado exitosamente!" }
+      revalidatePath(`/blog/${data.id}`)
+      return createSuccessResponse(
+        { blogPost: updatedBlogPost },
+        "Post de blog actualizado exitosamente!"
+      )
     } catch (error) {
       console.error("Error updating blog post:", error)
-      return { error: "Error al actualizar el post de blog" }
+      return handleAPIError(error, "Error al actualizar el post de blog")
     }
-  },
+  }
 )
 
-export const deleteBlogPost = validatedAction(
+export const deleteBlogPost = createValidatedAction(
   z.object({ id: z.string() }),
-  async (formData: FormData): Promise<ActionState> => {
-    const id = formData?.get('id') as string;
+  async (data): Promise<ActionState> => {
     try {
-      await db.delete(blogPosts).where(eq(blogPosts.id, parseInt(id)))
+      await db.delete(blogPosts).where(eq(blogPosts.id, parseInt(data.id)))
       revalidatePath("/dashboard/blog")
-      revalidatePath(`/blog/${id}`)
-      return { success: true, message: "Post de blog eliminado exitosamente!" }
+      revalidatePath(`/blog/${data.id}`)
+      return createSuccessResponse(
+        undefined,
+        "Post de blog eliminado exitosamente!"
+      )
     } catch (error) {
       console.error("Error deleting blog post:", error)
-      return { error: "Error al eliminar el post de blog" }
+      return handleAPIError(error, "Error al eliminar el post de blog")
     }
-  },
+  }
 )
+
+// Helper function for direct ID-based deletion (for backward compatibility)
+export const deleteBlogPostById = async (id: string): Promise<ActionState> => {
+  const formData = new FormData()
+  formData.append('id', id)
+  return await deleteBlogPost(formData)
+}
 
 export const getBlogPosts = async (page = 1, limit = 12, filters?: any) => {
   try {
@@ -193,15 +188,23 @@ export const getBlogPosts = async (page = 1, limit = 12, filters?: any) => {
   }
 }
 
-export const getBlogPostById = validatedAction(
+export const getBlogPostById = createValidatedAction(
   z.object({ id: z.string() }),
-  async (formData: FormData): Promise<BlogPost | null> => {
-    const id = formData?.get('id') as string;
+  async (data): Promise<ActionState<{ blogPost: BlogPost | null }>> => {
     try {
-      const result = await db.select().from(blogPosts).where(eq(blogPosts.id, parseInt(id)))
-      return result[0] || null
+      const result = await db.select().from(blogPosts).where(eq(blogPosts.id, parseInt(data.id)))
+      return createSuccessResponse({ blogPost: result[0] || null })
     } catch (error) {
       console.error("Error fetching blog post:", error)
-      return null
+      return handleAPIError(error, "Error al obtener el post de blog")
     }
-  })
+  }
+)
+
+// Helper function for direct ID-based fetching (for backward compatibility)
+export const getBlogPostByIdDirect = async (id: string): Promise<BlogPost | null> => {
+  const formData = new FormData()
+  formData.append('id', id)
+  const result = await getBlogPostById(formData)
+  return result.data?.blogPost || null
+}

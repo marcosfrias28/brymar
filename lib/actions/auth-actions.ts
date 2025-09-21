@@ -1,16 +1,19 @@
 "use server"
 
 import { put } from "@vercel/blob"
-import { auth } from "../../lib/auth/auth"
-import { ActionState, validatedAction, SignInActionState, SignUpActionState, ForgotPasswordActionState, ResetPasswordActionState, VerifyEmailActionState, SendVerificationActionState, validatedActionWithUser } from "../../lib/validations"
+import { auth } from "@/lib/auth/auth"
+import {
+  ActionState,
+  createValidatedAction,
+  handleAPIError,
+  createSuccessResponse,
+  createErrorResponse,
+} from "@/lib/validations"
 import { z } from "zod"
-import type { BetterCallAPIError } from "@/utils/types/types"
-// Removed headers import - will be passed as parameter
-import type { User } from "../../lib/db/schema"
-import { sendVerificationOTP as sendVerificationEmail } from "../../lib/email"
-import { redirect } from "next/navigation"
-import { role } from "better-auth/plugins/access"
-import image from "next/image"
+import type { User } from "@/lib/db/schema"
+import { sendVerificationOTP as sendVerificationEmail } from "@/lib/email"
+import { revalidatePath } from "next/cache"
+import { headers } from "next/headers"
 
 const signInSchema = z.object({
   email: z.string().email().min(3).max(255).describe("Email must be valid"),
@@ -27,11 +30,11 @@ export const getUserSession = async (requestHeaders?: Headers, maxRetries = 3, d
       const sessionData = (await auth.api.getSession({
         headers: headers,
       })) as unknown as { user: User | null }
-      
+
       if (sessionData?.user) {
         return sessionData.user
       }
-      
+
       // Si no hay usuario y no es el último intento, esperar antes del siguiente
       if (attempt < maxRetries) {
         await new Promise(resolve => setTimeout(resolve, delay))
@@ -47,84 +50,120 @@ export const getUserSession = async (requestHeaders?: Headers, maxRetries = 3, d
   return null
 }
 
-export const signIn = validatedAction(signInSchema, async (formData: FormData): Promise<SignInActionState> => {
-  const email = formData?.get('email') as string
-  const password = formData?.get('password') as string
-
-  if (!email || !password) {
-    return { error: "Email y contraseña son requeridos", user: undefined, redirect: false }
-  }
-
+async function signInAction(
+  data: { email: string; password: string }
+): Promise<ActionState<{ user: User }>> {
   try {
     const { user } = await auth.api.signInEmail({
       method: "POST",
       body: {
-        email,
-        password,
+        email: data.email,
+        password: data.password,
       },
     })
 
-    return {
-      success: true,
-      redirect: true,
-      url: "/profile",
-      message: "Has iniciado sesión exitosamente",
-      user: user as User,
-    }
+    revalidatePath('/')
+
+    return createSuccessResponse(
+      { user: user as User },
+      "Has iniciado sesión exitosamente",
+      true,
+      "/profile"
+    );
   } catch (error) {
-    const Error = error as BetterCallAPIError
-    return { 
-      error: Error?.body?.message || "Error al iniciar sesión", 
-      user: undefined, 
-      redirect: false 
-    }
+    return handleAPIError(error, "Error al iniciar sesión");
   }
-})
+}
+
+export const signIn = createValidatedAction(signInSchema, signInAction);
+
+export const getUser = async (requestHeaders?: Headers) => {
+  return await getUserSession(requestHeaders)
+}
+
+/**
+ * Server action for logout
+ */
+export async function logoutAction(): Promise<ActionState> {
+  try {
+    const requestHeaders = await headers();
+    
+    await auth.api.signOut({
+      headers: requestHeaders,
+      method: "POST",
+    });
+
+    // Revalidate the home page to update navbar
+    revalidatePath('/');
+
+    return createSuccessResponse(
+      undefined,
+      "Sesión cerrada exitosamente",
+      true,
+      "/"
+    );
+  } catch (error) {
+    return handleAPIError(error, "Error al cerrar sesión");
+  }
+}
 
 const updateUserSchema = z.object({
-    email: z.string().email().min(3).max(255).optional(),
+  email: z.string().email().min(3).max(255).optional(),
   password: z.string().min(8).max(100).optional(),
   name: z.string().min(3).max(100).optional(),
   image: z.instanceof(File).optional(),
   role: z.string().optional(),
 })
 
-export const updateUserAction = validatedActionWithUser(updateUserSchema, async (formData: FormData, user: User): Promise<ActionState> => {
-  const email = formData?.get('email') as string
-  const password = formData?.get('password') as string
-  const name = formData?.get('name') as string
-  const image = formData?.get('image') as File
-  const role = formData?.get('role') as string
+async function updateUserActionFunction(
+  data: {
+    email?: string;
+    password?: string;
+    name?: string;
+    image?: File;
+    role?: string;
+  },
+  user?: User
+): Promise<ActionState> {
+  if (!user) {
+    return createErrorResponse("User is not authenticated");
+  }
+
   try {
-    let imageUrl = image?.name || undefined
-    if (image?.type?.startsWith("image/")) {
-      const { url } = await put(`user/${email}`, image as File, {
+    let imageUrl = data.image?.name || undefined;
+
+    if (data.image?.type?.startsWith("image/")) {
+      const { url } = await put(`user/${data.email || user.email}`, data.image, {
         access: "public",
-      })
-      imageUrl = url
+      });
+      imageUrl = url;
     }
 
     await auth.api.updateUser({
       method: "POST",
       body: {
-        email,
-        password,
-        name,
+        email: data.email,
+        password: data.password,
+        name: data.name,
         image: imageUrl,
-        role,
+        role: data.role,
       },
-    })
-    return {
-      success: true,
-      message: "Usuario actualizado exitosamente",
-    }
+    });
+
+    return createSuccessResponse(
+      undefined,
+      "Usuario actualizado exitosamente"
+    );
   } catch (error) {
-    const Error = error as BetterCallAPIError
-    return {
-      error: Error?.body?.message || "Error actualizando el usuario",
-    }
+    return handleAPIError(error, "Error actualizando el usuario");
   }
-})
+}
+
+export const updateUserAction = createValidatedAction(
+  updateUserSchema,
+  updateUserActionFunction,
+  { withUser: true, getUserFn: getUser }
+);
 
 const signUpSchema = z.object({
   email: z.string().email().min(3).max(255),
@@ -133,22 +172,20 @@ const signUpSchema = z.object({
   image: z.instanceof(File).optional(),
 })
 
-export const signUp = validatedAction(signUpSchema, async (formData: FormData): Promise<SignUpActionState> => {
-  const email = formData?.get('email') as string
-  const password = formData?.get('password') as string
-  const name = formData?.get('name') as string
-  const image = formData?.get('image') as File
+async function signUpAction(
+  data: { email: string; password: string; name: string; image?: File }
+): Promise<ActionState> {
+  let imageUrl: string | null = null;
 
-  let imageUrl = null
-
-  if (image?.type?.startsWith("image/")) {
+  // Handle image upload if provided
+  if (data.image?.type?.startsWith("image/")) {
     try {
-      const { url } = await put(`user/${email}`, image as File, {
+      const { url } = await put(`user/${data.email}`, data.image, {
         access: "public",
-      })
-      imageUrl = url
+      });
+      imageUrl = url;
     } catch (error) {
-      return { error: "Error during image upload" }
+      return createErrorResponse("Error during image upload");
     }
   }
 
@@ -156,150 +193,155 @@ export const signUp = validatedAction(signUpSchema, async (formData: FormData): 
     await auth.api.signUpEmail({
       method: "POST",
       body: {
-        email,
-        password,
-        name,
+        email: data.email,
+        password: data.password,
+        name: data.name,
         image: imageUrl,
       },
-    })
+    });
 
-    // Enviar email de verificación automáticamente
-    const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/verify-email?email=${email}`
+    // Send verification email automatically
+    const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/verify-email?email=${data.email}`;
     await sendVerificationEmail({
-      to: email,
+      to: data.email,
       subject: "Verifica tu cuenta - Brymar Inmobiliaria",
       url: verificationUrl,
-    })
+    });
 
-    return {
-      success: true,
-      redirect: true,
-      url: `/verify-email?email=${email}`,
-      message: "Enlace de verificación enviado exitosamente",
-    }
+    // Revalidate the home page to update navbar
+    revalidatePath('/');
+
+    return createSuccessResponse(
+      undefined,
+      "Enlace de verificación enviado exitosamente",
+      true,
+      `/verify-email?email=${data.email}`
+    );
   } catch (error) {
-    const Error = error as BetterCallAPIError
-    return { error: Error.body?.message || "Error durante el registro", success: false, user: undefined, redirect: false }
+    return handleAPIError(error, "Error durante el registro");
   }
-})
-
-export const getUser = async (requestHeaders?: Headers) => {
-  return await getUserSession(requestHeaders)
 }
 
+export const signUp = createValidatedAction(signUpSchema, signUpAction);
 
-
-
-const forgotPasswordScherma = z.object({
+const forgotPasswordSchema = z.object({
   email: z.string().email().min(3).max(255).describe("Email es requerido"),
-})
+});
 
-export const forgotPassword = validatedAction(forgotPasswordScherma, async (formData: FormData): Promise<ForgotPasswordActionState> => {
-  const email = formData?.get('email') as string;
-
+async function forgotPasswordAction(
+  data: { email: string }
+): Promise<ActionState> {
   try {
     await auth.api.forgetPassword({
       method: "POST",
       body: {
-        email,
+        email: data.email,
         redirectTo: "/reset-password",
       },
-    })
-    return {
-      success: true,
-      message: "Enlace de restablecimiento de contraseña enviado exitosamente",
-    }
+    });
+
+    return createSuccessResponse(
+      undefined,
+      "Enlace de restablecimiento de contraseña enviado exitosamente"
+    );
   } catch (error) {
-    const Error = error as BetterCallAPIError
-    return { error: Error.body?.message || "Error enviando el enlace de restablecimiento de contraseña", success: false }
+    return handleAPIError(error, "Error enviando el enlace de restablecimiento de contraseña");
   }
-})
+}
+
+export const forgotPassword = createValidatedAction(forgotPasswordSchema, forgotPasswordAction);
 
 const resetPasswordSchema = z.object({
   password: z.string().min(8).max(100).describe("Contraseña debe tener al menos 8 caracteres"),
   confirmPassword: z.string().min(8).max(100).describe("Confirmación de contraseña es requerida"),
   token: z.string().min(1).describe("Token es requerido"),
-})
+});
 
-export const resetPassword = validatedAction(resetPasswordSchema, async (formData: FormData): Promise<ResetPasswordActionState> => {
-  const password = formData?.get('password') as string
-  const confirmPassword = formData?.get('confirmPassword') as string
-  const token = formData?.get('token') as string
-
-  if (password !== confirmPassword) {
-    return { error: "Contraseñas no coinciden", success: false }
+async function resetPasswordAction(
+  data: { password: string; confirmPassword: string; token: string }
+): Promise<ActionState> {
+  if (data.password !== data.confirmPassword) {
+    return createErrorResponse("Contraseñas no coinciden");
   }
 
   try {
     await auth.api.resetPassword({
       method: "POST",
       body: {
-        newPassword: password,
-        token,
+        newPassword: data.password,
+        token: data.token,
       },
-    })
-    return {
-      success: true,
-      redirect: true,
-      url: "/sign-in",
-      message: "Password reset successfully. Please sign in with your new password.",
-    }
+    });
+
+    return createSuccessResponse(
+      undefined,
+      "Password reset successfully. Please sign in with your new password.",
+      true,
+      "/sign-in"
+    );
   } catch (error) {
-    const Error = error as BetterCallAPIError
-    return { error: Error.body?.message || "Error resetting password" }
+    return handleAPIError(error, "Error resetting password");
   }
-})
+}
+
+export const resetPassword = createValidatedAction(resetPasswordSchema, resetPasswordAction);
 
 const sendVerificationOTPSchema = z.object({
   email: z.string().email().min(3).max(255).describe("Email must be valid"),
-})
+});
 
-export const sendVerificationOTP = validatedAction(sendVerificationOTPSchema, async (formData: FormData): Promise<SendVerificationActionState> => {
-  const email = formData?.get('email') as string;
-
+async function sendVerificationOTPAction(
+  data: { email: string }
+): Promise<ActionState> {
   try {
     await auth.api.sendVerificationOTP({
       method: "POST",
       body: {
-        email,
+        email: data.email,
         type: "email-verification",
       },
-    })
-    return {
-      success: true,
-      message: "Verification code sent successfully to your email",
-    }
+    });
+
+    return createSuccessResponse(
+      undefined,
+      "Verification code sent successfully to your email"
+    );
   } catch (error) {
-    const Error = error as BetterCallAPIError
-    return { error: Error.body?.message || "Error sending verification email" }
+    return handleAPIError(error, "Error sending verification email");
   }
-})
+}
+
+export const sendVerificationOTP = createValidatedAction(sendVerificationOTPSchema, sendVerificationOTPAction);
 
 const verifyOTPSchema = z.object({
   email: z.string().email().min(3).max(255).describe("Email debe ser válido"),
   otp: z.string().min(6, "OTP debe tener 6 caracteres").max(6, "OTP debe tener 6 caracteres"),
-})
+});
 
-export const verifyOTP = validatedAction(verifyOTPSchema, async (formData: FormData): Promise<VerifyEmailActionState> => {
-  const email = formData?.get('email') as string;
-  const otp = formData?.get('otp') as string;
-
+async function verifyOTPAction(
+  data: { email: string; otp: string }
+): Promise<ActionState<{ verified: boolean }>> {
   try {
     await auth.api.verifyEmailOTP({
       method: "POST",
       body: {
-        email,
-        otp
+        email: data.email,
+        otp: data.otp
       },
-    })
-    return {
-      success: true,
-      redirect: true,
-      url: "/dashboard",
-      message: "Email verified successfully",
-    }
+    });
+
+    // Revalidate the home page to update navbar
+    revalidatePath('/');
+
+    return createSuccessResponse(
+      { verified: true },
+      "Email verified successfully",
+      true,
+      "/dashboard"
+    );
   } catch (error) {
-    const Error = error as BetterCallAPIError
-    return { error: Error.body?.message || "Error verifying email" }
+    return handleAPIError(error, "Error verifying email");
   }
-})
+}
+
+export const verifyOTP = createValidatedAction(verifyOTPSchema, verifyOTPAction);

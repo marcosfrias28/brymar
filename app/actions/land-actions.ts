@@ -1,18 +1,12 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { put } from "@vercel/blob"
+// import { put } from "@vercel/blob" // Unused
 import { z } from "zod"
-import { eq, desc, count, and } from "drizzle-orm"
-import { 
-  type ActionState, 
-  createValidatedAction, 
-  handleAPIError, 
-  createSuccessResponse,
-  createErrorResponse 
-} from "../../lib/validations"
-import db from "../../lib/db/drizzle"
-import { lands } from "../../lib/db/schema"
+import { eq, desc, count } from "drizzle-orm"
+import { type ActionState, createValidatedAction, createSuccessResponse, createErrorResponse } from "@/lib/validations"
+import db from "@/lib/db/drizzle"
+import { lands } from "@/lib/db/schema"
 
 const landSchema = z.object({
   name: z.string().min(3).max(100),
@@ -20,54 +14,36 @@ const landSchema = z.object({
   area: z.number().min(100).max(1000000),
   price: z.number().min(10000).max(50000000),
   location: z.string().min(3).max(100),
-  type: z.enum(["commercial", "residential", "agricultural", "beachfront"]),
+  type: z.enum(["commercial", "residential", "agricultural", "beachfront"]).default("residential"),
 })
 
 async function addLandAction(
-  data: {
-    name: string;
-    description: string;
-    area: number;
-    price: number;
-    location: string;
-    type: "commercial" | "residential" | "agricultural" | "beachfront";
-  }
+  data: { name: string; description: string; area: number; price: number; location: string; type?: string }
 ): Promise<ActionState> {
   try {
-    // Note: Image handling would need to be done differently with the new system
-    // For now, we'll handle it in the component or create a separate image upload action
-    
     await db.insert(lands).values({
       name: data.name,
       description: data.description,
       area: data.area,
       price: data.price,
       location: data.location,
-      type: data.type,
-      images: [], // Will be handled separately
+      type: data.type || "residential",
+      images: [], // Images will be handled separately if needed
       createdAt: new Date(),
-    });
+    })
 
-    revalidatePath("/dashboard/lands");
-    return createSuccessResponse(undefined, "Terreno agregado exitosamente!");
+    revalidatePath("/dashboard/lands")
+    return createSuccessResponse(undefined, "Terreno agregado exitosamente!")
   } catch (error) {
-    console.error("Error adding land:", error);
-    return createErrorResponse("Error al agregar el terreno");
+    console.error("Error adding land:", error)
+    return createErrorResponse("Error al agregar el terreno")
   }
 }
 
-export const addLand = createValidatedAction(landSchema, addLandAction);
+export const addLand = createValidatedAction(landSchema, addLandAction)
 
 async function updateLandAction(
-  data: {
-    id: string;
-    name: string;
-    description: string;
-    area: number;
-    price: number;
-    location: string;
-    type: "commercial" | "residential" | "agricultural" | "beachfront";
-  }
+  data: { id: string; name: string; description: string; area: number; price: number; location: string; type?: string }
 ): Promise<ActionState> {
   try {
     const updateData = {
@@ -76,35 +52,50 @@ async function updateLandAction(
       area: data.area,
       price: data.price,
       location: data.location,
-      type: data.type,
+      type: data.type || "residential",
       updatedAt: new Date(),
-    };
+    }
 
-    await db.update(lands).set(updateData).where(eq(lands.id, parseInt(data.id)));
+    await db.update(lands).set(updateData).where(eq(lands.id, parseInt(data.id)))
 
-    revalidatePath("/dashboard/lands");
-    return createSuccessResponse(undefined, "Terreno actualizado exitosamente!");
+    revalidatePath("/dashboard/lands")
+    return createSuccessResponse(undefined, "Terreno actualizado exitosamente!")
   } catch (error) {
-    console.error("Error updating land:", error);
-    return createErrorResponse("Error al actualizar el terreno");
+    console.error("Error updating land:", error)
+    return createErrorResponse("Error al actualizar el terreno")
   }
 }
 
 export const updateLand = createValidatedAction(
   landSchema.extend({ id: z.string() }),
   updateLandAction
-);
+)
 
-export const deleteLand = async (id: string): Promise<ActionState> => {
+const deleteLandSchema = z.object({
+  id: z.string().min(1, "ID is required"),
+});
+
+async function deleteLandAction(
+  data: { id: string }
+): Promise<ActionState> {
   try {
-    await db.delete(lands).where(eq(lands.id, parseInt(id)))
-    revalidatePath("/dashboard/lands")
-    return { success: true, message: "Terreno eliminado exitosamente!" }
+    await db.delete(lands).where(eq(lands.id, parseInt(data.id)));
+    revalidatePath("/dashboard/lands");
+    return createSuccessResponse(undefined, "Terreno eliminado exitosamente!");
   } catch (error) {
-    console.error("Error deleting land:", error)
-    return { error: "Error al eliminar el terreno" }
+    console.error("Error deleting land:", error);
+    return createErrorResponse("Error al eliminar el terreno");
   }
 }
+
+export const deleteLand = createValidatedAction(deleteLandSchema, deleteLandAction);
+
+// Helper function for backward compatibility
+export const deleteLandById = async (id: string): Promise<ActionState> => {
+  const formData = new FormData();
+  formData.append('id', id);
+  return await deleteLand(formData);
+};
 
 export const getLands = async (page = 1, limit = 12, filters?: any) => {
   try {
