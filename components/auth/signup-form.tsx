@@ -1,7 +1,7 @@
 "use client";
 
 import { AuthFormWrapper, useAuthFields, AuthLink } from "./auth-form-wrapper";
-import { signUp } from "@/app/actions/auth-actions";
+import { signUp } from "@/lib/actions/auth-actions";
 
 export function SignUpForm() {
   const { nameField, emailField, newPasswordField, confirmPasswordField } = useAuthFields();

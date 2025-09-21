@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 const Logo = () => (
-    <Link href="/" className="flex items-center px-7 py-2 text-black dark:text-white">
+    <a href="/" className="flex items-center px-7 py-2 text-black dark:text-white">
         <svg
             width="62"
             height="63"
@@ -26,7 +26,7 @@ const Logo = () => (
         <span className="font-encode-sans text-3xl font-bold -ml-4 mt-4">
             ARBRY
         </span>
-    </Link>
+    </a>
 );
 
 export default Logo;

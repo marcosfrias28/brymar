@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ActionState, BaseActionState } from "@/lib/validations";
+import { ActionState } from "@/lib/validations";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -25,21 +25,21 @@ interface AuthFormField {
   pattern?: string;
 }
 
-interface AuthFormWrapperProps<T extends BaseActionState = ActionState> {
+interface AuthFormWrapperProps<T = void> {
   title: string;
   subtitle: string;
-  action: (formData: FormData) => Promise<T>;
+  action: (formData: FormData) => Promise<ActionState<T>>;
   fields: AuthFormField[];
   submitText: string;
   loadingText: string;
   footerContent?: ReactNode;
-  onSuccess?: (state: T) => void;
+  onSuccess?: (state: ActionState<T>) => void;
   onError?: (error: string) => void;
   className?: string;
   hiddenFields?: { name: string; value: string }[];
 }
 
-export function AuthFormWrapper<T extends BaseActionState = ActionState>({
+export function AuthFormWrapper<T = void>({
   title,
   subtitle,
   action,
@@ -52,22 +52,24 @@ export function AuthFormWrapper<T extends BaseActionState = ActionState>({
   className,
   hiddenFields = []
 }: AuthFormWrapperProps<T>) {
-  const initialState = {
+  const initialState: ActionState<T> = {
     error: "",
     success: false,
     message: "",
-  } as Awaited<T>;
+  };
   
-  const [state, formAction, pending] = useActionState<T, FormData>(
-    action,
+  const [state, formAction, pending] = useActionState(
+    async (prevState: ActionState<T>, formData: FormData) => {
+      return await action(formData);
+    },
     initialState
   );
 
   const router = useRouter();
 
-  const redirect = (state: T) => {
-    if ('redirect' in state && 'url' in state && state.redirect && state.url) {
-      router.push(state.url as string);
+  const redirect = (state: ActionState<T>) => {
+    if (state.redirect && state.url) {
+      router.push(state.url);
     }
   }
 
@@ -90,14 +92,14 @@ export function AuthFormWrapper<T extends BaseActionState = ActionState>({
         redirect(state);
       }
     }
-  }, [state?.success, state?.message, 'redirect' in state ? (state as any).redirect : undefined, 'url' in state ? (state as any).url : undefined, router, onSuccess]);
+  }, [state?.success, state?.message, state?.redirect, state?.url, router, onSuccess]);
 
   // Redirección específica para email no verificado
   useEffect(() => {
-    if (state?.error === "Email not verified" && 'email' in state) {
-      router.push(`/verify-email?email=${(state as any).email}`);
+    if (state?.error === "Email not verified" && state?.data && typeof state.data === 'object' && 'email' in state.data) {
+      router.push(`/verify-email?email=${(state.data as any).email}`);
     }
-  }, [state?.error, router]);
+  }, [state?.error, state?.data, router]);
 
   return (
     <div className={cn("flex flex-col gap-6", className)}>

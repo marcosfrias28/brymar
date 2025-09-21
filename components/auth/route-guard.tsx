@@ -2,13 +2,13 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAdmin } from "@/hooks/use-admin";
 import { Loader2 } from "lucide-react";
-import type { RolePermissions } from "@/lib/auth/permissions";
+import type { Permission, UserRole } from "@/lib/auth/admin-config";
 
 interface RouteGuardProps {
   children: React.ReactNode;
-  requiredPermission?: keyof RolePermissions;
+  requiredPermission?: Permission;
   requiredRoute?: string;
   fallback?: React.ReactNode;
   redirectTo?: string;
@@ -25,14 +25,14 @@ export function RouteGuard({
   fallback,
   redirectTo = "/sign-in"
 }: RouteGuardProps) {
-  const { hasPermission, hasRoutePermission, isLoading, userRole } = usePermissions();
+  const { hasPermission, canAccessRoute, loading, user } = useAdmin();
   const router = useRouter();
 
   useEffect(() => {
-    if (isLoading) return;
+    if (loading) return;
 
     // Se non c'è un utente autenticato, reindirizza al login
-    if (!userRole) {
+    if (!user) {
       router.push(redirectTo);
       return;
     }
@@ -44,52 +44,37 @@ export function RouteGuard({
     }
 
     // Verifica permesso per route specifica
-    if (requiredRoute && !hasRoutePermission(requiredRoute)) {
+    if (requiredRoute && !canAccessRoute(requiredRoute)) {
       router.push(redirectTo);
       return;
     }
-  }, [isLoading, userRole, hasPermission, hasRoutePermission, requiredPermission, requiredRoute, router, redirectTo]);
+  }, [loading, user, hasPermission, canAccessRoute, requiredPermission, requiredRoute, router, redirectTo]);
 
-  // Mostra loading durante la verifica
-  if (isLoading) {
+  // Mostra loader durante il caricamento
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
-        <span className="ml-2">Verificando permisos...</span>
-      </div>
+      fallback || (
+        <div className="flex items-center justify-center min-h-screen">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      )
     );
   }
 
-  // Se non c'è un utente autenticato, mostra fallback o nulla
-  if (!userRole) {
+  // Se non c'è utente, non mostrare nulla (il redirect è gestito nell'useEffect)
+  if (!user) {
+    return null;
+  }
+
+  // Verifica permessi
+  if (requiredPermission && !hasPermission(requiredPermission)) {
     return fallback || null;
   }
 
-  // Verifica permesso specifico
-  if (requiredPermission && !hasPermission(requiredPermission)) {
-    return fallback || (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Acceso Denegado</h2>
-          <p className="text-gray-600">No tienes permisos para acceder a esta sección.</p>
-        </div>
-      </div>
-    );
+  if (requiredRoute && !canAccessRoute(requiredRoute)) {
+    return fallback || null;
   }
 
-  // Verifica permesso per route specifica
-  if (requiredRoute && !hasRoutePermission(requiredRoute)) {
-    return fallback || (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Acceso Denegado</h2>
-          <p className="text-gray-600">No tienes permisos para acceder a esta página.</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Se tutti i controlli passano, mostra il contenuto
   return <>{children}</>;
 }
 
@@ -98,14 +83,14 @@ export function RouteGuard({
  */
 interface PermissionGateProps {
   children: React.ReactNode;
-  permission: keyof RolePermissions;
+  permission: Permission;
   fallback?: React.ReactNode;
 }
 
 export function PermissionGate({ children, permission, fallback }: PermissionGateProps) {
-  const { hasPermission, isLoading } = usePermissions();
+  const { hasPermission, loading } = useAdmin();
 
-  if (isLoading) {
+  if (loading) {
     return null;
   }
 
@@ -121,18 +106,18 @@ export function PermissionGate({ children, permission, fallback }: PermissionGat
  */
 interface RoleGateProps {
   children: React.ReactNode;
-  allowedRoles: string[];
+  allowedRoles: UserRole[];
   fallback?: React.ReactNode;
 }
 
 export function RoleGate({ children, allowedRoles, fallback }: RoleGateProps) {
-  const { userRole, isLoading } = usePermissions();
+  const { hasRole, loading } = useAdmin();
 
-  if (isLoading) {
+  if (loading) {
     return null;
   }
 
-  if (!userRole || !allowedRoles.includes(userRole)) {
+  if (!allowedRoles.some(role => hasRole(role))) {
     return fallback || null;
   }
 

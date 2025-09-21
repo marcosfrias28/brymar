@@ -1,7 +1,8 @@
 "use client";
 
-import { signIn } from "@/app/actions/auth-actions";
-import { SignInActionState } from "@/lib/validations";
+import { signIn } from "@/lib/actions/auth-actions";
+import { ActionState } from "@/lib/validations";
+import { User } from "@/lib/db/schema";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useAuthFields, AuthLink, AuthFormWrapper } from "./auth-form-wrapper";
@@ -33,7 +34,7 @@ export function SignInForm() {
   );
 
   return (
-    <AuthFormWrapper<SignInActionState>
+    <AuthFormWrapper<{ user: User }>
       title="Iniciar Sesión"
       subtitle="Ingresa tu email para acceder a tu cuenta"
       action={signIn}
