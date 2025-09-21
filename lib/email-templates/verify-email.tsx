@@ -275,7 +275,7 @@ export const VerifyEmailTemplate: React.FC<VerifyEmailProps> = ({
                 Pasos para verificar tu cuenta:
               </h3>
               <ol>
-                <li>Haz clic en el botón "Verificar Email" de arriba</li>
+                <li>Haz clic en el botón &quot;Verificar Email&quot; de arriba</li>
                 {otp && <li>O ingresa el código de verificación en la aplicación</li>}
                 <li>Serás redirigido a una página de confirmación</li>
                 <li>¡Tu cuenta estará lista para usar!</li>
