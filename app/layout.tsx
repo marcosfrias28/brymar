@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Navbar } from "@/components/navbar";
 import { Toaster } from "@/components/ui/sonner";
-import { getUser } from "@/app/actions/auth-actions";
+
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -24,7 +24,6 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const user = await getUser();
 
   return (
     <html lang="es" suppressHydrationWarning>
@@ -36,7 +35,7 @@ export default async function LocaleLayout({
           disableTransitionOnChange
         >
           <SidebarProvider>
-            <Navbar user={user} />
+            <Navbar />
             <main className="flex-1 overflow-y-auto overflow-x-hidden bg-background">
               {children}
             </main>

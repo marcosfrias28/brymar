@@ -6,7 +6,8 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { User } from "@/lib/db/schema";
 import { useAvoidRoutes } from "@/hooks/use-avoid-routes";
-import { usePermissions } from "@/hooks/use-permissions";
+import { useAdmin } from "@/hooks/use-admin";
+import { useUser } from "@/hooks/use-user";
 import {
   Home,
   Building2,
@@ -44,7 +45,6 @@ import LogOutButton from "./auth/logout-button";
 
 interface NavbarProps {
   className?: string;
-  user: User | null;
 }
 
 
@@ -61,19 +61,18 @@ const getMenuLabel = (index: number): string => {
   return labels[index] || "";
 };
 
-export function Navbar({ className, user: initialUser }: NavbarProps) {
+export function Navbar({ className }: NavbarProps) {
   const [active, setActive] = useState<boolean>(true);
-  const [user, setUser] = useState<User | null>(initialUser);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const shouldAvoid = useAvoidRoutes();
-  const { permissions, userRole } = usePermissions();
+  const { role, permissions } = useAdmin();
+  const { user } = useUser();
 
   useEffect(() => {
     if (!active) {
       setActive(true);
     }
-    setUser(initialUser);
-  }, [initialUser]);
+  }, []);
 
 
   if (shouldAvoid) return null;
@@ -179,7 +178,7 @@ export function Navbar({ className, user: initialUser }: NavbarProps) {
 
   // Auth buttons with profile functionality
   const AuthButtons = () => {
-    const profileItems = user && userRole ? getProfileItems(userRole, permissions) : [];
+    const profileItems = user && role ? getProfileItems(role, permissions) : [];
 
     return (
       <div className="flex items-center gap-2">
@@ -189,7 +188,7 @@ export function Navbar({ className, user: initialUser }: NavbarProps) {
               <NavigationMenuList>
                 <NavigationMenuItem>
                   <NavigationMenuTrigger className="px-4 py-1.5 text-foreground rounded-full text-center font-sofia-pro text-sm font-medium transition-all hover:bg-secondary hover:text-secondary-foreground hover:shadow-sm flex items-center gap-2 h-auto whitespace-nowrap">
-                    {userRole === 'user' ? (
+                    {role === 'user' ? (
                       <>
                         <UserIcon className="w-4 h-4" />
                         Perfil
@@ -206,11 +205,11 @@ export function Navbar({ className, user: initialUser }: NavbarProps) {
                   <NavigationMenuContent className="bg-white/95 backdrop-blur-sm border border-white/20 shadow-xl w-96">
                     {/* Información del usuario */}
                     <div className="px-3 py-2 text-sm text-muted-foreground border-b border-border/50">
-                      <Link href={userRole === 'admin' ? '/dashboard' : '/profile'}>
+                      <Link href={role === 'admin' ? '/dashboard' : '/profile'}>
                         <div className="font-medium text-foreground whitespace-nowrap truncate">{user.name || user.email}</div>
                         <div className="text-xs capitalize whitespace-nowrap">
-                          {userRole === 'admin' ? 'Administrador' :
-                            userRole === 'agent' ? 'Agente' : 'Usuario'}
+                          {role === 'admin' ? 'Administrador' :
+                            role === 'agent' ? 'Agente' : 'Usuario'}
                         </div>
                       </Link>
                     </div>
@@ -262,7 +261,7 @@ export function Navbar({ className, user: initialUser }: NavbarProps) {
 
   // Mobile Navigation Component
   const MobileNavigation = () => {
-    const profileItems = user && userRole ? getProfileItems(userRole, permissions) : [];
+    const profileItems = user && role ? getProfileItems(role, permissions) : [];
 
     return (
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -359,8 +358,8 @@ export function Navbar({ className, user: initialUser }: NavbarProps) {
                 <div className="px-3 py-2 bg-muted/50 rounded-lg">
                   <div className="font-medium text-sm truncate">{user.name || user.email}</div>
                   <div className="text-xs text-muted-foreground capitalize">
-                    {userRole === 'admin' ? 'Administrador' :
-                      userRole === 'agent' ? 'Agente' : 'Usuario'}
+                    {role === 'admin' ? 'Administrador' :
+                      role === 'agent' ? 'Agente' : 'Usuario'}
                   </div>
                 </div>
 
