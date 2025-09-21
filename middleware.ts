@@ -1,9 +1,11 @@
 import { auth } from "@/lib/auth/auth";
 import {
   isPublicRoute,
-  hasPermissionForRoute,
-  isValidRole,
-} from "@/lib/auth/permissions";
+  getRequiredPermission,
+  shouldRedirectUser,
+  getRedirectUrlForRole,
+  type UserRole,
+} from "@/lib/auth/admin-config";
 import { NextResponse, NextRequest } from "next/server";
 
 /**
@@ -61,17 +63,48 @@ export async function middleware(request: NextRequest) {
     // Redirigir usuarios autenticados de páginas de auth
     if (user.id && (pathname.includes('sign-in') || pathname.includes('sign-up') || pathname.includes('forgot-password') || pathname.includes('reset-password'))) {
       // Redirigir según el rol del usuario (sin requerir verificación de email)
-      const redirectUrl = user.role === "user" ? "/profile" : "/dashboard";
+      const redirectUrl = getRedirectUrlForRole(user.role as UserRole);
       return NextResponse.redirect(new URL(redirectUrl, process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"));
     }
 
-    // Verifica che l'utente abbia un ruolo valido
-    if (!user.role || !isValidRole(user.role)) {
+    // Redirecciones basadas en roles para mejorar UX
+    const userRole = user.role as UserRole;
+    const redirectUrl = shouldRedirectUser(pathname, userRole);
+    
+    if (redirectUrl) {
+      return NextResponse.redirect(new URL(redirectUrl, process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"));
+    }
+
+    // Verifica que el usuario tenga un rol válido
+    const validRoles: UserRole[] = ['admin', 'agent', 'user'];
+    if (!user.role || !validRoles.includes(user.role as UserRole)) {
       return createUnauthorizedResponse("User role not defined or invalid");
     }
-    // Verifica i permessi per la route specifica
-    if (!hasPermissionForRoute(pathname, user.role)) {
-      return createUnauthorizedResponse(`Insufficient permissions for role: ${user.role}`);
+
+    // Verificar permisos para la ruta específica
+    const requiredPermission = getRequiredPermission(pathname);
+    if (requiredPermission) {
+      // Verificar si el usuario tiene el permiso requerido usando la configuración
+      const permissionConfig = {
+        'dashboard.access': ['admin', 'agent'],
+        'analytics.view': ['admin'],
+        'settings.view': ['admin', 'agent'],
+        'properties.view': ['admin', 'agent', 'user'],
+        'properties.manage': ['admin', 'agent'],
+        'lands.view': ['admin', 'agent', 'user'],
+        'lands.manage': ['admin', 'agent'],
+        'blog.view': ['admin', 'agent', 'user'],
+        'blog.manage': ['admin'],
+        'users.view': ['admin'],
+        'users.manage': ['admin'],
+        'profile.access': ['admin', 'agent', 'user'],
+        'profile.manage': ['admin', 'agent', 'user'],
+      } as const;
+
+      const allowedRoles = permissionConfig[requiredPermission as keyof typeof permissionConfig];
+      if (!allowedRoles || !allowedRoles.includes(user.role as any)) {
+        return createUnauthorizedResponse(`Insufficient permissions for role: ${user.role}`);
+      }
     }
 
     // Aggiungi informazioni dell'utente agli header per le route protette

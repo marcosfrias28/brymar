@@ -3,9 +3,16 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import db from "../db/drizzle";
 import { accounts, session, users, verification } from "../db/schema";
 import { nextCookies } from "better-auth/next-js";
-import { emailOTP } from "better-auth/plugins";
+import { emailOTP, admin } from "better-auth/plugins";
 import { error as logError, getSafeUserMessage } from "../logger";
 import { sendVerificationOTP } from "../email";
+
+// Definire i ruoli come oggetto
+const ROLES = {
+  admin: 'admin',
+  agent: 'agent', 
+  user: 'user'
+} as const;
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -55,6 +62,36 @@ export const auth = betterAuth({
         }
       },
     }),
+    // admin({
+    //   roles: ROLES,
+    //   defaultRole: 'user',
+    //   permissions: {
+    //     // Dashboard y administración
+    //     'dashboard.access': ['admin', 'agent'],
+    //     'analytics.view': ['admin'],
+    //     'settings.view': ['admin', 'agent'],
+        
+    //     // Propiedades
+    //     'properties.view': ['admin', 'agent', 'user'],
+    //     'properties.manage': ['admin', 'agent'],
+        
+    //     // Terrenos
+    //     'lands.view': ['admin', 'agent', 'user'],
+    //     'lands.manage': ['admin', 'agent'],
+        
+    //     // Blog
+    //     'blog.view': ['admin', 'agent', 'user'],
+    //     'blog.manage': ['admin'],
+        
+    //     // Usuarios
+    //     'users.view': ['admin'],
+    //     'users.manage': ['admin'],
+        
+    //     // Perfil
+    //     'profile.access': ['admin', 'agent', 'user'],
+    //     'profile.manage': ['admin', 'agent', 'user'],
+    //   },
+    // }),
   ],
   emailAndPassword: {
     enabled: true,
