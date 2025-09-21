@@ -11,17 +11,28 @@ const logoutText = "Cerrar Sesión";
 const pendingText = "Cerrando sesión...";
 
 const LogOutButton = ({ user }: { user: User | null }) => {
-  const { signOut, loading: pending  } = useUser();
+  const { signOut, loading } = useUser();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   if (!user) {
     return null;
   }
 
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await signOut();
+    } finally {
+      // Don't reset isLoggingOut here since we're redirecting
+    }
+  };
+
+  const pending = loading || isLoggingOut;
   const text = pending ? pendingText : logoutText;
 
   return (
       <Button
-        onClick={signOut}
+        onClick={handleLogout}
         variant="ghost"
         className={cn(
           "w-full justify-start flex items-center gap-2",

@@ -45,18 +45,29 @@ export function useUser() {
   }, [])
 
   const signOut = useCallback(async () => {
+    setUserState(prev => ({ ...prev, loading: true }))
+    
     startTransition(async () => {
       try {
-        await authClient.signOut()
-        setUserState({ user: null, loading: false })
-        toast.success('Sesión cerrada exitosamente')
-        router.refresh()
+        const result = await logoutAction()
+        
+        if (result.success) {
+          setUserState({ user: null, loading: false })
+          toast.success(result.message || 'Sesión cerrada exitosamente')
+          
+          // Force a hard refresh to ensure all state is cleared
+          window.location.href = '/'
+        } else {
+          setUserState(prev => ({ ...prev, loading: false }))
+          toast.error(result.error || 'Error cerrando sesión')
+        }
       } catch (error) {
-         const errorMessage = (error as BetterCallAPIError)?.body?.message || "Error cerrando sesión"
-         toast.error(errorMessage)
-       }
+        setUserState(prev => ({ ...prev, loading: false }))
+        const errorMessage = (error as BetterCallAPIError)?.body?.message || "Error cerrando sesión"
+        toast.error(errorMessage)
+      }
     })
-  }, [router])
+  }, [])
 
   // Handle update state changes
   useEffect(() => {
