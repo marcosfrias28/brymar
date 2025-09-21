@@ -12,23 +12,16 @@ const pendingText = "Cerrando sesión...";
 
 const LogOutButton = ({ user }: { user: User | null }) => {
   const { signOut, loading } = useUser();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   if (!user) {
     return null;
   }
 
   const handleLogout = async () => {
-    setIsLoggingOut(true);
-    try {
       await signOut();
-    } finally {
-      // Don't reset isLoggingOut here since we're redirecting
-    }
   };
 
-  const pending = loading || isLoggingOut;
-  const text = pending ? pendingText : logoutText;
+  const text = loading ? pendingText : logoutText;
 
   return (
       <Button
@@ -40,9 +33,9 @@ const LogOutButton = ({ user }: { user: User | null }) => {
           "dark:hover:bg-red-900/20 dark:hover:text-red-400",
           "transition-colors duration-200"
         )}
-        disabled={pending}
+        disabled={loading}
       >
-        {pending ? (
+        {loading ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
             {text}
