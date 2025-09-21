@@ -5,7 +5,7 @@ import { AuthFormWrapper } from "@/components/auth/auth-form-wrapper";
 import { useSearchParams, useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth/auth-client";
 import { toast } from "sonner";
-import { sendVerificationOTPAction, verifyOTPAction } from "@/app/actions/verify-email-actions";
+import { sendVerificationOTP, verifyOTP } from "@/lib/actions/auth-actions";
 
 const VerifyEmailPage = () => {
   const searchParams = useSearchParams();
@@ -66,7 +66,7 @@ const VerifyEmailPage = () => {
       const formData = new FormData();
       formData.append('email', email);
       
-      const result = await sendVerificationOTPAction(formData);
+      const result = await sendVerificationOTP(formData);
       
       if (result.success) {
         toast.success('Código reenviado exitosamente');
@@ -89,7 +89,7 @@ const VerifyEmailPage = () => {
     // Agregar email al formData
     formData.append('email', email);
     
-    const result = await verifyOTPAction(formData);
+    const result = await verifyOTP(formData);
     
     if (result.success) {
       toast.success('Email verificado exitosamente');

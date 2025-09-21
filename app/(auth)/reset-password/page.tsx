@@ -3,7 +3,7 @@
 import React from "react";
 import { AuthFormWrapper, useAuthFields, AuthLink } from "@/components/auth/auth-form-wrapper";
 import { useSearchParams } from "next/navigation";
-import { resetPassword } from "@/app/actions/auth-actions";
+import { resetPassword } from "@/lib/actions/auth-actions";
 import Link from "next/link";
 
 const ResetPasswordPage = () => {

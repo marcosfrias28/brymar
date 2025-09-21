@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { forgotPassword } from "@/app/actions/auth-actions";
+import { forgotPassword } from "@/lib/actions/auth-actions";
 import { useAuthFields, AuthLink, AuthFormWrapper } from "@/components/auth/auth-form-wrapper";
 
 const ForgotPasswordPage = () => {
