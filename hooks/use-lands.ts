@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useActionState } from 'react'
-import { getLands, getLandById, addLand, updateLand, deleteLand } from '@/app/actions/land-actions'
+import { getLands, getLandById, addLand, updateLand, deleteLandById as deleteLandAction } from '@/app/actions/land-actions'
 import { toast } from 'sonner'
 import { ActionState } from '@/lib/validations'
 
@@ -47,11 +47,21 @@ export const useLands = (initialPage = 1, initialFilters?: any): UseLandsReturn 
   const [filters, setFilters] = useState(initialFilters)
 
   // Action states for form submissions
-  const [createState, createAction] = useActionState(addLand, { success: false, message: '', errors: {} })
-  const [updateState, updateAction] = useActionState(updateLand, { success: false, message: '', errors: {} })
+  const [createState, createAction] = useActionState(
+    async (prevState: ActionState, formData: FormData) => {
+      return await addLand(formData);
+    },
+    { success: false, message: '' } as ActionState
+  )
+  const [updateState, updateAction] = useActionState(
+    async (prevState: ActionState, formData: FormData) => {
+      return await updateLand(formData);
+    },
+    { success: false, message: '' } as ActionState
+  )
   
-  const isCreating = createState.success === false && Object.keys(createState.errors || {}).length === 0 && createState.message === ''
-  const isUpdating = updateState.success === false && Object.keys(updateState.errors || {}).length === 0 && updateState.message === ''
+  const isCreating = createState.success === undefined && Object.keys(createState).length > 1
+  const isUpdating = updateState.success === undefined && Object.keys(updateState).length > 1
 
   const fetchLands = async (page = currentPage, newFilters = filters) => {
     try {
@@ -88,9 +98,9 @@ export const useLands = (initialPage = 1, initialFilters?: any): UseLandsReturn 
     if (createState.success) {
       toast.success(createState.message || 'Terreno creado exitosamente')
       refreshLands()
-    } else if (createState.message && !createState.success) {
-      toast.error(createState.message)
-      setError(createState.message)
+    } else if (createState.error) {
+      toast.error(createState.error)
+      setError(createState.error)
     }
   }, [createState])
 
@@ -98,16 +108,16 @@ export const useLands = (initialPage = 1, initialFilters?: any): UseLandsReturn 
     if (updateState.success) {
       toast.success(updateState.message || 'Terreno actualizado exitosamente')
       refreshLands()
-    } else if (updateState.message && !updateState.success) {
-      toast.error(updateState.message)
-      setError(updateState.message)
+    } else if (updateState.error) {
+      toast.error(updateState.error)
+      setError(updateState.error)
     }
   }, [updateState])
 
   const deleteLandById = async (id: number): Promise<boolean> => {
     try {
       setError(null)
-      const result = await deleteLand(id.toString())
+      const result = await deleteLandAction(id.toString())
       
       if (result.success) {
         toast.success(result.message || 'Terreno eliminado exitosamente')
@@ -172,8 +182,13 @@ export const useLand = (id?: number): UseLandReturn => {
   const [error, setError] = useState<string | null>(null)
 
   // Action state for form submissions
-  const [updateState, updateAction] = useActionState(updateLand, { success: false, message: '', errors: {} })
-  const isUpdating = updateState.success === false && Object.keys(updateState.errors || {}).length === 0 && updateState.message === ''
+  const [updateState, updateAction] = useActionState(
+    async (prevState: ActionState, formData: FormData) => {
+      return await updateLand(formData);
+    },
+    { success: false, message: '' } as ActionState
+  )
+  const isUpdating = updateState.success === undefined && Object.keys(updateState).length > 1
 
   const fetchLand = async (landId: number) => {
     try {
@@ -202,9 +217,9 @@ export const useLand = (id?: number): UseLandReturn => {
     if (updateState.success && land?.id) {
       toast.success(updateState.message || 'Terreno actualizado exitosamente')
       fetchLand(land.id)
-    } else if (updateState.message && !updateState.success) {
-      toast.error(updateState.message)
-      setError(updateState.message)
+    } else if (updateState.error) {
+      toast.error(updateState.error)
+      setError(updateState.error)
     }
   }, [updateState, land?.id])
 
@@ -213,7 +228,7 @@ export const useLand = (id?: number): UseLandReturn => {
     
     try {
       setError(null)
-      const result = await deleteLand(land.id.toString())
+      const result = await deleteLandAction(land.id.toString())
       
       if (result.success) {
         toast.success(result.message || 'Terreno eliminado exitosamente')

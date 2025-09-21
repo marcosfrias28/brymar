@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useActionState } from 'react'
-import { getProperties, getPropertyById, addProperty, updateProperty, deleteProperty, searchProperties } from '@/app/actions/property-actions'
+import { getProperties, getPropertyById, addProperty, updateProperty, deletePropertyById as deletePropertyAction, searchProperties } from '@/app/actions/property-actions'
 import { toast } from 'sonner'
 import { ActionState } from '@/lib/validations'
 
@@ -51,8 +51,18 @@ export const useProperties = (initialPage = 1, initialFilters?: any): UsePropert
   const [filters, setFilters] = useState(initialFilters)
 
   // useActionState for form submissions
-  const [createState, createAction] = useActionState(addProperty, { success: false })
-  const [updateState, updateAction] = useActionState(updateProperty, { success: false })
+  const [createState, createAction] = useActionState(
+    async (prevState: ActionState, formData: FormData) => {
+      return await addProperty(formData);
+    },
+    { success: false } as ActionState
+  )
+  const [updateState, updateAction] = useActionState(
+    async (prevState: ActionState, formData: FormData) => {
+      return await updateProperty(formData);
+    },
+    { success: false } as ActionState
+  )
 
   const isCreating = createState.success === undefined && Object.keys(createState).length > 1
   const isUpdating = updateState.success === undefined && Object.keys(updateState).length > 1
@@ -129,7 +139,7 @@ export const useProperties = (initialPage = 1, initialFilters?: any): UsePropert
   const deletePropertyById = async (id: number): Promise<boolean> => {
     try {
       setError(null)
-      const result = await deleteProperty(id.toString())
+      const result = await deletePropertyAction(id.toString())
 
       if (result.success) {
         toast.success(result.message || 'Propiedad eliminada exitosamente')
@@ -194,7 +204,12 @@ export const useProperty = (id?: number): UsePropertyReturn => {
   const [error, setError] = useState<string | null>(null)
 
   // useActionState for form submissions
-  const [updateState, updateAction] = useActionState(updateProperty, { success: false })
+  const [updateState, updateAction] = useActionState(
+    async (prevState: ActionState, formData: FormData) => {
+      return await updateProperty(formData);
+    },
+    { success: false } as ActionState
+  )
   const isUpdating = updateState.success === undefined && Object.keys(updateState).length > 1
 
   const fetchProperty = async (propertyId: number) => {
@@ -236,7 +251,7 @@ export const useProperty = (id?: number): UsePropertyReturn => {
 
     try {
       setError(null)
-      const result = await deleteProperty(property.id.toString())
+      const result = await deletePropertyAction(property.id.toString())
 
       if (result.success) {
         toast.success(result.message || 'Propiedad eliminada exitosamente')

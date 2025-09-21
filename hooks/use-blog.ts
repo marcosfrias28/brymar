@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useActionState } from 'react'
-import { getBlogPosts, getBlogPostById, addBlogPost, updateBlogPost, deleteBlogPost } from '@/app/actions/blog-actions'
+import { getBlogPosts, getBlogPostByIdDirect, addBlogPost, updateBlogPost, deleteBlogPostById } from '@/app/actions/blog-actions'
 import { toast } from 'sonner'
 import { ActionState } from '@/lib/validations'
 
@@ -10,8 +10,8 @@ export interface BlogPost {
   title: string
   content: string
   author: string
-  category: 'market-analysis' | 'investment-tips' | 'property-news' | 'legal-advice' | 'lifestyle'
-  status: 'draft' | 'published'
+  category: string
+  status: string
   image: string | null
   readingTime: number
   createdAt: Date
@@ -31,8 +31,8 @@ export interface UseBlogPostsReturn {
   deleteBlogPostById: (id: string) => Promise<boolean>
   refreshBlogPosts: () => Promise<void>
   // Action states for form submissions
-  createState: ActionState
-  updateState: ActionState
+  createState: ActionState<{ blogPost: BlogPost }>
+  updateState: ActionState<{ blogPost: BlogPost }>
   isCreating: boolean
   isUpdating: boolean
 }
@@ -47,11 +47,21 @@ export const useBlogPosts = (initialPage = 1, initialFilters?: any): UseBlogPost
   const [filters, setFilters] = useState(initialFilters)
 
   // Action states for form submissions
-  const [createState, createAction] = useActionState(addBlogPost, { success: false, message: '', errors: {} })
-  const [updateState, updateAction] = useActionState(updateBlogPost, { success: false, message: '', errors: {} })
+  const [createState, createAction] = useActionState(
+    async (prevState: ActionState<{ blogPost: BlogPost }>, formData: FormData) => {
+      return await addBlogPost(formData);
+    },
+    { success: false, message: '' } as ActionState<{ blogPost: BlogPost }>
+  )
+  const [updateState, updateAction] = useActionState(
+    async (prevState: ActionState<{ blogPost: BlogPost }>, formData: FormData) => {
+      return await updateBlogPost(formData);
+    },
+    { success: false, message: '' } as ActionState<{ blogPost: BlogPost }>
+  )
   
-  const isCreating = createState.success === false && Object.keys(createState.errors || {}).length === 0 && createState.message === ''
-  const isUpdating = updateState.success === false && Object.keys(updateState.errors || {}).length === 0 && updateState.message === ''
+  const isCreating = createState.success === undefined && Object.keys(createState).length > 1
+  const isUpdating = updateState.success === undefined && Object.keys(updateState).length > 1
 
   const fetchBlogPosts = async (page = currentPage, newFilters = filters) => {
     try {
@@ -88,9 +98,9 @@ export const useBlogPosts = (initialPage = 1, initialFilters?: any): UseBlogPost
     if (createState.success) {
       toast.success(createState.message || 'Post creado exitosamente')
       refreshBlogPosts()
-    } else if (createState.message && !createState.success) {
-      toast.error(createState.message)
-      setError(createState.message)
+    } else if (createState.error) {
+      toast.error(createState.error)
+      setError(createState.error)
     }
   }, [createState])
 
@@ -98,16 +108,16 @@ export const useBlogPosts = (initialPage = 1, initialFilters?: any): UseBlogPost
     if (updateState.success) {
       toast.success(updateState.message || 'Post actualizado exitosamente')
       refreshBlogPosts()
-    } else if (updateState.message && !updateState.success) {
-      toast.error(updateState.message)
-      setError(updateState.message)
+    } else if (updateState.error) {
+      toast.error(updateState.error)
+      setError(updateState.error)
     }
   }, [updateState])
 
-  const deleteBlogPostById = async (id: string): Promise<boolean> => {
+  const deleteBlogPostByIdAction = async (id: string): Promise<boolean> => {
     try {
       setError(null)
-      const result = await deleteBlogPost(id)
+      const result = await deleteBlogPostById(id)
       
       if (result.success) {
         toast.success(result.message || 'Post eliminado exitosamente')
@@ -145,7 +155,7 @@ export const useBlogPosts = (initialPage = 1, initialFilters?: any): UseBlogPost
     fetchBlogPosts,
     createBlogPost,
     updateBlogPostById,
-    deleteBlogPostById,
+    deleteBlogPostById: deleteBlogPostByIdAction,
     refreshBlogPosts,
     createState,
     updateState,
@@ -161,7 +171,7 @@ export interface UseBlogPostReturn {
   fetchBlogPost: (id: string) => Promise<void>
   updateBlogPost: (formData: FormData) => void
   deleteBlogPost: () => Promise<boolean>
-  updateState: ActionState
+  updateState: ActionState<{ blogPost: BlogPost }>
   isUpdating: boolean
 }
 
@@ -171,16 +181,21 @@ export const useBlogPost = (id?: string): UseBlogPostReturn => {
   const [error, setError] = useState<string | null>(null)
 
   // Action state for form submissions
-  const [updateState, updateAction] = useActionState(updateBlogPost, { success: false, message: '', errors: {} })
-  const isUpdating = updateState.success === false && Object.keys(updateState.errors || {}).length === 0 && updateState.message === ''
+  const [updateState, updateAction] = useActionState(
+    async (prevState: ActionState<{ blogPost: BlogPost }>, formData: FormData) => {
+      return await updateBlogPost(formData);
+    },
+    { success: false, message: '' } as ActionState<{ blogPost: BlogPost }>
+  )
+  const isUpdating = updateState.success === undefined && Object.keys(updateState).length > 1
 
   const fetchBlogPost = async (postId: string) => {
     try {
       setLoading(true)
       setError(null)
       
-      const result = await getBlogPostById(postId)
-      setBlogPost(result as BlogPost)
+      const result = await getBlogPostByIdDirect(postId)
+      setBlogPost(result)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al cargar post'
       setError(errorMessage)
@@ -203,9 +218,9 @@ export const useBlogPost = (id?: string): UseBlogPostReturn => {
       if (blogPost?.id) {
         fetchBlogPost(blogPost.id.toString())
       }
-    } else if (updateState.message && !updateState.success) {
-      setError(updateState.message)
-      toast.error(updateState.message)
+    } else if (updateState.error) {
+      setError(updateState.error)
+      toast.error(updateState.error)
     }
   }, [updateState, blogPost?.id])
 
@@ -214,7 +229,7 @@ export const useBlogPost = (id?: string): UseBlogPostReturn => {
     
     try {
       setError(null)
-      const result = await deleteBlogPost(blogPost.id.toString())
+      const result = await deleteBlogPostById(blogPost.id.toString())
       
       if (result.success) {
         toast.success(result.message || 'Post eliminado exitosamente')
