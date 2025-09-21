@@ -38,7 +38,7 @@ export function LandForm() {
       formData.append('location', `${address}, ${city}, ${province}`);
       formData.append('type', 'residential');
       
-      await addLand({}, formData);
+      await addLand(formData);
       toast.success("Terreno creado exitosamente");
       // Reset form
       e.currentTarget.reset();

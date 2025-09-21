@@ -18,11 +18,13 @@ import { PropertyCard } from "@/components/properties/property-card";
 import { Property } from "@/utils/types/types";
 
 export default function PropertySearch() {
-  const [state, formAction, isPending] = useActionState<ActionState, FormData>(
-    searchPropertiesAction,
+  const [state, formAction, isPending] = useActionState(
+    async (prevState: ActionState<{ properties: any[]; total: number; totalPages: number; currentPage: number }>, formData: FormData) => {
+      return await searchPropertiesAction(formData);
+    },
     {
       error: "",
-    }
+    } as ActionState<{ properties: any[]; total: number; totalPages: number; currentPage: number }>
   );
   const [view, setView] = useState<"grid" | "list">("grid");
 
@@ -38,7 +40,7 @@ export default function PropertySearch() {
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">
-              {`${state?.properties?.length || 0} propiedades encontradas`}
+              {`${state?.data?.properties?.length || 0} propiedades encontradas`}
             </h1>
             <div className="flex items-center gap-2">
               <Select value={view} onValueChange={(value: "grid" | "list") => setView(value)}>
@@ -61,14 +63,14 @@ export default function PropertySearch() {
             <div className="lg:col-span-3">
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 <div className="order-2 xl:order-1">
-                  {state?.properties && state.properties.length > 0 ? (
+                  {state?.data?.properties && state.data.properties.length > 0 ? (
                     <div
                       className={cn(
                         "grid gap-4",
                         view === "grid" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"
                       )}
                     >
-                      {state.properties.map((property: Property) => (
+                      {state.data.properties.map((property: Property) => (
                         <PropertyCard
                           key={property.id}
                           property={property}
@@ -85,7 +87,7 @@ export default function PropertySearch() {
 
                 <div className="order-1 xl:order-2">
                   <div className="sticky top-4">
-                    <PropertyMap properties={state?.properties || []} />
+                    <PropertyMap properties={state?.data?.properties || []} />
                   </div>
                 </div>
               </div>

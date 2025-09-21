@@ -63,13 +63,16 @@ export function ProfileFavorites() {
     setRemovingId(favoriteId);
 
     try {
-      const result = await removeFavoriteAction(user.id, favoriteId);
+      const formData = new FormData();
+      formData.append('userId', user.id);
+      formData.append('favoriteId', favoriteId);
+      const result = await removeFavoriteAction(formData);
 
       if (result.success) {
-        toast.success(result.message);
+        toast.success(result.message || "Rimosso dai preferiti");
         await removeFavorite(favoriteId);
       } else {
-        toast.error(result.message);
+        toast.error(result.error || "Errore durante la rimozione");
       }
     } catch (error) {
       toast.error("Errore durante la rimozione del preferito");
@@ -248,7 +251,7 @@ export function ProfileFavorites() {
                             Rimuovi dai preferiti
                           </AlertDialogTitle>
                           <AlertDialogDescription>
-                            Sei sicuro di voler rimuovere "{favorite.title}" dai
+                            Sei sicuro di voler rimuovere &quot;{favorite.title}&quot; dai
                             tuoi preferiti? Questa azione non può essere
                             annullata.
                           </AlertDialogDescription>

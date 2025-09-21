@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { signIn } from "@/app/actions/auth-actions"
+import { signIn } from "@/lib/actions/auth-actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -26,19 +26,19 @@ export default function TestAuthPage() {
       formData.append("email", email)
       formData.append("password", password)
 
-      const result = await signIn({}, formData)
+      const result = await signIn(formData)
 
       if (result.error) {
         toast.error(result.error)
-      } else if (result.success && result.user) {
+      } else if (result.success && result.data?.user) {
         // Mostrar información del usuario
         setUserInfo({
-          ...result.user,
+          ...result.data.user,
           redirectUrl: result.url
         })
         
         // Toast con información del rol
-        toast.success(`¡Bienvenido! Rol: ${result.user.role}. Redirigiendo a ${result.url}...`)
+        toast.success(`¡Bienvenido! Rol: ${result.data.user.role}. Redirigiendo a ${result.url}...`)
         
         // Redirección con delay para mostrar la información
         setTimeout(() => {

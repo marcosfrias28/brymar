@@ -285,7 +285,7 @@ export default async function PropertyDetailPage({ params }: PropertyDetailPageP
                 Step inside to discover an open-concept layout that seamlessly connects the kitchen, dining, and living spaces. the gourmet kitchen is equipped with top-of-the-line appliances, sleek cabinetry, and a large island perfect for casual dining or meal prep. the sunlit living room offers floor-to-ceiling windows, creating a bright and airy atmosphere while providing stunning views of the outdoor space.
               </p>
               <p className="text-dark dark:text-white text-xm">
-                The primary suite serves as a private retreat with a spa-like ensuite bathroom and a spacious walk-in closet. each additional bedroom is thoughtfully designed with comfort and style in mind, offering ample space and modern finishes. the home's bathrooms feature high-end fixtures, custom vanities, and elegant tiling.
+                The primary suite serves as a private retreat with a spa-like ensuite bathroom and a spacious walk-in closet. each additional bedroom is thoughtfully designed with comfort and style in mind, offering ample space and modern finishes. the home&apos;s bathrooms feature high-end fixtures, custom vanities, and elegant tiling.
               </p>
               <p className="text-dark dark:text-white text-xm">
                 Outdoor living is equally impressive, with a beautifully landscaped backyard, multiple lounge areas, and two fully equipped bar spaces.

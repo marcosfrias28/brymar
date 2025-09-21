@@ -80,13 +80,16 @@ export function ProfileNotifications() {
     setProcessingIds(prev => [...prev, notificationId]);
     
     try {
-      const result = await markNotificationAsReadAction(user.id, notificationId);
+      const formData = new FormData();
+      formData.append('userId', user.id);
+      formData.append('notificationId', notificationId);
+      const result = await markNotificationAsReadAction(formData);
       
       if (result.success) {
-        toast.success(result.message);
+        toast.success(result.message || "Notifica segnata come letta");
         await markAsRead(notificationId);
       } else {
-        toast.error(result.message);
+        toast.error(result.error || "Errore durante l'aggiornamento");
       }
     } catch (error) {
       toast.error("Errore durante l'aggiornamento della notifica");
@@ -101,13 +104,15 @@ export function ProfileNotifications() {
     setIsMarkingAllRead(true);
     
     try {
-      const result = await markAllNotificationsAsReadAction(user.id);
+      const formData = new FormData();
+      formData.append('userId', user.id);
+      const result = await markAllNotificationsAsReadAction(formData);
       
       if (result.success) {
-        toast.success(result.message);
+        toast.success(result.message || "Tutte le notifiche segnate come lette");
         await markAllAsRead();
       } else {
-        toast.error(result.message);
+        toast.error(result.error || "Errore durante l'aggiornamento");
       }
     } catch (error) {
       toast.error("Errore durante l'aggiornamento delle notifiche");
