@@ -18,7 +18,6 @@ export default function ProfilePage() {
       </div>
 
       {/* Content Section */}
-      <div className="px-4 lg:px-6">
         <Tabs defaultValue="profile" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="profile" className="flex items-center gap-2">
@@ -59,7 +58,6 @@ export default function ProfilePage() {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
     </div>
   );
 }
