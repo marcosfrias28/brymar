@@ -3,12 +3,11 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Navbar } from "@/components/navbar";
 import { Toaster } from "@/components/ui/sonner";
-
-
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { SWRConfig } from "swr";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "Marbry Inmobiliaria - Experience the Epitome of Home Comfort",
@@ -18,30 +17,36 @@ export const metadata: Metadata = {
 
 export default async function LocaleLayout({
   children,
-  params,
-}: {
+}: // params,
+{
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
-
   return (
     <html lang="es" suppressHydrationWarning>
       <body className={`${inter.className} flex flex-col min-h-screen`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
-          disableTransitionOnChange
+        <SWRConfig
+          value={{
+            dedupingInterval: 300000, // 5 minutes deduplication
+            revalidateOnFocus: false,
+            revalidateOnReconnect: false,
+          }}
         >
-          <SidebarProvider>
-            <Navbar />
-            <main className="flex-1 overflow-y-auto overflow-x-hidden bg-background">
-              {children}
-            </main>
-            <Toaster richColors={true} position="bottom-center" />
-          </SidebarProvider>
-        </ThemeProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem={false}
+            disableTransitionOnChange
+          >
+            <SidebarProvider>
+              <Navbar />
+              <main className="flex-1 overflow-y-auto overflow-x-hidden bg-background">
+                {children}
+              </main>
+              <Toaster richColors={true} position="bottom-center" />
+            </SidebarProvider>
+          </ThemeProvider>
+        </SWRConfig>
       </body>
     </html>
   );

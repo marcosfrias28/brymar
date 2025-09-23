@@ -135,6 +135,7 @@ export const properties = pgTable("properties", {
   area: integer("area").notNull(),
   location: text("location").notNull(),
   status: text("status").notNull(),
+  featured: boolean("featured").default(false),
   images: jsonb("images").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -197,6 +198,36 @@ export const userFavorites = pgTable("user_favorites", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Page Sections Table - Para contenido modificable por admin
+export const pageSections = pgTable("page_sections", {
+  id: serial("id").primaryKey(),
+  page: text("page").notNull(), // "home", "contact", "about", etc.
+  section: text("section").notNull(), // "hero", "categories", "team", "faq", "contact-form", etc.
+  title: text("title"),
+  subtitle: text("subtitle"),
+  description: text("description"),
+  content: jsonb("content").default({}), // Contenido específico de cada sección
+  images: jsonb("images").default([]), // Array de URLs de imágenes
+  settings: jsonb("settings").default({}), // Configuraciones específicas (colores, layout, etc.)
+  isActive: boolean("is_active").default(true),
+  order: integer("order").default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Contact Information Table - Para datos de contacto modificables
+export const contactInfo = pgTable("contact_info", {
+  id: serial("id").primaryKey(),
+  type: text("type").notNull(), // "phone", "email", "address", "social"
+  label: text("label").notNull(), // "Teléfono Principal", "Email Soporte", etc.
+  value: text("value").notNull(), // El valor actual
+  icon: text("icon"), // Nombre del icono de Lucide
+  isActive: boolean("is_active").default(true),
+  order: integer("order").default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Type Inference
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -234,3 +265,9 @@ export type NewCategory = typeof categories.$inferInsert;
 
 export type UserFavorite = typeof userFavorites.$inferSelect;
 export type NewUserFavorite = typeof userFavorites.$inferInsert;
+
+export type PageSection = typeof pageSections.$inferSelect;
+export type NewPageSection = typeof pageSections.$inferInsert;
+
+export type ContactInfo = typeof contactInfo.$inferSelect;
+export type NewContactInfo = typeof contactInfo.$inferInsert;

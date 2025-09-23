@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useActionState } from 'react'
-import { getProperties, getPropertyById, addProperty, updateProperty, deletePropertyById as deletePropertyAction, searchProperties } from '@/app/actions/property-actions'
+import { getProperties, getPropertyById, addProperty, updateProperty, deleteProperty, searchProperties } from '@/lib/actions/property-actions'
 import { toast } from 'sonner'
 import { ActionState } from '@/lib/validations'
 
@@ -16,6 +16,7 @@ export interface Property {
   area: number
   location: string
   status: 'sale' | 'rent'
+  featured?: boolean
   images: string[]
   createdAt: Date
   updatedAt: Date | null
@@ -139,7 +140,9 @@ export const useProperties = (initialPage = 1, initialFilters?: any): UsePropert
   const deletePropertyById = async (id: number): Promise<boolean> => {
     try {
       setError(null)
-      const result = await deletePropertyAction(id.toString())
+      const formData = new FormData()
+      formData.append('id', id.toString())
+      const result = await deleteProperty(formData)
 
       if (result.success) {
         toast.success(result.message || 'Propiedad eliminada exitosamente')
@@ -251,7 +254,9 @@ export const useProperty = (id?: number): UsePropertyReturn => {
 
     try {
       setError(null)
-      const result = await deletePropertyAction(property.id.toString())
+      const formData = new FormData()
+      formData.append('id', property.id.toString())
+      const result = await deleteProperty(formData)
 
       if (result.success) {
         toast.success(result.message || 'Propiedad eliminada exitosamente')
