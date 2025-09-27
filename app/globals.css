@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../styles/mobile-wizard.css";
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -53,6 +54,16 @@
   --shadow-2xl: 0px 4px 10px 0px hsl(0 0% 0% / 0.25);
   --tracking-normal: normal;
   --spacing: 0.25rem;
+
+  /* Responsive spacing variables */
+  --spacing-mobile: 0.75rem;
+  --spacing-tablet: 1rem;
+  --spacing-desktop: 1.5rem;
+
+  /* Touch target sizes */
+  --touch-target-sm: 40px;
+  --touch-target-md: 44px;
+  --touch-target-lg: 48px;
 }
 
 .dark {
@@ -165,6 +176,28 @@
   --tracking-wide: calc(var(--tracking-normal) + 0.025em);
   --tracking-wider: calc(var(--tracking-normal) + 0.05em);
   --tracking-widest: calc(var(--tracking-normal) + 0.1em);
+
+  /* Custom animations for Tailwind v4 */
+  --animate-fade-in: fade-in 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --animate-fade-out: fade-out 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --animate-slide-in-bottom: slide-in-from-bottom 300ms
+    cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --animate-slide-in-top: slide-in-from-top 300ms
+    cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --animate-slide-in-left: slide-in-from-left 300ms
+    cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --animate-slide-in-right: slide-in-from-right 300ms
+    cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --animate-scale-in: scale-in 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --animate-scale-out: scale-out 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --animate-bounce-subtle: bounce-subtle 200ms
+    cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --animate-glow: glow 2s ease-in-out infinite;
+  --animate-shimmer: shimmer 2s infinite linear;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-glow: pulse-glow 3s ease-in-out infinite;
+  --animate-accordion-down: accordion-down 300ms cubic-bezier(0.87, 0, 0.13, 1);
+  --animate-accordion-up: accordion-up 300ms cubic-bezier(0.87, 0, 0.13, 1);
 }
 
 body {
@@ -179,8 +212,11 @@ body {
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
   }
-} /* Shi
-mmer animation for skeleton loading */
+}
+
+/* Enhanced animations for micro-interactions */
+
+/* Shimmer animation for skeleton loading */
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
@@ -192,6 +228,188 @@ mmer animation for skeleton loading */
 
 .animate-shimmer {
   animation: shimmer 2s infinite linear;
+}
+
+/* Smooth slide animations */
+@keyframes slide-in-from-bottom {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-from-top {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-from-left {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-from-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Fade animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Scale animations for micro-interactions */
+@keyframes scale-in {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes scale-out {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+/* Bounce animation for buttons */
+@keyframes bounce-subtle {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Glow animation for focus states */
+@keyframes glow {
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(var(--secondary), 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(var(--secondary), 0.6);
+  }
+}
+
+/* Pulse animation with secondary colors */
+@keyframes pulse-secondary {
+  0%,
+  100% {
+    background-color: rgb(var(--secondary) / 0.1);
+  }
+  50% {
+    background-color: rgb(var(--secondary) / 0.2);
+  }
+}
+
+/* Animation classes */
+.animate-slide-in-bottom {
+  animation: slide-in-from-bottom 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.animate-slide-in-top {
+  animation: slide-in-from-top 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.animate-slide-in-left {
+  animation: slide-in-from-left 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.animate-slide-in-right {
+  animation: slide-in-from-right 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.animate-fade-in {
+  animation: fade-in 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.animate-fade-out {
+  animation: fade-out 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.animate-scale-in {
+  animation: scale-in 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.animate-scale-out {
+  animation: scale-out 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 200ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* Staggered animation delays */
+.animation-delay-100 {
+  animation-delay: 100ms;
+}
+
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-300 {
+  animation-delay: 300ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
+
+.animation-delay-500 {
+  animation-delay: 500ms;
 }
 /* Line clamp utilities */
 .line-clamp-3 {
@@ -246,6 +464,50 @@ mmer animation for skeleton loading */
     background-color: rgba(255, 255, 255, 0.6);
   }
 }
+
+/* Secondary color utility classes */
+.secondary-accent {
+  @apply bg-secondary/10 border-secondary/20;
+}
+
+.secondary-accent-hover {
+  @apply hover:bg-secondary/20 hover:border-secondary/30 transition-colors duration-200;
+}
+
+.secondary-focus-ring {
+  @apply focus-visible:ring-secondary/50 focus-visible:border-secondary;
+}
+
+.secondary-badge {
+  @apply bg-secondary text-secondary-foreground;
+}
+
+.secondary-status-indicator {
+  @apply bg-secondary/20 text-secondary-foreground border-secondary/30;
+}
+
+/* Interactive state utilities with secondary colors */
+.secondary-interactive {
+  @apply hover:bg-secondary/10 active:bg-secondary/20 transition-colors duration-150;
+}
+
+.secondary-button-variant {
+  @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 focus-visible:ring-secondary/50;
+}
+
+/* Card hover effects with secondary accents */
+.card-secondary-hover {
+  @apply hover:border-secondary/30 hover:shadow-lg hover:shadow-secondary/5 transition-all duration-200;
+}
+
+/* Status indicators with secondary colors */
+.status-active-secondary {
+  @apply bg-secondary/20 text-secondary-foreground border-secondary/40;
+}
+
+.status-pending-secondary {
+  @apply bg-secondary/10 text-secondary-foreground/80 border-secondary/20;
+}
 /* FAQ Accordion Animations */
 @keyframes accordion-down {
   from {
@@ -298,4 +560,233 @@ mmer animation for skeleton loading */
 
 .accordion-trigger[data-state="open"] svg {
   transform: rotate(180deg);
+}
+
+/* Enhanced micro-interaction utilities */
+.hover-lift {
+  @apply hover:-translate-y-1 hover:shadow-lg transition-all duration-200;
+}
+
+.hover-glow {
+  @apply hover:shadow-lg hover:shadow-secondary/10 transition-all duration-200;
+}
+
+.focus-secondary {
+  @apply focus-visible:ring-2 focus-visible:ring-secondary/50 focus-visible:ring-offset-2;
+}
+
+.interactive-scale {
+  @apply hover:scale-[1.02] active:scale-95 transition-transform duration-150;
+}
+
+/* Loading state utilities */
+.loading-shimmer {
+  @apply animate-pulse bg-gradient-to-r from-muted via-secondary/20 to-muted;
+}
+
+.loading-pulse-secondary {
+  @apply animate-pulse;
+}
+
+/* Smooth transitions for all interactive elements */
+button,
+a,
+input,
+textarea,
+select {
+  @apply transition-colors duration-200 ease-out;
+}
+
+/* Enhanced focus styles */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  @apply outline-none ring-2 ring-secondary/50 ring-offset-2;
+}
+
+/* Hover effects for interactive elements */
+button:hover:not(:disabled),
+a:hover {
+  @apply transform transition-transform duration-200 ease-out;
+}
+
+/* Disabled state animations */
+button:disabled,
+input:disabled,
+textarea:disabled,
+select:disabled {
+  @apply opacity-50 cursor-not-allowed transition-opacity duration-200;
+}
+
+/* Page transition utilities */
+.page-enter {
+  @apply animate-fade-in;
+}
+
+.page-enter-stagger > * {
+  @apply animate-fade-in;
+}
+
+.page-enter-stagger > *:nth-child(1) {
+  animation-delay: 100ms;
+}
+.page-enter-stagger > *:nth-child(2) {
+  animation-delay: 200ms;
+}
+.page-enter-stagger > *:nth-child(3) {
+  animation-delay: 300ms;
+}
+.page-enter-stagger > *:nth-child(4) {
+  animation-delay: 400ms;
+}
+.page-enter-stagger > *:nth-child(5) {
+  animation-delay: 500ms;
+}
+
+/* Animation Keyframes */
+
+/* Responsive Design Utilities */
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Enhance touch targets */
+  button,
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"] {
+    min-height: var(--touch-target-md);
+    min-width: var(--touch-target-md);
+  }
+
+  /* Improve tap highlighting */
+  * {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+
+  /* Optimize scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 640px) {
+  /* Prevent zoom on input focus (iOS) */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+
+  /* Better mobile spacing */
+  .mobile-spacing {
+    padding: var(--spacing-mobile);
+  }
+
+  /* Mobile-optimized animations */
+  * {
+    animation-duration: 0.2s !important;
+    transition-duration: 0.2s !important;
+  }
+}
+
+/* Tablet-specific optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .tablet-spacing {
+    padding: var(--spacing-tablet);
+  }
+
+  /* Tablet grid optimizations */
+  .tablet-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-tablet);
+  }
+}
+
+/* Desktop optimizations */
+@media (min-width: 1025px) {
+  .desktop-spacing {
+    padding: var(--spacing-desktop);
+  }
+
+  /* Enhanced hover states on desktop */
+  .hover-enhance:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+/* Orientation-specific styles */
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Compact header for landscape mobile */
+  .landscape-compact {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+}
+
+/* High DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Sharper borders on high DPI */
+  .sharp-border {
+    border-width: 0.5px;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus improvements for keyboard navigation */
+@media (prefers-reduced-motion: no-preference) {
+  :focus-visible {
+    outline: 2px solid hsl(var(--secondary));
+    outline-offset: 2px;
+    transition: outline-offset 0.2s ease;
+  }
+}
+
+/* Container query utilities */
+@container (max-width: 400px) {
+  .container-compact {
+    padding: 0.5rem;
+  }
+
+  .container-compact .text-lg {
+    font-size: 1rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-break {
+    page-break-after: always;
+  }
+
+  * {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
 }

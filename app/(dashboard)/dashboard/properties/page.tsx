@@ -1,17 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { Home, DollarSign, Key, TrendingUp } from "lucide-react";
-import { UnifiedPageLayout } from "@/components/shared/unified-page-layout";
+import {
+  Home,
+  DollarSign,
+  Key,
+  TrendingUp,
+  Plus,
+  FileText,
+} from "lucide-react";
+import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { useProperties } from "@/hooks/use-properties";
 import { Button } from "@/components/ui/button";
 import { RouteGuard } from "@/components/auth/route-guard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { PropertyCardList } from "@/components/properties/property-card-list";
+import { PropertyFilters } from "@/components/properties/property-filters";
+import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 export default function PropertiesPage() {
-
   const [statusFilter, setStatusFilter] = useState<"all" | "sale" | "rent">(
     "all"
   );
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { properties, loading, error, refreshProperties } = useProperties();
 
@@ -20,30 +34,44 @@ export default function PropertiesPage() {
       ? properties
       : properties.filter((p) => p.status === statusFilter);
 
+  const filteredBySearch = filteredByStatus.filter(
+    (property) =>
+      property.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      property.location?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-arsenic mb-2">
-            Cargando...
-          </h2>
-          <p className="text-blackCoral mb-4">Cargando propiedades.</p>
+      <DashboardPageLayout
+        title="Gestión de Propiedades"
+        description="Administra todas las propiedades del sistema"
+      >
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold mb-2">Cargando...</h2>
+            <p className="text-muted-foreground mb-4">Cargando propiedades.</p>
+          </div>
         </div>
-      </div>
+      </DashboardPageLayout>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-arsenic mb-2">
-            Error al cargar propiedades
-          </h2>
-          <p className="text-blackCoral mb-4">{error}</p>
-          <Button onClick={refreshProperties}>Reintentar</Button>
+      <DashboardPageLayout
+        title="Gestión de Propiedades"
+        description="Administra todas las propiedades del sistema"
+      >
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold mb-2">
+              Error al cargar propiedades
+            </h2>
+            <p className="text-muted-foreground mb-4">{error}</p>
+            <Button onClick={refreshProperties}>Reintentar</Button>
+          </div>
         </div>
-      </div>
+      </DashboardPageLayout>
     );
   }
 
@@ -52,7 +80,7 @@ export default function PropertiesPage() {
       label: "Total Propiedades",
       value: properties.length,
       icon: <Home className="h-5 w-5" />,
-      color: "text-arsenic",
+      color: "text-foreground",
     },
     {
       label: "En Venta",
@@ -74,68 +102,144 @@ export default function PropertiesPage() {
     },
   ];
 
-  const quickFilters = [
-    {
-      label: "Punta Cana",
-      count: properties.filter((p) => p.location.includes("Punta Cana")).length,
-      active: false,
-      onClick: () => {},
-    },
-    {
-      label: "Santo Domingo",
-      count: properties.filter((p) => p.location.includes("Santo Domingo"))
-        .length,
-      active: false,
-      onClick: () => {},
-    },
-    {
-      label: "Cap Cana",
-      count: properties.filter((p) => p.location.includes("Cap Cana")).length,
-      active: false,
-      onClick: () => {},
-    },
-    {
-      label: "Destacadas",
-      count: properties.filter((p) => p.id % 7 === 0).length,
-      active: false,
-      onClick: () => {},
-    },
+  const breadcrumbs = [
+    { label: "Dashboard", href: "/dashboard" },
+    { label: "Propiedades" },
   ];
 
-  const statusFilters = [
-    {
-      label: "Todas",
-      value: "all",
-      active: statusFilter === "all",
-      onClick: () => setStatusFilter("all"),
-    },
-    {
-      label: "En Venta",
-      value: "sale",
-      active: statusFilter === "sale",
-      onClick: () => setStatusFilter("sale"),
-    },
-    {
-      label: "En Alquiler",
-      value: "rent",
-      active: statusFilter === "rent",
-      onClick: () => setStatusFilter("rent"),
-    },
-  ];
+  const actions = (
+    <div className="flex gap-2">
+      <Button
+        variant="outline"
+        asChild
+        className={cn(secondaryColorClasses.interactive)}
+      >
+        <Link href="/dashboard/properties/drafts">
+          <FileText className="h-4 w-4 mr-2" />
+          Borradores
+        </Link>
+      </Button>
+      <Button
+        asChild
+        className={cn(
+          "bg-primary hover:bg-primary/90",
+          secondaryColorClasses.focusRing
+        )}
+      >
+        <Link href="/dashboard/properties/new">
+          <Plus className="h-4 w-4 mr-2" />
+          Agregar Propiedad
+        </Link>
+      </Button>
+    </div>
+  );
 
   return (
     <RouteGuard requiredPermission="properties.manage">
-      <UnifiedPageLayout
+      <DashboardPageLayout
         title="Gestión de Propiedades"
-        stats={stats}
-        items={filteredByStatus}
-        itemType="property"
-        searchPlaceholder="Buscar propiedades..."
-        addNewHref="/dashboard/properties/new"
-        addNewLabel="Agregar Propiedad"
-        quickFilters={quickFilters}
-        statusFilters={statusFilters}
-      />
+        description="Administra todas las propiedades del sistema"
+        breadcrumbs={breadcrumbs}
+        actions={actions}
+      >
+        <div className="space-y-6">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {stats.map((stat, index) => (
+              <Card
+                key={index}
+                className={cn(
+                  "transition-all duration-200",
+                  secondaryColorClasses.cardHover
+                )}
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    {stat.label}
+                  </CardTitle>
+                  <div className={stat.color}>{stat.icon}</div>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stat.value}</div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Status Filters */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-muted-foreground font-medium">
+              Estado:
+            </span>
+            {[
+              { label: "Todas", value: "all" },
+              { label: "En Venta", value: "sale" },
+              { label: "En Alquiler", value: "rent" },
+            ].map((filter) => (
+              <Button
+                key={filter.value}
+                variant={statusFilter === filter.value ? "default" : "outline"}
+                size="sm"
+                onClick={() =>
+                  setStatusFilter(filter.value as "all" | "sale" | "rent")
+                }
+                className={cn(
+                  statusFilter === filter.value
+                    ? cn(
+                        "bg-secondary text-secondary-foreground",
+                        secondaryColorClasses.buttonSecondary
+                      )
+                    : cn(
+                        "border-border hover:bg-secondary/10",
+                        secondaryColorClasses.interactive
+                      )
+                )}
+              >
+                {filter.label}
+              </Button>
+            ))}
+          </div>
+
+          {/* Search and Filters */}
+          <PropertyFilters
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            properties={properties}
+          />
+
+          {/* Properties List */}
+          <PropertyCardList properties={filteredBySearch} />
+
+          {/* Results Summary */}
+          {filteredBySearch.length === 0 && searchTerm && (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">
+                No se encontraron propiedades que coincidan con &quot;
+                {searchTerm}&quot;
+              </p>
+            </div>
+          )}
+
+          {filteredBySearch.length > 0 && (
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>
+                Mostrando {filteredBySearch.length} de {properties.length}{" "}
+                propiedades
+              </span>
+              <Badge
+                variant="secondary"
+                className={secondaryColorClasses.badge}
+              >
+                {statusFilter === "all"
+                  ? "Todas"
+                  : statusFilter === "sale"
+                  ? "En Venta"
+                  : "En Alquiler"}
+              </Badge>
+            </div>
+          )}
+        </div>
+      </DashboardPageLayout>
     </RouteGuard>
   );
 }

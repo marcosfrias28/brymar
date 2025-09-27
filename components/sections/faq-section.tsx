@@ -10,10 +10,11 @@ import {
 } from "@/components/ui/accordion";
 import Image from "next/image";
 import {
-  useSection,
+  useSectionFromPage,
   getSectionContent,
   getSectionCustomContent,
-} from "@/hooks/use-sections";
+} from "@/hooks/queries/use-sections-query";
+import { FAQSkeleton } from "../skeletons/home/faq-skeleton";
 
 // Preparado para i18n - Solo 4 FAQ principales
 const faqData = [
@@ -67,9 +68,9 @@ const propertyImages = [
 
 // Componente separado para el header que usa el hook
 function FAQSectionHeader() {
-  const { section, loading } = useSection("home", "faq");
+  const { section, isLoading } = useSectionFromPage("home", "faq");
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="animate-pulse space-y-4 text-center">
         <div className="h-4 bg-muted rounded w-1/4 mx-auto"></div>
@@ -117,7 +118,11 @@ function FAQSectionHeader() {
 }
 
 export function FAQSection() {
-  const { section } = useSection("home", "faq");
+  const { section, isLoading } = useSectionFromPage("home", "faq");
+
+  if (isLoading) {
+    return <FAQSkeleton />;
+  }
 
   // Obtener FAQ personalizadas del contenido de la sección
   const customFAQs = getSectionCustomContent(section, "faqs", null);

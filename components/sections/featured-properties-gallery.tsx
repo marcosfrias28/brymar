@@ -21,7 +21,7 @@ function FeaturedPropertiesSkeleton() {
           key={index}
           className="relative flex-grow w-56 rounded-lg overflow-hidden h-[400px] bg-gray-200 animate-pulse"
         >
-          <div className="h-full w-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer" />
+          <div className="h-full w-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse" />
         </div>
       ))}
     </div>

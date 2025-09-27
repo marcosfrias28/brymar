@@ -12,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, Eye, EyeOff } from "lucide-react";
 import { getContactInfo } from "@/lib/actions/sections-actions";
-import { useSections } from "@/hooks/use-sections";
+import { useSections } from "@/hooks/queries/use-sections-query";
 import { SectionEditor } from "./section-editor";
 import { ContactInfoEditor } from "./contact-info-editor";
 import type { PageSection, ContactInfo } from "@/lib/db/schema";
@@ -23,7 +23,9 @@ interface SectionsManagerProps {
 
 export function SectionsManager({ page }: SectionsManagerProps) {
   // Use optimized hook for sections
-  const { sections, loading: sectionsLoading } = useSections(page);
+  const sectionsQuery = useSections(page) as any;
+  const sections = sectionsQuery.data || [];
+  const sectionsLoading = sectionsQuery.isLoading;
 
   // Keep contact info separate since it's not part of the sections store
   const [contactInfos, setContactInfos] = useState<ContactInfo[]>([]);
@@ -155,7 +157,7 @@ export function SectionsManager({ page }: SectionsManagerProps) {
       </div>
 
       <div className="grid gap-4">
-        {sections.map((section) => (
+        {sections.map((section: any) => (
           <Card key={section.id}>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">

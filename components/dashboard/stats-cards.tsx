@@ -8,7 +8,6 @@ import { useLands } from "@/hooks/use-lands";
 import { useBlogPosts } from "@/hooks/use-blog";
 
 export function StatsCards() {
-
   const { properties, loading: propertiesLoading } = useProperties();
   const { lands, loading: landsLoading } = useLands();
   const { blogPosts, loading: postsLoading } = useBlogPosts();
@@ -70,7 +69,7 @@ export function StatsCards() {
       {statsData.map((stat, index) => (
         <Card
           key={index}
-          className="border-border shadow-lg hover:shadow-xl transition-shadow"
+          className="border-border shadow-lg hover:shadow-xl hover:border-secondary/20 transition-all duration-200"
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -81,10 +80,14 @@ export function StatsCards() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{stat.value}</div>
+            <div className="text-2xl font-bold text-foreground">
+              {stat.value}
+            </div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-primary">{stat.change}</span> desde el mes
-              pasado
+              <span className="text-secondary-foreground bg-secondary/20 px-1.5 py-0.5 rounded-full font-medium">
+                {stat.change}
+              </span>{" "}
+              desde el mes pasado
             </p>
           </CardContent>
         </Card>

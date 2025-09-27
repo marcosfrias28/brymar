@@ -6,6 +6,11 @@ import { SectionCards } from "@/components/section-cards";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { QuickActions } from "@/components/dashboard/quick-actions";
 import { RouteGuard } from "@/components/auth/route-guard";
+import { DashboardPageLayout } from "@/components/layout";
+import { useBreadcrumbs } from "@/hooks/use-breadcrumbs";
+import { Button } from "@/components/ui/button";
+import { Plus, Settings, TrendingUp } from "lucide-react";
+import Link from "next/link";
 
 // Mock data for DataTable - replace with actual data source
 const mockData = [
@@ -39,35 +44,81 @@ const mockData = [
 ];
 
 export default function DashboardPage() {
+  const breadcrumbs = useBreadcrumbs();
+
+  const actions = (
+    <div className="flex items-center gap-3">
+      <Button
+        variant="outline"
+        size="sm"
+        asChild
+        className="hover:bg-secondary/10 hover:border-secondary/30 transition-colors"
+      >
+        <Link href="/dashboard/settings">
+          <Settings className="h-4 w-4 mr-2" />
+          Configuración
+        </Link>
+      </Button>
+      <Button
+        size="sm"
+        asChild
+        className="bg-secondary text-secondary-foreground hover:bg-secondary/80 focus-visible:ring-secondary/50"
+      >
+        <Link href="/dashboard/properties/new">
+          <Plus className="h-4 w-4 mr-2" />
+          Agregar Propiedad
+        </Link>
+      </Button>
+    </div>
+  );
+
   return (
     <RouteGuard requiredPermission="dashboard.access">
-      <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-        {/* Header Section */}
-        <div className="flex items-center justify-between space-y-2 px-4 lg:px-6">
-          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        </div>
-
-        {/* Cards Section */}
-        <SectionCards />
+      <DashboardPageLayout
+        title="Dashboard"
+        description="Resumen general de tu actividad y estadísticas de la plataforma"
+        breadcrumbs={breadcrumbs}
+        actions={actions}
+        showSearch={true}
+        searchPlaceholder="Buscar en dashboard..."
+        className="bg-background"
+        contentClassName="space-y-8"
+      >
+        {/* Overview Cards Section */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-secondary" />
+            <h2 className="text-xl font-semibold text-foreground">
+              Resumen General
+            </h2>
+          </div>
+          <SectionCards />
+        </section>
 
         {/* Charts and Activity Section */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 px-4 lg:px-6">
-          <div className="col-span-4">
-            <ChartAreaInteractive />
+        <section className="space-y-4">
+          <h2 className="text-xl font-semibold text-foreground">
+            Análisis y Actividad
+          </h2>
+          <div className="grid gap-6 lg:grid-cols-7">
+            <div className="lg:col-span-4 space-y-4">
+              <ChartAreaInteractive />
+            </div>
+            <div className="lg:col-span-3 space-y-4">
+              <RecentActivity />
+              <QuickActions />
+            </div>
           </div>
-          <div className="col-span-3">
-            <RecentActivity />
-          </div>
-        </div>
+        </section>
 
-        {/* Quick Actions */}
-        <div className="px-4 lg:px-6">
-          <QuickActions />
-        </div>
-
-        {/* Data Table */}
-        <DataTable data={mockData} />
-      </div>
+        {/* Data Overview Section */}
+        <section className="space-y-4">
+          <h2 className="text-xl font-semibold text-foreground">
+            Resumen de Datos
+          </h2>
+          <DataTable data={mockData} />
+        </section>
+      </DashboardPageLayout>
     </RouteGuard>
   );
 }

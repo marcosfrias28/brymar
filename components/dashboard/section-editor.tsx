@@ -25,7 +25,7 @@ import {
   createPageSection,
   updatePageSection,
 } from "@/lib/actions/sections-actions";
-import { useSectionMutations } from "@/hooks/use-sections";
+import { useSectionMutations } from "@/hooks/mutations/use-sections-mutations";
 import type { PageSection } from "@/lib/db/schema";
 import { toast } from "sonner";
 
@@ -56,46 +56,74 @@ export function SectionEditor({ section, page, onClose }: SectionEditorProps) {
     title: section?.title || "",
     subtitle: section?.subtitle || "",
     description: section?.description || "",
+    content: section?.content ? JSON.stringify(section.content) : "",
+    images: section?.images ? (section.images as string[]).join(", ") : "",
+    settings: section?.settings ? JSON.stringify(section.settings) : "",
     isActive: section?.isActive ?? true,
     order: section?.order || 0,
   });
 
-  const [isLoading, setIsLoading] = useState(false);
-  const { invalidatePageCache } = useSectionMutations();
+  const { createSection, updateSection, isLoading } = useSectionMutations();
   const isEditing = !!section;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
     try {
-      const formDataObj = new FormData();
+      const mutationData = {
+        page,
+        section: formData.section,
+        title: formData.title || undefined,
+        subtitle: formData.subtitle || undefined,
+        description: formData.description || undefined,
+        content:
+          formData.content && formData.content.trim()
+            ? (() => {
+                try {
+                  return JSON.parse(formData.content);
+                } catch (e) {
+                  console.error("Error parsing content JSON:", e);
+                  return {};
+                }
+              })()
+            : {},
+        images:
+          formData.images && formData.images.trim()
+            ? formData.images
+                .split(",")
+                .map((img) => img.trim())
+                .filter((img) => img)
+            : [],
+        settings:
+          formData.settings && formData.settings.trim()
+            ? (() => {
+                try {
+                  return JSON.parse(formData.settings);
+                } catch (e) {
+                  console.error("Error parsing settings JSON:", e);
+                  return {};
+                }
+              })()
+            : {},
+        isActive: formData.isActive,
+        order: formData.order,
+      };
 
-      Object.entries(formData).forEach(([key, value]) => {
-        formDataObj.append(key, value.toString());
-      });
+      console.log("Mutation data:", mutationData);
 
-      let result;
       if (isEditing) {
-        formDataObj.append("id", section.id.toString());
-        result = await updatePageSection(formDataObj);
+        await updateSection.mutateAsync({
+          id: section.id,
+          ...mutationData,
+        });
       } else {
-        result = await createPageSection(formDataObj);
+        await createSection.mutateAsync(mutationData);
       }
 
-      if (result.success) {
-        toast.success(result.message || "Sección guardada exitosamente");
-        // Invalidar cache para que se recarguen las secciones
-        invalidatePageCache(page);
-        onClose();
-      } else {
-        toast.error(result.error || "Error al guardar la sección");
-      }
+      onClose();
     } catch (error) {
-      toast.error("Error inesperado al guardar la sección");
+      // Error handling is done by the mutation hooks
       console.error("Error:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 

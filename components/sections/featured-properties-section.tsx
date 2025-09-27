@@ -2,21 +2,20 @@
 
 import { FeaturedPropertiesGallery } from "./featured-gallery";
 import { SectionWrapper, SectionHeader } from "../ui/section-wrapper";
-import { useSection, getSectionContent } from "@/hooks/use-sections";
+import {
+  useSectionFromPage,
+  getSectionContent,
+} from "@/hooks/queries/use-sections-query";
+import { FeaturedPropertiesSkeleton } from "../skeletons/home/featured-properties-skeleton";
 
 export function FeaturedPropertiesSection() {
-  const { section, loading } = useSection("home", "featured-properties");
+  const { section, isLoading } = useSectionFromPage(
+    "home",
+    "featured-properties"
+  );
 
-  if (loading) {
-    return (
-      <SectionWrapper>
-        <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-muted rounded w-1/4 mx-auto"></div>
-          <div className="h-8 bg-muted rounded w-1/2 mx-auto"></div>
-          <div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
-        </div>
-      </SectionWrapper>
-    );
+  if (isLoading) {
+    return <FeaturedPropertiesSkeleton />;
   }
 
   // Fallbacks si no hay datos en la base de datos

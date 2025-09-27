@@ -17,7 +17,11 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { useSection, getSectionContent } from "@/hooks/use-sections";
+import {
+  useSectionFromPage,
+  getSectionContent,
+} from "@/hooks/queries/use-sections-query";
+import { TeamSkeleton } from "../skeletons/home/team-skeleton";
 
 // Preparado para i18n - datos del equipo
 const teamMembers = [
@@ -91,9 +95,9 @@ const teamMembers = [
 
 // Componente separado para el header que usa el hook
 function TeamSectionHeader() {
-  const { section, loading } = useSection("home", "team");
+  const { section, isLoading } = useSectionFromPage("home", "team");
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="animate-pulse space-y-4 text-center">
         <div className="h-4 bg-muted rounded w-1/4 mx-auto"></div>
@@ -127,6 +131,11 @@ function TeamSectionHeader() {
 
 export function TeamSection() {
   const [activeCard, setActiveCard] = useState<number | null>(null);
+  const { isLoading } = useSectionFromPage("home", "team");
+
+  if (isLoading) {
+    return <TeamSkeleton />;
+  }
 
   return (
     <SectionWrapper className="relative overflow-hidden">

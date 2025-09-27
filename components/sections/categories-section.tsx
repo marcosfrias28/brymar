@@ -16,7 +16,11 @@ import Logo from "../ui/logo";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { SectionWrapper, SectionHeader } from "../ui/section-wrapper";
-import { useSection, getSectionContent } from "@/hooks/use-sections";
+import {
+  useSectionFromPage,
+  getSectionContent,
+} from "@/hooks/queries/use-sections-query";
+import { CategoriesSkeleton } from "../skeletons/home/categories-skeleton";
 
 interface CategoriesSectionProps {
   categories?: Category[];
@@ -24,9 +28,9 @@ interface CategoriesSectionProps {
 
 // Componente separado para el header que usa el hook
 function CategoriesSectionHeader() {
-  const { section, loading } = useSection("home", "categories");
+  const { section, isLoading } = useSectionFromPage("home", "categories");
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="animate-pulse space-y-4">
         <div className="h-4 bg-muted rounded w-1/4"></div>
@@ -79,10 +83,16 @@ function CategoriesSectionHeader() {
 
 export function CategoriesSection({ categories = [] }: CategoriesSectionProps) {
   const [mounted, setMounted] = useState(false);
+  const { isLoading } = useSectionFromPage("home", "categories");
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Show skeleton while loading or not mounted
+  if (!mounted || isLoading) {
+    return <CategoriesSkeleton />;
+  }
 
   // Mappa delle icone per categoria
   const categoryIcons: Record<string, React.ComponentType<any>> = {
@@ -158,10 +168,6 @@ export function CategoriesSection({ categories = [] }: CategoriesSectionProps) {
   const activeCategories = displayCategories
     .filter((cat) => cat.status === "active")
     .sort((a, b) => (a.order || 0) - (b.order || 0));
-
-  if (!mounted) {
-    return null;
-  }
 
   return (
     <SectionWrapper className="relative overflow-hidden">

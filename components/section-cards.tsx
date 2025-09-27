@@ -1,101 +1,117 @@
-import { TrendingDownIcon, TrendingUpIcon } from "lucide-react"
+import {
+  TrendingDownIcon,
+  TrendingUpIcon,
+  Building2,
+  Users,
+  FileText,
+  BarChart3,
+} from "lucide-react";
 
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
+import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
+import { cn } from "@/lib/utils";
+
+const statsData = [
+  {
+    title: "Propiedades Activas",
+    value: "142",
+    change: "+12.5%",
+    trend: "up",
+    description: "Propiedades disponibles para venta",
+    icon: Building2,
+  },
+  {
+    title: "Nuevos Clientes",
+    value: "1,234",
+    change: "-2.1%",
+    trend: "down",
+    description: "Clientes registrados este mes",
+    icon: Users,
+  },
+  {
+    title: "Terrenos Disponibles",
+    value: "89",
+    change: "+8.2%",
+    trend: "up",
+    description: "Terrenos en inventario",
+    icon: BarChart3,
+  },
+  {
+    title: "Posts Publicados",
+    value: "24",
+    change: "+15.3%",
+    trend: "up",
+    description: "Artículos del blog este mes",
+    icon: FileText,
+  },
+];
 
 export function SectionCards() {
   return (
-    <div className="*:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4 grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card lg:px-6">
-      <Card className="@container/card">
-        <CardHeader className="relative">
-          <CardDescription>Total Revenue</CardDescription>
-          <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-            $1,250.00
-          </CardTitle>
-          <div className="absolute right-4 top-4">
-            <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
-              <TrendingUpIcon className="size-3" />
-              +12.5%
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Trending up this month <TrendingUpIcon className="size-4" />
-          </div>
-          <div className="text-muted-foreground">
-            Visitors for the last 6 months
-          </div>
-        </CardFooter>
-      </Card>
-      <Card className="@container/card">
-        <CardHeader className="relative">
-          <CardDescription>New Customers</CardDescription>
-          <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-            1,234
-          </CardTitle>
-          <div className="absolute right-4 top-4">
-            <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
-              <TrendingDownIcon className="size-3" />
-              -20%
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Down 20% this period <TrendingDownIcon className="size-4" />
-          </div>
-          <div className="text-muted-foreground">
-            Acquisition needs attention
-          </div>
-        </CardFooter>
-      </Card>
-      <Card className="@container/card">
-        <CardHeader className="relative">
-          <CardDescription>Active Accounts</CardDescription>
-          <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-            45,678
-          </CardTitle>
-          <div className="absolute right-4 top-4">
-            <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
-              <TrendingUpIcon className="size-3" />
-              +12.5%
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Strong user retention <TrendingUpIcon className="size-4" />
-          </div>
-          <div className="text-muted-foreground">Engagement exceed targets</div>
-        </CardFooter>
-      </Card>
-      <Card className="@container/card">
-        <CardHeader className="relative">
-          <CardDescription>Growth Rate</CardDescription>
-          <CardTitle className="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-            4.5%
-          </CardTitle>
-          <div className="absolute right-4 top-4">
-            <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
-              <TrendingUpIcon className="size-3" />
-              +4.5%
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Steady performance <TrendingUpIcon className="size-4" />
-          </div>
-          <div className="text-muted-foreground">Meets growth projections</div>
-        </CardFooter>
-      </Card>
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {statsData.map((stat, index) => {
+        const Icon = stat.icon;
+        const isPositive = stat.trend === "up";
+
+        return (
+          <Card
+            key={index}
+            className={cn(
+              "relative overflow-hidden transition-all duration-200",
+              secondaryColorClasses.cardHover,
+              "border-l-4 border-l-secondary/30"
+            )}
+          >
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardDescription className="text-sm font-medium">
+                  {stat.title}
+                </CardDescription>
+                <div
+                  className={cn("p-2 rounded-lg", secondaryColorClasses.accent)}
+                >
+                  <Icon className="h-4 w-4 text-secondary-foreground" />
+                </div>
+              </div>
+              <CardTitle className="text-3xl font-bold tabular-nums">
+                {stat.value}
+              </CardTitle>
+            </CardHeader>
+            <CardFooter className="pt-0">
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-2">
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "flex items-center gap-1 text-xs",
+                      isPositive
+                        ? "text-green-700 border-green-200 bg-green-50 dark:text-green-400 dark:border-green-800 dark:bg-green-950"
+                        : "text-red-700 border-red-200 bg-red-50 dark:text-red-400 dark:border-red-800 dark:bg-red-950"
+                    )}
+                  >
+                    {isPositive ? (
+                      <TrendingUpIcon className="h-3 w-3" />
+                    ) : (
+                      <TrendingDownIcon className="h-3 w-3" />
+                    )}
+                    {stat.change}
+                  </Badge>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {stat.description}
+              </p>
+            </CardFooter>
+          </Card>
+        );
+      })}
     </div>
-  )
+  );
 }

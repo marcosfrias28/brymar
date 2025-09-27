@@ -24,7 +24,7 @@ import {
   createContactInfo,
   updateContactInfo,
 } from "@/lib/actions/sections-actions";
-import { useContactInfoMutations } from "@/hooks/use-contact-info";
+import { useContactInfoMutations } from "@/hooks/mutations/use-contact-info-mutations";
 import type { ContactInfo } from "@/lib/db/schema";
 import { toast } from "sonner";
 
@@ -56,42 +56,36 @@ export function ContactInfoEditor({
     order: contact?.order || 0,
   });
 
-  const [isLoading, setIsLoading] = useState(false);
-  const { invalidateContactInfo } = useContactInfoMutations();
+  const { createContactInfo, updateContactInfo, isLoading } =
+    useContactInfoMutations();
   const isEditing = !!contact;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
     try {
-      const formDataObj = new FormData();
+      const mutationData = {
+        type: formData.type,
+        label: formData.label,
+        value: formData.value,
+        icon: formData.icon,
+        isActive: formData.isActive,
+        order: formData.order,
+      };
 
-      Object.entries(formData).forEach(([key, value]) => {
-        formDataObj.append(key, value.toString());
-      });
-
-      let result;
       if (isEditing) {
-        formDataObj.append("id", contact.id.toString());
-        result = await updateContactInfo(formDataObj);
+        await updateContactInfo.mutateAsync({
+          id: contact.id,
+          ...mutationData,
+        });
       } else {
-        result = await createContactInfo(formDataObj);
+        await createContactInfo.mutateAsync(mutationData);
       }
 
-      if (result.success) {
-        toast.success(result.message || "Contacto guardado exitosamente");
-        // Invalidar cache para que se recarguen las secciones de contacto
-        invalidateContactInfo();
-        onClose();
-      } else {
-        toast.error(result.error || "Error al guardar el contacto");
-      }
+      onClose();
     } catch (error) {
-      toast.error("Error inesperado al guardar el contacto");
+      // Error handling is done by the mutation hooks
       console.error("Error:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 

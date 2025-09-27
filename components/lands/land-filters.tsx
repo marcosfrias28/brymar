@@ -1,137 +1,101 @@
-"use client"
+"use client";
 
-
-import { Card, CardContent } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-
-interface LandFilters {
-  type: string
-  minPrice: string
-  maxPrice: string
-  minSurface: string
-  maxSurface: string
-  location: string
-}
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import {
+  secondaryColorClasses,
+  badgeVariants,
+  interactiveClasses,
+} from "@/lib/utils/secondary-colors";
 
 interface LandFiltersProps {
-  filters: LandFilters
-  setFilters: (filters: LandFilters | ((prev: LandFilters) => LandFilters)) => void
+  currentFilter:
+    | "all"
+    | "commercial"
+    | "residential"
+    | "agricultural"
+    | "beachfront";
+  onFilterChange: (
+    filter: "all" | "commercial" | "residential" | "agricultural" | "beachfront"
+  ) => void;
+  totalCount: number;
 }
 
-export function LandFilters({ filters, setFilters }: LandFiltersProps) {
-
-
-
-  const handleFilterChange = (key: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [key]: value }))
-  }
-
-  const clearFilters = () => {
-    setFilters({
-      type: "all",
-      minPrice: "",
-      maxPrice: "",
-      minSurface: "",
-      maxSurface: "",
-      location: "",
-    })
-  }
+export function LandFilters({
+  currentFilter,
+  onFilterChange,
+  totalCount,
+}: LandFiltersProps) {
+  const filters = [
+    {
+      label: "Todos",
+      value: "all" as const,
+      count: totalCount,
+    },
+    {
+      label: "Comerciales",
+      value: "commercial" as const,
+      count: 0, // This would be calculated from actual data
+    },
+    {
+      label: "Residenciales",
+      value: "residential" as const,
+      count: 0, // This would be calculated from actual data
+    },
+    {
+      label: "Agrícolas",
+      value: "agricultural" as const,
+      count: 0, // This would be calculated from actual data
+    },
+    {
+      label: "Frente al Mar",
+      value: "beachfront" as const,
+      count: 0, // This would be calculated from actual data
+    },
+  ];
 
   return (
-    <Card className="border-blackCoral">
-      <CardContent className="p-4">
-        <div className="grid grid-cols-1 smartphone:grid-cols-2 tablet:grid-cols-3 laptop:grid-cols-6 gap-4">
-          {/* Land Type */}
-          <div className="space-y-2">
-            <Label className="text-arsenic">Tipo de Terreno</Label>
-            <Select value={filters.type} onValueChange={(value) => handleFilterChange("type", value)}>
-              <SelectTrigger className="border-blackCoral">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="commercial">Comercial</SelectItem>
-                <SelectItem value="residential">Residencial</SelectItem>
-                <SelectItem value="agricultural">Agrícola</SelectItem>
-                <SelectItem value="beachfront">Frente al Mar</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Min Price */}
-          <div className="space-y-2">
-            <Label className="text-arsenic">Precio Mínimo</Label>
-            <Input
-              type="number"
-              placeholder="0"
-              value={filters.minPrice}
-              onChange={(e) => handleFilterChange("minPrice", e.target.value)}
-              className="border-blackCoral"
-            />
-          </div>
-
-          {/* Max Price */}
-          <div className="space-y-2">
-            <Label className="text-arsenic">Precio Máximo</Label>
-            <Input
-              type="number"
-              placeholder="Sin límite"
-              value={filters.maxPrice}
-              onChange={(e) => handleFilterChange("maxPrice", e.target.value)}
-              className="border-blackCoral"
-            />
-          </div>
-
-          {/* Min Surface */}
-          <div className="space-y-2">
-            <Label className="text-arsenic">Superficie Mín. (m²)</Label>
-            <Input
-              type="number"
-              placeholder="0"
-              value={filters.minSurface}
-              onChange={(e) => handleFilterChange("minSurface", e.target.value)}
-              className="border-blackCoral"
-            />
-          </div>
-
-          {/* Max Surface */}
-          <div className="space-y-2">
-            <Label className="text-arsenic">Superficie Máx. (m²)</Label>
-            <Input
-              type="number"
-              placeholder="Sin límite"
-              value={filters.maxSurface}
-              onChange={(e) => handleFilterChange("maxSurface", e.target.value)}
-              className="border-blackCoral"
-            />
-          </div>
-
-          {/* Location */}
-          <div className="space-y-2">
-            <Label className="text-arsenic">Ubicación</Label>
-            <Input
-              placeholder="Ciudad o zona"
-              value={filters.location}
-              onChange={(e) => handleFilterChange("location", e.target.value)}
-              className="border-blackCoral"
-            />
-          </div>
-        </div>
-
-        {/* Clear Filters Button */}
-        <div className="mt-4 flex justify-end">
+    <div className="flex flex-wrap gap-2">
+      {filters.map((filter) => {
+        const isActive = currentFilter === filter.value;
+        return (
           <Button
-            variant="outline"
-            onClick={clearFilters}
-            className="border-blackCoral text-blackCoral hover:bg-blackCoral hover:text-white bg-transparent"
+            key={filter.value}
+            variant={isActive ? "default" : "outline"}
+            size="sm"
+            onClick={() => onFilterChange(filter.value)}
+            className={cn(
+              "transition-all duration-200",
+              isActive
+                ? cn(
+                    "bg-arsenic hover:bg-blackCoral text-white",
+                    secondaryColorClasses.focusRing
+                  )
+                : cn(
+                    "border-blackCoral/30 text-blackCoral hover:bg-blackCoral hover:text-white",
+                    secondaryColorClasses.accentHover,
+                    interactiveClasses.button
+                  )
+            )}
           >
-            Limpiar Filtros
+            {filter.label}
+            {filter.count > 0 && (
+              <Badge
+                variant="secondary"
+                className={cn(
+                  "ml-2 text-xs",
+                  isActive
+                    ? "bg-white/20 text-white"
+                    : badgeVariants.secondarySubtle
+                )}
+              >
+                {filter.count}
+              </Badge>
+            )}
           </Button>
-        </div>
-      </CardContent>
-    </Card>
-  )
+        );
+      })}
+    </div>
+  );
 }

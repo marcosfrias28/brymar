@@ -1,127 +1,65 @@
-"use client"
+"use client";
 
-
-import { Card, CardContent } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-
-interface PropertyFilters {
-  type: string
-  minPrice: string
-  maxPrice: string
-  bedrooms: string
-  location: string
-}
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
+import { cn } from "@/lib/utils";
 
 interface PropertyFiltersProps {
-  filters: PropertyFilters
-  setFilters: (filters: PropertyFilters | ((prev: PropertyFilters) => PropertyFilters)) => void
+  searchTerm: string;
+  onSearchChange: (value: string) => void;
+  properties: any[];
 }
 
-export function PropertyFilters({ filters, setFilters }: PropertyFiltersProps) {
-
-
-
-  const handleFilterChange = (key: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [key]: value }))
-  }
-
-  const clearFilters = () => {
-    setFilters({
-      type: "all",
-      minPrice: "",
-      maxPrice: "",
-      bedrooms: "all",
-      location: "",
-    })
-  }
+export function PropertyFilters({
+  searchTerm,
+  onSearchChange,
+  properties,
+}: PropertyFiltersProps) {
+  const locations = [
+    ...new Set(properties.map((p) => p.location).filter(Boolean)),
+  ];
+  const totalProperties = properties.length;
 
   return (
-    <Card className="border-blackCoral">
+    <Card
+      className={cn(
+        "border shadow-sm transition-all duration-200",
+        secondaryColorClasses.cardHover
+      )}
+    >
       <CardContent className="p-4">
-        <div className="grid grid-cols-1 smartphone:grid-cols-2 tablet:grid-cols-3 laptop:grid-cols-5 gap-4">
-          {/* Property Type */}
-          <div className="space-y-2">
-            <Label className="text-arsenic">Tipo de Propiedad</Label>
-            <Select value={filters.type} onValueChange={(value) => handleFilterChange("type", value)}>
-              <SelectTrigger className="border-blackCoral">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="sale">En Venta</SelectItem>
-              <SelectItem value="rent">En Alquiler</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Min Price */}
-          <div className="space-y-2">
-            <Label className="text-arsenic">Precio Mínimo</Label>
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          {/* Search */}
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              type="number"
-              placeholder="0"
-              value={filters.minPrice}
-              onChange={(e) => handleFilterChange("minPrice", e.target.value)}
-              className="border-blackCoral"
+              placeholder="Buscar propiedades por título o ubicación..."
+              value={searchTerm}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className={cn("pl-10", secondaryColorClasses.inputFocus)}
             />
           </div>
 
-          {/* Max Price */}
-          <div className="space-y-2">
-            <Label className="text-arsenic">Precio Máximo</Label>
-            <Input
-              type="number"
-              placeholder="Sin límite"
-              value={filters.maxPrice}
-              onChange={(e) => handleFilterChange("maxPrice", e.target.value)}
-              className="border-blackCoral"
-            />
+          {/* Quick Stats */}
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="secondary" className={secondaryColorClasses.badge}>
+              {totalProperties} propiedades
+            </Badge>
+            {locations.slice(0, 3).map((location) => (
+              <Badge
+                key={location}
+                variant="outline"
+                className={cn("text-xs", secondaryColorClasses.interactive)}
+              >
+                {location}
+              </Badge>
+            ))}
           </div>
-
-          {/* Bedrooms */}
-          <div className="space-y-2">
-            <Label className="text-arsenic">Habitaciones</Label>
-            <Select value={filters.bedrooms} onValueChange={(value) => handleFilterChange("bedrooms", value)}>
-              <SelectTrigger className="border-blackCoral">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas</SelectItem>
-                <SelectItem value="1">1</SelectItem>
-                <SelectItem value="2">2</SelectItem>
-                <SelectItem value="3">3</SelectItem>
-                <SelectItem value="4">4</SelectItem>
-                <SelectItem value="5">5+</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Location */}
-          <div className="space-y-2">
-            <Label className="text-arsenic">Ubicación</Label>
-            <Input
-              placeholder="Ciudad o zona"
-              value={filters.location}
-              onChange={(e) => handleFilterChange("location", e.target.value)}
-              className="border-blackCoral"
-            />
-          </div>
-        </div>
-
-        {/* Clear Filters Button */}
-        <div className="mt-4 flex justify-end">
-          <Button
-            variant="outline"
-            onClick={clearFilters}
-            className="border-blackCoral text-blackCoral hover:bg-blackCoral hover:text-white bg-transparent"
-          >
-            Limpiar Filtros
-          </Button>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

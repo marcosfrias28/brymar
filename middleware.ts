@@ -7,6 +7,8 @@ import {
   type UserRole,
 } from "@/lib/auth/admin-config";
 import { NextResponse, NextRequest } from "next/server";
+// Note: Security middleware disabled in Edge Runtime due to Node.js API limitations
+// Full security features are available in API routes running in Node.js runtime
 
 /**
  * Crea una risposta di errore per accesso non autorizzato
@@ -27,12 +29,19 @@ function createUnauthorizedResponse(reason: string): NextResponse {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Log para debug del problema de infinitas peticiones
+  if (pathname === '/sign-in' && request.method === 'POST') {
+    console.log('🔄 POST /sign-in detected in middleware');
+  }
+
   // Permetti l'accesso alle route pubbliche
   if (isPublicRoute(pathname)) {
     return NextResponse.next();
   }
 
   try {
+    // Basic security checks (Edge Runtime compatible)
+    // Full security middleware runs in API routes
     // Verifica la sessione dell'utente utilizzando better-auth
     const session = await auth.api.getSession({
       headers: request.headers,
@@ -70,7 +79,7 @@ export async function middleware(request: NextRequest) {
     // Redirecciones basadas en roles para mejorar UX
     const userRole = user.role as UserRole;
     const redirectUrl = shouldRedirectUser(pathname, userRole);
-    
+
     if (redirectUrl) {
       return NextResponse.redirect(new URL(redirectUrl, process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"));
     }
@@ -113,11 +122,22 @@ export async function middleware(request: NextRequest) {
     response.headers.set("X-User-Role", user.role);
     response.headers.set("X-Email-Verified", user.emailVerified ? "true" : "false");
 
+    // Return response with basic security headers
+    response.headers.set('X-Content-Type-Options', 'nosniff');
+    response.headers.set('X-Frame-Options', 'DENY');
+    response.headers.set('X-XSS-Protection', '1; mode=block');
     return response;
 
   } catch (error) {
     console.error("Middleware authentication error:", error);
-    return createUnauthorizedResponse("Authentication verification failed");
+
+    console.error("Middleware authentication error:", error);
+
+    const response = createUnauthorizedResponse("Authentication verification failed");
+    response.headers.set('X-Content-Type-Options', 'nosniff');
+    response.headers.set('X-Frame-Options', 'DENY');
+    response.headers.set('X-XSS-Protection', '1; mode=block');
+    return response;
   }
 }
 

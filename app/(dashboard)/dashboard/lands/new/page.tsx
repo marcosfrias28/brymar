@@ -1,29 +1,46 @@
-"use client"
+"use client";
 
-import { LandForm } from "@/components/lands/land-form"
-import { ArrowLeft } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
+import { ArrowLeft, Save } from "lucide-react";
+import Link from "next/link";
+
+import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
+import { LandForm } from "@/components/lands/land-form";
+import { Button } from "@/components/ui/button";
+import { useBreadcrumbs } from "@/hooks/use-breadcrumbs";
+import { cn } from "@/lib/utils";
+import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
 
 export default function NewLandPage() {
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" asChild className="text-blackCoral hover:bg-blackCoral hover:text-white">
-          <Link href="/dashboard/lands">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold text-arsenic font-serif">Agregar Terreno</h1>
-          <p className="text-blackCoral">Completa la información del nuevo terreno</p>
-        </div>
-      </div>
+  const breadcrumbs = useBreadcrumbs();
 
-      {/* Form */}
-      <LandForm />
+  const actions = (
+    <div className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        asChild
+        className={cn(
+          "border-blackCoral text-blackCoral hover:bg-blackCoral hover:text-white",
+          secondaryColorClasses.focusRing
+        )}
+      >
+        <Link href="/dashboard/lands">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Volver
+        </Link>
+      </Button>
     </div>
-  )
+  );
+
+  return (
+    <DashboardPageLayout
+      title="Agregar Terreno"
+      description="Completa la información del nuevo terreno para agregarlo al inventario"
+      breadcrumbs={breadcrumbs}
+      actions={actions}
+    >
+      <div className="max-w-4xl mx-auto">
+        <LandForm />
+      </div>
+    </DashboardPageLayout>
+  );
 }

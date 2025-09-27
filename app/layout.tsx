@@ -5,7 +5,9 @@ import { Navbar } from "@/components/navbar";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { SWRConfig } from "swr";
+import { QueryProvider } from "@/components/providers/query-provider";
+import { LoadingErrorProvider } from "@/components/providers/loading-error-provider";
+import { GlobalLiveRegion } from "@/components/ui/accessibility-announcer";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -25,28 +27,29 @@ export default async function LocaleLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <body className={`${inter.className} flex flex-col min-h-screen`}>
-        <SWRConfig
-          value={{
-            dedupingInterval: 300000, // 5 minutes deduplication
-            revalidateOnFocus: false,
-            revalidateOnReconnect: false,
-          }}
-        >
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem={false}
-            disableTransitionOnChange
-          >
-            <SidebarProvider>
-              <Navbar />
-              <main className="flex-1 overflow-y-auto overflow-x-hidden bg-background">
-                {children}
-              </main>
-              <Toaster richColors={true} position="bottom-center" />
-            </SidebarProvider>
-          </ThemeProvider>
-        </SWRConfig>
+        <QueryProvider>
+          <LoadingErrorProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem={false}
+              disableTransitionOnChange
+            >
+              <SidebarProvider>
+                {/* Global accessibility live regions */}
+                <GlobalLiveRegion />
+
+                <Navbar />
+                <main className="flex-1 overflow-y-auto overflow-x-hidden bg-background">
+                  {children}
+                </main>
+                <Toaster richColors={true} position="bottom-center" />
+
+                {/* Global accessibility live regions */}
+              </SidebarProvider>
+            </ThemeProvider>
+          </LoadingErrorProvider>
+        </QueryProvider>
       </body>
     </html>
   );

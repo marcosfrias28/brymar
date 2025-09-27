@@ -11,10 +11,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin } from "lucide-react";
-import { useContactInfo, getContactInfoValue } from "@/hooks/use-contact-info";
+import {
+  useContactInfo,
+  getContactInfoValue,
+} from "@/hooks/queries/use-contact-info-query";
 
 export function ContactForm() {
-  const { contactInfo, loading } = useContactInfo();
+  const contactQuery = useContactInfo() as any;
+  const contactInfo = contactQuery.data || [];
+  const isLoading = contactQuery.isLoading;
 
   return (
     <section className="py-16 px-4 bg-gray-50">
@@ -36,7 +41,7 @@ export function ContactForm() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {loading ? (
+              {isLoading ? (
                 <div className="space-y-4">
                   <div className="flex items-center">
                     <div className="h-5 w-5 mr-3 bg-gray-200 rounded animate-pulse" />

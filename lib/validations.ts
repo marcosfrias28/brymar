@@ -82,13 +82,13 @@ export type ActionFunction<TInput, TOutput> = (
  * ```
  */
 export function handleAPIError(
-    error: unknown, 
+    error: unknown,
     fallbackMessage = "Error desconocido"
 ): { success: false; error: string } {
     const apiError = error as BetterCallAPIError;
-    return { 
-        success: false, 
-        error: apiError?.body?.message || fallbackMessage 
+    return {
+        success: false,
+        error: apiError?.body?.message || fallbackMessage
     };
 }
 
@@ -114,10 +114,10 @@ export function handleAPIError(
 export function parseFormData(formData: FormData): Record<string, any> {
     const data: Record<string, any> = {};
     const entries = Array.from(formData.entries());
-    
+
     // Fields that should never be converted to numbers
     const stringOnlyFields = ['email', 'password', 'name', 'token', 'otp', 'title', 'description', 'location', 'type', 'category', 'author', 'content'];
-    
+
     for (const [key, value] of entries) {
         if (value instanceof File) {
             // Handle file uploads
@@ -125,7 +125,7 @@ export function parseFormData(formData: FormData): Record<string, any> {
         } else {
             // Handle regular form fields
             const stringValue = value.toString();
-            
+
             // Keep certain fields as strings to avoid type issues
             if (stringOnlyFields.includes(key)) {
                 data[key] = stringValue;
@@ -140,7 +140,7 @@ export function parseFormData(formData: FormData): Record<string, any> {
             }
         }
     }
-    
+
     return data;
 }
 
@@ -225,7 +225,7 @@ export function createValidatedAction<TInput, TOutput>(
             // Parse and validate form data
             const formObject = parseFormData(formData);
             const result = schema.safeParse(formObject);
-            
+
             if (!result.success) {
                 return createErrorResponse(result.error.errors[0].message) as TOutput;
             }
