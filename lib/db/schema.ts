@@ -271,3 +271,143 @@ export type NewPageSection = typeof pageSections.$inferInsert;
 
 export type ContactInfo = typeof contactInfo.$inferSelect;
 export type NewContactInfo = typeof contactInfo.$inferInsert;
+
+// AI Property Wizard Tables
+
+// Property Drafts Table - Para guardar borradores del wizard
+export const propertyDrafts = pgTable("property_drafts", {
+  id: varchar("id", { length: 36 }).primaryKey(), // UUID for draft ID
+  userId: varchar("user_id", { length: 36 })
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }), // FK to user.id
+  formData: jsonb("form_data").notNull(), // Partial PropertyFormData
+  stepCompleted: integer("step_completed").default(0), // Last completed step (0-4)
+  title: text("title"), // For easy identification in draft list
+  propertyType: text("property_type"), // For filtering drafts
+  completionPercentage: integer("completion_percentage").default(0), // 0-100%
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// AI Generations Table - Para trackear generaciones de IA
+export const aiGenerations = pgTable("ai_generations", {
+  id: varchar("id", { length: 36 }).primaryKey(), // UUID for generation ID
+  propertyId: integer("property_id").references(() => properties.id, { onDelete: "cascade" }), // FK to property.id (opcional)
+  draftId: varchar("draft_id", { length: 36 }).references(() => propertyDrafts.id, { onDelete: "cascade" }), // FK to draft.id (opcional)
+  userId: varchar("user_id", { length: 36 })
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }), // FK to user.id
+  generationType: text("generation_type").notNull(), // 'title', 'description', 'tags', 'market_insights'
+  inputData: jsonb("input_data").notNull(), // PropertyBasicInfo used for generation
+  generatedContent: text("generated_content").notNull(), // AI generated text
+  modelUsed: varchar("model_used", { length: 100 }), // HuggingFace model identifier
+  language: text("language").notNull().default("es"), // 'es' or 'en'
+  success: boolean("success").default(true), // Whether generation was successful
+  errorMessage: text("error_message"), // Error details if failed
+  processingTimeMs: integer("processing_time_ms"), // Time taken for generation
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Property Images Table - Para metadatos de imágenes del wizard
+export const propertyImages = pgTable("property_images", {
+  id: varchar("id", { length: 36 }).primaryKey(), // UUID for image ID
+  propertyId: integer("property_id").references(() => properties.id, { onDelete: "cascade" }), // FK to property.id (opcional)
+  draftId: varchar("draft_id", { length: 36 }).references(() => propertyDrafts.id, { onDelete: "cascade" }), // FK to draft.id (opcional)
+  userId: varchar("user_id", { length: 36 })
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }), // FK to user.id
+  url: text("url").notNull(), // Cloud storage URL
+  filename: varchar("filename", { length: 255 }).notNull(),
+  originalFilename: varchar("original_filename", { length: 255 }), // User's original filename
+  size: integer("size").notNull(), // File size in bytes
+  contentType: varchar("content_type", { length: 100 }).notNull(), // MIME type
+  width: integer("width"), // Image width in pixels
+  height: integer("height"), // Image height in pixels
+  displayOrder: integer("display_order").default(0), // Order for display
+  uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Property Videos Table - Para metadatos de videos del wizard
+export const propertyVideos = pgTable("property_videos", {
+  id: varchar("id", { length: 36 }).primaryKey(), // UUID for video ID
+  propertyId: integer("property_id").references(() => properties.id, { onDelete: "cascade" }), // FK to property.id (opcional)
+  draftId: varchar("draft_id", { length: 36 }).references(() => propertyDrafts.id, { onDelete: "cascade" }), // FK to draft.id (opcional)
+  userId: varchar("user_id", { length: 36 })
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }), // FK to user.id
+  url: text("url").notNull(), // Cloud storage URL
+  filename: varchar("filename", { length: 255 }).notNull(),
+  originalFilename: varchar("original_filename", { length: 255 }), // User's original filename
+  size: integer("size").notNull(), // File size in bytes
+  contentType: varchar("content_type", { length: 100 }).notNull(), // MIME type
+  duration: integer("duration"), // Video duration in seconds
+  displayOrder: integer("display_order").default(0), // Order for display
+  uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Property Characteristics Table - Para características dinámicas
+export const propertyCharacteristics = pgTable("property_characteristics", {
+  id: varchar("id", { length: 36 }).primaryKey(), // UUID for characteristic ID
+  name: varchar("name", { length: 100 }).notNull(),
+  category: text("category").notNull(), // 'amenity', 'feature', 'location'
+  propertyType: text("property_type"), // Optional: specific to property type
+  isDefault: boolean("is_default").default(false), // System-defined vs user-created
+  isActive: boolean("is_active").default(true),
+  order: integer("order").default(0),
+  createdBy: varchar("created_by", { length: 36 }).references(() => users.id), // User who created custom characteristic
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Property Draft Characteristics Junction Table
+export const propertyDraftCharacteristics = pgTable("property_draft_characteristics", {
+  id: serial("id").primaryKey(),
+  draftId: varchar("draft_id", { length: 36 })
+    .notNull()
+    .references(() => propertyDrafts.id, { onDelete: "cascade" }),
+  characteristicId: varchar("characteristic_id", { length: 36 })
+    .notNull()
+    .references(() => propertyCharacteristics.id, { onDelete: "cascade" }),
+  selected: boolean("selected").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Wizard Analytics Table - Para métricas y análisis
+export const wizardAnalytics = pgTable("wizard_analytics", {
+  id: varchar("id", { length: 36 }).primaryKey(), // UUID for analytics ID
+  userId: varchar("user_id", { length: 36 })
+    .references(() => users.id, { onDelete: "cascade" }), // FK to user.id (opcional para usuarios anónimos)
+  sessionId: varchar("session_id", { length: 100 }), // Browser session ID
+  draftId: varchar("draft_id", { length: 36 }).references(() => propertyDrafts.id, { onDelete: "cascade" }), // FK to draft.id (opcional)
+  eventType: text("event_type").notNull(), // 'step_started', 'step_completed', 'ai_generated', 'draft_saved', 'published'
+  stepNumber: integer("step_number"), // 1-4 for step events
+  eventData: jsonb("event_data").default({}), // Additional event-specific data
+  timeSpentMs: integer("time_spent_ms"), // Time spent on step/action
+  userAgent: text("user_agent"),
+  ipAddress: text("ip_address"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Type Inference for new tables
+export type PropertyDraft = typeof propertyDrafts.$inferSelect;
+export type NewPropertyDraft = typeof propertyDrafts.$inferInsert;
+
+export type AIGeneration = typeof aiGenerations.$inferSelect;
+export type NewAIGeneration = typeof aiGenerations.$inferInsert;
+
+export type PropertyImage = typeof propertyImages.$inferSelect;
+export type NewPropertyImage = typeof propertyImages.$inferInsert;
+
+export type PropertyVideo = typeof propertyVideos.$inferSelect;
+export type NewPropertyVideo = typeof propertyVideos.$inferInsert;
+
+export type PropertyCharacteristic = typeof propertyCharacteristics.$inferSelect;
+export type NewPropertyCharacteristic = typeof propertyCharacteristics.$inferInsert;
+
+export type PropertyDraftCharacteristic = typeof propertyDraftCharacteristics.$inferSelect;
+export type NewPropertyDraftCharacteristic = typeof propertyDraftCharacteristics.$inferInsert;
+
+export type WizardAnalytic = typeof wizardAnalytics.$inferSelect;
+export type NewWizardAnalytic = typeof wizardAnalytics.$inferInsert;
