@@ -1,22 +1,29 @@
+"use client";
+
 import { ProfileNotifications } from "@/components/profile/profile-notifications";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bell } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Bell, Home, User } from "lucide-react";
+import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 
 export default function ProfileNotificationsPage() {
-  return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Bell className="h-8 w-8" />
-            Le Mie Notifiche
-          </h1>
-          <p className="text-muted-foreground">
-            Gestisci e visualizza tutte le tue notifiche
-          </p>
-        </div>
-      </div>
+  const breadcrumbs = [
+    { label: "Dashboard", href: "/dashboard", icon: Home },
+    { label: "Profilo", href: "/profile", icon: User },
+    { label: "Le Mie Notifiche", icon: Bell },
+  ];
 
+  return (
+    <DashboardPageLayout
+      title="Le Mie Notifiche"
+      description="Gestisci e visualizza tutte le tue notifiche"
+      breadcrumbs={breadcrumbs}
+    >
       <Card>
         <CardHeader>
           <CardTitle>Centro Notifiche</CardTitle>
@@ -28,6 +35,6 @@ export default function ProfileNotificationsPage() {
           <ProfileNotifications />
         </CardContent>
       </Card>
-    </div>
+    </DashboardPageLayout>
   );
 }

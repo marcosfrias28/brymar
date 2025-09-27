@@ -1,22 +1,29 @@
+"use client";
+
 import { ProfileActivity } from "@/components/profile/profile-activity";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Activity, Home, User } from "lucide-react";
+import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 
 export default function ProfileActivityPage() {
-  return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <Activity className="h-8 w-8" />
-            Cronologia Attività
-          </h1>
-          <p className="text-muted-foreground">
-            Visualizza la cronologia completa delle tue attività e azioni
-          </p>
-        </div>
-      </div>
+  const breadcrumbs = [
+    { label: "Dashboard", href: "/dashboard", icon: Home },
+    { label: "Profilo", href: "/profile", icon: User },
+    { label: "Cronologia Attività", icon: Activity },
+  ];
 
+  return (
+    <DashboardPageLayout
+      title="Cronologia Attività"
+      description="Visualizza la cronologia completa delle tue attività e azioni"
+      breadcrumbs={breadcrumbs}
+    >
       <Card>
         <CardHeader>
           <CardTitle>Attività Utente</CardTitle>
@@ -28,6 +35,6 @@ export default function ProfileActivityPage() {
           <ProfileActivity />
         </CardContent>
       </Card>
-    </div>
+    </DashboardPageLayout>
   );
 }
