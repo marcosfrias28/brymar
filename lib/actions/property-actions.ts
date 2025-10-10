@@ -16,11 +16,11 @@ import { properties } from "../db/schema"
 const propertySchema = z.object({
   title: z.string().min(3, "El título debe tener al menos 3 caracteres").max(100, "El título no puede exceder 100 caracteres"),
   description: z.string().min(10, "La descripción debe tener al menos 10 caracteres").max(1000, "La descripción no puede exceder 1000 caracteres"),
-  price: z.number().min(1000, "El precio debe ser al menos $1,000").max(10000000, "El precio no puede exceder $10,000,000"),
+  price: z.coerce.number().min(1000, "El precio debe ser al menos $1,000").max(10000000, "El precio no puede exceder $10,000,000"),
   type: z.string().min(3, "El tipo debe tener al menos 3 caracteres").max(50, "El tipo no puede exceder 50 caracteres"),
-  bedrooms: z.number().min(1, "Debe tener al menos 1 habitación").max(10, "No puede tener más de 10 habitaciones"),
-  bathrooms: z.number().min(1, "Debe tener al menos 1 baño").max(10, "No puede tener más de 10 baños"),
-  area: z.number().min(20, "El área debe ser al menos 20 m²").max(10000, "El área no puede exceder 10,000 m²"),
+  bedrooms: z.coerce.number().min(1, "Debe tener al menos 1 habitación").max(10, "No puede tener más de 10 habitaciones"),
+  bathrooms: z.coerce.number().min(1, "Debe tener al menos 1 baño").max(10, "No puede tener más de 10 baños"),
+  area: z.coerce.number().min(20, "El área debe ser al menos 20 m²").max(10000, "El área no puede exceder 10,000 m²"),
   location: z.string().min(3, "La ubicación debe tener al menos 3 caracteres").max(100, "La ubicación no puede exceder 100 caracteres"),
   status: z.enum(["sale", "rent"], { errorMap: () => ({ message: "El estado debe ser 'sale' o 'rent'" }) }),
   featured: z.boolean(),
@@ -58,11 +58,11 @@ const updatePropertySchema = z.object({
   id: z.string().min(1, "ID de propiedad requerido"),
   title: z.string().min(3, "El título debe tener al menos 3 caracteres").max(100, "El título no puede exceder 100 caracteres"),
   description: z.string().min(10, "La descripción debe tener al menos 10 caracteres").max(1000, "La descripción no puede exceder 1000 caracteres"),
-  price: z.number().min(1000, "El precio debe ser al menos $1,000").max(10000000, "El precio no puede exceder $10,000,000"),
+  price: z.coerce.number().min(1000, "El precio debe ser al menos $1,000").max(10000000, "El precio no puede exceder $10,000,000"),
   type: z.string().min(3, "El tipo debe tener al menos 3 caracteres").max(50, "El tipo no puede exceder 50 caracteres"),
-  bedrooms: z.number().min(1, "Debe tener al menos 1 habitación").max(10, "No puede tener más de 10 habitaciones"),
-  bathrooms: z.number().min(1, "Debe tener al menos 1 baño").max(10, "No puede tener más de 10 baños"),
-  area: z.number().min(20, "El área debe ser al menos 20 m²").max(10000, "El área no puede exceder 10,000 m²"),
+  bedrooms: z.coerce.number().min(1, "Debe tener al menos 1 habitación").max(10, "No puede tener más de 10 habitaciones"),
+  bathrooms: z.coerce.number().min(1, "Debe tener al menos 1 baño").max(10, "No puede tener más de 10 baños"),
+  area: z.coerce.number().min(20, "El área debe ser al menos 20 m²").max(10000, "El área no puede exceder 10,000 m²"),
   location: z.string().min(3, "La ubicación debe tener al menos 3 caracteres").max(100, "La ubicación no puede exceder 100 caracteres"),
   status: z.enum(["sale", "rent"], { errorMap: () => ({ message: "El estado debe ser 'sale' o 'rent'" }) }),
   featured: z.boolean(),
@@ -229,8 +229,8 @@ export const getFeaturedProperties = async (limit = 6) => {
 // Schema per la ricerca con action
 const searchSchema = z.object({
   query: z.string().min(1, "La consulta de búsqueda es requerida").max(100, "La consulta no puede exceder 100 caracteres"),
-  page: z.number(),
-  limit: z.number(),
+  page: z.coerce.number(),
+  limit: z.coerce.number(),
 })
 
 type SearchResult = {

@@ -3,26 +3,27 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useUser } from "@/hooks/use-user";
-import { PropertyWizard } from "@/components/wizard";
+import { PropertyWizard } from "@/components/wizard/property";
 import {
-  updateProperty,
-  saveDraft,
-  convertPropertyToWizardFormat,
-} from "@/lib/actions/wizard-actions";
+  completePropertyWizard,
+  savePropertyDraft,
+  loadPropertyDraft,
+} from "@/lib/actions/property-wizard-actions";
+import { getPropertyById } from "@/app/actions/property-actions";
 import { RouteGuard } from "@/components/auth/route-guard";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import type { PropertyFormData } from "@/types/wizard";
+import type { PropertyWizardData } from "@/types/property-wizard";
 
 export default function EditPropertyPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useUser();
   const [initialData, setInitialData] =
-    useState<Partial<PropertyFormData> | null>(null);
+    useState<Partial<PropertyWizardData> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,13 +38,43 @@ export default function EditPropertyPage() {
       }
 
       try {
-        const wizardData = await convertPropertyToWizardFormat(propertyId);
+        const property = await getPropertyById(propertyId.toString());
 
-        if (!wizardData) {
+        if (!property) {
           setError("Propiedad no encontrada");
           setLoading(false);
           return;
         }
+
+        // Convert property data to wizard format
+        const wizardData: Partial<PropertyWizardData> = {
+          id: property.id?.toString(),
+          title: property.title,
+          description: property.description,
+          price: property.price,
+          surface: property.area, // Map area to surface
+          propertyType: property.type as any, // Map type to propertyType
+          bedrooms: property.bedrooms,
+          bathrooms: property.bathrooms,
+          characteristics: [], // Default empty characteristics
+          coordinates: undefined, // Not available in current schema
+          address: {
+            street: "",
+            city: property.location || "",
+            province: "",
+            country: "Dominican Republic",
+            formattedAddress: property.location || "",
+          },
+          images: Array.isArray(property.images) ? property.images : [],
+          videos: [],
+          status: (property.status as "draft" | "published") || "draft",
+          language: "es",
+          aiGenerated: {
+            title: false,
+            description: false,
+            tags: false,
+          },
+        };
 
         setInitialData(wizardData);
       } catch (err) {
@@ -57,44 +88,34 @@ export default function EditPropertyPage() {
     loadPropertyData();
   }, [propertyId]);
 
-  const handleComplete = async (data: PropertyFormData) => {
+  const handleComplete = async (data: PropertyWizardData) => {
     if (!user?.id || !propertyId) {
       toast.error("Usuario no autenticado o ID de propiedad inválido");
       return;
     }
 
     try {
-      const formData = new FormData();
+      // Add the property ID to the data for updates
+      const completeData = {
+        ...data,
+        id: propertyId.toString(),
+        aiGenerated: data.aiGenerated || {
+          title: false,
+          description: false,
+          tags: false,
+        },
+        address: data.address
+          ? {
+              ...data.address,
+              country: "Dominican Republic" as const,
+            }
+          : undefined,
+      };
 
-      // Add all property data to FormData
-      formData.append("userId", user.id);
-      formData.append("propertyId", propertyId.toString()); // Include property ID for updates
-      formData.append("title", data.title);
-      formData.append("description", data.description);
-      formData.append("price", data.price.toString());
-      formData.append("surface", data.surface.toString());
-      formData.append("propertyType", data.propertyType);
-      formData.append("bedrooms", (data.bedrooms || 0).toString());
-      formData.append("bathrooms", (data.bathrooms || 0).toString());
-      formData.append("status", data.status);
-      formData.append("language", data.language);
-
-      // Add coordinates
-      formData.append("coordinates", JSON.stringify(data.coordinates));
-
-      // Add address
-      formData.append("address", JSON.stringify(data.address));
-
-      // Add characteristics
-      formData.append("characteristics", JSON.stringify(data.characteristics));
-
-      // Add images metadata
-      formData.append("images", JSON.stringify(data.images));
-
-      // Add AI generation flags
-      formData.append("aiGenerated", JSON.stringify(data.aiGenerated));
-
-      const result = await updateProperty(formData);
+      const result = await completePropertyWizard({
+        userId: user.id,
+        data: completeData,
+      });
 
       if (result.success) {
         toast.success("¡Propiedad actualizada exitosamente!");
@@ -109,7 +130,8 @@ export default function EditPropertyPage() {
   };
 
   const handleSaveDraft = async (
-    data: Partial<PropertyFormData>
+    data: Partial<PropertyWizardData>,
+    currentStep: string
   ): Promise<string> => {
     if (!user?.id) {
       toast.error("Usuario no autenticado");
@@ -117,19 +139,20 @@ export default function EditPropertyPage() {
     }
 
     try {
-      const formData = new FormData();
-      formData.append("userId", user.id);
-      formData.append("formData", JSON.stringify(data));
-
-      // Calculate step completion based on data
-      let stepCompleted = 0;
-      if (data.title && data.description && data.price) stepCompleted = 1;
-      if (data.coordinates && data.address) stepCompleted = 2;
-      if (data.images && data.images.length > 0) stepCompleted = 3;
-
-      formData.append("stepCompleted", stepCompleted.toString());
-
-      const result = await saveDraft(formData);
+      const result = await savePropertyDraft({
+        userId: user.id,
+        data: {
+          ...data,
+          status: data.status || "draft",
+          address: data.address
+            ? {
+                ...data.address,
+                country: "Dominican Republic" as const,
+              }
+            : undefined,
+        },
+        currentStep: currentStep,
+      });
 
       if (result.success) {
         toast.success("Cambios guardados como borrador");

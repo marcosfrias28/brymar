@@ -272,9 +272,48 @@ export type NewPageSection = typeof pageSections.$inferInsert;
 export type ContactInfo = typeof contactInfo.$inferSelect;
 export type NewContactInfo = typeof contactInfo.$inferInsert;
 
-// AI Property Wizard Tables
+// Unified Wizard System Tables
 
-// Property Drafts Table - Para guardar borradores del wizard
+// Unified Wizard Drafts Table - For all wizard types (property, land, blog)
+export const wizardDrafts = pgTable("wizard_drafts", {
+  id: varchar("id", { length: 36 }).primaryKey(), // UUID for draft ID
+  userId: varchar("user_id", { length: 36 })
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }), // FK to user.id
+  wizardType: text("wizard_type").notNull(), // 'property', 'land', 'blog'
+  wizardConfigId: text("wizard_config_id").notNull(), // 'property-wizard', 'land-wizard', etc.
+  formData: jsonb("form_data").notNull(), // Partial wizard data
+  currentStep: text("current_step").notNull(), // Current step ID
+  stepProgress: jsonb("step_progress").default({}), // Track completion per step
+  completionPercentage: integer("completion_percentage").default(0), // 0-100%
+  title: text("title"), // For easy identification in draft list
+  description: text("description"), // Brief description for draft list
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Wizard Media Table - Unified for all wizard types
+export const wizardMedia = pgTable("wizard_media", {
+  id: varchar("id", { length: 36 }).primaryKey(), // UUID for media ID
+  draftId: varchar("draft_id", { length: 36 })
+    .references(() => wizardDrafts.id, { onDelete: "cascade" }), // FK to wizard_drafts.id
+  publishedId: integer("published_id"), // References final published entity (property.id, land.id, etc.)
+  wizardType: text("wizard_type").notNull(), // 'property', 'land', 'blog'
+  mediaType: text("media_type").notNull(), // 'image', 'video'
+  url: text("url").notNull(), // Cloud storage URL
+  filename: varchar("filename", { length: 255 }).notNull(),
+  originalFilename: varchar("original_filename", { length: 255 }), // User's original filename
+  size: integer("size").notNull(), // File size in bytes
+  contentType: varchar("content_type", { length: 100 }).notNull(), // MIME type
+  width: integer("width"), // Image width in pixels
+  height: integer("height"), // Image height in pixels
+  duration: integer("duration"), // Video duration in seconds
+  displayOrder: integer("display_order").default(0), // Order for display
+  uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Property Drafts Table - Para guardar borradores del wizard (DEPRECATED - use wizardDrafts)
 export const propertyDrafts = pgTable("property_drafts", {
   id: varchar("id", { length: 36 }).primaryKey(), // UUID for draft ID
   userId: varchar("user_id", { length: 36 })
@@ -380,7 +419,10 @@ export const wizardAnalytics = pgTable("wizard_analytics", {
   userId: varchar("user_id", { length: 36 })
     .references(() => users.id, { onDelete: "cascade" }), // FK to user.id (opcional para usuarios anónimos)
   sessionId: varchar("session_id", { length: 100 }), // Browser session ID
-  draftId: varchar("draft_id", { length: 36 }).references(() => propertyDrafts.id, { onDelete: "cascade" }), // FK to draft.id (opcional)
+  wizardType: text("wizard_type").notNull(), // 'property', 'land', 'blog'
+  propertyDraftId: varchar("property_draft_id", { length: 36 }).references(() => propertyDrafts.id, { onDelete: "cascade" }), // FK to property draft (opcional)
+  landDraftId: varchar("land_draft_id", { length: 36 }).references(() => landDrafts.id, { onDelete: "cascade" }), // FK to land draft (opcional)
+  blogDraftId: varchar("blog_draft_id", { length: 36 }).references(() => blogDrafts.id, { onDelete: "cascade" }), // FK to blog draft (opcional)
   eventType: text("event_type").notNull(), // 'step_started', 'step_completed', 'ai_generated', 'draft_saved', 'published'
   stepNumber: integer("step_number"), // 1-4 for step events
   eventData: jsonb("event_data").default({}), // Additional event-specific data
@@ -390,9 +432,51 @@ export const wizardAnalytics = pgTable("wizard_analytics", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Land Drafts Table - Para guardar borradores del wizard de terrenos (DEPRECATED - use wizardDrafts)
+export const landDrafts = pgTable("land_drafts", {
+  id: varchar("id", { length: 36 }).primaryKey(), // UUID for draft ID
+  userId: varchar("user_id", { length: 36 })
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }), // FK to user.id
+  formData: jsonb("form_data").notNull(), // Partial LandFormData
+  stepCompleted: integer("step_completed").default(0), // Last completed step (0-4)
+  title: text("title"), // For easy identification in draft list
+  landType: text("land_type"), // For filtering drafts
+  completionPercentage: integer("completion_percentage").default(0), // 0-100%
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Blog Drafts Table - Para guardar borradores del wizard de blog (DEPRECATED - use wizardDrafts)
+export const blogDrafts = pgTable("blog_drafts", {
+  id: varchar("id", { length: 36 }).primaryKey(), // UUID for draft ID
+  userId: varchar("user_id", { length: 36 })
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }), // FK to user.id
+  formData: jsonb("form_data").notNull(), // Partial BlogWizardData
+  stepCompleted: integer("step_completed").default(0), // Last completed step (0-4)
+  title: text("title"), // For easy identification in draft list
+  category: text("category"), // For filtering drafts
+  completionPercentage: integer("completion_percentage").default(0), // 0-100%
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Type Inference for new tables
+export type WizardDraft = typeof wizardDrafts.$inferSelect;
+export type NewWizardDraft = typeof wizardDrafts.$inferInsert;
+
+export type WizardMedia = typeof wizardMedia.$inferSelect;
+export type NewWizardMedia = typeof wizardMedia.$inferInsert;
+
 export type PropertyDraft = typeof propertyDrafts.$inferSelect;
 export type NewPropertyDraft = typeof propertyDrafts.$inferInsert;
+
+export type LandDraft = typeof landDrafts.$inferSelect;
+export type NewLandDraft = typeof landDrafts.$inferInsert;
+
+export type BlogDraft = typeof blogDrafts.$inferSelect;
+export type NewBlogDraft = typeof blogDrafts.$inferInsert;
 
 export type AIGeneration = typeof aiGenerations.$inferSelect;
 export type NewAIGeneration = typeof aiGenerations.$inferInsert;

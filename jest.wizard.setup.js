@@ -1,6 +1,9 @@
 import '@testing-library/jest-dom'
 import React from 'react'
 
+// Ensure jest globals are available
+global.expect = expect;
+
 // Mock performance API for performance tests
 global.performance = global.performance || {
     now: jest.fn(() => Date.now()),

@@ -2,12 +2,12 @@
 
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
-import { eq, desc, count, and, ilike, or } from "drizzle-orm"
-import { 
-  type ActionState, 
-  createValidatedAction, 
+import { eq, desc, asc, count, and, ilike, or, gte, lte } from "drizzle-orm"
+import {
+  type ActionState,
+  createValidatedAction,
   createSuccessResponse,
-  createErrorResponse 
+  createErrorResponse
 } from "@/lib/validations"
 import db from "@/lib/db/drizzle"
 import { properties } from "@/lib/db/schema"
@@ -41,12 +41,12 @@ async function addPropertyAction(
     location: string;
     status?: "sale" | "rent";
   }
-): Promise<ActionState> {
+): Promise<ActionState<any>> {
   try {
     // Note: Image handling would need to be done differently with the new system
     // For now, we'll handle it in the component or create a separate image upload action
-    
-    await db.insert(properties).values({
+
+    const result = await db.insert(properties).values({
       title: data.title,
       description: data.description,
       price: data.price,
@@ -57,10 +57,10 @@ async function addPropertyAction(
       location: data.location,
       status: data.status || "sale", // Apply default here
       images: [], // Will be handled separately
-    });
+    }).returning();
 
     revalidatePath("/dashboard/properties");
-    return createSuccessResponse(undefined, "Propiedad agregada exitosamente!");
+    return createSuccessResponse(result[0], "Propiedad agregada exitosamente!");
   } catch (error) {
     // console.error("Error adding property:", error);
     return createErrorResponse("Error al agregar la propiedad");
@@ -107,7 +107,7 @@ async function updatePropertyAction(
 }
 
 export const updateProperty = createValidatedAction(
-  propertyInputSchema.extend({ id: z.string() }), 
+  propertyInputSchema.extend({ id: z.string() }),
   updatePropertyAction
 );
 
@@ -143,7 +143,7 @@ export const getProperties = async (page = 1, limit = 12, filters?: any) => {
 
     // Build where conditions
     const whereConditions = []
-    
+
     if (filters?.status && filters.status !== "all") {
       whereConditions.push(eq(properties.status, filters.status))
     }
@@ -232,24 +232,159 @@ export const searchProperties = async (query: string, page = 1, limit = 12) => {
   }
 }
 
-const searchSchema = z.object({
-  query: z.string().min(1).max(100),
-  page: z.number().optional().default(1),
-  limit: z.number().optional().default(12),
+const advancedSearchSchema = z.object({
+  location: z.string().optional(),
+  propertyType: z.string().optional(),
+  landType: z.string().optional(),
+  status: z.string().optional(),
+  minPrice: z.coerce.number().optional(),
+  maxPrice: z.coerce.number().optional(),
+  bedrooms: z.string().optional(),
+  bathrooms: z.string().optional(),
+  minArea: z.coerce.number().optional(),
+  maxArea: z.coerce.number().optional(),
+  amenities: z.array(z.string()).optional(),
+  page: z.coerce.number().optional().default(1),
+  limit: z.coerce.number().optional().default(12),
+  sortBy: z.string().optional().default("newest"),
 })
 
-async function searchPropertiesActionFunction(
-  data: { query: string; page?: number; limit?: number }
+export const advancedSearchProperties = async (filters: any) => {
+  try {
+    const page = filters.page || 1;
+    const limit = filters.limit || 12;
+    const offset = (page - 1) * limit;
+
+    // Build where conditions
+    const whereConditions = [];
+
+    // Location search
+    if (filters.location && filters.location.trim()) {
+      whereConditions.push(
+        or(
+          ilike(properties.location, `%${filters.location}%`),
+          ilike(properties.title, `%${filters.location}%`),
+          ilike(properties.description, `%${filters.location}%`)
+        )
+      );
+    }
+
+    // Property type filter
+    if (filters.propertyType && filters.propertyType !== "all") {
+      whereConditions.push(eq(properties.type, filters.propertyType));
+    }
+
+    // Property status filter
+    if (filters.status && filters.status !== "all") {
+      whereConditions.push(eq(properties.status, filters.status));
+    }
+
+    // Price range filter
+    if (filters.minPrice && filters.minPrice > 0) {
+      whereConditions.push(gte(properties.price, filters.minPrice));
+    }
+    if (filters.maxPrice && filters.maxPrice > 0) {
+      whereConditions.push(lte(properties.price, filters.maxPrice));
+    }
+
+    // Bedrooms filter
+    if (filters.bedrooms && filters.bedrooms !== "any") {
+      const bedroomCount = parseInt(filters.bedrooms);
+      if (!isNaN(bedroomCount)) {
+        whereConditions.push(gte(properties.bedrooms, bedroomCount));
+      }
+    }
+
+    // Bathrooms filter
+    if (filters.bathrooms && filters.bathrooms !== "any") {
+      const bathroomCount = parseInt(filters.bathrooms);
+      if (!isNaN(bathroomCount)) {
+        whereConditions.push(gte(properties.bathrooms, bathroomCount));
+      }
+    }
+
+    // Area range filter
+    if (filters.minArea && filters.minArea > 0) {
+      whereConditions.push(gte(properties.area, filters.minArea));
+    }
+    if (filters.maxArea && filters.maxArea > 0) {
+      whereConditions.push(lte(properties.area, filters.maxArea));
+    }
+
+    // Build the base query
+    const baseQuery = db.select().from(properties);
+
+    // Apply where conditions if any
+    const queryWithWhere = whereConditions.length > 0
+      ? baseQuery.where(
+        whereConditions.length === 1 ? whereConditions[0] : and(...whereConditions)
+      )
+      : baseQuery;
+
+    // Apply sorting
+    let finalQuery;
+    switch (filters.sortBy) {
+      case "price-low":
+        finalQuery = queryWithWhere.orderBy(asc(properties.price));
+        break;
+      case "price-high":
+        finalQuery = queryWithWhere.orderBy(desc(properties.price));
+        break;
+      case "area-large":
+        finalQuery = queryWithWhere.orderBy(desc(properties.area));
+        break;
+      case "area-small":
+        finalQuery = queryWithWhere.orderBy(asc(properties.area));
+        break;
+      case "newest":
+      default:
+        finalQuery = queryWithWhere.orderBy(desc(properties.createdAt));
+        break;
+    }
+
+    // Execute query with pagination
+    const propertiesResult = await finalQuery
+      .limit(limit)
+      .offset(offset);
+
+    // Get total count
+    const totalBaseQuery = db.select({ count: count() }).from(properties);
+    const totalQueryWithWhere = whereConditions.length > 0
+      ? totalBaseQuery.where(
+        whereConditions.length === 1 ? whereConditions[0] : and(...whereConditions)
+      )
+      : totalBaseQuery;
+    const totalResult = await totalQueryWithWhere;
+
+    return {
+      properties: propertiesResult,
+      total: totalResult[0].count,
+      totalPages: Math.ceil(totalResult[0].count / limit),
+      currentPage: page,
+    };
+  } catch (error) {
+    console.error("Error in advanced search:", error);
+    return {
+      properties: [],
+      total: 0,
+      totalPages: 0,
+      currentPage: 1,
+    };
+  }
+};
+
+async function advancedSearchPropertiesActionFunction(
+  data: any
 ): Promise<ActionState<{ properties: any[]; total: number; totalPages: number; currentPage: number }>> {
   try {
-    const result = await searchProperties(data.query, data.page, data.limit);
-    
+    const result = await advancedSearchProperties(data);
+
     return createSuccessResponse(
       result,
       `Found ${result.total} properties`
     );
   } catch (error) {
-    // console.error('Search properties action error:', error);
+    console.error('Advanced search properties action error:', error);
     return {
       success: false,
       error: 'An error occurred while searching properties'
@@ -258,6 +393,6 @@ async function searchPropertiesActionFunction(
 }
 
 export const searchPropertiesAction = createValidatedAction(
-  searchSchema, 
-  searchPropertiesActionFunction
+  advancedSearchSchema,
+  advancedSearchPropertiesActionFunction
 );

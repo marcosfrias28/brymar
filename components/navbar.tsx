@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence, useScroll } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { User } from "@/lib/db/schema";
 import { useAvoidRoutes } from "@/hooks/use-avoid-routes";
 import { useAdmin } from "@/hooks/use-admin";
 import { useUser } from "@/hooks/use-user";
@@ -16,9 +15,7 @@ import {
   Mail,
   UserCheck2,
   LogInIcon,
-  LogOutIcon,
   Settings,
-  User as UserIcon,
   Shield,
   Menu,
 } from "lucide-react";
@@ -42,22 +39,28 @@ import Logo from "./ui/logo";
 import getProfileItems from "@/lib/navbar/getProfileItems";
 import { ModeToggle } from "./mode-toggle";
 import LogOutButton from "./auth/logout-button";
+import { AuthButtons } from "./auth/auth-buttons";
 
 interface NavbarProps {
   className?: string;
 }
 
-
 const menuItems = [
   { icon: Home, href: "/" },
-  { icon: Building2, href: "/search-property" },
+  { icon: Building2, href: "/search" },
   { icon: Landmark, href: "/land" },
   { icon: Users, href: "/about" },
   { icon: Mail, href: "/contact" },
 ];
 
 const getMenuLabel = (index: number): string => {
-  const labels = ["Inicio", "Buscar Propiedad", "Terrenos", "Nosotros", "Contacto"];
+  const labels = [
+    "Inicio",
+    "Buscar Propiedad",
+    "Terrenos",
+    "Nosotros",
+    "Contacto",
+  ];
   return labels[index] || "";
 };
 
@@ -73,7 +76,6 @@ export function Navbar({ className }: NavbarProps) {
       setActive(true);
     }
   }, []);
-
 
   if (shouldAvoid) return null;
 
@@ -106,24 +108,47 @@ export function Navbar({ className }: NavbarProps) {
               <div className="grid grid-cols-2 gap-4">
                 {/* Sección Servicios */}
                 <div className="space-y-3">
-                  <h4 className="text-sm font-semibold text-card-foreground whitespace-nowrap">Servicios</h4>
+                  <h4 className="text-sm font-semibold text-card-foreground whitespace-nowrap">
+                    Servicios
+                  </h4>
                   <div className="space-y-2">
                     <NavigationMenuLink asChild>
-                      <Link href="/services/valuation" className="block p-2 rounded-md hover:bg-secondary/60 hover:text-secondary-foreground transition-colors">
-                        <div className="text-sm font-medium text-card-foreground whitespace-nowrap">Valuación</div>
-                        <div className="text-xs text-muted-foreground whitespace-nowrap">Evaluación profesional</div>
+                      <Link
+                        href="/services/valuation"
+                        className="block p-2 rounded-md hover:bg-secondary/60 hover:text-secondary-foreground transition-colors"
+                      >
+                        <div className="text-sm font-medium text-card-foreground whitespace-nowrap">
+                          Valuación
+                        </div>
+                        <div className="text-xs text-muted-foreground whitespace-nowrap">
+                          Evaluación profesional
+                        </div>
                       </Link>
                     </NavigationMenuLink>
                     <NavigationMenuLink asChild>
-                      <Link href="/services/consulting" className="block p-2 rounded-md hover:bg-secondary/60 hover:text-secondary-foreground transition-colors">
-                        <div className="text-sm font-medium text-card-foreground whitespace-nowrap">Consultoría</div>
-                        <div className="text-xs text-muted-foreground whitespace-nowrap">Asesoría especializada</div>
+                      <Link
+                        href="/services/consulting"
+                        className="block p-2 rounded-md hover:bg-secondary/60 hover:text-secondary-foreground transition-colors"
+                      >
+                        <div className="text-sm font-medium text-card-foreground whitespace-nowrap">
+                          Consultoría
+                        </div>
+                        <div className="text-xs text-muted-foreground whitespace-nowrap">
+                          Asesoría especializada
+                        </div>
                       </Link>
                     </NavigationMenuLink>
                     <NavigationMenuLink asChild>
-                      <Link href="/services/legal" className="block p-2 rounded-md hover:bg-secondary/60 hover:text-secondary-foreground transition-colors">
-                        <div className="text-sm font-medium text-card-foreground whitespace-nowrap">Legal</div>
-                        <div className="text-xs text-muted-foreground whitespace-nowrap">Trámites legales</div>
+                      <Link
+                        href="/services/legal"
+                        className="block p-2 rounded-md hover:bg-secondary/60 hover:text-secondary-foreground transition-colors"
+                      >
+                        <div className="text-sm font-medium text-card-foreground whitespace-nowrap">
+                          Legal
+                        </div>
+                        <div className="text-xs text-muted-foreground whitespace-nowrap">
+                          Trámites legales
+                        </div>
                       </Link>
                     </NavigationMenuLink>
                   </div>
@@ -131,24 +156,47 @@ export function Navbar({ className }: NavbarProps) {
 
                 {/* Sección Recursos */}
                 <div className="space-y-3">
-                  <h4 className="text-sm font-semibold text-card-foreground whitespace-nowrap">Recursos</h4>
+                  <h4 className="text-sm font-semibold text-card-foreground whitespace-nowrap">
+                    Recursos
+                  </h4>
                   <div className="space-y-2">
                     <NavigationMenuLink asChild>
-                      <Link href="/blog" className="block p-2 rounded-md hover:bg-secondary/60 hover:text-secondary-foreground transition-colors">
-                        <div className="text-sm font-medium text-card-foreground whitespace-nowrap">Blog</div>
-                        <div className="text-xs text-muted-foreground whitespace-nowrap">Artículos y noticias</div>
+                      <Link
+                        href="/blog"
+                        className="block p-2 rounded-md hover:bg-secondary/60 hover:text-secondary-foreground transition-colors"
+                      >
+                        <div className="text-sm font-medium text-card-foreground whitespace-nowrap">
+                          Blog
+                        </div>
+                        <div className="text-xs text-muted-foreground whitespace-nowrap">
+                          Artículos y noticias
+                        </div>
                       </Link>
                     </NavigationMenuLink>
                     <NavigationMenuLink asChild>
-                      <Link href="/guides" className="block p-2 rounded-md hover:bg-secondary/60 hover:text-secondary-foreground transition-colors">
-                        <div className="text-sm font-medium text-card-foreground whitespace-nowrap">Guías</div>
-                        <div className="text-xs text-muted-foreground whitespace-nowrap">Guías de compra/venta</div>
+                      <Link
+                        href="/guides"
+                        className="block p-2 rounded-md hover:bg-secondary/60 hover:text-secondary-foreground transition-colors"
+                      >
+                        <div className="text-sm font-medium text-card-foreground whitespace-nowrap">
+                          Guías
+                        </div>
+                        <div className="text-xs text-muted-foreground whitespace-nowrap">
+                          Guías de compra/venta
+                        </div>
                       </Link>
                     </NavigationMenuLink>
                     <NavigationMenuLink asChild>
-                      <Link href="/calculator" className="block p-2 rounded-md hover:bg-secondary/60 hover:text-secondary-foreground transition-colors">
-                        <div className="text-sm font-medium text-card-foreground whitespace-nowrap">Calculadora</div>
-                        <div className="text-xs text-muted-foreground whitespace-nowrap">Calculadora hipotecaria</div>
+                      <Link
+                        href="/calculator"
+                        className="block p-2 rounded-md hover:bg-secondary/60 hover:text-secondary-foreground transition-colors"
+                      >
+                        <div className="text-sm font-medium text-card-foreground whitespace-nowrap">
+                          Calculadora
+                        </div>
+                        <div className="text-xs text-muted-foreground whitespace-nowrap">
+                          Calculadora hipotecaria
+                        </div>
                       </Link>
                     </NavigationMenuLink>
                   </div>
@@ -158,10 +206,17 @@ export function Navbar({ className }: NavbarProps) {
               {/* Sección destacada */}
               <div className="mt-4 pt-4 border-t border-border">
                 <NavigationMenuLink asChild>
-                  <Link href="/premium" className="flex items-center p-3 rounded-lg bg-gradient-to-r from-accent/20 to-primary/20 hover:from-accent/30 hover:to-primary/30 transition-all border border-accent/20">
+                  <Link
+                    href="/premium"
+                    className="flex items-center p-3 rounded-lg bg-gradient-to-r from-accent/20 to-primary/20 hover:from-accent/30 hover:to-primary/30 transition-all border border-accent/20"
+                  >
                     <div className="flex-1">
-                      <div className="text-sm font-semibold text-card-foreground whitespace-nowrap">Servicios Premium</div>
-                      <div className="text-xs text-muted-foreground whitespace-nowrap">Acceso exclusivo a herramientas avanzadas</div>
+                      <div className="text-sm font-semibold text-card-foreground whitespace-nowrap">
+                        Servicios Premium
+                      </div>
+                      <div className="text-xs text-muted-foreground whitespace-nowrap">
+                        Acceso exclusivo a herramientas avanzadas
+                      </div>
                     </div>
                     <div className="ml-2 px-2 py-1 bg-accent text-accent-foreground text-xs font-medium rounded-full whitespace-nowrap">
                       Nuevo
@@ -175,91 +230,6 @@ export function Navbar({ className }: NavbarProps) {
       </NavigationMenu>
     </div>
   );
-
-  // Auth buttons with profile functionality
-  const AuthButtons = () => {
-    const profileItems = user && role ? getProfileItems(role, permissions) : [];
-
-    return (
-      <div className="flex items-center gap-2">
-        <div className="flex items-center p-1.5 bg-card/95 backdrop-blur-sm rounded-full shadow-lg border border-border/50">
-          {user ? (
-            <NavigationMenu viewport={false}>
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger className="px-3 py-2 text-card-foreground rounded-full text-center font-sofia-pro text-sm font-medium transition-all hover:bg-secondary/80 hover:text-secondary-foreground hover:shadow-sm flex items-center gap-2 h-auto whitespace-nowrap">
-                    {role === 'user' ? (
-                      <>
-                        <UserIcon className="w-4 h-4" />
-                        <span className="hidden sm:inline">Perfil</span>
-                      </>
-                    ) : (
-                      <>
-                        <UserCheck2 className="w-4 h-4" />
-                        <span className="hidden lg:inline">
-                          Dashboard
-                        </span>
-                      </>
-                    )}
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent className="bg-card/95 backdrop-blur-sm border border-border/50 shadow-xl w-80 sm:w-96">
-                    {/* Información del usuario */}
-                    <div className="px-3 py-2 text-sm text-muted-foreground border-b border-border/50">
-                      <Link href={role === 'admin' ? '/dashboard' : '/profile'}>
-                        <div className="font-medium text-card-foreground whitespace-nowrap truncate">{user.name || user.email}</div>
-                        <div className="text-xs capitalize whitespace-nowrap">
-                          {role === 'admin' ? 'Administrador' :
-                            role === 'agent' ? 'Agente' : 'Usuario'}
-                        </div>
-                      </Link>
-                    </div>
-
-                    {/* Elementos del menú basados en rol */}
-                    {profileItems.map(({ icon: Icon, href, label }) => (
-                      <NavigationMenuLink key={href} asChild>
-                        <Link href={href}>
-                          <div className="flex items-center flex-nowrap gap-2 px-3 py-2 hover:bg-secondary/60 hover:text-secondary-foreground transition-colors rounded-sm whitespace-nowrap">
-                            <Icon className="w-4 h-4" />
-                            <span className="truncate">{label}</span>
-                          </div>
-
-                        </Link>
-                      </NavigationMenuLink>
-                    ))}
-
-                    {profileItems.length > 0 && <div className="border-t border-border/50 my-1" />}
-
-                    {/* Cerrar sesión */}
-                    <NavigationMenuLink asChild>
-                      <LogOutButton user={user} />
-                    </NavigationMenuLink>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
-          ) : (
-            <div className="flex items-center gap-1">
-              <Link
-                href="/sign-in"
-                className="px-3 py-2 text-card-foreground text-center font-sofia-pro text-sm font-medium transition-all hover:bg-secondary/80 hover:text-secondary-foreground hover:shadow-sm rounded-full whitespace-nowrap"
-              >
-                <span className="hidden sm:inline">Login</span>
-                <LogInIcon className="w-4 h-4 sm:hidden" />
-              </Link>
-              <Link
-                href="/sign-up"
-                className="px-3 py-2 bg-accent text-accent-foreground rounded-full text-center font-sofia-pro text-sm font-medium transition-all hover:bg-accent/90 hover:shadow-sm whitespace-nowrap"
-              >
-                <span className="hidden sm:inline">Get started</span>
-                <UserCheck2 className="w-4 h-4 sm:hidden" />
-              </Link>
-            </div>
-          )}
-        </div>
-        <ModeToggle />
-      </div>
-    );
-  };
 
   // Mobile Navigation Component
   const MobileNavigation = () => {
@@ -288,7 +258,9 @@ export function Navbar({ className }: NavbarProps) {
           <div className="px-6 space-y-6">
             {/* Navigation Links */}
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Navegación</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                Navegación
+              </h3>
               {menuItems.map((item, i) => {
                 const Icon = item.icon;
                 return (
@@ -309,26 +281,46 @@ export function Navbar({ className }: NavbarProps) {
 
             {/* Services Section */}
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Servicios</h3>
-              <Link href="/services/valuation" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                Servicios
+              </h3>
+              <Link
+                href="/services/valuation"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors"
+              >
                 <Shield className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <div className="font-medium">Valuación</div>
-                  <div className="text-xs text-muted-foreground">Evaluación profesional</div>
+                  <div className="text-xs text-muted-foreground">
+                    Evaluación profesional
+                  </div>
                 </div>
               </Link>
-              <Link href="/services/consulting" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors">
+              <Link
+                href="/services/consulting"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors"
+              >
                 <Users className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <div className="font-medium">Consultoría</div>
-                  <div className="text-xs text-muted-foreground">Asesoría especializada</div>
+                  <div className="text-xs text-muted-foreground">
+                    Asesoría especializada
+                  </div>
                 </div>
               </Link>
-              <Link href="/services/legal" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors">
+              <Link
+                href="/services/legal"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors"
+              >
                 <Settings className="h-5 w-5 text-muted-foreground" />
                 <div>
                   <div className="font-medium">Legal</div>
-                  <div className="text-xs text-muted-foreground">Trámites legales</div>
+                  <div className="text-xs text-muted-foreground">
+                    Trámites legales
+                  </div>
                 </div>
               </Link>
             </div>
@@ -337,16 +329,30 @@ export function Navbar({ className }: NavbarProps) {
 
             {/* Resources Section */}
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Recursos</h3>
-              <Link href="/blog" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                Recursos
+              </h3>
+              <Link
+                href="/blog"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors"
+              >
                 <Mail className="h-5 w-5 text-muted-foreground" />
                 <span className="font-medium">Blog</span>
               </Link>
-              <Link href="/guides" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors">
+              <Link
+                href="/guides"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors"
+              >
                 <Building2 className="h-5 w-5 text-muted-foreground" />
                 <span className="font-medium">Guías</span>
               </Link>
-              <Link href="/calculator" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors">
+              <Link
+                href="/calculator"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors"
+              >
                 <Landmark className="h-5 w-5 text-muted-foreground" />
                 <span className="font-medium">Calculadora</span>
               </Link>
@@ -358,10 +364,15 @@ export function Navbar({ className }: NavbarProps) {
             {user ? (
               <div className="space-y-2">
                 <div className="px-3 py-2 bg-muted/50 rounded-lg">
-                  <div className="font-medium text-sm truncate">{user.name || user.email}</div>
+                  <div className="font-medium text-sm truncate">
+                    {user.name || user.email}
+                  </div>
                   <div className="text-xs text-muted-foreground capitalize">
-                    {role === 'admin' ? 'Administrador' :
-                      role === 'agent' ? 'Agente' : 'Usuario'}
+                    {role === "admin"
+                      ? "Administrador"
+                      : role === "agent"
+                      ? "Agente"
+                      : "Usuario"}
                   </div>
                 </div>
 
@@ -402,11 +413,19 @@ export function Navbar({ className }: NavbarProps) {
 
             {/* Premium Section */}
             <div className="mt-6 p-4 bg-gradient-to-r from-accent/20 to-primary/20 rounded-lg border border-accent/20">
-              <Link href="/premium" onClick={() => setMobileMenuOpen(false)} className="block">
+              <Link
+                href="/premium"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block"
+              >
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-semibold text-sm text-card-foreground">Servicios Premium</div>
-                    <div className="text-xs text-muted-foreground">Herramientas avanzadas</div>
+                    <div className="font-semibold text-sm text-card-foreground">
+                      Servicios Premium
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Herramientas avanzadas
+                    </div>
                   </div>
                   <div className="px-2 py-1 bg-accent text-accent-foreground text-xs font-medium rounded-full">
                     Nuevo

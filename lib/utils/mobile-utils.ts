@@ -1,227 +1,531 @@
 /**
- * Mobile utility functions for responsive design and touch interactions
+ * Mobile Utility Functions
+ * Provides mobile detection, touch handling, and responsive utilities
  */
 
-// Device detection utilities
-export const isMobile = (): boolean => {
-    if (typeof window === 'undefined') return false;
-    return window.innerWidth < 768;
-};
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
-export const isTablet = (): boolean => {
+// Mobile detection utilities
+export function isMobile(): boolean {
     if (typeof window === 'undefined') return false;
-    return window.innerWidth >= 768 && window.innerWidth < 1024;
-};
+    return window.innerWidth < 640;
+}
 
-export const isDesktop = (): boolean => {
+export function isTablet(): boolean {
     if (typeof window === 'undefined') return false;
+    return window.innerWidth >= 640 && window.innerWidth < 1024;
+}
+
+export function isDesktop(): boolean {
+    if (typeof window === 'undefined') return true;
     return window.innerWidth >= 1024;
-};
+}
 
-export const isTouchDevice = (): boolean => {
+export function isTouchDevice(): boolean {
     if (typeof window === 'undefined') return false;
     return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-};
+}
+
+export function isIOS(): boolean {
+    if (typeof window === 'undefined') return false;
+    return /iPad|iPhone|iPod/.test(navigator.userAgent);
+}
+
+export function isAndroid(): boolean {
+    if (typeof window === 'undefined') return false;
+    return /Android/.test(navigator.userAgent);
+}
+
+export function isSafari(): boolean {
+    if (typeof window === 'undefined') return false;
+    return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+}
 
 // Viewport utilities
-export const getViewportHeight = (): number => {
-    if (typeof window === 'undefined') return 0;
-    return window.innerHeight;
+export function getViewportSize() {
+    if (typeof window === 'undefined') return { width: 1280, height: 800 };
+    return {
+        width: window.innerWidth,
+        height: window.innerHeight,
+    };
+}
+
+export function getDevicePixelRatio(): number {
+    if (typeof window === 'undefined') return 1;
+    return window.devicePixelRatio || 1;
+}
+
+// Touch utilities
+export function preventZoom(element: HTMLElement) {
+    element.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 1) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    let lastTouchEnd = 0;
+    element.addEventListener('touchend', (e) => {
+        const now = new Date().getTime();
+        if (now - lastTouchEnd <= 300) {
+            e.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, { passive: false });
+}
+
+export function enableSmoothScrolling(element: HTMLElement) {
+    (element.style as any).webkitOverflowScrolling = 'touch';
+    element.style.scrollBehavior = 'smooth';
+}
+
+// Mobile-specific CSS classes
+export const mobileClasses = {
+    // Container classes
+    mobileContainer: 'px-4 py-2 max-w-full',
+    mobileCard: 'rounded-lg shadow-sm border border-gray-200',
+    mobileModal: 'fixed inset-0 z-50 bg-white',
+    mobileForm: 'space-y-4 px-4',
+
+    // Input classes
+    mobileInput: 'text-base px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500',
+    mobileTextarea: 'text-base px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none',
+    mobileSelect: 'text-base px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500',
+
+    // Button classes
+    touchButton: 'min-h-[48px] min-w-[48px] touch-manipulation',
+    mobileButton: 'px-6 py-3 text-base font-medium rounded-lg touch-manipulation',
+    mobilePrimaryButton: 'px-6 py-3 text-base font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 touch-manipulation',
+    mobileSecondaryButton: 'px-6 py-3 text-base font-medium rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100 touch-manipulation',
+
+    // Navigation classes
+    mobileNav: 'fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40',
+    mobileNavButton: 'flex-1 py-3 px-2 text-center touch-manipulation',
+
+    // Grid classes
+    mobileGrid: 'grid grid-cols-1 gap-4',
+    mobileGrid2: 'grid grid-cols-2 gap-3',
+    tabletGrid: 'grid grid-cols-2 md:grid-cols-3 gap-4',
+
+    // Spacing classes
+    mobileSpacing: 'space-y-4',
+    mobileSpacingTight: 'space-y-2',
+    mobileSpacingLoose: 'space-y-6',
+
+    // Typography classes
+    mobileTitle: 'text-xl font-bold leading-tight',
+    mobileSubtitle: 'text-lg font-semibold leading-tight',
+    mobileBody: 'text-base leading-relaxed',
+    mobileCaption: 'text-sm text-gray-600',
+
+    // Layout classes
+    mobileStack: 'flex flex-col space-y-4',
+    mobileInline: 'flex flex-row space-x-2 items-center',
+    mobileCentered: 'flex items-center justify-center',
+
+    // Image classes
+    mobileImage: 'w-full h-auto rounded-lg',
+    mobileAvatar: 'w-12 h-12 rounded-full',
+    mobileIcon: 'w-6 h-6',
+
+    // Animation classes
+    mobileSlideUp: 'animate-slide-up',
+    mobileFadeIn: 'animate-fade-in',
+    mobileTransition: 'transition-all duration-200 ease-out',
 };
 
-export const getViewportWidth = (): number => {
-    if (typeof window === 'undefined') return 0;
-    return window.innerWidth;
-};
+// Responsive class generator
+export function responsiveClass(
+    mobile: string,
+    tablet?: string,
+    desktop?: string
+): string {
+    const classes = [mobile];
 
-// Touch-friendly sizing
-export const getTouchFriendlySize = (baseSize: number): number => {
-    return isTouchDevice() ? Math.max(baseSize, 44) : baseSize; // 44px minimum for touch
-};
+    if (tablet) {
+        classes.push(`md:${tablet}`);
+    }
 
-// Keyboard handling for mobile
-export const isVirtualKeyboardOpen = (): boolean => {
+    if (desktop) {
+        classes.push(`lg:${desktop}`);
+    }
+
+    return classes.join(' ');
+}
+
+// Mobile-optimized cn function
+export function mobileCn(...inputs: ClassValue[]): string {
+    const baseClasses = twMerge(clsx(inputs));
+
+    // Add mobile-specific optimizations
+    if (isMobile()) {
+        return twMerge(baseClasses, 'touch-manipulation');
+    }
+
+    return baseClasses;
+}
+
+// Image optimization utilities
+export function getOptimizedImageUrl(
+    url: string,
+    width: number,
+    height?: number,
+    quality: number = 80
+): string {
+    if (!url) return '';
+
+    // For mobile devices, use smaller images
+    const devicePixelRatio = getDevicePixelRatio();
+    const optimizedWidth = Math.round(width * devicePixelRatio);
+    const optimizedHeight = height ? Math.round(height * devicePixelRatio) : undefined;
+
+    // This would integrate with your image optimization service
+    // For now, return the original URL
+    return url;
+}
+
+// Performance utilities
+export function shouldReduceMotion(): boolean {
     if (typeof window === 'undefined') return false;
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
 
-    // Detect if virtual keyboard is open by comparing viewport height
-    const initialHeight = window.screen.height;
-    const currentHeight = window.innerHeight;
+export function shouldUseHighContrast(): boolean {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(prefers-contrast: high)').matches;
+}
 
-    return currentHeight < initialHeight * 0.75;
-};
+export function getConnectionSpeed(): string {
+    if (typeof navigator === 'undefined') return 'unknown';
+    const connection = (navigator as any).connection;
+    return connection?.effectiveType || 'unknown';
+}
 
-// Safe area utilities for mobile devices
-export const getSafeAreaInsets = () => {
+// Form utilities
+export function preventIOSZoom() {
+    if (!isIOS()) return;
+
+    const viewport = document.querySelector('meta[name=viewport]');
+    if (viewport) {
+        viewport.setAttribute('content',
+            'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
+        );
+    }
+}
+
+export function restoreIOSZoom() {
+    if (!isIOS()) return;
+
+    const viewport = document.querySelector('meta[name=viewport]');
+    if (viewport) {
+        viewport.setAttribute('content',
+            'width=device-width, initial-scale=1.0'
+        );
+    }
+}
+
+// Haptic feedback (if supported)
+export function triggerHapticFeedback(type: 'light' | 'medium' | 'heavy' = 'light') {
+    if (typeof navigator === 'undefined') return;
+
+    const vibrator = (navigator as any).vibrate;
+    if (vibrator) {
+        const patterns = {
+            light: [10],
+            medium: [20],
+            heavy: [30],
+        };
+        vibrator(patterns[type]);
+    }
+}
+
+// Safe area utilities
+export function getSafeAreaInsets() {
     if (typeof window === 'undefined') {
         return { top: 0, right: 0, bottom: 0, left: 0 };
     }
 
-    const style = getComputedStyle(document.documentElement);
+    const computedStyle = getComputedStyle(document.documentElement);
 
     return {
-        top: parseInt(style.getPropertyValue('--safe-area-inset-top') || '0'),
-        right: parseInt(style.getPropertyValue('--safe-area-inset-right') || '0'),
-        bottom: parseInt(style.getPropertyValue('--safe-area-inset-bottom') || '0'),
-        left: parseInt(style.getPropertyValue('--safe-area-inset-left') || '0'),
+        top: parseInt(computedStyle.getPropertyValue('env(safe-area-inset-top)') || '0'),
+        right: parseInt(computedStyle.getPropertyValue('env(safe-area-inset-right)') || '0'),
+        bottom: parseInt(computedStyle.getPropertyValue('env(safe-area-inset-bottom)') || '0'),
+        left: parseInt(computedStyle.getPropertyValue('env(safe-area-inset-left)') || '0'),
     };
-};
+}
 
-// Responsive breakpoints (matching Tailwind defaults)
-export const breakpoints = {
-    sm: 640,
-    md: 768,
-    lg: 1024,
-    xl: 1280,
-    '2xl': 1536,
-} as const;
+// Camera and media utilities
+export function isCameraSupported(): boolean {
+    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+}
 
-export type Breakpoint = keyof typeof breakpoints;
+export function isFileAPISupported(): boolean {
+    return !!(window.File && window.FileReader && window.FileList && window.Blob);
+}
 
-export const getCurrentBreakpoint = (): Breakpoint => {
-    if (typeof window === 'undefined') return 'sm';
+export async function requestCameraPermission(): Promise<boolean> {
+    if (!isCameraSupported()) return false;
 
-    const width = window.innerWidth;
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        stream.getTracks().forEach(track => track.stop());
+        return true;
+    } catch (error) {
+        console.warn('Camera permission denied:', error);
+        return false;
+    }
+}
 
-    if (width >= breakpoints['2xl']) return '2xl';
-    if (width >= breakpoints.xl) return 'xl';
-    if (width >= breakpoints.lg) return 'lg';
-    if (width >= breakpoints.md) return 'md';
-    return 'sm';
-};
+// Keyboard utilities
+export function isVirtualKeyboardOpen(): boolean {
+    if (typeof window === 'undefined') return false;
 
-// Responsive grid columns
-export const getResponsiveColumns = (
-    mobile: number = 1,
-    tablet: number = 2,
-    desktop: number = 3
-): number => {
-    const breakpoint = getCurrentBreakpoint();
+    // Use Visual Viewport API if available
+    if (window.visualViewport) {
+        return window.visualViewport.height < window.innerHeight * 0.75;
+    }
 
-    if (breakpoint === 'sm') return mobile;
-    if (breakpoint === 'md') return tablet;
-    return desktop;
-};
+    // Fallback: detect significant height change
+    const heightRatio = window.innerHeight / screen.height;
+    return heightRatio < 0.75;
+}
 
-// Mobile-specific CSS classes
-export const mobileClasses = {
-    // Touch-friendly buttons
-    touchButton: 'min-h-[44px] min-w-[44px] touch-manipulation',
+// Scroll utilities
+export function scrollToTop(smooth: boolean = true) {
+    if (typeof window === 'undefined') return;
 
-    // Mobile-optimized text sizes
-    mobileText: {
-        xs: 'text-xs sm:text-sm',
-        sm: 'text-sm sm:text-base',
-        base: 'text-base sm:text-lg',
-        lg: 'text-lg sm:text-xl',
-        xl: 'text-xl sm:text-2xl',
-    },
+    window.scrollTo({
+        top: 0,
+        behavior: smooth ? 'smooth' : 'auto',
+    });
+}
 
-    // Mobile-optimized spacing
-    mobileSpacing: {
-        xs: 'space-y-2 sm:space-y-3',
-        sm: 'space-y-3 sm:space-y-4',
-        base: 'space-y-4 sm:space-y-6',
-        lg: 'space-y-6 sm:space-y-8',
-    },
+export function scrollIntoView(element: HTMLElement, options?: ScrollIntoViewOptions) {
+    if (!element) return;
 
-    // Mobile-optimized padding
-    mobilePadding: {
-        xs: 'p-2 sm:p-3',
-        sm: 'p-3 sm:p-4',
-        base: 'p-4 sm:p-6',
-        lg: 'p-6 sm:p-8',
-    },
+    element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        ...options,
+    });
+}
 
-    // Mobile-optimized containers
-    mobileContainer: 'px-4 sm:px-6 lg:px-8',
+// Local storage utilities for mobile
+export function setMobilePreference(key: string, value: any) {
+    if (typeof localStorage === 'undefined') return;
 
-    // Mobile-friendly forms
-    mobileForm: 'space-y-4 sm:space-y-6',
-    mobileInput: 'min-h-[44px] text-base', // Prevents zoom on iOS
+    try {
+        localStorage.setItem(`mobile_${key}`, JSON.stringify(value));
+    } catch (error) {
+        console.warn('Failed to save mobile preference:', error);
+    }
+}
 
-    // Mobile navigation
-    mobileNav: 'fixed bottom-0 left-0 right-0 bg-background border-t z-50 safe-area-pb',
+export function getMobilePreference<T>(key: string, defaultValue: T): T {
+    if (typeof localStorage === 'undefined') return defaultValue;
 
-    // Mobile modal/dialog
-    mobileModal: 'fixed inset-0 z-50 bg-background sm:relative sm:bg-transparent',
+    try {
+        const stored = localStorage.getItem(`mobile_${key}`);
+        return stored ? JSON.parse(stored) : defaultValue;
+    } catch (error) {
+        console.warn('Failed to load mobile preference:', error);
+        return defaultValue;
+    }
+}
 
-    // Mobile-optimized grids
-    mobileGrid: {
-        single: 'grid grid-cols-1',
-        double: 'grid grid-cols-1 sm:grid-cols-2',
-        triple: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
-        quad: 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4',
-    },
-} as const;
-
-// Gesture utilities
-export const gestureUtils = {
-    // Prevent default touch behaviors
-    preventScroll: (e: TouchEvent) => {
-        e.preventDefault();
-    },
-
-    // Handle touch start for custom interactions
-    handleTouchStart: (callback: (touch: Touch) => void) => {
-        return (e: TouchEvent) => {
-            if (e.touches.length === 1) {
-                callback(e.touches[0]);
-            }
-        };
-    },
-
-    // Handle touch move for drag operations
-    handleTouchMove: (callback: (touch: Touch) => void) => {
-        return (e: TouchEvent) => {
-            if (e.touches.length === 1) {
-                e.preventDefault();
-                callback(e.touches[0]);
-            }
-        };
-    },
-
-    // Handle touch end
-    handleTouchEnd: (callback: () => void) => {
-        return (e: TouchEvent) => {
-            callback();
-        };
-    },
-};
-
-// Performance utilities for mobile
+// Performance utilities object
 export const performanceUtils = {
-    // Debounce for touch events
-    debounce: <T extends (...args: any[]) => void>(
-        func: T,
-        wait: number
-    ): ((...args: Parameters<T>) => void) => {
-        let timeout: NodeJS.Timeout;
-        return (...args: Parameters<T>) => {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func(...args), wait);
+    // Memory management
+    measureMemoryUsage: (): number => {
+        if (typeof performance !== 'undefined' && 'memory' in performance) {
+            return (performance as any).memory.usedJSHeapSize;
+        }
+        return 0;
+    },
+
+    // Performance timing
+    measureRenderTime: (callback: () => void): number => {
+        const start = performance.now();
+        callback();
+        return performance.now() - start;
+    },
+
+    // Frame rate monitoring
+    measureFrameRate: (): Promise<number> => {
+        return new Promise((resolve) => {
+            let frames = 0;
+            const startTime = performance.now();
+
+            function countFrames() {
+                frames++;
+                const elapsed = performance.now() - startTime;
+
+                if (elapsed >= 1000) {
+                    resolve(frames);
+                } else {
+                    requestAnimationFrame(countFrames);
+                }
+            }
+
+            requestAnimationFrame(countFrames);
+        });
+    },
+
+    // Network performance
+    getConnectionInfo: () => {
+        const connection = (navigator as any).connection;
+        if (!connection) return null;
+
+        return {
+            effectiveType: connection.effectiveType,
+            downlink: connection.downlink,
+            rtt: connection.rtt,
+            saveData: connection.saveData,
         };
     },
 
-    // Throttle for scroll events
-    throttle: <T extends (...args: any[]) => void>(
+    // Device capabilities
+    getDeviceCapabilities: () => ({
+        hardwareConcurrency: navigator.hardwareConcurrency || 1,
+        deviceMemory: (navigator as any).deviceMemory || 1,
+        maxTouchPoints: navigator.maxTouchPoints || 0,
+        devicePixelRatio: getDevicePixelRatio(),
+    }),
+
+    // Performance optimization
+    shouldOptimizeForPerformance: (): boolean => {
+        const capabilities = performanceUtils.getDeviceCapabilities();
+        const connection = performanceUtils.getConnectionInfo();
+
+        return (
+            capabilities.hardwareConcurrency <= 2 ||
+            capabilities.deviceMemory <= 2 ||
+            connection?.effectiveType === 'slow-2g' ||
+            connection?.effectiveType === '2g'
+        );
+    },
+
+    // Throttle function calls
+    throttle: <T extends (...args: any[]) => any>(
         func: T,
         limit: number
     ): ((...args: Parameters<T>) => void) => {
         let inThrottle: boolean;
-        return (...args: Parameters<T>) => {
+        return function (this: any, ...args: Parameters<T>) {
             if (!inThrottle) {
-                func(...args);
+                func.apply(this, args);
                 inThrottle = true;
                 setTimeout(() => (inThrottle = false), limit);
             }
         };
     },
 
-    // Request animation frame wrapper
-    raf: (callback: () => void) => {
-        if (typeof window !== 'undefined') {
-            return window.requestAnimationFrame(callback);
+    // Debounce function calls
+    debounce: <T extends (...args: any[]) => any>(
+        func: T,
+        delay: number
+    ): ((...args: Parameters<T>) => void) => {
+        let timeoutId: NodeJS.Timeout;
+        return function (this: any, ...args: Parameters<T>) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => func.apply(this, args), delay);
+        };
+    },
+
+    // Lazy loading utilities
+    createIntersectionObserver: (
+        callback: (entries: IntersectionObserverEntry[]) => void,
+        options?: IntersectionObserverInit
+    ): IntersectionObserver => {
+        return new IntersectionObserver(callback, {
+            rootMargin: '50px',
+            threshold: 0.1,
+            ...options,
+        });
+    },
+
+    // Image optimization
+    getOptimalImageSize: (containerWidth: number, containerHeight?: number) => {
+        const dpr = getDevicePixelRatio();
+        const isMobileDevice = isMobile();
+
+        // Reduce image size on mobile to save bandwidth
+        const maxWidth = isMobileDevice ? Math.min(containerWidth * dpr, 800) : containerWidth * dpr;
+        const maxHeight = containerHeight ?
+            (isMobileDevice ? Math.min(containerHeight * dpr, 800) : containerHeight * dpr) :
+            undefined;
+
+        return {
+            width: Math.round(maxWidth),
+            height: maxHeight ? Math.round(maxHeight) : undefined,
+        };
+    },
+
+    // Battery optimization
+    getBatteryInfo: async () => {
+        if ('getBattery' in navigator) {
+            try {
+                const battery = await (navigator as any).getBattery();
+                return {
+                    level: battery.level,
+                    charging: battery.charging,
+                    chargingTime: battery.chargingTime,
+                    dischargingTime: battery.dischargingTime,
+                };
+            } catch (error) {
+                console.warn('Battery API not available:', error);
+            }
         }
-        return setTimeout(callback, 16); // Fallback for SSR
+        return null;
+    },
+
+    // Resource preloading
+    preloadResource: (href: string, as: string = 'script') => {
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.href = href;
+        link.as = as;
+        document.head.appendChild(link);
+    },
+
+    // Critical resource hints
+    addResourceHints: (urls: string[], type: 'preload' | 'prefetch' | 'preconnect' = 'preload') => {
+        urls.forEach(url => {
+            const link = document.createElement('link');
+            link.rel = type;
+            link.href = url;
+            document.head.appendChild(link);
+        });
+    },
+
+    // Memoization utility
+    memoize: <T extends (...args: any[]) => any>(
+        func: T,
+        ttl: number = 60000 // 1 minute default TTL
+    ): T => {
+        const cache = new Map<string, { value: ReturnType<T>; timestamp: number }>();
+
+        return ((...args: Parameters<T>): ReturnType<T> => {
+            const key = JSON.stringify(args);
+            const now = Date.now();
+            const cached = cache.get(key);
+
+            if (cached && now - cached.timestamp < ttl) {
+                return cached.value;
+            }
+
+            const result = func(...args);
+            cache.set(key, { value: result, timestamp: now });
+
+            // Clean up expired entries
+            for (const [cacheKey, cacheValue] of cache.entries()) {
+                if (now - cacheValue.timestamp >= ttl) {
+                    cache.delete(cacheKey);
+                }
+            }
+
+            return result;
+        }) as T;
     },
 };

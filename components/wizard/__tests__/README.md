@@ -1,51 +1,51 @@
-# AI Property Wizard Test Suite
+# Wizard Framework Test Suite
 
-This directory contains comprehensive tests for the AI Property Wizard feature, covering all aspects of functionality, performance, accessibility, and visual consistency.
+This directory contains comprehensive tests for the wizard framework, covering all aspects of functionality, performance, accessibility, and visual consistency.
 
 ## Test Structure
 
 ### Test Categories
 
-1. **Unit Tests** - Individual component and function testing
-2. **Integration Tests** - Complete wizard flow testing
-3. **Accessibility Tests** - WCAG compliance and screen reader support
-4. **Performance Tests** - Load times, memory usage, and responsiveness
-5. **Visual Regression Tests** - UI consistency across different states
+1. **Unit Tests** (`wizard-framework-unit.test.tsx`)
 
-### Test Files
+   - Core wizard hook functionality
+   - Wizard validator logic
+   - Individual component behavior
+   - Data management and state handling
 
-#### Component Tests
+2. **Integration Tests** (`wizard-integration.test.tsx`)
 
-- `property-wizard.test.tsx` - Main wizard container component
-- `steps/general-info-step.test.tsx` - Step 1 form and AI generation
-- `steps/location-step.test.tsx` - Step 2 map and geocoding
-- `steps/media-upload-step.test.tsx` - Step 3 image upload and management
-- `steps/preview-step.test.tsx` - Step 4 preview and publication
+   - End-to-end wizard workflows
+   - Cross-wizard functionality
+   - Draft saving and loading
+   - Error recovery scenarios
 
-#### Hook Tests
+3. **Performance Tests** (`wizard-performance.test.tsx`)
 
-- `hooks/use-wizard-state-manager.test.ts` - State management and persistence
-- `hooks/use-ai-generation.test.ts` - AI content generation
+   - Rendering performance benchmarks
+   - Memory usage monitoring
+   - Navigation speed tests
+   - Auto-save debouncing
 
-#### Service Tests
+4. **Accessibility Tests** (`wizard-accessibility.test.tsx`)
 
-- `lib/actions/wizard-actions.test.ts` - Server actions for CRUD operations
+   - WCAG 2.1 AA compliance
+   - Keyboard navigation
+   - Screen reader support
+   - Focus management
 
-#### Integration Tests
+5. **Visual Regression Tests** (`wizard-visual-regression.test.tsx`)
 
-- `wizard-integration.test.tsx` - End-to-end wizard flow
+   - Layout consistency across viewports
+   - Theme variations
+   - Component visual states
+   - Cross-browser compatibility
 
-#### Accessibility Tests
-
-- `wizard-accessibility.test.tsx` - WCAG compliance and keyboard navigation
-
-#### Performance Tests
-
-- `wizard-performance.test.tsx` - Load times and memory usage
-
-#### Visual Regression Tests
-
-- `wizard-visual-regression.test.tsx` - UI consistency testing
+6. **Interactive Map Tests** (`interactive-map-integration.test.tsx`)
+   - Map component integration
+   - Location selection functionality
+   - Geolocation handling
+   - Mobile map experience
 
 ## Running Tests
 
@@ -58,303 +58,213 @@ npm run test:wizard
 ### Specific Test Suites
 
 ```bash
-npm run test:wizard:unit           # Unit tests only
-npm run test:wizard:integration    # Integration tests only
-npm run test:wizard:accessibility  # Accessibility tests only
-npm run test:wizard:performance    # Performance tests only
-npm run test:wizard:visual         # Visual regression tests only
-npm run test:wizard:hooks          # Hook tests only
-npm run test:wizard:actions        # Action tests only
+# Unit tests only
+npm run test:wizard:unit
+
+# Integration tests only
+npm run test:wizard:integration
+
+# Performance tests only
+npm run test:wizard:performance
+
+# Accessibility tests only
+npm run test:wizard:accessibility
+
+# Visual regression tests only
+npm run test:wizard:visual
 ```
 
-### Development Mode
+### Watch Mode
 
 ```bash
-npm run test:wizard:watch          # Watch mode for development
-npm run test:wizard:coverage       # Generate coverage report
+npm run test:wizard:watch
 ```
 
-### Advanced Usage
+### Coverage Reports
 
 ```bash
-# Run specific suite with verbose output
-node scripts/test-wizard.js --suite=accessibility --verbose
-
-# Run with coverage
-node scripts/test-wizard.js --coverage
-
-# List available test suites
-node scripts/test-wizard.js --list-suites
-
-# Get help
-node scripts/test-wizard.js --help
+npm run test:wizard:coverage
 ```
 
-## Test Coverage Requirements
+## Test Configuration
 
-### Overall Coverage Targets
+### Performance Benchmarks
 
-- **Lines**: 80%
-- **Functions**: 80%
-- **Branches**: 80%
-- **Statements**: 80%
+The performance tests validate against these benchmarks:
 
-### Component-Specific Targets
+- **Initial Render**: < 200ms for wizard with 5 steps
+- **Step Navigation**: < 100ms between steps
+- **Data Validation**: < 50ms for complex validation
+- **Draft Save**: < 200ms including network simulation
+- **Memory Usage**: < 10MB for large wizard configurations
 
-- **Wizard Components**: 85%
-- **Wizard Hooks**: 90%
-- **Wizard Actions**: 85%
+### Accessibility Standards
 
-## Test Scenarios Covered
+All tests validate against:
 
-### Unit Tests
+- WCAG 2.1 AA compliance
+- Keyboard navigation support
+- Screen reader compatibility
+- Focus management
+- Color contrast requirements
+- Touch target sizes (44px minimum)
 
-#### PropertyWizard Component
+### Browser Support
 
-- ✅ Initial render and state
-- ✅ Step navigation
-- ✅ Progress tracking
-- ✅ Loading states
-- ✅ Error handling
-- ✅ Keyboard shortcuts
-- ✅ Draft saving/loading
+Visual regression tests cover:
 
-#### GeneralInfoStep Component
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
 
-- ✅ Form field rendering
-- ✅ Input validation
-- ✅ AI content generation
-- ✅ Characteristics selection
-- ✅ Property type selection
-- ✅ Error display
+### Viewport Testing
 
-#### LocationStep Component
+Tests validate responsive behavior across:
 
-- ✅ Map interaction
-- ✅ Geocoding/reverse geocoding
-- ✅ Address form validation
-- ✅ Coordinate bounds checking
-- ✅ Error handling
+- Desktop: 1920x1080
+- Tablet: 768x1024
+- Mobile: 375x667
+- Small Mobile: 320x568
 
-#### MediaUploadStep Component
+## Test Data and Mocks
 
-- ✅ File selection and validation
-- ✅ Drag and drop functionality
-- ✅ Upload progress tracking
-- ✅ Image preview and management
-- ✅ Batch upload handling
-- ✅ Error recovery
+### Mock Services
 
-#### PreviewStep Component
+- **WizardPersistence**: Mocked for consistent test behavior
+- **Geolocation API**: Mocked for location testing
+- **LocalStorage**: Mocked for persistence testing
+- **Network Requests**: Mocked for offline/online scenarios
 
-- ✅ Complete property preview
-- ✅ Edit navigation
-- ✅ Publication workflow
-- ✅ Draft saving
-- ✅ Validation before publish
+### Test Data
 
-### Hook Tests
+Each test suite uses realistic test data that mirrors production usage:
 
-#### useWizardStateManager
+- Property wizard data with complete property information
+- Land wizard data with zoning and utility information
+- Blog wizard data with content and SEO metadata
 
-- ✅ State initialization
-- ✅ Form data updates
-- ✅ Step navigation
-- ✅ Validation tracking
-- ✅ History management (undo/redo)
-- ✅ Auto-save functionality
-- ✅ Persistence handling
+## Coverage Requirements
 
-#### useAIGeneration
+### Minimum Coverage Thresholds
 
-- ✅ Content generation
-- ✅ Loading states
-- ✅ Error handling
-- ✅ Retry functionality
-- ✅ Rate limiting
-- ✅ Generation history
+- **Core Components**: 90% (branches, functions, lines, statements)
+- **Hooks**: 85% (branches, functions, lines, statements)
+- **Utilities**: 85% (branches, functions, lines, statements)
+- **Overall**: 80% (branches, functions, lines, statements)
 
-### Service Tests
+### Coverage Reports
 
-#### Wizard Actions
+Coverage reports are generated in multiple formats:
 
-- ✅ Property publication
-- ✅ Draft management
-- ✅ Authentication checks
-- ✅ Database transactions
-- ✅ Error handling
-- ✅ Validation
-
-### Integration Tests
-
-- ✅ Complete wizard flow (start to finish)
-- ✅ Cross-step data persistence
-- ✅ Service integration
-- ✅ Error recovery scenarios
-- ✅ Multi-language support
-
-### Accessibility Tests
-
-- ✅ WCAG 2.1 AA compliance
-- ✅ Keyboard navigation
-- ✅ Screen reader support
-- ✅ Focus management
-- ✅ ARIA attributes
-- ✅ Color contrast
-- ✅ High contrast mode
-
-### Performance Tests
-
-- ✅ Initial render performance
-- ✅ Form input responsiveness
-- ✅ Image upload performance
-- ✅ Large dataset handling
-- ✅ Memory usage
-- ✅ Concurrent operations
-
-### Visual Regression Tests
-
-- ✅ Component visual states
-- ✅ Responsive design
-- ✅ Theme consistency
-- ✅ Animation states
-- ✅ Error states
-- ✅ Loading states
-
-## Mock Strategy
-
-### External Services
-
-- **HuggingFace API** - Mocked for AI generation tests
-- **Vercel Blob Storage** - Mocked for upload tests
-- **Map Services** - Mocked for location tests
-- **Database** - Mocked for action tests
-
-### Browser APIs
-
-- **File API** - Mocked for upload tests
-- **Geolocation API** - Mocked for location tests
-- **ResizeObserver** - Mocked for responsive tests
-- **IntersectionObserver** - Mocked for performance tests
-
-### React Ecosystem
-
-- **Next.js Router** - Mocked for navigation tests
-- **React Query** - Mocked for data fetching tests
-- **Framer Motion** - Mocked for animation tests
-
-## Test Data
-
-### Sample Property Data
-
-```typescript
-const mockPropertyData = {
-  title: 'Beautiful House in Santo Domingo',
-  description: 'A wonderful property...',
-  price: 150000,
-  surface: 200,
-  propertyType: 'house',
-  bedrooms: 3,
-  bathrooms: 2,
-  characteristics: [...],
-  coordinates: { latitude: 18.4861, longitude: -69.9312 },
-  address: { ... },
-  images: [...],
-  // ... other fields
-}
-```
-
-### Test Utilities
-
-- `createMockFile()` - Generate mock file objects
-- `createMockFormData()` - Generate mock form data
-- `takeSnapshot()` - Capture visual snapshots
-- `measureRenderTime()` - Performance measurement
+- **Text**: Console output during test runs
+- **HTML**: Interactive coverage report at `coverage/wizard/index.html`
+- **LCOV**: For CI/CD integration
+- **JSON**: For programmatic analysis
 
 ## Continuous Integration
 
-### Pre-commit Hooks
+### GitHub Actions
 
-- Run unit tests
-- Check test coverage
-- Lint test files
+The test suite integrates with GitHub Actions for:
 
-### CI Pipeline
+- Automated test execution on pull requests
+- Coverage reporting and enforcement
+- Performance regression detection
+- Accessibility compliance validation
 
-1. Install dependencies
-2. Run all test suites
-3. Generate coverage report
-4. Upload coverage to reporting service
-5. Run visual regression tests
-6. Archive test artifacts
+### Test Artifacts
 
-### Coverage Reporting
+CI generates and stores:
 
-- Coverage reports are generated in `coverage/` directory
-- HTML reports available at `coverage/lcov-report/index.html`
-- Coverage badges updated automatically
+- Test results and coverage reports
+- Performance benchmark data
+- Visual regression screenshots
+- Accessibility audit reports
 
 ## Debugging Tests
 
 ### Common Issues
 
-1. **Mock not working** - Check mock setup in `jest.wizard.setup.js`
-2. **Async test failures** - Ensure proper `await` usage
-3. **DOM cleanup** - Tests should clean up after themselves
-4. **Memory leaks** - Check for proper unmounting
+1. **Async Test Failures**
+
+   - Use `waitFor` for async operations
+   - Ensure proper cleanup in `afterEach`
+   - Check for race conditions
+
+2. **Mock Issues**
+
+   - Verify mocks are cleared between tests
+   - Check mock implementation matches real API
+   - Ensure proper mock restoration
+
+3. **Performance Test Flakiness**
+   - Run tests multiple times for consistency
+   - Check for external factors affecting performance
+   - Adjust timeouts for slower environments
 
 ### Debug Commands
 
 ```bash
-# Run single test file
-npx jest components/wizard/__tests__/property-wizard.test.tsx
+# Run tests with debug output
+npm run test:wizard -- --verbose
 
-# Run with debug output
-npx jest --verbose --no-cache
+# Run specific test file
+npm run test:wizard -- wizard-framework-unit.test.tsx
 
-# Run specific test
-npx jest -t "should render initial state"
+# Run tests in watch mode with coverage
+npm run test:wizard:watch -- --coverage
 ```
-
-### Test Environment
-
-- **Node.js**: Latest LTS
-- **Jest**: 30.x
-- **Testing Library**: Latest
-- **jsdom**: For DOM simulation
 
 ## Contributing
 
 ### Adding New Tests
 
-1. Follow existing naming conventions
-2. Add appropriate mocks
-3. Include both positive and negative test cases
-4. Update coverage thresholds if needed
-5. Document complex test scenarios
+1. Follow the existing test structure and naming conventions
+2. Include both positive and negative test cases
+3. Add performance benchmarks for new features
+4. Ensure accessibility compliance for UI components
+5. Update this README with new test categories
 
 ### Test Guidelines
 
-- **Arrange-Act-Assert** pattern
-- Descriptive test names
-- Single responsibility per test
-- Proper cleanup
-- Mock external dependencies
-- Test edge cases
+- **Descriptive Names**: Use clear, descriptive test names
+- **Arrange-Act-Assert**: Follow the AAA pattern
+- **Isolation**: Each test should be independent
+- **Cleanup**: Always clean up resources in `afterEach`
+- **Mocking**: Mock external dependencies consistently
 
-### Review Checklist
+### Performance Considerations
 
-- [ ] Tests cover new functionality
-- [ ] Mocks are appropriate
-- [ ] Tests are deterministic
-- [ ] Coverage thresholds met
-- [ ] Documentation updated
-- [ ] CI passes
+- Keep test execution time reasonable (< 30s per suite)
+- Use appropriate timeouts for different test types
+- Optimize test data size for performance tests
+- Consider parallel execution for independent tests
 
-## Resources
+## Troubleshooting
 
-- [Testing Library Documentation](https://testing-library.com/)
-- [Jest Documentation](https://jestjs.io/)
-- [Accessibility Testing Guide](https://web.dev/accessibility-testing/)
-- [Visual Regression Testing](https://storybook.js.org/docs/react/writing-tests/visual-testing)
-- [Performance Testing Best Practices](https://web.dev/performance-testing/)
+### Common Test Failures
+
+1. **Timeout Errors**
+
+   - Increase timeout for slow operations
+   - Check for infinite loops or hanging promises
+   - Verify mock implementations
+
+2. **Memory Leaks**
+
+   - Ensure proper cleanup of event listeners
+   - Clear timers and intervals
+   - Restore mocks after tests
+
+3. **Flaky Tests**
+   - Add proper wait conditions
+   - Avoid hardcoded delays
+   - Check for race conditions
+
+### Getting Help
+
+- Check existing test patterns for similar functionality
+- Review mock implementations for external dependencies
+- Consult the main project documentation for API details
+- Ask team members for guidance on complex test scenarios

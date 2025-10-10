@@ -372,3 +372,57 @@ export function FieldLoadingState({ className }: { className?: string }) {
     </div>
   );
 }
+
+/**
+ * Wizard-specific loading states
+ */
+export const LoadingStates = {
+  StepLoading: () => (
+    <div className="space-y-4 p-6">
+      <div className="h-6 w-48 bg-muted animate-pulse rounded" />
+      <div className="space-y-3">
+        <FieldLoadingState />
+        <FieldLoadingState />
+        <FieldLoadingState />
+      </div>
+      <div className="flex justify-between pt-4">
+        <div className="h-10 w-24 bg-muted animate-pulse rounded" />
+        <div className="h-10 w-24 bg-muted animate-pulse rounded" />
+      </div>
+    </div>
+  ),
+
+  NavigationLoading: () => (
+    <div className="space-y-4">
+      <div className="h-2 w-full bg-muted animate-pulse rounded" />
+      <div className="flex justify-between">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="flex flex-col items-center space-y-2">
+            <div className="w-10 h-10 bg-muted animate-pulse rounded-full" />
+            <div className="h-3 w-16 bg-muted animate-pulse rounded" />
+          </div>
+        ))}
+      </div>
+    </div>
+  ),
+
+  MapLoading: () => (
+    <div className="w-full h-64 bg-muted animate-pulse rounded-lg flex items-center justify-center">
+      <div className="text-center space-y-2">
+        <LoadingSpinner />
+        <p className="text-sm text-muted-foreground">Cargando mapa...</p>
+      </div>
+    </div>
+  ),
+
+  ImageUploadLoading: () => (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      {[1, 2, 3, 4, 5, 6].map((i) => (
+        <div
+          key={i}
+          className="aspect-video bg-muted animate-pulse rounded-lg"
+        />
+      ))}
+    </div>
+  ),
+};

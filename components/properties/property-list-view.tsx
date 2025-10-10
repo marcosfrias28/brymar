@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
 import { Edit, Eye, MapPin, Bed, Bath, Square, Calendar } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -68,7 +69,13 @@ export function PropertyListView({ properties }: PropertyListViewProps) {
                   <MapPin className="h-4 w-4 mr-1" />
                   {property.location}
                 </div>
-                <p className="text-blackCoral/80 text-sm line-clamp-2">{property.description}</p>
+                <p className="text-blackCoral/80 text-sm line-clamp-2">
+                  <MarkdownRenderer 
+                    content={property.description} 
+                    variant="compact"
+                    className="text-blackCoral/80 text-sm"
+                  />
+                </p>
               </div>
 
               {/* Property Details */}

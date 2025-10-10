@@ -24,19 +24,6 @@ export function OrganizationRoleGate({
 }: OrganizationRoleGateProps) {
   const { user, loading } = useUser();
 
-  if (loading) {
-    return (
-      loadingFallback || (
-        <div className="flex items-center justify-center p-4">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          <span className="ml-2 text-sm text-muted-foreground">
-            Verificando permisos...
-          </span>
-        </div>
-      )
-    );
-  }
-
   if (!user || !user.role || !allowedRoles.includes(user.role)) {
     return fallback || null;
   }
@@ -74,19 +61,6 @@ export function OrganizationPermissionGate({
   loadingFallback,
 }: OrganizationPermissionGateProps) {
   const { user, loading } = useUser();
-
-  if (loading) {
-    return (
-      loadingFallback || (
-        <div className="flex items-center justify-center p-4">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          <span className="ml-2 text-sm text-muted-foreground">
-            Verificando permisos...
-          </span>
-        </div>
-      )
-    );
-  }
 
   if (!user || !user.role) {
     return fallback || null;

@@ -30,6 +30,7 @@ export async function POST(request: NextRequest) {
         // Store analytics event in database
         await db.insert(wizardAnalyticsTable).values({
             id: body.id,
+            wizardType: body.wizardType,
             sessionId: body.sessionId,
             userId: session?.user?.id || body.userId,
             eventType: body.eventType,

@@ -64,11 +64,16 @@ async function signInAction(
 
     revalidatePath('/')
 
+    // Import the redirect logic to get the correct URL based on user role
+    const { getRedirectUrlForRole } = await import("@/lib/auth/admin-config");
+    const userWithRole = user as User; // Cast to our User type which includes role
+    const redirectUrl = getRedirectUrlForRole(userWithRole.role as "admin" | "agent" | "user");
+
     return createSuccessResponse(
       { user: user as User },
       "Has iniciado sesión exitosamente",
       true,
-      "/profile"
+      redirectUrl
     );
   } catch (error) {
     return handleAPIError(error, "Error al iniciar sesión");
@@ -87,7 +92,7 @@ export const getUser = async (requestHeaders?: Headers) => {
 export async function logoutAction(): Promise<ActionState> {
   try {
     const requestHeaders = await headers();
-    
+
     await auth.api.signOut({
       headers: requestHeaders,
       method: "POST",

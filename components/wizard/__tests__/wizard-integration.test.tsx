@@ -1,470 +1,686 @@
+/**
+ * Integration Tests for Complete Wizard Workflows
+ * Tests end-to-end wizard functionality across all wizard types
+ */
+
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { PropertyWizard } from "../property-wizard";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-// Mock all the services and hooks
-jest.mock("@/hooks/use-wizard-state-manager");
-jest.mock("@/hooks/use-wizard-actions");
-jest.mock("@/hooks/use-ai-generation");
-jest.mock("@/hooks/use-characteristics");
-jest.mock("@/lib/services/image-upload-service");
-jest.mock("@/lib/services/map-service");
-
-import { useWizardStateManager } from "@/hooks/use-wizard-state-manager";
-import { useWizardActions } from "@/hooks/use-wizard-actions";
-import { useAIGeneration } from "@/hooks/use-ai-generation";
-import { useCharacteristics } from "@/hooks/use-characteristics";
 import {
-  generateSignedUrl,
-  uploadDirect,
-} from "@/lib/services/image-upload-service";
-import { reverseGeocode, geocode } from "@/lib/services/map-service";
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
-const mockUseWizardStateManager = useWizardStateManager as jest.MockedFunction<
-  typeof useWizardStateManager
->;
-const mockUseWizardActions = useWizardActions as jest.MockedFunction<
-  typeof useWizardActions
->;
-const mockUseAIGeneration = useAIGeneration as jest.MockedFunction<
-  typeof useAIGeneration
->;
-const mockUseCharacteristics = useCharacteristics as jest.MockedFunction<
-  typeof useCharacteristics
->;
-const mockGenerateSignedUrl = generateSignedUrl as jest.MockedFunction<
-  typeof generateSignedUrl
->;
-const mockUploadDirect = uploadDirect as jest.MockedFunction<
-  typeof uploadDirect
->;
-const mockReverseGeocode = reverseGeocode as jest.MockedFunction<
-  typeof reverseGeocode
->;
-const mockGeocode = geocode as jest.MockedFunction<typeof geocode>;
+// Mock external dependencies
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
+  }),
+}));
 
-// Test wrapper with QueryClient
-const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
+vi.mock("sonner", () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+    warning: vi.fn(),
+  },
+}));
+
+vi.mock("@/hooks/use-mobile", () => ({
+  useIsMobile: () => false,
+}));
+
+vi.mock("@/lib/utils", () => ({
+  cn: (...classes: any[]) => classes.filter(Boolean).join(" "),
+}));
+
+// Mock database operations
+vi.mock("@/lib/db/drizzle", () => ({
+  default: {
+    insert: vi.fn(),
+    select: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+  },
+}));
+
+// Mock server actions
+vi.mock("@/lib/actions/unified-wizard-actions", () => ({
+  createPropertyFromWizard: vi
+    .fn()
+    .mockResolvedValue({ success: true, id: "prop-123" }),
+  createLandFromWizard: vi
+    .fn()
+    .mockResolvedValue({ success: true, id: "land-123" }),
+  createBlogFromWizard: vi
+    .fn()
+    .mockResolvedValue({ success: true, id: "blog-123" }),
+  updatePropertyFromWizard: vi.fn().mockResolvedValue({ success: true }),
+  updateLandFromWizard: vi.fn().mockResolvedValue({ success: true }),
+  updateBlogFromWizard: vi.fn().mockResolvedValue({ success: true }),
+}));
+
+// Import components after mocking
+import { PropertyWizard } from "@/components/wizard/property/property-wizard";
+import { LandWizard } from "@/components/wizard/land/land-wizard";
+import { BlogWizard } from "@/components/wizard/blog/blog-wizard";
+import { WizardPersistence } from "@/lib/wizard/wizard-persistence";
+import type {
+  PropertyWizardData,
+  LandWizardData,
+  BlogWizardData,
+} from "@/types/wizard-core";
+
+// Test data
+const mockPropertyData: Partial<PropertyWizardData> = {
+  title: "Beautiful Villa",
+  description: "A stunning villa with ocean views",
+  price: 500000,
+  surface: 200,
+  propertyType: "villa",
+  bedrooms: 3,
+  bathrooms: 2,
+  characteristics: ["pool", "garden", "garage"],
+  address: {
+    street: "123 Ocean Drive",
+    city: "Miami",
+    state: "FL",
+    zipCode: "33101",
+    country: "USA",
+  },
+  coordinates: {
+    lat: 25.7617,
+    lng: -80.1918,
+  },
+  images: [
+    {
+      id: "img-1",
+      url: "https://example.com/image1.jpg",
+      filename: "image1.jpg",
+      size: 1024000,
+      contentType: "image/jpeg",
+      width: 1920,
+      height: 1080,
+      displayOrder: 0,
     },
-  });
-
-  return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
+  ],
 };
 
-describe("Wizard Integration Tests", () => {
-  const mockWizardState = {
-    wizardState: {
-      currentStep: 1,
-      formData: {},
-      isValid: { 1: false, 2: false, 3: false, 4: false },
-      isDirty: false,
-      isLoading: false,
-      errors: {},
+const mockLandData: Partial<LandWizardData> = {
+  title: "Prime Development Land",
+  description: "Perfect for residential development",
+  price: 200000,
+  surface: 5000,
+  landType: "residential",
+  location: "Downtown District",
+  coordinates: {
+    lat: 25.7617,
+    lng: -80.1918,
+  },
+  zoning: "R-2",
+  utilities: ["water", "electricity", "sewer"],
+  images: [
+    {
+      id: "img-1",
+      url: "https://example.com/land1.jpg",
+      filename: "land1.jpg",
+      size: 512000,
+      contentType: "image/jpeg",
+      width: 1600,
+      height: 900,
+      displayOrder: 0,
     },
-    stepValidation: { 1: false, 2: false, 3: false, 4: false },
-    stepCompletion: { 1: 0, 2: 0, 3: 0, 4: 0 },
-    updateFormData: jest.fn(),
-    goToStep: jest.fn(),
-    goToNextStep: jest.fn(),
-    goToPreviousStep: jest.fn(),
-    undo: jest.fn(),
-    redo: jest.fn(),
-    canUndo: false,
-    canRedo: false,
-    setLoading: jest.fn(),
-    setErrors: jest.fn(),
-    clearDirtyState: jest.fn(),
-  };
+  ],
+};
 
-  const mockWizardActions = {
-    publishProperty: jest.fn(),
-    saveDraft: jest.fn(),
-    loadDraft: jest.fn(),
-    deleteDraft: jest.fn(),
-    isLoading: false,
-    error: null,
-  };
+const mockBlogData: Partial<BlogWizardData> = {
+  title: "Real Estate Market Trends 2024",
+  description: "Analysis of current market conditions",
+  content: "The real estate market in 2024 shows interesting trends...",
+  author: "John Smith",
+  category: "market-analysis",
+  coverImage: "https://example.com/blog-cover.jpg",
+  tags: ["market", "trends", "2024"],
+  seoTitle: "Real Estate Market Trends 2024 - Expert Analysis",
+  seoDescription:
+    "Comprehensive analysis of real estate market trends for 2024",
+};
 
-  const mockAIGeneration = {
-    generateContent: jest.fn(),
-    generateTitle: jest.fn(),
-    generateDescription: jest.fn(),
-    generateTags: jest.fn(),
-    isGenerating: false,
-    error: null,
-    retry: jest.fn(),
-    generationHistory: [],
-  };
-
-  const mockCharacteristics = {
-    characteristics: [
-      {
-        id: "1",
-        name: "Piscina",
-        category: "amenity" as const,
-        selected: false,
-      },
-      {
-        id: "2",
-        name: "Garaje",
-        category: "feature" as const,
-        selected: false,
-      },
-    ],
-    loading: false,
-    error: null,
-    toggleCharacteristic: jest.fn(),
-    addCustomCharacteristic: jest.fn(),
-  };
-
+describe("Property Wizard Integration", () => {
   beforeEach(() => {
-    mockUseWizardStateManager.mockReturnValue(mockWizardState);
-    mockUseWizardActions.mockReturnValue(mockWizardActions);
-    mockUseAIGeneration.mockReturnValue(mockAIGeneration);
-    mockUseCharacteristics.mockReturnValue(mockCharacteristics);
-
-    // Mock service responses
-    mockGenerateSignedUrl.mockResolvedValue({
-      uploadUrl: "https://blob.vercel-storage.com/upload-url",
-      publicUrl: "https://blob.vercel-storage.com/test-image.jpg",
-      expiresAt: new Date(Date.now() + 3600000),
-    });
-
-    mockUploadDirect.mockResolvedValue({
-      url: "https://blob.vercel-storage.com/test-image.jpg",
-      size: 1024 * 1024,
-      uploadedAt: new Date(),
-    });
-
-    mockReverseGeocode.mockResolvedValue({
-      street: "Calle Principal 123",
-      city: "Santo Domingo",
-      province: "Distrito Nacional",
-      postalCode: "10101",
-      country: "Dominican Republic",
-      formattedAddress: "Calle Principal 123, Santo Domingo, Distrito Nacional",
-    });
-
-    mockGeocode.mockResolvedValue({
-      latitude: 18.4861,
-      longitude: -69.9312,
+    vi.clearAllMocks();
+    // Mock localStorage
+    Object.defineProperty(window, "localStorage", {
+      value: {
+        getItem: vi.fn(),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
+        clear: vi.fn(),
+      },
+      writable: true,
     });
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("completes full wizard flow from start to finish", async () => {
+  it("should complete full property creation workflow", async () => {
     const user = userEvent.setup();
+    const onComplete = vi.fn();
 
-    // Mock progressive step validation
-    let currentStep = 1;
-    mockWizardState.goToNextStep.mockImplementation(() => {
-      currentStep++;
-      mockWizardState.wizardState.currentStep = currentStep;
-    });
+    render(<PropertyWizard onComplete={onComplete} />);
 
-    mockWizardState.goToPreviousStep.mockImplementation(() => {
-      if (currentStep > 1) {
-        currentStep--;
-        mockWizardState.wizardState.currentStep = currentStep;
-      }
-    });
+    // Step 1: General Information
+    expect(screen.getByText("Información General")).toBeInTheDocument();
 
-    // Mock AI generation
-    mockAIGeneration.generateContent.mockResolvedValue({
-      title: "Hermosa Casa en Santo Domingo",
-      description: "Una propiedad excepcional con todas las comodidades...",
-      tags: ["casa", "santo domingo", "moderna"],
-    });
-
-    // Mock successful publication
-    mockWizardActions.publishProperty.mockResolvedValue({
-      success: true,
-      data: { id: "prop-123" },
-    });
-
-    render(
-      <TestWrapper>
-        <PropertyWizard />
-      </TestWrapper>
+    await user.type(screen.getByLabelText(/título/i), mockPropertyData.title!);
+    await user.type(
+      screen.getByLabelText(/descripción/i),
+      mockPropertyData.description!
+    );
+    await user.type(
+      screen.getByLabelText(/precio/i),
+      mockPropertyData.price!.toString()
+    );
+    await user.selectOptions(
+      screen.getByLabelText(/tipo de propiedad/i),
+      mockPropertyData.propertyType!
     );
 
-    // Step 1: Fill general information
-    expect(screen.getByText("Paso 1 de 4")).toBeInTheDocument();
+    // Navigate to next step
+    await user.click(screen.getByRole("button", { name: /siguiente/i }));
 
-    const titleInput = screen.getByLabelText("Título de la propiedad");
-    await user.type(titleInput, "Casa en Santo Domingo");
-
-    const priceInput = screen.getByLabelText("Precio (USD)");
-    await user.type(priceInput, "150000");
-
-    const surfaceInput = screen.getByLabelText("Superficie (m²)");
-    await user.type(surfaceInput, "200");
-
-    // Test AI generation
-    const aiButton = screen.getByText("Generar con IA");
-    await user.click(aiButton);
-
-    expect(mockAIGeneration.generateContent).toHaveBeenCalled();
-
-    // Select characteristics
-    const poolCheckbox = screen.getByLabelText("Piscina");
-    await user.click(poolCheckbox);
-
-    expect(mockCharacteristics.toggleCharacteristic).toHaveBeenCalledWith("1");
-
-    // Proceed to step 2
-    mockWizardState.stepValidation[1] = true;
-    const nextButton = screen.getByText("Siguiente");
-    await user.click(nextButton);
-
-    expect(mockWizardState.goToNextStep).toHaveBeenCalled();
-
-    // Step 2: Set location
-    mockWizardState.wizardState.currentStep = 2;
-
-    // Simulate map click
-    const mapContainer = screen.getByTestId("map-container");
-    fireEvent.click(mapContainer, {
-      latlng: { lat: 18.4861, lng: -69.9312 },
+    // Step 2: Location
+    await waitFor(() => {
+      expect(screen.getByText("Ubicación")).toBeInTheDocument();
     });
+
+    await user.type(
+      screen.getByLabelText(/dirección/i),
+      mockPropertyData.address!.street
+    );
+    await user.type(
+      screen.getByLabelText(/ciudad/i),
+      mockPropertyData.address!.city
+    );
+
+    // Navigate to next step
+    await user.click(screen.getByRole("button", { name: /siguiente/i }));
+
+    // Step 3: Media
+    await waitFor(() => {
+      expect(screen.getByText("Fotos y Videos")).toBeInTheDocument();
+    });
+
+    // Mock file upload
+    const fileInput = screen.getByLabelText(/subir imágenes/i);
+    const file = new File(["test"], "test.jpg", { type: "image/jpeg" });
+    await user.upload(fileInput, file);
+
+    // Navigate to preview
+    await user.click(screen.getByRole("button", { name: /siguiente/i }));
+
+    // Step 4: Preview
+    await waitFor(() => {
+      expect(screen.getByText("Vista Previa")).toBeInTheDocument();
+    });
+
+    // Verify data is displayed correctly
+    expect(screen.getByText(mockPropertyData.title!)).toBeInTheDocument();
+    expect(screen.getByText(mockPropertyData.description!)).toBeInTheDocument();
+
+    // Complete wizard
+    await user.click(screen.getByRole("button", { name: /completar/i }));
 
     await waitFor(() => {
-      expect(mockReverseGeocode).toHaveBeenCalled();
+      expect(onComplete).toHaveBeenCalled();
     });
-
-    // Fill address manually
-    const streetInput = screen.getByLabelText("Dirección");
-    await user.type(streetInput, "Calle Principal 123");
-
-    // Proceed to step 3
-    mockWizardState.stepValidation[2] = true;
-    await user.click(screen.getByText("Siguiente"));
-
-    // Step 3: Upload images
-    mockWizardState.wizardState.currentStep = 3;
-
-    const imageFile = new File(["image content"], "test-image.jpg", {
-      type: "image/jpeg",
-    });
-
-    const fileInput = screen.getByLabelText("Seleccionar imágenes");
-    await user.upload(fileInput, imageFile);
-
-    await waitFor(() => {
-      expect(mockGenerateSignedUrl).toHaveBeenCalled();
-      expect(mockUploadDirect).toHaveBeenCalled();
-    });
-
-    // Proceed to step 4
-    mockWizardState.stepValidation[3] = true;
-    await user.click(screen.getByText("Siguiente"));
-
-    // Step 4: Preview and publish
-    mockWizardState.wizardState.currentStep = 4;
-
-    expect(screen.getByText("Paso 4 de 4")).toBeInTheDocument();
-    expect(screen.getByText("Vista Previa")).toBeInTheDocument();
-
-    // Publish property
-    const publishButton = screen.getByText("Publicar Propiedad");
-    await user.click(publishButton);
-
-    // Confirm publication
-    const confirmButton = screen.getByText("Confirmar Publicación");
-    await user.click(confirmButton);
-
-    expect(mockWizardActions.publishProperty).toHaveBeenCalled();
   });
 
-  it("handles validation errors throughout the flow", async () => {
+  it("should handle draft saving and loading", async () => {
     const user = userEvent.setup();
 
-    render(
-      <TestWrapper>
-        <PropertyWizard />
-      </TestWrapper>
+    // Mock WizardPersistence
+    const saveDraftSpy = vi
+      .spyOn(WizardPersistence, "saveDraft")
+      .mockResolvedValue({
+        success: true,
+        data: { draftId: "property-draft-123" },
+      });
+
+    const loadDraftSpy = vi
+      .spyOn(WizardPersistence, "loadDraft")
+      .mockResolvedValue({
+        success: true,
+        data: {
+          data: mockPropertyData,
+          currentStep: "general",
+          stepProgress: { general: true },
+          completionPercentage: 25,
+        },
+      });
+
+    render(<PropertyWizard />);
+
+    // Fill in some data
+    await user.type(screen.getByLabelText(/título/i), mockPropertyData.title!);
+    await user.type(
+      screen.getByLabelText(/descripción/i),
+      mockPropertyData.description!
     );
+
+    // Save draft
+    await user.click(screen.getByRole("button", { name: /guardar borrador/i }));
+
+    await waitFor(() => {
+      expect(saveDraftSpy).toHaveBeenCalled();
+    });
+
+    // Simulate loading draft in new wizard instance
+    render(<PropertyWizard draftId="property-draft-123" />);
+
+    await waitFor(() => {
+      expect(loadDraftSpy).toHaveBeenCalledWith("property-draft-123");
+    });
+  });
+
+  it("should handle validation errors gracefully", async () => {
+    const user = userEvent.setup();
+
+    render(<PropertyWizard />);
 
     // Try to proceed without filling required fields
-    const nextButton = screen.getByText("Siguiente");
-    await user.click(nextButton);
+    await user.click(screen.getByRole("button", { name: /siguiente/i }));
 
     // Should show validation errors
-    expect(mockWizardState.goToNextStep).toHaveBeenCalled();
-
-    // Mock validation errors
-    mockWizardState.wizardState.errors = {
-      title: "El título es requerido",
-      price: "El precio es requerido",
-    };
-
-    expect(screen.getByText("El título es requerido")).toBeInTheDocument();
-    expect(screen.getByText("El precio es requerido")).toBeInTheDocument();
-  });
-
-  it("supports draft saving and loading", async () => {
-    const user = userEvent.setup();
-
-    mockWizardActions.saveDraft.mockResolvedValue({
-      success: true,
-      data: { id: "draft-123" },
+    await waitFor(() => {
+      expect(screen.getByText(/título es requerido/i)).toBeInTheDocument();
+      expect(screen.getByText(/descripción es requerida/i)).toBeInTheDocument();
     });
 
-    render(
-      <TestWrapper>
-        <PropertyWizard />
-      </TestWrapper>
+    // Should stay on current step
+    expect(screen.getByText("Información General")).toBeInTheDocument();
+  });
+
+  it("should support keyboard navigation", async () => {
+    const user = userEvent.setup();
+
+    render(<PropertyWizard initialData={mockPropertyData} />);
+
+    // Use keyboard shortcut to navigate
+    await user.keyboard("{Control>}{ArrowRight}{/Control}");
+
+    await waitFor(() => {
+      expect(screen.getByText("Ubicación")).toBeInTheDocument();
+    });
+
+    // Navigate back
+    await user.keyboard("{Control>}{ArrowLeft}{/Control}");
+
+    await waitFor(() => {
+      expect(screen.getByText("Información General")).toBeInTheDocument();
+    });
+  });
+});
+
+describe("Land Wizard Integration", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should complete full land creation workflow", async () => {
+    const user = userEvent.setup();
+    const onComplete = vi.fn();
+
+    render(<LandWizard onComplete={onComplete} />);
+
+    // Step 1: General Information
+    await user.type(screen.getByLabelText(/título/i), mockLandData.title!);
+    await user.type(
+      screen.getByLabelText(/descripción/i),
+      mockLandData.description!
     );
+    await user.type(
+      screen.getByLabelText(/precio/i),
+      mockLandData.price!.toString()
+    );
+    await user.type(
+      screen.getByLabelText(/superficie/i),
+      mockLandData.surface!.toString()
+    );
+
+    await user.click(screen.getByRole("button", { name: /siguiente/i }));
+
+    // Step 2: Location
+    await waitFor(() => {
+      expect(screen.getByText("Ubicación")).toBeInTheDocument();
+    });
+
+    await user.type(
+      screen.getByLabelText(/ubicación/i),
+      mockLandData.location!
+    );
+
+    await user.click(screen.getByRole("button", { name: /siguiente/i }));
+
+    // Step 3: Media
+    await waitFor(() => {
+      expect(screen.getByText("Fotos y Videos")).toBeInTheDocument();
+    });
+
+    const fileInput = screen.getByLabelText(/subir imágenes/i);
+    const file = new File(["test"], "land.jpg", { type: "image/jpeg" });
+    await user.upload(fileInput, file);
+
+    await user.click(screen.getByRole("button", { name: /siguiente/i }));
+
+    // Step 4: Preview
+    await waitFor(() => {
+      expect(screen.getByText("Vista Previa")).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("button", { name: /completar/i }));
+
+    await waitFor(() => {
+      expect(onComplete).toHaveBeenCalled();
+    });
+  });
+
+  it("should handle land-specific validation", async () => {
+    const user = userEvent.setup();
+
+    render(<LandWizard />);
+
+    // Try to proceed with invalid land type
+    await user.type(screen.getByLabelText(/título/i), "Test Land");
+    await user.selectOptions(
+      screen.getByLabelText(/tipo de terreno/i),
+      "invalid-type"
+    );
+
+    await user.click(screen.getByRole("button", { name: /siguiente/i }));
+
+    // Should show validation error for invalid land type
+    await waitFor(() => {
+      expect(screen.getByText(/tipo de terreno inválido/i)).toBeInTheDocument();
+    });
+  });
+});
+
+describe("Blog Wizard Integration", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should complete full blog creation workflow", async () => {
+    const user = userEvent.setup();
+    const onComplete = vi.fn();
+
+    render(<BlogWizard onComplete={onComplete} />);
+
+    // Step 1: Content
+    await user.type(screen.getByLabelText(/título/i), mockBlogData.title!);
+    await user.type(screen.getByLabelText(/contenido/i), mockBlogData.content!);
+    await user.selectOptions(
+      screen.getByLabelText(/categoría/i),
+      mockBlogData.category!
+    );
+
+    await user.click(screen.getByRole("button", { name: /siguiente/i }));
+
+    // Step 2: Media
+    await waitFor(() => {
+      expect(screen.getByText("Multimedia")).toBeInTheDocument();
+    });
+
+    await user.type(
+      screen.getByLabelText(/imagen de portada/i),
+      mockBlogData.coverImage!
+    );
+
+    await user.click(screen.getByRole("button", { name: /siguiente/i }));
+
+    // Step 3: SEO
+    await waitFor(() => {
+      expect(screen.getByText("SEO")).toBeInTheDocument();
+    });
+
+    await user.type(
+      screen.getByLabelText(/título seo/i),
+      mockBlogData.seoTitle!
+    );
+    await user.type(
+      screen.getByLabelText(/descripción seo/i),
+      mockBlogData.seoDescription!
+    );
+
+    await user.click(screen.getByRole("button", { name: /siguiente/i }));
+
+    // Step 4: Preview
+    await waitFor(() => {
+      expect(screen.getByText("Vista Previa")).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("button", { name: /completar/i }));
+
+    await waitFor(() => {
+      expect(onComplete).toHaveBeenCalled();
+    });
+  });
+
+  it("should handle rich text editing", async () => {
+    const user = userEvent.setup();
+
+    render(<BlogWizard />);
+
+    // Find rich text editor
+    const editor = screen.getByRole("textbox", { name: /contenido/i });
+
+    // Type content
+    await user.type(editor, mockBlogData.content!);
+
+    // Verify content is updated
+    expect(editor).toHaveValue(mockBlogData.content);
+  });
+});
+
+describe("Cross-Wizard Integration", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should handle multiple wizard instances simultaneously", async () => {
+    const user = userEvent.setup();
+
+    // Render multiple wizards
+    const { rerender } = render(<PropertyWizard />);
+
+    // Fill property wizard
+    await user.type(screen.getByLabelText(/título/i), "Property Title");
+
+    // Switch to land wizard
+    rerender(<LandWizard />);
+
+    // Fill land wizard
+    await user.type(screen.getByLabelText(/título/i), "Land Title");
+
+    // Both should maintain their state independently
+    rerender(<PropertyWizard />);
+    expect(screen.getByDisplayValue("Property Title")).toBeInTheDocument();
+
+    rerender(<LandWizard />);
+    expect(screen.getByDisplayValue("Land Title")).toBeInTheDocument();
+  });
+
+  it("should handle offline/online state transitions", async () => {
+    const user = userEvent.setup();
+
+    // Mock online/offline events
+    Object.defineProperty(navigator, "onLine", {
+      writable: true,
+      value: true,
+    });
+
+    render(<PropertyWizard />);
 
     // Fill some data
-    const titleInput = screen.getByLabelText("Título de la propiedad");
-    await user.type(titleInput, "Draft Property");
+    await user.type(screen.getByLabelText(/título/i), "Test Property");
 
-    // Save as draft
-    const saveDraftButton = screen.getByText("Guardar Borrador");
-    await user.click(saveDraftButton);
+    // Go offline
+    Object.defineProperty(navigator, "onLine", { value: false });
+    fireEvent(window, new Event("offline"));
 
-    expect(mockWizardActions.saveDraft).toHaveBeenCalled();
+    // Save draft (should use localStorage)
+    await user.click(screen.getByRole("button", { name: /guardar borrador/i }));
+
+    // Go back online
+    Object.defineProperty(navigator, "onLine", { value: true });
+    fireEvent(window, new Event("online"));
+
+    // Should sync with database
+    await waitFor(() => {
+      expect(WizardPersistence.syncDrafts).toHaveBeenCalled();
+    });
   });
 
-  it("handles service errors gracefully", async () => {
+  it("should handle concurrent auto-save operations", async () => {
     const user = userEvent.setup();
 
-    // Mock AI generation error
-    mockAIGeneration.generateContent.mockRejectedValue(
-      new Error("AI service error")
+    const autoSaveSpy = vi
+      .spyOn(WizardPersistence, "autoSaveDraft")
+      .mockResolvedValue({
+        success: true,
+        data: { draftId: "auto-save-123" },
+      });
+
+    render(<PropertyWizard />);
+
+    // Rapid typing should debounce auto-save
+    const titleInput = screen.getByLabelText(/título/i);
+
+    await user.type(titleInput, "T");
+    await user.type(titleInput, "e");
+    await user.type(titleInput, "s");
+    await user.type(titleInput, "t");
+
+    // Wait for debounce
+    await waitFor(
+      () => {
+        expect(autoSaveSpy).toHaveBeenCalledTimes(1);
+      },
+      { timeout: 2000 }
+    );
+  });
+
+  it("should handle memory pressure and cleanup", async () => {
+    const clearCacheSpy = vi.spyOn(WizardPersistence, "clearMemoryCache");
+    const clearTimeoutsSpy = vi.spyOn(
+      WizardPersistence,
+      "clearAutoSaveTimeouts"
     );
 
-    render(
-      <TestWrapper>
-        <PropertyWizard />
-      </TestWrapper>
+    const { unmount } = render(<PropertyWizard />);
+
+    // Unmount component
+    unmount();
+
+    // Should cleanup resources
+    expect(clearTimeoutsSpy).toHaveBeenCalled();
+  });
+});
+
+describe("Error Recovery Integration", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should recover from network failures", async () => {
+    const user = userEvent.setup();
+
+    // Mock network failure
+    vi.spyOn(WizardPersistence, "saveDraft").mockRejectedValueOnce(
+      new Error("Network error")
     );
 
-    const aiButton = screen.getByText("Generar con IA");
-    await user.click(aiButton);
+    render(<PropertyWizard />);
+
+    await user.type(screen.getByLabelText(/título/i), "Test Property");
+
+    // Try to save draft
+    await user.click(screen.getByRole("button", { name: /guardar borrador/i }));
+
+    // Should show error message
+    await waitFor(() => {
+      expect(screen.getByText(/error de red/i)).toBeInTheDocument();
+    });
+
+    // Mock successful retry
+    vi.spyOn(WizardPersistence, "saveDraft").mockResolvedValueOnce({
+      success: true,
+      data: { draftId: "retry-success" },
+    });
+
+    // Retry save
+    await user.click(screen.getByRole("button", { name: /reintentar/i }));
 
     await waitFor(() => {
+      expect(screen.getByText(/borrador guardado/i)).toBeInTheDocument();
+    });
+  });
+
+  it("should handle corrupted draft data", async () => {
+    const user = userEvent.setup();
+
+    // Mock corrupted draft
+    vi.spyOn(WizardPersistence, "loadDraft").mockResolvedValueOnce({
+      success: false,
+      error: "Corrupted draft data",
+    });
+
+    render(<PropertyWizard draftId="corrupted-draft" />);
+
+    // Should show error and offer to start fresh
+    await waitFor(() => {
+      expect(screen.getByText(/borrador corrupto/i)).toBeInTheDocument();
       expect(
-        screen.getByText("Error al generar contenido con IA")
+        screen.getByRole("button", { name: /empezar de nuevo/i })
       ).toBeInTheDocument();
     });
+
+    // Start fresh
+    await user.click(screen.getByRole("button", { name: /empezar de nuevo/i }));
+
+    // Should reset to initial state
+    expect(screen.getByText("Información General")).toBeInTheDocument();
   });
 
-  it("supports navigation between steps", async () => {
+  it("should handle validation schema changes", async () => {
     const user = userEvent.setup();
 
-    render(
-      <TestWrapper>
-        <PropertyWizard />
-      </TestWrapper>
-    );
-
-    // Go to step 2
-    mockWizardState.wizardState.currentStep = 2;
-
-    // Go back to step 1
-    const prevButton = screen.getByText("Anterior");
-    await user.click(prevButton);
-
-    expect(mockWizardState.goToPreviousStep).toHaveBeenCalled();
-  });
-
-  it("handles undo/redo functionality", async () => {
-    const user = userEvent.setup();
-
-    mockWizardState.canUndo = true;
-    mockWizardState.canRedo = true;
-
-    render(
-      <TestWrapper>
-        <PropertyWizard />
-      </TestWrapper>
-    );
-
-    // Test keyboard shortcuts
-    await user.keyboard("{Control>}z{/Control}");
-    expect(mockWizardState.undo).toHaveBeenCalled();
-
-    await user.keyboard("{Control>}{Shift>}z{/Shift}{/Control}");
-    expect(mockWizardState.redo).toHaveBeenCalled();
-  });
-
-  it("displays loading states appropriately", () => {
-    mockWizardState.wizardState.isLoading = true;
-
-    render(
-      <TestWrapper>
-        <PropertyWizard />
-      </TestWrapper>
-    );
-
-    expect(screen.getByText("Guardando...")).toBeInTheDocument();
-  });
-
-  it("handles network connectivity issues", async () => {
-    const user = userEvent.setup();
-
-    // Mock network error
-    mockUploadDirect.mockRejectedValue(new Error("Network error"));
-
-    render(
-      <TestWrapper>
-        <PropertyWizard />
-      </TestWrapper>
-    );
-
-    // Try to upload image
-    const imageFile = new File(["image content"], "test-image.jpg", {
-      type: "image/jpeg",
+    // Mock draft with old schema
+    vi.spyOn(WizardPersistence, "loadDraft").mockResolvedValueOnce({
+      success: true,
+      data: {
+        data: {
+          title: "Old Property",
+          oldField: "deprecated value", // Field no longer in schema
+        },
+        currentStep: "general",
+        stepProgress: {},
+        completionPercentage: 25,
+      },
     });
 
-    const fileInput = screen.getByLabelText("Seleccionar imágenes");
-    await user.upload(fileInput, imageFile);
+    render(<PropertyWizard draftId="old-schema-draft" />);
 
+    // Should load compatible fields and ignore deprecated ones
     await waitFor(() => {
-      expect(screen.getByText("Error de conexión")).toBeInTheDocument();
-      expect(screen.getByText("Reintentar")).toBeInTheDocument();
+      expect(screen.getByDisplayValue("Old Property")).toBeInTheDocument();
     });
-  });
 
-  it("supports multilingual interface", () => {
-    // Test English locale
-    mockWizardState.wizardState.formData.language = "en";
-
-    render(
-      <TestWrapper>
-        <PropertyWizard />
-      </TestWrapper>
-    );
-
-    // Should display English text
-    expect(screen.getByText("Step 1 of 4")).toBeInTheDocument();
-    expect(screen.getByText("General Information")).toBeInTheDocument();
-  });
-
-  it("tracks step completion progress", () => {
-    mockWizardState.stepCompletion = { 1: 100, 2: 75, 3: 50, 4: 0 };
-
-    render(
-      <TestWrapper>
-        <PropertyWizard />
-      </TestWrapper>
-    );
-
-    // Check progress indicators
-    const progressBar = screen.getByRole("progressbar");
-    expect(progressBar).toHaveAttribute("aria-valuenow", "25"); // Step 1 of 4
+    // Should not crash on deprecated fields
+    expect(screen.queryByText("oldField")).not.toBeInTheDocument();
   });
 });

@@ -149,7 +149,7 @@ export function PropertyCardList({ properties }: PropertyCardListProps) {
                     )}
                     asChild
                   >
-                    <Link href={`/properties/${property.id}`}>
+                    <Link href={`/dashboard/properties/${property.id}`}>
                       <Eye className="h-3 w-3 mr-1" />
                       Ver
                     </Link>

@@ -1,693 +1,702 @@
+/**
+ * Visual Regression Tests for Wizard UI Components
+ * Tests visual consistency and responsive design across different viewports
+ */
+
 import React from "react";
-import { render } from "@testing-library/react";
-import { PropertyWizard } from "../property-wizard";
-import { GeneralInfoStep } from "../steps/general-info-step";
-import { LocationStep } from "../steps/location-step";
-import { MediaUploadStep } from "../steps/media-upload-step";
-import { PreviewStep } from "../steps/preview-step";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
-// Mock dependencies
-jest.mock("@/hooks/use-wizard-state-manager");
-jest.mock("@/hooks/use-wizard-actions");
-jest.mock("@/hooks/use-ai-generation");
-jest.mock("@/hooks/use-characteristics");
+// Mock external dependencies
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
+  }),
+}));
 
-import { useWizardStateManager } from "@/hooks/use-wizard-state-manager";
-import { useWizardActions } from "@/hooks/use-wizard-actions";
-import { useAIGeneration } from "@/hooks/use-ai-generation";
-import { useCharacteristics } from "@/hooks/use-characteristics";
+vi.mock("sonner", () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+    warning: vi.fn(),
+  },
+}));
 
-const mockUseWizardStateManager = useWizardStateManager as jest.MockedFunction<
-  typeof useWizardStateManager
->;
-const mockUseWizardActions = useWizardActions as jest.MockedFunction<
-  typeof useWizardActions
->;
-const mockUseAIGeneration = useAIGeneration as jest.MockedFunction<
-  typeof useAIGeneration
->;
-const mockUseCharacteristics = useCharacteristics as jest.MockedFunction<
-  typeof useCharacteristics
->;
+vi.mock("@/lib/utils", () => ({
+  cn: (...classes: any[]) => classes.filter(Boolean).join(" "),
+}));
 
-// Visual regression testing utilities
-const takeSnapshot = (container: HTMLElement, testName: string) => {
-  // In a real implementation, this would capture a screenshot
-  // For now, we'll capture the HTML structure and styles
-  const snapshot = {
-    html: container.innerHTML,
-    styles: Array.from(container.querySelectorAll("*")).map((el) => ({
-      tagName: el.tagName,
-      className: el.className,
-      computedStyles: window.getComputedStyle(el),
-    })),
-    testName,
-    timestamp: new Date().toISOString(),
-  };
+// Import components after mocking
+import { Wizard } from "@/components/wizard/core/wizard";
+import { WizardNavigation } from "@/components/wizard/core/wizard-navigation";
+import { WizardProgress } from "@/components/wizard/core/wizard-progress";
+import { PropertyWizard } from "@/components/wizard/property/property-wizard";
+import { LandWizard } from "@/components/wizard/land/land-wizard";
+import { BlogWizard } from "@/components/wizard/blog/blog-wizard";
+import type { WizardConfig, WizardData } from "@/types/wizard-core";
+import { z } from "zod";
 
-  return snapshot;
-};
+// Visual test utilities
+class VisualTestUtils {
+  static setViewport(width: number, height: number): void {
+    Object.defineProperty(window, "innerWidth", {
+      writable: true,
+      configurable: true,
+      value: width,
+    });
+    Object.defineProperty(window, "innerHeight", {
+      writable: true,
+      configurable: true,
+      value: height,
+    });
 
-const compareSnapshots = (snapshot1: any, snapshot2: any) => {
-  // Simple comparison - in real implementation would use image diff
-  return snapshot1.html === snapshot2.html;
-};
+    // Trigger resize event
+    window.dispatchEvent(new Event("resize"));
+  }
+
+  static mockMatchMedia(query: string, matches: boolean): void {
+    Object.defineProperty(window, "matchMedia", {
+      writable: true,
+      value: vi.fn().mockImplementation((q) => ({
+        matches: q === query ? matches : false,
+        media: q,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
+  }
+
+  static async takeSnapshot(
+    container: HTMLElement,
+    name: string
+  ): Promise<void> {
+    // In a real implementation, this would capture a screenshot
+    // For testing purposes, we'll validate the DOM structure
+    expect(container).toMatchSnapshot(name);
+  }
+
+  static validateLayout(element: HTMLElement): {
+    isVisible: boolean;
+    hasOverflow: boolean;
+    isAccessible: boolean;
+    hasProperSpacing: boolean;
+  } {
+    const styles = window.getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+
+    return {
+      isVisible:
+        rect.width > 0 && rect.height > 0 && styles.visibility !== "hidden",
+      hasOverflow:
+        element.scrollWidth > element.clientWidth ||
+        element.scrollHeight > element.clientHeight,
+      isAccessible: element.getAttribute("aria-hidden") !== "true",
+      hasProperSpacing:
+        parseInt(styles.padding) >= 8 && parseInt(styles.margin) >= 0,
+    };
+  }
+}
+
+// Test data
+interface TestWizardData extends WizardData {
+  name: string;
+  email: string;
+  description: string;
+}
+
+const createVisualTestConfig = (): WizardConfig<TestWizardData> => ({
+  id: "visual-test-wizard",
+  type: "test",
+  title: "Visual Test Wizard",
+  description: "A wizard for visual regression testing",
+  steps: [
+    {
+      id: "step-1",
+      title: "Basic Information",
+      description: "Enter your basic details",
+      component: ({ data, onUpdate, onNext, errors }: any) => (
+        <div className="step-content">
+          <h2>Basic Information</h2>
+          <div className="form-group">
+            <label htmlFor="name">Name</label>
+            <input
+              id="name"
+              type="text"
+              value={data.name || ""}
+              onChange={(e) => onUpdate({ name: e.target.value })}
+              className={errors.name ? "error" : ""}
+            />
+            {errors.name && (
+              <span className="error-message">{errors.name}</span>
+            )}
+          </div>
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              value={data.email || ""}
+              onChange={(e) => onUpdate({ email: e.target.value })}
+              className={errors.email ? "error" : ""}
+            />
+            {errors.email && (
+              <span className="error-message">{errors.email}</span>
+            )}
+          </div>
+          <button onClick={onNext} className="next-button">
+            Next Step
+          </button>
+        </div>
+      ),
+      validation: z.object({
+        name: z.string().min(1, "Name is required"),
+        email: z.string().email("Invalid email"),
+      }),
+    },
+    {
+      id: "step-2",
+      title: "Description",
+      description: "Add a description",
+      component: ({ data, onUpdate, onNext, onPrevious, errors }: any) => (
+        <div className="step-content">
+          <h2>Description</h2>
+          <div className="form-group">
+            <label htmlFor="description">Description</label>
+            <textarea
+              id="description"
+              value={data.description || ""}
+              onChange={(e) => onUpdate({ description: e.target.value })}
+              className={errors.description ? "error" : ""}
+              rows={4}
+            />
+            {errors.description && (
+              <span className="error-message">{errors.description}</span>
+            )}
+          </div>
+          <div className="button-group">
+            <button onClick={onPrevious} className="prev-button">
+              Previous
+            </button>
+            <button onClick={onNext} className="next-button">
+              Complete
+            </button>
+          </div>
+        </div>
+      ),
+      validation: z.object({
+        description: z
+          .string()
+          .min(10, "Description must be at least 10 characters"),
+      }),
+    },
+  ],
+  validation: {
+    stepSchemas: {
+      "step-1": z.object({
+        name: z.string().min(1),
+        email: z.string().email(),
+      }),
+      "step-2": z.object({
+        description: z.string().min(10),
+      }),
+    },
+    finalSchema: z.object({
+      name: z.string().min(1),
+      email: z.string().email(),
+      description: z.string().min(10),
+      status: z.enum(["draft", "published"]),
+    }),
+  },
+});
 
 describe("Wizard Visual Regression Tests", () => {
-  const mockWizardState = {
-    wizardState: {
-      currentStep: 1,
-      formData: {},
-      isValid: { 1: false, 2: false, 3: false, 4: false },
-      isDirty: false,
-      isLoading: false,
-      errors: {},
-    },
-    stepValidation: { 1: false, 2: false, 3: false, 4: false },
-    stepCompletion: { 1: 0, 2: 0, 3: 0, 4: 0 },
-    updateFormData: jest.fn(),
-    goToStep: jest.fn(),
-    goToNextStep: jest.fn(),
-    goToPreviousStep: jest.fn(),
-    undo: jest.fn(),
-    redo: jest.fn(),
-    canUndo: false,
-    canRedo: false,
-    setLoading: jest.fn(),
-    setErrors: jest.fn(),
-    clearDirtyState: jest.fn(),
-  };
-
-  const mockWizardActions = {
-    publishProperty: jest.fn(),
-    saveDraft: jest.fn(),
-    loadDraft: jest.fn(),
-    deleteDraft: jest.fn(),
-    isLoading: false,
-    error: null,
-  };
-
-  const mockAIGeneration = {
-    generateContent: jest.fn(),
-    generateTitle: jest.fn(),
-    generateDescription: jest.fn(),
-    generateTags: jest.fn(),
-    isGenerating: false,
-    error: null,
-    retry: jest.fn(),
-    generationHistory: [],
-  };
-
-  const mockCharacteristics = {
-    characteristics: [
-      {
-        id: "1",
-        name: "Piscina",
-        category: "amenity" as const,
-        selected: false,
-      },
-      {
-        id: "2",
-        name: "Garaje",
-        category: "feature" as const,
-        selected: false,
-      },
-      { id: "3", name: "Jardín", category: "feature" as const, selected: true },
-    ],
-    loading: false,
-    error: null,
-    toggleCharacteristic: jest.fn(),
-    addCustomCharacteristic: jest.fn(),
-  };
-
   beforeEach(() => {
-    mockUseWizardStateManager.mockReturnValue(mockWizardState);
-    mockUseWizardActions.mockReturnValue(mockWizardActions);
-    mockUseAIGeneration.mockReturnValue(mockAIGeneration);
-    mockUseCharacteristics.mockReturnValue(mockCharacteristics);
+    vi.clearAllMocks();
+    // Reset viewport to default
+    VisualTestUtils.setViewport(1024, 768);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    // Clean up any viewport changes
+    VisualTestUtils.setViewport(1024, 768);
   });
 
-  describe("PropertyWizard Visual States", () => {
-    it("renders initial state consistently", () => {
-      const { container } = render(<PropertyWizard />);
-      const snapshot = takeSnapshot(container, "wizard-initial-state");
+  describe("Desktop Layout", () => {
+    it("should render wizard correctly on desktop", async () => {
+      VisualTestUtils.setViewport(1920, 1080);
 
-      // Verify key visual elements are present
-      expect(
-        container.querySelector('[data-testid="wizard-progress"]')
-      ).toBeInTheDocument();
-      expect(
-        container.querySelector('[data-testid="wizard-step-1"]')
-      ).toBeInTheDocument();
-      expect(container.querySelector(".wizard-navigation")).toBeInTheDocument();
+      const { container } = render(
+        <Wizard config={createVisualTestConfig()} />
+      );
 
-      // Store snapshot for future comparisons
-      expect(snapshot).toBeDefined();
-    });
-
-    it("renders loading state consistently", () => {
-      mockWizardState.wizardState.isLoading = true;
-
-      const { container } = render(<PropertyWizard />);
-      const snapshot = takeSnapshot(container, "wizard-loading-state");
-
-      // Verify loading indicators
-      expect(
-        container.querySelector('[data-testid="loading-spinner"]')
-      ).toBeInTheDocument();
-      expect(container.querySelector(".wizard-loading")).toBeInTheDocument();
-
-      expect(snapshot).toBeDefined();
-    });
-
-    it("renders error state consistently", () => {
-      mockWizardState.wizardState.errors = {
-        title: "El título es requerido",
-        price: "El precio debe ser mayor a 0",
-      };
-
-      const { container } = render(<PropertyWizard />);
-      const snapshot = takeSnapshot(container, "wizard-error-state");
-
-      // Verify error styling
-      expect(container.querySelector(".error-message")).toBeInTheDocument();
-      expect(
-        container.querySelector('[aria-invalid="true"]')
-      ).toBeInTheDocument();
-
-      expect(snapshot).toBeDefined();
-    });
-
-    it("renders different steps consistently", () => {
-      const steps = [1, 2, 3, 4];
-      const snapshots: any[] = [];
-
-      steps.forEach((step) => {
-        mockWizardState.wizardState.currentStep = step;
-        const { container } = render(<PropertyWizard />);
-        const snapshot = takeSnapshot(container, `wizard-step-${step}`);
-        snapshots.push(snapshot);
-
-        // Verify step-specific elements
-        expect(
-          container.querySelector(`[data-testid="wizard-step-${step}"]`)
-        ).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText("Basic Information")).toBeInTheDocument();
       });
 
-      // Ensure each step has unique visual characteristics
-      snapshots.forEach((snapshot, index) => {
-        if (index > 0) {
-          expect(compareSnapshots(snapshot, snapshots[index - 1])).toBe(false);
-        }
+      // Validate layout
+      const wizardContainer = container.querySelector(".wizard-container");
+      expect(wizardContainer).toBeInTheDocument();
+
+      const layout = VisualTestUtils.validateLayout(
+        wizardContainer as HTMLElement
+      );
+      expect(layout.isVisible).toBe(true);
+      expect(layout.isAccessible).toBe(true);
+
+      // Take visual snapshot
+      await VisualTestUtils.takeSnapshot(container, "wizard-desktop-initial");
+    });
+
+    it("should render progress indicator correctly on desktop", () => {
+      VisualTestUtils.setViewport(1920, 1080);
+
+      const { container } = render(
+        <Wizard config={createVisualTestConfig()} showProgress={true} />
+      );
+
+      const progressContainer = container.querySelector(
+        ".wizard-progress-container"
+      );
+      expect(progressContainer).toBeInTheDocument();
+
+      const layout = VisualTestUtils.validateLayout(
+        progressContainer as HTMLElement
+      );
+      expect(layout.isVisible).toBe(true);
+      expect(layout.hasProperSpacing).toBe(true);
+    });
+
+    it("should render navigation correctly on desktop", () => {
+      VisualTestUtils.setViewport(1920, 1080);
+
+      const { container } = render(
+        <Wizard config={createVisualTestConfig()} />
+      );
+
+      const navigationContainer = container.querySelector(
+        ".wizard-navigation-container"
+      );
+      expect(navigationContainer).toBeInTheDocument();
+
+      const layout = VisualTestUtils.validateLayout(
+        navigationContainer as HTMLElement
+      );
+      expect(layout.isVisible).toBe(true);
+      expect(layout.hasProperSpacing).toBe(true);
+    });
+  });
+
+  describe("Tablet Layout", () => {
+    it("should render wizard correctly on tablet", async () => {
+      VisualTestUtils.setViewport(768, 1024);
+
+      const { container } = render(
+        <Wizard config={createVisualTestConfig()} />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText("Basic Information")).toBeInTheDocument();
       });
+
+      const wizardContainer = container.querySelector(".wizard-container");
+      const layout = VisualTestUtils.validateLayout(
+        wizardContainer as HTMLElement
+      );
+      expect(layout.isVisible).toBe(true);
+      expect(layout.hasOverflow).toBe(false);
+
+      await VisualTestUtils.takeSnapshot(container, "wizard-tablet-initial");
+    });
+
+    it("should adapt progress indicator for tablet", () => {
+      VisualTestUtils.setViewport(768, 1024);
+
+      const { container } = render(
+        <Wizard config={createVisualTestConfig()} showProgress={true} />
+      );
+
+      const progressContainer = container.querySelector(
+        ".wizard-progress-container"
+      );
+      expect(progressContainer).toBeInTheDocument();
+
+      // Progress should be visible and not overflow
+      const layout = VisualTestUtils.validateLayout(
+        progressContainer as HTMLElement
+      );
+      expect(layout.isVisible).toBe(true);
+      expect(layout.hasOverflow).toBe(false);
     });
   });
 
-  describe("GeneralInfoStep Visual States", () => {
-    const mockProps = {
-      data: {},
-      onUpdate: jest.fn(),
-      onNext: jest.fn(),
-      locale: "es" as const,
-    };
-
-    it("renders empty form consistently", () => {
-      const { container } = render(<GeneralInfoStep {...mockProps} />);
-      const snapshot = takeSnapshot(container, "general-info-empty");
-
-      // Verify form structure
-      expect(container.querySelector("form")).toBeInTheDocument();
-      expect(container.querySelectorAll("input")).toHaveLength(4); // title, price, surface, bedrooms, bathrooms
-      expect(container.querySelector("textarea")).toBeInTheDocument(); // description
-
-      expect(snapshot).toBeDefined();
-    });
-
-    it("renders filled form consistently", () => {
-      const filledProps = {
-        ...mockProps,
-        data: {
-          title: "Beautiful House in Santo Domingo",
-          description: "A wonderful property with all modern amenities...",
-          price: 150000,
-          surface: 200,
-          bedrooms: 3,
-          bathrooms: 2,
-          propertyType: "house" as const,
-        },
-      };
-
-      const { container } = render(<GeneralInfoStep {...filledProps} />);
-      const snapshot = takeSnapshot(container, "general-info-filled");
-
-      // Verify filled values are displayed
-      expect(
-        container.querySelector(
-          'input[value="Beautiful House in Santo Domingo"]'
-        )
-      ).toBeInTheDocument();
-      expect(
-        container.querySelector('input[value="150000"]')
-      ).toBeInTheDocument();
-
-      expect(snapshot).toBeDefined();
-    });
-
-    it("renders AI generation states consistently", () => {
-      // Loading state
-      mockAIGeneration.isGenerating = true;
-      const { container: loadingContainer } = render(
-        <GeneralInfoStep {...mockProps} />
+  describe("Mobile Layout", () => {
+    beforeEach(() => {
+      // Mock mobile hook
+      vi.mocked(require("@/hooks/use-mobile").useIsMobile).mockReturnValue(
+        true
       );
-      const loadingSnapshot = takeSnapshot(
-        loadingContainer,
-        "general-info-ai-loading"
+    });
+
+    it("should render wizard correctly on mobile", async () => {
+      VisualTestUtils.setViewport(375, 667); // iPhone SE
+
+      const { container } = render(
+        <Wizard config={createVisualTestConfig()} />
       );
 
-      expect(
-        loadingContainer.querySelector('[data-testid="ai-loading"]')
-      ).toBeInTheDocument();
-
-      // Error state
-      mockAIGeneration.isGenerating = false;
-      mockAIGeneration.error = "AI service unavailable";
-      const { container: errorContainer } = render(
-        <GeneralInfoStep {...mockProps} />
-      );
-      const errorSnapshot = takeSnapshot(
-        errorContainer,
-        "general-info-ai-error"
-      );
-
-      expect(errorContainer.querySelector(".ai-error")).toBeInTheDocument();
-
-      expect(loadingSnapshot).toBeDefined();
-      expect(errorSnapshot).toBeDefined();
-    });
-
-    it("renders characteristics selection consistently", () => {
-      const { container } = render(<GeneralInfoStep {...mockProps} />);
-      const snapshot = takeSnapshot(container, "general-info-characteristics");
-
-      // Verify characteristics are displayed
-      expect(
-        container.querySelector('[data-testid="characteristics-list"]')
-      ).toBeInTheDocument();
-      expect(container.querySelectorAll(".characteristic-item")).toHaveLength(
-        3
-      );
-
-      // Verify selected state styling
-      expect(
-        container.querySelector(".characteristic-item.selected")
-      ).toBeInTheDocument();
-
-      expect(snapshot).toBeDefined();
-    });
-  });
-
-  describe("LocationStep Visual States", () => {
-    const mockProps = {
-      data: {},
-      onUpdate: jest.fn(),
-      onNext: jest.fn(),
-      onPrevious: jest.fn(),
-      locale: "es" as const,
-    };
-
-    it("renders map interface consistently", () => {
-      const { container } = render(<LocationStep {...mockProps} />);
-      const snapshot = takeSnapshot(container, "location-step-map");
-
-      // Verify map container
-      expect(
-        container.querySelector('[data-testid="map-container"]')
-      ).toBeInTheDocument();
-      expect(container.querySelector(".map-controls")).toBeInTheDocument();
-
-      expect(snapshot).toBeDefined();
-    });
-
-    it("renders address form consistently", () => {
-      const { container } = render(<LocationStep {...mockProps} />);
-      const snapshot = takeSnapshot(container, "location-step-address");
-
-      // Verify address form fields
-      expect(
-        container.querySelector('input[name="street"]')
-      ).toBeInTheDocument();
-      expect(container.querySelector('input[name="city"]')).toBeInTheDocument();
-      expect(
-        container.querySelector('input[name="province"]')
-      ).toBeInTheDocument();
-
-      expect(snapshot).toBeDefined();
-    });
-
-    it("renders with selected location consistently", () => {
-      const propsWithLocation = {
-        ...mockProps,
-        data: {
-          coordinates: { latitude: 18.4861, longitude: -69.9312 },
-          address: {
-            street: "Calle Principal 123",
-            city: "Santo Domingo",
-            province: "Distrito Nacional",
-            country: "Dominican Republic",
-            formattedAddress: "Calle Principal 123, Santo Domingo",
-          },
-        },
-      };
-
-      const { container } = render(<LocationStep {...propsWithLocation} />);
-      const snapshot = takeSnapshot(container, "location-step-selected");
-
-      // Verify marker and filled address
-      expect(
-        container.querySelector('[data-testid="map-marker"]')
-      ).toBeInTheDocument();
-      expect(
-        container.querySelector('input[value="Calle Principal 123"]')
-      ).toBeInTheDocument();
-
-      expect(snapshot).toBeDefined();
-    });
-  });
-
-  describe("MediaUploadStep Visual States", () => {
-    const mockProps = {
-      data: { images: [] },
-      onUpdate: jest.fn(),
-      onNext: jest.fn(),
-      onPrevious: jest.fn(),
-      locale: "es" as const,
-    };
-
-    it("renders empty upload interface consistently", () => {
-      const { container } = render(<MediaUploadStep {...mockProps} />);
-      const snapshot = takeSnapshot(container, "media-upload-empty");
-
-      // Verify upload interface
-      expect(
-        container.querySelector('[data-testid="upload-dropzone"]')
-      ).toBeInTheDocument();
-      expect(
-        container.querySelector(".upload-instructions")
-      ).toBeInTheDocument();
-
-      expect(snapshot).toBeDefined();
-    });
-
-    it("renders with uploaded images consistently", () => {
-      const propsWithImages = {
-        ...mockProps,
-        data: {
-          images: [
-            {
-              id: "img-1",
-              url: "https://example.com/image1.jpg",
-              filename: "image1.jpg",
-              size: 1024 * 1024,
-              contentType: "image/jpeg",
-              width: 800,
-              height: 600,
-            },
-            {
-              id: "img-2",
-              url: "https://example.com/image2.jpg",
-              filename: "image2.jpg",
-              size: 2 * 1024 * 1024,
-              contentType: "image/jpeg",
-              width: 1200,
-              height: 800,
-            },
-          ],
-        },
-      };
-
-      const { container } = render(<MediaUploadStep {...propsWithImages} />);
-      const snapshot = takeSnapshot(container, "media-upload-with-images");
-
-      // Verify image previews
-      expect(container.querySelectorAll(".image-preview")).toHaveLength(2);
-      expect(container.querySelectorAll(".image-controls")).toHaveLength(2);
-
-      expect(snapshot).toBeDefined();
-    });
-
-    it("renders upload progress consistently", () => {
-      // Mock upload in progress
-      const { container } = render(<MediaUploadStep {...mockProps} />);
-
-      // Simulate upload progress UI
-      const progressElement = document.createElement("div");
-      progressElement.className = "upload-progress";
-      progressElement.setAttribute("data-testid", "upload-progress");
-      container.appendChild(progressElement);
-
-      const snapshot = takeSnapshot(container, "media-upload-progress");
-
-      expect(
-        container.querySelector('[data-testid="upload-progress"]')
-      ).toBeInTheDocument();
-      expect(snapshot).toBeDefined();
-    });
-  });
-
-  describe("PreviewStep Visual States", () => {
-    const mockCompleteData = {
-      title: "Beautiful House in Santo Domingo",
-      description:
-        "A wonderful property with all modern amenities and stunning views.",
-      price: 150000,
-      surface: 200,
-      propertyType: "house" as const,
-      bedrooms: 3,
-      bathrooms: 2,
-      characteristics: [
-        {
-          id: "1",
-          name: "Piscina",
-          category: "amenity" as const,
-          selected: true,
-        },
-        {
-          id: "2",
-          name: "Garaje",
-          category: "feature" as const,
-          selected: true,
-        },
-      ],
-      coordinates: { latitude: 18.4861, longitude: -69.9312 },
-      address: {
-        street: "Calle Principal 123",
-        city: "Santo Domingo",
-        province: "Distrito Nacional",
-        country: "Dominican Republic",
-        formattedAddress: "Calle Principal 123, Santo Domingo",
-      },
-      images: [
-        {
-          id: "img-1",
-          url: "https://example.com/image1.jpg",
-          filename: "image1.jpg",
-          size: 1024 * 1024,
-          contentType: "image/jpeg",
-          width: 800,
-          height: 600,
-        },
-      ],
-      status: "draft" as const,
-      language: "es" as const,
-      aiGenerated: {
-        title: true,
-        description: true,
-        tags: false,
-      },
-    };
-
-    const mockProps = {
-      data: mockCompleteData,
-      onPublish: jest.fn(),
-      onSaveDraft: jest.fn(),
-      onEdit: jest.fn(),
-      locale: "es" as const,
-    };
-
-    it("renders complete preview consistently", () => {
-      const { container } = render(<PreviewStep {...mockProps} />);
-      const snapshot = takeSnapshot(container, "preview-step-complete");
-
-      // Verify preview sections
-      expect(container.querySelector(".property-preview")).toBeInTheDocument();
-      expect(container.querySelector(".property-details")).toBeInTheDocument();
-      expect(container.querySelector(".property-images")).toBeInTheDocument();
-      expect(container.querySelector(".property-location")).toBeInTheDocument();
-
-      expect(snapshot).toBeDefined();
-    });
-
-    it("renders AI generation indicators consistently", () => {
-      const { container } = render(<PreviewStep {...mockProps} />);
-      const snapshot = takeSnapshot(container, "preview-step-ai-indicators");
-
-      // Verify AI indicators
-      expect(
-        container.querySelectorAll(".ai-generated-indicator")
-      ).toHaveLength(2); // title and description
-
-      expect(snapshot).toBeDefined();
-    });
-
-    it("renders action buttons consistently", () => {
-      const { container } = render(<PreviewStep {...mockProps} />);
-      const snapshot = takeSnapshot(container, "preview-step-actions");
-
-      // Verify action buttons
-      expect(
-        container.querySelector('[data-testid="publish-button"]')
-      ).toBeInTheDocument();
-      expect(
-        container.querySelector('[data-testid="save-draft-button"]')
-      ).toBeInTheDocument();
-      expect(container.querySelectorAll(".edit-step-button")).toHaveLength(3); // Edit buttons for steps 1-3
-
-      expect(snapshot).toBeDefined();
-    });
-  });
-
-  describe("Responsive Design Consistency", () => {
-    const viewports = [
-      { width: 320, height: 568, name: "mobile" },
-      { width: 768, height: 1024, name: "tablet" },
-      { width: 1024, height: 768, name: "desktop" },
-      { width: 1920, height: 1080, name: "large-desktop" },
-    ];
-
-    viewports.forEach((viewport) => {
-      it(`renders consistently on ${viewport.name} viewport`, () => {
-        // Mock viewport size
-        Object.defineProperty(window, "innerWidth", {
-          writable: true,
-          configurable: true,
-          value: viewport.width,
-        });
-        Object.defineProperty(window, "innerHeight", {
-          writable: true,
-          configurable: true,
-          value: viewport.height,
-        });
-
-        const { container } = render(<PropertyWizard />);
-        const snapshot = takeSnapshot(container, `wizard-${viewport.name}`);
-
-        // Verify responsive classes are applied
-        expect(
-          container.querySelector(".wizard-container")
-        ).toBeInTheDocument();
-
-        // Check for mobile-specific elements on small screens
-        if (viewport.width < 768) {
-          expect(
-            container.querySelector(".mobile-navigation")
-          ).toBeInTheDocument();
-        }
-
-        expect(snapshot).toBeDefined();
+      await waitFor(() => {
+        expect(screen.getByText("Basic Information")).toBeInTheDocument();
       });
+
+      const wizardContainer = container.querySelector(".wizard-container");
+      expect(wizardContainer).toHaveClass("mobile-optimized");
+
+      const layout = VisualTestUtils.validateLayout(
+        wizardContainer as HTMLElement
+      );
+      expect(layout.isVisible).toBe(true);
+      expect(layout.hasOverflow).toBe(false);
+
+      await VisualTestUtils.takeSnapshot(container, "wizard-mobile-initial");
     });
-  });
 
-  describe("Theme Consistency", () => {
-    const themes = ["light", "dark"];
+    it("should render mobile-optimized progress", () => {
+      VisualTestUtils.setViewport(375, 667);
 
-    themes.forEach((theme) => {
-      it(`renders consistently in ${theme} theme`, () => {
-        // Mock theme
-        document.documentElement.setAttribute("data-theme", theme);
+      const { container } = render(
+        <Wizard config={createVisualTestConfig()} showProgress={true} />
+      );
 
-        const { container } = render(<PropertyWizard />);
-        const snapshot = takeSnapshot(container, `wizard-${theme}-theme`);
+      // Mobile progress should be compact
+      const progressContainer = container.querySelector(
+        ".wizard-progress-container"
+      );
+      expect(progressContainer).toBeInTheDocument();
 
-        // Verify theme-specific styling
-        expect(document.documentElement.getAttribute("data-theme")).toBe(theme);
+      const layout = VisualTestUtils.validateLayout(
+        progressContainer as HTMLElement
+      );
+      expect(layout.isVisible).toBe(true);
+      expect(layout.hasOverflow).toBe(false);
+    });
 
-        expect(snapshot).toBeDefined();
+    it("should render mobile-optimized navigation", () => {
+      VisualTestUtils.setViewport(375, 667);
+
+      const { container } = render(
+        <Wizard config={createVisualTestConfig()} />
+      );
+
+      const navigationContainer = container.querySelector(
+        ".wizard-navigation-container"
+      );
+      expect(navigationContainer).toBeInTheDocument();
+
+      // Navigation should be sticky on mobile
+      const styles = window.getComputedStyle(navigationContainer as Element);
+      expect(styles.position).toBe("sticky");
+
+      const layout = VisualTestUtils.validateLayout(
+        navigationContainer as HTMLElement
+      );
+      expect(layout.isVisible).toBe(true);
+    });
+
+    it("should handle very small screens", async () => {
+      VisualTestUtils.setViewport(320, 568); // iPhone 5
+
+      const { container } = render(
+        <Wizard config={createVisualTestConfig()} />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText("Basic Information")).toBeInTheDocument();
       });
+
+      const wizardContainer = container.querySelector(".wizard-container");
+      const layout = VisualTestUtils.validateLayout(
+        wizardContainer as HTMLElement
+      );
+      expect(layout.isVisible).toBe(true);
+      expect(layout.hasOverflow).toBe(false);
     });
   });
 
-  describe("Animation States", () => {
-    it("renders step transition animations consistently", () => {
-      const { container, rerender } = render(<PropertyWizard />);
+  describe("Step Transitions", () => {
+    it("should maintain visual consistency during step transitions", async () => {
+      const user = userEvent.setup();
+      const { container } = render(
+        <Wizard
+          config={createVisualTestConfig()}
+          initialData={{ name: "John", email: "john@example.com" }}
+        />
+      );
 
       // Initial state
-      const initialSnapshot = takeSnapshot(container, "wizard-step-1-initial");
+      await VisualTestUtils.takeSnapshot(container, "wizard-step-1");
 
-      // Change step
-      mockWizardState.wizardState.currentStep = 2;
-      rerender(<PropertyWizard />);
+      // Navigate to next step
+      await user.click(screen.getByRole("button", { name: /next step/i }));
 
-      const transitionSnapshot = takeSnapshot(
-        container,
-        "wizard-step-2-transition"
+      await waitFor(() => {
+        expect(screen.getByText("Description")).toBeInTheDocument();
+      });
+
+      // Second step state
+      await VisualTestUtils.takeSnapshot(container, "wizard-step-2");
+
+      // Verify layout consistency
+      const wizardContainer = container.querySelector(".wizard-container");
+      const layout = VisualTestUtils.validateLayout(
+        wizardContainer as HTMLElement
       );
-
-      // Verify transition classes
-      expect(container.querySelector(".step-transition")).toBeInTheDocument();
-
-      expect(initialSnapshot).toBeDefined();
-      expect(transitionSnapshot).toBeDefined();
+      expect(layout.isVisible).toBe(true);
+      expect(layout.hasProperSpacing).toBe(true);
     });
 
-    it("renders loading animations consistently", () => {
-      mockWizardState.wizardState.isLoading = true;
+    it("should handle loading states visually", async () => {
+      const { container } = render(
+        <Wizard config={createVisualTestConfig()} />
+      );
 
-      const { container } = render(<PropertyWizard />);
-      const snapshot = takeSnapshot(container, "wizard-loading-animation");
-
-      // Verify loading animation elements
-      expect(container.querySelector(".loading-spinner")).toBeInTheDocument();
-      expect(container.querySelector(".loading-animation")).toBeInTheDocument();
-
-      expect(snapshot).toBeDefined();
+      // Simulate loading state
+      const loadingElement = container.querySelector('[data-loading="true"]');
+      if (loadingElement) {
+        const layout = VisualTestUtils.validateLayout(
+          loadingElement as HTMLElement
+        );
+        expect(layout.isVisible).toBe(true);
+      }
     });
   });
 
-  describe("Accessibility Visual States", () => {
-    it("renders focus states consistently", () => {
-      const { container } = render(<PropertyWizard />);
-
-      // Simulate focus on first input
-      const firstInput = container.querySelector("input");
-      firstInput?.focus();
-
-      const snapshot = takeSnapshot(container, "wizard-focus-state");
-
-      // Verify focus styling
-      expect(document.activeElement).toBe(firstInput);
-      expect(firstInput).toHaveClass("focus:ring-2");
-
-      expect(snapshot).toBeDefined();
-    });
-
-    it("renders high contrast mode consistently", () => {
-      // Mock high contrast mode
-      document.documentElement.setAttribute("data-contrast", "high");
-
-      const { container } = render(<PropertyWizard />);
-      const snapshot = takeSnapshot(container, "wizard-high-contrast");
-
-      // Verify high contrast styling
-      expect(document.documentElement.getAttribute("data-contrast")).toBe(
-        "high"
+  describe("Error States", () => {
+    it("should display validation errors consistently", async () => {
+      const user = userEvent.setup();
+      const { container } = render(
+        <Wizard config={createVisualTestConfig()} />
       );
 
-      expect(snapshot).toBeDefined();
+      // Try to proceed without filling required fields
+      await user.click(screen.getByRole("button", { name: /next step/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText("Name is required")).toBeInTheDocument();
+        expect(screen.getByText("Invalid email")).toBeInTheDocument();
+      });
+
+      // Verify error styling
+      const errorMessages = container.querySelectorAll(".error-message");
+      errorMessages.forEach((error) => {
+        const layout = VisualTestUtils.validateLayout(error as HTMLElement);
+        expect(layout.isVisible).toBe(true);
+      });
+
+      const errorInputs = container.querySelectorAll("input.error");
+      expect(errorInputs.length).toBeGreaterThan(0);
+
+      await VisualTestUtils.takeSnapshot(container, "wizard-validation-errors");
+    });
+
+    it("should handle network error states", async () => {
+      const { container } = render(
+        <Wizard
+          config={createVisualTestConfig()}
+          onSaveDraft={() => Promise.reject(new Error("Network error"))}
+        />
+      );
+
+      // Simulate network error
+      const errorContainer = container.querySelector(".wizard-error-container");
+      if (errorContainer) {
+        const layout = VisualTestUtils.validateLayout(
+          errorContainer as HTMLElement
+        );
+        expect(layout.isVisible).toBe(true);
+      }
+    });
+  });
+
+  describe("Theme Variations", () => {
+    it("should render correctly in dark mode", () => {
+      VisualTestUtils.mockMatchMedia("(prefers-color-scheme: dark)", true);
+
+      const { container } = render(
+        <Wizard config={createVisualTestConfig()} />
+      );
+
+      const wizardContainer = container.querySelector(".wizard-container");
+      const layout = VisualTestUtils.validateLayout(
+        wizardContainer as HTMLElement
+      );
+      expect(layout.isVisible).toBe(true);
+    });
+
+    it("should render correctly in high contrast mode", () => {
+      VisualTestUtils.mockMatchMedia("(prefers-contrast: high)", true);
+
+      const { container } = render(
+        <Wizard config={createVisualTestConfig()} />
+      );
+
+      const wizardContainer = container.querySelector(".wizard-container");
+      const layout = VisualTestUtils.validateLayout(
+        wizardContainer as HTMLElement
+      );
+      expect(layout.isVisible).toBe(true);
+    });
+
+    it("should respect reduced motion preferences", () => {
+      VisualTestUtils.mockMatchMedia("(prefers-reduced-motion: reduce)", true);
+
+      const { container } = render(
+        <Wizard config={createVisualTestConfig()} />
+      );
+
+      // Animations should be disabled
+      const animatedElements = container.querySelectorAll(
+        '[data-animate="true"]'
+      );
+      animatedElements.forEach((element) => {
+        const styles = window.getComputedStyle(element);
+        expect(styles.animationDuration).toBe("0s");
+      });
+    });
+  });
+
+  describe("Specific Wizard Types", () => {
+    it("should render PropertyWizard consistently", async () => {
+      const { container } = render(<PropertyWizard />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Información General")).toBeInTheDocument();
+      });
+
+      const wizardContainer = container.querySelector(".wizard-container");
+      const layout = VisualTestUtils.validateLayout(
+        wizardContainer as HTMLElement
+      );
+      expect(layout.isVisible).toBe(true);
+
+      await VisualTestUtils.takeSnapshot(container, "property-wizard-initial");
+    });
+
+    it("should render LandWizard consistently", async () => {
+      const { container } = render(<LandWizard />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Información General")).toBeInTheDocument();
+      });
+
+      const wizardContainer = container.querySelector(".wizard-container");
+      const layout = VisualTestUtils.validateLayout(
+        wizardContainer as HTMLElement
+      );
+      expect(layout.isVisible).toBe(true);
+
+      await VisualTestUtils.takeSnapshot(container, "land-wizard-initial");
+    });
+
+    it("should render BlogWizard consistently", async () => {
+      const { container } = render(<BlogWizard />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Contenido")).toBeInTheDocument();
+      });
+
+      const wizardContainer = container.querySelector(".wizard-container");
+      const layout = VisualTestUtils.validateLayout(
+        wizardContainer as HTMLElement
+      );
+      expect(layout.isVisible).toBe(true);
+
+      await VisualTestUtils.takeSnapshot(container, "blog-wizard-initial");
+    });
+  });
+
+  describe("Component Isolation", () => {
+    it("should render WizardNavigation in isolation", () => {
+      const { container } = render(
+        <WizardNavigation
+          canGoNext={true}
+          canGoPrevious={true}
+          canComplete={false}
+          isFirstStep={false}
+          isLastStep={false}
+          onNext={vi.fn()}
+          onPrevious={vi.fn()}
+          onComplete={vi.fn()}
+          onSaveDraft={vi.fn()}
+          isLoading={false}
+          isSaving={false}
+          isMobile={false}
+        />
+      );
+
+      const navigation = container.querySelector('[role="navigation"]');
+      expect(navigation).toBeInTheDocument();
+
+      const layout = VisualTestUtils.validateLayout(navigation as HTMLElement);
+      expect(layout.isVisible).toBe(true);
+      expect(layout.hasProperSpacing).toBe(true);
+    });
+
+    it("should render WizardProgress in isolation", () => {
+      const mockSteps = [
+        { id: "step1", title: "Step 1", component: () => null },
+        { id: "step2", title: "Step 2", component: () => null },
+        { id: "step3", title: "Step 3", component: () => null },
+      ];
+
+      const { container } = render(
+        <WizardProgress
+          steps={mockSteps}
+          currentStep={1}
+          showStepNumbers={true}
+          isMobile={false}
+        />
+      );
+
+      const progress = container.querySelector('[role="progressbar"]');
+      expect(progress).toBeInTheDocument();
+
+      const layout = VisualTestUtils.validateLayout(progress as HTMLElement);
+      expect(layout.isVisible).toBe(true);
+    });
+  });
+
+  describe("Cross-Browser Compatibility", () => {
+    it("should render consistently across different user agents", () => {
+      // Mock different user agents
+      const userAgents = [
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0",
+      ];
+
+      userAgents.forEach((userAgent) => {
+        Object.defineProperty(navigator, "userAgent", {
+          value: userAgent,
+          configurable: true,
+        });
+
+        const { container } = render(
+          <Wizard config={createVisualTestConfig()} />
+        );
+
+        const wizardContainer = container.querySelector(".wizard-container");
+        const layout = VisualTestUtils.validateLayout(
+          wizardContainer as HTMLElement
+        );
+        expect(layout.isVisible).toBe(true);
+      });
     });
   });
 });

@@ -80,6 +80,11 @@ global.FormData = class FormData {
   }
 }
 
+// Add TextDecoder and TextEncoder for Node.js compatibility
+const { TextDecoder, TextEncoder } = require('util')
+global.TextDecoder = TextDecoder
+global.TextEncoder = TextEncoder
+
 // Suppress console errors in tests unless explicitly testing them
 const originalError = console.error
 beforeAll(() => {

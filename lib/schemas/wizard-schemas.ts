@@ -89,12 +89,16 @@ export const Step3Schema = z.object({
 
 // Step 4: Meta Schema (for final validation)
 export const Step4Schema = z.object({
-    status: z.enum(["draft", "published"]),
-    language: z.enum(["es", "en"]),
+    status: z.enum(["draft", "published"]).default("draft"),
+    language: z.enum(["es", "en"]).default("es"),
     aiGenerated: z.object({
-        title: z.boolean(),
-        description: z.boolean(),
-        tags: z.boolean(),
+        title: z.boolean().default(false),
+        description: z.boolean().default(false),
+        tags: z.boolean().default(false),
+    }).default({
+        title: false,
+        description: false,
+        tags: false,
     }),
 });
 
@@ -119,9 +123,13 @@ export const PropertyFormDataSchema = z.object({
     videos: Step3Schema.shape.videos,
 
     // Step 4 fields
-    status: Step4Schema.shape.status,
-    language: Step4Schema.shape.language,
-    aiGenerated: Step4Schema.shape.aiGenerated,
+    status: Step4Schema.shape.status.default("draft"),
+    language: Step4Schema.shape.language.default("es"),
+    aiGenerated: Step4Schema.shape.aiGenerated.default({
+        title: false,
+        description: false,
+        tags: false,
+    }),
 });
 
 // Partial schemas for draft validation
@@ -171,18 +179,33 @@ export const UploadResultSchema = z.object({
 // Validation helper functions
 export function validateStep(stepNumber: number, data: any): { success: boolean; errors?: any } {
     try {
+        let dataToValidate = data;
+
+        // Apply defaults for step 4 (preview) to ensure required fields are present
+        if (stepNumber === 4) {
+            dataToValidate = {
+                ...data,
+                status: data.status || "draft",
+                aiGenerated: data.aiGenerated || {
+                    title: false,
+                    description: false,
+                    tags: false,
+                },
+            };
+        }
+
         switch (stepNumber) {
             case 1:
-                Step1Schema.parse(data);
+                Step1Schema.parse(dataToValidate);
                 break;
             case 2:
-                Step2Schema.parse(data);
+                Step2Schema.parse(dataToValidate);
                 break;
             case 3:
-                Step3Schema.parse(data);
+                Step3Schema.parse(dataToValidate);
                 break;
             case 4:
-                Step4Schema.parse(data);
+                Step4Schema.parse(dataToValidate);
                 break;
             default:
                 return { success: false, errors: { step: "Paso inválido" } };
@@ -198,18 +221,33 @@ export function validateStep(stepNumber: number, data: any): { success: boolean;
 
 export function validatePartialStep(stepNumber: number, data: any): { success: boolean; errors?: any } {
     try {
+        let dataToValidate = data;
+
+        // Apply defaults for step 4 (preview) to ensure required fields are present
+        if (stepNumber === 4) {
+            dataToValidate = {
+                ...data,
+                status: data.status || "draft",
+                aiGenerated: data.aiGenerated || {
+                    title: false,
+                    description: false,
+                    tags: false,
+                },
+            };
+        }
+
         switch (stepNumber) {
             case 1:
-                PartialStep1Schema.parse(data);
+                PartialStep1Schema.parse(dataToValidate);
                 break;
             case 2:
-                PartialStep2Schema.parse(data);
+                PartialStep2Schema.parse(dataToValidate);
                 break;
             case 3:
-                PartialStep3Schema.parse(data);
+                PartialStep3Schema.parse(dataToValidate);
                 break;
             case 4:
-                PartialStep4Schema.parse(data);
+                PartialStep4Schema.parse(dataToValidate);
                 break;
             default:
                 return { success: false, errors: { step: "Paso inválido" } };

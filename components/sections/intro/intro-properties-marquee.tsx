@@ -1,4 +1,4 @@
-import { PropertyCard } from "../../property/property-card";
+import { PropertyCard } from "../../properties/property-card";
 import Marquee from "../../ui/marquee";
 import { FC } from "react";
 
@@ -147,14 +147,18 @@ export const IntroPropertiesMarquee: FC = () => {
           ).map(({ id, imgSrc, name, location, beds, baths, price, area }) => (
             <PropertyCard
               key={id}
-              id={id}
-              sqm={area}
-              imageUrl={imgSrc}
-              title={name}
-              location={location}
-              bedrooms={beds}
-              bathrooms={baths}
-              price={price}
+              property={{
+                id,
+                title: name,
+                location,
+                bedrooms: beds,
+                bathrooms: baths,
+                price,
+                sqm: area,
+                imageUrl: imgSrc,
+                type: 'residential',
+                description: ''
+              }}
             />
           ))}
         </Marquee>
@@ -168,14 +172,18 @@ export const IntroPropertiesMarquee: FC = () => {
             ) => (
               <PropertyCard
                 key={id}
-                id={id}
-                sqm={area}
-                imageUrl={imgSrc}
-                title={name}
-                location={location}
-                bedrooms={beds}
-                bathrooms={baths}
-                price={price}
+                property={{
+                  id,
+                  title: name,
+                  location,
+                  bedrooms: beds,
+                  bathrooms: baths,
+                  price,
+                  sqm: area,
+                  imageUrl: imgSrc,
+                  type: 'residential',
+                  description: ''
+                }}
               />
             )
           )}

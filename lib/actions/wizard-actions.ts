@@ -9,6 +9,8 @@ import {
     createSuccessResponse,
     createErrorResponse,
 } from "@/lib/validations";
+import { preprocessFormData, preprocessObjectData } from "@/lib/utils/form-data-preprocessor";
+import { formatValidationErrorResponse } from "@/lib/utils/validation-error-handler";
 import db from "@/lib/db/drizzle";
 import {
     properties,
@@ -23,7 +25,7 @@ import { PropertyFormDataSchema } from "@/lib/schemas/wizard-schemas";
 import type { PropertyFormData } from "@/types/wizard";
 import { calculateCompletionPercentage } from "@/lib/utils/wizard-validation";
 import { ValidationError, WizardError, DraftServiceError } from "../errors/wizard-errors";
-import { validatePropertyFormData } from "../validation/server-validation";
+// Validation is now handled by Zod schemas in createValidatedAction
 import { retryDraftOperation } from "../utils/retry-logic";
 
 // Security imports
@@ -31,10 +33,89 @@ import { sanitizeFormData } from "../security/input-sanitization";
 import { checkFormSubmissionRateLimit, checkDraftSaveRateLimit, recordSuccessfulOperation, recordFailedOperation } from "../security/rate-limiting";
 import { validateCSRFInServerAction } from "../security/csrf-protection";
 
-// Schema for publishing a property from wizard
-const publishPropertySchema = PropertyFormDataSchema.extend({
+// Helper function to parse JSON fields from form data
+function parseJsonFields(data: any) {
+    const parsed = { ...data };
+
+    // Parse JSON string fields
+    const jsonFields = ['coordinates', 'address', 'characteristics', 'images', 'videos', 'aiGenerated'];
+
+    for (const field of jsonFields) {
+        if (parsed[field] && typeof parsed[field] === 'string') {
+            try {
+                parsed[field] = JSON.parse(parsed[field]);
+            } catch (error) {
+                // Keep original value if parsing fails
+                console.warn(`Failed to parse JSON field ${field}:`, error);
+            }
+        }
+    }
+
+    return parsed;
+}
+
+// Schema for publishing a property from wizard with form data preprocessing
+const publishPropertySchema = z.object({
+    // Basic string fields
+    title: z.string().min(10, "El título debe tener al menos 10 caracteres").max(100, "El título no puede superar 100 caracteres"),
+    description: z.string().min(50, "La descripción debe tener al menos 50 caracteres").max(5000, "La descripción no puede superar 5000 caracteres"),
     userId: z.string().min(1, "User ID is required"),
-    _csrf_token: z.string().optional(), // CSRF token
+    _csrf_token: z.string().optional(),
+
+    // Numeric fields
+    price: z.coerce.number().positive("El precio debe ser mayor a 0").max(999999999, "El precio es demasiado alto"),
+    surface: z.coerce.number().positive("La superficie debe ser mayor a 0").max(999999, "La superficie es demasiado grande"),
+    bedrooms: z.coerce.number().min(0).max(50).optional(),
+    bathrooms: z.coerce.number().min(0).max(50).optional(),
+
+    // Enum fields
+    propertyType: z.string(),
+    status: z.enum(["draft", "published"]),
+    language: z.enum(["es", "en"]),
+
+    // Object fields (will be parsed from JSON strings in preprocessing)
+    coordinates: z.object({
+        latitude: z.number().min(17.5).max(19.9),
+        longitude: z.number().min(-72.0).max(-68.3),
+    }),
+    address: z.object({
+        street: z.string().optional(),
+        city: z.string().min(2, "La ciudad debe tener al menos 2 caracteres"),
+        province: z.string().min(2, "La provincia debe tener al menos 2 caracteres"),
+        postalCode: z.string().optional(),
+        country: z.literal("Dominican Republic"),
+        formattedAddress: z.string().min(1),
+    }),
+    characteristics: z.array(z.object({
+        id: z.string(),
+        name: z.string().min(1),
+        category: z.enum(["amenity", "feature", "location"]),
+        selected: z.boolean(),
+    })).min(1, "Selecciona al menos una característica"),
+    images: z.array(z.object({
+        id: z.string(),
+        url: z.string().url("URL de imagen inválida"),
+        filename: z.string().min(1),
+        size: z.coerce.number().max(10 * 1024 * 1024, "La imagen no puede superar 10MB"),
+        contentType: z.string().regex(/^image\/(jpeg|jpg|png|webp)$/, "Tipo de archivo no válido"),
+        width: z.coerce.number().optional(),
+        height: z.coerce.number().optional(),
+        displayOrder: z.coerce.number().min(0),
+    })).min(1, "Sube al menos una imagen").max(20, "No puedes subir más de 20 imágenes"),
+    videos: z.array(z.object({
+        id: z.string(),
+        url: z.string().url("URL de video inválida"),
+        filename: z.string().min(1),
+        size: z.coerce.number().max(100 * 1024 * 1024, "El video no puede superar 100MB"),
+        contentType: z.string().regex(/^video\/(mp4|webm|ogg)$/, "Tipo de video no válido"),
+        duration: z.coerce.number().optional(),
+        displayOrder: z.coerce.number().min(0),
+    })).optional(),
+    aiGenerated: z.object({
+        title: z.boolean(),
+        description: z.boolean(),
+        tags: z.boolean(),
+    }),
 });
 
 // Schema for saving a draft
@@ -44,7 +125,7 @@ const saveDraftSchema = z.object({
         z.record(z.any()), // Object format
         z.string() // JSON string format - will be parsed in the action
     ]),
-    stepCompleted: z.number().min(0).max(4).optional(),
+    stepCompleted: z.coerce.number().min(0).max(4).optional(),
     draftId: z.string().optional(), // For updating existing draft
     _csrf_token: z.string().optional(), // CSRF token
 });
@@ -65,7 +146,7 @@ const deleteDraftSchema = z.object({
  * Publish a property from the wizard
  */
 async function publishPropertyAction(
-    data: PropertyFormData & { userId: string; _csrf_token?: string }
+    data: z.infer<typeof publishPropertySchema>
 ): Promise<ActionState<{ propertyId: number }>> {
     const clientId = `user:${data.userId}`;
 
@@ -79,23 +160,34 @@ async function publishPropertyAction(
         await checkFormSubmissionRateLimit(clientId);
 
         // Input sanitization
-        const sanitizedData = sanitizeFormData(data) as PropertyFormData & { userId: string };
+        const sanitizedData = sanitizeFormData(data) as z.infer<typeof publishPropertySchema>;
 
-        // Server-side validation
-        await validatePropertyFormData(sanitizedData);
+        // Apply defaults for fields that might be missing
+        const dataWithDefaults = {
+            ...sanitizedData,
+            status: sanitizedData.status || "draft",
+            language: sanitizedData.language || "es",
+            aiGenerated: sanitizedData.aiGenerated || {
+                title: false,
+                description: false,
+                tags: false,
+            },
+        };
+
+        // Note: Validation is now handled by the publishPropertySchema in createValidatedAction
         // Convert wizard data to existing property schema format
         const propertyData = {
-            title: sanitizedData.title,
-            description: sanitizedData.description,
-            price: sanitizedData.price,
-            type: sanitizedData.propertyType,
-            bedrooms: sanitizedData.bedrooms || 0,
-            bathrooms: sanitizedData.bathrooms || 0,
-            area: sanitizedData.surface,
-            location: sanitizedData.address?.formattedAddress || `${sanitizedData.address?.city}, ${sanitizedData.address?.province}`,
+            title: dataWithDefaults.title,
+            description: dataWithDefaults.description,
+            price: dataWithDefaults.price,
+            type: dataWithDefaults.propertyType,
+            bedrooms: dataWithDefaults.bedrooms || 0,
+            bathrooms: dataWithDefaults.bathrooms || 0,
+            area: dataWithDefaults.surface,
+            location: dataWithDefaults.address?.formattedAddress || `${dataWithDefaults.address?.city}, ${dataWithDefaults.address?.province}`,
             status: "sale", // Default status - can be enhanced later
             featured: false,
-            images: sanitizedData.images?.map((img) => img.url) || [], // Convert to simple URL array for existing schema compatibility
+            images: dataWithDefaults.images?.map((img) => img.url) || [], // Convert to simple URL array for existing schema compatibility
         };
 
         // Insert the property using existing schema
@@ -198,21 +290,53 @@ async function publishPropertyAction(
     }
 }
 
-export const publishProperty = createValidatedAction(
-    publishPropertySchema,
-    publishPropertyAction
-);
+// Custom action wrapper that handles JSON parsing from form data
+export async function publishProperty(formData: FormData): Promise<ActionState<{ propertyId: number }>> {
+    try {
+        // Convert FormData to object
+        const rawData: any = {};
+        for (const [key, value] of formData.entries()) {
+            rawData[key] = value;
+        }
+
+        // Parse JSON fields
+        const parsedData = parseJsonFields(rawData);
+
+        // Apply defaults
+        const dataWithDefaults = {
+            ...parsedData,
+            status: parsedData.status || "draft",
+            language: parsedData.language || "es",
+            aiGenerated: parsedData.aiGenerated || {
+                title: false,
+                description: false,
+                tags: false,
+            },
+        };
+
+        // Validate with schema
+        const validatedData = publishPropertySchema.parse(dataWithDefaults);
+
+        // Call the action
+        return await publishPropertyAction(validatedData);
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            return createErrorResponse("Datos de formulario inválidos") as ActionState<{ propertyId: number }>;
+        }
+        return createErrorResponse("Error al procesar la solicitud") as ActionState<{ propertyId: number }>;
+    }
+}
 
 // Schema for updating an existing property
 const updatePropertySchema = publishPropertySchema.extend({
-    propertyId: z.number().min(1, "Property ID is required"),
+    propertyId: z.coerce.number().min(1, "Property ID is required"),
 });
 
 /**
  * Update an existing property from the wizard
  */
 async function updatePropertyAction(
-    data: PropertyFormData & { userId: string; propertyId: number }
+    data: z.infer<typeof updatePropertySchema>
 ): Promise<ActionState<{ propertyId: number }>> {
     try {
         // Convert wizard data to existing property schema format

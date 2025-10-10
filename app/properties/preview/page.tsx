@@ -15,6 +15,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { PropertyFormData, PropertyType } from "@/types/wizard";
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 
 const PROPERTY_TYPE_LABELS = {
   [PropertyType.HOUSE]: "Casa",
@@ -244,10 +245,11 @@ function PropertyPreviewContent() {
               </CardHeader>
               <CardContent>
                 <div className="prose prose-sm max-w-none">
-                  <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                    {propertyData.description ||
-                      "No hay descripción disponible"}
-                  </p>
+                  <MarkdownRenderer 
+                    content={propertyData.description || "No hay descripción disponible"}
+                    variant="default"
+                    className="text-muted-foreground leading-relaxed"
+                  />
                 </div>
                 {propertyData.aiGenerated?.description && (
                   <Badge variant="outline" className="mt-3">

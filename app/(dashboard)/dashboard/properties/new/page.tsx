@@ -3,22 +3,24 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useUser } from "@/hooks/use-user";
-import { PropertyWizard } from "@/components/wizard";
+import { PropertyWizard } from "@/components/wizard/property";
 import {
-  publishProperty,
-  saveDraft,
-  loadDraft,
-} from "@/lib/actions/wizard-actions";
+  completePropertyWizard,
+  savePropertyDraft,
+  loadPropertyDraft,
+} from "@/lib/actions/property-wizard-actions";
 import { RouteGuard } from "@/components/auth/route-guard";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { toast } from "sonner";
-import type { PropertyFormData } from "@/types/wizard";
+import type { PropertyWizardData } from "@/types/property-wizard";
 
 export default function NewPropertyPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useUser();
-  const [initialData, setInitialData] = useState<Partial<PropertyFormData>>({});
+  const [initialData, setInitialData] = useState<Partial<PropertyWizardData>>(
+    {}
+  );
   const [loading, setLoading] = useState(false);
 
   const draftId = searchParams?.get("draft");
@@ -29,14 +31,10 @@ export default function NewPropertyPage() {
 
       setLoading(true);
       try {
-        const formData = new FormData();
-        formData.append("draftId", draftId);
-        formData.append("userId", user.id);
+        const result = await loadPropertyDraft(draftId, user.id);
 
-        const result = await loadDraft(formData);
-
-        if (result.success && result.data?.draft) {
-          setInitialData(result.data.draft.formData);
+        if (result.success && result.data) {
+          setInitialData(result.data.data);
           toast.success("Borrador cargado exitosamente");
         } else {
           toast.error(result.error || "Error al cargar el borrador");
@@ -55,43 +53,33 @@ export default function NewPropertyPage() {
     loadDraftData();
   }, [draftId, user?.id, router]);
 
-  const handleComplete = async (data: PropertyFormData) => {
+  const handleComplete = async (data: PropertyWizardData) => {
     if (!user?.id) {
       toast.error("Usuario no autenticado");
       return;
     }
 
     try {
-      const formData = new FormData();
+      const completeData = {
+        ...data,
+        aiGenerated: data.aiGenerated || {
+          title: false,
+          description: false,
+          tags: false,
+        },
+        address: data.address
+          ? {
+              ...data.address,
+              country: "Dominican Republic" as const,
+            }
+          : undefined,
+      };
 
-      // Add all property data to FormData
-      formData.append("userId", user.id);
-      formData.append("title", data.title);
-      formData.append("description", data.description);
-      formData.append("price", data.price.toString());
-      formData.append("surface", data.surface.toString());
-      formData.append("propertyType", data.propertyType);
-      formData.append("bedrooms", (data.bedrooms || 0).toString());
-      formData.append("bathrooms", (data.bathrooms || 0).toString());
-      formData.append("status", data.status);
-      formData.append("language", data.language);
-
-      // Add coordinates
-      formData.append("coordinates", JSON.stringify(data.coordinates));
-
-      // Add address
-      formData.append("address", JSON.stringify(data.address));
-
-      // Add characteristics
-      formData.append("characteristics", JSON.stringify(data.characteristics));
-
-      // Add images metadata
-      formData.append("images", JSON.stringify(data.images));
-
-      // Add AI generation flags
-      formData.append("aiGenerated", JSON.stringify(data.aiGenerated));
-
-      const result = await publishProperty(formData);
+      const result = await completePropertyWizard({
+        userId: user.id,
+        data: completeData,
+        draftId: draftId || undefined,
+      });
 
       if (result.success) {
         toast.success("¡Propiedad publicada exitosamente!");
@@ -106,7 +94,8 @@ export default function NewPropertyPage() {
   };
 
   const handleSaveDraft = async (
-    data: Partial<PropertyFormData>
+    data: Partial<PropertyWizardData>,
+    currentStep: string
   ): Promise<string> => {
     if (!user?.id) {
       toast.error("Usuario no autenticado");
@@ -114,23 +103,21 @@ export default function NewPropertyPage() {
     }
 
     try {
-      const formData = new FormData();
-      formData.append("userId", user.id);
-      formData.append("formData", JSON.stringify(data));
-
-      // Calculate step completion based on data
-      let stepCompleted = 0;
-      if (data.title && data.description && data.price) stepCompleted = 1;
-      if (data.coordinates && data.address) stepCompleted = 2;
-      if (data.images && data.images.length > 0) stepCompleted = 3;
-
-      formData.append("stepCompleted", stepCompleted.toString());
-
-      if (draftId) {
-        formData.append("draftId", draftId);
-      }
-
-      const result = await saveDraft(formData);
+      const result = await savePropertyDraft({
+        userId: user.id,
+        data: {
+          ...data,
+          status: data.status || "draft",
+          address: data.address
+            ? {
+                ...data.address,
+                country: "Dominican Republic" as const,
+              }
+            : undefined,
+        },
+        currentStep: currentStep,
+        draftId: draftId || undefined,
+      });
 
       if (result.success) {
         toast.success("Borrador guardado exitosamente");

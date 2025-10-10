@@ -30,7 +30,7 @@ export class WizardError extends Error {
 export class AIServiceError extends WizardError {
     constructor(
         message: string,
-        code: 'RATE_LIMIT' | 'API_ERROR' | 'INVALID_RESPONSE' | 'NETWORK_ERROR' | 'TIMEOUT' | 'QUOTA_EXCEEDED',
+        code: 'RATE_LIMIT' | 'API_ERROR' | 'INVALID_RESPONSE' | 'NETWORK_ERROR' | 'TIMEOUT' | 'QUOTA_EXCEEDED' | 'MODEL_NOT_FOUND',
         retryable: boolean = false,
         context?: Record<string, any>
     ) {
@@ -40,7 +40,8 @@ export class AIServiceError extends WizardError {
             INVALID_RESPONSE: 'Respuesta inválida del servicio de IA. Usando contenido predeterminado.',
             NETWORK_ERROR: 'Error de conexión con el servicio de IA. Verifica tu conexión.',
             TIMEOUT: 'El servicio de IA tardó demasiado en responder. Inténtalo nuevamente.',
-            QUOTA_EXCEEDED: 'Se ha alcanzado el límite de uso del servicio de IA por hoy.'
+            QUOTA_EXCEEDED: 'Se ha alcanzado el límite de uso del servicio de IA por hoy.',
+            MODEL_NOT_FOUND: 'Modelo de IA no disponible. Usando modelo alternativo.'
         };
 
         super(message, code, retryable, userMessages[code], context);

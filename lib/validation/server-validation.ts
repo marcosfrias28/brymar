@@ -17,13 +17,13 @@ export const ServerPropertyValidationSchema = z.object({
 
     description: z.string()
         .min(50, 'La descripción debe tener al menos 50 caracteres')
-        .max(2000, 'La descripción no puede exceder 2000 caracteres')
+        .max(5000, 'La descripción no puede exceder 5000 caracteres')
         .refine(
             (desc) => !containsMaliciousContent(desc),
             'La descripción contiene contenido no permitido'
         ),
 
-    price: z.number()
+    price: z.coerce.number()
         .positive('El precio debe ser mayor a 0')
         .max(100000000, 'El precio excede el límite máximo')
         .refine(
@@ -31,7 +31,7 @@ export const ServerPropertyValidationSchema = z.object({
             'El precio debe ser un número válido'
         ),
 
-    surface: z.number()
+    surface: z.coerce.number()
         .positive('La superficie debe ser mayor a 0')
         .max(100000, 'La superficie excede el límite máximo')
         .refine(
@@ -43,13 +43,13 @@ export const ServerPropertyValidationSchema = z.object({
         errorMap: () => ({ message: 'Tipo de propiedad no válido' })
     }),
 
-    bedrooms: z.number()
+    bedrooms: z.coerce.number()
         .int('El número de habitaciones debe ser un entero')
         .min(0, 'El número de habitaciones no puede ser negativo')
         .max(20, 'El número de habitaciones excede el límite')
         .optional(),
 
-    bathrooms: z.number()
+    bathrooms: z.coerce.number()
         .int('El número de baños debe ser un entero')
         .min(0, 'El número de baños no puede ser negativo')
         .max(20, 'El número de baños excede el límite')
@@ -70,10 +70,10 @@ export const ServerPropertyValidationSchema = z.object({
 
     // Step 2: Location
     coordinates: z.object({
-        latitude: z.number()
+        latitude: z.coerce.number()
             .min(17.5, 'Latitud fuera del rango de República Dominicana')
             .max(19.9, 'Latitud fuera del rango de República Dominicana'),
-        longitude: z.number()
+        longitude: z.coerce.number()
             .min(-72.0, 'Longitud fuera del rango de República Dominicana')
             .max(-68.3, 'Longitud fuera del rango de República Dominicana')
     }),
@@ -124,17 +124,17 @@ export const ServerPropertyValidationSchema = z.object({
                 (filename) => /\.(jpg|jpeg|png|webp)$/i.test(filename),
                 'Tipo de archivo de imagen no válido'
             ),
-        size: z.number()
+        size: z.coerce.number()
             .positive('El tamaño del archivo debe ser positivo')
             .max(10 * 1024 * 1024, 'Archivo demasiado grande (máximo 10MB)'),
         contentType: z.enum(['image/jpeg', 'image/jpg', 'image/png', 'image/webp'], {
             errorMap: () => ({ message: 'Tipo de contenido de imagen no válido' })
         }),
-        displayOrder: z.number()
+        displayOrder: z.coerce.number()
             .int('El orden de visualización debe ser un entero')
             .min(0, 'El orden de visualización no puede ser negativo'),
-        width: z.number().positive().optional(),
-        height: z.number().positive().optional()
+        width: z.coerce.number().positive().optional(),
+        height: z.coerce.number().positive().optional()
     }))
         .min(1, 'Debe incluir al menos una imagen')
         .max(20, 'Demasiadas imágenes (máximo 20)'),
@@ -143,9 +143,9 @@ export const ServerPropertyValidationSchema = z.object({
         id: z.string(),
         url: z.string().url(),
         filename: z.string(),
-        size: z.number().max(100 * 1024 * 1024), // 100MB max for videos
+        size: z.coerce.number().max(100 * 1024 * 1024), // 100MB max for videos
         contentType: z.string().regex(/^video\//),
-        displayOrder: z.number().int().min(0)
+        displayOrder: z.coerce.number().int().min(0)
     })).optional(),
 
     // Step 4: Meta
@@ -168,11 +168,11 @@ export const ServerPropertyValidationSchema = z.object({
 export const PropertyBasicInfoSchema = z.object({
     type: z.string().min(1, 'Tipo de propiedad requerido'),
     location: z.string().min(1, 'Ubicación requerida'),
-    price: z.number().positive('Precio debe ser positivo'),
-    surface: z.number().positive('Superficie debe ser positiva'),
+    price: z.coerce.number().positive('Precio debe ser positivo'),
+    surface: z.coerce.number().positive('Superficie debe ser positiva'),
     characteristics: z.array(z.string()).min(1, 'Al menos una característica requerida'),
-    bedrooms: z.number().int().min(0).optional(),
-    bathrooms: z.number().int().min(0).optional()
+    bedrooms: z.coerce.number().int().min(0).optional(),
+    bathrooms: z.coerce.number().int().min(0).optional()
 });
 
 // Security validation functions

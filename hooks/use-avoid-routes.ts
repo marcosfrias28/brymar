@@ -1,7 +1,7 @@
 import { usePathname } from "next/navigation";
 
 export const useAvoidRoutes = () => {
-    const avoidRoutes = ["/dashboard", "/profile", "/sign-in", "/sign-up", "/verify-email", "/forgot-password", "/reset-password"];
+    const avoidRoutes = ["/dashboard", "/profile", "/sign-in", "/sign-up", "/verify-email", "/forgot-password", "/reset-password", "/search"];
     const pathname = usePathname();
 
     // Verificar que pathname no sea null

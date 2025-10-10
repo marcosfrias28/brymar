@@ -17,21 +17,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, loading } = useUser();
   const { canAccessDashboard } = useAdmin();
   const pathname = usePathname();
-
-  // Mostrar loading mientras se cargan los datos del usuario
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-2 text-sm text-gray-600">Verificando permisos...</p>
-        </div>
-      </div>
-    );
-  }
-
   // Verificar si es una ruta de perfil (accesible para todos los usuarios autenticados)
-  const isProfileRoute = pathname?.startsWith('/profile') || false;
+  const isProfileRoute = pathname?.startsWith("/profile") || false;
 
   // Para rutas de perfil, solo verificar que el usuario esté autenticado
   // El middleware ya se encarga de redirigir admin/agent a /dashboard
@@ -40,9 +27,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       return (
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-primary mb-2">Acceso Denegado</h1>
-            <p className="text-gray-600 mb-4 text-sm">Debes iniciar sesión para acceder a tu perfil.</p>
-            <Link href="/sign-in" className="inline-block px-4 py-2 underline underline-offset-1 text-sm text-blue-500">
+            <h1 className="text-2xl font-bold text-primary mb-2">
+              Acceso Denegado
+            </h1>
+            <p className="text-gray-600 mb-4 text-sm">
+              Debes iniciar sesión para acceder a tu perfil.
+            </p>
+            <Link
+              href="/sign-in"
+              className="inline-block px-4 py-2 underline underline-offset-1 text-sm text-blue-500"
+            >
               Iniciar Sesión
             </Link>
           </div>
@@ -56,13 +50,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       return (
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-primary mb-2">Acceso Denegado</h1>
-            <p className="text-gray-600 mb-2 text-sm">Debes iniciar sesión para acceder a tu perfil.</p>
-            <p className="text-sm text-gray-500">
-              Rol actual: {user?.role || 'No definido'} |
-              Permisos dashboard: {canAccessDashboard ? 'Sí' : 'No'}
+            <h1 className="text-2xl font-bold text-primary mb-2">
+              Acceso Denegado
+            </h1>
+            <p className="text-gray-600 mb-2 text-sm">
+              Debes iniciar sesión para acceder a tu perfil.
             </p>
-            <Link href="/profile" className="inline-block px-4 py-2 underline underline-offset-1 text-sm text-blue-500">
+            <p className="text-sm text-gray-500">
+              Rol actual: {user?.role || "No definido"} | Permisos dashboard:{" "}
+              {canAccessDashboard ? "Sí" : "No"}
+            </p>
+            <Link
+              href="/profile"
+              className="inline-block px-4 py-2 underline underline-offset-1 text-sm text-blue-500"
+            >
               Volver al Mi Perfil
             </Link>
           </div>
@@ -72,8 +73,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   // Determinar qué sidebar mostrar basado en la ruta y el rol del usuario
-  const isAdminOrAgent = user?.role === 'admin' || user?.role === 'agent';
-  const SidebarComponent = (isProfileRoute || !isAdminOrAgent) ? UserSidebar : AdminSidebar;
+  const isAdminOrAgent = user?.role === "admin" || user?.role === "agent";
+  const SidebarComponent =
+    isProfileRoute || !isAdminOrAgent ? UserSidebar : AdminSidebar;
 
   return (
     <SidebarProvider>

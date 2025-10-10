@@ -6,26 +6,36 @@ import {
     generatePropertyDescription,
     generatePropertyTags,
     generateAllPropertyContent,
+    generateEnhancedPropertyDescription,
+    generateLandDescription,
+    generateLandTitle,
 } from "@/lib/actions/ai-actions";
+
+export interface RichTextContent {
+    html: string;
+    plainText: string;
+    formatted: boolean;
+}
 
 interface AIGenerationState {
     isGenerating: boolean;
     error: string | null;
     lastGenerated: {
         title?: string;
-        description?: string;
+        description?: string | RichTextContent;
         tags?: string[];
     };
 }
 
 interface UseAIGenerationOptions {
     language?: "es" | "en";
+    useRichText?: boolean;
     onSuccess?: (type: "title" | "description" | "tags", content: any) => void;
     onError?: (error: string) => void;
 }
 
 export function useAIGeneration(options: UseAIGenerationOptions = {}) {
-    const { language = "es", onSuccess, onError } = options;
+    const { language = "es", useRichText = false, onSuccess, onError } = options;
 
     const [state, setState] = useState<AIGenerationState>({
         isGenerating: false,
@@ -91,11 +101,17 @@ export function useAIGeneration(options: UseAIGenerationOptions = {}) {
     /**
      * Generate property description with AI
      */
-    const generateDescription = useCallback(async (propertyData: PropertyBasicInfo): Promise<string | null> => {
+    const generateDescription = useCallback(async (propertyData: PropertyBasicInfo): Promise<string | RichTextContent | null> => {
         setGenerating(true);
 
         try {
-            const result = await generatePropertyDescription(propertyData, { language });
+            let result;
+
+            if (useRichText) {
+                result = await generateEnhancedPropertyDescription(propertyData, { language });
+            } else {
+                result = await generatePropertyDescription(propertyData, { language });
+            }
 
             if (result.success && result.data) {
                 setGenerated("description", result.data);
@@ -103,7 +119,9 @@ export function useAIGeneration(options: UseAIGenerationOptions = {}) {
 
                 toast({
                     title: "Descripción generada",
-                    description: "Se ha generado una descripción automáticamente con IA",
+                    description: useRichText
+                        ? "Se ha generado una descripción rica con formato automáticamente con IA"
+                        : "Se ha generado una descripción automáticamente con IA",
                 });
 
                 return result.data;
@@ -124,7 +142,7 @@ export function useAIGeneration(options: UseAIGenerationOptions = {}) {
 
             return null;
         }
-    }, [language, onSuccess, onError, setGenerating, setError, setGenerated]);
+    }, [language, useRichText, onSuccess, onError, setGenerating, setError, setGenerated]);
 
     /**
      * Generate property tags with AI
@@ -171,32 +189,47 @@ export function useAIGeneration(options: UseAIGenerationOptions = {}) {
         setGenerating(true);
 
         try {
-            const result = await generateAllPropertyContent(propertyData, { language });
+            // Generate title and tags normally, but use enhanced description if rich text is enabled
+            const [titleResult, descriptionResult, tagsResult] = await Promise.allSettled([
+                generatePropertyTitle(propertyData, { language }),
+                useRichText
+                    ? generateEnhancedPropertyDescription(propertyData, { language })
+                    : generatePropertyDescription(propertyData, { language }),
+                generatePropertyTags(propertyData, { language }),
+            ]);
 
-            if (result.success && result.data) {
-                const { title, description, tags } = result.data;
+            const title = titleResult.status === "fulfilled" && titleResult.value.success
+                ? titleResult.value.data!
+                : "";
 
-                setState(prev => ({
-                    ...prev,
-                    lastGenerated: { title, description, tags },
-                    isGenerating: false,
-                    error: null,
-                }));
+            const description = descriptionResult.status === "fulfilled" && descriptionResult.value.success
+                ? descriptionResult.value.data!
+                : (useRichText ? { html: "", plainText: "", formatted: false } : "");
 
-                toast({
-                    title: "Contenido generado",
-                    description: "Se ha generado título, descripción y etiquetas con IA",
-                });
+            const tags = tagsResult.status === "fulfilled" && tagsResult.value.success
+                ? tagsResult.value.data!
+                : [];
 
-                // Call onSuccess for each generated item
-                onSuccess?.("title", title);
-                onSuccess?.("description", description);
-                onSuccess?.("tags", tags);
+            setState(prev => ({
+                ...prev,
+                lastGenerated: { title, description, tags },
+                isGenerating: false,
+                error: null,
+            }));
 
-                return { title, description, tags };
-            } else {
-                throw new Error(result.error || "Error al generar contenido");
-            }
+            toast({
+                title: "Contenido generado",
+                description: useRichText
+                    ? "Se ha generado título, descripción rica y etiquetas con IA"
+                    : "Se ha generado título, descripción y etiquetas con IA",
+            });
+
+            // Call onSuccess for each generated item
+            onSuccess?.("title", title);
+            onSuccess?.("description", description);
+            onSuccess?.("tags", tags);
+
+            return { title, description, tags };
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Error al generar contenido con IA";
             setError(errorMessage);
@@ -209,7 +242,103 @@ export function useAIGeneration(options: UseAIGenerationOptions = {}) {
 
             return null;
         }
-    }, [language, onSuccess, setGenerating, setError]);
+    }, [language, useRichText, onSuccess, setGenerating, setError]);
+
+    /**
+     * Generic content generation for different types (property, land, blog)
+     */
+    const generateContent = useCallback(async (request: {
+        type: "property" | "land" | "blog";
+        generationType: "title" | "description" | "tags";
+        inputData: any;
+        language: "es" | "en";
+    }): Promise<string | null> => {
+        setGenerating(true);
+
+        try {
+            let result;
+
+            if (request.type === "property") {
+                switch (request.generationType) {
+                    case "title":
+                        result = await generatePropertyTitle(request.inputData, { language: request.language });
+                        break;
+                    case "description":
+                        result = useRichText
+                            ? await generateEnhancedPropertyDescription(request.inputData, { language: request.language })
+                            : await generatePropertyDescription(request.inputData, { language: request.language });
+                        break;
+                    case "tags":
+                        result = await generatePropertyTags(request.inputData, { language: request.language });
+                        break;
+                    default:
+                        throw new Error("Tipo de generación no soportado para propiedades");
+                }
+            } else if (request.type === "land") {
+                switch (request.generationType) {
+                    case "title":
+                        result = await generateLandTitle(request.inputData, { language: request.language });
+                        break;
+                    case "description":
+                        result = await generateLandDescription(request.inputData, { language: request.language });
+                        break;
+                    default:
+                        throw new Error("Tipo de generación no soportado para terrenos");
+                }
+            } else {
+                throw new Error("Tipo de contenido no soportado");
+            }
+
+            if (result.success && result.data) {
+                const contentType = request.generationType;
+                setGenerated(contentType, result.data);
+                onSuccess?.(contentType, result.data);
+
+                const typeLabels = {
+                    property: "propiedad",
+                    land: "terreno",
+                    blog: "blog"
+                };
+
+                const generationLabels = {
+                    title: "título",
+                    description: "descripción",
+                    content: "contenido",
+                    tags: "etiquetas"
+                };
+
+                toast({
+                    title: `${generationLabels[request.generationType]} generado`,
+                    description: `Se ha generado ${generationLabels[request.generationType]} para ${typeLabels[request.type]} con IA`,
+                });
+
+                if (typeof result.data === "string") {
+                    return result.data;
+                } else if (Array.isArray(result.data)) {
+                    return result.data.join(", ");
+                } else if (result.data && typeof result.data === "object" && "plainText" in result.data) {
+                    return (result.data as any).plainText || (result.data as any).html || "";
+                } else {
+                    return String(result.data);
+                }
+            } else {
+                throw new Error(result.error || `Error al generar ${request.generationType}`);
+            }
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : `Error inesperado al generar ${request.generationType}`;
+
+            setError(errorMessage);
+            onError?.(errorMessage);
+
+            toast({
+                title: `Error al generar ${request.generationType}`,
+                description: errorMessage,
+                variant: "destructive",
+            });
+
+            return null;
+        }
+    }, [language, useRichText, onSuccess, onError, setGenerating, setError, setGenerated]);
 
     /**
      * Clear generation state
@@ -233,6 +362,7 @@ export function useAIGeneration(options: UseAIGenerationOptions = {}) {
         generateDescription,
         generateTags,
         generateAll,
+        generateContent, // New generic function
         clearState,
     };
 }

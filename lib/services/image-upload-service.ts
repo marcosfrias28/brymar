@@ -1,6 +1,7 @@
 "use server";
 
 import { put } from "@vercel/blob";
+import { shouldUseMockStorage, getBlobConfigInfo } from "@/lib/config/blob-config";
 import { z } from "zod";
 import {
     SignedUrlResponse,
@@ -126,21 +127,63 @@ export async function uploadDirect(
         const securePath = uploadPath.replace(/[^/]+$/, secureFilename);
         const result = await retryUploadOperation(async () => {
             return await circuitBreakers.uploadService.execute(async () => {
-                // Upload to Vercel Blob with secure path
-                const { url } = await put(securePath, file, {
-                    access: 'public',
-                    contentType: file.type,
-                });
+                // Check if we should use mock storage
+                if (shouldUseMockStorage()) {
+                    const mockUrl = `https://mock-storage.example.com/images/${secureFilename}`;
+                    console.warn(`[Upload Service] Using mock storage: ${mockUrl}`);
 
-                // Validate the returned URL
-                validateImageUrl(url);
+                    return {
+                        url: mockUrl,
+                        filename: secureFilename,
+                        size: file.size,
+                        contentType: file.type,
+                    };
+                }
 
-                return {
-                    url,
-                    filename: secureFilename,
-                    size: file.size,
-                    contentType: file.type,
-                };
+                try {
+                    // Upload to Vercel Blob with secure path
+                    const { url } = await put(securePath, file, {
+                        access: 'public',
+                        contentType: file.type,
+                    });
+
+                    // Validate the returned URL
+                    validateImageUrl(url);
+
+                    return {
+                        url,
+                        filename: secureFilename,
+                        size: file.size,
+                        contentType: file.type,
+                    };
+                } catch (blobError: any) {
+                    console.error('Vercel Blob upload error:', blobError);
+
+                    // Check if it's a "store does not exist" error
+                    if (blobError.message && blobError.message.includes('store does not exist')) {
+                        const configInfo = getBlobConfigInfo();
+                        console.error('[Upload Service] Blob store configuration issue:', {
+                            error: configInfo.error,
+                            recommendations: configInfo.recommendations
+                        });
+
+                        // For development/testing, create a mock URL
+                        if (configInfo.isDevelopment) {
+                            const mockUrl = `https://mock-storage.example.com/images/${secureFilename}`;
+                            console.warn(`[Upload Service] Using mock URL due to Blob store configuration: ${mockUrl}`);
+
+                            return {
+                                url: mockUrl,
+                                filename: secureFilename,
+                                size: file.size,
+                                contentType: file.type,
+                            };
+                        }
+                    }
+
+                    // Re-throw other blob errors
+                    throw blobError;
+                }
             });
         });
 

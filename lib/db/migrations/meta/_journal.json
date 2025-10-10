@@ -50,6 +50,20 @@
       "when": 1758660170135,
       "tag": "0006_flowery_darkstar",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1759357180181,
+      "tag": "0007_thankful_pretty_boy",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1759536585188,
+      "tag": "0008_parallel_the_executioner",
+      "breakpoints": true
     }
   ]
 }
