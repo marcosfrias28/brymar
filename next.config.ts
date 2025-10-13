@@ -1,9 +1,14 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
+  // Configure Next.js to use src directory structure
+  pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
+
   eslint: {
     ignoreDuringBuilds: true,
   },
+
   images: {
     unoptimized: true,
     domains: ['localhost'],
@@ -14,11 +19,23 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+
   experimental: {
     reactCompiler: false,
     serverActions: {
       bodySizeLimit: '5mb',
     },
+  },
+
+  // Configure webpack to handle the new structure
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Add alias for cleaner imports
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, 'src'),
+    };
+
+    return config;
   },
 };
 

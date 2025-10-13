@@ -1,0 +1,38 @@
+import { LoadWizardDraftInput } from "../../dto/wizard/LoadWizardDraftInput";
+import { LoadWizardDraftOutput } from "../../dto/wizard/LoadWizardDraftOutput";
+import { IWizardDraftRepository } from '@/domain/wizard/repositories/IWizardDraftRepository';
+import { WizardDraftId } from '@/domain/wizard/value-objects/WizardDraftId';
+import { UserId } from '@/domain/user/value-objects/UserId';
+import { DomainError } from '@/domain/shared/errors/DomainError';
+
+export class LoadWizardDraftUseCase {
+    constructor(
+        private readonly wizardDraftRepository: IWizardDraftRepository
+    ) { }
+
+    async execute(input: LoadWizardDraftInput): Promise<LoadWizardDraftOutput> {
+        try {
+            const draftId = WizardDraftId.create(input.draftId);
+            const userId = UserId.create(input.userId);
+
+            // Find the draft
+            const wizardDraft = await this.wizardDraftRepository.findById(draftId);
+
+            if (!wizardDraft) {
+                throw new DomainError(`Wizard draft with ID ${input.draftId} not found`);
+            }
+
+            // Verify ownership
+            if (!wizardDraft.getUserId().equals(userId)) {
+                throw new DomainError("You don't have permission to access this draft");
+            }
+
+            return LoadWizardDraftOutput.from(wizardDraft);
+        } catch (error) {
+            if (error instanceof DomainError) {
+                throw error;
+            }
+            throw new Error(`Failed to load wizard draft: ${error instanceof Error ? error.message : "Unknown error"}`);
+        }
+    }
+}

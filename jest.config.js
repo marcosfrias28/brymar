@@ -10,22 +10,26 @@ const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testEnvironment: 'jest-environment-jsdom',
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1',
+    '^@/(.*)$': '<rootDir>/src/$1',
   },
   testMatch: [
-    '<rootDir>/**/__tests__/**/*.{js,jsx,ts,tsx}',
-    '<rootDir>/**/*.{test,spec}.{js,jsx,ts,tsx}'
+    '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
+    '<rootDir>/src/**/*.{test,spec}.{js,jsx,ts,tsx}'
   ],
   testPathIgnorePatterns: [
-    '<rootDir>/tests/',
+    '<rootDir>/src/tests/',
     '<rootDir>/node_modules/',
-    '<rootDir>/lib/__tests__/action-integration.test.ts'
+    '<rootDir>/src/lib/__tests__/action-integration.test.ts'
   ],
   collectCoverageFrom: [
-    'lib/**/*.{js,ts,jsx,tsx}',
-    'components/**/*.{js,ts,jsx,tsx}',
-    'app/**/*.{js,ts,jsx,tsx}',
-    'hooks/**/*.{js,ts,jsx,tsx}',
+    'src/lib/**/*.{js,ts,jsx,tsx}',
+    'src/components/**/*.{js,ts,jsx,tsx}',
+    'src/app/**/*.{js,ts,jsx,tsx}',
+    'src/hooks/**/*.{js,ts,jsx,tsx}',
+    'src/presentation/**/*.{js,ts,jsx,tsx}',
+    'src/application/**/*.{js,ts,jsx,tsx}',
+    'src/domain/**/*.{js,ts,jsx,tsx}',
+    'src/infrastructure/**/*.{js,ts,jsx,tsx}',
     '!**/*.d.ts',
     '!**/node_modules/**',
     '!**/.next/**',

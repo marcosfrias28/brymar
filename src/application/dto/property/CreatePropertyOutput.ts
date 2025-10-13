@@ -1,0 +1,112 @@
+import { Property } from '@/domain/property/entities/Property';
+
+/**
+ * Output DTO for property creation result
+ */
+export class CreatePropertyOutput {
+    constructor(
+        public readonly id: string,
+        public readonly title: string,
+        public readonly description: string,
+        public readonly price: number,
+        public readonly currency: string,
+        public readonly address: {
+            street: string;
+            city: string;
+            state: string;
+            country: string;
+            postalCode?: string;
+            coordinates?: {
+                latitude: number;
+                longitude: number;
+            };
+        },
+        public readonly type: string,
+        public readonly status: string,
+        public readonly features: {
+            bedrooms: number;
+            bathrooms: number;
+            area: number;
+            amenities?: string[];
+            features?: string[];
+            parking?: {
+                spaces: number;
+                type: string;
+            };
+            yearBuilt?: number;
+            lotSize?: number;
+        },
+        public readonly images: string[],
+        public readonly featured: boolean,
+        public readonly createdAt: Date,
+        public readonly updatedAt: Date
+    ) { }
+
+    /**
+     * Creates CreatePropertyOutput from a Property entity
+     */
+    static from(property: Property): CreatePropertyOutput {
+        const address = property.getAddress();
+        const features = property.getFeatures();
+        const price = property.getPrice();
+
+        return new CreatePropertyOutput(
+            property.getId().value,
+            property.getTitle().value,
+            property.getDescription().value,
+            price.amount,
+            price.currency.code,
+            {
+                street: address.street,
+                city: address.city,
+                state: address.state,
+                country: address.country,
+                postalCode: address.postalCode,
+                coordinates: address.coordinates ? {
+                    latitude: address.coordinates.latitude,
+                    longitude: address.coordinates.longitude,
+                } : undefined,
+            },
+            property.getType().value,
+            property.getStatus().value,
+            {
+                bedrooms: features.bedrooms,
+                bathrooms: features.bathrooms,
+                area: features.area,
+                amenities: features.amenities,
+                features: features.features,
+                parking: features.parking ? {
+                    spaces: features.parking.spaces,
+                    type: features.parking.type,
+                } : undefined,
+                yearBuilt: features.yearBuilt,
+                lotSize: features.lotSize,
+            },
+            property.getImages(),
+            property.isFeatured(),
+            property.getCreatedAt(),
+            property.getUpdatedAt()
+        );
+    }
+
+    /**
+     * Converts to JSON representation
+     */
+    toJSON(): object {
+        return {
+            id: this.id,
+            title: this.title,
+            description: this.description,
+            price: this.price,
+            currency: this.currency,
+            address: this.address,
+            type: this.type,
+            status: this.status,
+            features: this.features,
+            images: this.images,
+            featured: this.featured,
+            createdAt: this.createdAt.toISOString(),
+            updatedAt: this.updatedAt.toISOString(),
+        };
+    }
+}
