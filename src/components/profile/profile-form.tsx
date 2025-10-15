@@ -1,25 +1,37 @@
 "use client";
 
 import { useState, useEffect, useActionState } from "react";
-import { Loader2, User, Mail, Calendar, Shield, Edit3, Save, X, Settings } from "lucide-react";
+import {
+  Loader2,
+  User,
+  Mail,
+  Calendar,
+  Shield,
+  Edit3,
+  Save,
+  X,
+  Settings,
+} from "lucide-react";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { useUser } from '@/hooks/use-user';
-import { cn } from '@/lib/utils';
-import { updateProfileAction } from '@/app/actions/profile-actions';
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { useUser } from "@/presentation/hooks/use-user";
+import { cn } from "@/lib/utils";
+// Profile actions need to be implemented in DDD structure
+// import { updateProfileAction } from "@/presentation/server-actions/profile-actions";
 import { AvatarUpload } from "./avatar-upload";
+import { UserPreferences } from "@/domain";
 
 const initialState = {
   success: false,
@@ -34,7 +46,12 @@ interface ProfileSectionProps {
   children: React.ReactNode;
 }
 
-function ProfileSection({ title, description, icon, children }: ProfileSectionProps) {
+function ProfileSection({
+  title,
+  description,
+  icon,
+  children,
+}: ProfileSectionProps) {
   return (
     <Card>
       <CardHeader>
@@ -91,25 +108,25 @@ export function ProfileForm() {
   const formatDate = (date: string | Date | null | undefined) => {
     if (!date) return "No especificado";
     const dateObj = date instanceof Date ? date : new Date(date);
-    return dateObj.toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return dateObj.toLocaleDateString("es-ES", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const getRoleColor = (role: string | null | undefined) => {
     switch (role) {
-      case 'admin':
-        return 'bg-red-100 text-red-800';
-      case 'editor':
-        return 'bg-blue-100 text-blue-800';
-      case 'user':
-        return 'bg-green-100 text-green-800';
+      case "admin":
+        return "bg-red-100 text-red-800";
+      case "editor":
+        return "bg-blue-100 text-blue-800";
+      case "user":
+        return "bg-green-100 text-green-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -129,20 +146,30 @@ export function ProfileForm() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Avatar className="h-20 w-20">
-                <AvatarImage src={user.image || ""} alt={user.name || ""} />
+                <AvatarImage
+                  src={user.getProfile().getAvatar() || ""}
+                  alt={user.getProfile().getFullName() || ""}
+                />
                 <AvatarFallback className="text-lg">
-                  {user.name ? user.name.slice(0, 2).toUpperCase() : "U"}
+                  {user.getProfile().getFullName()
+                    ? user.getProfile().getFullName().slice(0, 2).toUpperCase()
+                    : "U"}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
-                <p className="text-gray-600">{user.email}</p>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  {user.getProfile().getFullName()}
+                </h1>
+                <p className="text-gray-600">{user.getEmail().value}</p>
                 <div className="flex items-center gap-2 mt-2">
-                  <Badge className={getRoleColor(user.role)}>
-                    {user.role || 'user'}
+                  <Badge className={getRoleColor(user.getRole().value)}>
+                    {user.getRole().value || "user"}
                   </Badge>
-                  {user.emailVerified && (
-                    <Badge variant="outline" className="text-green-600 border-green-600">
+                  {user.getStatus().isActive() && (
+                    <Badge
+                      variant="outline"
+                      className="text-green-600 border-green-600"
+                    >
                       ✓ Verificado
                     </Badge>
                   )}
@@ -219,18 +246,20 @@ export function ProfileForm() {
                   id="name"
                   name="name"
                   type="text"
-                  defaultValue={user?.name || ""}
+                  defaultValue={user?.getProfile().getFullName() || ""}
                   placeholder="Tu nombre completo"
                   required
                 />
               ) : (
-                <p className="text-sm text-muted-foreground">{user?.name || "No especificado"}</p>
+                <p className="text-sm text-muted-foreground">
+                  {user?.getProfile().getFullName() || "No especificado"}
+                </p>
               )}
               {state.error && (
                 <p className="text-sm text-red-500">{state.error}</p>
               )}
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="email">Correo Electrónico</Label>
               {isEditing ? (
@@ -238,42 +267,53 @@ export function ProfileForm() {
                   id="email"
                   name="email"
                   type="email"
-                  defaultValue={user?.email || ""}
+                  defaultValue={user?.getEmail().value || ""}
                   placeholder="tu@email.com"
                   required
                 />
               ) : (
-                <p className="text-sm text-muted-foreground">{user?.email || "No especificado"}</p>
+                <p className="text-sm text-muted-foreground">
+                  {user?.getEmail().value || "No especificado"}
+                </p>
               )}
               {state.error && (
                 <p className="text-sm text-red-500">{state.error}</p>
               )}
             </div>
-            
+
             <div className="space-y-2 md:col-span-2">
               {isEditing ? (
                 <AvatarUpload
                   label="Avatar"
                   name="image"
-                  defaultValue={user?.image || ""}
+                  defaultValue={user?.getProfile().getAvatar() || ""}
                   error={state.error}
                 />
               ) : (
                 <div className="space-y-2">
                   <Label>Avatar</Label>
-                  {user?.image ? (
+                  {user?.getProfile().getAvatar() ? (
                     <div className="flex items-center gap-3">
                       <Avatar className="h-16 w-16">
-                        <AvatarImage src={user.image} alt="Avatar" />
+                        <AvatarImage
+                          src={user.getProfile().getAvatar()}
+                          alt="Avatar"
+                        />
                         <AvatarFallback>
-                          {user.name?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || "U"}
+                          {user
+                            .getProfile()
+                            .getFullName()
+                            ?.charAt(0)
+                            ?.toUpperCase() ||
+                            user.getEmail().value?.charAt(0)?.toUpperCase() ||
+                            "U"}
                         </AvatarFallback>
                       </Avatar>
                       <div className="space-y-1">
                         <p className="text-sm font-medium">Imagen actual</p>
-                        <a 
-                          href={user.image} 
-                          target="_blank" 
+                        <a
+                          href={user.getProfile().getAvatar()}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="text-sm text-blue-600 hover:text-blue-800 underline"
                         >
@@ -285,10 +325,18 @@ export function ProfileForm() {
                     <div className="flex items-center gap-3">
                       <Avatar className="h-16 w-16">
                         <AvatarFallback>
-                          {user?.name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || "U"}
+                          {user
+                            ?.getProfile()
+                            .getFullName()
+                            ?.charAt(0)
+                            ?.toUpperCase() ||
+                            user?.getEmail().value?.charAt(0)?.toUpperCase() ||
+                            "U"}
                         </AvatarFallback>
                       </Avatar>
-                      <p className="text-sm text-muted-foreground">No hay imagen de avatar</p>
+                      <p className="text-sm text-muted-foreground">
+                        No hay imagen de avatar
+                      </p>
                     </div>
                   )}
                 </div>
@@ -303,11 +351,23 @@ export function ProfileForm() {
           icon={<Shield className="h-5 w-5" />}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <InfoField label="ID de Usuario" value={user.id} />
-            <InfoField label="Rol" value={user.role || 'user'} />
-            <InfoField label="Estado de Email" value={user.emailVerified ? 'Verificado' : 'No verificado'} />
-            <InfoField label="Fecha de Creación" value={formatDate(user.createdAt)} />
-            <InfoField label="Última Actualización" value={formatDate(user.updatedAt)} className="md:col-span-2" />
+            <InfoField label="ID de Usuario" value={user.getId().value} />
+            <InfoField label="Rol" value={user.getRole().value || "user"} />
+            <InfoField
+              label="Estado de Email"
+              value={
+                user.getStatus().isActive() ? "Verificado" : "No verificado"
+              }
+            />
+            <InfoField
+              label="Fecha de Creación"
+              value={formatDate(user.getCreatedAt().value)}
+            />
+            <InfoField
+              label="Última Actualización"
+              value={formatDate(user.getUpdatedAt().value)}
+              className="md:col-span-2"
+            />
           </div>
         </ProfileSection>
 
@@ -324,17 +384,19 @@ export function ProfileForm() {
                   id="firstName"
                   name="firstName"
                   type="text"
-                  defaultValue={user?.firstName || ""}
+                  defaultValue={user?.getProfile().getFirstName() || ""}
                   placeholder="Tu primer nombre"
                 />
               ) : (
-                <p className="text-sm text-muted-foreground">{user?.firstName || "No especificado"}</p>
+                <p className="text-sm text-muted-foreground">
+                  {user?.getProfile().getFirstName() || "No especificado"}
+                </p>
               )}
               {state.error && (
                 <p className="text-sm text-red-500">{state.error}</p>
               )}
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="lastName">Apellido</Label>
               {isEditing ? (
@@ -342,17 +404,19 @@ export function ProfileForm() {
                   id="lastName"
                   name="lastName"
                   type="text"
-                  defaultValue={user?.lastName || ""}
+                  defaultValue={user?.getProfile().getLastName() || ""}
                   placeholder="Tu apellido"
                 />
               ) : (
-                <p className="text-sm text-muted-foreground">{user?.lastName || "No especificado"}</p>
+                <p className="text-sm text-muted-foreground">
+                  {user?.getProfile().getLastName() || "No especificado"}
+                </p>
               )}
               {state.error && (
                 <p className="text-sm text-red-500">{state.error}</p>
               )}
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="phone">Teléfono</Label>
               {isEditing ? (
@@ -360,17 +424,19 @@ export function ProfileForm() {
                   id="phone"
                   name="phone"
                   type="tel"
-                  defaultValue={user?.phone || ""}
+                  defaultValue={user?.getProfile().getPhone() || ""}
                   placeholder="Tu número de teléfono"
                 />
               ) : (
-                <p className="text-sm text-muted-foreground">{user?.phone || "No especificado"}</p>
+                <p className="text-sm text-muted-foreground">
+                  {user?.getProfile().getPhone() || "No especificado"}
+                </p>
               )}
               {state.error && (
                 <p className="text-sm text-red-500">{state.error}</p>
               )}
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="location">Ubicación</Label>
               {isEditing ? (
@@ -378,17 +444,19 @@ export function ProfileForm() {
                   id="location"
                   name="location"
                   type="text"
-                  defaultValue={user?.location || ""}
+                  defaultValue={user?.getProfile().getLocation() || ""}
                   placeholder="Tu ubicación"
                 />
               ) : (
-                <p className="text-sm text-muted-foreground">{user?.location || "No especificado"}</p>
+                <p className="text-sm text-muted-foreground">
+                  {user?.getProfile().getLocation() || "No especificado"}
+                </p>
               )}
               {state.error && (
                 <p className="text-sm text-red-500">{state.error}</p>
               )}
             </div>
-            
+
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="website">Sitio Web</Label>
               {isEditing ? (
@@ -396,17 +464,19 @@ export function ProfileForm() {
                   id="website"
                   name="website"
                   type="url"
-                  defaultValue={user?.website || ""}
+                  defaultValue=""
                   placeholder="https://tu-sitio-web.com"
                 />
               ) : (
-                <p className="text-sm text-muted-foreground">{user?.website || "No especificado"}</p>
+                <p className="text-sm text-muted-foreground">
+                  {"No especificado"}
+                </p>
               )}
               {state.error && (
                 <p className="text-sm text-red-500">{state.error}</p>
               )}
             </div>
-            
+
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="bio">Biografía</Label>
               {isEditing ? (
@@ -414,11 +484,13 @@ export function ProfileForm() {
                   id="bio"
                   name="bio"
                   type="text"
-                  defaultValue={user?.bio || ""}
+                  defaultValue={user?.getProfile().getBio() || ""}
                   placeholder="Cuéntanos sobre ti"
                 />
               ) : (
-                <p className="text-sm text-muted-foreground">{user?.bio || "No especificado"}</p>
+                <p className="text-sm text-muted-foreground">
+                  {user?.getProfile().getBio() || "No especificado"}
+                </p>
               )}
               {state.error && (
                 <p className="text-sm text-red-500">{state.error}</p>
@@ -434,55 +506,92 @@ export function ProfileForm() {
         >
           <div className="space-y-6">
             <div>
-              <h4 className="text-sm font-medium text-gray-900 mb-3">Notificaciones</h4>
+              <h4 className="text-sm font-medium text-gray-900 mb-3">
+                Notificaciones
+              </h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <InfoField
                   label="Email"
-                  value={(user.preferences as any)?.notifications?.email ? 'Activado' : 'Desactivado'}
+                  value={
+                    (user.getPreferences().value as any)?.notifications?.email
+                      ? "Activado"
+                      : "Desactivado"
+                  }
                 />
                 <InfoField
                   label="Push"
-                  value={(user.preferences as any)?.notifications?.push ? 'Activado' : 'Desactivado'}
+                  value={
+                    (user.getPreferences().value as any)?.notifications?.push
+                      ? "Activado"
+                      : "Desactivado"
+                  }
                 />
                 <InfoField
                   label="Marketing"
-                  value={(user.preferences as any)?.notifications?.marketing ? 'Activado' : 'Desactivado'}
+                  value={
+                    (user.getPreferences().value as any)?.notifications
+                      ?.marketing
+                      ? "Activado"
+                      : "Desactivado"
+                  }
                 />
               </div>
             </div>
-            
+
             <div>
-              <h4 className="text-sm font-medium text-gray-900 mb-3">Privacidad</h4>
+              <h4 className="text-sm font-medium text-gray-900 mb-3">
+                Privacidad
+              </h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <InfoField
                   label="Perfil Visible"
-                  value={(user.preferences as any)?.privacy?.profileVisible ? 'Público' : 'Privado'}
+                  value={
+                    user.getPreferences().value?.privacy?.profileVisibility
+                      ? "Público"
+                      : "Privado"
+                  }
                 />
                 <InfoField
                   label="Mostrar Email"
-                  value={(user.preferences as any)?.privacy?.showEmail ? 'Visible' : 'Oculto'}
+                  value={
+                    (user.getPreferences().value as any)?.privacy?.showEmail
+                      ? "Visible"
+                      : "Oculto"
+                  }
                 />
                 <InfoField
                   label="Mostrar Teléfono"
-                  value={(user.preferences as any)?.privacy?.showPhone ? 'Visible' : 'Oculto'}
+                  value={
+                    (user.getPreferences().value as any)?.privacy?.showPhone
+                      ? "Visible"
+                      : "Oculto"
+                  }
                 />
               </div>
             </div>
-            
+
             <div>
-              <h4 className="text-sm font-medium text-gray-900 mb-3">Configuración de Pantalla</h4>
+              <h4 className="text-sm font-medium text-gray-900 mb-3">
+                Configuración de Pantalla
+              </h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <InfoField
                   label="Tema"
-                  value={(user.preferences as any)?.display?.theme || 'light'}
+                  value={user.getPreferences().value?.theme || "light"}
                 />
                 <InfoField
                   label="Idioma"
-                  value={(user.preferences as any)?.display?.language || 'es'}
+                  value={
+                    (user.getPreferences().value as any)?.display?.language ||
+                    "es"
+                  }
                 />
                 <InfoField
                   label="Moneda"
-                  value={(user.preferences as any)?.display?.currency || 'USD'}
+                  value={
+                    (user.getPreferences().value as any)?.display?.currency ||
+                    "USD"
+                  }
                 />
               </div>
             </div>

@@ -2,31 +2,31 @@
 
 import { useState, useEffect } from "react";
 import { useActionState } from "react";
-import { useUser } from '@/hooks/use-user';
-import { updateUserAction } from '@/lib/actions/auth-actions';
-import { ActionState } from '@/lib/validations';
-import { Button } from '@/components/ui/button';
+import { useUser } from "@/presentation/hooks/use-user";
+import { updateUserAction } from "@/presentation/server-actions/auth-actions";
+import { ActionState } from "@/lib/validations";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   User as UserIcon,
   Shield,
@@ -38,10 +38,10 @@ import {
   Home,
   Settings,
 } from "lucide-react";
-import { RouteGuard } from '@/components/auth/route-guard';
-import { User } from '@/lib/db/schema';
+import { RouteGuard } from "@/components/auth/route-guard";
+import { User } from "@/lib/db/schema";
 import { toast } from "sonner";
-import { DashboardPageLayout } from '@/components/layout/dashboard-page-layout';
+import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 
 const rolePermissions = {
   admin: {
@@ -78,10 +78,10 @@ export default function SettingsPage() {
       message: undefined,
     }
   );
-  const [formData, setFormData] = useState<Partial<User>>({
-    name: user?.name || "",
-    email: user?.email || "",
-    role: user?.role || "user",
+  const [formData, setFormData] = useState<any>({
+    name: user?.getProfile().getFullName() || "",
+    email: user?.getEmail().value || "",
+    role: user?.getRole().value || "user",
   });
   const [notifications, setNotifications] = useState({
     email: true,
@@ -127,7 +127,7 @@ export default function SettingsPage() {
   }
 
   const currentRole = user
-    ? rolePermissions[user.role as keyof typeof rolePermissions]
+    ? rolePermissions[user.getRole().value as keyof typeof rolePermissions]
     : null;
 
   const breadcrumbs = [
@@ -186,11 +186,13 @@ export default function SettingsPage() {
                   <div className="flex items-center gap-4">
                     <Avatar className="h-20 w-20">
                       <AvatarImage
-                        src={user?.image || "/placeholder.svg"}
-                        alt={user?.name || "Usuario"}
+                        src={
+                          user?.getProfile().getAvatar() || "/placeholder.svg"
+                        }
+                        alt={user?.getProfile().getFullName() || "Usuario"}
                       />
                       <AvatarFallback className="text-lg">
-                        {(user?.name || "Usuario")
+                        {(user?.getProfile().getFullName() || "Usuario")
                           .split(" ")
                           .map((n) => n[0])
                           .join("")}
@@ -314,7 +316,7 @@ export default function SettingsPage() {
                           <Card
                             key={roleKey}
                             className={
-                              user?.role === roleKey
+                              user?.getRole().value === roleKey
                                 ? "ring-2 ring-arsenic"
                                 : ""
                             }

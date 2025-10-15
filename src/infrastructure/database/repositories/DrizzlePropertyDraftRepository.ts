@@ -1,4 +1,4 @@
-import { eq, and, gte, lte, like, desc, asc, count, sql } from 'drizzle-orm';
+import { eq, and, gte, lte, desc, asc, count } from 'drizzle-orm';
 import {
     IPropertyDraftRepository,
     PropertyDraft,
@@ -14,7 +14,7 @@ import type { Database } from '@/lib/db/drizzle';
  * Simple PropertyDraft implementation for the repository
  */
 class PropertyDraftImpl implements PropertyDraft {
-    constructor(private data: PropertyDraftData) { }
+    constructor(private _data: PropertyDraftData) { }
 
     getId(): PropertyDraftId {
         return this.data.id;
@@ -76,14 +76,14 @@ class PropertyDraftImpl implements PropertyDraft {
  * Drizzle implementation of IPropertyDraftRepository
  */
 export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository {
-    constructor(private readonly db: Database) { }
+    constructor(private readonly _database: Database) { }
 
     /**
      * Find draft by ID
      */
     async findById(id: PropertyDraftId): Promise<PropertyDraft | null> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select()
                 .from(propertyDrafts)
                 .where(eq(propertyDrafts.id, id.value))
@@ -107,7 +107,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
             const draftData = this.mapToDatabase(draft);
 
             // Check if draft exists
-            const existing = await this.db
+            const existing = await this.database
                 .select({ id: propertyDrafts.id })
                 .from(propertyDrafts)
                 .where(eq(propertyDrafts.id, draft.getId().value))
@@ -115,10 +115,10 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
 
             if (existing.length === 0) {
                 // Create new draft
-                await this.db.insert(propertyDrafts).values(draftData);
+                await this.database.insert(propertyDrafts).values(draftData);
             } else {
                 // Update existing draft
-                await this.db
+                await this.database
                     .update(propertyDrafts)
                     .set(draftData)
                     .where(eq(propertyDrafts.id, draft.getId().value));
@@ -133,7 +133,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
      */
     async delete(id: PropertyDraftId): Promise<void> {
         try {
-            await this.db
+            await this.database
                 .delete(propertyDrafts)
                 .where(eq(propertyDrafts.id, id.value));
         } catch (error) {
@@ -146,7 +146,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
      */
     async findByUserId(userId: string): Promise<PropertyDraft[]> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select()
                 .from(propertyDrafts)
                 .where(eq(propertyDrafts.userId, userId))
@@ -162,7 +162,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
       */
     async findMostRecentByUserId(userId: string): Promise<PropertyDraft | null> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select()
                 .from(propertyDrafts)
                 .where(eq(propertyDrafts.userId, userId))
@@ -188,7 +188,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
             const orderBy = this.buildOrderBy(criteria.sortBy, criteria.sortOrder);
 
             // Get total count
-            const totalResult = await this.db
+            const totalResult = await this.database
                 .select({ count: count() })
                 .from(propertyDrafts)
                 .where(conditions);
@@ -196,21 +196,19 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
             const total = totalResult[0]?.count || 0;
 
             // Get paginated results
-            let query = this.db
+            const queryBuilder = this.database
                 .select()
                 .from(propertyDrafts)
                 .where(conditions)
                 .orderBy(orderBy);
 
-            if (criteria.limit) {
-                query = query.limit(criteria.limit);
-            }
-
-            if (criteria.offset) {
-                query = query.offset(criteria.offset);
-            }
-
-            const result = await query;
+            const result = await (criteria.limit && criteria.offset
+                ? queryBuilder.limit(criteria.limit).offset(criteria.offset)
+                : criteria.limit
+                    ? queryBuilder.limit(criteria.limit)
+                    : criteria.offset
+                        ? queryBuilder.offset(criteria.offset)
+                        : queryBuilder);
             const drafts = result.map(row => this.mapToDomain(row));
 
             const hasMore = criteria.offset && criteria.limit
@@ -232,7 +230,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
      */
     async findByPropertyType(propertyType: string): Promise<PropertyDraft[]> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select()
                 .from(propertyDrafts)
                 .where(eq(propertyDrafts.propertyType, propertyType))
@@ -248,7 +246,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
        */
     async findIncomplete(maxCompletionPercentage: number = 80): Promise<PropertyDraft[]> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select()
                 .from(propertyDrafts)
                 .where(lte(propertyDrafts.completionPercentage, maxCompletionPercentage))
@@ -268,7 +266,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
             const cutoffDate = new Date();
             cutoffDate.setDate(cutoffDate.getDate() - daysOld);
 
-            const result = await this.db
+            const result = await this.database
                 .select()
                 .from(propertyDrafts)
                 .where(lte(propertyDrafts.updatedAt, cutoffDate))
@@ -285,7 +283,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
      */
     async findReadyForCompletion(minCompletionPercentage: number = 90): Promise<PropertyDraft[]> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select()
                 .from(propertyDrafts)
                 .where(gte(propertyDrafts.completionPercentage, minCompletionPercentage))
@@ -302,7 +300,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
      */
     async countByUserId(userId: string): Promise<number> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select({ count: count() })
                 .from(propertyDrafts)
                 .where(eq(propertyDrafts.userId, userId));
@@ -320,7 +318,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
         try {
             const conditions = criteria ? this.buildSearchConditions(criteria) : undefined;
 
-            const result = await this.db
+            const result = await this.database
                 .select({ count: count() })
                 .from(propertyDrafts)
                 .where(conditions);
@@ -341,7 +339,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
         abandonedDrafts: number;
     }> {
         try {
-            const result = await this.db.select().from(propertyDrafts);
+            const result = await this.database.select().from(propertyDrafts);
 
             const total = result.length;
             const byPropertyType: Record<string, number> = {};
@@ -358,10 +356,10 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
                 byPropertyType[type] = (byPropertyType[type] || 0) + 1;
 
                 // Sum completion percentages
-                totalCompletion += row.completionPercentage;
+                totalCompletion += row.completionPercentage || 0;
 
                 // Count completed drafts (100% completion)
-                if (row.completionPercentage >= 100) {
+                if ((row.completionPercentage || 0) >= 100) {
                     completedDrafts++;
                 }
 
@@ -394,7 +392,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
             cutoffDate.setDate(cutoffDate.getDate() - daysOld);
 
             // Note: Drizzle doesn't return affected rows count directly
-            await this.db
+            await this.database
                 .delete(propertyDrafts)
                 .where(lte(propertyDrafts.updatedAt, cutoffDate));
 
@@ -409,7 +407,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
      */
     async hasExistingDraft(userId: string, propertyType: string): Promise<boolean> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select({ id: propertyDrafts.id })
                 .from(propertyDrafts)
                 .where(and(
@@ -428,7 +426,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
       */
     async findByUserIdAndType(userId: string, propertyType: string): Promise<PropertyDraft | null> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select()
                 .from(propertyDrafts)
                 .where(and(
@@ -455,7 +453,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
         try {
             const conditions = this.buildSearchConditions(criteria);
 
-            await this.db
+            await this.database
                 .delete(propertyDrafts)
                 .where(conditions);
 
@@ -470,7 +468,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
      */
     async updateCompletionPercentage(id: PropertyDraftId, percentage: number): Promise<void> {
         try {
-            await this.db
+            await this.database
                 .update(propertyDrafts)
                 .set({
                     completionPercentage: Math.max(0, Math.min(100, percentage)),
@@ -487,7 +485,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
      */
     async updateStep(id: PropertyDraftId, step: number): Promise<void> {
         try {
-            await this.db
+            await this.database
                 .update(propertyDrafts)
                 .set({
                     stepCompleted: step,
@@ -512,7 +510,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
             // Merge the data
             const mergedData = { ...current.getFormData(), ...partialData };
 
-            await this.db
+            await this.database
                 .update(propertyDrafts)
                 .set({
                     formData: mergedData,
@@ -529,7 +527,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
      */
     async exists(id: PropertyDraftId): Promise<boolean> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select({ id: propertyDrafts.id })
                 .from(propertyDrafts)
                 .where(eq(propertyDrafts.id, id.value))
@@ -549,7 +547,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
             const cutoffDate = new Date();
             cutoffDate.setHours(cutoffDate.getHours() - hoursOld);
 
-            const result = await this.db
+            const result = await this.database
                 .select()
                 .from(propertyDrafts)
                 .where(lte(propertyDrafts.updatedAt, cutoffDate))
@@ -572,7 +570,7 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
         draftsByType: Record<string, number>;
     }> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select()
                 .from(propertyDrafts)
                 .where(eq(propertyDrafts.userId, userId));
@@ -589,10 +587,10 @@ export class DrizzlePropertyDraftRepository implements IPropertyDraftRepository 
                 draftsByType[type] = (draftsByType[type] || 0) + 1;
 
                 // Sum completion
-                totalCompletion += row.completionPercentage;
+                totalCompletion += row.completionPercentage || 0;
 
                 // Count completed
-                if (row.completionPercentage >= 100) {
+                if ((row.completionPercentage || 0) >= 100) {
                     completedDrafts++;
                 }
 

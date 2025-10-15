@@ -26,8 +26,8 @@ export class AuthenticateUserOutput {
      */
     static from(user: User, session: Session): AuthenticateUserOutput {
         const profile = user.getProfile();
-        const displayName = profile.getDisplayName();
-        const redirectUrl = user.getRole().getDefaultRedirectUrl();
+        const displayName = profile.getFullName();
+        const redirectUrl = user.getRole().isAdmin() ? '/dashboard' : '/profile';
 
         return new AuthenticateUserOutput(
             {
@@ -64,6 +64,29 @@ export class AuthenticateUserOutput {
             },
             redirectUrl: this.redirectUrl,
         };
+    }
+
+    /**
+     * Frontend compatibility methods
+     */
+    getId(): { value: string } {
+        return { value: this.user.id };
+    }
+
+    getEmail(): { value: string } {
+        return { value: this.user.email };
+    }
+
+    getName(): { value: string } {
+        return { value: this.user.name };
+    }
+
+    getRole(): { value: string } {
+        return { value: this.user.role };
+    }
+
+    getStatus(): { value: string } {
+        return { value: this.user.status };
     }
 
     /**

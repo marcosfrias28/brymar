@@ -1,5 +1,5 @@
 import { AggregateRoot } from '@/domain/shared/entities/AggregateRoot';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 import { WizardMediaId } from "../value-objects/WizardMediaId";
 import { WizardDraftId } from "../value-objects/WizardDraftId";
 import { WizardType } from "../value-objects/WizardType";
@@ -38,7 +38,7 @@ export interface WizardMediaData {
 
 export class WizardMedia extends AggregateRoot {
     private constructor(
-        private readonly id: WizardMediaId,
+        id: WizardMediaId,
         private readonly draftId: WizardDraftId | undefined,
         private readonly publishedId: number | undefined,
         private readonly wizardType: WizardType,
@@ -49,7 +49,7 @@ export class WizardMedia extends AggregateRoot {
         private readonly uploadedAt: Date,
         createdAt?: Date
     ) {
-        super(id, createdAt);
+        super(id, createdAt || new Date(), new Date());
     }
 
     static create(data: CreateWizardMediaData): WizardMedia {
@@ -70,12 +70,12 @@ export class WizardMedia extends AggregateRoot {
 
         // Validate that either draftId or publishedId is provided
         if (!data.draftId && !data.publishedId) {
-            throw new DomainError("Either draft ID or published ID must be provided");
+            throw new BusinessRuleViolationError("Either draft ID or published ID must be provided", "WIZARD_VALIDATION");
         }
 
         const displayOrder = data.displayOrder ?? 0;
         if (displayOrder < 0) {
-            throw new DomainError("Display order cannot be negative");
+            throw new BusinessRuleViolationError("Display order cannot be negative", "WIZARD_VALIDATION");
         }
 
         return new WizardMedia(
@@ -109,7 +109,7 @@ export class WizardMedia extends AggregateRoot {
 
     updateDisplayOrder(order: number): void {
         if (order < 0) {
-            throw new DomainError("Display order cannot be negative");
+            throw new BusinessRuleViolationError("Display order cannot be negative", "WIZARD_VALIDATION");
         }
         this.displayOrder = order;
     }

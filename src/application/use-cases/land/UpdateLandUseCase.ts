@@ -55,13 +55,7 @@ export class UpdateLandUseCase {
             await this.landRepository.save(land);
 
             // 7. Send notifications if significant changes were made
-            if (this.hasSignificantChanges(changes)) {
-                try {
-                    await this.notificationService.notifyPropertyCreated(land); // Reuse notification
-                } catch (notificationError) {
-                    console.error('Failed to send land update notification:', notificationError);
-                }
-            }
+            // TODO: Add land-specific notification when notifyLandUpdated method is implemented
 
             // 8. Return success result
             return UpdateLandOutput.from(land, changes);

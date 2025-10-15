@@ -17,7 +17,7 @@ export class VercelBlobImageService implements IImageService {
         this.baseUrl = process.env.BLOB_READ_WRITE_TOKEN ? 'https://blob.vercel-storage.com' : '';
 
         if (!process.env.BLOB_READ_WRITE_TOKEN) {
-            console.warn('BLOB_READ_WRITE_TOKEN not found in environment variables');
+            // Note: BLOB_READ_WRITE_TOKEN not found in environment variables
         }
     }
 
@@ -60,19 +60,17 @@ export class VercelBlobImageService implements IImageService {
             });
 
             // Get image dimensions (simplified - in production, use image processing library)
-            const dimensions = await this.getImageDimensions(image);
+            await this.getImageDimensions(image);
 
             // Generate thumbnail URL (Vercel Blob doesn't have built-in thumbnails)
             // In production, you might want to create actual thumbnails
-            const thumbnailUrl = blob.url;
+            blob.url;
 
             return {
-                id: this.extractIdFromUrl(blob.url),
                 url: blob.url,
-                thumbnailUrl,
                 filename: uniqueFilename,
-                size: this.getFileSize(image.file),
-                dimensions
+                size: image.file.size,
+                mimeType: image.mimeType
             };
         } catch (error) {
             throw new Error(`Failed to process image ${image.filename}: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -179,7 +177,7 @@ export class VercelBlobImageService implements IImageService {
             // For Buffer objects, you could use sharp or similar library
             // For now, return default dimensions
             return { width: 800, height: 600 };
-        } catch (error) {
+        } catch (_error) {
             // Return default dimensions if we can't determine actual size
             return { width: 800, height: 600 };
         }
@@ -197,7 +195,7 @@ export class VercelBlobImageService implements IImageService {
 
             // Use the filename as the ID, or extract a hash from the URL
             return filename || url.split('/').pop() || Math.random().toString(36);
-        } catch (error) {
+        } catch (_error) {
             return Math.random().toString(36);
         }
     }
@@ -219,7 +217,7 @@ export class VercelBlobImageService implements IImageService {
             // If it's just a filename, we can't easily reconstruct the full Vercel Blob URL
             // without additional information. In production, store the full URL.
             return null;
-        } catch (error) {
+        } catch (_error) {
             return null;
         }
     }
@@ -276,7 +274,7 @@ export class VercelBlobImageService implements IImageService {
             // Try to fetch the image to check if it exists
             const response = await fetch(url, { method: 'HEAD' });
             return response.ok;
-        } catch (error) {
+        } catch (_error) {
             return false;
         }
     }
@@ -284,32 +282,22 @@ export class VercelBlobImageService implements IImageService {
     /**
      * Get image metadata
      */
-    async getImageMetadata(imageId: string): Promise<{
-        url: string;
-        size?: number;
-        contentType?: string;
-        lastModified?: Date;
-    } | null> {
+    async getImageMetadata(imageUrl: string): Promise<{ size: number; mimeType: string } | null> {
         try {
-            const url = this.reconstructUrlFromId(imageId);
-            if (!url) {
-                return null;
-            }
-
-            const response = await fetch(url, { method: 'HEAD' });
+            const response = await fetch(imageUrl, { method: 'HEAD' });
             if (!response.ok) {
                 return null;
             }
 
+            const size = response.headers.get('content-length') ?
+                parseInt(response.headers.get('content-length')!) : 0;
+            const mimeType = response.headers.get('content-type') || 'image/jpeg';
+
             return {
-                url,
-                size: response.headers.get('content-length') ?
-                    parseInt(response.headers.get('content-length')!) : undefined,
-                contentType: response.headers.get('content-type') || undefined,
-                lastModified: response.headers.get('last-modified') ?
-                    new Date(response.headers.get('last-modified')!) : undefined,
+                size,
+                mimeType
             };
-        } catch (error) {
+        } catch (_error) {
             return null;
         }
     }

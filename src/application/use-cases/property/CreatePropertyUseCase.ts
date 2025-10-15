@@ -31,7 +31,7 @@ export class CreatePropertyUseCase {
             // 2. Process images if provided
             let processedImageUrls: string[] = [];
             if (input.images && input.images.length > 0) {
-                const processedImages = await this.imageService.processImages(input.images);
+                const processedImages = await this.imageService.processImages(input.images as any);
                 processedImageUrls = processedImages.map(img => img.url);
             }
 
@@ -112,7 +112,8 @@ export class CreatePropertyUseCase {
 
         if (duplicateProperty) {
             throw new BusinessRuleViolationError(
-                `A similar property already exists at this address (ID: ${duplicateProperty.getId().value})`
+                `A similar property already exists at this address (ID: ${duplicateProperty.getId().value})`,
+                'DUPLICATE_PROPERTY_ADDRESS'
             );
         }
 

@@ -1,40 +1,35 @@
 "use client";
 
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Edit, Trash2, Eye, Square, MapPin, Calculator } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 import {
   secondaryColorClasses,
   badgeVariants,
   interactiveClasses,
-} from '@/lib/utils/secondary-colors';
+} from "@/lib/utils/secondary-colors";
 
-interface Land {
-  id: string | number;
-  name: string;
-  area?: number;
-  surface?: number;
-  price: number;
-  location: string;
-  description: string;
-  images: string[];
-  createdAt: Date;
-  type: string;
+import { LandSummary } from "@/application/dto/land/SearchLandsOutput";
+
+interface Land extends LandSummary {
+  // Additional properties if needed
 }
 
 interface LandCardListProps {
-  lands: Land[];
+  lands: LandSummary[];
   loading?: boolean;
 }
 
-function LandCard({ land }: { land: Land }) {
-  const surface = land.area || land.surface || 0;
-  const pricePerM2 = surface > 0 ? Math.round(land.price / surface) : 0;
+function LandCard({ land }: { land: LandSummary }) {
+  const surface = land.area;
+  const pricePerM2 =
+    land.pricePerSquareMeter ||
+    (surface > 0 ? Math.round(land.price / surface) : 0);
   const hectares = (surface / 10000).toFixed(4);
   const tareas = (surface / 629).toFixed(2);
 
@@ -65,8 +60,8 @@ function LandCard({ land }: { land: Land }) {
           {/* Image */}
           <div className="relative w-full sm:w-48 h-32 sm:h-24 flex-shrink-0">
             <Image
-              src={land.images?.[0] || "/placeholder.svg"}
-              alt={land.name}
+              src={land.mainImage || "/placeholder.svg"}
+              alt={land.title}
               fill
               className="object-cover rounded-l-lg"
             />
@@ -77,7 +72,7 @@ function LandCard({ land }: { land: Land }) {
             <div className="flex justify-between items-start gap-4">
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-arsenic text-sm line-clamp-1 mb-1">
-                  {land.name}
+                  {land.title}
                 </h3>
 
                 <div className="flex items-center gap-2 text-xs text-blackCoral mb-2">

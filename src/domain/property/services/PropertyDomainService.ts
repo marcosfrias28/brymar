@@ -3,7 +3,7 @@ import { Price } from "../value-objects/Price";
 import { PropertyType } from "../value-objects/PropertyType";
 import { PropertyFeatures } from "../value-objects/PropertyFeatures";
 import { Address } from "../value-objects/Address";
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 export interface PropertyValuationData {
     averagePricePerSqm: number;
@@ -31,30 +31,30 @@ export class PropertyDomainService {
         // Business rule: Residential properties must have at least 1 bedroom and 1 bathroom
         if ((type === 'house' || type === 'apartment' || type === 'condo' || type === 'townhouse' || type === 'villa')) {
             if (features.bedrooms === 0) {
-                throw new DomainError("Residential properties must have at least 1 bedroom");
+                throw new BusinessRuleViolationError("Residential properties must have at least 1 bedroom", "PROPERTY_VALIDATION");
             }
             if (features.bathrooms === 0) {
-                throw new DomainError("Residential properties must have at least 1 bathroom");
+                throw new BusinessRuleViolationError("Residential properties must have at least 1 bathroom", "PROPERTY_VALIDATION");
             }
         }
 
         // Business rule: Price must be reasonable for property type
         if (type === 'land' && price < 1000) {
-            throw new DomainError("Land properties must have a minimum price of $1,000");
+            throw new BusinessRuleViolationError("Land properties must have a minimum price of $1,000", "PROPERTY_VALIDATION");
         }
 
         if ((type === 'house' || type === 'apartment' || type === 'condo' || type === 'townhouse' || type === 'villa') && price < 10000) {
-            throw new DomainError("Residential properties must have a minimum price of $10,000");
+            throw new BusinessRuleViolationError("Residential properties must have a minimum price of $10,000", "PROPERTY_VALIDATION");
         }
 
         if ((type === 'commercial' || type === 'office') && price < 50000) {
-            throw new DomainError("Commercial properties must have a minimum price of $50,000");
+            throw new BusinessRuleViolationError("Commercial properties must have a minimum price of $50,000", "PROPERTY_VALIDATION");
         }
 
         // Business rule: Large properties should have multiple bathrooms
         if (features.area > 200 && features.bathrooms < 2) {
             // This is a warning, not an error - could be logged or handled differently
-            console.warn("Large properties (>200 sqm) typically have multiple bathrooms");
+            // Note: Large properties (>200 sqm) typically have multiple bathrooms
         }
     }
 
@@ -64,7 +64,7 @@ export class PropertyDomainService {
     static validatePropertyUpdate(property: Property): void {
         // Validate that the property is still complete after updates
         if (!property.isComplete()) {
-            throw new DomainError("Property updates resulted in incomplete property data");
+            throw new BusinessRuleViolationError("Property updates resulted in incomplete property data", "PROPERTY_VALIDATION");
         }
 
         // Validate business rules still hold
@@ -75,20 +75,20 @@ export class PropertyDomainService {
         // Re-validate core business rules
         if (type.isResidential() && type.requiresBedrooms()) {
             if (features.bedrooms === 0) {
-                throw new DomainError("Residential properties must have at least 1 bedroom");
+                throw new BusinessRuleViolationError("Residential properties must have at least 1 bedroom", "PROPERTY_VALIDATION");
             }
             if (features.bathrooms === 0) {
-                throw new DomainError("Residential properties must have at least 1 bathroom");
+                throw new BusinessRuleViolationError("Residential properties must have at least 1 bathroom", "PROPERTY_VALIDATION");
             }
         }
 
         // Validate price reasonableness
         if (type.isLand() && price.amount < 1000) {
-            throw new DomainError("Land properties must have a minimum price of $1,000");
+            throw new BusinessRuleViolationError("Land properties must have a minimum price of $1,000", "PROPERTY_VALIDATION");
         }
 
         if (type.isResidential() && price.amount < 10000) {
-            throw new DomainError("Residential properties must have a minimum price of $10,000");
+            throw new BusinessRuleViolationError("Residential properties must have a minimum price of $10,000", "PROPERTY_VALIDATION");
         }
     }
 

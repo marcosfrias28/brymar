@@ -102,11 +102,11 @@ export class LandLocation extends ValueObject<LandLocationData> {
         // Business rule: For Dominican Republic, validate approximate bounds
         // DR is roughly between 17.5°N to 19.9°N and 68.3°W to 71.9°W
         if (latitude < 17.0 || latitude > 20.0) {
-            console.warn("Latitude appears to be outside Dominican Republic bounds");
+            // Note: Latitude appears to be outside Dominican Republic bounds
         }
 
         if (longitude < -72.0 || longitude > -68.0) {
-            console.warn("Longitude appears to be outside Dominican Republic bounds");
+            // Note: Longitude appears to be outside Dominican Republic bounds
         }
     }
 

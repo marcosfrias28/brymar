@@ -21,10 +21,10 @@ import {
   LayersIcon,
 } from "lucide-react";
 
-import { NavDocuments } from '@/components/nav-documents';
-import { NavMain, type NavItem } from '@/components/nav-main';
-import { NavSecondary } from '@/components/nav-secondary';
-import { NavUser } from '@/components/nav-user';
+import { NavDocuments } from "@/components/nav-documents";
+import { NavMain, type NavItem } from "@/components/nav-main";
+import { NavSecondary } from "@/components/nav-secondary";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -33,15 +33,15 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from '@/components/ui/sidebar';
+} from "@/components/ui/sidebar";
 import Logo from "./ui/logo";
-import { useAdmin } from '@/hooks/use-admin';
-import { useUser } from '@/hooks/use-user';
-import { PageTransition } from '@/components/ui/page-transition';
-import { hoverAnimations, focusAnimations } from '@/lib/utils/animations';
-import { cn } from '@/lib/utils';
-import { useResponsive } from '@/hooks/use-responsive';
-import { ariaLabels, focusRingClasses } from '@/lib/utils/accessibility';
+import { useAdmin } from "@/hooks/use-admin";
+import { useUser } from "@/presentation/hooks/use-user";
+import { PageTransition } from "@/components/ui/page-transition";
+import { hoverAnimations, focusAnimations } from "@/lib/utils/animations";
+import { cn } from "@/lib/utils";
+import { useResponsive } from "@/hooks/use-responsive";
+import { ariaLabels, focusRingClasses } from "@/lib/utils/accessibility";
 
 // Navigation data generator function
 const getAdminNavigationData = (
@@ -214,18 +214,22 @@ export const AdminSidebar = memo(function AdminSidebar({
 
   // Memoize navigation data
   const navigationData = useMemo(
-    () => getAdminNavigationData(user?.role || null, permissions),
-    [user?.role, permissions]
+    () => getAdminNavigationData(user?.getRole()?.value || null, permissions),
+    [user?.getRole()?.value, permissions]
   );
 
   // Memoize user data to prevent unnecessary re-renders
   const userData = useMemo(
     () => ({
-      name: user?.name || "Usuario",
-      email: user?.email || "usuario@brymar.com",
-      avatar: user?.image || "/avatars/default.jpg",
+      name: user?.getProfile()?.getFullName() || "Usuario",
+      email: user?.getEmail()?.value || "usuario@brymar.com",
+      avatar: user?.getProfile()?.getAvatar() || "/avatars/default.jpg",
     }),
-    [user?.name, user?.email, user?.image]
+    [
+      user?.getProfile()?.getFullName(),
+      user?.getEmail()?.value,
+      user?.getProfile()?.getAvatar(),
+    ]
   );
 
   return (

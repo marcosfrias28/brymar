@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Category } from '@/lib/db/schema';
-import { getCategories } from '@/app/actions/category-actions';
+// Category actions need to be implemented in DDD structure
+// import { getCategories } from '@/presentation/server-actions/category-actions';
 
 interface UseCategoriesReturn {
   categories: Category[];
@@ -20,9 +21,10 @@ export function useCategories(): UseCategoriesReturn {
     try {
       setLoading(true);
       setError(null);
-      
-      const data = await getCategories();
-      setCategories(data);
+
+      // Categories functionality needs to be implemented in DDD structure
+      setCategories([]);
+      throw new Error('Categories functionality needs to be implemented in DDD structure');
     } catch (err) {
       setError(err instanceof Error ? err.message : "Errore sconosciuto");
       console.error("Errore nel fetch delle categorie:", err);

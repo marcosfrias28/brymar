@@ -1,4 +1,4 @@
-import { AggregateRoot } from '@/domain/shared/base/AggregateRoot';
+import { AggregateRoot } from '@/domain/shared/entities/AggregateRoot';
 import { BlogPostId } from "../value-objects/BlogPostId";
 import { BlogTitle } from "../value-objects/BlogTitle";
 import { BlogContent } from "../value-objects/BlogContent";
@@ -6,7 +6,7 @@ import { BlogCategory } from "../value-objects/BlogCategory";
 import { ContentStatus } from "../value-objects/ContentStatus";
 import { BlogAuthor } from "../value-objects/BlogAuthor";
 import { ReadingTime } from "../value-objects/ReadingTime";
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 export interface CreateBlogPostData {
     title: string;
@@ -118,7 +118,7 @@ export class BlogPost extends AggregateRoot {
 
     publish(): void {
         if (!this.canBePublished()) {
-            throw new DomainError("Blog post cannot be published: missing required content");
+            throw new BusinessRuleViolationError("Blog post cannot be published: missing required content", "PUBLISH_VALIDATION");
         }
         this.status = ContentStatus.published();
         this.markAsUpdated();

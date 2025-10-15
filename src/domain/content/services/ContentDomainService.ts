@@ -3,7 +3,7 @@ import { PageSection } from "../entities/PageSection";
 import { BlogContent } from "../value-objects/BlogContent";
 import { BlogTitle } from "../value-objects/BlogTitle";
 import { ContentStatus } from "../value-objects/ContentStatus";
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 export class ContentDomainService {
 
@@ -12,24 +12,24 @@ export class ContentDomainService {
      */
     validateBlogPostForPublishing(blogPost: BlogPost): void {
         if (!blogPost.getTitle().isValid()) {
-            throw new DomainError("Blog post title is invalid for publishing");
+            throw new BusinessRuleViolationError("Blog post title is invalid for publishing", "CONTENT_VALIDATION");
         }
 
         if (!blogPost.getContent().isValid()) {
-            throw new DomainError("Blog post content is invalid for publishing");
+            throw new BusinessRuleViolationError("Blog post content is invalid for publishing", "CONTENT_VALIDATION");
         }
 
         if (!blogPost.getAuthor().isValid()) {
-            throw new DomainError("Blog post author is invalid for publishing");
+            throw new BusinessRuleViolationError("Blog post author is invalid for publishing", "CONTENT_VALIDATION");
         }
 
         if (!blogPost.getCategory().isValid()) {
-            throw new DomainError("Blog post category is invalid for publishing");
+            throw new BusinessRuleViolationError("Blog post category is invalid for publishing", "CONTENT_VALIDATION");
         }
 
         // Business rule: Blog posts should have a minimum reading time for quality
         if (blogPost.getReadingTime().minutes < 1) {
-            throw new DomainError("Blog post is too short for publishing (minimum 1 minute reading time)");
+            throw new BusinessRuleViolationError("Blog post is too short for publishing (minimum 1 minute reading time)", "CONTENT_VALIDATION");
         }
     }
 
@@ -150,37 +150,37 @@ export class ContentDomainService {
 
     private validateHeroSectionContent(content: Record<string, any>): void {
         if (!content.title || typeof content.title !== 'string') {
-            throw new DomainError("Hero section must have a title");
+            throw new BusinessRuleViolationError("Hero section must have a title", "CONTENT_VALIDATION");
         }
 
         if (!content.subtitle || typeof content.subtitle !== 'string') {
-            throw new DomainError("Hero section must have a subtitle");
+            throw new BusinessRuleViolationError("Hero section must have a subtitle", "CONTENT_VALIDATION");
         }
 
         if (content.title.length < 10) {
-            throw new DomainError("Hero section title is too short");
+            throw new BusinessRuleViolationError("Hero section title is too short", "CONTENT_VALIDATION");
         }
 
         if (content.title.length > 100) {
-            throw new DomainError("Hero section title is too long");
+            throw new BusinessRuleViolationError("Hero section title is too long", "CONTENT_VALIDATION");
         }
     }
 
     private validateCategoriesSectionContent(content: Record<string, any>): void {
         if (!content.categories || !Array.isArray(content.categories)) {
-            throw new DomainError("Categories section must have a categories array");
+            throw new BusinessRuleViolationError("Categories section must have a categories array", "CONTENT_VALIDATION");
         }
 
         if (content.categories.length === 0) {
-            throw new DomainError("Categories section must have at least one category");
+            throw new BusinessRuleViolationError("Categories section must have at least one category", "CONTENT_VALIDATION");
         }
 
         content.categories.forEach((category: any, index: number) => {
             if (!category.name || typeof category.name !== 'string') {
-                throw new DomainError(`Category ${index + 1} must have a name`);
+                throw new BusinessRuleViolationError(`Category ${index + 1} must have a name`, "CONTENT_VALIDATION");
             }
             if (!category.href || typeof category.href !== 'string') {
-                throw new DomainError(`Category ${index + 1} must have a href`);
+                throw new BusinessRuleViolationError(`Category ${index + 1} must have a href`, "CONTENT_VALIDATION");
             }
         });
     }
@@ -188,14 +188,14 @@ export class ContentDomainService {
     private validateFeaturedPropertiesSectionContent(content: Record<string, any>): void {
         if (content.maxProperties && typeof content.maxProperties === 'number') {
             if (content.maxProperties < 1 || content.maxProperties > 12) {
-                throw new DomainError("Featured properties section can display between 1 and 12 properties");
+                throw new BusinessRuleViolationError("Featured properties section can display between 1 and 12 properties", "CONTENT_VALIDATION");
             }
         }
     }
 
     private validateContactFormSectionContent(content: Record<string, any>): void {
         if (!content.fields || !Array.isArray(content.fields)) {
-            throw new DomainError("Contact form section must have a fields array");
+            throw new BusinessRuleViolationError("Contact form section must have a fields array", "CONTENT_VALIDATION");
         }
 
         const requiredFields = ['name', 'email', 'message'];
@@ -203,7 +203,7 @@ export class ContentDomainService {
 
         requiredFields.forEach(requiredField => {
             if (!fieldNames.includes(requiredField)) {
-                throw new DomainError(`Contact form must include ${requiredField} field`);
+                throw new BusinessRuleViolationError(`Contact form must include ${requiredField} field`, "CONTENT_VALIDATION");
             }
         });
     }

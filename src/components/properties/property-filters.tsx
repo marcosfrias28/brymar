@@ -1,16 +1,18 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { secondaryColorClasses } from '@/lib/utils/secondary-colors';
-import { cn } from '@/lib/utils';
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
+import { cn } from "@/lib/utils";
+
+import { PropertySearchResult } from "@/presentation/hooks/use-properties";
 
 interface PropertyFiltersProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
-  properties: any[];
+  properties: PropertySearchResult[];
 }
 
 export function PropertyFilters({
@@ -19,7 +21,11 @@ export function PropertyFilters({
   properties,
 }: PropertyFiltersProps) {
   const locations = [
-    ...new Set(properties.map((p) => p.location).filter(Boolean)),
+    ...new Set(
+      properties
+        .map((p) => `${p.address.city}, ${p.address.state}`)
+        .filter(Boolean)
+    ),
   ];
   const totalProperties = properties.length;
 

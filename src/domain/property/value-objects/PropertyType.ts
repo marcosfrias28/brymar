@@ -1,5 +1,5 @@
 import { ValueObject } from '@/domain/shared/value-objects/ValueObject';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 export enum PropertyTypeEnum {
     HOUSE = "house",
@@ -23,7 +23,7 @@ export class PropertyType extends ValueObject<PropertyTypeEnum> {
 
     static create(type: string): PropertyType {
         if (!type || type.trim().length === 0) {
-            throw new DomainError("Property type cannot be empty");
+            throw new BusinessRuleViolationError("Property type cannot be empty", "PROPERTY_VALIDATION");
         }
 
         const normalizedType = type.toLowerCase().trim();
@@ -33,7 +33,7 @@ export class PropertyType extends ValueObject<PropertyTypeEnum> {
         const matchedType = validTypes.find(validType => validType === normalizedType);
 
         if (!matchedType) {
-            throw new DomainError(`Invalid property type: ${type}. Valid types are: ${validTypes.join(', ')}`);
+            throw new BusinessRuleViolationError(`Invalid property type: ${type}. Valid types are: ${validTypes.join(', ')}`, "PROPERTY_VALIDATION");
         }
 
         return new PropertyType(matchedType);

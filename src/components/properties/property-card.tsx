@@ -3,22 +3,38 @@
 import { Bed, Bath, Square, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { Property } from "@/utils/types/types";
-import { cn } from '@/lib/utils';
-import { AnimatedCard } from '@/components/ui/animated-card';
-import { hoverAnimations, focusAnimations } from '@/lib/utils/animations';
+import { PropertySearchResult } from "@/presentation/hooks/use-properties";
+import { cn } from "@/lib/utils";
+import { AnimatedCard } from "@/components/ui/animated-card";
+import { hoverAnimations, focusAnimations } from "@/lib/utils/animations";
 
 interface PropertyCardProps {
-  property: Property;
+  property: PropertySearchResult;
   variant?: "horizontal" | "vertical";
 }
 
 export function PropertyCard({ property }: PropertyCardProps) {
-  const formatPrice = (price: number) => {
+  const formatPrice = (price: number, currency: string = "USD") => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: currency,
     }).format(price);
+  };
+
+  // Extract location string from address object
+  const getLocationString = () => {
+    if (typeof property.address === "string") {
+      return property.address;
+    }
+    return `${property.address.street}, ${property.address.city}`;
+  };
+
+  // Get the first image or fallback
+  const getImageUrl = () => {
+    if (property.images && property.images.length > 0) {
+      return property.images[0];
+    }
+    return "/placeholder.jpg";
   };
 
   return (
@@ -29,12 +45,12 @@ export function PropertyCard({ property }: PropertyCardProps) {
     >
       <div className="overflow-hidden rounded-t-2xl">
         <Link
-          href={`/properties/${property.id}`}
+          href={`/properties/${property.getId().value}`}
           className={cn("block focus:outline-none", focusAnimations.ring)}
         >
           <div className="w-full h-[300px] relative overflow-hidden">
             <Image
-              alt={property.title}
+              alt={property.getTitle().value}
               loading="lazy"
               width={440}
               height={300}
@@ -43,7 +59,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
                 "transition-all duration-500 ease-out",
                 "group-hover:brightness-75 group-hover:scale-110"
               )}
-              src={property.imageUrl || "/placeholder.jpg"}
+              src={getImageUrl()}
             />
           </div>
         </Link>
@@ -61,7 +77,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
         <div className="flex flex-col mobile:flex-row gap-5 mobile:gap-0 justify-between mb-6">
           <div className="space-y-1">
             <Link
-              href={`/properties/${property.id}`}
+              href={`/properties/${property.getId().value}`}
               className={cn("block focus:outline-none", focusAnimations.ring)}
             >
               <h3
@@ -70,11 +86,11 @@ export function PropertyCard({ property }: PropertyCardProps) {
                   "transition-colors duration-300 group-hover:text-primary"
                 )}
               >
-                {property.title}
+                {property.getTitle().value}
               </h3>
             </Link>
             <p className="text-base font-normal text-black/50 dark:text-white/50 transition-colors duration-200">
-              {property.location}
+              {getLocationString()}
             </p>
           </div>
           <div>
@@ -86,7 +102,10 @@ export function PropertyCard({ property }: PropertyCardProps) {
                 "focus-visible:ring-2 focus-visible:ring-secondary/50 focus-visible:ring-offset-2"
               )}
             >
-              {formatPrice(property.price)}
+              {formatPrice(
+                property.getPrice().value,
+                property.getPrice().currency
+              )}
             </button>
           </div>
         </div>
@@ -99,7 +118,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
               )}
             />
             <p className="text-sm mobile:text-base font-normal text-black dark:text-white transition-colors duration-200">
-              {property.bedrooms} Bedrooms
+              {property.features.bedrooms} Bedrooms
             </p>
           </div>
           <div className="flex flex-col gap-2 border-e border-black/10 dark:border-white/20 px-2 xs:px-4 mobile:px-8 group/stat">
@@ -110,7 +129,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
               )}
             />
             <p className="text-sm mobile:text-base font-normal text-black dark:text-white transition-colors duration-200">
-              {property.bathrooms} Bathrooms
+              {property.features.bathrooms} Bathrooms
             </p>
           </div>
           <div className="flex flex-col gap-2 pl-2 xs:pl-4 mobile:pl-8 group/stat">
@@ -121,7 +140,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
               )}
             />
             <p className="text-sm mobile:text-base font-normal text-black dark:text-white transition-colors duration-200">
-              {property.sqm}m<sup>2</sup>
+              {property.features.area}m<sup>2</sup>
             </p>
           </div>
         </div>

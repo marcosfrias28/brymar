@@ -1,4 +1,4 @@
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { ValueObjectValidationError } from '@/domain/shared/errors/DomainError';
 
 export type BlogCategoryType =
     | "market-analysis"
@@ -24,8 +24,8 @@ export class BlogCategory {
         "lifestyle": "Estilo de Vida"
     };
 
-    private constructor(private readonly value: BlogCategoryType) {
-        this.validate(value);
+    private constructor(private readonly _value: BlogCategoryType) {
+        this.validate(_value);
     }
 
     static create(category: string): BlogCategory {
@@ -54,46 +54,46 @@ export class BlogCategory {
 
     private validate(category: string): void {
         if (!category || category.trim().length === 0) {
-            throw new DomainError("Blog category cannot be empty");
+            throw new ValueObjectValidationError("Blog category cannot be empty");
         }
 
         if (!BlogCategory.VALID_CATEGORIES.includes(category as BlogCategoryType)) {
-            throw new DomainError(
+            throw new ValueObjectValidationError(
                 `Invalid blog category: ${category}. Valid categories are: ${BlogCategory.VALID_CATEGORIES.join(", ")}`
             );
         }
     }
 
     get value(): BlogCategoryType {
-        return this.value;
+        return this._value;
     }
 
     getLabel(): string {
-        return BlogCategory.CATEGORY_LABELS[this.value];
+        return BlogCategory.CATEGORY_LABELS[this._value];
     }
 
     isValid(): boolean {
-        return BlogCategory.VALID_CATEGORIES.includes(this.value);
+        return BlogCategory.VALID_CATEGORIES.includes(this._value);
     }
 
     isMarketAnalysis(): boolean {
-        return this.value === "market-analysis";
+        return this._value === "market-analysis";
     }
 
     isInvestmentTips(): boolean {
-        return this.value === "investment-tips";
+        return this._value === "investment-tips";
     }
 
     isPropertyNews(): boolean {
-        return this.value === "property-news";
+        return this._value === "property-news";
     }
 
     isLegalAdvice(): boolean {
-        return this.value === "legal-advice";
+        return this._value === "legal-advice";
     }
 
     isLifestyle(): boolean {
-        return this.value === "lifestyle";
+        return this._value === "lifestyle";
     }
 
     static getAllCategories(): BlogCategoryType[] {
@@ -105,10 +105,10 @@ export class BlogCategory {
     }
 
     equals(other: BlogCategory): boolean {
-        return this.value === other.value;
+        return this._value === other._value;
     }
 
     toString(): string {
-        return this.value;
+        return this._value;
     }
 }

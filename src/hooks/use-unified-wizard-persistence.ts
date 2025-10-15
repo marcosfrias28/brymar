@@ -7,20 +7,20 @@ export interface UseUnifiedWizardPersistenceOptions {
     autoSave?: boolean;
     autoSaveInterval?: number;
     enableOfflineSupport?: boolean;
-    onSaveSuccess?: (draftId: string) => void;
-    onSaveError?: (error: string) => void;
+    onSaveSuccess?: () => void;
+    onSaveError?: () => void;
     onLoadSuccess?: () => void;
-    onLoadError?: (error: string) => void;
+    onLoadError?: () => void;
 }
 
 export interface UseUnifiedWizardPersistenceReturn<T extends WizardData> {
     // Draft management
-    saveDraft: (data: Partial<T>, currentStep: string) => Promise<string | null>;
-    loadDraft: (draftId: string) => Promise<boolean>;
-    deleteDraft: (draftId: string) => Promise<boolean>;
+    saveDraft: (data: Partial<T>, currentStep?: string) => Promise<string | null>;
+    loadDraft: (draftId?: string) => Promise<boolean>;
+    deleteDraft: (draftId?: string) => Promise<boolean>;
 
     // Auto-save
-    enableAutoSave: (data: Partial<T>, currentStep: string) => void;
+    enableAutoSave: (data: Partial<T>, currentStep?: string) => void;
     disableAutoSave: () => void;
 
     // State
@@ -143,7 +143,7 @@ export function useUnifiedWizardPersistence<T extends WizardData>(
             if (result.success && result.data) {
                 setCurrentDraftId(result.data.draftId);
                 setLastSaved(new Date());
-                onSaveSuccess?.(result.data.draftId);
+                onSaveSuccess?.();
 
                 // Check if saved offline
                 if (result.source !== 'database') {
@@ -151,19 +151,19 @@ export function useUnifiedWizardPersistence<T extends WizardData>(
                 }
             } else {
                 setSaveError(result.error || 'Auto-save failed');
-                onSaveError?.(result.error || 'Auto-save failed');
+                onSaveError?.();
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Auto-save failed';
             setSaveError(errorMessage);
-            onSaveError?.(errorMessage);
+            onSaveError?.();
         } finally {
             setIsSaving(false);
         }
     }, [wizardType, wizardConfigId, userId, currentDraftId, enableOfflineSupport, onSaveSuccess, onSaveError]);
 
     // Manual save draft
-    const saveDraft = useCallback(async (data: Partial<T>, currentStep: string): Promise<string | null> => {
+    const saveDraft = useCallback(async (data: Partial<T>, currentStep: string = 'general'): Promise<string | null> => {
         if (!userId) return null;
 
         try {
@@ -186,7 +186,7 @@ export function useUnifiedWizardPersistence<T extends WizardData>(
             if (result.success && result.data) {
                 setCurrentDraftId(result.data.draftId);
                 setLastSaved(new Date());
-                onSaveSuccess?.(result.data.draftId);
+                onSaveSuccess?.();
 
                 // Check if saved offline
                 if (result.source !== 'database') {
@@ -196,13 +196,13 @@ export function useUnifiedWizardPersistence<T extends WizardData>(
                 return result.data.draftId;
             } else {
                 setSaveError(result.error || 'Save failed');
-                onSaveError?.(result.error || 'Save failed');
+                onSaveError?.();
                 return null;
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Save failed';
             setSaveError(errorMessage);
-            onSaveError?.(errorMessage);
+            onSaveError?.();
             return null;
         } finally {
             setIsSaving(false);
@@ -210,8 +210,8 @@ export function useUnifiedWizardPersistence<T extends WizardData>(
     }, [wizardType, wizardConfigId, userId, currentDraftId, enableOfflineSupport, onSaveSuccess, onSaveError]);
 
     // Load draft
-    const loadDraft = useCallback(async (draftId: string): Promise<boolean> => {
-        if (!userId) return false;
+    const loadDraft = useCallback(async (draftId?: string): Promise<boolean> => {
+        if (!userId || !draftId) return false;
 
         try {
             setIsLoading(true);
@@ -226,13 +226,13 @@ export function useUnifiedWizardPersistence<T extends WizardData>(
                 return true;
             } else {
                 setLoadError(result.error || 'Load failed');
-                onLoadError?.(result.error || 'Load failed');
+                onLoadError?.();
                 return false;
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Load failed';
             setLoadError(errorMessage);
-            onLoadError?.(errorMessage);
+            onLoadError?.();
             return false;
         } finally {
             setIsLoading(false);
@@ -240,8 +240,8 @@ export function useUnifiedWizardPersistence<T extends WizardData>(
     }, [userId, onLoadSuccess, onLoadError]);
 
     // Delete draft
-    const deleteDraft = useCallback(async (draftId: string): Promise<boolean> => {
-        if (!userId) return false;
+    const deleteDraft = useCallback(async (draftId?: string): Promise<boolean> => {
+        if (!userId || !draftId) return false;
 
         try {
             const result = await WizardPersistence.deleteDraft(draftId, userId);
@@ -264,7 +264,7 @@ export function useUnifiedWizardPersistence<T extends WizardData>(
     }, [userId, currentDraftId]);
 
     // Enable auto-save
-    const enableAutoSave = useCallback((data: Partial<T>, currentStep: string) => {
+    const enableAutoSave = useCallback((data: Partial<T>, currentStep: string = 'general') => {
         if (!autoSave) return;
 
         autoSaveDataRef.current = data;

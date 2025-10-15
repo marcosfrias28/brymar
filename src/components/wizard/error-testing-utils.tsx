@@ -6,16 +6,16 @@
  */
 
 import React, { useState, useCallback } from "react";
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Bug, Zap, Wifi, Shield } from "lucide-react";
 
 export interface ErrorScenario {
@@ -50,7 +50,7 @@ export function ErrorTestingPanel({
       await scenario.trigger();
       onScenarioTrigger?.(scenario);
     } catch (error) {
-      console.error("Error triggering scenario:", error);
+      // Note: Error triggering scenario - would be logged in production
     } finally {
       setIsRunning(false);
     }
@@ -187,7 +187,7 @@ export function ErrorScenarioRunner() {
 
   const handleScenarioTrigger = useCallback((scenario: ErrorScenario) => {
     setActiveScenarios((prev) => [...prev, scenario]);
-    console.log("Triggered scenario:", scenario);
+    // Note: Triggered scenario - would be logged in development
   }, []);
 
   return (
@@ -238,7 +238,7 @@ export function useErrorTesting() {
     (error: Error) => {
       setErrors((prev) => [...prev, error]);
       if (isTestingMode) {
-        console.error("Test error triggered:", error);
+        // Note: Test error triggered - would be logged in development
       } else {
         throw error;
       }
@@ -270,7 +270,7 @@ export function useErrorTesting() {
         await scenario.trigger();
       }
     } catch (error) {
-      console.error("Error running scenarios:", error);
+      // Note: Error running scenarios - would be logged in production
     } finally {
       setIsRunning(false);
     }

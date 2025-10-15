@@ -16,10 +16,10 @@ import {
   MessageCircleIcon,
 } from "lucide-react";
 
-import { NavDocuments } from '@/components/nav-documents';
-import { NavMain } from '@/components/nav-main';
-import { NavSecondary } from '@/components/nav-secondary';
-import { NavUser } from '@/components/nav-user';
+import { NavDocuments } from "@/components/nav-documents";
+import { NavMain } from "@/components/nav-main";
+import { NavSecondary } from "@/components/nav-secondary";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -28,10 +28,10 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from '@/components/ui/sidebar';
+} from "@/components/ui/sidebar";
 import Logo from "./ui/logo";
-import { useUser } from '@/hooks/use-user';
-import { useAdmin } from '@/hooks/use-admin';
+import { useUser } from "@/presentation/hooks/use-user";
+import { useAdmin } from "@/hooks/use-admin";
 
 // Configuración del menú para usuarios
 const getUserNavigationData = () => {
@@ -124,9 +124,9 @@ export function UserSidebar({
 
   // Map user data to expected format
   const userData = {
-    name: user?.name || "Usuario",
-    email: user?.email || "usuario@ejemplo.com",
-    avatar: user?.image || "/avatars/user.jpg",
+    name: user?.getProfile().getFullName() || "Usuario",
+    email: user?.getEmail().value || "usuario@ejemplo.com",
+    avatar: user?.getProfile().getAvatar() || "/avatars/user.jpg",
   };
 
   return (

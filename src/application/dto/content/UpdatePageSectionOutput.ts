@@ -20,11 +20,30 @@ export class UpdatePageSectionOutput {
             pageSection.getSection().value,
             pageSection.getTitle()?.value || null,
             pageSection.getIsActive(),
-            pageSection.getOrder(),
+            pageSection.getOrder().value,
             pageSection.getUpdatedAt(),
-            pageSection.getContent().getContentSummary(),
-            pageSection.getSettings().getSettingsSummary()
+            pageSection.getContent().toString(),
+            JSON.stringify(pageSection.getSettings())
         );
+    }
+
+    /**
+     * Frontend compatibility methods
+     */
+    getId(): { value: string } {
+        return { value: this.id };
+    }
+
+    getPage(): { value: string } {
+        return { value: this.page };
+    }
+
+    getSection(): { value: string } {
+        return { value: this.section };
+    }
+
+    getTitle(): { value: string | null } {
+        return { value: this.title };
     }
 
     toJSON(): string {

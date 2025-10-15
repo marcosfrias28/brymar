@@ -64,7 +64,7 @@ describe('Blob Configuration', () => {
     describe('getBlobConfigInfo', () => {
         it('provides recommendations when not configured', () => {
             delete process.env.BLOB_READ_WRITE_TOKEN;
-            process.env.NODE_ENV = 'development';
+            (process.env as any).NODE_ENV = 'development';
 
             const info = getBlobConfigInfo();
 
@@ -75,7 +75,7 @@ describe('Blob Configuration', () => {
 
         it('provides development-specific recommendations', () => {
             delete process.env.BLOB_READ_WRITE_TOKEN;
-            process.env.NODE_ENV = 'development';
+            (process.env as any).NODE_ENV = 'development';
 
             const info = getBlobConfigInfo();
 
@@ -84,7 +84,7 @@ describe('Blob Configuration', () => {
 
         it('does not provide mock recommendations in production', () => {
             delete process.env.BLOB_READ_WRITE_TOKEN;
-            process.env.NODE_ENV = 'production';
+            (process.env as any).NODE_ENV = 'production';
 
             const info = getBlobConfigInfo();
 
@@ -96,7 +96,7 @@ describe('Blob Configuration', () => {
     describe('shouldUseMockStorage', () => {
         it('returns true when explicitly enabled', () => {
             process.env.MOCK_BLOB_STORAGE = 'true';
-            process.env.NODE_ENV = 'production';
+            (process.env as any).NODE_ENV = 'production';
             process.env.BLOB_READ_WRITE_TOKEN = 'vercel_blob_rw_valid_token';
 
             expect(shouldUseMockStorage()).toBe(true);
@@ -104,7 +104,7 @@ describe('Blob Configuration', () => {
 
         it('returns true in development when blob not configured', () => {
             delete process.env.BLOB_READ_WRITE_TOKEN;
-            process.env.NODE_ENV = 'development';
+            (process.env as any).NODE_ENV = 'development';
             process.env.MOCK_BLOB_STORAGE = 'false';
 
             expect(shouldUseMockStorage()).toBe(true);
@@ -112,7 +112,7 @@ describe('Blob Configuration', () => {
 
         it('returns false in development when blob is configured and mock not enabled', () => {
             process.env.BLOB_READ_WRITE_TOKEN = 'vercel_blob_rw_valid_token';
-            process.env.NODE_ENV = 'development';
+            (process.env as any).NODE_ENV = 'development';
             process.env.MOCK_BLOB_STORAGE = 'false';
 
             expect(shouldUseMockStorage()).toBe(false);
@@ -120,7 +120,7 @@ describe('Blob Configuration', () => {
 
         it('returns false in production when blob is configured and mock not enabled', () => {
             process.env.BLOB_READ_WRITE_TOKEN = 'vercel_blob_rw_valid_token';
-            process.env.NODE_ENV = 'production';
+            (process.env as any).NODE_ENV = 'production';
             delete process.env.MOCK_BLOB_STORAGE;
 
             expect(shouldUseMockStorage()).toBe(false);

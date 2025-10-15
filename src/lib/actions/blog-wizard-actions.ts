@@ -23,8 +23,8 @@ export const createBlogFromWizard = async (data: BlogWizardData): Promise<Action
         const wordCount = data.content.split(" ").length;
         const readingTime = Math.ceil(wordCount / wordsPerMinute);
 
-        // Generate slug if not provided
-        const slug = data.slug || data.title
+        // Generate slug if not provided (for potential future use)
+        data.slug || data.title
             .toLowerCase()
             .replace(/[^a-z0-9\s-]/g, '')
             .replace(/\s+/g, '-')

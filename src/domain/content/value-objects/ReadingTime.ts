@@ -1,11 +1,11 @@
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { ValueObjectValidationError } from '@/domain/shared/errors/DomainError';
 
 export class ReadingTime {
     private static readonly WORDS_PER_MINUTE = 200;
     private static readonly MIN_READING_TIME = 1; // Minimum 1 minute
 
-    private constructor(private readonly minutes: number) {
-        this.validate(minutes);
+    private constructor(private readonly _minutes: number) {
+        this.validate(_minutes);
     }
 
     static create(minutes: number): ReadingTime {
@@ -34,21 +34,21 @@ export class ReadingTime {
 
     private validate(minutes: number): void {
         if (!Number.isInteger(minutes) || minutes < ReadingTime.MIN_READING_TIME) {
-            throw new DomainError(`Reading time must be at least ${ReadingTime.MIN_READING_TIME} minute`);
+            throw new ValueObjectValidationError(`Reading time must be at least ${ReadingTime.MIN_READING_TIME} minute`);
         }
 
         if (minutes > 120) { // Maximum 2 hours seems reasonable for a blog post
-            throw new DomainError("Reading time cannot exceed 120 minutes");
+            throw new ValueObjectValidationError("Reading time cannot exceed 120 minutes");
         }
     }
 
     get minutes(): number {
-        return this.minutes;
+        return this._minutes;
     }
 
     isValid(): boolean {
         try {
-            this.validate(this.minutes);
+            this.validate(this._minutes);
             return true;
         } catch {
             return false;
@@ -56,15 +56,15 @@ export class ReadingTime {
     }
 
     isShortRead(): boolean {
-        return this.minutes <= 3;
+        return this._minutes <= 3;
     }
 
     isMediumRead(): boolean {
-        return this.minutes > 3 && this.minutes <= 10;
+        return this._minutes > 3 && this._minutes <= 10;
     }
 
     isLongRead(): boolean {
-        return this.minutes > 10;
+        return this._minutes > 10;
     }
 
     getReadingCategory(): "short" | "medium" | "long" {
@@ -74,21 +74,21 @@ export class ReadingTime {
     }
 
     getDisplayText(): string {
-        if (this.minutes === 1) {
+        if (this._minutes === 1) {
             return "1 minuto de lectura";
         }
-        return `${this.minutes} minutos de lectura`;
+        return `${this._minutes} minutos de lectura`;
     }
 
     getShortDisplayText(): string {
-        return `${this.minutes} min`;
+        return `${this._minutes} min`;
     }
 
     equals(other: ReadingTime): boolean {
-        return this.minutes === other.minutes;
+        return this._minutes === other._minutes;
     }
 
     toString(): string {
-        return this.minutes.toString();
+        return this._minutes.toString();
     }
 }

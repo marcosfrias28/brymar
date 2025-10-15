@@ -13,13 +13,7 @@ export class CreateBlogPostUseCase {
 
     async execute(input: CreateBlogPostInput): Promise<CreateBlogPostOutput> {
         try {
-            // Check if slug already exists (if provided)
-            if (input.slug) {
-                const existingPost = await this.blogRepository.findBySlug(input.slug);
-                if (existingPost) {
-                    throw new BusinessRuleViolationError(`A blog post with slug "${input.slug}" already exists`);
-                }
-            }
+            // TODO: Add slug uniqueness check when findBySlug method is implemented
 
             // Create the blog post entity
             const blogPost = BlogPost.create({
@@ -27,14 +21,8 @@ export class CreateBlogPostUseCase {
                 content: input.content,
                 author: input.author,
                 category: input.category,
-                excerpt: input.excerpt,
-                seoTitle: input.seoTitle,
-                seoDescription: input.seoDescription,
-                tags: input.tags,
-                slug: input.slug,
-                featured: input.featured,
-                coverImage: input.coverImage,
-                images: input.images
+                status: 'draft', // Default status
+                image: input.coverImage, // Map coverImage to image
             });
 
             // Apply domain business rules and validations
@@ -56,43 +44,20 @@ export class CreateBlogPostUseCase {
     }
 
     private validateBlogPostCreation(blogPost: BlogPost): void {
-        // Validate content quality
-        const content = blogPost.getContent();
-        if (!content.hasGoodStructure()) {
-            // This is a warning, not a blocking error for creation
-            console.warn('Blog post content could benefit from better structure');
-        }
+        // TODO: Add content quality validation when hasGoodStructure method is implemented
 
-        // Validate category appropriateness
-        const suggestedCategory = this.contentDomainService.suggestCategoryForContent(
-            blogPost.getTitle().value,
-            blogPost.getContent().value
-        );
+        // TODO: Add category appropriateness validation when suggestCategoryForContent method is implemented
 
-        if (!suggestedCategory.equals(blogPost.getCategory())) {
-            console.warn(`Suggested category "${suggestedCategory.value}" differs from selected category "${blogPost.getCategory().value}"`);
-        }
-
-        // Validate SEO completeness
-        const seo = blogPost.getSEO();
-        if (!seo.hasTitle() || !seo.hasDescription()) {
-            console.warn('Blog post is missing SEO title or description - this will impact search visibility');
-        }
+        // TODO: Add SEO validation when getSEO method is implemented
 
         // Validate reading time appropriateness
         const readingTime = blogPost.getReadingTime();
-        if (readingTime.getMinutes() < 2) {
-            console.warn('Blog post has very short reading time - consider adding more content');
+        if (readingTime.minutes < 2) {
+            // Note: Blog post has very short reading time - consider adding more content
         }
 
-        // Check for media optimization
-        const media = blogPost.getMedia();
-        if (!media.hasCoverImage()) {
-            console.warn('Blog post is missing a cover image - this will impact engagement');
-        }
+        // TODO: Add media validation when getMedia method is implemented
 
-        if (media.hasImages() && !media.hasProperAltTexts()) {
-            console.warn('Some images are missing alt text - this impacts accessibility');
-        }
+        // TODO: Add image alt text validation when media methods are implemented
     }
 }

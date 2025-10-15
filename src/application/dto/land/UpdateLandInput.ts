@@ -83,7 +83,8 @@ export class UpdateLandInput {
         const price = priceStr ? parseFloat(priceStr) : undefined;
         const currency = formData.get('currency') as string || undefined;
         const location = formData.get('location') as string || undefined;
-        const type = formData.get('type') as string || undefined;
+        const typeStr = formData.get('type') as string;
+        const type = typeStr as 'residential' | 'commercial' | 'agricultural' | 'industrial' | 'recreational' | 'mixed-use' | undefined;
 
         // Parse features array
         const featuresStr = formData.get('features') as string;

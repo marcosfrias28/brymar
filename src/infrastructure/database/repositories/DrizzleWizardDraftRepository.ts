@@ -1,4 +1,4 @@
-import { eq, and, desc, asc, count, gte, lte, like } from "drizzle-orm";
+import { eq, and, desc, asc, count, gte, lte } from "drizzle-orm";
 import type { Database } from '@/lib/db/drizzle';
 import { wizardDrafts } from '@/lib/db/schema';
 import {
@@ -16,7 +16,7 @@ import { WizardFormData } from '@/domain/wizard/value-objects/WizardFormData';
 import { UserId } from '@/domain/user/value-objects/UserId';
 
 export class DrizzleWizardDraftRepository implements IWizardDraftRepository {
-    constructor(private readonly db: Database) { }
+    constructor(private readonly _db: Database) { }
 
     async save(draft: WizardDraft): Promise<void> {
         const draftData = this.mapToDatabase(draft);

@@ -1,6 +1,6 @@
 import { z, ZodError, ZodSchema } from 'zod';
 import { UseCaseValidationError } from '../errors/ApplicationError';
-import { ValidationService as DomainValidationService } from '@/domain/shared/services/ValidationService';
+// Domain ValidationService not implemented yet
 
 export interface ValidationResult<T = any> {
     success: boolean;
@@ -142,18 +142,14 @@ export class ApplicationValidationService {
         return {
             email: z.string().email('Invalid email format'),
 
-            phone: z.string().refine(
-                (phone) => DomainValidationService.validatePhone(phone),
+            phone: z.string().regex(
+                /^[\+]?[1-9][\d]{0,15}$/,
                 'Invalid phone number format'
             ),
 
-            password: z.string().refine(
-                (password) => {
-                    const result = DomainValidationService.validatePasswordStrength(password);
-                    return result.isValid;
-                },
-                'Password does not meet strength requirements'
-            ),
+            password: z.string()
+                .min(8, 'Password must be at least 8 characters')
+                .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain at least one lowercase letter, one uppercase letter, and one number'),
 
             url: z.string().url('Invalid URL format'),
 
@@ -161,10 +157,7 @@ export class ApplicationValidationService {
 
             nonEmptyString: z.string().min(1, 'Cannot be empty'),
 
-            currency: z.string().refine(
-                (currency) => DomainValidationService.validateCurrency(currency),
-                'Invalid currency code'
-            ),
+            currency: z.string().length(3, 'Currency code must be 3 characters').regex(/^[A-Z]{3}$/, 'Invalid currency code format'),
 
             coordinates: z.object({
                 latitude: z.number().min(-90).max(90),
@@ -175,17 +168,17 @@ export class ApplicationValidationService {
                 startDate: z.date(),
                 endDate: z.date()
             }).refine(
-                (data) => DomainValidationService.validateDateRange(data.startDate, data.endDate),
+                (data) => data.startDate <= data.endDate,
                 'End date must be after start date'
             ),
 
-            fileSize: (maxSizeMB: number) => z.number().refine(
-                (size) => DomainValidationService.validateFileSize(size, maxSizeMB),
-                `File size must not exceed ${maxSizeMB}MB`
-            ),
+            fileSize: (maxSizeMB: number) => z.number().max(maxSizeMB * 1024 * 1024, `File size must not exceed ${maxSizeMB}MB`),
 
             fileExtension: (allowedExtensions: string[]) => z.string().refine(
-                (filename) => DomainValidationService.validateFileExtension(filename, allowedExtensions),
+                (filename) => {
+                    const extension = filename.split('.').pop()?.toLowerCase();
+                    return extension && allowedExtensions.map(ext => ext.toLowerCase()).includes(extension);
+                },
                 `File must have one of these extensions: ${allowedExtensions.join(', ')}`
             )
         };

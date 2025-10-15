@@ -5,9 +5,9 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import { useRouter } from "next/navigation";
-import { useUser } from '@/hooks/use-user';
-import { useAdmin } from '@/hooks/use-admin';
-import { RouteGuard } from '@/components/auth/route-guard';
+import { useUser } from "@/presentation/hooks/use-user";
+import { useAdmin } from "@/hooks/use-admin";
+import { RouteGuard } from "@/components/auth/route-guard";
 
 // Mock Next.js router
 jest.mock("next/navigation", () => ({
@@ -18,7 +18,7 @@ jest.mock("next/navigation", () => ({
 }));
 
 // Mock authentication hooks
-jest.mock("@/hooks/use-user");
+jest.mock("@/presentation/hooks/use-user");
 jest.mock("@/hooks/use-admin");
 
 // Mock toast notifications

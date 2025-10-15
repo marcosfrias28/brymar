@@ -56,7 +56,7 @@ export class UpdatePageSectionUseCase {
                 // Check if the new order conflicts with existing sections
                 const existingSections = await this.pageSectionRepository.findByPage(pageSection.getPage());
                 const conflictingSection = existingSections.find(
-                    section => section.getOrder() === input.order && !section.getId().equals(pageSection.getId())
+                    section => section.getOrder().value === input.order && !section.getId().equals(pageSection.getId())
                 );
 
                 if (conflictingSection) {
@@ -67,8 +67,7 @@ export class UpdatePageSectionUseCase {
                 pageSection.updateOrder(input.order);
             }
 
-            // Validate the updated page section
-            this.contentDomainService.validatePageSectionConfiguration(pageSection);
+            // TODO: Add page section validation when validatePageSectionConfiguration method is implemented
 
             // Save the updated page section
             await this.pageSectionRepository.save(pageSection);
@@ -95,17 +94,17 @@ export class UpdatePageSectionUseCase {
 
         // Find sections that need to be reordered
         const sectionsToReorder = sections.filter(
-            section => section.getOrder() >= newOrder && !section.getId().equals(excludeId)
+            section => section.getOrder().value >= newOrder && !section.getId().equals(excludeId)
         );
 
         // Update their orders
         const orderUpdates = sectionsToReorder.map(section => ({
-            id: section.getId(),
-            order: section.getOrder() + 1
+            sectionId: section.getId(),
+            order: section.getOrder().increment().value
         }));
 
         if (orderUpdates.length > 0) {
-            await this.pageSectionRepository.updateSectionOrder(page, orderUpdates);
+            await this.pageSectionRepository.updateSectionOrders(page, orderUpdates);
         }
     }
 }

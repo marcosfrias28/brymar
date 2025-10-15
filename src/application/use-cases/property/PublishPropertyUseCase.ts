@@ -120,7 +120,8 @@ export class PublishPropertyUseCase {
             }
 
             throw new BusinessRuleViolationError(
-                `Property cannot be published: ${reasons.join(', ')}`
+                `Property cannot be published: ${reasons.join(', ')}`,
+                'PROPERTY_NOT_PUBLISHABLE'
             );
         }
 
@@ -158,7 +159,8 @@ export class PublishPropertyUseCase {
             const features = property.getFeatures();
             if (!features.features || features.features.length === 0) {
                 throw new BusinessRuleViolationError(
-                    'Commercial properties must have detailed features listed'
+                    'Commercial properties must have detailed features listed',
+                    'COMMERCIAL_PROPERTY_MISSING_FEATURES'
                 );
             }
         }

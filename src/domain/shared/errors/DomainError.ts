@@ -28,3 +28,9 @@ export class EntityNotFoundError extends DomainError {
         super(`${entityType} with id ${id} not found`, 'ENTITY_NOT_FOUND');
     }
 }
+
+export class InfrastructureError extends DomainError {
+    constructor(message: string, public readonly operation?: string) {
+        super(message, 'INFRASTRUCTURE_ERROR');
+    }
+}

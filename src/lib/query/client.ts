@@ -18,7 +18,7 @@ function handleMutationError(error: Error) {
 // Success handler for mutations
 function handleMutationSuccess(data: any, variables: any, context: any) {
     // Let individual mutations handle their own success messages
-    console.log('Mutation Success:', { data, variables, context });
+    // Removed debug console.log for production
 }
 
 // Retry function for queries

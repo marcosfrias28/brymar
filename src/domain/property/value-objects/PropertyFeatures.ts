@@ -1,5 +1,5 @@
 import { ValueObject } from '@/domain/shared/value-objects/ValueObject';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 interface PropertyFeaturesData {
     bedrooms: number;
@@ -40,52 +40,52 @@ export class PropertyFeatures extends ValueObject<PropertyFeaturesData> {
     }): PropertyFeatures {
         // Validate bedrooms
         if (data.bedrooms < 0) {
-            throw new DomainError("Bedrooms cannot be negative");
+            throw new BusinessRuleViolationError("Bedrooms cannot be negative", "PROPERTY_VALIDATION");
         }
         if (data.bedrooms > 20) {
-            throw new DomainError("Bedrooms cannot exceed 20");
+            throw new BusinessRuleViolationError("Bedrooms cannot exceed 20", "PROPERTY_VALIDATION");
         }
 
         // Validate bathrooms
         if (data.bathrooms < 0) {
-            throw new DomainError("Bathrooms cannot be negative");
+            throw new BusinessRuleViolationError("Bathrooms cannot be negative", "PROPERTY_VALIDATION");
         }
         if (data.bathrooms > 20) {
-            throw new DomainError("Bathrooms cannot exceed 20");
+            throw new BusinessRuleViolationError("Bathrooms cannot exceed 20", "PROPERTY_VALIDATION");
         }
 
         // Validate area
         if (data.area < this.MIN_AREA) {
-            throw new DomainError(`Area must be at least ${this.MIN_AREA} square meters`);
+            throw new BusinessRuleViolationError(`Area must be at least ${this.MIN_AREA} square meters`, "PROPERTY_VALIDATION");
         }
         if (data.area > this.MAX_AREA) {
-            throw new DomainError(`Area cannot exceed ${this.MAX_AREA} square meters`);
+            throw new BusinessRuleViolationError(`Area cannot exceed ${this.MAX_AREA} square meters`, "PROPERTY_VALIDATION");
         }
 
         // Validate year built if provided
         if (data.yearBuilt !== undefined) {
             if (data.yearBuilt < this.MIN_YEAR || data.yearBuilt > this.MAX_YEAR) {
-                throw new DomainError(`Year built must be between ${this.MIN_YEAR} and ${this.MAX_YEAR}`);
+                throw new BusinessRuleViolationError(`Year built must be between ${this.MIN_YEAR} and ${this.MAX_YEAR}`, "PROPERTY_VALIDATION");
             }
         }
 
         // Validate lot size if provided
         if (data.lotSize !== undefined) {
             if (data.lotSize < 0) {
-                throw new DomainError("Lot size cannot be negative");
+                throw new BusinessRuleViolationError("Lot size cannot be negative", "PROPERTY_VALIDATION");
             }
             if (data.lotSize > 100000) { // 10 hectares
-                throw new DomainError("Lot size cannot exceed 100,000 square meters");
+                throw new BusinessRuleViolationError("Lot size cannot exceed 100,000 square meters", "PROPERTY_VALIDATION");
             }
         }
 
         // Validate parking if provided
         if (data.parking) {
             if (data.parking.spaces < 0) {
-                throw new DomainError("Parking spaces cannot be negative");
+                throw new BusinessRuleViolationError("Parking spaces cannot be negative", "PROPERTY_VALIDATION");
             }
             if (data.parking.spaces > 20) {
-                throw new DomainError("Parking spaces cannot exceed 20");
+                throw new BusinessRuleViolationError("Parking spaces cannot exceed 20", "PROPERTY_VALIDATION");
             }
         }
 
@@ -234,7 +234,7 @@ export class PropertyFeatures extends ValueObject<PropertyFeaturesData> {
 
     addAmenity(amenity: string): PropertyFeatures {
         if (!amenity || amenity.trim().length === 0) {
-            throw new DomainError("Amenity cannot be empty");
+            throw new BusinessRuleViolationError("Amenity cannot be empty", "PROPERTY_VALIDATION");
         }
 
         const trimmedAmenity = amenity.trim();
@@ -259,7 +259,7 @@ export class PropertyFeatures extends ValueObject<PropertyFeaturesData> {
 
     addFeature(feature: string): PropertyFeatures {
         if (!feature || feature.trim().length === 0) {
-            throw new DomainError("Feature cannot be empty");
+            throw new BusinessRuleViolationError("Feature cannot be empty", "PROPERTY_VALIDATION");
         }
 
         const trimmedFeature = feature.trim();

@@ -1,8 +1,8 @@
 "use server";
 
 import { PropertyBasicInfo } from '@/types/wizard';
-import { LandBasicInfoSchema, type LandFormData } from '@/lib/schemas/land-wizard-schemas';
-import { AIServiceError, ErrorFactory } from "../errors/wizard-errors";
+import { LandBasicInfoSchema } from '@/lib/schemas/land-wizard-schemas';
+import { AIServiceError } from "../errors/wizard-errors";
 import { retryAIOperation, circuitBreakers } from "../utils/retry-logic";
 import { sanitizeAIContent } from "../security/input-sanitization";
 import { checkAIGenerationRateLimit, recordSuccessfulOperation, recordFailedOperation } from "../security/rate-limiting";
@@ -13,10 +13,7 @@ const GEMINI_MODEL = 'gemini-2.5-flash-lite'; // Latest stable model with 1M+ co
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-interface HuggingFaceResponse {
-    generated_text?: string;
-    error?: string;
-}
+// Interface removed as it's not currently used
 
 interface GenerationOptions {
     maxLength?: number;
@@ -70,7 +67,7 @@ export async function generatePropertyTitle(
                     );
                 }
 
-                console.log(`✅ Title generation successful with Gemini`);
+                // Title generation successful with Gemini
                 return sanitizedText;
             });
         });
@@ -323,7 +320,7 @@ export async function generateAllPropertyContent(
  * Build enhanced description generation prompt for rich content
  */
 function buildEnhancedDescriptionPrompt(propertyData: PropertyBasicInfo, language: "es" | "en"): string {
-    const { type, location, price, surface, characteristics, bedrooms, bathrooms } = propertyData;
+    const { type, location, _price, surface, characteristics, bedrooms, bathrooms } = propertyData;
 
     if (language === "en") {
         return `Write a detailed, compelling real estate description for a ${type} in ${location}. 
@@ -372,7 +369,7 @@ Descripción Mejorada:`;
  * Build description generation prompt
  */
 function buildDescriptionPrompt(propertyData: PropertyBasicInfo, language: "es" | "en"): string {
-    const { type, location, price, surface, characteristics, bedrooms, bathrooms } = propertyData;
+    const { type, location, _price, surface, characteristics, bedrooms, bathrooms } = propertyData;
 
     if (language === "en") {
         return `Write a compelling real estate description for a ${type} in ${location}. 
@@ -464,7 +461,7 @@ function cleanGeneratedText(generatedText: string, originalPrompt: string): stri
         // Split by common list indicators and take the first item
         const lines = cleaned.split('\n');
         const firstLine = lines[0];
-        
+
         // If it's a bulleted list, extract the first item
         if (firstLine.includes('*') || firstLine.includes('-') || firstLine.includes('•')) {
             // Extract text after the bullet point
@@ -476,7 +473,7 @@ function cleanGeneratedText(generatedText: string, originalPrompt: string): stri
             // Take the first line as is
             cleaned = firstLine;
         }
-        
+
         // Remove any remaining formatting
         cleaned = cleaned
             .replace(/^\*\*|\*\*$/g, '') // Remove bold markdown
@@ -500,7 +497,7 @@ function parseTagsFromText(text: string): string[] {
 
 // Fallback template methods
 function generateTemplateDescription(propertyData: PropertyBasicInfo, language: "es" | "en"): string {
-    const { type, location, price, surface, characteristics, bedrooms, bathrooms } = propertyData;
+    const { type, location, _price, surface, characteristics, bedrooms, bathrooms } = propertyData;
 
     if (language === "en") {
         const bedroomText = bedrooms ? ` with ${bedrooms} bedroom${bedrooms > 1 ? 's' : ''}` : '';
@@ -547,8 +544,8 @@ function generateTemplateTags(propertyData: PropertyBasicInfo, language: "es" | 
 
  * Generate fallback title when AI service fails
  */
-function generateFallbackTitle(propertyData: PropertyBasicInfo, language: "es" | "en"): string {
-    const { type, location, price, surface, bedrooms, bathrooms } = propertyData;
+function _generateFallbackTitle(propertyData: PropertyBasicInfo, language: "es" | "en"): string {
+    const { type, location, _price, surface, bedrooms, bathrooms } = propertyData;
 
     if (language === "en") {
         const bedroomText = bedrooms ? `${bedrooms} bedroom${bedrooms > 1 ? 's' : ''}` : '';
@@ -569,7 +566,7 @@ function generateFallbackTitle(propertyData: PropertyBasicInfo, language: "es" |
  * Generate fallback description when AI service fails
  */
 function generateFallbackDescription(propertyData: PropertyBasicInfo, language: "es" | "en"): string {
-    const { type, location, price, surface, characteristics, bedrooms, bathrooms } = propertyData;
+    const { type, location, _price, surface, characteristics, bedrooms, bathrooms } = propertyData;
 
     if (language === "en") {
         let description = `Discover this beautiful ${type} located in ${location}. `;
@@ -617,7 +614,7 @@ function generateFallbackDescription(propertyData: PropertyBasicInfo, language: 
 /**
  * Generate fallback tags when AI service fails
  */
-function generateFallbackTags(propertyData: PropertyBasicInfo, language: "es" | "en"): string[] {
+function _generateFallbackTags(propertyData: PropertyBasicInfo, language: "es" | "en"): string[] {
     const { type, location, characteristics } = propertyData;
 
     if (language === "en") {
@@ -685,7 +682,7 @@ function convertToRichTextContent(text: string, language: "es" | "en"): RichText
  * Generate enhanced fallback description with rich formatting
  */
 function generateEnhancedFallbackDescription(propertyData: PropertyBasicInfo, language: "es" | "en"): RichTextContent {
-    const { type, location, price, surface, characteristics, bedrooms, bathrooms } = propertyData;
+    const { type, location, _price, surface, characteristics, bedrooms, bathrooms } = propertyData;
 
     if (language === "en") {
         const bedroomText = bedrooms ? ` with ${bedrooms} bedroom${bedrooms > 1 ? 's' : ''}` : '';
@@ -774,8 +771,7 @@ async function callGeminiAPI(
 
         const data = await response.json();
 
-        // Debug: Log the full response to understand the structure
-        console.log('Gemini API Response:', JSON.stringify(data, null, 2));
+        // Debug logging removed for production
 
         // Try different possible response structures
         let generatedText = '';
@@ -805,7 +801,7 @@ async function callGeminiAPI(
         // Clean up the text
         generatedText = generatedText.trim();
 
-        console.log('Extracted text:', generatedText);
+        // Debug logging removed for production
 
         if (!generatedText || generatedText.length < 10) {
             console.error('Gemini response structure:', data);

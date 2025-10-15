@@ -1,11 +1,11 @@
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { ValueObjectValidationError } from '@/domain/shared/errors/DomainError';
 
 export class BlogContent {
     private static readonly MIN_LENGTH = 50;
     private static readonly MAX_LENGTH = 10000;
 
-    private constructor(private readonly value: string) {
-        this.validate(value);
+    private constructor(private readonly _value: string) {
+        this.validate(_value);
     }
 
     static create(content: string): BlogContent {
@@ -14,27 +14,27 @@ export class BlogContent {
 
     private validate(content: string): void {
         if (!content || content.trim().length === 0) {
-            throw new DomainError("Blog content cannot be empty");
+            throw new ValueObjectValidationError("Blog content cannot be empty");
         }
 
         const trimmedContent = content.trim();
 
         if (trimmedContent.length < BlogContent.MIN_LENGTH) {
-            throw new DomainError(`Blog content must be at least ${BlogContent.MIN_LENGTH} characters long`);
+            throw new ValueObjectValidationError(`Blog content must be at least ${BlogContent.MIN_LENGTH} characters long`);
         }
 
         if (trimmedContent.length > BlogContent.MAX_LENGTH) {
-            throw new DomainError(`Blog content cannot exceed ${BlogContent.MAX_LENGTH} characters`);
+            throw new ValueObjectValidationError(`Blog content cannot exceed ${BlogContent.MAX_LENGTH} characters`);
         }
     }
 
     get value(): string {
-        return this.value.trim();
+        return this._value.trim();
     }
 
     isValid(): boolean {
         try {
-            this.validate(this.value);
+            this.validate(this._value);
             return true;
         } catch {
             return false;
@@ -42,15 +42,15 @@ export class BlogContent {
     }
 
     getLength(): number {
-        return this.value.trim().length;
+        return this._value.trim().length;
     }
 
     getWordCount(): number {
-        return this.value.trim().split(/\s+/).length;
+        return this._value.trim().split(/\s+/).length;
     }
 
     getExcerpt(maxLength: number = 150): string {
-        const content = this.value.trim();
+        const content = this._value.trim();
         if (content.length <= maxLength) {
             return content;
         }
@@ -66,10 +66,10 @@ export class BlogContent {
     }
 
     equals(other: BlogContent): boolean {
-        return this.value.trim() === other.value.trim();
+        return this._value.trim() === other._value.trim();
     }
 
     toString(): string {
-        return this.value.trim();
+        return this._value.trim();
     }
 }

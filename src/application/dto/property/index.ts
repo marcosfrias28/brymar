@@ -7,3 +7,5 @@ export * from './SearchPropertiesInput';
 export * from './SearchPropertiesOutput';
 export * from './PublishPropertyInput';
 export * from './PublishPropertyOutput';
+export * from './GetPropertyByIdInput';
+export * from './GetPropertyByIdOutput';

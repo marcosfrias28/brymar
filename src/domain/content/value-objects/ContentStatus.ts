@@ -1,4 +1,4 @@
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { ValueObjectValidationError } from '@/domain/shared/errors/DomainError';
 
 export type ContentStatusType = "draft" | "published";
 
@@ -10,8 +10,8 @@ export class ContentStatus {
         published: "Publicado"
     };
 
-    private constructor(private readonly value: ContentStatusType) {
-        this.validate(value);
+    private constructor(private readonly _value: ContentStatusType) {
+        this.validate(_value);
     }
 
     static create(status: string): ContentStatus {
@@ -28,34 +28,34 @@ export class ContentStatus {
 
     private validate(status: string): void {
         if (!status || status.trim().length === 0) {
-            throw new DomainError("Content status cannot be empty");
+            throw new ValueObjectValidationError("Content status cannot be empty");
         }
 
         if (!ContentStatus.VALID_STATUSES.includes(status as ContentStatusType)) {
-            throw new DomainError(
+            throw new ValueObjectValidationError(
                 `Invalid content status: ${status}. Valid statuses are: ${ContentStatus.VALID_STATUSES.join(", ")}`
             );
         }
     }
 
     get value(): ContentStatusType {
-        return this.value;
+        return this._value;
     }
 
     getLabel(): string {
-        return ContentStatus.STATUS_LABELS[this.value];
+        return ContentStatus.STATUS_LABELS[this._value];
     }
 
     isValid(): boolean {
-        return ContentStatus.VALID_STATUSES.includes(this.value);
+        return ContentStatus.VALID_STATUSES.includes(this._value);
     }
 
     isDraft(): boolean {
-        return this.value === "draft";
+        return this._value === "draft";
     }
 
     isPublished(): boolean {
-        return this.value === "published";
+        return this._value === "published";
     }
 
     canTransitionTo(newStatus: ContentStatus): boolean {
@@ -82,10 +82,10 @@ export class ContentStatus {
     }
 
     equals(other: ContentStatus): boolean {
-        return this.value === other.value;
+        return this._value === other._value;
     }
 
     toString(): string {
-        return this.value;
+        return this._value;
     }
 }

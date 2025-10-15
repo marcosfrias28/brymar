@@ -15,24 +15,25 @@ import {
   Home,
   BookOpen,
 } from "lucide-react";
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { RichTextEditor } from '@/components/ui/rich-text-editor';
-import { DashboardPageLayout } from '@/components/layout/dashboard-page-layout';
+} from "@/components/ui/select";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 
-import { useBlogPost, BlogPost } from '@/hooks/use-blog';
-import { secondaryColorClasses } from '@/lib/utils/secondary-colors';
-import { cn } from '@/lib/utils';
+import { useBlogPost } from "@/presentation/hooks/use-blog";
+import type { GetBlogPostByIdOutput } from "@/application/dto/content";
+import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 export default function BlogDetailPage() {
@@ -46,23 +47,17 @@ export default function BlogDetailPage() {
     error,
     updateBlogPost,
     deleteBlogPost,
-    updateState,
-    isUpdating,
+    refreshBlogPost,
   } = useBlogPost(params?.id as string);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedPost, setEditedPost] = useState<Partial<BlogPost> | null>(null);
+  const [editedPost, setEditedPost] =
+    useState<Partial<GetBlogPostByIdOutput> | null>(null);
 
   useEffect(() => {
     if (blogPost) {
       setEditedPost({ ...blogPost });
     }
   }, [blogPost]);
-
-  useEffect(() => {
-    if (updateState?.success) {
-      setIsEditing(false);
-    }
-  }, [updateState]);
 
   const breadcrumbs = [
     { label: "Dashboard", href: "/dashboard", icon: Home },
@@ -125,22 +120,27 @@ export default function BlogDetailPage() {
     );
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (editedPost && blogPost) {
-      const formData = new FormData();
-      formData.append("title", editedPost.title || blogPost.title);
-      formData.append("content", editedPost.content || blogPost.content);
-      formData.append("author", editedPost.author || blogPost.author);
-      formData.append(
-        "status",
-        (editedPost.status || blogPost.status) as string
-      );
-      formData.append(
-        "category",
-        (editedPost.category || blogPost.category) as string
-      );
+      const { UpdateBlogPostInput } = await import("@/application/dto/content");
 
-      updateBlogPost(formData);
+      const input = UpdateBlogPostInput.create({
+        id: blogPost.getId().value,
+        title: editedPost.title || blogPost.title,
+        content: editedPost.content || blogPost.content,
+        author: editedPost.author || blogPost.author,
+        category: (editedPost.category || blogPost.category) as
+          | "market-analysis"
+          | "investment-tips"
+          | "property-news"
+          | "legal-advice"
+          | "lifestyle",
+      });
+
+      const result = await updateBlogPost(input);
+      if (result) {
+        setIsEditing(false);
+      }
     }
   };
 
@@ -212,14 +212,13 @@ export default function BlogDetailPage() {
           <Button
             size="sm"
             onClick={handleSave}
-            disabled={isUpdating}
             className={cn(
               "bg-primary hover:bg-primary/90",
               secondaryColorClasses.focusRing
             )}
           >
             <Save className="h-4 w-4 mr-2" />
-            {isUpdating ? "Guardando..." : "Guardar"}
+            Guardar
           </Button>
         </>
       )}
@@ -274,17 +273,14 @@ export default function BlogDetailPage() {
                     <Label htmlFor="coverImage">URL de Imagen</Label>
                     <Input
                       id="coverImage"
-                      value={editedPost?.image || ""}
-                      onChange={(e) =>
-                        editedPost &&
-                        setEditedPost({ ...editedPost, image: e.target.value })
-                      }
-                      placeholder="URL de la imagen de portada"
+                      value=""
+                      disabled
+                      placeholder="Image functionality not implemented"
                     />
                   </div>
                   <div className="aspect-video rounded-lg overflow-hidden bg-gray-100">
                     <img
-                      src={editedPost?.image || "/placeholder.svg"}
+                      src="/placeholder.svg"
                       alt="Vista previa"
                       className="w-full h-full object-cover"
                     />
@@ -293,7 +289,7 @@ export default function BlogDetailPage() {
               ) : (
                 <div className="aspect-video rounded-lg overflow-hidden">
                   <img
-                    src={currentData.image || "/placeholder.svg"}
+                    src="/placeholder.svg"
                     alt={currentData.title}
                     className="w-full h-full object-cover"
                   />
@@ -405,7 +401,7 @@ export default function BlogDetailPage() {
                 <>
                   <div className="flex items-center gap-2 text-sm text-blackCoral">
                     <User className="h-4 w-4" />
-                    <span>{currentData.author}</span>
+                    <span>{currentData.author || "Unknown Author"}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-blackCoral">
                     <Calendar className="h-4 w-4" />
@@ -441,7 +437,10 @@ export default function BlogDetailPage() {
                       value={editedPost?.author || ""}
                       onChange={(e) =>
                         editedPost &&
-                        setEditedPost({ ...editedPost, author: e.target.value })
+                        setEditedPost({
+                          ...editedPost,
+                          author: e.target.value,
+                        })
                       }
                     />
                   </div>

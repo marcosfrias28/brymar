@@ -5,12 +5,12 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { useRouter } from "next/navigation";
-import { useUser } from '@/hooks/use-user';
-import { useAdmin } from '@/hooks/use-admin';
+import { useUser } from "@/presentation/hooks/use-user";
+import { useAdmin } from "@/hooks/use-admin";
 
 // Mock all dependencies
 jest.mock("next/navigation");
-jest.mock("@/hooks/use-user");
+jest.mock("@/presentation/hooks/use-user");
 jest.mock("@/hooks/use-admin");
 jest.mock("sonner");
 

@@ -2,21 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useUser } from '@/hooks/use-user';
-import { LazyWizardWrapper } from '@/components/wizard/lazy-wizard-wrapper';
-import { RouteGuard } from '@/components/auth/route-guard';
-import { DashboardPageLayout } from '@/components/layout/dashboard-page-layout';
-import { WizardErrorBoundary } from '@/components/wizard/core/wizard-error-boundary';
-import { ComprehensiveErrorRecovery } from '@/components/wizard/comprehensive-error-recovery';
-import { NetworkAwareWizard } from '@/components/wizard/network-aware-wizard';
-import { WizardFallbackUI } from '@/components/wizard/fallback-ui-states';
+import { useUser } from "@/presentation/hooks/use-user";
+import { LazyWizardWrapper } from "@/components/wizard/lazy-wizard-wrapper";
+import { RouteGuard } from "@/components/auth/route-guard";
+import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
+import { WizardErrorBoundary } from "@/components/wizard/core/wizard-error-boundary";
+import { ComprehensiveErrorRecovery } from "@/components/wizard/comprehensive-error-recovery";
+import { NetworkAwareWizard } from "@/components/wizard/network-aware-wizard";
+import { WizardFallbackUI } from "@/components/wizard/fallback-ui-states";
 import {
   generateWizardBreadcrumbs,
   ConsistentLoadingState,
   ConsistentErrorState,
-} from '@/components/wizard/shared/consistent-navigation';
+} from "@/components/wizard/shared/consistent-navigation";
 import { toast } from "sonner";
-import type { BlogWizardData } from '@/lib/schemas/blog-wizard-schemas';
+import type { BlogWizardData } from "@/lib/schemas/blog-wizard-schemas";
 
 export default function NewBlogPage() {
   const router = useRouter();
@@ -29,7 +29,7 @@ export default function NewBlogPage() {
 
   useEffect(() => {
     const loadDraftData = async () => {
-      if (!draftId || !user?.id) return;
+      if (!draftId || !user?.getId()) return;
 
       setLoading(true);
       try {
@@ -40,7 +40,7 @@ export default function NewBlogPage() {
 
         const result = await loadBlogDraft({
           draftId,
-          userId: user.id,
+          userId: user.getId().value,
         });
 
         if (result.success && result.data?.formData) {
@@ -61,7 +61,7 @@ export default function NewBlogPage() {
     };
 
     loadDraftData();
-  }, [draftId, user?.id, router]);
+  }, [draftId, user?.getId(), router]);
 
   const handleComplete = async (data: BlogWizardData) => {
     try {
@@ -103,7 +103,7 @@ export default function NewBlogPage() {
     );
   }
 
-  if (!user?.id) {
+  if (!user?.getId()) {
     return (
       <RouteGuard requiredPermission="blog.manage">
         <DashboardPageLayout
@@ -171,10 +171,10 @@ export default function NewBlogPage() {
             >
               <LazyWizardWrapper
                 type="blog"
-                wizardId={`blog-${user.id}-${draftId || "new"}`}
+                wizardId={`blog-${user.getId().value}-${draftId || "new"}`}
                 initialData={initialData}
                 draftId={draftId || undefined}
-                userId={user.id}
+                userId={user.getId().value}
                 onComplete={handleComplete}
                 onUpdate={handleUpdate}
                 onCancel={handleCancel}

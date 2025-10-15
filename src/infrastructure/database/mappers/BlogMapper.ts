@@ -5,8 +5,7 @@ import { BlogContent } from '@/domain/content/value-objects/BlogContent';
 import { BlogAuthor } from '@/domain/content/value-objects/BlogAuthor';
 import { BlogCategory } from '@/domain/content/value-objects/BlogCategory';
 import { ContentStatus } from '@/domain/content/value-objects/ContentStatus';
-import { BlogSEO } from '@/domain/content/value-objects/BlogSEO';
-import { BlogMedia } from '@/domain/content/value-objects/BlogMedia';
+
 import { ReadingTime } from '@/domain/content/value-objects/ReadingTime';
 import { BlogPost as BlogPostSchema } from '@/lib/db/schema';
 
@@ -22,21 +21,6 @@ export class BlogMapper {
 
         // Create SEO object with available data
         // Note: Current schema doesn't have all SEO fields, so we'll use defaults
-        const seo = BlogSEO.create({
-            title: undefined, // Not in current schema
-            description: undefined, // Not in current schema
-            tags: ['inmobiliaria'], // Default tag since not in current schema
-            slug: undefined, // Not in current schema
-            featured: false // Not in current schema
-        });
-
-        // Create media object
-        // Note: Current schema has single image field, we'll adapt it
-        const media = BlogMedia.create({
-            coverImage: row.image || undefined,
-            images: [] // Not in current schema
-        });
-
         const readingTime = ReadingTime.create(row.readingTime);
 
         return BlogPost.reconstitute({
@@ -46,8 +30,6 @@ export class BlogMapper {
             author,
             category,
             status,
-            seo,
-            media,
             readingTime,
             createdAt: row.createdAt || new Date(),
             updatedAt: row.updatedAt || new Date()
@@ -66,17 +48,15 @@ export class BlogMapper {
         createdAt: Date;
         updatedAt: Date;
     } {
-        const media = blogPost.getMedia();
-
         return {
-            id: blogPost.getId().isNumeric() ? blogPost.getId().toNumber() : parseInt(blogPost.getId().value, 10),
+            id: blogPost.getId().toNumber(),
             title: blogPost.getTitle().value,
             content: blogPost.getContent().value,
             author: blogPost.getAuthor().value,
             category: blogPost.getCategory().value,
             status: blogPost.getStatus().value,
-            image: media.hasCoverImage() ? media.coverImage! : null,
-            readingTime: blogPost.getReadingTime().getMinutes(),
+            image: null, // No media support in current implementation
+            readingTime: blogPost.getReadingTime().minutes,
             createdAt: blogPost.getCreatedAt(),
             updatedAt: blogPost.getUpdatedAt()
         };
@@ -91,16 +71,14 @@ export class BlogMapper {
         image: string | null;
         readingTime: number;
     } {
-        const media = blogPost.getMedia();
-
         return {
             title: blogPost.getTitle().value,
             content: blogPost.getContent().value,
             author: blogPost.getAuthor().value,
             category: blogPost.getCategory().value,
             status: blogPost.getStatus().value,
-            image: media.hasCoverImage() ? media.coverImage! : null,
-            readingTime: blogPost.getReadingTime().getMinutes()
+            image: null, // No media support in current implementation
+            readingTime: blogPost.getReadingTime().minutes
         };
     }
 
@@ -114,16 +92,14 @@ export class BlogMapper {
         readingTime: number;
         updatedAt: Date;
     } {
-        const media = blogPost.getMedia();
-
         return {
             title: blogPost.getTitle().value,
             content: blogPost.getContent().value,
             author: blogPost.getAuthor().value,
             category: blogPost.getCategory().value,
             status: blogPost.getStatus().value,
-            image: media.hasCoverImage() ? media.coverImage! : null,
-            readingTime: blogPost.getReadingTime().getMinutes(),
+            image: null, // No media support in current implementation
+            readingTime: blogPost.getReadingTime().minutes,
             updatedAt: new Date()
         };
     }

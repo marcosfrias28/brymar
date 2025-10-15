@@ -1,20 +1,34 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { User } from "@/domain/user/entities/User";
+
 import { UpdateUserProfileUseCase } from "@/application/use-cases/user/UpdateUserProfileUseCase";
+import { GetCurrentUserUseCase } from "@/application/use-cases/user/GetCurrentUserUseCase";
+import { SignOutUseCase } from "@/application/use-cases/user/SignOutUseCase";
 import { UpdateUserProfileInput } from "@/application/dto/user/UpdateUserProfileInput";
+import { GetCurrentUserInput } from "@/application/dto/user/GetCurrentUserInput";
+import { SignOutInput } from "@/application/dto/user/SignOutInput";
+import { GetCurrentUserOutput } from "@/application/dto/user/GetCurrentUserOutput";
+import { container } from "@/infrastructure/container/Container";
+import { initializeContainer } from "@/infrastructure/container/ServiceRegistration";
+import { authClient } from "@/lib/auth/auth-client";
+
+// Initialize container if not already done
+if (!container.has('UpdateUserProfileUseCase')) {
+    initializeContainer();
+}
 
 export interface UseUserReturn {
-    user: User | null;
+    user: GetCurrentUserOutput | null;
     loading: boolean;
     error: string | null;
     updateProfile: (profileData: any) => Promise<void>;
     refetch: () => Promise<void>;
+    signOut: () => Promise<void>;
 }
 
 export function useUser(): UseUserReturn {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<GetCurrentUserOutput | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -22,33 +36,68 @@ export function useUser(): UseUserReturn {
         try {
             setError(null);
 
-            const updateUserProfileUseCase = new UpdateUserProfileUseCase(/* dependencies */);
+            const updateUserProfileUseCase = container.get<UpdateUserProfileUseCase>('UpdateUserProfileUseCase');
             const input = UpdateUserProfileInput.create(profileData);
+            await updateUserProfileUseCase.execute(input);
 
-            const result = await updateUserProfileUseCase.execute(input);
-
-            // Update local user state
-            if (user) {
-                // This would typically be handled by the use case returning the updated user
-                setUser(user); // Placeholder - would update with new data
-            }
+            // Refetch the updated user data
+            await refetch();
         } catch (err) {
             setError(err instanceof Error ? err.message : "Update failed");
         }
-    }, [user]);
+    }, []);
 
     const refetch = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
 
-            // This would typically call a GetCurrentUserUseCase
-            // For now, we'll use a placeholder implementation
+            // Get current session from Better Auth
+            const session = await authClient.getSession();
 
-            setLoading(false);
+            if (!session.data?.user?.id) {
+                setUser(null);
+                setLoading(false);
+                return;
+            }
+
+            // Use the GetCurrentUserUseCase to fetch user data
+            const getCurrentUserUseCase = container.get<GetCurrentUserUseCase>('GetCurrentUserUseCase');
+            const input = GetCurrentUserInput.fromUserId(session.data.user.id);
+            const result = await getCurrentUserUseCase.execute(input);
+
+            setUser(result);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to fetch user");
+            setUser(null);
+        } finally {
             setLoading(false);
+        }
+    }, []);
+
+    const signOut = useCallback(async () => {
+        try {
+            setError(null);
+
+            // Get current session for the sign out use case
+            const session = await authClient.getSession();
+            const userId = session.data?.user?.id;
+
+            // Use the SignOutUseCase
+            const signOutUseCase = container.get<SignOutUseCase>('SignOutUseCase');
+            const input = SignOutInput.create(userId);
+            await signOutUseCase.execute(input);
+
+            // Sign out from Better Auth
+            await authClient.signOut();
+
+            // Clear local state
+            setUser(null);
+
+            // Redirect to home page
+            window.location.href = '/';
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Sign out failed");
         }
     }, []);
 
@@ -62,5 +111,6 @@ export function useUser(): UseUserReturn {
         error,
         updateProfile,
         refetch,
+        signOut,
     };
 }

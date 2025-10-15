@@ -1,5 +1,5 @@
 import { ValueObject } from '@/domain/shared/value-objects/ValueObject';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 export class MediaUrl extends ValueObject<string> {
     private constructor(value: string) {
@@ -8,7 +8,7 @@ export class MediaUrl extends ValueObject<string> {
 
     static create(url: string): MediaUrl {
         if (!url || url.trim().length === 0) {
-            throw new DomainError("Media URL cannot be empty");
+            throw new BusinessRuleViolationError("Media URL cannot be empty", "WIZARD_VALIDATION");
         }
 
         const trimmedUrl = url.trim();
@@ -17,12 +17,12 @@ export class MediaUrl extends ValueObject<string> {
         try {
             new URL(trimmedUrl);
         } catch {
-            throw new DomainError("Media URL must be a valid URL");
+            throw new BusinessRuleViolationError("Media URL must be a valid URL", "WIZARD_VALIDATION");
         }
 
         // Validate protocol (should be https for security)
         if (!trimmedUrl.startsWith("https://") && !trimmedUrl.startsWith("http://")) {
-            throw new DomainError("Media URL must use HTTP or HTTPS protocol");
+            throw new BusinessRuleViolationError("Media URL must use HTTP or HTTPS protocol", "WIZARD_VALIDATION");
         }
 
         return new MediaUrl(trimmedUrl);

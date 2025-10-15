@@ -1,21 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, Eye, EyeOff } from "lucide-react";
-import { getContactInfo } from '@/lib/actions/sections-actions';
-import { useSections } from '@/hooks/queries/use-sections-query';
+import { getContactInfo } from "@/lib/actions/sections-actions";
+import { useSections } from "@/hooks/queries/use-sections-query";
 import { SectionEditor } from "./section-editor";
 import { ContactInfoEditor } from "./contact-info-editor";
-import type { PageSection, ContactInfo } from '@/lib/db/schema';
+import type { PageSection, ContactInfo } from "@/lib/db/schema";
 
 interface SectionsManagerProps {
   page: string;
@@ -53,7 +53,7 @@ export function SectionsManager({ page }: SectionsManagerProps) {
       const contacts = await getContactInfo();
       setContactInfos(contacts);
     } catch (error) {
-      console.error("Error loading contact info:", error);
+      // Note: Error loading contact info - would be logged in production
     } finally {
       setContactLoading(false);
     }

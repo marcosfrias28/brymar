@@ -10,6 +10,13 @@ jest.mock('@/lib/auth/auth');
 const mockDb = db as jest.Mocked<typeof db>;
 const mockAuth = auth as jest.Mocked<typeof auth>;
 
+// Helper function to convert object to FormData
+function objectToFormData(obj: any): FormData {
+    const formData = new FormData();
+    formData.append('data', JSON.stringify(obj));
+    return formData;
+}
+
 describe('wizard-actions', () => {
     const mockUser = {
         id: 'user-123',
@@ -81,7 +88,7 @@ describe('wizard-actions', () => {
                 return await callback(mockDb);
             });
 
-            const result = await publishProperty(mockPropertyData);
+            const result = await publishProperty(objectToFormData(mockPropertyData));
 
             expect(result.success).toBe(true);
             expect(result.data).toEqual(mockInsertedProperty);
@@ -95,7 +102,7 @@ describe('wizard-actions', () => {
                 price: -1000, // Invalid: negative price
             };
 
-            const result = await publishProperty(invalidData);
+            const result = await publishProperty(objectToFormData(invalidData));
 
             expect(result.success).toBe(false);
             expect(result.error).toContain('validation');
@@ -113,7 +120,7 @@ describe('wizard-actions', () => {
                 return await callback(mockDb);
             });
 
-            const result = await publishProperty(mockPropertyData);
+            const result = await publishProperty(objectToFormData(mockPropertyData));
 
             expect(result.success).toBe(false);
             expect(result.error).toBe('Error al publicar la propiedad');
@@ -125,7 +132,7 @@ describe('wizard-actions', () => {
                 user: null,
             });
 
-            const result = await publishProperty(mockPropertyData);
+            const result = await publishProperty(objectToFormData(mockPropertyData));
 
             expect(result.success).toBe(false);
             expect(result.error).toBe('No autorizado');
@@ -145,7 +152,7 @@ describe('wizard-actions', () => {
                 return await callback(mockDb);
             });
 
-            await publishProperty(mockPropertyData);
+            await publishProperty(objectToFormData(mockPropertyData));
 
             expect(mockDb.insert).toHaveBeenCalledWith(propertyImages);
         });
@@ -169,7 +176,7 @@ describe('wizard-actions', () => {
                 }
             });
 
-            const result = await publishProperty(mockPropertyData);
+            const result = await publishProperty(objectToFormData(mockPropertyData));
 
             expect(result.success).toBe(false);
             expect(result.error).toBe('Error al publicar la propiedad');

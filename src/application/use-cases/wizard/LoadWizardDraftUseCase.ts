@@ -3,7 +3,7 @@ import { LoadWizardDraftOutput } from "../../dto/wizard/LoadWizardDraftOutput";
 import { IWizardDraftRepository } from '@/domain/wizard/repositories/IWizardDraftRepository';
 import { WizardDraftId } from '@/domain/wizard/value-objects/WizardDraftId';
 import { UserId } from '@/domain/user/value-objects/UserId';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { EntityNotFoundError, BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 export class LoadWizardDraftUseCase {
     constructor(
@@ -19,17 +19,17 @@ export class LoadWizardDraftUseCase {
             const wizardDraft = await this.wizardDraftRepository.findById(draftId);
 
             if (!wizardDraft) {
-                throw new DomainError(`Wizard draft with ID ${input.draftId} not found`);
+                throw new EntityNotFoundError('WizardDraft', input.draftId);
             }
 
             // Verify ownership
             if (!wizardDraft.getUserId().equals(userId)) {
-                throw new DomainError("You don't have permission to access this draft");
+                throw new BusinessRuleViolationError("You don't have permission to access this draft", 'UNAUTHORIZED_DRAFT_ACCESS');
             }
 
             return LoadWizardDraftOutput.from(wizardDraft);
         } catch (error) {
-            if (error instanceof DomainError) {
+            if (error instanceof EntityNotFoundError || error instanceof BusinessRuleViolationError) {
                 throw error;
             }
             throw new Error(`Failed to load wizard draft: ${error instanceof Error ? error.message : "Unknown error"}`);

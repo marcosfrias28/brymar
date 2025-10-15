@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { cn } from '@/lib/utils';
-import { useAvoidRoutes } from '@/hooks/use-avoid-routes';
-import { useAdmin } from '@/hooks/use-admin';
-import { useUser } from '@/hooks/use-user';
+import { cn } from "@/lib/utils";
+import { useAvoidRoutes } from "@/hooks/use-avoid-routes";
+import { useAdmin } from "@/hooks/use-admin";
+import { useUser } from "@/presentation/hooks/use-user";
 import {
   Home,
   Building2,
@@ -26,17 +26,17 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-} from '@/components/ui/navigation-menu';
+} from "@/components/ui/navigation-menu";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTrigger,
-} from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import Logo from "./ui/logo";
-import getProfileItems from '@/lib/navbar/getProfileItems';
+import getProfileItems from "@/lib/navbar/getProfileItems";
 import { ModeToggle } from "./mode-toggle";
 import LogOutButton from "./auth/logout-button";
 import { AuthButtons } from "./auth/auth-buttons";
@@ -365,7 +365,7 @@ export function Navbar({ className }: NavbarProps) {
               <div className="space-y-2">
                 <div className="px-3 py-2 bg-muted/50 rounded-lg">
                   <div className="font-medium text-sm truncate">
-                    {user.name || user.email}
+                    {user.getProfile().getFullName() || user.getEmail().value}
                   </div>
                   <div className="text-xs text-muted-foreground capitalize">
                     {role === "admin"
@@ -388,7 +388,7 @@ export function Navbar({ className }: NavbarProps) {
                   </Link>
                 ))}
 
-                <LogOutButton user={user} />
+                <LogOutButton user={null} />
               </div>
             ) : (
               <div className="space-y-3">

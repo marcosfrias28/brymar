@@ -26,16 +26,16 @@ export class RegisterUserUseCase {
         const existingUser = await this.userRepository.findByEmail(email);
 
         if (existingUser) {
-            throw new BusinessRuleViolationError('User with this email already exists');
+            throw new BusinessRuleViolationError('User with this email already exists', 'EMAIL_ALREADY_EXISTS');
         }
 
         // 3. Create new user entity
         const user = User.create({
             email: input.email,
-            name: input.name,
-            firstName: input.firstName,
-            lastName: input.lastName,
-            phone: input.phone,
+            profile: {
+                firstName: input.firstName || '',
+                lastName: input.lastName || ''
+            },
             role: input.role,
             preferences: input.preferences,
         });

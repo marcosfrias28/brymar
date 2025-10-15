@@ -10,25 +10,26 @@ import {
   Bell,
   ArrowUpDown,
 } from "lucide-react";
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { SearchLandsFilters } from "@/presentation/hooks/use-lands";
 
 interface RealTimeLandFiltersProps {
-  filters: Record<string, any>;
-  onFilterChange: (filterName: string, value: any) => void;
+  filters: SearchLandsFilters;
+  onFilterChange: (filterName: keyof SearchLandsFilters, value: any) => void;
   isLoading?: boolean;
   className?: string;
 }
@@ -51,13 +52,13 @@ export function RealTimeLandFilters({
 
   // Land types from schema
   const landTypes = [
-    { value: "residencial", label: "Residencial" },
-    { value: "comercial", label: "Comercial" },
+    { value: "residential", label: "Residencial" },
+    { value: "commercial", label: "Comercial" },
     { value: "industrial", label: "Industrial" },
-    { value: "agricola", label: "Agrícola" },
-    { value: "mixto", label: "Mixto" },
-    { value: "turistico", label: "Turístico" },
-    { value: "desarrollo", label: "Para Desarrollo" },
+    { value: "agricultural", label: "Agrícola" },
+    { value: "mixed", label: "Mixto" },
+    { value: "tourist", label: "Turístico" },
+    { value: "development", label: "Para Desarrollo" },
   ];
 
   // Update local ranges when filters change from URL
@@ -86,7 +87,7 @@ export function RealTimeLandFilters({
 
   const resetFilters = () => {
     // Clear all filters by setting them to undefined
-    Object.keys(filters).forEach((key) => {
+    (Object.keys(filters) as Array<keyof SearchLandsFilters>).forEach((key) => {
       onFilterChange(key, undefined);
     });
     setLocalPriceRange([10000, 1000000]);

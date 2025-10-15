@@ -14,7 +14,7 @@ export class UserDomainService {
      */
     static canAssignRole(currentUser: User, targetUser: User, newRole: UserRole): boolean {
         // Only admins can assign roles
-        if (!currentUser.isAdmin()) {
+        if (!currentUser.getRole().isAdmin()) {
             return false;
         }
 
@@ -24,7 +24,7 @@ export class UserDomainService {
         }
 
         // Cannot assign a role higher than your own
-        if (newRole.getHierarchyLevel() >= currentUser.getRole().getHierarchyLevel()) {
+        if (!currentUser.getRole().canManage(newRole)) {
             return false;
         }
 
@@ -36,7 +36,7 @@ export class UserDomainService {
      */
     static canDeactivateUser(currentUser: User, targetUser: User): boolean {
         // Only admins can deactivate users
-        if (!currentUser.isAdmin()) {
+        if (!currentUser.getRole().isAdmin()) {
             return false;
         }
 
@@ -46,22 +46,19 @@ export class UserDomainService {
         }
 
         // Cannot deactivate users with equal or higher role
-        const currentUserLevel = currentUser.getRole().getHierarchyLevel();
-        const targetUserLevel = targetUser.getRole().getHierarchyLevel();
-
-        return currentUserLevel > targetUserLevel;
+        return currentUser.getRole().canManage(targetUser.getRole());
     }
 
     /**
      * Validates if an email change is allowed
      */
     static validateEmailChange(user: User, newEmail: Email): void {
-        if (!user.isActive()) {
-            throw new BusinessRuleViolationError('Cannot change email for inactive user');
+        if (!user.getStatus().isActive()) {
+            throw new BusinessRuleViolationError('Cannot change email for inactive user', 'USER_NOT_ACTIVE');
         }
 
         if (user.getEmail().equals(newEmail)) {
-            throw new BusinessRuleViolationError('New email must be different from current email');
+            throw new BusinessRuleViolationError('New email must be different from current email', 'EMAIL_UNCHANGED');
         }
     }
 
@@ -70,17 +67,17 @@ export class UserDomainService {
      */
     static canAccessResource(user: User, resourceType: string, resourceOwnerId?: string): boolean {
         // Inactive users cannot access any resources
-        if (!user.isActive()) {
+        if (!user.getStatus().isActive()) {
             return false;
         }
 
         // Admins can access everything
-        if (user.isAdmin()) {
+        if (user.getRole().isAdmin()) {
             return true;
         }
 
         // Check if user has permission for the resource type
-        if (!user.canManage(resourceType)) {
+        if (!user.hasPermission(resourceType)) {
             return false;
         }
 
@@ -92,7 +89,7 @@ export class UserDomainService {
             }
 
             // Agents can access resources they manage
-            if (user.isAgent()) {
+            if (user.getRole().isAgent()) {
                 return true;
             }
 
@@ -109,12 +106,12 @@ export class UserDomainService {
         const baseHours = rememberMe ? 720 : 24; // 30 days or 1 day
 
         // Admins get shorter sessions for security
-        if (user.isAdmin()) {
+        if (user.getRole().isAdmin()) {
             return Math.min(baseHours, 8) * 60 * 60 * 1000; // Max 8 hours for admins
         }
 
         // Agents get medium duration
-        if (user.isAgent()) {
+        if (user.getRole().isAgent()) {
             return Math.min(baseHours, 168) * 60 * 60 * 1000; // Max 7 days for agents
         }
 
@@ -126,12 +123,12 @@ export class UserDomainService {
      * Validates session creation parameters
      */
     static validateSessionCreation(user: User, ipAddress?: string, userAgent?: string): void {
-        if (!user.isActive()) {
-            throw new BusinessRuleViolationError('Cannot create session for inactive user');
+        if (!user.getStatus().isActive()) {
+            throw new BusinessRuleViolationError('Cannot create session for inactive user', 'USER_NOT_ACTIVE');
         }
 
         if (user.getStatus().isPendingVerification()) {
-            throw new BusinessRuleViolationError('User must verify email before creating session');
+            throw new BusinessRuleViolationError('User must verify email before creating session', 'EMAIL_NOT_VERIFIED');
         }
     }
 
@@ -148,7 +145,7 @@ export class UserDomainService {
         }
 
         // Agents and admins need additional contact information
-        if ((role.isAgent() || role.isAdmin()) && !profile.hasContactInfo()) {
+        if ((role.isAgent() || role.isAdmin()) && !profile.isComplete()) {
             return false;
         }
 
@@ -168,7 +165,7 @@ export class UserDomainService {
 
             // Only allow user role for self-registration
             if (!userRole.isUser()) {
-                throw new BusinessRuleViolationError('Only user role is allowed for self-registration');
+                throw new BusinessRuleViolationError('Only user role is allowed for self-registration', 'INVALID_SELF_REGISTRATION_ROLE');
             }
         }
     }
@@ -230,15 +227,15 @@ export class UserDomainService {
      */
     static canUsersInteract(user1: User, user2: User): boolean {
         // Both users must be active
-        if (!user1.isActive() || !user2.isActive()) {
+        if (!user1.getStatus().isActive() || !user2.getStatus().isActive()) {
             return false;
         }
 
         // Check privacy preferences
-        const user2Privacy = user2.getPreferences().privacy;
+        const user2Privacy = user2.getPreferences().getPrivacyPreferences();
 
         // If user2's profile is not visible, only admins and agents can interact
-        if (!user2Privacy.profileVisible && !user1.isAdmin() && !user1.isAgent()) {
+        if (user2Privacy.profileVisibility === 'private' && !user1.getRole().isAdmin() && !user1.getRole().isAgent()) {
             return false;
         }
 

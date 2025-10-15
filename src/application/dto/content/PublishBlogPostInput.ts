@@ -1,7 +1,12 @@
 import { z } from 'zod';
+import {
+    IdSchema,
+    OptionalShortTextSchema,
+    OptionalTagsSchema
+} from '@/domain/shared/schemas';
 
 const PublishBlogPostInputSchema = z.object({
-    id: z.string().min(1, 'Blog post ID is required'),
+    id: IdSchema,
     publishDate: z.date().optional(),
     seoOptimizations: z.object({
         title: z.string().max(60).optional(),

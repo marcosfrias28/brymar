@@ -4,26 +4,30 @@ import type React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { ImageUpload } from '@/components/properties/image-upload';
-import { RichTextEditor } from '@/components/ui/rich-text-editor';
+} from "@/components/ui/select";
+import { ImageUpload } from "@/components/properties/image-upload";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { Save, X } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 import {
   secondaryColorClasses,
   interactiveClasses,
-} from '@/lib/utils/secondary-colors';
+} from "@/lib/utils/secondary-colors";
+import {
+  createLand,
+  updateLand,
+} from "@/presentation/server-actions/land-actions";
 
 interface LandFormData {
   name: string;
@@ -90,15 +94,38 @@ export function LandForm({ initialData, isEditing = false }: LandFormProps) {
         return;
       }
 
-      // Simular guardado (en una app real sería una llamada a API)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Create FormData for server action
+      const serverFormData = new FormData();
+      serverFormData.append("title", formData.name);
+      serverFormData.append("type", formData.type);
+      serverFormData.append("price", formData.price);
+      serverFormData.append("area", formData.surface);
+      serverFormData.append("location", formData.location);
+      serverFormData.append("description", formData.description);
 
-      toast.success(
-        isEditing
-          ? "Terreno actualizado exitosamente"
-          : "Terreno creado exitosamente"
-      );
-      router.push("/dashboard/lands");
+      // Handle images
+      formData.images.forEach((image, index) => {
+        serverFormData.append(`image_${index}`, image);
+      });
+
+      let result;
+      if (isEditing) {
+        result = await updateLand(serverFormData);
+      } else {
+        result = await createLand(serverFormData);
+      }
+
+      if (result.success) {
+        toast.success(
+          result.message ||
+            (isEditing
+              ? "Terreno actualizado exitosamente"
+              : "Terreno creado exitosamente")
+        );
+        router.push("/dashboard/lands");
+      } else {
+        toast.error(result.error || "Error al guardar el terreno");
+      }
     } catch (error) {
       toast.error("Error al guardar el terreno");
     } finally {

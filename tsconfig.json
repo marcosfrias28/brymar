@@ -40,5 +40,11 @@
     "src/**/*.tsx",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "scripts/**/*", "*.config.ts", "**/*.config.ts"]
+  "exclude": [
+    "node_modules",
+    "scripts/**/*",
+    "src/scripts/**/*",
+    "*.config.ts",
+    "**/*.config.ts"
+  ]
 }

@@ -24,7 +24,7 @@ jest.mock("@/hooks/use-admin", () => ({
   }),
 }));
 
-jest.mock("@/hooks/use-user", () => ({
+jest.mock("@/presentation/hooks/use-user", () => ({
   useUser: () => ({
     user: {
       name: "Test User",

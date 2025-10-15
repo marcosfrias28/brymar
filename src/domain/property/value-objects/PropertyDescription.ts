@@ -1,5 +1,5 @@
 import { ValueObject } from '@/domain/shared/value-objects/ValueObject';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 export class PropertyDescription extends ValueObject<string> {
     private static readonly MIN_LENGTH = 10;
@@ -11,22 +11,22 @@ export class PropertyDescription extends ValueObject<string> {
 
     static create(description: string): PropertyDescription {
         if (!description || description.trim().length === 0) {
-            throw new DomainError("Property description cannot be empty");
+            throw new BusinessRuleViolationError("Property description cannot be empty", "PROPERTY_VALIDATION");
         }
 
         const trimmedDescription = description.trim();
 
         if (trimmedDescription.length < this.MIN_LENGTH) {
-            throw new DomainError(`Property description must be at least ${this.MIN_LENGTH} characters long`);
+            throw new BusinessRuleViolationError(`Property description must be at least ${this.MIN_LENGTH} characters long`, "PROPERTY_VALIDATION");
         }
 
         if (trimmedDescription.length > this.MAX_LENGTH) {
-            throw new DomainError(`Property description cannot exceed ${this.MAX_LENGTH} characters`);
+            throw new BusinessRuleViolationError(`Property description cannot exceed ${this.MAX_LENGTH} characters`, "PROPERTY_VALIDATION");
         }
 
         // Check for inappropriate content (basic validation)
         if (this.containsInappropriateContent(trimmedDescription)) {
-            throw new DomainError("Property description contains inappropriate content");
+            throw new BusinessRuleViolationError("Property description contains inappropriate content", "PROPERTY_VALIDATION");
         }
 
         return new PropertyDescription(trimmedDescription);

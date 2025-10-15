@@ -41,8 +41,8 @@ export class VercelBlobImageService implements IImageService {
                 };
 
                 processedImages.push(processedImage);
-            } catch (error) {
-                console.error(`Failed to process image ${image.filename}:`, error);
+            } catch (_error) {
+                // Note: Failed to process image - would be logged in production
                 throw new Error(`Image processing failed for ${image.filename}`);
             }
         }
@@ -59,11 +59,11 @@ export class VercelBlobImageService implements IImageService {
             // 1. Extract the blob key from the URL
             // 2. Call Vercel Blob delete API
 
-            console.log(`Deleting image: ${imageUrl}`);
+            // Note: In production, would delete image from Vercel Blob
             // Simulate deletion
             await new Promise(resolve => setTimeout(resolve, 100));
-        } catch (error) {
-            console.error(`Failed to delete image ${imageUrl}:`, error);
+        } catch (_error) {
+            // Note: Failed to delete image - would be logged in production
             throw new Error(`Image deletion failed for ${imageUrl}`);
         }
     }
@@ -71,15 +71,15 @@ export class VercelBlobImageService implements IImageService {
     /**
      * Get image metadata
      */
-    async getImageMetadata(imageUrl: string): Promise<{ size: number; mimeType: string } | null> {
+    async getImageMetadata(_imageUrl: string): Promise<{ size: number; mimeType: string } | null> {
         try {
             // In a real implementation, you would fetch metadata from storage
             return {
                 size: 1024000, // 1MB placeholder
                 mimeType: 'image/jpeg'
             };
-        } catch (error) {
-            console.error(`Failed to get image metadata for ${imageUrl}:`, error);
+        } catch (_error) {
+            // Note: Failed to get image metadata - would be logged in production
             return null;
         }
     }

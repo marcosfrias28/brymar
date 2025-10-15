@@ -4,20 +4,20 @@ import { useState, useMemo } from "react";
 import { MapPin, DollarSign, Ruler, TreePine, Plus } from "lucide-react";
 import Link from "next/link";
 
-import { DashboardPageLayout } from '@/components/layout/dashboard-page-layout';
-import { LandCardList } from '@/components/lands/land-card-list';
-import { LandFilters } from '@/components/lands/land-filters';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { useLands } from '@/hooks/use-lands';
-import { useBreadcrumbs } from '@/hooks/use-breadcrumbs';
-import { RouteGuard } from '@/components/auth/route-guard';
-import { cn } from '@/lib/utils';
+import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
+import { LandCardList } from "@/components/lands/land-card-list";
+import { LandFilters } from "@/components/lands/land-filters";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useLands } from "@/presentation/hooks/use-lands";
+import { useBreadcrumbs } from "@/hooks/use-breadcrumbs";
+import { RouteGuard } from "@/components/auth/route-guard";
+import { cn } from "@/lib/utils";
 import {
   secondaryColorClasses,
   badgeVariants,
-} from '@/lib/utils/secondary-colors';
+} from "@/lib/utils/secondary-colors";
 
 export default function LandsPage() {
   const breadcrumbs = useBreadcrumbs();
@@ -26,8 +26,8 @@ export default function LandsPage() {
     "all" | "commercial" | "residential" | "agricultural" | "beachfront"
   >("all");
 
-  const { lands, loading, error, fetchLands } = useLands(1, {
-    type: typeFilter,
+  const { lands, loading, error, searchLands } = useLands({
+    landType: typeFilter === "all" ? undefined : typeFilter,
   });
 
   const filteredByType = useMemo(() => {
@@ -68,7 +68,7 @@ export default function LandsPage() {
 
   const handleFilterChange = (newFilter: typeof typeFilter) => {
     setTypeFilter(newFilter);
-    fetchLands(1, { type: newFilter });
+    searchLands({ landType: newFilter === "all" ? undefined : newFilter }, 1);
   };
 
   if (error) {
@@ -81,7 +81,7 @@ export default function LandsPage() {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <p className="text-red-600 mb-2">Error al cargar terrenos</p>
-            <Button onClick={() => fetchLands()} variant="outline">
+            <Button onClick={() => searchLands()} variant="outline">
               Reintentar
             </Button>
           </div>

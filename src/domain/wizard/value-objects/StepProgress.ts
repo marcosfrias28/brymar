@@ -1,5 +1,5 @@
 import { ValueObject } from '@/domain/shared/value-objects/ValueObject';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 export interface StepProgressData {
     [stepId: string]: {
@@ -19,7 +19,7 @@ export class StepProgress extends ValueObject<StepProgressData> {
 
         for (const [stepId, stepData] of Object.entries(progressData)) {
             if (!stepId || stepId.trim().length === 0) {
-                throw new DomainError("Step ID cannot be empty");
+                throw new BusinessRuleViolationError("Step ID cannot be empty", "WIZARD_VALIDATION");
             }
 
             if (typeof stepData === "object" && stepData !== null) {
@@ -43,7 +43,7 @@ export class StepProgress extends ValueObject<StepProgressData> {
 
     markStepCompleted(stepId: string, validationPassed: boolean = true): StepProgress {
         if (!stepId || stepId.trim().length === 0) {
-            throw new DomainError("Step ID cannot be empty");
+            throw new BusinessRuleViolationError("Step ID cannot be empty", "WIZARD_VALIDATION");
         }
 
         const newProgress = { ...this._value };
@@ -58,7 +58,7 @@ export class StepProgress extends ValueObject<StepProgressData> {
 
     markStepIncomplete(stepId: string): StepProgress {
         if (!stepId || stepId.trim().length === 0) {
-            throw new DomainError("Step ID cannot be empty");
+            throw new BusinessRuleViolationError("Step ID cannot be empty", "WIZARD_VALIDATION");
         }
 
         const newProgress = { ...this._value };

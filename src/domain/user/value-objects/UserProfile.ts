@@ -96,6 +96,10 @@ export class UserProfile extends ValueObject<UserProfileData> {
         return !!this._value.avatar;
     }
 
+    isComplete(): boolean {
+        return !!(this._value.firstName && this._value.lastName);
+    }
+
     updateFirstName(firstName: string): UserProfile {
         return UserProfile.create({
             ...this._value,

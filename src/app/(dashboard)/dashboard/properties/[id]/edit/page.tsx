@@ -2,21 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useUser } from '@/hooks/use-user';
-import { PropertyWizard } from '@/components/wizard/property';
+import { useUser } from "@/presentation/hooks/use-user";
+import { PropertyWizard } from "@/components/wizard/property";
 import {
-  completePropertyWizard,
-  savePropertyDraft,
-  loadPropertyDraft,
-} from '@/lib/actions/property-wizard-actions';
-import { getPropertyById } from '@/app/actions/property-actions';
-import { RouteGuard } from '@/components/auth/route-guard';
-import { DashboardPageLayout } from '@/components/layout/dashboard-page-layout';
+  getPropertyById,
+  updateProperty,
+} from "@/presentation/server-actions/property-actions";
+import { RouteGuard } from "@/components/auth/route-guard";
+import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { toast } from "sonner";
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import type { PropertyWizardData } from '@/types/property-wizard';
+import type { PropertyWizardData } from "@/types/property-wizard";
 
 export default function EditPropertyPage() {
   const params = useParams();
@@ -38,13 +36,15 @@ export default function EditPropertyPage() {
       }
 
       try {
-        const property = await getPropertyById(propertyId.toString());
+        const result = await getPropertyById(propertyId.toString());
 
-        if (!property) {
+        if (!result.success || !result.data) {
           setError("Propiedad no encontrada");
           setLoading(false);
           return;
         }
+
+        const property = result.data;
 
         // Convert property data to wizard format
         const wizardData: Partial<PropertyWizardData> = {
@@ -89,33 +89,59 @@ export default function EditPropertyPage() {
   }, [propertyId]);
 
   const handleComplete = async (data: PropertyWizardData) => {
-    if (!user?.id || !propertyId) {
+    if (!user?.getId() || !propertyId) {
       toast.error("Usuario no autenticado o ID de propiedad inválido");
       return;
     }
 
     try {
-      // Add the property ID to the data for updates
-      const completeData = {
-        ...data,
-        id: propertyId.toString(),
-        aiGenerated: data.aiGenerated || {
-          title: false,
-          description: false,
-          tags: false,
-        },
-        address: data.address
-          ? {
-              ...data.address,
-              country: "Dominican Republic" as const,
-            }
-          : undefined,
-      };
+      // Convert wizard data to FormData for DDD server action
+      const formData = new FormData();
+      formData.append("id", propertyId.toString());
+      formData.append("title", data.title || "");
+      formData.append("description", data.description || "");
+      formData.append("price", data.price?.toString() || "0");
+      formData.append("propertyType", data.propertyType || "residential");
+      formData.append("status", "published");
 
-      const result = await completePropertyWizard({
-        userId: user.id,
-        data: completeData,
-      });
+      // Add address fields
+      if (data.address) {
+        formData.append("address.street", data.address.street || "");
+        formData.append("address.city", data.address.city || "");
+        formData.append("address.state", data.address.state || "");
+        formData.append(
+          "address.country",
+          data.address.country || "Dominican Republic"
+        );
+        formData.append("address.postalCode", data.address.postalCode || "");
+      }
+
+      // Add features
+      if (data.features) {
+        formData.append(
+          "features.bedrooms",
+          data.features.bedrooms?.toString() || "0"
+        );
+        formData.append(
+          "features.bathrooms",
+          data.features.bathrooms?.toString() || "0"
+        );
+        formData.append("features.area", data.features.area?.toString() || "0");
+        if (data.features.amenities) {
+          data.features.amenities.forEach((amenity, index) => {
+            formData.append(`features.amenities[${index}]`, amenity);
+          });
+        }
+      }
+
+      // Add images
+      if (data.images) {
+        data.images.forEach((image, index) => {
+          formData.append(`images[${index}]`, image);
+        });
+      }
+
+      const result = await updateProperty(formData);
 
       if (result.success) {
         toast.success("¡Propiedad actualizada exitosamente!");
@@ -133,14 +159,14 @@ export default function EditPropertyPage() {
     data: Partial<PropertyWizardData>,
     currentStep: string
   ): Promise<string> => {
-    if (!user?.id) {
+    if (!user?.getId()) {
       toast.error("Usuario no autenticado");
       throw new Error("Usuario no autenticado");
     }
 
     try {
       const result = await savePropertyDraft({
-        userId: user.id,
+        userId: user.getId().value,
         data: {
           ...data,
           status: data.status || "draft",

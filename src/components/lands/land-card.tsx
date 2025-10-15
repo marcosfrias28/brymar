@@ -2,33 +2,23 @@
 
 import { Square, MapPin, Eye, Edit, Trash2, TreePine } from "lucide-react";
 
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import { MoreVertical } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
-interface Land {
-  id: string;
-  name: string;
-  surface: number;
-  price: number;
-  location: string;
-  description: string;
-  images: string[];
-  createdAt: string;
-  type: "commercial" | "residential" | "agricultural" | "beachfront";
-}
+import { LandSummary } from "@/application/dto/land/SearchLandsOutput";
 
 interface LandCardProps {
-  land: Land;
+  land: LandSummary;
 }
 
 export function LandCard({ land }: LandCardProps) {
@@ -64,7 +54,7 @@ export function LandCard({ land }: LandCardProps) {
   };
 
   const getPricePerM2 = () => {
-    return Math.round(land.price / land.surface);
+    return land.pricePerSquareMeter || Math.round(land.price / land.area);
   };
 
   return (
@@ -72,8 +62,8 @@ export function LandCard({ land }: LandCardProps) {
       {/* Image */}
       <div className="relative h-48 overflow-hidden rounded-t-lg">
         <Image
-          src={land.images[0] || "/placeholder.svg"}
-          alt={land.name}
+          src={land.mainImage || "/placeholder.svg"}
+          alt={land.title}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-300"
         />
@@ -122,7 +112,7 @@ export function LandCard({ land }: LandCardProps) {
         {/* Title and Price */}
         <div className="mb-3">
           <h3 className="font-semibold text-foreground text-lg mb-1 line-clamp-1">
-            {land.name}
+            {land.title}
           </h3>
           <div className="flex items-center justify-between">
             <p className="text-2xl font-bold text-foreground">
@@ -144,17 +134,17 @@ export function LandCard({ land }: LandCardProps) {
         <div className="flex items-center gap-4 text-muted-foreground text-sm mb-3">
           <div className="flex items-center gap-1">
             <Square className="h-4 w-4" />
-            <span>{land.surface.toLocaleString()} m²</span>
+            <span>{land.area.toLocaleString()} m²</span>
           </div>
           <div className="flex items-center gap-1">
             <TreePine className="h-4 w-4" />
-            <span>{(land.surface / 10000).toFixed(2)} ha</span>
+            <span>{(land.area / 10000).toFixed(2)} ha</span>
           </div>
         </div>
 
-        {/* Description */}
+        {/* Features */}
         <p className="text-muted-foreground text-sm line-clamp-2">
-          {land.description}
+          {land.features.join(", ") || "Sin características especificadas"}
         </p>
       </CardContent>
 

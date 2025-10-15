@@ -2,22 +2,23 @@
 
 import { useState } from "react";
 import { LayoutGrid, List, MapPin, SortAsc } from "lucide-react";
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { LoadingSpinner } from '@/components/ui/loading-states';
-import { InlineErrorState } from '@/components/ui/error-states';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { LoadingSpinner } from "@/components/ui/loading-states";
+import { InlineErrorState } from "@/components/ui/error-states";
+import { cn } from "@/lib/utils";
+import { LandSummary } from "@/application/dto/land/SearchLandsOutput";
 
 interface LandResultsProps {
-  lands: any[];
+  lands: LandSummary[];
   total: number;
   isLoading?: boolean;
   error?: string;
@@ -190,7 +191,7 @@ function LandCard({
   land,
   variant = "vertical",
 }: {
-  land: any;
+  land: LandSummary;
   variant?: "vertical" | "horizontal";
 }) {
   const isHorizontal = variant === "horizontal";
@@ -205,10 +206,10 @@ function LandCard({
             isHorizontal ? "w-48 h-32" : "w-full h-48"
           )}
         >
-          {land.images && land.images.length > 0 ? (
+          {land.mainImage ? (
             <img
-              src={land.images[0]}
-              alt={land.name}
+              src={land.mainImage}
+              alt={land.title}
               className="w-full h-full object-cover"
             />
           ) : (
@@ -224,9 +225,9 @@ function LandCard({
         {/* Content */}
         <CardContent className={cn("p-4", isHorizontal && "flex-1")}>
           <div className="space-y-2">
-            <h3 className="font-semibold text-lg line-clamp-2">{land.name}</h3>
+            <h3 className="font-semibold text-lg line-clamp-2">{land.title}</h3>
             <p className="text-sm text-muted-foreground line-clamp-2">
-              {land.description}
+              {land.features.join(", ") || "Sin características especificadas"}
             </p>
 
             <div className="flex items-center gap-4 text-sm text-muted-foreground">

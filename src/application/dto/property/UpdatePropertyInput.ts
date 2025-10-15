@@ -24,8 +24,8 @@ const UpdatePropertyInputSchema = z.object({
 });
 
 export type UpdatePropertyInputData = z.infer<typeof UpdatePropertyInputSchema>;
-export type AddressInputData = z.infer<typeof AddressSchema>;
-export type PropertyFeaturesInputData = z.infer<typeof PropertyFeaturesSchema>;
+export type UpdateAddressInputData = z.infer<typeof AddressSchema>;
+export type UpdatePropertyFeaturesInputData = z.infer<typeof PropertyFeaturesSchema>;
 
 /**
  * Input DTO for updating an existing property
@@ -37,8 +37,8 @@ export class UpdatePropertyInput {
         public readonly description?: string,
         public readonly price?: number,
         public readonly currency?: string,
-        public readonly address?: AddressInputData,
-        public readonly features?: PropertyFeaturesInputData,
+        public readonly address?: UpdateAddressInputData,
+        public readonly features?: UpdatePropertyFeaturesInputData,
         public readonly featured?: boolean,
         public readonly imagesToAdd?: string[],
         public readonly imagesToRemove?: string[],
@@ -82,7 +82,7 @@ export class UpdatePropertyInput {
         const featured = featuredStr ? featuredStr === 'true' : undefined;
 
         // Parse address if provided
-        let address: AddressInputData | undefined;
+        let address: UpdateAddressInputData | undefined;
         const street = formData.get('address.street') as string;
         if (street) {
             address = {
@@ -105,13 +105,15 @@ export class UpdatePropertyInput {
         }
 
         // Parse features if provided
-        let features: PropertyFeaturesInputData | undefined;
+        let features: UpdatePropertyFeaturesInputData | undefined;
         const areaStr = formData.get('features.area') as string;
         if (areaStr) {
             features = {
                 bedrooms: parseInt(formData.get('features.bedrooms') as string) || 0,
                 bathrooms: parseInt(formData.get('features.bathrooms') as string) || 0,
                 area: parseFloat(areaStr),
+                amenities: [],
+                features: [],
             };
 
             // Parse optional features

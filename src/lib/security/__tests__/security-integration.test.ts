@@ -156,7 +156,7 @@ describe('Security Integration Tests', () => {
     describe('CSRF Protection', () => {
         it('should generate valid CSRF tokens', async () => {
             const mockRequest = new NextRequest('http://localhost:3000/test');
-            const { token } = await generateCSRFToken(mockRequest, 'test-user');
+            const token = generateCSRFToken();
 
             expect(token).toBeDefined();
             expect(typeof token).toBe('string');
@@ -321,7 +321,7 @@ describe('Security Integration Tests', () => {
             });
 
             // Mock console.warn to capture logs
-            const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+            const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => { });
 
             logSecurityEvent('csrf_failure', mockRequest, 'test-user', {
                 reason: 'Invalid token',

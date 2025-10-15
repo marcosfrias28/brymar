@@ -1,31 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import { X, Save, Loader2, Phone, Mail, MapPin, Globe } from "lucide-react";
 import {
   createContactInfo,
   updateContactInfo,
-} from '@/lib/actions/sections-actions';
-import { useContactInfoMutations } from '@/hooks/mutations/use-contact-info-mutations';
-import type { ContactInfo } from '@/lib/db/schema';
+} from "@/lib/actions/sections-actions";
+import { useContactInfoMutations } from "@/hooks/mutations/use-contact-info-mutations";
+import type { ContactInfo } from "@/lib/db/schema";
 import { toast } from "sonner";
 
 interface ContactInfoEditorProps {
@@ -85,7 +85,7 @@ export function ContactInfoEditor({
       onClose();
     } catch (error) {
       // Error handling is done by the mutation hooks
-      console.error("Error:", error);
+      // Note: Error - would be logged in production
     }
   };
 

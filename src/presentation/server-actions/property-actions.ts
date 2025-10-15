@@ -1,13 +1,17 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import * as logger from "@/lib/logger";
 import { CreatePropertyInput } from "@/application/dto/property/CreatePropertyInput";
 import { UpdatePropertyInput } from "@/application/dto/property/UpdatePropertyInput";
 import { SearchPropertiesInput } from "@/application/dto/property/SearchPropertiesInput";
+import { GetPropertyByIdInput } from "@/application/dto/property/GetPropertyByIdInput";
+import { PublishPropertyInput } from "@/application/dto/property/PublishPropertyInput";
 import { CreatePropertyUseCase } from "@/application/use-cases/property/CreatePropertyUseCase";
 import { UpdatePropertyUseCase } from "@/application/use-cases/property/UpdatePropertyUseCase";
 import { SearchPropertiesUseCase } from "@/application/use-cases/property/SearchPropertiesUseCase";
 import { PublishPropertyUseCase } from "@/application/use-cases/property/PublishPropertyUseCase";
+import { GetPropertyByIdUseCase } from "@/application/use-cases/property/GetPropertyByIdUseCase";
 import {
     createSuccessResponse,
     createErrorResponse,
@@ -15,19 +19,45 @@ import {
 } from "@/lib/validations";
 import { DomainError } from "@/domain/shared/errors/DomainError";
 import { ApplicationError } from "@/application/errors/ApplicationError";
+import { container } from "@/infrastructure/container/Container";
+import { initializeContainer } from "@/infrastructure/container/ServiceRegistration";
 
-// Container would be injected here in a real implementation
-// For now, we'll create instances directly
-const createPropertyUseCase = new CreatePropertyUseCase(
-    // Dependencies would be injected from container
-);
+// Initialize container if not already done
+if (!container.has('CreatePropertyUseCase')) {
+    initializeContainer();
+}
 
-export async function createProperty(formData: FormData): Promise<ActionState> {
+export async function getPropertyById(id: string): Promise<ActionState<any>> {
+    try {
+        const input = GetPropertyByIdInput.fromId(id);
+        const getPropertyByIdUseCase = container.get<GetPropertyByIdUseCase>('GetPropertyByIdUseCase');
+        const result = await getPropertyByIdUseCase.execute(input);
+
+        if (!result) {
+            return createErrorResponse("Property not found");
+        }
+
+        return createSuccessResponse(result, "Property retrieved successfully");
+    } catch (error) {
+        if (error instanceof DomainError) {
+            return createErrorResponse(error.message);
+        }
+        if (error instanceof ApplicationError) {
+            return createErrorResponse(error.message);
+        }
+
+        await logger.error("Failed to retrieve property", error, { propertyId: id });
+        return createErrorResponse("Failed to retrieve property");
+    }
+}
+
+export async function createProperty(formData: FormData): Promise<ActionState<any>> {
     try {
         // Map form data to input DTO
         const input = CreatePropertyInput.fromFormData(formData);
 
         // Execute use case
+        const createPropertyUseCase = container.get<CreatePropertyUseCase>('CreatePropertyUseCase');
         const result = await createPropertyUseCase.execute(input);
 
         // Revalidate cache
@@ -43,15 +73,15 @@ export async function createProperty(formData: FormData): Promise<ActionState> {
             return createErrorResponse(error.message);
         }
 
-        console.error("Create property error:", error);
+        await logger.error("Failed to create property", error);
         return createErrorResponse("Failed to create property");
     }
 }
 
-export async function updateProperty(formData: FormData): Promise<ActionState> {
+export async function updateProperty(formData: FormData): Promise<ActionState<any>> {
     try {
         const input = UpdatePropertyInput.fromFormData(formData);
-        const updatePropertyUseCase = new UpdatePropertyUseCase(/* dependencies */);
+        const updatePropertyUseCase = container.get<UpdatePropertyUseCase>('UpdatePropertyUseCase');
 
         const result = await updatePropertyUseCase.execute(input);
 
@@ -67,15 +97,18 @@ export async function updateProperty(formData: FormData): Promise<ActionState> {
             return createErrorResponse(error.message);
         }
 
-        console.error("Update property error:", error);
+        await logger.error("Failed to update property", error);
         return createErrorResponse("Failed to update property");
     }
 }
 
-export async function searchProperties(formData: FormData): Promise<ActionState> {
+// Alias for createProperty to match the task requirement
+export const addProperty = createProperty;
+
+export async function searchProperties(formData: FormData): Promise<ActionState<any>> {
     try {
         const input = SearchPropertiesInput.fromFormData(formData);
-        const searchPropertiesUseCase = new SearchPropertiesUseCase(/* dependencies */);
+        const searchPropertiesUseCase = container.get<SearchPropertiesUseCase>('SearchPropertiesUseCase');
 
         const result = await searchPropertiesUseCase.execute(input);
 
@@ -88,25 +121,22 @@ export async function searchProperties(formData: FormData): Promise<ActionState>
             return createErrorResponse(error.message);
         }
 
-        console.error("Search properties error:", error);
+        await logger.error("Failed to search properties", error);
         return createErrorResponse("Failed to search properties");
     }
 }
 
-export async function publishProperty(formData: FormData): Promise<ActionState> {
+// Alias for searchProperties to match the task requirement
+export const searchPropertiesAction = searchProperties;
+
+export async function publishProperty(formData: FormData): Promise<ActionState<any>> {
     try {
-        const publishPropertyUseCase = new PublishPropertyUseCase(/* dependencies */);
-
-        // Extract property ID from form data
-        const propertyId = formData.get("propertyId") as string;
-        if (!propertyId) {
-            return createErrorResponse("Property ID is required");
-        }
-
-        const result = await publishPropertyUseCase.execute({ propertyId });
+        const input = PublishPropertyInput.fromFormData(formData);
+        const publishPropertyUseCase = container.get<PublishPropertyUseCase>('PublishPropertyUseCase');
+        const result = await publishPropertyUseCase.execute(input);
 
         revalidatePath("/dashboard/properties");
-        revalidatePath(`/properties/${propertyId}`);
+        revalidatePath(`/properties/${input.id}`);
 
         return createSuccessResponse(result, "Property published successfully");
     } catch (error) {
@@ -117,7 +147,7 @@ export async function publishProperty(formData: FormData): Promise<ActionState> 
             return createErrorResponse(error.message);
         }
 
-        console.error("Publish property error:", error);
+        await logger.error("Failed to publish property", error);
         return createErrorResponse("Failed to publish property");
     }
 }

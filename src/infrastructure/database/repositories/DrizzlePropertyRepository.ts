@@ -21,7 +21,7 @@ import type { Database } from '@/lib/db/drizzle';
  * Maps between Property domain entities and database schema
  */
 export class DrizzlePropertyRepository implements IPropertyRepository {
-    constructor(private readonly db: Database) { }
+    constructor(private readonly _db: Database) { }
 
     async findById(id: PropertyId): Promise<Property | null> {
         try {
@@ -182,7 +182,7 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
         }
     }
 
-    async findNearLocation(latitude: number, longitude: number, radiusKm: number): Promise<Property[]> {
+    async findNearLocation(_latitude: number, _longitude: number, _radiusKm: number): Promise<Property[]> {
         // Simplified implementation - in production use PostGIS
         return this.findByLocation(''); // Return empty for now
     }
@@ -252,7 +252,7 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
         }
     }
 
-    async findByOwner(ownerId: string): Promise<Property[]> {
+    async findByOwner(_ownerId: string): Promise<Property[]> {
         // Current schema doesn't have owner field - return empty array
         return [];
     }
@@ -389,6 +389,61 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
             throw new Error(`Failed to get price statistics: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
+    private mapDatabaseStatusToDomain(dbStatus: string): string {
+        // Map Spanish/legacy database statuses to domain statuses
+        const statusMap: Record<string, string> = {
+            'venta': 'published',
+            'vendido': 'sold',
+            'alquiler': 'rented',
+            'borrador': 'draft',
+            'pendiente': 'pending_review',
+            'retirado': 'withdrawn',
+            'expirado': 'expired',
+            'archivado': 'archived',
+            // English statuses (pass through)
+            'draft': 'draft',
+            'pending_review': 'pending_review',
+            'published': 'published',
+            'sold': 'sold',
+            'rented': 'rented',
+            'withdrawn': 'withdrawn',
+            'expired': 'expired',
+            'archived': 'archived',
+        };
+
+        return statusMap[dbStatus.toLowerCase()] || 'draft';
+    }
+
+    private mapDatabaseTypeToDomain(dbType: string): string {
+        // Map Spanish/legacy database types to domain types
+        const typeMap: Record<string, string> = {
+            'casa': 'house',
+            'apartamento': 'apartment',
+            'condominio': 'condo',
+            'casa adosada': 'townhouse',
+            'villa': 'villa',
+            'estudio': 'studio',
+            'penthouse': 'penthouse',
+            'duplex': 'duplex',
+            'terreno': 'land',
+            'comercial': 'commercial',
+            'oficina': 'office',
+            'almacen': 'warehouse',
+            // English types (pass through)
+            'house': 'house',
+            'apartment': 'apartment',
+            'condo': 'condo',
+            'townhouse': 'townhouse',
+            'studio': 'studio',
+            'land': 'land',
+            'commercial': 'commercial',
+            'office': 'office',
+            'warehouse': 'warehouse',
+        };
+
+        return typeMap[dbType.toLowerCase()] || 'house';
+    }
+
     private buildSearchConditions(criteria: Partial<PropertySearchCriteria>) {
         const conditions = [];
 
@@ -428,17 +483,19 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
             const description = PropertyDescription.create(row.description);
             const price = Price.create(row.price, 'USD');
 
+            // Parse location string to create proper address
+            const locationParts = (row.location || 'Unknown Street, Unknown City, Unknown State, Unknown Country').split(',').map((p: string) => p.trim());
             const addressData = {
-                street: '',
-                city: row.location || '',
-                state: '',
-                country: '',
-                postalCode: '',
+                street: locationParts[0] || 'Unknown Street',
+                city: locationParts[1] || 'Unknown City',
+                state: locationParts[2] || 'Unknown State',
+                country: locationParts[3] || 'Unknown Country',
+                postalCode: locationParts[4] || undefined,
             };
 
             const address = Address.create(addressData);
-            const type = PropertyType.create(row.type);
-            const status = PropertyStatus.create(row.status);
+            const type = PropertyType.create(this.mapDatabaseTypeToDomain(row.type));
+            const status = PropertyStatus.create(this.mapDatabaseStatusToDomain(row.status));
 
             const features = PropertyFeatures.create({
                 bedrooms: row.bedrooms || 0,

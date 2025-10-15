@@ -1,16 +1,19 @@
 "use client";
 
 import React from "react";
-import { forgotPassword } from '@/lib/actions/auth-actions';
-import { useAuthFields, AuthLink, AuthFormWrapper } from '@/components/auth/auth-form-wrapper';
+import { forgotPassword } from "@/presentation/server-actions/auth-actions";
+import {
+  useAuthFields,
+  AuthLink,
+  AuthFormWrapper,
+} from "@/components/auth/auth-form-wrapper";
 
 const ForgotPasswordPage = () => {
   const { emailField } = useAuthFields();
 
   const footerContent = (
     <div className="text-center text-sm">
-      ¿Ya tienes cuenta?{" "}
-      <AuthLink href="/sign-in">Iniciar sesión</AuthLink>
+      ¿Ya tienes cuenta? <AuthLink href="/sign-in">Iniciar sesión</AuthLink>
     </div>
   );
 

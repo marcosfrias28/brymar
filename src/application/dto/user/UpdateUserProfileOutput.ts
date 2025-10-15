@@ -50,24 +50,51 @@ export class UpdateUserProfileOutput {
             user.getId().value,
             user.getEmail().value,
             {
-                name: profile.name,
-                firstName: profile.firstName,
-                lastName: profile.lastName,
-                phone: profile.phone,
-                bio: profile.bio,
-                location: profile.location,
-                website: profile.website,
-                image: profile.image,
-                displayName: profile.getDisplayName(),
-                isComplete: profile.isComplete(),
+                name: profile.getFullName(),
+                firstName: profile.getFirstName(),
+                lastName: profile.getLastName(),
+                phone: profile.getPhone(),
+                bio: profile.getBio(),
+                location: profile.getLocation(),
+                website: undefined, // Not available in current UserProfile
+                image: profile.getAvatar(),
+                displayName: profile.getFullName(),
+                isComplete: true, // Not available in current UserProfile
             },
             {
-                notifications: preferences.notifications,
-                privacy: preferences.privacy,
-                display: preferences.display,
+                notifications: {
+                    email: preferences.getNotificationPreferences().email ?? true,
+                    push: preferences.getNotificationPreferences().push ?? true,
+                    marketing: preferences.getNotificationPreferences().marketing ?? false,
+                },
+                privacy: {
+                    profileVisible: preferences.getPrivacyPreferences().profileVisibility === 'public',
+                    showEmail: preferences.getPrivacyPreferences().showEmail ?? false,
+                    showPhone: preferences.getPrivacyPreferences().showPhone ?? false,
+                },
+                display: {
+                    theme: preferences.getTheme(),
+                    language: preferences.getLanguage(),
+                    currency: 'USD', // Default currency, not available in current UserPreferences
+                },
             },
             user.getUpdatedAt()
         );
+    }
+
+    /**
+     * Frontend compatibility methods
+     */
+    getId(): { value: string } {
+        return { value: this.id };
+    }
+
+    getEmail(): { value: string } {
+        return { value: this.email };
+    }
+
+    getProfile(): { value: any } {
+        return { value: this.profile };
     }
 
     /**

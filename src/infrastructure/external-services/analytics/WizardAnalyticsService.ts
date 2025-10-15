@@ -1,5 +1,6 @@
 import type { Database } from '@/lib/db/drizzle';
 import { wizardAnalytics } from '@/lib/db/schema';
+import { and, eq, gte, lte } from 'drizzle-orm';
 import { randomUUID } from "crypto";
 
 export interface WizardAnalyticsEvent {
@@ -61,9 +62,9 @@ export class WizardAnalyticsService {
             };
 
             await this.db.insert(wizardAnalytics).values(analyticsData);
-        } catch (error) {
+        } catch (_error) {
             // Log error but don't throw - analytics should not break the main flow
-            console.error("Failed to track wizard analytics event:", error);
+            // Note: Failed to track wizard analytics event - this is non-critical
         }
     }
 
@@ -178,13 +179,9 @@ export class WizardAnalyticsService {
         const conditions = this.buildWhereConditions(query);
 
         // Get all matching events
-        let queryBuilder = this.db.select().from(wizardAnalytics);
-
-        if (conditions.length > 0) {
-            queryBuilder = queryBuilder.where(conditions.reduce((acc, condition) => acc && condition));
-        }
-
-        const events = await queryBuilder;
+        const events = conditions.length > 0
+            ? await this.db.select().from(wizardAnalytics).where(and(...conditions))
+            : await this.db.select().from(wizardAnalytics);
 
         // Calculate statistics
         const totalEvents = events.length;
@@ -235,15 +232,9 @@ export class WizardAnalyticsService {
             throw new Error("Either sessionId or userId must be provided");
         }
 
-        let queryBuilder = this.db.select().from(wizardAnalytics);
-
-        if (sessionId) {
-            queryBuilder = queryBuilder.where(eq(wizardAnalytics.sessionId, sessionId));
-        } else if (userId) {
-            queryBuilder = queryBuilder.where(eq(wizardAnalytics.userId, userId));
-        }
-
-        const events = await queryBuilder.orderBy(wizardAnalytics.createdAt);
+        const events = sessionId
+            ? await this.db.select().from(wizardAnalytics).where(eq(wizardAnalytics.sessionId, sessionId)).orderBy(wizardAnalytics.createdAt)
+            : await this.db.select().from(wizardAnalytics).where(eq(wizardAnalytics.userId, userId!)).orderBy(wizardAnalytics.createdAt);
 
         return events.map((event: any) => ({
             eventType: event.eventType,
@@ -356,5 +347,3 @@ export class WizardAnalyticsService {
     }
 }
 
-// Import the necessary functions from drizzle-orm
-import { eq, and, gte, lte } from "drizzle-orm";

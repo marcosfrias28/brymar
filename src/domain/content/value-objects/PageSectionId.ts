@@ -1,9 +1,9 @@
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { ValueObjectValidationError } from '@/domain/shared/errors/DomainError';
 
 export class PageSectionId {
     private constructor(private readonly _value: string) {
         if (!_value || _value.trim().length === 0) {
-            throw new DomainError("PageSection ID cannot be empty");
+            throw new ValueObjectValidationError("PageSection ID cannot be empty");
         }
     }
 
@@ -17,7 +17,7 @@ export class PageSectionId {
 
     static fromNumber(id: number): PageSectionId {
         if (id <= 0) {
-            throw new DomainError("PageSection ID must be a positive number");
+            throw new ValueObjectValidationError("PageSection ID must be a positive number");
         }
         return new PageSectionId(id.toString());
     }
@@ -29,7 +29,7 @@ export class PageSectionId {
     toNumber(): number {
         const num = parseInt(this._value, 10);
         if (isNaN(num)) {
-            throw new DomainError("PageSection ID is not a valid number");
+            throw new ValueObjectValidationError("PageSection ID is not a valid number");
         }
         return num;
     }

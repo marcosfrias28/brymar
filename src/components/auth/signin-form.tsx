@@ -1,9 +1,9 @@
 "use client";
 
-import { signIn } from '@/lib/actions/auth-actions';
-import { ActionState } from '@/lib/validations';
-import { User } from '@/lib/db/schema';
-import { Label } from '@/components/ui/label';
+import { signIn } from "@/presentation/server-actions/auth-actions";
+import { ActionState } from "@/lib/validations";
+import { User } from "@/lib/db/schema";
+import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useAuthFields, AuthLink, AuthFormWrapper } from "./auth-form-wrapper";
 
@@ -23,18 +23,17 @@ export function SignInForm() {
           ¿Olvidaste tu contraseña?
         </Link>
       </div>
-    )
+    ),
   };
 
   const footerContent = (
     <>
-      ¿No tienes cuenta?{" "}
-      <AuthLink href="/sign-up">Registrarse</AuthLink>
+      ¿No tienes cuenta? <AuthLink href="/sign-up">Registrarse</AuthLink>
     </>
   );
 
   return (
-    <AuthFormWrapper<{ user: User }>
+    <AuthFormWrapper
       title="Iniciar Sesión"
       subtitle="Ingresa tu email para acceder a tu cuenta"
       action={signIn}

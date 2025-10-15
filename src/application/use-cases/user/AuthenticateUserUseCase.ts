@@ -48,7 +48,7 @@ export class AuthenticateUserUseCase {
         const isPasswordValid = await this.passwordService.verify(input.password, 'stored-hash');
 
         if (!isPasswordValid) {
-            throw new BusinessRuleViolationError('Invalid credentials');
+            throw new BusinessRuleViolationError('Invalid credentials', 'INVALID_CREDENTIALS');
         }
 
         // 4. Generate session token
@@ -96,7 +96,7 @@ export class AuthenticateUserUseCase {
             }
         } catch (error) {
             // Log error but don't fail authentication
-            console.error('Failed to cleanup expired sessions:', error);
+            // Note: Failed to cleanup expired sessions - this is non-critical
         }
     }
 
@@ -104,16 +104,16 @@ export class AuthenticateUserUseCase {
      * Validates authentication attempt
      */
     private async validateAuthenticationAttempt(user: User): Promise<void> {
-        if (!user.isActive()) {
-            throw new BusinessRuleViolationError('User account is not active');
+        if (!user.getStatus().isActive()) {
+            throw new BusinessRuleViolationError('User account is not active', 'USER_NOT_ACTIVE');
         }
 
         if (user.getStatus().isPendingVerification()) {
-            throw new BusinessRuleViolationError('Please verify your email before signing in');
+            throw new BusinessRuleViolationError('Please verify your email before signing in', 'EMAIL_NOT_VERIFIED');
         }
 
         if (user.getStatus().isSuspended()) {
-            throw new BusinessRuleViolationError('User account is suspended');
+            throw new BusinessRuleViolationError('User account is suspended', 'USER_SUSPENDED');
         }
     }
 }

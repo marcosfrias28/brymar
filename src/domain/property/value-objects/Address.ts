@@ -1,5 +1,5 @@
 import { ValueObject } from '@/domain/shared/value-objects/ValueObject';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 interface AddressData {
     street: string;
@@ -31,19 +31,19 @@ export class Address extends ValueObject<AddressData> {
     }): Address {
         // Validate required fields
         if (!data.street || data.street.trim().length === 0) {
-            throw new DomainError("Street address is required");
+            throw new BusinessRuleViolationError("Street address is required", "PROPERTY_VALIDATION");
         }
 
         if (!data.city || data.city.trim().length === 0) {
-            throw new DomainError("City is required");
+            throw new BusinessRuleViolationError("City is required", "PROPERTY_VALIDATION");
         }
 
         if (!data.state || data.state.trim().length === 0) {
-            throw new DomainError("State is required");
+            throw new BusinessRuleViolationError("State is required", "PROPERTY_VALIDATION");
         }
 
         if (!data.country || data.country.trim().length === 0) {
-            throw new DomainError("Country is required");
+            throw new BusinessRuleViolationError("Country is required", "PROPERTY_VALIDATION");
         }
 
         // Validate coordinates if provided
@@ -51,18 +51,18 @@ export class Address extends ValueObject<AddressData> {
             const { latitude, longitude } = data.coordinates;
 
             if (latitude < -90 || latitude > 90) {
-                throw new DomainError("Latitude must be between -90 and 90 degrees");
+                throw new BusinessRuleViolationError("Latitude must be between -90 and 90 degrees", "PROPERTY_VALIDATION");
             }
 
             if (longitude < -180 || longitude > 180) {
-                throw new DomainError("Longitude must be between -180 and 180 degrees");
+                throw new BusinessRuleViolationError("Longitude must be between -180 and 180 degrees", "PROPERTY_VALIDATION");
             }
         }
 
         // Validate postal code format if provided
         if (data.postalCode && data.postalCode.trim().length > 0) {
             if (data.postalCode.trim().length < 3 || data.postalCode.trim().length > 10) {
-                throw new DomainError("Postal code must be between 3 and 10 characters");
+                throw new BusinessRuleViolationError("Postal code must be between 3 and 10 characters", "PROPERTY_VALIDATION");
             }
         }
 
@@ -81,7 +81,7 @@ export class Address extends ValueObject<AddressData> {
         const parts = addressString.split(',').map(part => part.trim());
 
         if (parts.length < 3) {
-            throw new DomainError("Address string must contain at least street, city, and country");
+            throw new BusinessRuleViolationError("Address string must contain at least street, city, and country", "PROPERTY_VALIDATION");
         }
 
         return Address.create({

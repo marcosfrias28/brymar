@@ -102,6 +102,49 @@ export class SearchLandsInput {
     }
 
     /**
+     * Creates SearchLandsInput from FormData
+     */
+    static fromFormData(formData: FormData): SearchLandsInput {
+        const data: any = {};
+
+        // Extract form data
+        const query = formData.get('query')?.toString();
+        const location = formData.get('location')?.toString();
+        const landType = formData.get('landType')?.toString();
+        const minPrice = formData.get('minPrice')?.toString();
+        const maxPrice = formData.get('maxPrice')?.toString();
+        const minArea = formData.get('minArea')?.toString();
+        const maxArea = formData.get('maxArea')?.toString();
+        const status = formData.get('status')?.toString();
+        const limit = formData.get('limit')?.toString();
+        const offset = formData.get('offset')?.toString();
+        const sortBy = formData.get('sortBy')?.toString();
+        const sortOrder = formData.get('sortOrder')?.toString();
+
+        // Map form data to input data
+        if (query) data.query = query;
+        if (location) data.location = location;
+        if (landType && landType !== 'all') data.landTypes = [landType];
+        if (minPrice) data.minPrice = parseFloat(minPrice);
+        if (maxPrice) data.maxPrice = parseFloat(maxPrice);
+        if (minArea) data.minArea = parseFloat(minArea);
+        if (maxArea) data.maxArea = parseFloat(maxArea);
+        if (status) data.status = status;
+        if (limit) data.limit = parseInt(limit);
+        if (offset) data.offset = parseInt(offset);
+        if (sortBy) data.sortBy = sortBy;
+        if (sortOrder) data.sortOrder = sortOrder;
+
+        // Handle features/amenities
+        const amenities = formData.getAll('amenities');
+        if (amenities.length > 0) {
+            data.features = amenities.map(a => a.toString());
+        }
+
+        return SearchLandsInput.create(data);
+    }
+
+    /**
      * Validates the input data
      */
     static validate(data: any): SearchLandsInputData {

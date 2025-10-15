@@ -72,7 +72,7 @@ export class CreatePropertyInput {
         const description = formData.get('description') as string;
         const price = parseFloat(formData.get('price') as string);
         const currency = (formData.get('currency') as string) || 'USD';
-        const type = formData.get('type') as string;
+        const type = formData.get('type') as 'house' | 'apartment' | 'condo' | 'townhouse' | 'villa' | 'studio' | 'penthouse' | 'duplex' | 'land' | 'commercial' | 'office' | 'warehouse';
         const featured = formData.get('featured') === 'true';
 
         // Parse address
@@ -99,6 +99,8 @@ export class CreatePropertyInput {
             bedrooms: parseInt(formData.get('features.bedrooms') as string) || 0,
             bathrooms: parseInt(formData.get('features.bathrooms') as string) || 0,
             area: parseFloat(formData.get('features.area') as string),
+            amenities: [],
+            features: [],
         };
 
         // Parse optional features

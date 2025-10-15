@@ -2,10 +2,10 @@
 
 import { Building2, MapPin, FileText, TrendingUp } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useProperties } from '@/hooks/use-properties';
-import { useLands } from '@/hooks/use-lands';
-import { useBlogPosts } from '@/hooks/use-blog';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useProperties } from "@/presentation/hooks/use-properties";
+import { useLands } from "@/presentation/hooks/use-lands";
+import { useBlogPosts } from "@/presentation/hooks/use-blog";
 
 export function StatsCards() {
   const { properties, loading: propertiesLoading } = useProperties();

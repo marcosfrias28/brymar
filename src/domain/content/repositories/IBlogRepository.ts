@@ -4,10 +4,14 @@ import { BlogCategory } from "../value-objects/BlogCategory";
 import { ContentStatus } from "../value-objects/ContentStatus";
 
 export interface BlogSearchFilters {
-    status?: ContentStatus;
-    category?: BlogCategory;
+    search?: string;
+    status?: string;
+    category?: string;
     author?: string;
-    searchTerm?: string;
+    sortBy?: string;
+    sortOrder?: string;
+    offset?: number;
+    limit?: number;
 }
 
 export interface BlogSearchResult {
@@ -69,13 +73,9 @@ export interface IBlogRepository {
     ): Promise<BlogSearchResult>;
 
     /**
-     * Search blog posts by title or content
+     * Search blog posts with filters and pagination
      */
-    search(
-        searchTerm: string,
-        page: number,
-        limit: number
-    ): Promise<BlogSearchResult>;
+    search(filters: BlogSearchFilters): Promise<BlogSearchResult>;
 
     /**
      * Get recent blog posts

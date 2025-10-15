@@ -1,5 +1,5 @@
 import { ValueObject } from '@/domain/shared/value-objects/ValueObject';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 export class CompletionPercentage extends ValueObject<number> {
     private constructor(value: number) {
@@ -8,15 +8,15 @@ export class CompletionPercentage extends ValueObject<number> {
 
     static create(percentage: number): CompletionPercentage {
         if (typeof percentage !== "number" || isNaN(percentage)) {
-            throw new DomainError("Completion percentage must be a valid number");
+            throw new BusinessRuleViolationError("Completion percentage must be a valid number", "WIZARD_VALIDATION");
         }
 
         if (percentage < 0) {
-            throw new DomainError("Completion percentage cannot be negative");
+            throw new BusinessRuleViolationError("Completion percentage cannot be negative", "WIZARD_VALIDATION");
         }
 
         if (percentage > 100) {
-            throw new DomainError("Completion percentage cannot exceed 100");
+            throw new BusinessRuleViolationError("Completion percentage cannot exceed 100", "WIZARD_VALIDATION");
         }
 
         // Round to nearest integer

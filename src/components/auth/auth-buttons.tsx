@@ -9,12 +9,12 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-} from '@/components/ui/navigation-menu';
-import { ModeToggle } from '@/components/mode-toggle';
-import LogOutButton from '@/components/auth/logout-button';
-import { useAdmin } from '@/hooks/use-admin';
-import { useUser } from '@/hooks/use-user';
-import getProfileItems from '@/lib/navbar/getProfileItems';
+} from "@/components/ui/navigation-menu";
+import { ModeToggle } from "@/components/mode-toggle";
+import LogOutButton from "@/components/auth/logout-button";
+import { useAdmin } from "@/hooks/use-admin";
+import { useUser } from "@/presentation/hooks/use-user";
+import getProfileItems from "@/lib/navbar/getProfileItems";
 
 interface AuthButtonsProps {
   className?: string;
@@ -124,7 +124,8 @@ export function AuthButtons({
                   <div className="px-3 py-2 text-sm text-muted-foreground border-b border-border/50">
                     <Link href={role === "admin" ? "/dashboard" : "/profile"}>
                       <div className="font-medium text-card-foreground whitespace-nowrap truncate">
-                        {user.name || user.email}
+                        {user.getProfile()?.getFullName() ||
+                          user.getEmail()?.value}
                       </div>
                       <div className="text-xs capitalize whitespace-nowrap">
                         {role === "admin"
@@ -154,7 +155,7 @@ export function AuthButtons({
 
                   {/* Cerrar sesión */}
                   <NavigationMenuLink asChild>
-                    <LogOutButton user={user} />
+                    <LogOutButton user={null} />
                   </NavigationMenuLink>
                 </NavigationMenuContent>
               </NavigationMenuItem>

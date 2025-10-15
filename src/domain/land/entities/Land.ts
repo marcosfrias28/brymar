@@ -113,7 +113,7 @@ export class Land extends AggregateRoot {
     updatePrice(newPrice: LandPrice): void {
         // Business rule: Significant price changes on published lands require validation
         if (this.status.isPublished() && this.price.isSignificantlyDifferent(newPrice)) {
-            throw new BusinessRuleViolationError("Significant price changes on published lands require approval");
+            throw new BusinessRuleViolationError("Significant price changes on published lands require approval", 'PUBLISHED_LAND_PRICE_CHANGE');
         }
 
         this.price = newPrice;
@@ -123,7 +123,7 @@ export class Land extends AggregateRoot {
     updateArea(newArea: LandArea): void {
         // Business rule: Area changes affect price per square meter calculations
         if (this.status.isPublished() && !this.area.equals(newArea)) {
-            throw new BusinessRuleViolationError("Area changes on published lands require approval");
+            throw new BusinessRuleViolationError("Area changes on published lands require approval", 'PUBLISHED_LAND_AREA_CHANGE');
         }
 
         this.area = newArea;
@@ -148,7 +148,7 @@ export class Land extends AggregateRoot {
     updateType(newType: LandType): void {
         // Business rule: Type changes may affect zoning and pricing rules
         if (this.status.isPublished() && !this.type.equals(newType)) {
-            throw new BusinessRuleViolationError("Land type changes on published lands require approval");
+            throw new BusinessRuleViolationError("Land type changes on published lands require approval", 'PUBLISHED_LAND_TYPE_CHANGE');
         }
 
         this.type = newType;
@@ -178,7 +178,7 @@ export class Land extends AggregateRoot {
     publish(): void {
         // Business rule: Land must be complete to publish
         if (!this.isComplete()) {
-            throw new BusinessRuleViolationError("Land must be complete before publishing");
+            throw new BusinessRuleViolationError("Land must be complete before publishing", 'INCOMPLETE_LAND_PUBLISH');
         }
 
         this.status = LandStatus.published();

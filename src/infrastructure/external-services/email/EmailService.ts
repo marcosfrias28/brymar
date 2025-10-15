@@ -1,130 +1,131 @@
 import { User } from '@/domain/user/entities/User';
 
 export interface EmailTemplate {
-    subject: string;
-    htmlContent: string;
-    textContent: string;
+  subject: string;
+  htmlContent: string;
+  textContent: string;
 }
 
 export interface SendEmailOptions {
-    to: string;
-    subject: string;
-    htmlContent?: string;
-    textContent?: string;
-    template?: string;
-    templateData?: Record<string, any>;
+  to: string;
+  subject: string;
+  htmlContent?: string;
+  textContent?: string;
+  template?: string;
+  templateData?: Record<string, any>;
 }
 
 /**
  * Service for sending emails (adapter for external email service)
  */
 export class EmailService {
-    constructor(
-        private readonly apiKey: string,
-        private readonly fromEmail: string,
-        private readonly fromName: string = 'Brymar Real Estate'
-    ) { }
+  constructor(
+    private readonly _apiKey: string,
+    private readonly _fromEmail: string,
+    private readonly _fromName: string = 'Brymar Real Estate'
+  ) { }
 
-    /**
-     * Sends a welcome email to a new user
-     */
-    async sendWelcomeEmail(user: User): Promise<void> {
-        const profile = user.getProfile();
-        const displayName = profile.getDisplayName();
+  /**
+   * Sends a welcome email to a new user
+   */
+  async sendWelcomeEmail(user: User): Promise<void> {
+    const profile = user.getProfile();
+    const displayName = profile.getFullName();
 
-        const template = this.getWelcomeEmailTemplate(displayName);
+    const template = this.getWelcomeEmailTemplate(displayName);
 
-        await this.sendEmail({
-            to: user.getEmail().value,
-            subject: template.subject,
-            htmlContent: template.htmlContent,
-            textContent: template.textContent,
-        });
+    await this.sendEmail({
+      to: user.getEmail().value,
+      subject: template.subject,
+      htmlContent: template.htmlContent,
+      textContent: template.textContent,
+    });
+  }
+
+  /**
+   * Sends an email verification email
+   */
+  async sendEmailVerification(user: User, verificationToken: string): Promise<void> {
+    const profile = user.getProfile();
+    const displayName = profile.getFullName();
+    const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${verificationToken}`;
+
+    const template = this.getEmailVerificationTemplate(displayName, verificationUrl);
+
+    await this.sendEmail({
+      to: user.getEmail().value,
+      subject: template.subject,
+      htmlContent: template.htmlContent,
+      textContent: template.textContent,
+    });
+  }
+
+  /**
+   * Sends a password reset email
+   */
+  async sendPasswordResetEmail(user: User, resetToken: string): Promise<void> {
+    const profile = user.getProfile();
+    const displayName = profile.getFullName();
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
+
+    const template = this.getPasswordResetTemplate(displayName, resetUrl);
+
+    await this.sendEmail({
+      to: user.getEmail().value,
+      subject: template.subject,
+      htmlContent: template.htmlContent,
+      textContent: template.textContent,
+    });
+  }
+
+  /**
+   * Sends a generic email
+   */
+  async sendEmail(options: SendEmailOptions): Promise<void> {
+    try {
+      // This would integrate with an actual email service like Resend, SendGrid, etc.
+      // For now, we'll simulate the API call
+
+      // Prepare email data for potential future use
+      ({
+        from: `${this._fromName} <${this._fromEmail}>`,
+        to: options.to,
+        subject: options.subject,
+        html: options.htmlContent,
+        text: options.textContent,
+      };
+
+      // Simulate API call
+      // Note: In production, would send actual email via email service
+
+      // In a real implementation, you would make an HTTP request to your email service
+      // Example with Resend:
+      // const response = await fetch('https://api.resend.com/emails', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Authorization': `Bearer ${this.apiKey}`,
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify(emailData),
+      // });
+
+      // if (!response.ok) {
+      //   throw new Error(`Email service error: ${response.statusText}`);
+      // }
+
+    } catch (error) {
+      // Note: Failed to send email - would be logged in production
+      throw new Error(`Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
+  }
 
-    /**
-     * Sends an email verification email
-     */
-    async sendEmailVerification(user: User, verificationToken: string): Promise<void> {
-        const profile = user.getProfile();
-        const displayName = profile.getDisplayName();
-        const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${verificationToken}`;
+  /**
+   * Gets the welcome email template
+   */
+  private getWelcomeEmailTemplate(userName: string): EmailTemplate {
+    const subject = '¡Bienvenido a Brymar Real Estate!';
 
-        const template = this.getEmailVerificationTemplate(displayName, verificationUrl);
-
-        await this.sendEmail({
-            to: user.getEmail().value,
-            subject: template.subject,
-            htmlContent: template.htmlContent,
-            textContent: template.textContent,
-        });
-    }
-
-    /**
-     * Sends a password reset email
-     */
-    async sendPasswordResetEmail(user: User, resetToken: string): Promise<void> {
-        const profile = user.getProfile();
-        const displayName = profile.getDisplayName();
-        const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
-
-        const template = this.getPasswordResetTemplate(displayName, resetUrl);
-
-        await this.sendEmail({
-            to: user.getEmail().value,
-            subject: template.subject,
-            htmlContent: template.htmlContent,
-            textContent: template.textContent,
-        });
-    }
-
-    /**
-     * Sends a generic email
-     */
-    async sendEmail(options: SendEmailOptions): Promise<void> {
-        try {
-            // This would integrate with an actual email service like Resend, SendGrid, etc.
-            // For now, we'll simulate the API call
-
-            const emailData = {
-                from: `${this.fromName} <${this.fromEmail}>`,
-                to: options.to,
-                subject: options.subject,
-                html: options.htmlContent,
-                text: options.textContent,
-            };
-
-            // Simulate API call
-            console.log('Sending email:', emailData);
-
-            // In a real implementation, you would make an HTTP request to your email service
-            // Example with Resend:
-            // const response = await fetch('https://api.resend.com/emails', {
-            //   method: 'POST',
-            //   headers: {
-            //     'Authorization': `Bearer ${this.apiKey}`,
-            //     'Content-Type': 'application/json',
-            //   },
-            //   body: JSON.stringify(emailData),
-            // });
-
-            // if (!response.ok) {
-            //   throw new Error(`Email service error: ${response.statusText}`);
-            // }
-
-        } catch (error) {
-            console.error('Failed to send email:', error);
-            throw new Error(`Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        }
-    }
-
-    /**
-     * Gets the welcome email template
-     */
-    private getWelcomeEmailTemplate(userName: string): EmailTemplate {
-        const subject = '¡Bienvenido a Brymar Real Estate!';
-
-        const htmlContent = `
+    const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #2563eb;">¡Bienvenido a Brymar Real Estate!</h1>
         <p>Hola ${userName},</p>
@@ -142,7 +143,7 @@ export class EmailService {
       </div>
     `;
 
-        const textContent = `
+    const textContent = `
       ¡Bienvenido a Brymar Real Estate!
       
       Hola ${userName},
@@ -161,16 +162,16 @@ export class EmailService {
       El equipo de Brymar Real Estate
     `;
 
-        return { subject, htmlContent, textContent };
-    }
+    return { subject, htmlContent, textContent };
+  }
 
-    /**
-     * Gets the email verification template
-     */
-    private getEmailVerificationTemplate(userName: string, verificationUrl: string): EmailTemplate {
-        const subject = 'Verifica tu dirección de email';
+  /**
+   * Gets the email verification template
+   */
+  private getEmailVerificationTemplate(userName: string, verificationUrl: string): EmailTemplate {
+    const subject = 'Verifica tu dirección de email';
 
-        const htmlContent = `
+    const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #2563eb;">Verifica tu dirección de email</h1>
         <p>Hola ${userName},</p>
@@ -189,7 +190,7 @@ export class EmailService {
       </div>
     `;
 
-        const textContent = `
+    const textContent = `
       Verifica tu dirección de email
       
       Hola ${userName},
@@ -206,16 +207,16 @@ export class EmailService {
       El equipo de Brymar Real Estate
     `;
 
-        return { subject, htmlContent, textContent };
-    }
+    return { subject, htmlContent, textContent };
+  }
 
-    /**
-     * Gets the password reset template
-     */
-    private getPasswordResetTemplate(userName: string, resetUrl: string): EmailTemplate {
-        const subject = 'Restablece tu contraseña';
+  /**
+   * Gets the password reset template
+   */
+  private getPasswordResetTemplate(userName: string, resetUrl: string): EmailTemplate {
+    const subject = 'Restablece tu contraseña';
 
-        const htmlContent = `
+    const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #2563eb;">Restablece tu contraseña</h1>
         <p>Hola ${userName},</p>
@@ -234,7 +235,7 @@ export class EmailService {
       </div>
     `;
 
-        const textContent = `
+    const textContent = `
       Restablece tu contraseña
       
       Hola ${userName},
@@ -251,6 +252,6 @@ export class EmailService {
       El equipo de Brymar Real Estate
     `;
 
-        return { subject, htmlContent, textContent };
-    }
+    return { subject, htmlContent, textContent };
+  }
 }

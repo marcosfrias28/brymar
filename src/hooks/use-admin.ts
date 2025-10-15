@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from '@/hooks/use-user';
+import { useUser } from '@/presentation/hooks/use-user';
 import { PERMISSIONS, ROUTE_PERMISSIONS, type Permission, type UserRole } from '@/lib/auth/admin-config';
 
 /**
@@ -25,14 +25,14 @@ export function useAdmin() {
     };
   }
 
-  const userRole = user.role as UserRole;
+  const userRole = user.getRole().value as UserRole;
 
   /**
    * Verifica si el usuario tiene un permiso específico
    */
   const hasPermission = (permission: Permission): boolean => {
-    if (!user || !user.role) return false;
-    
+    if (!user || !user.getRole()) return false;
+
     // Usar la lógica nativa del plugin admin si está disponible
     // Por ahora, usar nuestra configuración local
     const allowedRoles = {
@@ -40,23 +40,23 @@ export function useAdmin() {
       'dashboard.access': ['admin', 'agent'],
       'analytics.view': ['admin'],
       'settings.view': ['admin', 'agent'],
-      
+
       // Propiedades
       'properties.view': ['admin', 'agent', 'user'],
       'properties.manage': ['admin', 'agent'],
-      
+
       // Terrenos
       'lands.view': ['admin', 'agent', 'user'],
       'lands.manage': ['admin', 'agent'],
-      
+
       // Blog
       'blog.view': ['admin', 'agent', 'user'],
       'blog.manage': ['admin'],
-      
+
       // Usuarios
       'users.view': ['admin'],
       'users.manage': ['admin'],
-      
+
       // Perfil
       'profile.access': ['admin', 'agent', 'user'],
       'profile.manage': ['admin', 'agent', 'user'],
@@ -70,7 +70,7 @@ export function useAdmin() {
    * Verifica si el usuario tiene un rol específico
    */
   const hasRole = (role: UserRole): boolean => {
-    return user?.role === role;
+    return user?.getRole().value === role;
   };
 
   /**
@@ -81,12 +81,12 @@ export function useAdmin() {
     const matchingRoute = Object.keys(ROUTE_PERMISSIONS)
       .sort((a, b) => b.length - a.length)
       .find(route => pathname.startsWith(route));
-    
+
     if (matchingRoute) {
       const requiredPermission = ROUTE_PERMISSIONS[matchingRoute as keyof typeof ROUTE_PERMISSIONS];
       return hasPermission(requiredPermission);
     }
-    
+
     // Si no hay permiso específico requerido, permitir acceso
     return true;
   };
@@ -106,15 +106,15 @@ export function useAdmin() {
     hasPermission,
     hasRole,
     canAccessRoute,
-    
+
     // Shortcuts para roles comunes
     isAdmin: hasRole('admin'),
     isAgent: hasRole('agent'),
     isUser: hasRole('user'),
-    
+
     // Lista de permisos del usuario
     permissions: getUserPermissions(),
-    
+
     // Permisos específicos para facilidad de uso
     canAccessDashboard: hasPermission(PERMISSIONS.DASHBOARD_ACCESS),
     canManageProperties: hasPermission(PERMISSIONS.PROPERTIES_MANAGE),

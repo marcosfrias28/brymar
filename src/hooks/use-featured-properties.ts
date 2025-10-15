@@ -2,17 +2,17 @@
 
 import { useState, useEffect } from 'react'
 import { getFeaturedProperties } from '@/lib/actions/property-actions';
-import { Property } from './use-properties'
+import { PropertySearchResult } from '@/presentation/hooks/use-properties'
 
 export interface UseFeaturedPropertiesReturn {
-    properties: Property[]
+    properties: PropertySearchResult[]
     loading: boolean
     error: string | null
     refreshFeaturedProperties: () => Promise<void>
 }
 
 export const useFeaturedProperties = (limit = 6): UseFeaturedPropertiesReturn => {
-    const [properties, setProperties] = useState<Property[]>([])
+    const [properties, setProperties] = useState<PropertySearchResult[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
@@ -22,7 +22,7 @@ export const useFeaturedProperties = (limit = 6): UseFeaturedPropertiesReturn =>
             setError(null)
 
             const result = await getFeaturedProperties(limit)
-            setProperties(result as Property[])
+            setProperties(result as unknown as PropertySearchResult[])
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Error loading featured properties'
             setError(errorMessage)

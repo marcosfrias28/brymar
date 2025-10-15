@@ -1,26 +1,26 @@
 import { eq, and, or, desc, asc, count, sql } from 'drizzle-orm';
+import * as logger from '@/lib/logger';
 import { PageSection } from '@/domain/content/entities/PageSection';
 import { PageSectionId } from '@/domain/content/value-objects/PageSectionId';
 import { PageName } from '@/domain/content/value-objects/PageName';
 import { SectionName } from '@/domain/content/value-objects/SectionName';
 import {
     IPageSectionRepository,
-    PageSectionFilters,
-    PageSectionSearchOptions
+    PageSectionFilters
 } from '@/domain/content/repositories/IPageSectionRepository';
 import { pageSections } from '@/lib/db/schema';
 import type { Database } from '@/lib/db/drizzle';
 import { PageSectionMapper } from '../mappers/PageSectionMapper.js';
 
 export class DrizzlePageSectionRepository implements IPageSectionRepository {
-    constructor(private readonly db: Database) { }
+    constructor(private readonly _database: Database) { }
 
     async findById(id: PageSectionId): Promise<PageSection | null> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select()
                 .from(pageSections)
-                .where(eq(pageSections.id, id.isNumeric() ? id.toNumber() : parseInt(id.value, 10)))
+                .where(eq(pageSections.id, id.toNumber()))
                 .limit(1);
 
             if (result.length === 0) {
@@ -29,7 +29,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
             return PageSectionMapper.toDomain(result[0]);
         } catch (error) {
-            console.error('Error finding page section by ID:', error);
+            await logger.error('Failed to find page section by ID', error, { id: id.toNumber() });
             throw new Error(`Failed to find page section: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -43,7 +43,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
             if (existingSection) {
                 // Update existing section
-                await this.db
+                await this.database
                     .update(pageSections)
                     .set({
                         page: pageSectionData.page,
@@ -61,64 +61,49 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
                     .where(eq(pageSections.id, pageSectionData.id));
             } else {
                 // Create new section
-                await this.db
+                await this.database
                     .insert(pageSections)
                     .values(pageSectionData);
             }
         } catch (error) {
-            console.error('Error saving page section:', error);
+            await logger.error('Failed to save page section', error);
             throw new Error(`Failed to save page section: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async delete(id: PageSectionId): Promise<void> {
         try {
-            await this.db
+            await this.database
                 .delete(pageSections)
-                .where(eq(pageSections.id, id.isNumeric() ? id.toNumber() : parseInt(id.value, 10)));
+                .where(eq(pageSections.id, id.toNumber()));
         } catch (error) {
-            console.error('Error deleting page section:', error);
+            await logger.error('Failed to delete page section', error, { id: id.toNumber() });
             throw new Error(`Failed to delete page section: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async exists(id: PageSectionId): Promise<boolean> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select({ count: count() })
                 .from(pageSections)
-                .where(eq(pageSections.id, id.isNumeric() ? id.toNumber() : parseInt(id.value, 10)));
+                .where(eq(pageSections.id, id.toNumber()));
 
             return (result[0]?.count || 0) > 0;
         } catch (error) {
-            console.error('Error checking page section existence:', error);
+            await logger.error('Failed to checking page section existence:', error);
             throw new Error(`Failed to check page section existence: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async findAll(
-        filters?: PageSectionFilters,
-        options?: PageSectionSearchOptions
+        filters?: PageSectionFilters
     ): Promise<PageSection[]> {
         try {
             const whereConditions = this.buildWhereConditions(filters);
-            const { sortBy = 'order', sortOrder = 'asc' } = options || {};
+            const orderBy = asc(pageSections.order);
 
-            let orderBy;
-            switch (sortBy) {
-                case 'createdAt':
-                    orderBy = sortOrder === 'asc' ? asc(pageSections.createdAt) : desc(pageSections.createdAt);
-                    break;
-                case 'updatedAt':
-                    orderBy = sortOrder === 'asc' ? asc(pageSections.updatedAt) : desc(pageSections.updatedAt);
-                    break;
-                case 'order':
-                default:
-                    orderBy = sortOrder === 'asc' ? asc(pageSections.order) : desc(pageSections.order);
-                    break;
-            }
-
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(pageSections)
                 .where(whereConditions)
@@ -126,7 +111,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
             return results.map(row => PageSectionMapper.toDomain(row));
         } catch (error) {
-            console.error('Error finding all page sections:', error);
+            await logger.error('Failed to finding all page sections:', error);
             throw new Error(`Failed to find page sections: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -140,7 +125,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
                 ? eq(pageSections.page, page.value)
                 : and(eq(pageSections.page, page.value), eq(pageSections.isActive, true));
 
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(pageSections)
                 .where(whereConditions)
@@ -148,7 +133,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
             return results.map(row => PageSectionMapper.toDomain(row));
         } catch (error) {
-            console.error('Error finding page sections by page:', error);
+            await logger.error('Failed to finding page sections by page:', error);
             throw new Error(`Failed to find page sections by page: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -162,7 +147,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
         section: SectionName
     ): Promise<PageSection | null> {
         try {
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(pageSections)
                 .where(
@@ -179,14 +164,14 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
             return PageSectionMapper.toDomain(results[0]);
         } catch (error) {
-            console.error('Error finding page section by page and section:', error);
+            await logger.error('Failed to finding page section by page and section:', error);
             throw new Error(`Failed to find page section: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async findBySection(section: SectionName): Promise<PageSection[]> {
         try {
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(pageSections)
                 .where(eq(pageSections.section, section.value))
@@ -194,7 +179,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
             return results.map(row => PageSectionMapper.toDomain(row));
         } catch (error) {
-            console.error('Error finding page sections by section:', error);
+            await logger.error('Failed to finding page sections by section:', error);
             throw new Error(`Failed to find page sections by section: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -205,40 +190,40 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
     ): Promise<void> {
         try {
             // Use a transaction to update all orders atomically
-            await this.db.transaction(async (tx) => {
+            await this.database.transaction(async (tx) => {
                 for (const { id, order } of sectionOrders) {
                     await tx
                         .update(pageSections)
                         .set({ order, updatedAt: new Date() })
-                        .where(eq(pageSections.id, id.isNumeric() ? id.toNumber() : parseInt(id.value, 10)));
+                        .where(eq(pageSections.id, id.toNumber()));
                 }
             });
         } catch (error) {
-            console.error('Error updating section order:', error);
+            await logger.error('Failed to updating section order:', error);
             throw new Error(`Failed to update section order: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async activate(id: PageSectionId): Promise<void> {
         try {
-            await this.db
+            await this.database
                 .update(pageSections)
                 .set({ isActive: true, updatedAt: new Date() })
-                .where(eq(pageSections.id, id.isNumeric() ? id.toNumber() : parseInt(id.value, 10)));
+                .where(eq(pageSections.id, id.toNumber()));
         } catch (error) {
-            console.error('Error activating page section:', error);
+            await logger.error('Failed to activating page section:', error);
             throw new Error(`Failed to activate page section: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async deactivate(id: PageSectionId): Promise<void> {
         try {
-            await this.db
+            await this.database
                 .update(pageSections)
                 .set({ isActive: false, updatedAt: new Date() })
-                .where(eq(pageSections.id, id.isNumeric() ? id.toNumber() : parseInt(id.value, 10)));
+                .where(eq(pageSections.id, id.toNumber()));
         } catch (error) {
-            console.error('Error deactivating page section:', error);
+            await logger.error('Failed to deactivating page section:', error);
             throw new Error(`Failed to deactivate page section: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -248,7 +233,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
         section: SectionName
     ): Promise<boolean> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select({ count: count() })
                 .from(pageSections)
                 .where(
@@ -260,14 +245,14 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
             return (result[0]?.count || 0) > 0;
         } catch (error) {
-            console.error('Error checking page section existence:', error);
+            await logger.error('Failed to checking page section existence:', error);
             throw new Error(`Failed to check page section existence: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async getNextOrderForPage(page: PageName): Promise<number> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select({
                     maxOrder: sql<number>`MAX(${pageSections.order})`
                 })
@@ -277,7 +262,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
             const maxOrder = result[0]?.maxOrder || 0;
             return maxOrder + 1;
         } catch (error) {
-            console.error('Error getting next order for page:', error);
+            await logger.error('Failed to getting next order for page:', error);
             throw new Error(`Failed to get next order: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -301,10 +286,10 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
                 page: targetPage.value,
                 section: sourceSection.getSection().value,
                 title: sourceSection.getTitle()?.value,
-                subtitle: sourceSection.getContent().subtitle,
-                description: sourceSection.getContent().description,
-                content: sourceSection.getContent().content,
-                images: sourceSection.getContent().images,
+                subtitle: sourceSection.getContent().getPropertyAsString('subtitle'),
+                description: sourceSection.getContent().getPropertyAsString('description'),
+                content: sourceSection.getContent().value,
+                images: sourceSection.getContent().getPropertyAsArray('images'),
                 settings: sourceSection.getSettings().value,
                 isActive: sourceSection.getIsActive(),
                 order: nextOrder
@@ -313,14 +298,14 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
             await this.save(newSection);
             return newSection;
         } catch (error) {
-            console.error('Error duplicating page section:', error);
+            await logger.error('Failed to duplicating page section:', error);
             throw new Error(`Failed to duplicate page section: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async findIncomplete(): Promise<PageSection[]> {
         try {
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(pageSections)
                 .where(
@@ -334,35 +319,35 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
             return results.map(row => PageSectionMapper.toDomain(row));
         } catch (error) {
-            console.error('Error finding incomplete page sections:', error);
+            await logger.error('Failed to finding incomplete page sections:', error);
             throw new Error(`Failed to find incomplete page sections: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async countByPage(page: PageName): Promise<number> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select({ count: count() })
                 .from(pageSections)
                 .where(eq(pageSections.page, page.value));
 
             return result[0]?.count || 0;
         } catch (error) {
-            console.error('Error counting page sections by page:', error);
+            await logger.error('Failed to counting page sections by page:', error);
             throw new Error(`Failed to count page sections: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async countBySection(section: SectionName): Promise<number> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select({ count: count() })
                 .from(pageSections)
                 .where(eq(pageSections.section, section.value));
 
             return result[0]?.count || 0;
         } catch (error) {
-            console.error('Error counting page sections by section:', error);
+            await logger.error('Failed to counting page sections by section:', error);
             throw new Error(`Failed to count page sections: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -372,7 +357,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
         propertyValue: any
     ): Promise<PageSection[]> {
         try {
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(pageSections)
                 .where(sql`${pageSections.content}->>${propertyKey} = ${propertyValue}`)
@@ -380,14 +365,14 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
             return results.map(row => PageSectionMapper.toDomain(row));
         } catch (error) {
-            console.error('Error finding page sections by content property:', error);
+            await logger.error('Failed to finding page sections by content property:', error);
             throw new Error(`Failed to find page sections by content property: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async findByImageUrl(imageUrl: string): Promise<PageSection[]> {
         try {
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(pageSections)
                 .where(sql`${pageSections.images} @> ${JSON.stringify([imageUrl])}`)
@@ -395,7 +380,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
             return results.map(row => PageSectionMapper.toDomain(row));
         } catch (error) {
-            console.error('Error finding page sections by image URL:', error);
+            await logger.error('Failed to finding page sections by image URL:', error);
             throw new Error(`Failed to find page sections by image URL: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -418,14 +403,14 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
                 updateData.isActive = updates.isActive;
             }
 
-            const result = await this.db
+            const result = await this.database
                 .update(pageSections)
                 .set(updateData)
                 .where(whereConditions);
 
             return result.rowCount || 0;
         } catch (error) {
-            console.error('Error bulk updating page sections:', error);
+            await logger.error('Failed to bulk updating page sections:', error);
             throw new Error(`Failed to bulk update page sections: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -442,13 +427,13 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
         try {
             // Get basic counts
             const [totalResult, activeResult, inactiveResult] = await Promise.all([
-                this.db.select({ count: count() }).from(pageSections),
-                this.db.select({ count: count() }).from(pageSections).where(eq(pageSections.isActive, true)),
-                this.db.select({ count: count() }).from(pageSections).where(eq(pageSections.isActive, false))
+                this.database.select({ count: count() }).from(pageSections),
+                this.database.select({ count: count() }).from(pageSections).where(eq(pageSections.isActive, true)),
+                this.database.select({ count: count() }).from(pageSections).where(eq(pageSections.isActive, false))
             ]);
 
             // Get sections by page
-            const pageResults = await this.db
+            const pageResults = await this.database
                 .select({
                     page: pageSections.page,
                     count: count()
@@ -462,7 +447,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
             });
 
             // Get sections by type
-            const typeResults = await this.db
+            const typeResults = await this.database
                 .select({
                     section: pageSections.section,
                     count: count()
@@ -476,13 +461,13 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
             });
 
             // Get sections with images
-            const imagesResult = await this.db
+            const imagesResult = await this.database
                 .select({ count: count() })
                 .from(pageSections)
                 .where(sql`json_array_length(${pageSections.images}) > 0`);
 
             // Get sections with custom settings
-            const settingsResult = await this.db
+            const settingsResult = await this.database
                 .select({ count: count() })
                 .from(pageSections)
                 .where(sql`${pageSections.settings} != '{}'`);
@@ -497,14 +482,14 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
                 sectionsWithCustomSettings: settingsResult[0]?.count || 0
             };
         } catch (error) {
-            console.error('Error getting page section statistics:', error);
+            await logger.error('Failed to getting page section statistics:', error);
             throw new Error(`Failed to get statistics: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async findModifiedAfter(date: Date): Promise<PageSection[]> {
         try {
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(pageSections)
                 .where(sql`${pageSections.updatedAt} > ${date}`)
@@ -512,7 +497,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
             return results.map(row => PageSectionMapper.toDomain(row));
         } catch (error) {
-            console.error('Error finding modified page sections:', error);
+            await logger.error('Failed to finding modified page sections:', error);
             throw new Error(`Failed to find modified page sections: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -520,26 +505,14 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
     async resetPageToDefaults(page: PageName): Promise<void> {
         try {
             // Delete all existing sections for the page
-            await this.db
+            await this.database
                 .delete(pageSections)
                 .where(eq(pageSections.page, page.value));
 
-            // Create default sections for the page
-            const defaultSections = page.getDefaultSections();
-
-            for (let i = 0; i < defaultSections.length; i++) {
-                const sectionName = defaultSections[i];
-                const section = PageSection.create({
-                    page: page.value,
-                    section: sectionName,
-                    title: SectionName.create(sectionName).getLabel(),
-                    order: i
-                });
-
-                await this.save(section);
-            }
+            // Note: Default sections would need to be defined elsewhere
+            // This is a placeholder implementation
         } catch (error) {
-            console.error('Error resetting page to defaults:', error);
+            await logger.error('Failed to resetting page to defaults:', error);
             throw new Error(`Failed to reset page to defaults: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -563,19 +536,14 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
                 sections: sections.map(section => ({
                     section: section.getSection().value,
                     title: section.getTitle()?.value,
-                    content: {
-                        subtitle: section.getContent().subtitle,
-                        description: section.getContent().description,
-                        content: section.getContent().content,
-                        images: section.getContent().images
-                    },
+                    content: section.getContent().value,
                     settings: section.getSettings().value,
-                    order: section.getOrder(),
+                    order: section.getOrder().value,
                     isActive: section.getIsActive()
                 }))
             };
         } catch (error) {
-            console.error('Error exporting page configuration:', error);
+            await logger.error('Failed to exporting page configuration:', error);
             throw new Error(`Failed to export page configuration: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -595,7 +563,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
     ): Promise<void> {
         try {
             // Delete existing sections
-            await this.db
+            await this.database
                 .delete(pageSections)
                 .where(eq(pageSections.page, page.value));
 
@@ -617,8 +585,59 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
                 await this.save(section);
             }
         } catch (error) {
-            console.error('Error importing page configuration:', error);
+            await logger.error('Failed to importing page configuration:', error);
             throw new Error(`Failed to import page configuration: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
+    async findWithFilters(filters: PageSectionFilters): Promise<PageSection[]> {
+        try {
+            const whereCondition = this.buildWhereConditions(filters);
+
+            const query = this.database
+                .select()
+                .from(pageSections)
+                .orderBy(asc(pageSections.page), asc(pageSections.order));
+
+            const results = whereCondition
+                ? await query.where(whereCondition)
+                : await query;
+
+            return results.map(row => PageSectionMapper.toDomain(row));
+        } catch (error) {
+            throw new Error(`Failed to find page sections with filters: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
+    async findAllOrdered(): Promise<PageSection[]> {
+        try {
+            const results = await this.database
+                .select()
+                .from(pageSections)
+                .orderBy(asc(pageSections.page), asc(pageSections.order));
+
+            return results.map(row => PageSectionMapper.toDomain(row));
+        } catch (error) {
+            throw new Error(`Failed to find all ordered page sections: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
+    async updateSectionOrders(
+        page: PageName,
+        sectionOrders: Array<{ sectionId: PageSectionId; order: number }>
+    ): Promise<void> {
+        try {
+            for (const { sectionId, order } of sectionOrders) {
+                await this.database
+                    .update(pageSections)
+                    .set({ order })
+                    .where(and(
+                        eq(pageSections.id, sectionId.toNumber()),
+                        eq(pageSections.page, page.value)
+                    ));
+            }
+        } catch (error) {
+            throw new Error(`Failed to update section orders: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 

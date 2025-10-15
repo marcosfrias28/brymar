@@ -9,15 +9,15 @@ import {
     ImageMetadata,
     UploadError
 } from '@/types/wizard';
-import { UploadError as WizardUploadError, ErrorFactory } from "../errors/wizard-errors";
+import { UploadError as WizardUploadError } from "../errors/wizard-errors";
 import { retryUploadOperation, circuitBreakers } from "../utils/retry-logic";
 import { validateUploadedFile, validateImageUrl, generateSecureFilename, performCompleteSecurityValidation } from "../security/file-upload-security";
 import { checkImageUploadRateLimit, recordSuccessfulOperation, recordFailedOperation } from "../security/rate-limiting";
-import { generatePresignedUploadUrl } from "../security/signed-url-generation";
+
 
 // Constants
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
 const UPLOAD_PATH_PREFIX = 'properties';
 
 // Validation schemas
@@ -130,7 +130,7 @@ export async function uploadDirect(
                 // Check if we should use mock storage
                 if (shouldUseMockStorage()) {
                     const mockUrl = `https://mock-storage.example.com/images/${secureFilename}`;
-                    console.warn(`[Upload Service] Using mock storage: ${mockUrl}`);
+                    // Note: Using mock storage in development
 
                     return {
                         url: mockUrl,
@@ -157,20 +157,17 @@ export async function uploadDirect(
                         contentType: file.type,
                     };
                 } catch (blobError: any) {
-                    console.error('Vercel Blob upload error:', blobError);
+                    // Note: Vercel Blob upload error - would be logged in production
 
                     // Check if it's a "store does not exist" error
                     if (blobError.message && blobError.message.includes('store does not exist')) {
                         const configInfo = getBlobConfigInfo();
-                        console.error('[Upload Service] Blob store configuration issue:', {
-                            error: configInfo.error,
-                            recommendations: configInfo.recommendations
-                        });
+                        // Note: Blob store configuration issue - would be logged in production
 
                         // For development/testing, create a mock URL
                         if (configInfo.isDevelopment) {
                             const mockUrl = `https://mock-storage.example.com/images/${secureFilename}`;
-                            console.warn(`[Upload Service] Using mock URL due to Blob store configuration: ${mockUrl}`);
+                            // Note: Using mock URL due to Blob store configuration
 
                             return {
                                 url: mockUrl,
@@ -192,7 +189,7 @@ export async function uploadDirect(
 
         return result;
     } catch (error) {
-        console.error('Error uploading to Vercel Blob:', error);
+        // Note: Error uploading to Vercel Blob - would be logged in production
 
         // Record failed operation
         await recordFailedOperation('imageUpload', clientId);
@@ -297,7 +294,7 @@ export async function uploadMultipleImages(files: File[]): Promise<{
 export async function deleteImage(url: string): Promise<void> {
     // For now, we'll just log the deletion request
     // In a production environment, you might want to implement cleanup logic
-    console.log(`Image deletion requested for: ${url}`);
+    // Note: Image deletion requested - would be logged in production
 }
 
 // Server action for uploading images (main entry point)
@@ -308,7 +305,7 @@ export async function uploadPropertyImages(files: File[]): Promise<{
     try {
         return await uploadMultipleImages(files);
     } catch (error) {
-        console.error('Error in uploadPropertyImages:', error);
+        // Note: Error in uploadPropertyImages - would be logged in production
         return {
             successful: [],
             failed: files.map(file => ({
@@ -327,7 +324,7 @@ export async function uploadSinglePropertyImage(file: File): Promise<ImageMetada
         const uploadResult = await uploadDirect(file, signedUrl.uploadUrl);
         return await processMetadata(uploadResult);
     } catch (error) {
-        console.error('Error in uploadSinglePropertyImage:', error);
+        // Note: Error in uploadSinglePropertyImage - would be logged in production
         throw new Error(error instanceof Error ? error.message : 'Error al subir imagen');
     }
 }

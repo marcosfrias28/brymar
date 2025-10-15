@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { DashboardPageLayout } from "../layout/dashboard-page-layout";
 import { AdminSidebar } from "../admin-sidebar";
-import { BreadcrumbItem } from '@/types/layout';
+import { BreadcrumbItem } from "@/types/layout";
 
 // Mock Next.js router
 const mockPush = jest.fn();
@@ -33,7 +33,7 @@ jest.mock("@/hooks/use-admin", () => ({
   }),
 }));
 
-jest.mock("@/hooks/use-user", () => ({
+jest.mock("@/presentation/hooks/use-user", () => ({
   useUser: () => ({
     user: {
       name: "Admin User",

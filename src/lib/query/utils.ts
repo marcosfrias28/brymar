@@ -227,15 +227,10 @@ export function debugCache(queryClient: QueryClient): void {
         const cache = queryClient.getQueryCache();
         const queries = cache.getAll();
 
-        console.group('Query Cache Debug');
+        // Debug logging removed for production
         queries.forEach(query => {
-            console.log({
-                queryKey: query.queryKey,
-                state: query.state.status,
-                stale: query.isStale(),
-                lastUpdated: new Date(query.state.dataUpdatedAt || 0).toLocaleTimeString(),
-            });
+            // Query debug info available in development tools
+            // Removed debug logging for production
         });
-        console.groupEnd();
     }
 }

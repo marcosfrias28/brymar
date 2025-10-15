@@ -16,7 +16,7 @@ import { MediaUrl } from '@/domain/wizard/value-objects/MediaUrl';
 import { MediaMetadata } from '@/domain/wizard/value-objects/MediaMetadata';
 
 export class DrizzleWizardMediaRepository implements IWizardMediaRepository {
-    constructor(private readonly db: Database) { }
+    constructor(private readonly _db: Database) { }
 
     async save(media: WizardMedia): Promise<void> {
         const mediaData = this.mapToDatabase(media);

@@ -5,3 +5,4 @@
 export * from './CreateLandUseCase';
 export * from './UpdateLandUseCase';
 export * from './SearchLandsUseCase';
+export * from './GetLandByIdUseCase';

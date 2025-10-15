@@ -4,7 +4,7 @@ import { DashboardPageLayout } from "../layout/dashboard-page-layout";
 import { ContentGrid } from "../layout/content-grid";
 import { PageHeader } from "../layout/page-header";
 import { AdminSidebar } from "../admin-sidebar";
-import { BreadcrumbItem } from '@/types/layout';
+import { BreadcrumbItem } from "@/types/layout";
 
 // Mock dependencies
 jest.mock("@/hooks/use-responsive", () => ({
@@ -26,7 +26,7 @@ jest.mock("@/hooks/use-admin", () => ({
   }),
 }));
 
-jest.mock("@/hooks/use-user", () => ({
+jest.mock("@/presentation/hooks/use-user", () => ({
   useUser: () => ({
     user: {
       name: "Test User",

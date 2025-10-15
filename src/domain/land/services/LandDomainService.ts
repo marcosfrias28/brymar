@@ -3,7 +3,7 @@ import { LandType } from "../value-objects/LandType";
 import { LandArea } from "../value-objects/LandArea";
 import { LandPrice } from "../value-objects/LandPrice";
 import { LandLocation } from "../value-objects/LandLocation";
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 export class LandDomainService {
 
@@ -12,7 +12,7 @@ export class LandDomainService {
      */
     validateForPublication(land: Land): void {
         if (!land.isComplete()) {
-            throw new DomainError("Land must be complete before publication");
+            throw new BusinessRuleViolationError("Land must be complete before publication", "LAND_VALIDATION");
         }
 
         // Business rule: Beachfront lands require special validation
@@ -82,19 +82,18 @@ export class LandDomainService {
 
         const rules = pricingRules[type.value];
         if (!rules) {
-            throw new DomainError(`No pricing rules defined for land type: ${type.value}`);
+            throw new BusinessRuleViolationError(`No pricing rules defined for land type: ${type.value}`, "LAND_VALIDATION");
         }
 
         if (pricePerM2 < rules.min) {
-            throw new DomainError(
-                `Price per square meter ($${pricePerM2}) is below minimum for ${type.getDescription()} ($${rules.min})`
+            throw new BusinessRuleViolationError(
+                `Price per square meter ($${pricePerM2}) is below minimum for ${type.getDescription()} ($${rules.min})`,
+                "LAND_VALIDATION"
             );
         }
 
         if (pricePerM2 > rules.max) {
-            console.warn(
-                `Price per square meter ($${pricePerM2}) is above typical maximum for ${type.getDescription()} ($${rules.max})`
-            );
+            // Note: Price per square meter is above typical maximum for this land type
         }
     }
 
@@ -162,13 +161,13 @@ export class LandDomainService {
     private validateBeachfrontLand(land: Land): void {
         // Business rule: Beachfront lands must have beach access feature
         if (!land.getFeatures().hasFeature("Beach Access")) {
-            throw new DomainError("Beachfront lands must have beach access");
+            throw new BusinessRuleViolationError("Beachfront lands must have beach access", "LAND_VALIDATION");
         }
 
         // Business rule: Beachfront lands have minimum price requirements
         const pricePerM2 = land.getPricePerSquareMeter();
         if (pricePerM2 < 100) {
-            throw new DomainError("Beachfront land price appears too low for market standards");
+            throw new BusinessRuleViolationError("Beachfront land price appears too low for market standards", "LAND_VALIDATION");
         }
     }
 
@@ -176,12 +175,12 @@ export class LandDomainService {
         // Business rule: Commercial lands require minimum area
         const minCommercialArea = 500; // 500 m²
         if (land.getArea().getValue() < minCommercialArea) {
-            throw new DomainError(`Commercial lands must be at least ${minCommercialArea} square meters`);
+            throw new BusinessRuleViolationError(`Commercial lands must be at least ${minCommercialArea} square meters`, "LAND_VALIDATION");
         }
 
         // Business rule: Commercial lands should have road access
         if (!land.getFeatures().hasFeature("Road Access")) {
-            console.warn("Commercial land should have road access for better marketability");
+            // Note: Commercial land should have road access for better marketability
         }
     }
 
@@ -189,7 +188,7 @@ export class LandDomainService {
         // Business rule: Agricultural lands require minimum area
         const minAgriculturalArea = 1000; // 1000 m² (0.1 hectare)
         if (land.getArea().getValue() < minAgriculturalArea) {
-            throw new DomainError(`Agricultural lands must be at least ${minAgriculturalArea} square meters`);
+            throw new BusinessRuleViolationError(`Agricultural lands must be at least ${minAgriculturalArea} square meters`, "LAND_VALIDATION");
         }
 
         // Business rule: Agricultural lands should have water access
@@ -198,7 +197,7 @@ export class LandDomainService {
             land.getFeatures().hasFeature("River Access");
 
         if (!hasWaterAccess) {
-            console.warn("Agricultural land should have water access for farming purposes");
+            // Note: Agricultural land should have water access for farming purposes
         }
     }
 

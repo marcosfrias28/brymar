@@ -14,7 +14,7 @@ import type { Database } from '@/lib/db/drizzle';
  * Drizzle implementation of the User repository
  */
 export class DrizzleUserRepository implements IUserRepository {
-    constructor(private readonly db: Database) { }
+    constructor(private readonly _db: Database) { }
 
     /**
      * Saves a user (create or update)
@@ -280,17 +280,15 @@ export class DrizzleUserRepository implements IUserRepository {
      */
     private mapToDomain(row: any): User {
         const profile = UserProfile.create({
-            name: row.name,
-            firstName: row.firstName,
-            lastName: row.lastName,
+            firstName: row.firstName || row.name || '',
+            lastName: row.lastName || '',
             phone: row.phone,
             bio: row.bio,
             location: row.location,
-            website: row.website,
-            image: row.image,
+            avatar: row.image,
         });
 
-        const preferences = UserPreferences.fromJSON(row.preferences);
+        const preferences = UserPreferences.create(row.preferences || {});
 
         return User.reconstitute({
             id: UserId.create(row.id),
@@ -313,18 +311,17 @@ export class DrizzleUserRepository implements IUserRepository {
 
         return {
             id: user.getId().value,
-            name: profile.name,
+            name: profile.getFullName(),
             email: user.getEmail().value,
             emailVerified: false, // Would need to be tracked separately
-            image: profile.image,
+            image: profile.getAvatar(),
             role: user.getRole().value,
-            firstName: profile.firstName,
-            lastName: profile.lastName,
-            phone: profile.phone,
-            bio: profile.bio,
-            location: profile.location,
-            website: profile.website,
-            preferences: preferences.toJSON(),
+            firstName: profile.getFirstName(),
+            lastName: profile.getLastName(),
+            phone: profile.getPhone(),
+            bio: profile.getBio(),
+            location: profile.getLocation(),
+            preferences: preferences.value,
             createdAt: user.getCreatedAt(),
             updatedAt: user.getUpdatedAt(),
         };

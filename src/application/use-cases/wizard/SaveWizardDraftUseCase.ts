@@ -5,7 +5,7 @@ import { WizardDomainService, WizardStepDefinition } from '@/domain/wizard/servi
 import { WizardDraft } from '@/domain/wizard/entities/WizardDraft';
 import { WizardDraftId } from '@/domain/wizard/value-objects/WizardDraftId';
 import { UserId } from '@/domain/user/value-objects/UserId';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { EntityNotFoundError, BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 export class SaveWizardDraftUseCase {
     constructor(
@@ -23,13 +23,13 @@ export class SaveWizardDraftUseCase {
                 const existingDraft = await this.wizardDraftRepository.findById(draftId);
 
                 if (!existingDraft) {
-                    throw new DomainError(`Wizard draft with ID ${input.draftId} not found`);
+                    throw new EntityNotFoundError('WizardDraft', input.draftId);
                 }
 
                 // Verify ownership
                 const userId = UserId.create(input.userId);
                 if (!existingDraft.getUserId().equals(userId)) {
-                    throw new DomainError("You don't have permission to update this draft");
+                    throw new BusinessRuleViolationError("You don't have permission to update this draft", 'UNAUTHORIZED_DRAFT_UPDATE');
                 }
 
                 // Update the draft
@@ -103,7 +103,7 @@ export class SaveWizardDraftUseCase {
 
             return SaveWizardDraftOutput.from(wizardDraft);
         } catch (error) {
-            if (error instanceof DomainError) {
+            if (error instanceof EntityNotFoundError || error instanceof BusinessRuleViolationError) {
                 throw error;
             }
             throw new Error(`Failed to save wizard draft: ${error instanceof Error ? error.message : "Unknown error"}`);

@@ -7,7 +7,7 @@ import {
     propertyDrafts
 } from '@/lib/db/schema';
 import { PropertyType, PropertyCharacteristic } from '@/types/wizard';
-import { eq, and, inArray, sql } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { auth } from '@/lib/auth/auth';
 import { revalidatePath } from "next/cache";
 
@@ -214,7 +214,7 @@ export async function deleteCustomCharacteristic(characteristicId: string): Prom
         }
 
         // Delete the characteristic (only if created by current user)
-        const result = await db
+        await db
             .delete(propertyCharacteristics)
             .where(
                 and(

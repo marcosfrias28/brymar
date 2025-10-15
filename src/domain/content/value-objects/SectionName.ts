@@ -1,4 +1,4 @@
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { ValueObjectValidationError } from '@/domain/shared/errors/DomainError';
 
 export type SectionNameType =
     | "hero"
@@ -39,8 +39,8 @@ export class SectionName {
         footer: "Pie de Página"
     };
 
-    private constructor(private readonly value: SectionNameType) {
-        this.validate(value);
+    private constructor(private readonly _value: SectionNameType) {
+        this.validate(_value);
     }
 
     static create(section: string): SectionName {
@@ -89,66 +89,66 @@ export class SectionName {
 
     private validate(section: string): void {
         if (!section || section.trim().length === 0) {
-            throw new DomainError("Section name cannot be empty");
+            throw new ValueObjectValidationError("Section name cannot be empty");
         }
 
         if (!SectionName.VALID_SECTIONS.includes(section as SectionNameType)) {
-            throw new DomainError(
+            throw new ValueObjectValidationError(
                 `Invalid section name: ${section}. Valid sections are: ${SectionName.VALID_SECTIONS.join(", ")}`
             );
         }
     }
 
     get value(): SectionNameType {
-        return this.value;
+        return this._value;
     }
 
     getLabel(): string {
-        return SectionName.SECTION_LABELS[this.value];
+        return SectionName.SECTION_LABELS[this._value];
     }
 
     isValid(): boolean {
-        return SectionName.VALID_SECTIONS.includes(this.value);
+        return SectionName.VALID_SECTIONS.includes(this._value);
     }
 
     isHero(): boolean {
-        return this.value === "hero";
+        return this._value === "hero";
     }
 
     isCategories(): boolean {
-        return this.value === "categories";
+        return this._value === "categories";
     }
 
     isFeaturedProperties(): boolean {
-        return this.value === "featured-properties";
+        return this._value === "featured-properties";
     }
 
     isTeam(): boolean {
-        return this.value === "team";
+        return this._value === "team";
     }
 
     isFaq(): boolean {
-        return this.value === "faq";
+        return this._value === "faq";
     }
 
     isContactForm(): boolean {
-        return this.value === "contact-form";
+        return this._value === "contact-form";
     }
 
     isTestimonials(): boolean {
-        return this.value === "testimonials";
+        return this._value === "testimonials";
     }
 
     isServices(): boolean {
-        return this.value === "services";
+        return this._value === "services";
     }
 
     isNews(): boolean {
-        return this.value === "news";
+        return this._value === "news";
     }
 
     isFooter(): boolean {
-        return this.value === "footer";
+        return this._value === "footer";
     }
 
     static getAllSections(): SectionNameType[] {
@@ -160,10 +160,10 @@ export class SectionName {
     }
 
     equals(other: SectionName): boolean {
-        return this.value === other.value;
+        return this._value === other._value;
     }
 
     toString(): string {
-        return this.value;
+        return this._value;
     }
 }

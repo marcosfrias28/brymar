@@ -1,4 +1,11 @@
 import { z } from "zod";
+import {
+    IdSchema,
+    ShortTextSchema,
+    OptionalShortTextSchema,
+    MediumTextSchema,
+    OptionalMediumTextSchema
+} from '@/domain/shared/schemas';
 
 export class SaveWizardDraftInput {
     constructor(
@@ -58,9 +65,9 @@ const SaveWizardDraftInputSchema = z.object({
     wizardType: z.enum(["property", "land", "blog"], {
         errorMap: () => ({ message: "Wizard type must be property, land, or blog" }),
     }),
-    wizardConfigId: z.string().min(1, "Wizard config ID is required"),
-    formData: z.record(z.any(), "Form data must be a valid object"),
-    currentStep: z.string().min(1, "Current step is required"),
+    wizardConfigId: IdSchema,
+    formData: z.record(z.any()),
+    currentStep: ShortTextSchema,
     title: z.string().min(1).max(200).optional(),
     description: z.string().min(1).max(500).optional(),
 });

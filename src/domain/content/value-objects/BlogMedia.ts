@@ -1,5 +1,5 @@
 import { ValueObject } from '@/domain/shared/value-objects/ValueObject';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { ValueObjectValidationError } from '@/domain/shared/errors/DomainError';
 
 export interface BlogImage {
     id: string;
@@ -35,24 +35,24 @@ export class BlogMedia extends ValueObject<BlogMediaData> {
     private static validateMediaData(data: BlogMediaData): BlogMediaData {
         // Validate cover image URL if provided
         if (data.coverImage && !this.isValidUrl(data.coverImage)) {
-            throw new DomainError('Cover image must be a valid URL');
+            throw new ValueObjectValidationError('Cover image must be a valid URL');
         }
 
         // Validate images array
         if (data.images.length > this.MAX_IMAGES) {
-            throw new DomainError(`Cannot have more than ${this.MAX_IMAGES} images`);
+            throw new ValueObjectValidationError(`Cannot have more than ${this.MAX_IMAGES} images`);
         }
 
         // Validate each image
         data.images.forEach((image, index) => {
             if (!image.id || image.id.trim().length === 0) {
-                throw new DomainError(`Image at index ${index} must have an ID`);
+                throw new ValueObjectValidationError(`Image at index ${index} must have an ID`);
             }
             if (!image.url || !this.isValidUrl(image.url)) {
-                throw new DomainError(`Image at index ${index} must have a valid URL`);
+                throw new ValueObjectValidationError(`Image at index ${index} must have a valid URL`);
             }
             if (!image.filename || image.filename.trim().length === 0) {
-                throw new DomainError(`Image at index ${index} must have a filename`);
+                throw new ValueObjectValidationError(`Image at index ${index} must have a filename`);
             }
         });
 
@@ -60,7 +60,7 @@ export class BlogMedia extends ValueObject<BlogMediaData> {
         const imageIds = data.images.map(img => img.id);
         const uniqueIds = new Set(imageIds);
         if (imageIds.length !== uniqueIds.size) {
-            throw new DomainError('Duplicate image IDs are not allowed');
+            throw new ValueObjectValidationError('Duplicate image IDs are not allowed');
         }
 
         return {
@@ -110,7 +110,7 @@ export class BlogMedia extends ValueObject<BlogMediaData> {
 
     setCoverImage(imageUrl: string): BlogMedia {
         if (!BlogMedia.isValidUrl(imageUrl)) {
-            throw new DomainError('Cover image must be a valid URL');
+            throw new ValueObjectValidationError('Cover image must be a valid URL');
         }
 
         return BlogMedia.create({
@@ -128,11 +128,11 @@ export class BlogMedia extends ValueObject<BlogMediaData> {
 
     addImage(imageData: BlogImage): BlogMedia {
         if (this.value.images.length >= BlogMedia.MAX_IMAGES) {
-            throw new DomainError(`Cannot add more than ${BlogMedia.MAX_IMAGES} images`);
+            throw new ValueObjectValidationError(`Cannot add more than ${BlogMedia.MAX_IMAGES} images`);
         }
 
         if (this.getImageById(imageData.id)) {
-            throw new DomainError('Image with this ID already exists');
+            throw new ValueObjectValidationError('Image with this ID already exists');
         }
 
         return BlogMedia.create({
@@ -145,7 +145,7 @@ export class BlogMedia extends ValueObject<BlogMediaData> {
         const newImages = this.value.images.filter(img => img.id !== imageId);
 
         if (newImages.length === this.value.images.length) {
-            throw new DomainError('Image not found');
+            throw new ValueObjectValidationError('Image not found');
         }
 
         return BlogMedia.create({
@@ -158,7 +158,7 @@ export class BlogMedia extends ValueObject<BlogMediaData> {
         const imageIndex = this.value.images.findIndex(img => img.id === imageId);
 
         if (imageIndex === -1) {
-            throw new DomainError('Image not found');
+            throw new ValueObjectValidationError('Image not found');
         }
 
         const updatedImages = [...this.value.images];
@@ -177,7 +177,7 @@ export class BlogMedia extends ValueObject<BlogMediaData> {
         const imageIndex = this.value.images.findIndex(img => img.id === imageId);
 
         if (imageIndex === -1) {
-            throw new DomainError('Image not found');
+            throw new ValueObjectValidationError('Image not found');
         }
 
         const updatedImages = [...this.value.images];

@@ -4,24 +4,26 @@ import type React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { RichTextEditor } from '@/components/ui/rich-text-editor';
+} from "@/components/ui/select";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { X, FileText, Eye, Upload } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
-import { secondaryColorClasses } from '@/lib/utils/secondary-colors';
-import { cn } from '@/lib/utils';
+import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
+import { cn } from "@/lib/utils";
+import { createBlogPost } from "@/presentation/server-actions/blog-actions";
+import { CreateBlogPostInput } from "@/application/dto/content";
 
 interface BlogFormData {
   title: string;
@@ -103,23 +105,51 @@ export function BlogForm({ initialData, isEditing = false }: BlogFormProps) {
         return;
       }
 
-      // Actualizar estado y tiempo de lectura
-      const updatedData = {
-        ...formData,
-        status: saveAs,
-        readTime: calculateReadTime().toString(),
-      };
+      // Create the input using DDD patterns
+      const input = CreateBlogPostInput.create({
+        title: formData.title,
+        content: formData.content,
+        author: formData.author,
+        category: formData.category as
+          | "market-analysis"
+          | "investment-tips"
+          | "property-news"
+          | "legal-advice"
+          | "lifestyle",
+        tags: [], // TODO: Add tags support
+        excerpt: formData.excerpt,
+        coverImage: formData.coverImage
+          ? URL.createObjectURL(formData.coverImage)
+          : undefined,
+        featured: false,
+        images: [], // Empty images array for now
+      });
 
-      // Simular guardado (en una app real sería una llamada a API)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Create form data for server action
+      const serverFormData = new FormData();
+      serverFormData.append("title", input.title);
+      serverFormData.append("content", input.content);
+      serverFormData.append("author", input.author);
+      serverFormData.append("category", input.category);
+      serverFormData.append("tags", JSON.stringify(input.tags));
+      if (input.excerpt) serverFormData.append("excerpt", input.excerpt);
+      if (input.coverImage)
+        serverFormData.append("coverImage", input.coverImage);
+      serverFormData.append("featured", input.featured.toString());
 
-      const action = isEditing ? "actualizado" : "creado";
-      const statusText =
-        saveAs === "published" ? "y publicado" : "como borrador";
-      toast.success(`Post ${action} ${statusText} exitosamente`);
+      const result = await createBlogPost(serverFormData);
 
-      router.push("/dashboard/blog");
+      if (result.success) {
+        const action = isEditing ? "actualizado" : "creado";
+        const statusText =
+          saveAs === "published" ? "y publicado" : "como borrador";
+        toast.success(`Post ${action} ${statusText} exitosamente`);
+        router.push("/dashboard/blog");
+      } else {
+        toast.error(result.message || "Error al guardar el post");
+      }
     } catch (error) {
+      console.error("Error saving blog post:", error);
       toast.error("Error al guardar el post");
     } finally {
       setIsLoading(false);

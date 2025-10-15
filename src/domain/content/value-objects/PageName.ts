@@ -1,4 +1,4 @@
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { ValueObjectValidationError } from '@/domain/shared/errors/DomainError';
 
 export type PageNameType =
     | "home"
@@ -30,8 +30,8 @@ export class PageName {
         services: "Servicios"
     };
 
-    private constructor(private readonly value: PageNameType) {
-        this.validate(value);
+    private constructor(private readonly _value: PageNameType) {
+        this.validate(_value);
     }
 
     static create(page: string): PageName {
@@ -68,54 +68,54 @@ export class PageName {
 
     private validate(page: string): void {
         if (!page || page.trim().length === 0) {
-            throw new DomainError("Page name cannot be empty");
+            throw new ValueObjectValidationError("Page name cannot be empty");
         }
 
         if (!PageName.VALID_PAGES.includes(page as PageNameType)) {
-            throw new DomainError(
+            throw new ValueObjectValidationError(
                 `Invalid page name: ${page}. Valid pages are: ${PageName.VALID_PAGES.join(", ")}`
             );
         }
     }
 
     get value(): PageNameType {
-        return this.value;
+        return this._value;
     }
 
     getLabel(): string {
-        return PageName.PAGE_LABELS[this.value];
+        return PageName.PAGE_LABELS[this._value];
     }
 
     isValid(): boolean {
-        return PageName.VALID_PAGES.includes(this.value);
+        return PageName.VALID_PAGES.includes(this._value);
     }
 
     isHome(): boolean {
-        return this.value === "home";
+        return this._value === "home";
     }
 
     isAbout(): boolean {
-        return this.value === "about";
+        return this._value === "about";
     }
 
     isContact(): boolean {
-        return this.value === "contact";
+        return this._value === "contact";
     }
 
     isProperties(): boolean {
-        return this.value === "properties";
+        return this._value === "properties";
     }
 
     isLands(): boolean {
-        return this.value === "lands";
+        return this._value === "lands";
     }
 
     isBlog(): boolean {
-        return this.value === "blog";
+        return this._value === "blog";
     }
 
     isServices(): boolean {
-        return this.value === "services";
+        return this._value === "services";
     }
 
     static getAllPages(): PageNameType[] {
@@ -127,10 +127,10 @@ export class PageName {
     }
 
     equals(other: PageName): boolean {
-        return this.value === other.value;
+        return this._value === other._value;
     }
 
     toString(): string {
-        return this.value;
+        return this._value;
     }
 }

@@ -7,7 +7,7 @@ import { Address } from "../value-objects/Address";
 import { PropertyType } from "../value-objects/PropertyType";
 import { PropertyStatus } from "../value-objects/PropertyStatus";
 import { PropertyFeatures } from "../value-objects/PropertyFeatures";
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 export interface CreatePropertyData {
     title: string;
@@ -133,26 +133,26 @@ export class Property extends AggregateRoot {
         // Business rule: Residential properties must have at least 1 bedroom and 1 bathroom
         if (type.isResidential() && type.requiresBedrooms()) {
             if (features.bedrooms === 0) {
-                throw new DomainError("Residential properties must have at least 1 bedroom");
+                throw new BusinessRuleViolationError("Residential properties must have at least 1 bedroom", "PROPERTY_VALIDATION");
             }
             if (features.bathrooms === 0) {
-                throw new DomainError("Residential properties must have at least 1 bathroom");
+                throw new BusinessRuleViolationError("Residential properties must have at least 1 bathroom", "PROPERTY_VALIDATION");
             }
         }
 
         // Business rule: Price must be reasonable for property type
         if (type.isLand() && price.amount < 1000) {
-            throw new DomainError("Land properties must have a minimum price of $1,000");
+            throw new BusinessRuleViolationError("Land properties must have a minimum price of $1,000", "PROPERTY_VALIDATION");
         }
 
         if (type.isResidential() && price.amount < 10000) {
-            throw new DomainError("Residential properties must have a minimum price of $10,000");
+            throw new BusinessRuleViolationError("Residential properties must have a minimum price of $10,000", "PROPERTY_VALIDATION");
         }
 
         // Business rule: Large properties should have multiple bathrooms
         if (features.area > 200 && features.bathrooms < 2) {
             // This is a warning, not an error - could be logged or handled differently
-            console.warn("Large properties (>200 sqm) typically have multiple bathrooms");
+            // Note: Large properties (>200 sqm) typically have multiple bathrooms
         }
     }
 
@@ -200,7 +200,7 @@ export class Property extends AggregateRoot {
     // Business methods
     updateTitle(newTitle: string): void {
         if (!this.status.canBeEdited()) {
-            throw new DomainError(`Cannot update title when property status is ${this.status.getDisplayName()}`);
+            throw new BusinessRuleViolationError(`Cannot update title when property status is ${this.status.getDisplayName()}`, "PROPERTY_VALIDATION");
         }
 
         this.title = PropertyTitle.create(newTitle);
@@ -209,7 +209,7 @@ export class Property extends AggregateRoot {
 
     updateDescription(newDescription: string): void {
         if (!this.status.canBeEdited()) {
-            throw new DomainError(`Cannot update description when property status is ${this.status.getDisplayName()}`);
+            throw new BusinessRuleViolationError(`Cannot update description when property status is ${this.status.getDisplayName()}`, "PROPERTY_VALIDATION");
         }
 
         this.description = PropertyDescription.create(newDescription);
@@ -218,14 +218,14 @@ export class Property extends AggregateRoot {
 
     updatePrice(newPrice: number, currency?: string): void {
         if (!this.status.canBeEdited()) {
-            throw new DomainError(`Cannot update price when property status is ${this.status.getDisplayName()}`);
+            throw new BusinessRuleViolationError(`Cannot update price when property status is ${this.status.getDisplayName()}`, "PROPERTY_VALIDATION");
         }
 
         const price = Price.create(newPrice, currency || this.price.currency.code);
 
         // Business rule: Significant price changes on published properties require approval
         if (this.status.isPublished() && this.price.isSignificantlyDifferent(price, 0.15)) {
-            throw new DomainError("Significant price changes on published properties require approval");
+            throw new BusinessRuleViolationError("Significant price changes on published properties require approval", "PROPERTY_VALIDATION");
         }
 
         this.price = price;
@@ -241,7 +241,7 @@ export class Property extends AggregateRoot {
         coordinates?: { latitude: number; longitude: number };
     }): void {
         if (!this.status.canBeEdited()) {
-            throw new DomainError(`Cannot update address when property status is ${this.status.getDisplayName()}`);
+            throw new BusinessRuleViolationError(`Cannot update address when property status is ${this.status.getDisplayName()}`, "PROPERTY_VALIDATION");
         }
 
         this.address = Address.create(newAddress);
@@ -262,7 +262,7 @@ export class Property extends AggregateRoot {
         lotSize?: number;
     }): void {
         if (!this.status.canBeEdited()) {
-            throw new DomainError(`Cannot update features when property status is ${this.status.getDisplayName()}`);
+            throw new BusinessRuleViolationError(`Cannot update features when property status is ${this.status.getDisplayName()}`, "PROPERTY_VALIDATION");
         }
 
         const features = PropertyFeatures.create(newFeatures);
@@ -276,7 +276,7 @@ export class Property extends AggregateRoot {
 
     addImage(imageUrl: string): void {
         if (!imageUrl || imageUrl.trim().length === 0) {
-            throw new DomainError("Image URL cannot be empty");
+            throw new BusinessRuleViolationError("Image URL cannot be empty", "PROPERTY_VALIDATION");
         }
 
         if (this.images.includes(imageUrl)) {
@@ -284,7 +284,7 @@ export class Property extends AggregateRoot {
         }
 
         if (this.images.length >= 20) {
-            throw new DomainError("Cannot add more than 20 images to a property");
+            throw new BusinessRuleViolationError("Cannot add more than 20 images to a property", "PROPERTY_VALIDATION");
         }
 
         this.images.push(imageUrl);
@@ -307,12 +307,12 @@ export class Property extends AggregateRoot {
         const newOrderSet = new Set(newOrder);
 
         if (currentImageSet.size !== newOrderSet.size) {
-            throw new DomainError("New image order must contain all current images");
+            throw new BusinessRuleViolationError("New image order must contain all current images", "PROPERTY_VALIDATION");
         }
 
         for (const image of newOrder) {
             if (!currentImageSet.has(image)) {
-                throw new DomainError(`Image ${image} not found in current images`);
+                throw new BusinessRuleViolationError(`Image ${image} not found in current images`, "PROPERTY_VALIDATION");
             }
         }
 
@@ -328,7 +328,7 @@ export class Property extends AggregateRoot {
     // Status transitions
     publish(): void {
         if (!this.canBePublished()) {
-            throw new DomainError("Property cannot be published in its current state");
+            throw new BusinessRuleViolationError("Property cannot be published in its current state", "PROPERTY_VALIDATION");
         }
 
         this.status = this.status.transitionTo(PropertyStatus.published());
@@ -337,7 +337,7 @@ export class Property extends AggregateRoot {
 
     withdraw(): void {
         if (!this.status.canBeWithdrawn()) {
-            throw new DomainError(`Cannot withdraw property with status ${this.status.getDisplayName()}`);
+            throw new BusinessRuleViolationError(`Cannot withdraw property with status ${this.status.getDisplayName()}`, "PROPERTY_VALIDATION");
         }
 
         this.status = this.status.transitionTo(PropertyStatus.withdrawn());
@@ -346,7 +346,7 @@ export class Property extends AggregateRoot {
 
     markAsSold(): void {
         if (!this.status.isPublished()) {
-            throw new DomainError("Only published properties can be marked as sold");
+            throw new BusinessRuleViolationError("Only published properties can be marked as sold", "PROPERTY_VALIDATION");
         }
 
         this.status = this.status.transitionTo(PropertyStatus.sold());
@@ -355,7 +355,7 @@ export class Property extends AggregateRoot {
 
     markAsRented(): void {
         if (!this.status.isPublished()) {
-            throw new DomainError("Only published properties can be marked as rented");
+            throw new BusinessRuleViolationError("Only published properties can be marked as rented", "PROPERTY_VALIDATION");
         }
 
         this.status = this.status.transitionTo(PropertyStatus.rented());
@@ -364,7 +364,7 @@ export class Property extends AggregateRoot {
 
     archive(): void {
         if (!this.status.canBeArchived()) {
-            throw new DomainError(`Cannot archive property with status ${this.status.getDisplayName()}`);
+            throw new BusinessRuleViolationError(`Cannot archive property with status ${this.status.getDisplayName()}`, "PROPERTY_VALIDATION");
         }
 
         this.status = this.status.transitionTo(PropertyStatus.archived());
@@ -471,7 +471,7 @@ export class Property extends AggregateRoot {
         return true;
     }
 
-    private touch(): void {
+    protected touch(): void {
         this.updatedAt = new Date();
     }
 }

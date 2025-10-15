@@ -179,7 +179,8 @@ export class UpdatePropertyUseCase {
         // Check if property can be edited
         if (!property.getStatus().canBeEdited()) {
             throw new BusinessRuleViolationError(
-                `Cannot update property with status: ${property.getStatus().getDisplayName()}`
+                `Cannot update property with status: ${property.getStatus().getDisplayName()}`,
+                'PROPERTY_STATUS_NOT_EDITABLE'
             );
         }
 
@@ -190,7 +191,8 @@ export class UpdatePropertyUseCase {
 
             if (priceChangePercentage > 0.15) { // 15% threshold
                 throw new BusinessRuleViolationError(
-                    'Price changes greater than 15% on published properties require approval'
+                    'Price changes greater than 15% on published properties require approval',
+                    'SIGNIFICANT_PRICE_CHANGE_REQUIRES_APPROVAL'
                 );
             }
         }

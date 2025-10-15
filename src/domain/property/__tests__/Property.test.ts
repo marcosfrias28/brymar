@@ -6,7 +6,7 @@ import { Address } from "../value-objects/Address";
 import { PropertyType } from "../value-objects/PropertyType";
 import { PropertyStatus } from "../value-objects/PropertyStatus";
 import { PropertyFeatures } from "../value-objects/PropertyFeatures";
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 describe("Property Domain", () => {
     const validPropertyData: CreatePropertyData = {

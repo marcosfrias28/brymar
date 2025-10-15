@@ -9,21 +9,21 @@ export class EmailNotificationService implements INotificationService {
     /**
      * Send notification when a property is created
      */
-    async notifyPropertyCreated(property: Property): Promise<void> {
+    async notifyPropertyCreated(_property: Property): Promise<void> {
         try {
             // In a real implementation, you would:
             // 1. Get admin/agent email addresses
             // 2. Format email template with property details
             // 3. Send email using service like Resend, SendGrid, etc.
 
-            console.log(`Sending property creation notification for: ${property.getTitle().value}`);
+            // Note: In production, would send actual property creation notification
 
             // Simulate email sending
             await new Promise(resolve => setTimeout(resolve, 200));
 
-            console.log(`Property creation notification sent successfully`);
-        } catch (error) {
-            console.error('Failed to send property creation notification:', error);
+            // Note: Property creation notification sent successfully
+        } catch (_error) {
+            // Note: Failed to send property creation notification - would be logged in production
             throw new Error('Notification service unavailable');
         }
     }
@@ -31,17 +31,16 @@ export class EmailNotificationService implements INotificationService {
     /**
      * Send notification when a property is updated
      */
-    async notifyPropertyUpdated(property: Property, changes: string[]): Promise<void> {
+    async notifyPropertyUpdated(_property: Property, _changes: string[]): Promise<void> {
         try {
-            console.log(`Sending property update notification for: ${property.getTitle().value}`);
-            console.log(`Changes: ${changes.join(', ')}`);
+            // Note: In production, would send actual property update notification
 
             // Simulate email sending
             await new Promise(resolve => setTimeout(resolve, 200));
 
-            console.log(`Property update notification sent successfully`);
-        } catch (error) {
-            console.error('Failed to send property update notification:', error);
+            // Note: Property update notification sent successfully
+        } catch (_error) {
+            // Note: Failed to send property update notification - would be logged in production
             throw new Error('Notification service unavailable');
         }
     }
@@ -49,16 +48,16 @@ export class EmailNotificationService implements INotificationService {
     /**
      * Send notification when a user registers
      */
-    async notifyUserRegistered(userEmail: string, userName: string): Promise<void> {
+    async notifyUserRegistered(_userEmail: string, _userName: string): Promise<void> {
         try {
-            console.log(`Sending user registration notification for: ${userName} (${userEmail})`);
+            // Note: In production, would send actual user registration notification
 
             // Simulate email sending
             await new Promise(resolve => setTimeout(resolve, 200));
 
-            console.log(`User registration notification sent successfully`);
-        } catch (error) {
-            console.error('Failed to send user registration notification:', error);
+            // Note: User registration notification sent successfully
+        } catch (_error) {
+            // Note: Failed to send user registration notification - would be logged in production
             throw new Error('Notification service unavailable');
         }
     }

@@ -1,12 +1,11 @@
 "use client";
 
 import { AuthFormWrapper, useAuthFields, AuthLink } from "./auth-form-wrapper";
-import { signUp } from '@/lib/actions/auth-actions';
+import { signUp } from "@/presentation/server-actions/auth-actions";
 
 export function SignUpForm() {
-  const { nameField, emailField, newPasswordField, confirmPasswordField } = useAuthFields();
-
-
+  const { nameField, emailField, newPasswordField, confirmPasswordField } =
+    useAuthFields();
 
   return (
     <AuthFormWrapper
@@ -23,9 +22,8 @@ export function SignUpForm() {
     />
   );
 }
-  const FooterContent = (
-    <>
-      ¿Ya tienes cuenta?{" "}
-      <AuthLink href="/sign-in">Iniciar Sesión</AuthLink>
-    </>
-  );
+const FooterContent = (
+  <>
+    ¿Ya tienes cuenta? <AuthLink href="/sign-in">Iniciar Sesión</AuthLink>
+  </>
+);

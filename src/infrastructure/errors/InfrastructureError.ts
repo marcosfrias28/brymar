@@ -4,17 +4,21 @@
 export abstract class InfrastructureError extends Error {
     public readonly timestamp: Date;
     public readonly context?: Record<string, any>;
+    public readonly code?: string;
+    public readonly cause?: Error;
 
     constructor(
         message: string,
-        public readonly code?: string,
-        public readonly cause?: Error,
+        code?: string,
+        cause?: Error,
         context?: Record<string, any>
     ) {
         super(message);
         this.name = this.constructor.name;
         this.timestamp = new Date();
         this.context = context;
+        this.code = code;
+        this.cause = cause;
 
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this, this.constructor);
@@ -46,8 +50,8 @@ export abstract class InfrastructureError extends Error {
 export class DatabaseError extends InfrastructureError {
     constructor(
         message: string,
-        public readonly operation: string,
-        public readonly table?: string,
+        _operation: string,
+        _table?: string,
         cause?: Error,
         context?: Record<string, any>
     ) {
@@ -61,7 +65,7 @@ export class DatabaseError extends InfrastructureError {
 export class DatabaseConnectionError extends InfrastructureError {
     constructor(
         message: string,
-        public readonly connectionString?: string,
+        public readonly _connectionString?: string,
         cause?: Error,
         context?: Record<string, any>
     ) {
@@ -75,7 +79,7 @@ export class DatabaseConnectionError extends InfrastructureError {
 export class DatabaseTransactionError extends InfrastructureError {
     constructor(
         message: string,
-        public readonly transactionId?: string,
+        public readonly _transactionId?: string,
         cause?: Error,
         context?: Record<string, any>
     ) {
@@ -89,10 +93,10 @@ export class DatabaseTransactionError extends InfrastructureError {
 export class ExternalApiError extends InfrastructureError {
     constructor(
         message: string,
-        public readonly apiName: string,
-        public readonly endpoint?: string,
-        public readonly statusCode?: number,
-        public readonly responseBody?: any,
+        public readonly _apiName: string,
+        public readonly _endpoint?: string,
+        public readonly _statusCode?: number,
+        public readonly _responseBody?: any,
         cause?: Error,
         context?: Record<string, any>
     ) {
@@ -106,8 +110,8 @@ export class ExternalApiError extends InfrastructureError {
 export class FileSystemError extends InfrastructureError {
     constructor(
         message: string,
-        public readonly operation: string,
-        public readonly filePath?: string,
+        public readonly _operation: string,
+        public readonly _filePath?: string,
         cause?: Error,
         context?: Record<string, any>
     ) {
@@ -121,9 +125,9 @@ export class FileSystemError extends InfrastructureError {
 export class NetworkError extends InfrastructureError {
     constructor(
         message: string,
-        public readonly operation: string,
-        public readonly url?: string,
-        public readonly statusCode?: number,
+        public readonly _operation: string,
+        public readonly _url?: string,
+        public readonly _statusCode?: number,
         cause?: Error,
         context?: Record<string, any>
     ) {
@@ -137,8 +141,8 @@ export class NetworkError extends InfrastructureError {
 export class CacheError extends InfrastructureError {
     constructor(
         message: string,
-        public readonly operation: string,
-        public readonly key?: string,
+        public readonly _operation: string,
+        public readonly _key?: string,
         cause?: Error,
         context?: Record<string, any>
     ) {
@@ -152,9 +156,9 @@ export class CacheError extends InfrastructureError {
 export class MessageQueueError extends InfrastructureError {
     constructor(
         message: string,
-        public readonly operation: string,
-        public readonly queue?: string,
-        public readonly messageId?: string,
+        public readonly _operation: string,
+        public readonly _queue?: string,
+        public readonly _messageId?: string,
         cause?: Error,
         context?: Record<string, any>
     ) {
@@ -168,9 +172,9 @@ export class MessageQueueError extends InfrastructureError {
 export class StorageError extends InfrastructureError {
     constructor(
         message: string,
-        public readonly operation: string,
-        public readonly bucket?: string,
-        public readonly key?: string,
+        public readonly _operation: string,
+        public readonly _bucket?: string,
+        public readonly _key?: string,
         cause?: Error,
         context?: Record<string, any>
     ) {
@@ -184,9 +188,9 @@ export class StorageError extends InfrastructureError {
 export class EmailServiceError extends InfrastructureError {
     constructor(
         message: string,
-        public readonly operation: string,
-        public readonly recipient?: string,
-        public readonly messageId?: string,
+        public readonly _operation: string,
+        public readonly _recipient?: string,
+        public readonly _messageId?: string,
         cause?: Error,
         context?: Record<string, any>
     ) {

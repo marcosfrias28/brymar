@@ -28,7 +28,7 @@ const SearchPropertiesInputSchema = z.object({
     statuses: z.array(PropertyStatusSchema).optional(),
 
     // Location filters
-    location: OptionalShortTextSchema.max(200),
+    location: z.string().max(200).trim().optional(),
     city: OptionalShortTextSchema,
     state: OptionalShortTextSchema,
     country: OptionalShortTextSchema,
@@ -108,7 +108,11 @@ export class SearchPropertiesInput {
             validated.city,
             validated.state,
             validated.country,
-            validated.coordinates,
+            validated.coordinates ? {
+                latitude: validated.coordinates.coordinates.latitude,
+                longitude: validated.coordinates.coordinates.longitude,
+                radiusKm: validated.coordinates.radiusKm
+            } : undefined,
             validated.amenities,
             validated.features,
             validated.featured,
@@ -120,6 +124,73 @@ export class SearchPropertiesInput {
             validated.sortOrder,
             validated.query
         );
+    }
+
+    /**
+     * Creates SearchPropertiesInput from form data
+     */
+    static fromFormData(formData: FormData): SearchPropertiesInput {
+        const data: Partial<SearchPropertiesInputData> = {};
+
+        // Parse numeric filters
+        if (formData.get('minPrice')) data.minPrice = parseFloat(formData.get('minPrice') as string);
+        if (formData.get('maxPrice')) data.maxPrice = parseFloat(formData.get('maxPrice') as string);
+        if (formData.get('minBedrooms')) data.minBedrooms = parseInt(formData.get('minBedrooms') as string);
+        if (formData.get('maxBedrooms')) data.maxBedrooms = parseInt(formData.get('maxBedrooms') as string);
+        if (formData.get('minBathrooms')) data.minBathrooms = parseInt(formData.get('minBathrooms') as string);
+        if (formData.get('maxBathrooms')) data.maxBathrooms = parseInt(formData.get('maxBathrooms') as string);
+        if (formData.get('minArea')) data.minArea = parseFloat(formData.get('minArea') as string);
+        if (formData.get('maxArea')) data.maxArea = parseFloat(formData.get('maxArea') as string);
+
+        // Parse string filters
+        if (formData.get('location')) data.location = formData.get('location') as string;
+        if (formData.get('city')) data.city = formData.get('city') as string;
+        if (formData.get('state')) data.state = formData.get('state') as string;
+        if (formData.get('country')) data.country = formData.get('country') as string;
+        if (formData.get('query')) data.query = formData.get('query') as string;
+
+        // Parse array filters
+        if (formData.get('propertyTypes')) {
+            data.propertyTypes = (formData.get('propertyTypes') as string).split(',').map(t => t.trim()).filter(t => t.length > 0) as any[];
+        }
+        if (formData.get('statuses')) {
+            data.statuses = (formData.get('statuses') as string).split(',').map(s => s.trim()).filter(s => s.length > 0) as any[];
+        }
+        if (formData.get('amenities')) {
+            data.amenities = (formData.get('amenities') as string).split(',').map(a => a.trim()).filter(a => a.length > 0);
+        }
+        if (formData.get('features')) {
+            data.features = (formData.get('features') as string).split(',').map(f => f.trim()).filter(f => f.length > 0);
+        }
+
+        // Parse boolean filters
+        if (formData.get('featured')) data.featured = formData.get('featured') === 'true';
+
+        // Parse year filters
+        if (formData.get('yearBuiltMin')) data.yearBuiltMin = parseInt(formData.get('yearBuiltMin') as string);
+        if (formData.get('yearBuiltMax')) data.yearBuiltMax = parseInt(formData.get('yearBuiltMax') as string);
+
+        // Parse coordinates
+        const lat = formData.get('lat') as string;
+        const lng = formData.get('lng') as string;
+        const radius = formData.get('radius') as string;
+        if (lat && lng && radius) {
+            data.coordinates = {
+                coordinates: {
+                    latitude: parseFloat(lat),
+                    longitude: parseFloat(lng),
+                },
+                radiusKm: parseFloat(radius),
+            };
+        }
+
+        // Parse pagination and sorting
+        if (formData.get('limit')) data.limit = parseInt(formData.get('limit') as string);
+        if (formData.get('offset')) data.offset = parseInt(formData.get('offset') as string);
+        if (formData.get('sortBy')) data.sortBy = formData.get('sortBy') as any;
+        if (formData.get('sortOrder')) data.sortOrder = formData.get('sortOrder') as any;
+
+        return SearchPropertiesInput.create(data as SearchPropertiesInputData);
     }
 
     /**
@@ -172,8 +243,10 @@ export class SearchPropertiesInput {
         const radius = params.get('radius');
         if (lat && lng && radius) {
             data.coordinates = {
-                latitude: parseFloat(lat),
-                longitude: parseFloat(lng),
+                coordinates: {
+                    latitude: parseFloat(lat),
+                    longitude: parseFloat(lng),
+                },
                 radiusKm: parseFloat(radius),
             };
         }

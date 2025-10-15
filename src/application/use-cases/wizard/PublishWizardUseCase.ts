@@ -5,7 +5,7 @@ import { IWizardMediaRepository } from '@/domain/wizard/repositories/IWizardMedi
 import { WizardDomainService, WizardStepDefinition } from '@/domain/wizard/services/WizardDomainService';
 import { WizardDraftId } from '@/domain/wizard/value-objects/WizardDraftId';
 import { UserId } from '@/domain/user/value-objects/UserId';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { EntityNotFoundError, BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 // Import use cases for publishing to specific entities
 import { CreatePropertyUseCase } from "../property/CreatePropertyUseCase";
@@ -36,12 +36,12 @@ export class PublishWizardUseCase {
             const wizardDraft = await this.wizardDraftRepository.findById(draftId);
 
             if (!wizardDraft) {
-                throw new DomainError(`Wizard draft with ID ${input.draftId} not found`);
+                throw new EntityNotFoundError('WizardDraft', input.draftId);
             }
 
             // Verify ownership
             if (!wizardDraft.getUserId().equals(userId)) {
-                throw new DomainError("You don't have permission to publish this draft");
+                throw new BusinessRuleViolationError("You don't have permission to publish this draft", 'UNAUTHORIZED_DRAFT_PUBLISH');
             }
 
             // Get final form data (use provided data or draft data)
@@ -56,8 +56,9 @@ export class PublishWizardUseCase {
             const publishValidation = this.wizardDomainService.canPublish(wizardDraft, stepDefinitions);
 
             if (!publishValidation.canPublish) {
-                throw new DomainError(
-                    `Cannot publish wizard: ${publishValidation.reasons.join(", ")}`
+                throw new BusinessRuleViolationError(
+                    `Cannot publish wizard: ${publishValidation.reasons.join(", ")}`,
+                    'WIZARD_PUBLISH_VALIDATION_FAILED'
                 );
             }
 
@@ -85,7 +86,7 @@ export class PublishWizardUseCase {
                     break;
 
                 default:
-                    throw new DomainError(`Unsupported wizard type: ${wizardDraft.getWizardType().value}`);
+                    throw new BusinessRuleViolationError(`Unsupported wizard type: ${wizardDraft.getWizardType().value}`, 'UNSUPPORTED_WIZARD_TYPE');
             }
 
             // Move media from draft to published entity
@@ -102,7 +103,7 @@ export class PublishWizardUseCase {
                 draftId: input.draftId,
             });
         } catch (error) {
-            if (error instanceof DomainError) {
+            if (error instanceof EntityNotFoundError || error instanceof BusinessRuleViolationError) {
                 throw error;
             }
             throw new Error(`Failed to publish wizard: ${error instanceof Error ? error.message : "Unknown error"}`);
@@ -116,15 +117,17 @@ export class PublishWizardUseCase {
             description: formData.description,
             price: formData.price,
             currency: formData.currency || "USD",
-            propertyType: formData.propertyType,
-            bedrooms: formData.bedrooms,
-            bathrooms: formData.bathrooms,
-            area: formData.area,
+            type: formData.propertyType,
+            features: {
+                bedrooms: formData.bedrooms || 0,
+                bathrooms: formData.bathrooms || 0,
+                area: formData.area || 0,
+                amenities: formData.characteristics || [],
+                features: [],
+            },
             address: formData.address,
-            coordinates: formData.coordinates,
-            characteristics: formData.characteristics || [],
             images: formData.images || [],
-            userId,
+            featured: false,
         });
 
         const result = await this.createPropertyUseCase.execute(propertyInput);
@@ -138,15 +141,15 @@ export class PublishWizardUseCase {
             description: formData.description,
             area: formData.area,
             price: formData.price,
+            currency: formData.currency || "USD",
             location: formData.location,
-            landType: formData.landType,
-            coordinates: formData.coordinates,
+            type: formData.landType,
+            features: formData.features || [],
             images: formData.images || [],
-            userId,
         });
 
         const result = await this.createLandUseCase.execute(landInput);
-        return { id: parseInt(result.id), title: result.name };
+        return { id: parseInt(result.id), title: result.title };
     }
 
     private async publishBlogPost(formData: Record<string, any>, userId: string): Promise<{ id: number; title: string }> {
@@ -157,10 +160,12 @@ export class PublishWizardUseCase {
             author: formData.author,
             category: formData.category,
             tags: formData.tags || [],
+            excerpt: formData.excerpt,
             coverImage: formData.coverImage,
             seoTitle: formData.seoTitle,
             seoDescription: formData.seoDescription,
-            userId,
+            featured: false,
+            images: formData.images || [],
         });
 
         const result = await this.createBlogPostUseCase.execute(blogInput);

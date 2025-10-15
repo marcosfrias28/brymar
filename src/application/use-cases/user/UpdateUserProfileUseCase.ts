@@ -1,5 +1,6 @@
 import { User } from '@/domain/user/entities/User';
 import { UserId } from '@/domain/user/value-objects/UserId';
+import { UserProfile } from '@/domain/user/value-objects/UserProfile';
 import { IUserRepository } from '@/domain/user/repositories/IUserRepository';
 import { UserDomainService } from '@/domain/user/services/UserDomainService';
 import { UpdateUserProfileInput } from '../../dto/user/UpdateUserProfileInput';
@@ -32,7 +33,19 @@ export class UpdateUserProfileUseCase {
         // 3. Update profile information if provided
         if (input.hasProfileUpdates()) {
             const profileData = input.getProfileData();
-            user.updateProfile(profileData);
+            const currentProfile = user.getProfile();
+
+            // Create updated profile by merging current data with updates
+            const updatedProfile = UserProfile.create({
+                firstName: profileData.firstName || currentProfile.getFirstName(),
+                lastName: profileData.lastName || currentProfile.getLastName(),
+                avatar: profileData.image || currentProfile.getAvatar(),
+                bio: profileData.bio || currentProfile.getBio(),
+                phone: profileData.phone || currentProfile.getPhone(),
+                location: profileData.location || currentProfile.getLocation(),
+            });
+
+            user.updateProfile(updatedProfile);
         }
 
         // 4. Update preferences if provided
@@ -54,12 +67,12 @@ export class UpdateUserProfileUseCase {
      * Validates if user can update their profile
      */
     private validateProfileUpdate(user: User): void {
-        if (!user.isActive()) {
-            throw new BusinessRuleViolationError('Cannot update profile for inactive user');
+        if (!user.getStatus().isActive()) {
+            throw new BusinessRuleViolationError('Cannot update profile for inactive user', 'USER_NOT_ACTIVE');
         }
 
         if (user.getStatus().isSuspended()) {
-            throw new BusinessRuleViolationError('Cannot update profile for suspended user');
+            throw new BusinessRuleViolationError('Cannot update profile for suspended user', 'USER_SUSPENDED');
         }
     }
 
@@ -79,7 +92,7 @@ export class UpdateUserProfileUseCase {
         const profile = user.getProfile();
 
         if (role.isAgent() || role.isAdmin()) {
-            if (!profile.hasContactInfo()) {
+            if (!profile.getPhone() && !profile.getLocation()) {
                 // This could be a warning or requirement depending on business rules
                 console.warn(`${role.value} user should have contact information`);
             }
@@ -95,7 +108,7 @@ export class UpdateUserProfileUseCase {
             try {
                 new URL(input.website);
             } catch {
-                throw new BusinessRuleViolationError('Invalid website URL format');
+                throw new BusinessRuleViolationError('Invalid website URL format', 'INVALID_WEBSITE_URL');
             }
         }
 
@@ -103,13 +116,13 @@ export class UpdateUserProfileUseCase {
         if (input.phone) {
             const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
             if (!phoneRegex.test(input.phone.replace(/[\s\-\(\)]/g, ''))) {
-                throw new BusinessRuleViolationError('Invalid phone number format');
+                throw new BusinessRuleViolationError('Invalid phone number format', 'INVALID_PHONE_FORMAT');
             }
         }
 
         // Bio content validation (could check for inappropriate content)
         if (input.bio && input.bio.length > 500) {
-            throw new BusinessRuleViolationError('Bio cannot exceed 500 characters');
+            throw new BusinessRuleViolationError('Bio cannot exceed 500 characters', 'BIO_TOO_LONG');
         }
     }
 }

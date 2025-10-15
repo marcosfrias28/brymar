@@ -1,23 +1,34 @@
 import { z } from 'zod';
+import {
+    ShortTextSchema,
+    LongTextSchema,
+    OptionalShortTextSchema,
+    OptionalMediumTextSchema,
+    TagsSchema,
+    BooleanFlagSchema,
+    OptionalUrlSchema,
+    IdSchema,
+    UrlSchema
+} from '@/domain/shared/schemas';
 
 const CreateBlogPostInputSchema = z.object({
-    title: z.string().min(10, 'Title must be at least 10 characters').max(200, 'Title cannot exceed 200 characters'),
-    content: z.string().min(100, 'Content must be at least 100 characters').max(50000, 'Content cannot exceed 50,000 characters'),
-    author: z.string().min(2, 'Author must be at least 2 characters').max(100, 'Author cannot exceed 100 characters'),
+    title: ShortTextSchema.min(10, 'Title must be at least 10 characters').max(200, 'Title cannot exceed 200 characters'),
+    content: LongTextSchema.min(100, 'Content must be at least 100 characters').max(50000, 'Content cannot exceed 50,000 characters'),
+    author: ShortTextSchema.min(2, 'Author must be at least 2 characters').max(100, 'Author cannot exceed 100 characters'),
     category: z.enum(['market-analysis', 'investment-tips', 'property-news', 'legal-advice', 'lifestyle']),
     excerpt: z.string().min(50, 'Excerpt must be at least 50 characters').max(500, 'Excerpt cannot exceed 500 characters').optional(),
     seoTitle: z.string().max(60, 'SEO title cannot exceed 60 characters').optional(),
     seoDescription: z.string().max(160, 'SEO description cannot exceed 160 characters').optional(),
-    tags: z.array(z.string().min(1)).min(1, 'Must include at least one tag').max(10, 'Cannot exceed 10 tags'),
+    tags: TagsSchema.min(1, 'Must include at least one tag').max(10, 'Cannot exceed 10 tags'),
     slug: z.string().min(3, 'Slug must be at least 3 characters').max(100, 'Slug cannot exceed 100 characters').optional(),
-    featured: z.boolean().default(false),
-    coverImage: z.string().url('Cover image must be a valid URL').optional(),
+    featured: BooleanFlagSchema,
+    coverImage: OptionalUrlSchema,
     images: z.array(z.object({
-        id: z.string(),
-        url: z.string().url(),
-        filename: z.string(),
-        alt: z.string().optional(),
-        caption: z.string().optional(),
+        id: IdSchema,
+        url: UrlSchema,
+        filename: ShortTextSchema,
+        alt: OptionalShortTextSchema,
+        caption: OptionalShortTextSchema,
     })).default([]),
 });
 

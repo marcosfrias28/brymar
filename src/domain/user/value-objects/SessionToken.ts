@@ -4,62 +4,45 @@ import { ValueObjectValidationError } from '@/domain/shared/errors/DomainError';
 /**
  * SessionToken value object representing a session authentication token
  */
-export class SessionToken extends ValueObject {
-    private constructor(private readonly _value: string) {
-        super();
-        this.validate();
+export class SessionToken extends ValueObject<string> {
+    private constructor(value: string) {
+        super(value);
     }
 
     /**
      * Creates a SessionToken from a string value
      */
     static create(value: string): SessionToken {
-        return new SessionToken(value);
-    }
-
-    protected validate(): void {
-        if (!this._value || typeof this._value !== 'string') {
+        if (!value || typeof value !== 'string') {
             throw new ValueObjectValidationError('Session token must be a non-empty string');
         }
 
-        if (this._value.trim().length === 0) {
+        if (value.trim().length === 0) {
             throw new ValueObjectValidationError('Session token cannot be empty');
         }
 
         // Basic validation - token should be at least 32 characters for security
-        if (this._value.length < 32) {
+        if (value.length < 32) {
             throw new ValueObjectValidationError('Session token must be at least 32 characters long');
         }
 
         // Token should not exceed reasonable length (to prevent DoS)
-        if (this._value.length > 512) {
+        if (value.length > 512) {
             throw new ValueObjectValidationError('Session token cannot exceed 512 characters');
         }
-    }
 
-    /**
-     * Gets the string value of the token
-     */
-    get value(): string {
-        return this._value;
-    }
-
-    /**
-     * Checks if this token equals another token
-     */
-    equals(other: ValueObject): boolean {
-        return other instanceof SessionToken && this._value === other._value;
+        return new SessionToken(value);
     }
 
     /**
      * Returns a masked version of the token for logging/display
      */
     getMasked(): string {
-        if (this._value.length <= 8) {
+        if (this.value.length <= 8) {
             return '***';
         }
-        const start = this._value.substring(0, 4);
-        const end = this._value.substring(this._value.length - 4);
+        const start = this.value.substring(0, 4);
+        const end = this.value.substring(this.value.length - 4);
         return `${start}...${end}`;
     }
 
@@ -74,6 +57,6 @@ export class SessionToken extends ValueObject {
      * Gets the raw token value (use with caution)
      */
     getRawValue(): string {
-        return this._value;
+        return this.value;
     }
 }

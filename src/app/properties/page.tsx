@@ -1,90 +1,56 @@
-import { PageHeader } from '@/components/sections/page-header';
-import { PropertyCard } from '@/components/properties/property-card';
-import { Home } from "lucide-react";
+"use client";
 
-// Mock data - in a real app, this would come from your database
-const mockProperties = [
-  {
-    id: "1",
-    title: "Serenity Residential Home",
-    location: "15 S Aurora Ave, Miami",
-    price: 570000,
-    bedrooms: 4,
-    bathrooms: 3,
-    sqm: 120,
-    imageUrl: "/villa/1.jpg",
-    type: "residential" as const,
-    description:
-      "Beautiful residential home with modern amenities and spacious rooms.",
-  },
-  {
-    id: "2",
-    title: "Mountain View Villa",
-    location: "18 S Aurora Ave, Miami",
-    price: 575000,
-    bedrooms: 5,
-    bathrooms: 2,
-    sqm: 150,
-    imageUrl: "/villa2/1.jpg",
-    type: "residential" as const,
-    description:
-      "Stunning villa with breathtaking mountain views and luxury finishes.",
-  },
-  {
-    id: "3",
-    title: "Modern Luxe Apartment",
-    location: "20 S Aurora Ave, Miami",
-    price: 580000,
-    bedrooms: 3,
-    bathrooms: 2,
-    sqm: 110,
-    imageUrl: "/villa3/1.jpg",
-    type: "residential" as const,
-    description:
-      "Contemporary apartment with high-end appliances and elegant design.",
-  },
-  {
-    id: "4",
-    title: "Sunset Grove Home",
-    location: "90 Maple Leaf Lane, Orlando",
-    price: 540000,
-    bedrooms: 3,
-    bathrooms: 2,
-    sqm: 110,
-    imageUrl: "/residencial/1.webp",
-    type: "residential" as const,
-    description:
-      "Charming home in a peaceful neighborhood with beautiful sunset views.",
-  },
-  {
-    id: "5",
-    title: "Ocean Breeze Villa",
-    location: "25 Coastal Drive, Miami Beach",
-    price: 650000,
-    bedrooms: 4,
-    bathrooms: 3,
-    sqm: 180,
-    imageUrl: "/residencial/2.webp",
-    type: "residential" as const,
-    description:
-      "Luxurious beachfront villa with panoramic ocean views and private beach access.",
-  },
-  {
-    id: "6",
-    title: "Downtown Penthouse",
-    location: "100 City Center, Miami",
-    price: 750000,
-    bedrooms: 2,
-    bathrooms: 2,
-    sqm: 95,
-    imageUrl: "/residencial/3.webp",
-    type: "residential" as const,
-    description:
-      "Exclusive penthouse in the heart of downtown with city skyline views.",
-  },
-];
+import { PageHeader } from "@/components/sections/page-header";
+import { PropertyCard } from "@/components/properties/property-card";
+import { LoadingSpinner } from "@/components/ui/loading-states";
+import { InlineErrorState } from "@/components/ui/error-states";
+import { Home } from "lucide-react";
+import { useProperties } from "@/presentation/hooks/use-properties";
 
 export default function PropertiesPage() {
+  const { properties, loading, error, refetch } = useProperties();
+
+  if (loading) {
+    return (
+      <>
+        <PageHeader
+          title="Properties"
+          subtitle="Experience elegance and comfort with our exclusive luxury villas, designed for sophisticated living."
+          icon={<Home className="w-5 h-5 text-primary" />}
+        />
+        <section className="pt-0! relative">
+          <div className="container max-w-8xl mx-auto px-5 2xl:px-0">
+            <div className="flex items-center justify-center py-20">
+              <div className="flex flex-col items-center space-y-4">
+                <LoadingSpinner />
+                <p className="text-muted-foreground">Loading properties...</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <PageHeader
+          title="Properties"
+          subtitle="Experience elegance and comfort with our exclusive luxury villas, designed for sophisticated living."
+          icon={<Home className="w-5 h-5 text-primary" />}
+        />
+        <section className="pt-0! relative">
+          <div className="container max-w-8xl mx-auto px-5 2xl:px-0">
+            <div className="flex items-center justify-center py-20">
+              <InlineErrorState message={error} onRetry={refetch} />
+            </div>
+          </div>
+        </section>
+      </>
+    );
+  }
+
   return (
     <>
       <PageHeader
@@ -99,11 +65,26 @@ export default function PropertiesPage() {
         <div className="absolute bottom-20 right-1/3 w-24 h-24 bg-secondary/8 rounded-full blur-xl"></div>
 
         <div className="container max-w-8xl mx-auto px-5 2xl:px-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
-            {mockProperties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
-          </div>
+          {properties.length === 0 ? (
+            <div className="text-center py-20">
+              <div className="text-muted-foreground">
+                <Home className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <h3 className="text-lg font-semibold mb-2">
+                  No properties found
+                </h3>
+                <p>There are currently no properties available.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
+              {properties.map((property) => (
+                <PropertyCard
+                  key={property.getId().value}
+                  property={property}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </>

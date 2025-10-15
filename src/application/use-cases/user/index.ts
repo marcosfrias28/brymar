@@ -1,3 +1,12 @@
 export { RegisterUserUseCase } from './RegisterUserUseCase';
 export { AuthenticateUserUseCase } from './AuthenticateUserUseCase';
 export { UpdateUserProfileUseCase } from './UpdateUserProfileUseCase';
+export { GetCurrentUserUseCase } from './GetCurrentUserUseCase';
+export { SignOutUseCase } from './SignOutUseCase';
+export { ForgotPasswordUseCase } from './ForgotPasswordUseCase';
+export { ResetPasswordUseCase } from './ResetPasswordUseCase';
+export { SendVerificationOTPUseCase } from './SendVerificationOTPUseCase';
+export { VerifyOTPUseCase } from './VerifyOTPUseCase';
+export { RemoveFavoriteUseCase } from './RemoveFavoriteUseCase';
+export { MarkNotificationAsReadUseCase } from './MarkNotificationAsReadUseCase';
+export { MarkAllNotificationsAsReadUseCase } from './MarkAllNotificationsAsReadUseCase';

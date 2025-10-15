@@ -29,7 +29,7 @@ export class CreateUserInput {
         public readonly firstName?: string,
         public readonly lastName?: string,
         public readonly phone?: string,
-        public readonly role: 'admin' | 'agent' | 'user' = 'user',
+        public readonly role: 'admin' | 'editor' | 'super_admin' | 'user' | 'agent' = 'user',
         public readonly preferences?: any
     ) { }
 

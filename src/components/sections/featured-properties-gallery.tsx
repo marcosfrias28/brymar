@@ -1,6 +1,6 @@
 "use client";
 
-import { useFeaturedProperties } from '@/hooks/use-featured-properties';
+import { useFeaturedProperties } from "@/hooks/use-featured-properties";
 import Image from "next/image";
 
 // Placeholder images for fallback
@@ -54,7 +54,7 @@ export function FeaturedPropertiesGallery() {
               ? property.images[0]
               : placeholderImages[index % placeholderImages.length],
           price: property.price,
-          location: property.location,
+          location: `${property.address.city}, ${property.address.state}`,
         }))
       : placeholderImages.map((image, index) => ({
           id: index + 1,

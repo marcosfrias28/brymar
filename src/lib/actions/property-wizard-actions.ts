@@ -12,7 +12,7 @@ import {
 import { PropertyWizardData } from '@/types/property-wizard';
 import { PropertyCompleteSchema, PropertyDraftSchema } from '@/lib/schemas/property-wizard-schemas';
 import { saveUnifiedDraft, loadUnifiedDraft, deleteUnifiedDraft } from "./unified-wizard-actions";
-import { addProperty, updateProperty } from '@/app/actions/property-actions';
+import { createProperty, updateProperty } from '@/presentation/server-actions/property-actions';
 
 // Schema for completing a property wizard
 const completePropertyWizardSchema = z.object({
@@ -59,7 +59,7 @@ export async function completePropertyWizard(
             result = await updateProperty(propertyFormData);
         } else {
             // Create new property
-            result = await addProperty(propertyFormData);
+            result = await createProperty(propertyFormData);
         }
 
         if (!result.success) {

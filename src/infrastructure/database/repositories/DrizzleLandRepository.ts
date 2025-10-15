@@ -16,28 +16,28 @@ import { InfrastructureError } from '@/domain/shared/errors/DomainError';
 import { LandMapper } from "../mappers/LandMapper";
 
 export class DrizzleLandRepository implements ILandRepository {
-    constructor(private readonly db: Database) { }
+    constructor(private readonly _database: Database) { }
 
     async save(land: Land): Promise<void> {
         try {
             const landData = this.mapToDatabase(land);
 
             if (land.isNew()) {
-                await this.db.insert(lands).values(landData);
+                await this.database.insert(lands).values(landData);
             } else {
-                await this.db
+                await this.database
                     .update(lands)
                     .set(landData)
                     .where(eq(lands.id, parseInt(landData.id)));
             }
         } catch (error) {
-            throw new InfrastructureError(`Failed to save land: ${error.message}`);
+            throw new InfrastructureError(`Failed to save land: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async findById(id: LandId): Promise<Land | null> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select()
                 .from(lands)
                 .where(eq(lands.id, parseInt(id.value)))
@@ -49,33 +49,33 @@ export class DrizzleLandRepository implements ILandRepository {
 
             return this.mapToDomain(result[0]);
         } catch (error) {
-            throw new InfrastructureError(`Failed to find land by ID: ${error.message}`);
+            throw new InfrastructureError(`Failed to find land by ID: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async findByStatus(status: LandStatus): Promise<Land[]> {
         try {
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(lands)
                 .where(eq(lands.status, status.value));
 
             return results.map(row => this.mapToDomain(row));
         } catch (error) {
-            throw new InfrastructureError(`Failed to find lands by status: ${error.message}`);
+            throw new InfrastructureError(`Failed to find lands by status: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async findByType(type: LandType): Promise<Land[]> {
         try {
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(lands)
                 .where(eq(lands.type, type.value));
 
             return results.map(row => this.mapToDomain(row));
         } catch (error) {
-            throw new InfrastructureError(`Failed to find lands by type: ${error.message}`);
+            throw new InfrastructureError(`Failed to find lands by type: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
@@ -90,7 +90,7 @@ export class DrizzleLandRepository implements ILandRepository {
             const whereConditions = this.buildWhereConditions(filters);
 
             // Build the base query
-            const baseQuery = this.db.select().from(lands);
+            const baseQuery = this.database.select().from(lands);
 
             // Apply where conditions if any
             const queryWithWhere = whereConditions.length > 0
@@ -108,7 +108,7 @@ export class DrizzleLandRepository implements ILandRepository {
                 .offset(offset);
 
             // Get total count
-            const totalBaseQuery = this.db.select({ count: count() }).from(lands);
+            const totalBaseQuery = this.database.select({ count: count() }).from(lands);
             const totalQueryWithWhere = whereConditions.length > 0
                 ? totalBaseQuery.where(
                     whereConditions.length === 1 ? whereConditions[0] : and(...whereConditions)
@@ -119,13 +119,13 @@ export class DrizzleLandRepository implements ILandRepository {
             const total = totalResult[0].count;
 
             return {
-                lands: landsResult.map(row => this.mapToDomain(row)),
+                lands: landsResult.map((row: any) => this.mapToDomain(row)),
                 total,
                 totalPages: Math.ceil(total / limit),
                 currentPage: page,
             };
         } catch (error) {
-            throw new InfrastructureError(`Failed to search lands: ${error.message}`);
+            throw new InfrastructureError(`Failed to search lands: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
@@ -133,7 +133,7 @@ export class DrizzleLandRepository implements ILandRepository {
         try {
             const offset = (page - 1) * limit;
 
-            const landsResult = await this.db
+            const landsResult = await this.database
                 .select()
                 .from(lands)
                 .where(eq(lands.status, "published"))
@@ -141,7 +141,7 @@ export class DrizzleLandRepository implements ILandRepository {
                 .limit(limit)
                 .offset(offset);
 
-            const totalResult = await this.db
+            const totalResult = await this.database
                 .select({ count: count() })
                 .from(lands)
                 .where(eq(lands.status, "published"));
@@ -149,19 +149,19 @@ export class DrizzleLandRepository implements ILandRepository {
             const total = totalResult[0].count;
 
             return {
-                lands: landsResult.map(row => this.mapToDomain(row)),
+                lands: landsResult.map((row: any) => this.mapToDomain(row)),
                 total,
                 totalPages: Math.ceil(total / limit),
                 currentPage: page,
             };
         } catch (error) {
-            throw new InfrastructureError(`Failed to find published lands: ${error.message}`);
+            throw new InfrastructureError(`Failed to find published lands: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async findByLocation(location: string): Promise<Land[]> {
         try {
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(lands)
                 .where(
@@ -174,13 +174,13 @@ export class DrizzleLandRepository implements ILandRepository {
 
             return results.map(row => this.mapToDomain(row));
         } catch (error) {
-            throw new InfrastructureError(`Failed to find lands by location: ${error.message}`);
+            throw new InfrastructureError(`Failed to find lands by location: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async findByPriceRange(minPrice: number, maxPrice: number): Promise<Land[]> {
         try {
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(lands)
                 .where(
@@ -192,13 +192,13 @@ export class DrizzleLandRepository implements ILandRepository {
 
             return results.map(row => this.mapToDomain(row));
         } catch (error) {
-            throw new InfrastructureError(`Failed to find lands by price range: ${error.message}`);
+            throw new InfrastructureError(`Failed to find lands by price range: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async findByAreaRange(minArea: number, maxArea: number): Promise<Land[]> {
         try {
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(lands)
                 .where(
@@ -210,7 +210,7 @@ export class DrizzleLandRepository implements ILandRepository {
 
             return results.map(row => this.mapToDomain(row));
         } catch (error) {
-            throw new InfrastructureError(`Failed to find lands by area range: ${error.message}`);
+            throw new InfrastructureError(`Failed to find lands by area range: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
@@ -219,7 +219,8 @@ export class DrizzleLandRepository implements ILandRepository {
             const landPrice = land.getPrice().amount;
             const landArea = land.getArea().getValue();
             const landType = land.getType().value;
-            const landLocation = land.getLocation().value;
+            // Get location for potential future use
+            land.getLocation().value;
 
             // Find similar lands based on type, price range (±20%), and area range (±30%)
             const priceMin = landPrice * 0.8;
@@ -227,7 +228,7 @@ export class DrizzleLandRepository implements ILandRepository {
             const areaMin = landArea * 0.7;
             const areaMax = landArea * 1.3;
 
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(lands)
                 .where(
@@ -249,13 +250,13 @@ export class DrizzleLandRepository implements ILandRepository {
 
             return results.map(row => this.mapToDomain(row));
         } catch (error) {
-            throw new InfrastructureError(`Failed to find similar lands: ${error.message}`);
+            throw new InfrastructureError(`Failed to find similar lands: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async delete(id: LandId): Promise<void> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .delete(lands)
                 .where(eq(lands.id, parseInt(id.value)))
                 .returning();
@@ -264,13 +265,13 @@ export class DrizzleLandRepository implements ILandRepository {
                 throw new InfrastructureError("Land not found");
             }
         } catch (error) {
-            throw new InfrastructureError(`Failed to delete land: ${error.message}`);
+            throw new InfrastructureError(`Failed to delete land: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async exists(id: LandId): Promise<boolean> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select({ id: lands.id })
                 .from(lands)
                 .where(eq(lands.id, parseInt(id.value)))
@@ -278,45 +279,45 @@ export class DrizzleLandRepository implements ILandRepository {
 
             return result.length > 0;
         } catch (error) {
-            throw new InfrastructureError(`Failed to check land existence: ${error.message}`);
+            throw new InfrastructureError(`Failed to check land existence: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async count(): Promise<number> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select({ count: count() })
                 .from(lands);
 
             return result[0].count;
         } catch (error) {
-            throw new InfrastructureError(`Failed to count lands: ${error.message}`);
+            throw new InfrastructureError(`Failed to count lands: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async countByStatus(status: LandStatus): Promise<number> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select({ count: count() })
                 .from(lands)
                 .where(eq(lands.status, status.value));
 
             return result[0].count;
         } catch (error) {
-            throw new InfrastructureError(`Failed to count lands by status: ${error.message}`);
+            throw new InfrastructureError(`Failed to count lands by status: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async countByType(type: LandType): Promise<number> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select({ count: count() })
                 .from(lands)
                 .where(eq(lands.type, type.value));
 
             return result[0].count;
         } catch (error) {
-            throw new InfrastructureError(`Failed to count lands by type: ${error.message}`);
+            throw new InfrastructureError(`Failed to count lands by type: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 

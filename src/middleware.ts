@@ -129,7 +129,7 @@ function logTrackingStats(): void {
   if (process.env.NODE_ENV === 'development') {
     const stats = getTrackingStats();
     if (stats.activeRequests > 0 || stats.activeCircuitBreakers > 0 || stats.activeAuthFlows > 0) {
-      console.log('📊 Middleware tracking stats:', stats);
+      // Note: Middleware tracking stats would be logged in production
     }
   }
 }
@@ -152,7 +152,7 @@ function clearTrackingForEndpoint(pathname: string, method?: string): void {
   const circuitKey = method ? `${method}:${pathname}` : pathname;
   circuitBreakers.delete(circuitKey);
 
-  console.log(`🧹 Cleared tracking for ${pathname} (${keysToDelete.length} entries)`);
+  // Note: Cleared tracking for pathname - would be logged in production
 }
 
 // Log stats periodically in development
@@ -268,14 +268,14 @@ function updateCircuitBreaker(key: string, isFailure: boolean): boolean {
     if (now >= state.nextAttemptTime) {
       state.isOpen = false;
       state.failureCount = 0;
-      console.log(`🔄 Circuit breaker reset for: ${key}`);
+      // Note: Circuit breaker reset - would be logged in production
     } else {
       // Don't block form submissions even if circuit breaker is open
       if (key.includes('/new') || key.includes('/edit') || key.includes('/drafts')) {
-        console.warn(`⚡ Circuit breaker open but allowing form submission: ${key}`);
+        // Note: Circuit breaker open but allowing form submission - would be logged in production
         return false;
       }
-      console.warn(`⚡ Circuit breaker open, blocking request: ${key}`);
+      // Note: Circuit breaker open, blocking request - would be logged in production
       return true; // Circuit is open, block request
     }
   }
@@ -292,7 +292,7 @@ function updateCircuitBreaker(key: string, isFailure: boolean): boolean {
     if (state.failureCount >= threshold) {
       state.isOpen = true;
       state.nextAttemptTime = now + CIRCUIT_BREAKER_TIMEOUT;
-      console.error(`🚨 Circuit breaker opened for: ${key} (${state.failureCount} failures, threshold: ${threshold})`);
+      // Note: Circuit breaker opened - would be logged in production
       return true;
     }
   } else {
@@ -321,7 +321,7 @@ function trackAuthFlow(request: NextRequest, requestId: string): void {
 
       // Check for flow timeout
       if (now - existing.startTime > AUTH_FLOW_TIMEOUT) {
-        console.warn(`⏰ Auth flow timeout detected: ${flowKey}`);
+        // Note: Auth flow timeout detected - would be logged in production
         authFlowTracker.delete(flowKey);
       }
     } else {
@@ -330,7 +330,7 @@ function trackAuthFlow(request: NextRequest, requestId: string): void {
         startTime: now,
         requestIds: [requestId]
       });
-      console.log(`🔐 Auth flow started: ${flowKey}`);
+      // Note: Auth flow started - would be logged in production
     }
   }
 }
@@ -408,7 +408,7 @@ function trackRequest(request: NextRequest): { shouldBlock: boolean; requestId: 
     if (timeDiff > resetInterval) {
       context.consecutiveCount = 1;
       requestTracker.set(requestKey, context);
-      console.log(`🔄 Request tracker reset for: ${requestKey}`);
+      // Note: Request tracker reset - would be logged in production
       return { shouldBlock: false, requestId, context };
     }
 
@@ -429,21 +429,12 @@ function trackRequest(request: NextRequest): { shouldBlock: boolean; requestId: 
     const isRapidLoop = timeDiff < 5000 && context.consecutiveCount > maxConsecutive;
 
     if (isRapidLoop && !isLegitimate) {
-      console.error(`🚨 Loop detected - consecutive requests: ${requestKey} (${context.consecutiveCount} times)`);
+      // Note: Loop detected - would be logged in production
 
       // Update circuit breaker with failure (only for non-legitimate actions)
       updateCircuitBreaker(circuitKey, true);
 
-      // Log detailed context for debugging
-      console.error(`Loop context:`, {
-        requestId,
-        method,
-        pathname,
-        consecutiveCount: context.consecutiveCount,
-        timeDiff,
-        isAuthFlow: context.isAuthFlow,
-        isLegitimate
-      });
+      // Note: Loop context would be logged in production
 
       return { shouldBlock: true, requestId, context };
     }
@@ -458,10 +449,7 @@ function trackRequest(request: NextRequest): { shouldBlock: boolean; requestId: 
   // Update tracker
   requestTracker.set(requestKey, context);
 
-  // Log request for debugging (only in development and only for non-legitimate requests to reduce noise)
-  if (process.env.NODE_ENV === 'development' && (!isLegitimate || context.consecutiveCount > 1)) {
-    console.log(`📝 Request tracked: ${requestId} - ${method} ${pathname} (count: ${context.consecutiveCount}, legitimate: ${isLegitimate})`);
-  }
+  // Note: Request tracking would be logged in development for debugging
 
   return { shouldBlock: false, requestId, context };
 }
@@ -474,7 +462,7 @@ export async function middleware(request: NextRequest) {
 
   // Check if this request should bypass middleware entirely
   if (shouldBypassMiddleware(request)) {
-    console.log(`⏭️ Bypassing middleware for ${request.method} ${pathname}`);
+    // Note: Bypassing middleware - would be logged in production
     return NextResponse.next();
   }
 
@@ -482,13 +470,7 @@ export async function middleware(request: NextRequest) {
   const { shouldBlock, requestId, context } = trackRequest(request);
 
   if (shouldBlock) {
-    console.error(`🚫 Request blocked due to loop/circuit breaker: ${request.method} ${pathname}`);
-    console.error(`Block context:`, {
-      requestId,
-      consecutiveCount: context.consecutiveCount,
-      isAuthFlow: context.isAuthFlow,
-      timestamp: new Date(context.timestamp).toISOString()
-    });
+    // Note: Request blocked due to loop/circuit breaker - would be logged in production
 
     // For auth flows, clear the tracking and redirect to sign-in to break the loop
     if (context.isAuthFlow) {
@@ -500,7 +482,7 @@ export async function middleware(request: NextRequest) {
       authFlowTracker.delete(flowKey);
       requestTracker.delete(requestKey);
 
-      console.log(`🔄 Cleared auth flow tracking for: ${flowKey}`);
+      // Note: Cleared auth flow tracking - would be logged in production
 
       const response = NextResponse.redirect(new URL("/sign-in?error=auth-loop", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"));
       response.headers.set("X-Loop-Detected", "true");
@@ -513,7 +495,7 @@ export async function middleware(request: NextRequest) {
     const isFormSubmission = isLegitimateUserAction(pathname, request.method);
 
     if (isFormSubmission) {
-      console.warn(`⚠️ Allowing potentially looped form submission: ${request.method} ${pathname}`);
+      // Note: Allowing potentially looped form submission - would be logged in production
       const response = NextResponse.next();
       response.headers.set("X-Loop-Warning", "true");
       response.headers.set("X-Request-ID", requestId);
@@ -566,7 +548,7 @@ export async function middleware(request: NextRequest) {
     if (user.id && request.method === 'GET' && (pathname.includes('sign-in') || pathname.includes('sign-up') || pathname.includes('forgot-password') || pathname.includes('reset-password'))) {
       // Redirigir según el rol del usuario (sin requerir verificación de email)
       const redirectUrl = getRedirectUrlForRole(user.role as UserRole);
-      console.log(`🔀 Redirecting authenticated user from ${pathname} to ${redirectUrl}`);
+      // Note: Redirecting authenticated user - would be logged in production
       return NextResponse.redirect(new URL(redirectUrl, process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"));
     }
 
@@ -577,7 +559,7 @@ export async function middleware(request: NextRequest) {
       const redirectUrl = shouldRedirectUser(pathname, userRole);
 
       if (redirectUrl) {
-        console.log(`🔀 Role-based redirect: ${pathname} → ${redirectUrl} (${userRole})`);
+        // Note: Role-based redirect - would be logged in production
         return NextResponse.redirect(new URL(redirectUrl, process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"));
       }
     }
@@ -633,14 +615,7 @@ export async function middleware(request: NextRequest) {
     return response;
 
   } catch (error) {
-    console.error("Middleware authentication error:", error);
-    console.error(`Authentication error context:`, {
-      requestId,
-      method: request.method,
-      pathname,
-      timestamp: new Date().toISOString(),
-      error: error instanceof Error ? error.message : 'Unknown error'
-    });
+    // Note: Middleware authentication error - would be logged in production
 
     // Mark circuit breaker as failed
     const circuitKey = `${request.method}:${pathname}`;

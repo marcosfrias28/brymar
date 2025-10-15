@@ -1,5 +1,5 @@
 import { ValueObject } from '@/domain/shared/value-objects/ValueObject';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 type ValidWizardType = "property" | "land" | "blog";
 
@@ -12,14 +12,15 @@ export class WizardType extends ValueObject<ValidWizardType> {
 
     static create(type: string): WizardType {
         if (!type || type.trim().length === 0) {
-            throw new DomainError("Wizard type cannot be empty");
+            throw new BusinessRuleViolationError("Wizard type cannot be empty", "WIZARD_VALIDATION");
         }
 
         const normalizedType = type.trim().toLowerCase() as ValidWizardType;
 
         if (!this.VALID_TYPES.includes(normalizedType)) {
-            throw new DomainError(
-                `Invalid wizard type: ${type}. Valid types are: ${this.VALID_TYPES.join(", ")}`
+            throw new BusinessRuleViolationError(
+                `Invalid wizard type: ${type}. Valid types are: ${this.VALID_TYPES.join(", ")}`,
+                "WIZARD_VALIDATION"
             );
         }
 

@@ -1,7 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import * as logger from "@/lib/logger";
 import { SaveWizardDraftInput } from "@/application/dto/wizard/SaveWizardDraftInput";
+import { LoadWizardDraftInput } from "@/application/dto/wizard/LoadWizardDraftInput";
+import { PublishWizardInput } from "@/application/dto/wizard/PublishWizardInput";
+import { GenerateAIContentInput } from "@/application/dto/wizard/GenerateAIContentInput";
 import { SaveWizardDraftUseCase } from "@/application/use-cases/wizard/SaveWizardDraftUseCase";
 import { LoadWizardDraftUseCase } from "@/application/use-cases/wizard/LoadWizardDraftUseCase";
 import { PublishWizardUseCase } from "@/application/use-cases/wizard/PublishWizardUseCase";
@@ -13,11 +17,21 @@ import {
 } from "@/lib/validations";
 import { DomainError } from "@/domain/shared/errors/DomainError";
 import { ApplicationError } from "@/application/errors/ApplicationError";
+import { container } from "@/infrastructure/container/Container";
+import { initializeContainer } from "@/infrastructure/container/ServiceRegistration";
 
-export async function saveWizardDraft(formData: FormData): Promise<ActionState> {
+// Initialize container if not already done
+if (!container.has('SaveWizardDraftUseCase')) {
+    initializeContainer();
+}
+
+export async function saveWizardDraft(formData: FormData): Promise<ActionState<any>> {
+    const type = formData.get("type") as string;
+    const step = formData.get("step") as string;
+
     try {
         const input = SaveWizardDraftInput.fromFormData(formData);
-        const saveWizardDraftUseCase = new SaveWizardDraftUseCase(/* dependencies */);
+        const saveWizardDraftUseCase = container.get<SaveWizardDraftUseCase>('SaveWizardDraftUseCase');
 
         const result = await saveWizardDraftUseCase.execute(input);
 
@@ -30,16 +44,17 @@ export async function saveWizardDraft(formData: FormData): Promise<ActionState> 
             return createErrorResponse(error.message);
         }
 
-        console.error("Save wizard draft error:", error);
+        await logger.error("Failed to save wizard draft", error, { type, step });
         return createErrorResponse("Failed to save draft");
     }
 }
 
-export async function loadWizardDraft(draftId: string): Promise<ActionState> {
+export async function loadWizardDraft(draftId: string, userId: string): Promise<ActionState<any>> {
     try {
-        const loadWizardDraftUseCase = new LoadWizardDraftUseCase(/* dependencies */);
+        const input = LoadWizardDraftInput.create({ draftId, userId });
+        const loadWizardDraftUseCase = container.get<LoadWizardDraftUseCase>('LoadWizardDraftUseCase');
 
-        const result = await loadWizardDraftUseCase.execute({ draftId });
+        const result = await loadWizardDraftUseCase.execute(input);
 
         return createSuccessResponse(result, "Draft loaded successfully");
     } catch (error) {
@@ -50,21 +65,28 @@ export async function loadWizardDraft(draftId: string): Promise<ActionState> {
             return createErrorResponse(error.message);
         }
 
-        console.error("Load wizard draft error:", error);
+        await logger.error("Failed to load wizard draft", error, { userId });
         return createErrorResponse("Failed to load draft");
     }
 }
 
-export async function publishWizard(formData: FormData): Promise<ActionState> {
+export async function publishWizard(formData: FormData): Promise<ActionState<any>> {
+    const draftId = formData.get("draftId") as string;
+    const userId = formData.get("userId") as string;
+    const type = formData.get("type") as string;
+
     try {
-        const draftId = formData.get("draftId") as string;
         if (!draftId) {
             return createErrorResponse("Draft ID is required");
         }
+        if (!userId) {
+            return createErrorResponse("User ID is required");
+        }
 
-        const publishWizardUseCase = new PublishWizardUseCase(/* dependencies */);
+        const input = PublishWizardInput.create({ draftId, userId });
+        const publishWizardUseCase = container.get<PublishWizardUseCase>('PublishWizardUseCase');
 
-        const result = await publishWizardUseCase.execute({ draftId });
+        const result = await publishWizardUseCase.execute(input);
 
         revalidatePath("/dashboard");
 
@@ -77,23 +99,19 @@ export async function publishWizard(formData: FormData): Promise<ActionState> {
             return createErrorResponse(error.message);
         }
 
-        console.error("Publish wizard error:", error);
+        await logger.error("Failed to publish wizard content", error, { type, userId });
         return createErrorResponse("Failed to publish content");
     }
 }
 
-export async function generateAIContent(formData: FormData): Promise<ActionState> {
+export async function generateAIContent(formData: FormData): Promise<ActionState<any>> {
+    const type = formData.get("type") as string;
+    const prompt = formData.get("prompt") as string;
+
     try {
-        const contentType = formData.get("contentType") as string;
-        const prompt = formData.get("prompt") as string;
-
-        if (!contentType || !prompt) {
-            return createErrorResponse("Content type and prompt are required");
-        }
-
-        const generateAIContentUseCase = new GenerateAIContentUseCase(/* dependencies */);
-
-        const result = await generateAIContentUseCase.execute({ contentType, prompt });
+        const input = GenerateAIContentInput.fromFormData(formData);
+        const generateAIContentUseCase = container.get<GenerateAIContentUseCase>('GenerateAIContentUseCase');
+        const result = await generateAIContentUseCase.execute(input);
 
         return createSuccessResponse(result, "AI content generated successfully");
     } catch (error) {
@@ -104,7 +122,7 @@ export async function generateAIContent(formData: FormData): Promise<ActionState
             return createErrorResponse(error.message);
         }
 
-        console.error("Generate AI content error:", error);
+        await logger.error("Failed to generate AI content", error, { type, prompt });
         return createErrorResponse("Failed to generate AI content");
     }
 }

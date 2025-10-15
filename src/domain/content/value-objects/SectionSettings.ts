@@ -1,5 +1,5 @@
 import { ValueObject } from '@/domain/shared/value-objects/ValueObject';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { ValueObjectValidationError } from '@/domain/shared/errors/DomainError';
 
 export interface SectionSettingsData {
     layout?: string;
@@ -50,37 +50,37 @@ export class SectionSettings extends ValueObject<SectionSettingsData> {
 
         // Validate layout
         if (validated.layout && !this.VALID_LAYOUTS.includes(validated.layout)) {
-            throw new DomainError(
+            throw new ValueObjectValidationError(
                 `Invalid layout: ${validated.layout}. Valid layouts are: ${this.VALID_LAYOUTS.join(', ')}`
             );
         }
 
         // Validate theme
         if (validated.theme && !this.VALID_THEMES.includes(validated.theme)) {
-            throw new DomainError(
+            throw new ValueObjectValidationError(
                 `Invalid theme: ${validated.theme}. Valid themes are: ${this.VALID_THEMES.join(', ')}`
             );
         }
 
         // Validate animation
         if (validated.animation && !this.VALID_ANIMATIONS.includes(validated.animation)) {
-            throw new DomainError(
+            throw new ValueObjectValidationError(
                 `Invalid animation: ${validated.animation}. Valid animations are: ${this.VALID_ANIMATIONS.join(', ')}`
             );
         }
 
         // Validate color values (basic hex color validation)
         if (validated.backgroundColor && !this.isValidColor(validated.backgroundColor)) {
-            throw new DomainError('Invalid background color format');
+            throw new ValueObjectValidationError('Invalid background color format');
         }
 
         if (validated.textColor && !this.isValidColor(validated.textColor)) {
-            throw new DomainError('Invalid text color format');
+            throw new ValueObjectValidationError('Invalid text color format');
         }
 
         // Validate CSS (basic check for dangerous content)
         if (validated.customCSS && this.containsDangerousCSS(validated.customCSS)) {
-            throw new DomainError('Custom CSS contains potentially dangerous content');
+            throw new ValueObjectValidationError('Custom CSS contains potentially dangerous content');
         }
 
         return validated;

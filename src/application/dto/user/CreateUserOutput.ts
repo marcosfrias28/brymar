@@ -18,7 +18,7 @@ export class CreateUserOutput {
      */
     static from(user: User): CreateUserOutput {
         const profile = user.getProfile();
-        const displayName = profile.getDisplayName();
+        const displayName = profile.getFullName();
 
         return new CreateUserOutput(
             user.getId().value,
@@ -28,6 +28,29 @@ export class CreateUserOutput {
             user.getStatus().value,
             user.getCreatedAt()
         );
+    }
+
+    /**
+     * Frontend compatibility methods
+     */
+    getId(): { value: string } {
+        return { value: this.id };
+    }
+
+    getEmail(): { value: string } {
+        return { value: this.email };
+    }
+
+    getName(): { value: string } {
+        return { value: this.name };
+    }
+
+    getRole(): { value: string } {
+        return { value: this.role };
+    }
+
+    getStatus(): { value: string } {
+        return { value: this.status };
     }
 
     /**

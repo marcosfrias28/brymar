@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useUser } from '@/hooks/use-user';
+import { useUser } from "@/presentation/hooks/use-user";
 import { toast } from "sonner";
 
 // Import page components
@@ -10,7 +10,7 @@ import NewLandPage from "@/app/(dashboard)/dashboard/lands/new/page";
 
 // Mock dependencies
 jest.mock("next/navigation");
-jest.mock("@/hooks/use-user");
+jest.mock("@/presentation/hooks/use-user");
 jest.mock("sonner");
 jest.mock("@/lib/actions/blog-wizard-actions");
 jest.mock("@/lib/actions/land-wizard-actions");

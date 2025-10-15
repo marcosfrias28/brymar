@@ -6,8 +6,7 @@ import { toast } from "sonner";
 import {
     WizardData,
     UseWizardOptions,
-    UseWizardReturn,
-    WizardConfig
+    UseWizardReturn
 } from '@/types/wizard-core';
 import { WizardValidator } from '@/lib/wizard/wizard-validator';
 import { WizardPersistence } from '@/lib/wizard/wizard-persistence';
@@ -38,8 +37,8 @@ export function useWizard<T extends WizardData>(
         onUpdate,
     } = options;
 
-    const router = useRouter();
-    const isMobile = useIsMobile();
+    // const router = useRouter();
+    // const isMobile = useIsMobile();
 
     // Core state
     const [data, setData] = useState<Partial<T>>(initialData);
@@ -354,7 +353,6 @@ export function useWizard<T extends WizardData>(
                 const input = PublishWizardInput.create({
                     draftId,
                     userId: 'current-user-id', // This would come from auth context
-                    publishOptions: {},
                 });
 
                 await useCase.execute(input);

@@ -10,7 +10,6 @@ import {
     createErrorResponse,
 } from '@/lib/validations';
 import { preprocessFormData, preprocessObjectData } from '@/lib/utils/form-data-preprocessor';
-import { formatValidationErrorResponse } from '@/lib/utils/validation-error-handler';
 import db from '@/lib/db/drizzle';
 import {
     properties,

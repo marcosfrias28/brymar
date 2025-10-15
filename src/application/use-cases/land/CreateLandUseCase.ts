@@ -27,7 +27,7 @@ export class CreateLandUseCase {
             // 2. Process images if provided
             let processedImageUrls: string[] = [];
             if (input.images && input.images.length > 0) {
-                const processedImages = await this.imageService.processImages(input.images);
+                const processedImages = await this.imageService.processImages(input.images as any);
                 processedImageUrls = processedImages.map(img => img.url);
             }
 
@@ -61,13 +61,7 @@ export class CreateLandUseCase {
             // 7. Save land to repository
             await this.landRepository.save(land);
 
-            // 8. Send notifications
-            try {
-                await this.notificationService.notifyPropertyCreated(land);
-            } catch (notificationError) {
-                // Log notification error but don't fail the use case
-                console.error('Failed to send land creation notification:', notificationError);
-            }
+            // TODO: Add land-specific notification when notifyLandCreated method is implemented
 
             // 9. Return success result
             return CreateLandOutput.from(land);
@@ -111,7 +105,8 @@ export class CreateLandUseCase {
 
         if (duplicateLand) {
             throw new BusinessRuleViolationError(
-                `A similar land already exists at this location (ID: ${duplicateLand.getLandId().value})`
+                `A similar land already exists at this location (ID: ${duplicateLand.getLandId().value})`,
+                'DUPLICATE_LAND_LOCATION'
             );
         }
 

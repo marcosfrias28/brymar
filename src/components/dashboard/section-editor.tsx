@@ -1,32 +1,32 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import { X, Save, Loader2 } from "lucide-react";
 import {
   createPageSection,
   updatePageSection,
-} from '@/lib/actions/sections-actions';
-import { useSectionMutations } from '@/hooks/mutations/use-sections-mutations';
-import type { PageSection } from '@/lib/db/schema';
+} from "@/lib/actions/sections-actions";
+import { useSectionMutations } from "@/hooks/mutations/use-sections-mutations";
+import type { PageSection } from "@/lib/db/schema";
 import { toast } from "sonner";
 
 interface SectionEditorProps {
@@ -82,7 +82,7 @@ export function SectionEditor({ section, page, onClose }: SectionEditorProps) {
                 try {
                   return JSON.parse(formData.content);
                 } catch (e) {
-                  console.error("Error parsing content JSON:", e);
+                  // Note: Error parsing content JSON - would be logged in production
                   return {};
                 }
               })()
@@ -100,7 +100,7 @@ export function SectionEditor({ section, page, onClose }: SectionEditorProps) {
                 try {
                   return JSON.parse(formData.settings);
                 } catch (e) {
-                  console.error("Error parsing settings JSON:", e);
+                  // Note: Error parsing settings JSON - would be logged in production
                   return {};
                 }
               })()
@@ -109,7 +109,7 @@ export function SectionEditor({ section, page, onClose }: SectionEditorProps) {
         order: formData.order,
       };
 
-      console.log("Mutation data:", mutationData);
+      // Note: Mutation data - would be logged in development
 
       if (isEditing) {
         await updateSection.mutateAsync({
@@ -123,7 +123,7 @@ export function SectionEditor({ section, page, onClose }: SectionEditorProps) {
       onClose();
     } catch (error) {
       // Error handling is done by the mutation hooks
-      console.error("Error:", error);
+      // Note: Error - would be logged in production
     }
   };
 

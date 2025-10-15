@@ -1,28 +1,17 @@
 "use client";
 
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, Eye, Calendar, Clock, User } from "lucide-react";
 import Image from "next/image";
-import { secondaryColorClasses } from '@/lib/utils/secondary-colors';
-import { cn } from '@/lib/utils';
+import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
+import { cn } from "@/lib/utils";
 
-interface BlogPost {
-  id: string;
-  title: string;
-  content: string;
-  author: string;
-  coverImage: string;
-  publishedDate: string;
-  status: "draft" | "published";
-  category: string;
-  readTime: number;
-  excerpt: string;
-}
+import type { GetBlogPostByIdOutput } from "@/application/dto/content";
 
 interface BlogCardListProps {
-  post: BlogPost;
+  post: GetBlogPostByIdOutput;
 }
 
 export function BlogCardList({ post }: BlogCardListProps) {
@@ -55,20 +44,22 @@ export function BlogCardList({ post }: BlogCardListProps) {
           {/* Image */}
           <div className="relative w-full sm:w-48 h-32 sm:h-24 flex-shrink-0">
             <Image
-              src={post.coverImage || "/placeholder.svg"}
-              alt={post.title}
+              src={post.getImage() || "/placeholder.svg"}
+              alt={post.getTitle().value}
               fill
               className="object-cover rounded-l-lg"
             />
             <Badge
               className={cn(
                 "absolute top-2 left-2 text-xs",
-                post.status === "published"
+                post.getStatus().value === "published"
                   ? "bg-green-600 text-white"
                   : cn("text-yellow-800", secondaryColorClasses.badge)
               )}
             >
-              {post.status === "published" ? "Publicado" : "Borrador"}
+              {post.getStatus().value === "published"
+                ? "Publicado"
+                : "Borrador"}
             </Badge>
           </div>
 
@@ -77,27 +68,25 @@ export function BlogCardList({ post }: BlogCardListProps) {
             <div className="flex justify-between items-start gap-4">
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-foreground text-sm line-clamp-2 mb-1">
-                  {post.title}
+                  {post.getTitle().value}
                 </h3>
 
                 <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
-                  {post.excerpt}
+                  {post.getContent().value.substring(0, 150)}...
                 </p>
 
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <User className="h-3 w-3" />
-                    <span>{post.author}</span>
+                    <span>{post.getAuthor().value}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
-                    <span>
-                      {new Date(post.publishedDate).toLocaleDateString()}
-                    </span>
+                    <span>{post.getCreatedAt().toLocaleDateString()}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    <span>{post.readTime} min</span>
+                    <span>{post.getReadingTime().minutes} min</span>
                   </div>
                 </div>
               </div>
@@ -110,7 +99,7 @@ export function BlogCardList({ post }: BlogCardListProps) {
                     secondaryColorClasses.badgeWithBorder
                   )}
                 >
-                  {getCategoryLabel(post.category)}
+                  {getCategoryLabel(post.getCategory().value)}
                 </Badge>
               </div>
             </div>

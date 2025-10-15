@@ -5,7 +5,7 @@ export class PasswordService {
     /**
      * Verify a password against a hash
      */
-    async verify(password: string, hashedPassword: string): Promise<boolean> {
+    async verify(password: string, _hashedPassword: string): Promise<boolean> {
         // In a real implementation, you would use bcrypt or similar
         // For now, we'll simulate password verification
         return password === 'password123'; // Placeholder logic

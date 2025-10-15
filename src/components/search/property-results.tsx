@@ -2,25 +2,25 @@
 
 import { useState } from "react";
 import { LayoutGrid, List, MapPin, SortAsc } from "lucide-react";
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { PropertyCard } from '@/components/properties/property-card';
-import { PropertyMap } from '@/components/properties/property-map';
-import { LoadingSpinner } from '@/components/ui/loading-states';
-import { InlineErrorState } from '@/components/ui/error-states';
-import { cn } from '@/lib/utils';
-import { Property } from "@/utils/types/types";
+} from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { PropertyCard } from "@/components/properties/property-card";
+import { PropertyMap } from "@/components/properties/property-map";
+import { LoadingSpinner } from "@/components/ui/loading-states";
+import { InlineErrorState } from "@/components/ui/error-states";
+import { cn } from "@/lib/utils";
+import { PropertySearchResult } from "@/presentation/hooks/use-properties";
 
 interface PropertyResultsProps {
-  properties: Property[];
+  properties: PropertySearchResult[];
   total: number;
   isLoading?: boolean;
   error?: string;
@@ -160,7 +160,7 @@ export function PropertyResults({
             >
               {properties.map((property) => (
                 <PropertyCard
-                  key={property.id}
+                  key={property.getId().value}
                   property={property}
                   variant={view === "list" ? "horizontal" : "vertical"}
                 />

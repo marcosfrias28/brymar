@@ -1,5 +1,5 @@
 import { ValueObject } from '@/domain/shared/value-objects/ValueObject';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 export interface MediaMetadataData {
     filename: string;
@@ -19,34 +19,34 @@ export class MediaMetadata extends ValueObject<MediaMetadataData> {
     static create(data: MediaMetadataData): MediaMetadata {
         // Validate required fields
         if (!data.filename || data.filename.trim().length === 0) {
-            throw new DomainError("Filename is required");
+            throw new BusinessRuleViolationError("Filename is required", "WIZARD_VALIDATION");
         }
 
         if (typeof data.size !== "number" || data.size < 0) {
-            throw new DomainError("Size must be a non-negative number");
+            throw new BusinessRuleViolationError("Size must be a non-negative number", "WIZARD_VALIDATION");
         }
 
         if (!data.contentType || data.contentType.trim().length === 0) {
-            throw new DomainError("Content type is required");
+            throw new BusinessRuleViolationError("Content type is required", "WIZARD_VALIDATION");
         }
 
         // Validate optional numeric fields
         if (data.width !== undefined && (typeof data.width !== "number" || data.width < 0)) {
-            throw new DomainError("Width must be a non-negative number");
+            throw new BusinessRuleViolationError("Width must be a non-negative number", "WIZARD_VALIDATION");
         }
 
         if (data.height !== undefined && (typeof data.height !== "number" || data.height < 0)) {
-            throw new DomainError("Height must be a non-negative number");
+            throw new BusinessRuleViolationError("Height must be a non-negative number", "WIZARD_VALIDATION");
         }
 
         if (data.duration !== undefined && (typeof data.duration !== "number" || data.duration < 0)) {
-            throw new DomainError("Duration must be a non-negative number");
+            throw new BusinessRuleViolationError("Duration must be a non-negative number", "WIZARD_VALIDATION");
         }
 
         // Validate content type format
         const contentTypeRegex = /^[a-zA-Z0-9][a-zA-Z0-9!#$&\-\^_]*\/[a-zA-Z0-9][a-zA-Z0-9!#$&\-\^_.]*$/;
         if (!contentTypeRegex.test(data.contentType.trim())) {
-            throw new DomainError("Content type must be a valid MIME type");
+            throw new BusinessRuleViolationError("Content type must be a valid MIME type", "WIZARD_VALIDATION");
         }
 
         const validatedData: MediaMetadataData = {

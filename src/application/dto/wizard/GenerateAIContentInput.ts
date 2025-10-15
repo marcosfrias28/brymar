@@ -1,4 +1,7 @@
 import { z } from "zod";
+import {
+    LanguageSchema
+} from '@/domain/shared/schemas';
 
 export class GenerateAIContentInput {
     constructor(
@@ -47,7 +50,7 @@ const GenerateAIContentInputSchema = z.object({
     contentType: z.enum(["title", "description", "tags", "market_insights"], {
         errorMap: () => ({ message: "Content type must be title, description, tags, or market_insights" }),
     }),
-    baseData: z.record(z.any(), "Base data must be a valid object"),
-    language: z.enum(["es", "en"]).default("es"),
+    baseData: z.record(z.any()),
+    language: LanguageSchema.default("es"),
     userId: z.string().uuid().optional(),
 });

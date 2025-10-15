@@ -14,7 +14,7 @@ jest.mock("@/hooks/use-admin", () => ({
   })),
 }));
 
-jest.mock("@/hooks/use-user", () => ({
+jest.mock("@/presentation/hooks/use-user", () => ({
   useUser: jest.fn(() => ({
     user: {
       name: "Test User",
@@ -126,7 +126,7 @@ jest.mock("@/components/ui/sidebar", () => ({
 }));
 
 const { useAdmin } = require("@/hooks/use-admin");
-const { useUser } = require("@/hooks/use-user");
+const { useUser } = require("@/presentation/hooks/use-user");
 
 describe("AdminSidebar", () => {
   beforeEach(() => {

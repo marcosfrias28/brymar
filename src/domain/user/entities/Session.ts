@@ -49,7 +49,7 @@ export class Session extends Entity {
         const token = SessionToken.create(data.token);
 
         if (data.expiresAt <= new Date()) {
-            throw new BusinessRuleViolationError('Session expiration date must be in the future');
+            throw new BusinessRuleViolationError('Session expiration date must be in the future', 'INVALID_SESSION_EXPIRATION');
         }
 
         return new Session(
@@ -97,11 +97,11 @@ export class Session extends Entity {
      */
     extend(newExpiresAt: Date): void {
         if (newExpiresAt <= new Date()) {
-            throw new BusinessRuleViolationError('New expiration date must be in the future');
+            throw new BusinessRuleViolationError('New expiration date must be in the future', 'INVALID_EXTENSION_DATE');
         }
 
         if (this.isExpired()) {
-            throw new BusinessRuleViolationError('Cannot extend an expired session');
+            throw new BusinessRuleViolationError('Cannot extend an expired session', 'SESSION_EXPIRED');
         }
 
         this.expiresAt = newExpiresAt;
@@ -113,7 +113,7 @@ export class Session extends Entity {
      */
     refresh(newToken: string, newExpiresAt: Date): void {
         if (this.isExpired()) {
-            throw new BusinessRuleViolationError('Cannot refresh an expired session');
+            throw new BusinessRuleViolationError('Cannot refresh an expired session', 'SESSION_EXPIRED');
         }
 
         this.token = SessionToken.create(newToken);

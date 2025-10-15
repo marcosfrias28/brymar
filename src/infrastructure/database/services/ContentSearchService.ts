@@ -1,4 +1,5 @@
 import { eq, and, or, like, desc, asc, count, sql } from 'drizzle-orm';
+import * as logger from '@/lib/logger';
 import { BlogPost } from '@/domain/content/entities/BlogPost';
 import { PageSection } from '@/domain/content/entities/PageSection';
 import { BlogCategory } from '@/domain/content/value-objects/BlogCategory';
@@ -35,7 +36,7 @@ export interface ContentSearchResult {
 }
 
 export class ContentSearchService {
-    constructor(private readonly db: Database) { }
+    constructor(private readonly _db: Database) { }
 
     async searchContent(
         filters: ContentSearchFilters,
@@ -86,7 +87,7 @@ export class ContentSearchService {
                 hasMore
             };
         } catch (error) {
-            console.error('Error searching content:', error);
+            await logger.error('Failed to search content', error);
             throw new Error(`Failed to search content: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -148,7 +149,7 @@ export class ContentSearchService {
 
             return { posts, total, hasMore };
         } catch (error) {
-            console.error('Error searching blog posts:', error);
+            await logger.error('Failed to search blog posts', error);
             throw new Error(`Failed to search blog posts: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -211,7 +212,7 @@ export class ContentSearchService {
 
             return { sections, total, hasMore };
         } catch (error) {
-            console.error('Error searching page sections:', error);
+            await logger.error('Failed to search page sections', error);
             throw new Error(`Failed to search page sections: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -277,7 +278,7 @@ export class ContentSearchService {
                 contentByPage
             };
         } catch (error) {
-            console.error('Error getting content statistics:', error);
+            await logger.error('Failed to get content statistics', error);
             throw new Error(`Failed to get content statistics: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }

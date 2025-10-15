@@ -1,7 +1,7 @@
 import { GenerateAIContentInput } from "../../dto/wizard/GenerateAIContentInput";
 import { GenerateAIContentOutput } from "../../dto/wizard/GenerateAIContentOutput";
 import { IAIService } from "../../services/interfaces/IAIService";
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 export interface PropertyBasicInfo {
     propertyType?: string;
@@ -61,7 +61,7 @@ export class GenerateAIContentUseCase {
                     break;
 
                 default:
-                    throw new DomainError(`Unsupported wizard type: ${input.wizardType}`);
+                    throw new BusinessRuleViolationError(`Unsupported wizard type: ${input.wizardType}`, 'UNSUPPORTED_WIZARD_TYPE');
             }
 
             const processingTime = Date.now() - startTime;
@@ -124,7 +124,7 @@ export class GenerateAIContentUseCase {
                 };
 
             default:
-                throw new DomainError(`Unsupported content type for property: ${input.contentType}`);
+                throw new BusinessRuleViolationError(`Unsupported content type for property: ${input.contentType}`, 'UNSUPPORTED_CONTENT_TYPE');
         }
     }
 
@@ -159,7 +159,7 @@ export class GenerateAIContentUseCase {
                 };
 
             default:
-                throw new DomainError(`Unsupported content type for land: ${input.contentType}`);
+                throw new BusinessRuleViolationError(`Unsupported content type for land: ${input.contentType}`, 'UNSUPPORTED_CONTENT_TYPE');
         }
     }
 
@@ -192,7 +192,7 @@ export class GenerateAIContentUseCase {
                 };
 
             default:
-                throw new DomainError(`Unsupported content type for blog: ${input.contentType}`);
+                throw new BusinessRuleViolationError(`Unsupported content type for blog: ${input.contentType}`, 'UNSUPPORTED_CONTENT_TYPE');
         }
     }
 }

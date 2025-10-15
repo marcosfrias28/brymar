@@ -93,6 +93,37 @@ export class LandSummary {
         );
     }
 
+    /**
+     * Frontend compatibility methods
+     */
+    getId(): { value: string } {
+        return { value: this.id };
+    }
+
+    getTitle(): { value: string } {
+        return { value: this.title };
+    }
+
+    getPrice(): { value: number; currency: string } {
+        return { value: this.price, currency: this.currency };
+    }
+
+    getStatus(): { value: string } {
+        return { value: this.status };
+    }
+
+    getType(): { value: string } {
+        return { value: this.type };
+    }
+
+    getArea(): { value: number } {
+        return { value: this.area };
+    }
+
+    getLocation(): { value: string } {
+        return { value: this.location };
+    }
+
     toJSON(): object {
         return {
             id: this.id,

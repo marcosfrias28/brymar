@@ -1,6 +1,6 @@
-import { eq, and, desc, asc, count, gte, lte, like } from "drizzle-orm";
+import { eq, and, desc, count, gte, lte, like } from "drizzle-orm";
 import type { Database } from '@/lib/db/drizzle';
-import { landDrafts, wizardDrafts } from '@/lib/db/schema';
+import { landDrafts } from '@/lib/db/schema';
 import {
     ILandDraftRepository,
     LandDraftData
@@ -9,7 +9,7 @@ import { InfrastructureError } from '@/domain/shared/errors/DomainError';
 import { randomUUID } from "crypto";
 
 export class DrizzleLandDraftRepository implements ILandDraftRepository {
-    constructor(private readonly db: Database) { }
+    constructor(private readonly _database: Database) { }
 
     async save(draft: LandDraftData): Promise<string> {
         try {
@@ -17,7 +17,7 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
             const draftId = draft.id || randomUUID();
 
             // Check if draft exists
-            const existing = await this.db
+            const existing = await this.database
                 .select({ id: landDrafts.id })
                 .from(landDrafts)
                 .where(eq(landDrafts.id, draftId))
@@ -36,13 +36,13 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
 
             if (existing.length > 0) {
                 // Update existing draft
-                await this.db
+                await this.database
                     .update(landDrafts)
                     .set(draftData)
                     .where(eq(landDrafts.id, draftId));
             } else {
                 // Insert new draft
-                await this.db.insert(landDrafts).values({
+                await this.database.insert(landDrafts).values({
                     ...draftData,
                     createdAt: new Date(),
                 });
@@ -50,13 +50,13 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
 
             return draftId;
         } catch (error) {
-            throw new InfrastructureError(`Failed to save land draft: ${error.message}`);
+            throw new InfrastructureError(`Failed to save land draft: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async findById(draftId: string): Promise<LandDraftData | null> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select()
                 .from(landDrafts)
                 .where(eq(landDrafts.id, draftId))
@@ -68,13 +68,13 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
 
             return this.mapToDomain(result[0]);
         } catch (error) {
-            throw new InfrastructureError(`Failed to find land draft by ID: ${error.message}`);
+            throw new InfrastructureError(`Failed to find land draft by ID: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async findByUserId(userId: string): Promise<LandDraftData[]> {
         try {
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(landDrafts)
                 .where(eq(landDrafts.userId, userId))
@@ -82,14 +82,14 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
 
             return results.map(row => this.mapToDomain(row));
         } catch (error) {
-            throw new InfrastructureError(`Failed to find land drafts by user ID: ${error.message}`);
+            throw new InfrastructureError(`Failed to find land drafts by user ID: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async findByUserAndLand(userId: string, landId: string): Promise<LandDraftData | null> {
         try {
             // Check if there's a draft for editing an existing land
-            const result = await this.db
+            const result = await this.database
                 .select()
                 .from(landDrafts)
                 .where(
@@ -106,7 +106,7 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
 
             return this.mapToDomain(result[0]);
         } catch (error) {
-            throw new InfrastructureError(`Failed to find land draft by user and land: ${error.message}`);
+            throw new InfrastructureError(`Failed to find land draft by user and land: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
@@ -117,7 +117,7 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
         completionPercentage: number
     ): Promise<void> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .update(landDrafts)
                 .set({
                     formData,
@@ -134,13 +134,13 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
                 throw new InfrastructureError("Land draft not found");
             }
         } catch (error) {
-            throw new InfrastructureError(`Failed to update land draft: ${error.message}`);
+            throw new InfrastructureError(`Failed to update land draft: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async delete(draftId: string): Promise<void> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .delete(landDrafts)
                 .where(eq(landDrafts.id, draftId))
                 .returning();
@@ -149,17 +149,17 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
                 throw new InfrastructureError("Land draft not found");
             }
         } catch (error) {
-            throw new InfrastructureError(`Failed to delete land draft: ${error.message}`);
+            throw new InfrastructureError(`Failed to delete land draft: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async deleteByUserId(userId: string): Promise<void> {
         try {
-            await this.db
+            await this.database
                 .delete(landDrafts)
                 .where(eq(landDrafts.userId, userId));
         } catch (error) {
-            throw new InfrastructureError(`Failed to delete land drafts by user ID: ${error.message}`);
+            throw new InfrastructureError(`Failed to delete land drafts by user ID: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
@@ -168,20 +168,20 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
             const cutoffDate = new Date();
             cutoffDate.setDate(cutoffDate.getDate() - days);
 
-            const result = await this.db
+            const result = await this.database
                 .delete(landDrafts)
                 .where(lte(landDrafts.updatedAt, cutoffDate))
                 .returning();
 
             return result.length;
         } catch (error) {
-            throw new InfrastructureError(`Failed to delete old land drafts: ${error.message}`);
+            throw new InfrastructureError(`Failed to delete old land drafts: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async exists(draftId: string): Promise<boolean> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select({ id: landDrafts.id })
                 .from(landDrafts)
                 .where(eq(landDrafts.id, draftId))
@@ -189,20 +189,20 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
 
             return result.length > 0;
         } catch (error) {
-            throw new InfrastructureError(`Failed to check land draft existence: ${error.message}`);
+            throw new InfrastructureError(`Failed to check land draft existence: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async countByUserId(userId: string): Promise<number> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select({ count: count() })
                 .from(landDrafts)
                 .where(eq(landDrafts.userId, userId));
 
             return result[0].count;
         } catch (error) {
-            throw new InfrastructureError(`Failed to count land drafts by user ID: ${error.message}`);
+            throw new InfrastructureError(`Failed to count land drafts by user ID: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
@@ -219,7 +219,7 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
                 conditions.push(gte(landDrafts.updatedAt, cutoffDate));
             }
 
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(landDrafts)
                 .where(and(...conditions))
@@ -227,7 +227,7 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
 
             return results.map(row => this.mapToDomain(row));
         } catch (error) {
-            throw new InfrastructureError(`Failed to find incomplete land drafts: ${error.message}`);
+            throw new InfrastructureError(`Failed to find incomplete land drafts: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 

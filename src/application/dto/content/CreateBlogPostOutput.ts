@@ -13,10 +13,10 @@ export class CreateBlogPostOutput {
     ) { }
 
     static from(blogPost: BlogPost): CreateBlogPostOutput {
-        const seo = blogPost.getSEO();
-        const slug = seo.hasSlug()
-            ? seo.slug!
-            : blogPost.getTitle().toSlug();
+        // Generate slug from title since SEO is not implemented yet
+        const slug = blogPost.getTitle().toString().toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
 
         return new CreateBlogPostOutput(
             blogPost.getId().value,
@@ -25,9 +25,36 @@ export class CreateBlogPostOutput {
             blogPost.getStatus().value,
             blogPost.getCategory().value,
             blogPost.getAuthor().value,
-            blogPost.getReadingTime().getMinutes(),
+            blogPost.getReadingTime().minutes,
             blogPost.getCreatedAt()
         );
+    }
+
+    /**
+     * Frontend compatibility methods
+     */
+    getId(): { value: string } {
+        return { value: this.id };
+    }
+
+    getTitle(): { value: string } {
+        return { value: this.title };
+    }
+
+    getStatus(): { value: string } {
+        return { value: this.status };
+    }
+
+    getCategory(): { value: string } {
+        return { value: this.category };
+    }
+
+    getAuthor(): { value: string } {
+        return { value: this.author };
+    }
+
+    getSlug(): { value: string } {
+        return { value: this.slug };
     }
 
     toJSON(): string {

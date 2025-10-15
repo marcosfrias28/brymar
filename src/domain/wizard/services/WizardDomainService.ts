@@ -1,4 +1,4 @@
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 import { WizardDraft } from "../entities/WizardDraft";
 import { WizardType } from "../value-objects/WizardType";
 import { StepProgress } from "../value-objects/StepProgress";

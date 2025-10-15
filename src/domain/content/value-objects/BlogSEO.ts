@@ -1,5 +1,5 @@
 import { ValueObject } from '@/domain/shared/value-objects/ValueObject';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { ValueObjectValidationError } from '@/domain/shared/errors/DomainError';
 
 export interface BlogSEOData {
     title?: string;
@@ -29,43 +29,43 @@ export class BlogSEO extends ValueObject<BlogSEOData> {
     private static validateSEOData(data: BlogSEOData): BlogSEOData {
         // Validate SEO title
         if (data.title && data.title.length > this.MAX_TITLE_LENGTH) {
-            throw new DomainError(`SEO title cannot exceed ${this.MAX_TITLE_LENGTH} characters`);
+            throw new ValueObjectValidationError(`SEO title cannot exceed ${this.MAX_TITLE_LENGTH} characters`);
         }
 
         // Validate SEO description
         if (data.description && data.description.length > this.MAX_DESCRIPTION_LENGTH) {
-            throw new DomainError(`SEO description cannot exceed ${this.MAX_DESCRIPTION_LENGTH} characters`);
+            throw new ValueObjectValidationError(`SEO description cannot exceed ${this.MAX_DESCRIPTION_LENGTH} characters`);
         }
 
         // Validate tags
         if (!data.tags || data.tags.length < this.MIN_TAGS) {
-            throw new DomainError(`Must have at least ${this.MIN_TAGS} tag`);
+            throw new ValueObjectValidationError(`Must have at least ${this.MIN_TAGS} tag`);
         }
 
         if (data.tags.length > this.MAX_TAGS) {
-            throw new DomainError(`Cannot have more than ${this.MAX_TAGS} tags`);
+            throw new ValueObjectValidationError(`Cannot have more than ${this.MAX_TAGS} tags`);
         }
 
         // Validate each tag
         data.tags.forEach(tag => {
             if (!tag || tag.trim().length === 0) {
-                throw new DomainError('Tags cannot be empty');
+                throw new ValueObjectValidationError('Tags cannot be empty');
             }
             if (tag.length > 50) {
-                throw new DomainError('Individual tags cannot exceed 50 characters');
+                throw new ValueObjectValidationError('Individual tags cannot exceed 50 characters');
             }
         });
 
         // Validate slug
         if (data.slug) {
             if (data.slug.length < this.MIN_SLUG_LENGTH) {
-                throw new DomainError(`Slug must be at least ${this.MIN_SLUG_LENGTH} characters long`);
+                throw new ValueObjectValidationError(`Slug must be at least ${this.MIN_SLUG_LENGTH} characters long`);
             }
             if (data.slug.length > this.MAX_SLUG_LENGTH) {
-                throw new DomainError(`Slug cannot exceed ${this.MAX_SLUG_LENGTH} characters`);
+                throw new ValueObjectValidationError(`Slug cannot exceed ${this.MAX_SLUG_LENGTH} characters`);
             }
             if (!/^[a-z0-9-]+$/.test(data.slug)) {
-                throw new DomainError('Slug can only contain lowercase letters, numbers, and hyphens');
+                throw new ValueObjectValidationError('Slug can only contain lowercase letters, numbers, and hyphens');
             }
         }
 
@@ -159,12 +159,12 @@ export class BlogSEO extends ValueObject<BlogSEOData> {
     // Utility methods
     addTag(tag: string): BlogSEO {
         if (this.value.tags.length >= BlogSEO.MAX_TAGS) {
-            throw new DomainError(`Cannot add more than ${BlogSEO.MAX_TAGS} tags`);
+            throw new ValueObjectValidationError(`Cannot add more than ${BlogSEO.MAX_TAGS} tags`);
         }
 
         const trimmedTag = tag.trim();
         if (this.value.tags.includes(trimmedTag)) {
-            throw new DomainError('Tag already exists');
+            throw new ValueObjectValidationError('Tag already exists');
         }
 
         return BlogSEO.create({
@@ -177,7 +177,7 @@ export class BlogSEO extends ValueObject<BlogSEOData> {
         const newTags = this.value.tags.filter(t => t !== tag);
 
         if (newTags.length < BlogSEO.MIN_TAGS) {
-            throw new DomainError(`Must have at least ${BlogSEO.MIN_TAGS} tag`);
+            throw new ValueObjectValidationError(`Must have at least ${BlogSEO.MIN_TAGS} tag`);
         }
 
         return BlogSEO.create({

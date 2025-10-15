@@ -7,7 +7,8 @@ import {
     ShortTextSchema,
     LongTextSchema,
     BooleanFlagSchema,
-    OptionalTagsSchema
+    OptionalTagsSchema,
+    OptionalShortTextSchema
 } from '@/domain/shared/schemas';
 
 // Land Type Schema
@@ -19,11 +20,11 @@ const LandFeaturesSchema = z.object({
     zoning: z.string().max(100, 'Zoning cannot exceed 100 characters').optional(),
     topography: z.enum(['flat', 'sloped', 'hilly', 'mountainous']).optional(),
     soilType: z.string().max(100, 'Soil type cannot exceed 100 characters').optional(),
-    waterAccess: z.boolean().default(false),
-    electricityAccess: z.boolean().default(false),
-    roadAccess: z.boolean().default(false),
-    utilities: z.array(z.string()).optional(),
-    restrictions: z.array(z.string()).optional(),
+    waterAccess: BooleanFlagSchema,
+    electricityAccess: BooleanFlagSchema,
+    roadAccess: BooleanFlagSchema,
+    utilities: OptionalTagsSchema,
+    restrictions: OptionalTagsSchema,
     developmentPotential: z.enum(['low', 'medium', 'high']).optional(),
 });
 
@@ -41,7 +42,7 @@ const CreateLandInputSchema = z.object({
 
 export type CreateLandInputData = z.infer<typeof CreateLandInputSchema>;
 export type LandFeaturesInputData = z.infer<typeof LandFeaturesSchema>;
-export type ImageInputData = z.infer<typeof ImageInputSchema>;
+export type LandImageInputData = z.infer<typeof ImageInputSchema>;
 
 /**
  * Input DTO for creating a new land
@@ -56,7 +57,7 @@ export class CreateLandInput {
         public readonly location: string,
         public readonly type: string,
         public readonly features?: string[],
-        public readonly images?: ImageInputData[]
+        public readonly images?: LandImageInputData[]
     ) { }
 
     /**
@@ -96,7 +97,7 @@ export class CreateLandInput {
         const features = featuresStr ? featuresStr.split(',').map(f => f.trim()).filter(f => f.length > 0) : undefined;
 
         // Handle images (files)
-        const images: ImageInputData[] = [];
+        const images: LandImageInputData[] = [];
         const imageFiles = formData.getAll('images') as File[];
         for (const file of imageFiles) {
             if (file && file.size > 0) {
@@ -115,7 +116,7 @@ export class CreateLandInput {
             price,
             currency,
             location,
-            type,
+            type: type as 'residential' | 'commercial' | 'agricultural' | 'industrial' | 'recreational' | 'mixed-use',
             features,
             images: images.length > 0 ? images : undefined,
         };

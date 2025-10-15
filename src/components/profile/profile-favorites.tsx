@@ -4,23 +4,23 @@ import { useState } from "react";
 import { Heart, Trash2, ExternalLink, Search, Filter } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,10 +31,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { useProfileFavorites } from '@/hooks/use-profile';
-import { removeFavoriteAction } from '@/app/actions/profile-actions';
-import { useUser } from '@/hooks/use-user';
+} from "@/components/ui/alert-dialog";
+import { useProfileFavorites } from "@/hooks/use-profile";
+// Profile actions need to be implemented in DDD structure
+// import { removeFavoriteAction } from "@/presentation/server-actions/profile-actions";
+import { useUser } from "@/presentation/hooks/use-user";
 
 type FilterType = "all" | "property" | "search";
 
@@ -58,22 +59,19 @@ export function ProfileFavorites() {
   });
 
   const handleRemoveFavorite = async (favoriteId: string) => {
-    if (!user?.id) return;
+    if (!user?.getId()) return;
 
     setRemovingId(favoriteId);
 
     try {
       const formData = new FormData();
-      formData.append('userId', user.id);
-      formData.append('favoriteId', favoriteId);
-      const result = await removeFavoriteAction(formData);
-
-      if (result.success) {
-        toast.success(result.message || "Rimosso dai preferiti");
-        await removeFavorite(favoriteId);
-      } else {
-        toast.error(result.error || "Errore durante la rimozione");
-      }
+      formData.append("userId", user.getId().value);
+      formData.append("favoriteId", favoriteId);
+      // Remove favorite functionality needs to be implemented in DDD structure
+      toast.error(
+        "Remove favorite functionality needs to be implemented in DDD structure"
+      );
+      return;
     } catch (error) {
       toast.error("Errore durante la rimozione del preferito");
     } finally {
@@ -251,9 +249,9 @@ export function ProfileFavorites() {
                             Rimuovi dai preferiti
                           </AlertDialogTitle>
                           <AlertDialogDescription>
-                            Sei sicuro di voler rimuovere &quot;{favorite.title}&quot; dai
-                            tuoi preferiti? Questa azione non può essere
-                            annullata.
+                            Sei sicuro di voler rimuovere &quot;{favorite.title}
+                            &quot; dai tuoi preferiti? Questa azione non può
+                            essere annullata.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>

@@ -22,13 +22,20 @@ export class UserRole extends ValueObject<UserRoleValue> {
             throw new ValueObjectValidationError('User role is required');
         }
 
-        const normalizedRole = role.toLowerCase().trim() as UserRoleValue;
+        let normalizedRole = role.toLowerCase().trim();
 
-        if (!this.VALID_ROLES.includes(normalizedRole)) {
+        // Handle backward compatibility mapping
+        if (normalizedRole === 'agent') {
+            normalizedRole = 'editor'; // Map agent to editor for domain logic
+        }
+
+        const domainRole = normalizedRole as UserRoleValue;
+
+        if (!this.VALID_ROLES.includes(domainRole)) {
             throw new ValueObjectValidationError(`Invalid user role: ${role}`);
         }
 
-        return new UserRole(normalizedRole);
+        return new UserRole(domainRole);
     }
 
     static user(): UserRole {
@@ -47,6 +54,11 @@ export class UserRole extends ValueObject<UserRoleValue> {
         return new UserRole('super_admin');
     }
 
+    static agent(): UserRole {
+        // For backward compatibility, agent maps to editor
+        return new UserRole('editor');
+    }
+
     isUser(): boolean {
         return this._value === 'user';
     }
@@ -61,6 +73,12 @@ export class UserRole extends ValueObject<UserRoleValue> {
 
     isSuperAdmin(): boolean {
         return this._value === 'super_admin';
+    }
+
+    // Backward compatibility method for current system
+    isAgent(): boolean {
+        // Map 'agent' role to 'editor' for domain logic
+        return this._value === 'editor';
     }
 
     hasPermission(permission: string): boolean {

@@ -1,4 +1,4 @@
-import { eq, desc, asc, count, and, ilike, or, gte, lte, sql, inArray } from "drizzle-orm";
+import { eq, desc, asc, count, and, ilike, or, gte, lte, sql } from "drizzle-orm";
 import type { Database } from '@/lib/db/drizzle';
 import { lands } from '@/lib/db/schema';
 import { Land } from '@/domain/land/entities/Land';
@@ -65,7 +65,7 @@ export interface AdvancedLandSearchResult extends LandSearchResult {
 }
 
 export class LandSearchService {
-    constructor(private readonly db: Database) { }
+    constructor(private readonly _db: Database) { }
 
     async advancedSearch(
         filters: AdvancedLandSearchFilters,
@@ -218,7 +218,7 @@ export class LandSearchService {
 
     private buildAdvancedWhereConditions(
         filters: AdvancedLandSearchFilters,
-        includeInactive: boolean
+        _includeInactive: boolean
     ): any[] {
         const conditions = [];
 

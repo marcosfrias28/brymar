@@ -1,32 +1,93 @@
-import { z } from 'zod';
+/**
+ * Shared domain schemas - Barrel exports for all validation schemas
+ * 
+ * This file provides a centralized export point for all shared validation schemas
+ * used across the domain layer. These schemas ensure consistent validation
+ * and type safety throughout the application.
+ */
 
-// Common validation schemas
-export const EmailSchema = z.string().email('Invalid email format');
+// Text validation schemas
+export {
+    ShortTextSchema,
+    LongTextSchema,
+    OptionalShortTextSchema,
+    OptionalLongTextSchema,
+    MediumTextSchema,
+    OptionalMediumTextSchema
+} from './text-schemas';
+
+// Price validation schemas
+export {
+    SimplePriceSchema,
+    PriceSchema,
+    CurrencySchema,
+    OptionalPriceSchema
+} from './price-schemas';
+
+// Property-specific schemas
+export {
+    PropertyTypeSchema,
+    PropertyStatusSchema,
+    PropertyFeaturesSchema,
+    AddressSchema,
+    ParkingTypeSchema,
+    PropertyConditionSchema,
+    PropertyListingTypeSchema,
+    PropertyPrioritySchema
+} from './property-schemas';
+
+// User-specific schemas
+export {
+    UserRoleSchema,
+    UserPreferencesSchema,
+    EmailSchema,
+    PhoneSchema,
+    OptionalPhoneSchema,
+    ContactInfoSchema,
+    UserStatusSchema,
+    ProfileVisibilitySchema,
+    NotificationPreferencesSchema,
+    PrivacyPreferencesSchema
+} from './user-schemas';
+
+// Search and pagination schemas
+export {
+    SearchQuerySchema,
+    PaginationSchema,
+    SortSchema,
+    LocationSearchSchema,
+    DateRangeSchema
+} from './search-schemas';
+
+// Utility schemas
+export {
+    BooleanFlagSchema,
+    ImageInputSchema,
+    OptionalTagsSchema,
+    TagsSchema,
+    IdSchema,
+    OptionalYearSchema,
+    YearSchema,
+    UrlSchema,
+    OptionalUrlSchema,
+    FileUploadSchema,
+    PercentageSchema,
+    RatingSchema,
+    OptionalRatingSchema,
+    StatusSchema,
+    PrioritySchema,
+    VisibilitySchema,
+    LanguageSchema,
+    ThemeSchema,
+    NotificationTypeSchema
+} from './utility-schemas';
+
+// Legacy schemas for backward compatibility (will be deprecated)
+import { z } from 'zod';
 
 export const PasswordSchema = z.string()
     .min(8, 'Password must be at least 8 characters')
     .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 'Password must contain at least one lowercase letter, one uppercase letter, and one number');
-
-export const PhoneSchema = z.string()
-    .regex(/^[\+]?[1-9][\d]{0,15}$/, 'Invalid phone number format');
-
-export const PriceSchema = z.number()
-    .min(0, 'Price cannot be negative')
-    .max(100_000_000, 'Price exceeds maximum allowed value');
-
-export const CurrencySchema = z.enum(['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'CHF', 'CNY', 'SEK', 'NZD']);
-
-export const AddressSchema = z.object({
-    street: z.string().min(1, 'Street is required'),
-    city: z.string().min(1, 'City is required'),
-    state: z.string().min(1, 'State is required'),
-    zipCode: z.string().min(1, 'Zip code is required'),
-    country: z.string().min(1, 'Country is required'),
-    coordinates: z.object({
-        latitude: z.number().min(-90).max(90),
-        longitude: z.number().min(-180).max(180)
-    }).optional()
-});
 
 export const ImageSchema = z.object({
     url: z.string().url('Invalid image URL'),

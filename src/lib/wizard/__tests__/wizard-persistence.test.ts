@@ -1,15 +1,15 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { WizardPersistence } from '../wizard-persistence';
 import type { WizardData } from '@/types/wizard-core';
 
 // Mock localStorage
 const localStorageMock = {
-    getItem: vi.fn(),
-    setItem: vi.fn(),
-    removeItem: vi.fn(),
-    clear: vi.fn(),
+    getItem: jest.fn(),
+    setItem: jest.fn(),
+    removeItem: jest.fn(),
+    clear: jest.fn(),
     length: 0,
-    key: vi.fn(),
+    key: jest.fn(),
 };
 
 // Mock navigator.onLine
@@ -24,12 +24,12 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 // Mock database
-vi.mock('@/lib/db/drizzle', () => ({
+jest.mock('@/lib/db/drizzle', () => ({
     default: {
-        insert: vi.fn(),
-        select: vi.fn(),
-        update: vi.fn(),
-        delete: vi.fn(),
+        insert: jest.fn(),
+        select: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
     },
 }));
 
@@ -40,7 +40,7 @@ interface TestWizardData extends WizardData {
 
 describe('WizardPersistence', () => {
     beforeEach(() => {
-        vi.clearAllMocks();
+        jest.clearAllMocks();
         WizardPersistence.clearMemoryCache();
         WizardPersistence.clearAutoSaveTimeouts();
     });

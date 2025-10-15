@@ -1,5 +1,5 @@
 import { ValueObject } from '@/domain/shared/value-objects/ValueObject';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 export enum PropertyStatusEnum {
     DRAFT = "draft",
@@ -19,7 +19,7 @@ export class PropertyStatus extends ValueObject<PropertyStatusEnum> {
 
     static create(status: string): PropertyStatus {
         if (!status || status.trim().length === 0) {
-            throw new DomainError("Property status cannot be empty");
+            throw new BusinessRuleViolationError("Property status cannot be empty", "PROPERTY_VALIDATION");
         }
 
         const normalizedStatus = status.toLowerCase().trim();
@@ -29,7 +29,7 @@ export class PropertyStatus extends ValueObject<PropertyStatusEnum> {
         const matchedStatus = validStatuses.find(validStatus => validStatus === normalizedStatus);
 
         if (!matchedStatus) {
-            throw new DomainError(`Invalid property status: ${status}. Valid statuses are: ${validStatuses.join(', ')}`);
+            throw new BusinessRuleViolationError(`Invalid property status: ${status}. Valid statuses are: ${validStatuses.join(', ')}`, "PROPERTY_VALIDATION");
         }
 
         return new PropertyStatus(matchedStatus);
@@ -160,7 +160,7 @@ export class PropertyStatus extends ValueObject<PropertyStatusEnum> {
     // Transition methods with business rules
     transitionTo(newStatus: PropertyStatus): PropertyStatus {
         if (!this.canTransitionTo(newStatus)) {
-            throw new DomainError(`Cannot transition from ${this.getDisplayName()} to ${newStatus.getDisplayName()}`);
+            throw new BusinessRuleViolationError(`Cannot transition from ${this.getDisplayName()} to ${newStatus.getDisplayName()}`, "PROPERTY_VALIDATION");
         }
         return newStatus;
     }

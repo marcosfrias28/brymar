@@ -1,5 +1,5 @@
 import { AggregateRoot } from '@/domain/shared/entities/AggregateRoot';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 import { WizardDraftId } from "../value-objects/WizardDraftId";
 import { WizardType } from "../value-objects/WizardType";
 import { StepProgress } from "../value-objects/StepProgress";
@@ -34,7 +34,7 @@ export interface WizardDraftData {
 
 export class WizardDraft extends AggregateRoot {
     private constructor(
-        private readonly id: WizardDraftId,
+        id: WizardDraftId,
         private readonly userId: UserId,
         private readonly wizardType: WizardType,
         private readonly wizardConfigId: string,
@@ -47,7 +47,7 @@ export class WizardDraft extends AggregateRoot {
         createdAt?: Date,
         updatedAt?: Date
     ) {
-        super(id, createdAt, updatedAt);
+        super(id, createdAt || new Date(), updatedAt || new Date());
     }
 
     static create(data: CreateWizardDraftData): WizardDraft {
@@ -60,12 +60,12 @@ export class WizardDraft extends AggregateRoot {
 
         // Validate wizard config ID
         if (!data.wizardConfigId || data.wizardConfigId.trim().length === 0) {
-            throw new DomainError("Wizard config ID is required");
+            throw new BusinessRuleViolationError("Wizard config ID is required", "WIZARD_VALIDATION");
         }
 
         // Validate current step
         if (!data.currentStep || data.currentStep.trim().length === 0) {
-            throw new DomainError("Current step is required");
+            throw new BusinessRuleViolationError("Current step is required", "WIZARD_VALIDATION");
         }
 
         return new WizardDraft(
@@ -108,7 +108,7 @@ export class WizardDraft extends AggregateRoot {
 
     updateCurrentStep(stepId: string): void {
         if (!stepId || stepId.trim().length === 0) {
-            throw new DomainError("Step ID cannot be empty");
+            throw new BusinessRuleViolationError("Step ID cannot be empty", "WIZARD_VALIDATION");
         }
         this.currentStep = stepId.trim();
         this.touch();
@@ -116,7 +116,7 @@ export class WizardDraft extends AggregateRoot {
 
     markStepCompleted(stepId: string): void {
         if (!stepId || stepId.trim().length === 0) {
-            throw new DomainError("Step ID cannot be empty");
+            throw new BusinessRuleViolationError("Step ID cannot be empty", "WIZARD_VALIDATION");
         }
         this.stepProgress = this.stepProgress.markStepCompleted(stepId);
         this.touch();
@@ -190,7 +190,7 @@ export class WizardDraft extends AggregateRoot {
         return this.description;
     }
 
-    private touch(): void {
+    protected touch(): void {
         this.updatedAt = new Date();
     }
 }

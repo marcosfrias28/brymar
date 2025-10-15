@@ -2,17 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useUser } from '@/hooks/use-user';
-import { PropertyWizard } from '@/components/wizard/property';
+import { useUser } from "@/presentation/hooks/use-user";
+import { PropertyWizard } from "@/components/wizard/property";
 import {
-  completePropertyWizard,
-  savePropertyDraft,
-  loadPropertyDraft,
-} from '@/lib/actions/property-wizard-actions';
-import { RouteGuard } from '@/components/auth/route-guard';
-import { DashboardPageLayout } from '@/components/layout/dashboard-page-layout';
+  createProperty,
+  updateProperty,
+} from "@/presentation/server-actions/property-actions";
+import { RouteGuard } from "@/components/auth/route-guard";
+import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { toast } from "sonner";
-import type { PropertyWizardData } from '@/types/property-wizard';
+import type { PropertyWizardData } from "@/types/property-wizard";
 
 export default function NewPropertyPage() {
   const router = useRouter();
@@ -27,11 +26,11 @@ export default function NewPropertyPage() {
 
   useEffect(() => {
     const loadDraftData = async () => {
-      if (!draftId || !user?.id) return;
+      if (!draftId || !user?.getId()) return;
 
       setLoading(true);
       try {
-        const result = await loadPropertyDraft(draftId, user.id);
+        const result = await loadPropertyDraft(draftId, user.getId().value);
 
         if (result.success && result.data) {
           setInitialData(result.data.data);
@@ -51,39 +50,65 @@ export default function NewPropertyPage() {
     };
 
     loadDraftData();
-  }, [draftId, user?.id, router]);
+  }, [draftId, user?.getId(), router]);
 
   const handleComplete = async (data: PropertyWizardData) => {
-    if (!user?.id) {
+    if (!user?.getId()) {
       toast.error("Usuario no autenticado");
       return;
     }
 
     try {
-      const completeData = {
-        ...data,
-        aiGenerated: data.aiGenerated || {
-          title: false,
-          description: false,
-          tags: false,
-        },
-        address: data.address
-          ? {
-              ...data.address,
-              country: "Dominican Republic" as const,
-            }
-          : undefined,
-      };
+      // Convert wizard data to FormData for DDD server action
+      const formData = new FormData();
+      formData.append("title", data.title || "");
+      formData.append("description", data.description || "");
+      formData.append("price", data.price?.toString() || "0");
+      formData.append("propertyType", data.propertyType || "residential");
+      formData.append("status", "published");
 
-      const result = await completePropertyWizard({
-        userId: user.id,
-        data: completeData,
-        draftId: draftId || undefined,
-      });
+      // Add address fields
+      if (data.address) {
+        formData.append("address.street", data.address.street || "");
+        formData.append("address.city", data.address.city || "");
+        formData.append("address.state", data.address.state || "");
+        formData.append(
+          "address.country",
+          data.address.country || "Dominican Republic"
+        );
+        formData.append("address.postalCode", data.address.postalCode || "");
+      }
+
+      // Add features
+      if (data.features) {
+        formData.append(
+          "features.bedrooms",
+          data.features.bedrooms?.toString() || "0"
+        );
+        formData.append(
+          "features.bathrooms",
+          data.features.bathrooms?.toString() || "0"
+        );
+        formData.append("features.area", data.features.area?.toString() || "0");
+        if (data.features.amenities) {
+          data.features.amenities.forEach((amenity, index) => {
+            formData.append(`features.amenities[${index}]`, amenity);
+          });
+        }
+      }
+
+      // Add images
+      if (data.images) {
+        data.images.forEach((image, index) => {
+          formData.append(`images[${index}]`, image);
+        });
+      }
+
+      const result = await createProperty(formData);
 
       if (result.success) {
         toast.success("¡Propiedad publicada exitosamente!");
-        router.push(`/dashboard/properties/${result.data?.propertyId}`);
+        router.push(`/dashboard/properties/${result.data?.id}`);
       } else {
         toast.error(result.error || "Error al publicar la propiedad");
       }
@@ -97,14 +122,14 @@ export default function NewPropertyPage() {
     data: Partial<PropertyWizardData>,
     currentStep: string
   ): Promise<string> => {
-    if (!user?.id) {
+    if (!user?.getId()) {
       toast.error("Usuario no autenticado");
       throw new Error("Usuario no autenticado");
     }
 
     try {
       const result = await savePropertyDraft({
-        userId: user.id,
+        userId: user.getId().value,
         data: {
           ...data,
           status: data.status || "draft",

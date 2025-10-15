@@ -150,7 +150,9 @@ export const lands = pgTable("lands", {
   price: integer("price").notNull(),
   location: text("location").notNull(),
   type: text("type").notNull(),
-  images: jsonb("images").notNull(),
+  status: text("status").notNull().default("draft"),
+  features: jsonb("features").notNull().default('[]'),
+  images: jsonb("images").notNull().default('[]'),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

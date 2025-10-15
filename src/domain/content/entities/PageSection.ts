@@ -1,4 +1,4 @@
-import { AggregateRoot } from '@/domain/shared/base/AggregateRoot';
+import { AggregateRoot } from '@/domain/shared/entities/AggregateRoot';
 import { PageSectionId } from "../value-objects/PageSectionId";
 import { PageName } from "../value-objects/PageName";
 import { SectionName } from "../value-objects/SectionName";

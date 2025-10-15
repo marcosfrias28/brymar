@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 export function BlogForm() {
@@ -30,7 +30,7 @@ export function BlogForm() {
       e.currentTarget.reset();
       setImage(null);
     } catch (error) {
-      console.error("Error creating blog post:", error);
+      // Note: Error creating blog post - would be logged in production
       toast.error("Errore durante la creazione del post");
     } finally {
       setIsSubmitting(false);

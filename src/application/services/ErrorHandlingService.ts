@@ -164,7 +164,7 @@ export class ErrorHandlingService {
         if (error instanceof DomainError || error instanceof ApplicationError) {
             this.logger.warn(`${error.constructor.name}: ${error.message}`, logContext);
         } else {
-            this.logger.error(`${error.constructor.name}: ${error.message}`, error, logContext);
+            this.logger.error(`${error.constructor.name}: ${error.message}`, { error, ...logContext });
         }
     }
 

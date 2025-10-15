@@ -1,5 +1,5 @@
 import { ValueObject } from '@/domain/shared/value-objects/ValueObject';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 export class PropertyTitle extends ValueObject<string> {
     private static readonly MIN_LENGTH = 3;
@@ -11,22 +11,22 @@ export class PropertyTitle extends ValueObject<string> {
 
     static create(title: string): PropertyTitle {
         if (!title || title.trim().length === 0) {
-            throw new DomainError("Property title cannot be empty");
+            throw new BusinessRuleViolationError("Property title cannot be empty", "PROPERTY_VALIDATION");
         }
 
         const trimmedTitle = title.trim();
 
         if (trimmedTitle.length < this.MIN_LENGTH) {
-            throw new DomainError(`Property title must be at least ${this.MIN_LENGTH} characters long`);
+            throw new BusinessRuleViolationError(`Property title must be at least ${this.MIN_LENGTH} characters long`, "PROPERTY_VALIDATION");
         }
 
         if (trimmedTitle.length > this.MAX_LENGTH) {
-            throw new DomainError(`Property title cannot exceed ${this.MAX_LENGTH} characters`);
+            throw new BusinessRuleViolationError(`Property title cannot exceed ${this.MAX_LENGTH} characters`, "PROPERTY_VALIDATION");
         }
 
         // Check for inappropriate content (basic validation)
         if (this.containsInappropriateContent(trimmedTitle)) {
-            throw new DomainError("Property title contains inappropriate content");
+            throw new BusinessRuleViolationError("Property title contains inappropriate content", "PROPERTY_VALIDATION");
         }
 
         return new PropertyTitle(trimmedTitle);
@@ -53,6 +53,6 @@ export class PropertyTitle extends ValueObject<string> {
             .replace(/[^a-z0-9\s-]/g, '')
             .replace(/\s+/g, '-')
             .replace(/-+/g, '-')
-            .trim('-');
+            .replace(/^-+|-+$/g, '');
     }
 }

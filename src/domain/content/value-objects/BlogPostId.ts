@@ -1,9 +1,9 @@
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { ValueObjectValidationError } from '@/domain/shared/errors/DomainError';
 
 export class BlogPostId {
     private constructor(private readonly _value: string) {
         if (!_value || _value.trim().length === 0) {
-            throw new DomainError("BlogPost ID cannot be empty");
+            throw new ValueObjectValidationError("BlogPost ID cannot be empty");
         }
     }
 
@@ -17,7 +17,7 @@ export class BlogPostId {
 
     static fromNumber(id: number): BlogPostId {
         if (id <= 0) {
-            throw new DomainError("BlogPost ID must be a positive number");
+            throw new ValueObjectValidationError("BlogPost ID must be a positive number");
         }
         return new BlogPostId(id.toString());
     }
@@ -29,7 +29,7 @@ export class BlogPostId {
     toNumber(): number {
         const num = parseInt(this._value, 10);
         if (isNaN(num)) {
-            throw new DomainError("BlogPost ID is not a valid number");
+            throw new ValueObjectValidationError("BlogPost ID is not a valid number");
         }
         return num;
     }

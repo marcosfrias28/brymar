@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { searchLandsAction } from '@/app/actions/land-actions';
+import { searchLands } from "@/presentation/server-actions/land-actions";
 
 export default function DebugLandsPage() {
   const [dbLands, setDbLands] = useState<any>(null);
@@ -33,7 +33,7 @@ export default function DebugLandsPage() {
     try {
       // Test search with empty filters
       const formData = new FormData();
-      const result = await searchLandsAction(formData);
+      const result = await searchLands(formData);
 
       setSearchResults(result);
 

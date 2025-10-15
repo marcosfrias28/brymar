@@ -9,13 +9,13 @@ export class PublishPropertyOutput {
         public readonly title: string,
         public readonly status: string,
         public readonly publishedAt: Date,
+        public readonly featured: boolean,
+        public readonly notificationsSent: boolean,
+        public readonly url: string,
         public readonly publishedBy?: string,
         public readonly publishNotes?: string,
         public readonly scheduledPublishDate?: Date,
-        public readonly featured: boolean,
-        public readonly featuredUntil?: Date,
-        public readonly notificationsSent: boolean,
-        public readonly url: string
+        public readonly featuredUntil?: Date
     ) { }
 
     /**
@@ -37,13 +37,13 @@ export class PublishPropertyOutput {
             property.getTitle().value,
             property.getStatus().value,
             property.getUpdatedAt(), // When it was published
+            property.isFeatured(),
+            notificationsSent,
+            propertyUrl,
             publishedBy,
             publishNotes,
             scheduledPublishDate,
-            property.isFeatured(),
-            featuredUntil,
-            notificationsSent,
-            propertyUrl
+            featuredUntil
         );
     }
 

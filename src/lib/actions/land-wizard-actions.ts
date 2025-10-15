@@ -1,42 +1,19 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
-import { eq, desc, count } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import {
     type ActionState,
-    createValidatedAction,
     createSuccessResponse,
     createErrorResponse
 } from '@/lib/validations';
 import db from '@/lib/db/drizzle';
 import { lands } from '@/lib/db/schema';
 import {
-    LandFormDataSchema,
-    LandDraftSchema,
     type LandFormData,
     type LandDraftData
 } from '@/lib/schemas/land-wizard-schemas';
 import { LandDraftManager } from '@/lib/utils/draft-management';
-
-// Draft management schemas
-const SaveLandDraftSchema = z.object({
-    draftId: z.string().optional(),
-    userId: z.string(),
-    formData: LandDraftSchema,
-    stepCompleted: z.number().min(0).max(4),
-    completionPercentage: z.number().min(0).max(100),
-});
-
-const LoadLandDraftSchema = z.object({
-    draftId: z.string(),
-    userId: z.string(),
-});
-
-const DeleteLandDraftSchema = z.object({
-    draftId: z.string(),
-    userId: z.string(),
-});
 
 // Create land from wizard
 async function createLandFromWizardAction(data: LandFormData): Promise<ActionState<{ landId: number }>> {

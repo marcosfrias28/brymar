@@ -1,4 +1,5 @@
 import { eq, and, or, like, desc, asc, count, sql } from 'drizzle-orm';
+import * as logger from '@/lib/logger';
 import { BlogPost } from '@/domain/content/entities/BlogPost';
 import { BlogPostId } from '@/domain/content/value-objects/BlogPostId';
 import { BlogCategory } from '@/domain/content/value-objects/BlogCategory';
@@ -6,15 +7,14 @@ import { ContentStatus } from '@/domain/content/value-objects/ContentStatus';
 import {
     IBlogRepository,
     BlogSearchFilters,
-    BlogSearchOptions,
     BlogSearchResult
 } from '@/domain/content/repositories/IBlogRepository';
 import { blogPosts } from '@/lib/db/schema';
 import type { Database } from '@/lib/db/drizzle';
-import { BlogMapper } from '../mappers/BlogMapper.js';
+import { BlogMapper } from '../mappers/BlogMapper';
 
 export class DrizzleBlogRepository implements IBlogRepository {
-    constructor(private readonly db: Database) { }
+    constructor(private readonly _database: Database) { }
 
     private getOrderBy(sortBy: string, sortOrder: string) {
         switch (sortBy) {
@@ -32,10 +32,10 @@ export class DrizzleBlogRepository implements IBlogRepository {
 
     async findById(id: BlogPostId): Promise<BlogPost | null> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select()
                 .from(blogPosts)
-                .where(eq(blogPosts.id, id.isNumeric() ? id.toNumber() : parseInt(id.value, 10)))
+                .where(eq(blogPosts.id, id.toNumber()))
                 .limit(1);
 
             if (result.length === 0) {
@@ -44,7 +44,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
 
             return BlogMapper.toDomain(result[0]);
         } catch (error) {
-            console.error('Error finding blog post by ID:', error);
+            await logger.error('Failed to find blog post by ID', error, { id: id.toNumber() });
             throw new Error(`Failed to find blog post: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -58,7 +58,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
 
             if (existingPost) {
                 // Update existing post
-                await this.db
+                await this.database
                     .update(blogPosts)
                     .set({
                         title: blogPostData.title,
@@ -73,51 +73,185 @@ export class DrizzleBlogRepository implements IBlogRepository {
                     .where(eq(blogPosts.id, blogPostData.id));
             } else {
                 // Create new post
-                await this.db
+                await this.database
                     .insert(blogPosts)
                     .values(blogPostData);
             }
         } catch (error) {
-            console.error('Error saving blog post:', error);
+            await logger.error('Failed to save blog post', error, { blogPostId: blogPost.getId().toNumber() });
             throw new Error(`Failed to save blog post: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async delete(id: BlogPostId): Promise<void> {
         try {
-            await this.db
+            await this.database
                 .delete(blogPosts)
-                .where(eq(blogPosts.id, id.isNumeric() ? id.toNumber() : parseInt(id.value, 10)));
+                .where(eq(blogPosts.id, id.toNumber()));
         } catch (error) {
-            console.error('Error deleting blog post:', error);
+            await logger.error('Failed to delete blog post', error, { id: id.toNumber() });
             throw new Error(`Failed to delete blog post: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async exists(id: BlogPostId): Promise<boolean> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select({ count: count() })
                 .from(blogPosts)
-                .where(eq(blogPosts.id, id.isNumeric() ? id.toNumber() : parseInt(id.value, 10)));
+                .where(eq(blogPosts.id, id.toNumber()));
 
             return (result[0]?.count || 0) > 0;
         } catch (error) {
-            console.error('Error checking blog post existence:', error);
+            await logger.error('Failed to check blog post existence', error, { id: id.toNumber() });
             throw new Error(`Failed to check blog post existence: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
+    async findWithFilters(
+        filters: BlogSearchFilters,
+        page: number,
+        limit: number
+    ): Promise<BlogSearchResult> {
+        try {
+            const offset = (page - 1) * limit;
+            const whereConditions = this.buildWhereConditions(filters);
+
+            // Get total count
+            const totalResult = await this.database
+                .select({ count: count() })
+                .from(blogPosts)
+                .where(whereConditions);
+
+            const total = totalResult[0]?.count || 0;
+
+            // Get paginated results
+            const results = await this.database
+                .select()
+                .from(blogPosts)
+                .where(whereConditions)
+                .orderBy(desc(blogPosts.createdAt))
+                .limit(limit)
+                .offset(offset);
+
+            const posts = results.map(row => BlogMapper.toDomain(row));
+
+            return {
+                blogPosts: posts,
+                total,
+                totalPages: Math.ceil(total / limit)
+            };
+        } catch (error) {
+            await logger.error('Failed to find blog posts with filters', error, { filters });
+            throw new Error(`Failed to find blog posts with filters: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
+    async findByStatus(
+        status: ContentStatus,
+        page: number,
+        limit: number
+    ): Promise<BlogSearchResult> {
+        try {
+            const offset = (page - 1) * limit;
+            const whereConditions = eq(blogPosts.status, status.value);
+
+            // Get total count
+            const totalResult = await this.database
+                .select({ count: count() })
+                .from(blogPosts)
+                .where(whereConditions);
+
+            const total = totalResult[0]?.count || 0;
+
+            // Get paginated results
+            const results = await this.database
+                .select()
+                .from(blogPosts)
+                .where(whereConditions)
+                .orderBy(desc(blogPosts.createdAt))
+                .limit(limit)
+                .offset(offset);
+
+            const posts = results.map(row => BlogMapper.toDomain(row));
+
+            return {
+                blogPosts: posts,
+                total,
+                totalPages: Math.ceil(total / limit)
+            };
+        } catch (error) {
+            await logger.error('Failed to find blog posts by status', error, { status });
+            throw new Error(`Failed to find blog posts by status: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
+    async search(filters: BlogSearchFilters): Promise<BlogSearchResult> {
+        try {
+            const page = Math.max(1, Math.floor((filters.offset || 0) / (filters.limit || 10)) + 1);
+            const limit = filters.limit || 10;
+            const offset = (page - 1) * limit;
+
+            let whereConditions = undefined;
+            if (filters.search) {
+                whereConditions = or(
+                    like(blogPosts.title, `%${filters.search}%`),
+                    like(blogPosts.content, `%${filters.search}%`)
+                );
+            }
+
+            // Get total count
+            const totalResult = await this.database
+                .select({ count: count() })
+                .from(blogPosts)
+                .where(whereConditions);
+
+            const total = totalResult[0]?.count || 0;
+
+            // Get paginated results
+            const results = await this.database
+                .select()
+                .from(blogPosts)
+                .where(whereConditions)
+                .orderBy(desc(blogPosts.createdAt))
+                .limit(limit)
+                .offset(offset);
+
+            const posts = results.map(row => BlogMapper.toDomain(row));
+
+            return {
+                blogPosts: posts,
+                total,
+                totalPages: Math.ceil(total / limit)
+            };
+        } catch (error) {
+            await logger.error('Failed to search blog posts', error);
+            throw new Error(`Failed to search blog posts: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
+    async count(): Promise<number> {
+        try {
+            const result = await this.database
+                .select({ count: count() })
+                .from(blogPosts);
+
+            return result[0]?.count || 0;
+        } catch (error) {
+            await logger.error('Failed to count blog posts', error);
+            throw new Error(`Failed to count blog posts: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+    }
+
     async findAll(
-        filters?: BlogSearchFilters,
-        options?: BlogSearchOptions
+        filters?: BlogSearchFilters
     ): Promise<BlogSearchResult> {
         try {
             const whereConditions = this.buildWhereConditions(filters);
-            const { sortBy = 'createdAt', sortOrder = 'desc', limit = 10, offset = 0 } = options || {};
+            const { sortBy = 'createdAt', sortOrder = 'desc', limit = 10, offset = 0 } = {};
 
             // Get total count
-            const totalResult = await this.db
+            const totalResult = await this.database
                 .select({ count: count() })
                 .from(blogPosts)
                 .where(whereConditions);
@@ -127,7 +261,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
             // Get posts with pagination
             const orderBy = this.getOrderBy(sortBy, sortOrder);
 
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(blogPosts)
                 .where(whereConditions)
@@ -136,69 +270,130 @@ export class DrizzleBlogRepository implements IBlogRepository {
                 .offset(offset);
 
             const posts = results.map(row => BlogMapper.toDomain(row));
-            const hasMore = offset + limit < total;
 
             return {
-                posts,
+                blogPosts: posts,
                 total,
-                hasMore
+                totalPages: Math.ceil(total / limit)
             };
         } catch (error) {
-            console.error('Error finding all blog posts:', error);
+            await logger.error('Failed to find all blog posts', error);
             throw new Error(`Failed to find blog posts: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async findPublished(
-        filters?: Omit<BlogSearchFilters, 'status'>,
-        options?: BlogSearchOptions
+        page: number,
+        limit: number
     ): Promise<BlogSearchResult> {
-        return this.findAll(
-            { ...filters, status: ContentStatus.published() },
-            options
-        );
+        try {
+            const offset = (page - 1) * limit;
+            const whereConditions = eq(blogPosts.status, 'published');
+
+            // Get total count
+            const totalResult = await this.database
+                .select({ count: count() })
+                .from(blogPosts)
+                .where(whereConditions);
+
+            const total = totalResult[0]?.count || 0;
+
+            // Get paginated results
+            const results = await this.database
+                .select()
+                .from(blogPosts)
+                .where(whereConditions)
+                .orderBy(desc(blogPosts.createdAt))
+                .limit(limit)
+                .offset(offset);
+
+            const posts = results.map(row => BlogMapper.toDomain(row));
+
+            return {
+                blogPosts: posts,
+                total,
+                totalPages: Math.ceil(total / limit)
+            };
+        } catch (error) {
+            await logger.error('Failed to find published blog posts', error);
+            throw new Error(`Failed to find published blog posts: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
     }
 
     async findByCategory(
         category: BlogCategory,
-        options?: BlogSearchOptions
-    ): Promise<BlogPost[]> {
+        page: number,
+        limit: number
+    ): Promise<BlogSearchResult> {
         try {
-            const { sortBy = 'createdAt', sortOrder = 'desc' } = options || {};
+            const offset = (page - 1) * limit;
+            const whereConditions = eq(blogPosts.category, category.value);
 
-            const orderBy = this.getOrderBy(sortBy, sortOrder);
+            // Get total count
+            const totalResult = await this.database
+                .select({ count: count() })
+                .from(blogPosts)
+                .where(whereConditions);
 
-            const results = await this.db
+            const total = totalResult[0]?.count || 0;
+
+            // Get paginated results
+            const results = await this.database
                 .select()
                 .from(blogPosts)
-                .where(eq(blogPosts.category, category.value))
-                .orderBy(orderBy);
+                .where(whereConditions)
+                .orderBy(desc(blogPosts.createdAt))
+                .limit(limit)
+                .offset(offset);
 
-            return results.map(row => BlogMapper.toDomain(row));
+            const posts = results.map(row => BlogMapper.toDomain(row));
+
+            return {
+                blogPosts: posts,
+                total,
+                totalPages: Math.ceil(total / limit)
+            };
         } catch (error) {
-            console.error('Error finding blog posts by category:', error);
+            await logger.error('Failed to find blog posts by category', error);
             throw new Error(`Failed to find blog posts by category: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async findByAuthor(
         author: string,
-        options?: BlogSearchOptions
-    ): Promise<BlogPost[]> {
+        page: number,
+        limit: number
+    ): Promise<BlogSearchResult> {
         try {
-            const { sortBy = 'createdAt', sortOrder = 'desc' } = options || {};
+            const offset = (page - 1) * limit;
+            const whereConditions = eq(blogPosts.author, author);
 
-            const orderBy = this.getOrderBy(sortBy, sortOrder);
+            // Get total count
+            const totalResult = await this.database
+                .select({ count: count() })
+                .from(blogPosts)
+                .where(whereConditions);
 
-            const results = await this.db
+            const total = totalResult[0]?.count || 0;
+
+            // Get paginated results
+            const results = await this.database
                 .select()
                 .from(blogPosts)
-                .where(eq(blogPosts.author, author))
-                .orderBy(orderBy);
+                .where(whereConditions)
+                .orderBy(desc(blogPosts.createdAt))
+                .limit(limit)
+                .offset(offset);
 
-            return results.map(row => BlogMapper.toDomain(row));
+            const posts = results.map(row => BlogMapper.toDomain(row));
+
+            return {
+                blogPosts: posts,
+                total,
+                totalPages: Math.ceil(total / limit)
+            };
         } catch (error) {
-            console.error('Error finding blog posts by author:', error);
+            await logger.error('Failed to find blog posts by author', error);
             throw new Error(`Failed to find blog posts by author: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -207,7 +402,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
         try {
             // Since the current schema doesn't have a featured field, 
             // we'll return the most recent published posts
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(blogPosts)
                 .where(eq(blogPosts.status, 'published'))
@@ -216,15 +411,14 @@ export class DrizzleBlogRepository implements IBlogRepository {
 
             return results.map(row => BlogMapper.toDomain(row));
         } catch (error) {
-            console.error('Error finding featured blog posts:', error);
+            await logger.error('Failed to find featured blog posts', error, { limit });
             throw new Error(`Failed to find featured blog posts: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async searchByText(
         searchTerm: string,
-        filters?: BlogSearchFilters,
-        options?: BlogSearchOptions
+        filters?: BlogSearchFilters
     ): Promise<BlogSearchResult> {
         try {
             const whereConditions = and(
@@ -235,10 +429,10 @@ export class DrizzleBlogRepository implements IBlogRepository {
                 )
             );
 
-            const { sortBy = 'createdAt', sortOrder = 'desc', limit = 10, offset = 0 } = options || {};
+            const { sortBy = 'createdAt', sortOrder = 'desc', limit = 10, offset = 0 } = {};
 
             // Get total count
-            const totalResult = await this.db
+            const totalResult = await this.database
                 .select({ count: count() })
                 .from(blogPosts)
                 .where(whereConditions);
@@ -248,7 +442,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
             // Get posts with pagination
             const orderBy = this.getOrderBy(sortBy, sortOrder);
 
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(blogPosts)
                 .where(whereConditions)
@@ -257,34 +451,32 @@ export class DrizzleBlogRepository implements IBlogRepository {
                 .offset(offset);
 
             const posts = results.map(row => BlogMapper.toDomain(row));
-            const hasMore = offset + limit < total;
 
             return {
-                posts,
+                blogPosts: posts,
                 total,
-                hasMore
+                totalPages: Math.ceil(total / limit)
             };
         } catch (error) {
-            console.error('Error searching blog posts by text:', error);
+            await logger.error('Failed to search blog posts by text', error);
             throw new Error(`Failed to search blog posts: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async findByTags(
-        tags: string[],
-        options?: BlogSearchOptions
+        tags: string[]
     ): Promise<BlogPost[]> {
         // Note: Current schema doesn't have tags field, so this is a placeholder implementation
         // In a real implementation, you would need to add a tags field or separate tags table
         try {
-            const { sortBy = 'createdAt', sortOrder = 'desc' } = options || {};
+            const { sortBy = 'createdAt', sortOrder = 'desc' } = {};
 
             const orderBy = this.getOrderBy(sortBy, sortOrder);
 
             // For now, search in content for tag-like terms
             const tagConditions = tags.map(tag => like(blogPosts.content, `%${tag}%`));
 
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(blogPosts)
                 .where(or(...tagConditions))
@@ -292,48 +484,48 @@ export class DrizzleBlogRepository implements IBlogRepository {
 
             return results.map(row => BlogMapper.toDomain(row));
         } catch (error) {
-            console.error('Error finding blog posts by tags:', error);
+            await logger.error('Failed to find blog posts by tags', error);
             throw new Error(`Failed to find blog posts by tags: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async countByStatus(status: ContentStatus): Promise<number> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select({ count: count() })
                 .from(blogPosts)
                 .where(eq(blogPosts.status, status.value));
 
             return result[0]?.count || 0;
         } catch (error) {
-            console.error('Error counting blog posts by status:', error);
+            await logger.error('Failed to count blog posts by status', error, { status });
             throw new Error(`Failed to count blog posts by status: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async countByCategory(category: BlogCategory): Promise<number> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .select({ count: count() })
                 .from(blogPosts)
                 .where(eq(blogPosts.category, category.value));
 
             return result[0]?.count || 0;
         } catch (error) {
-            console.error('Error counting blog posts by category:', error);
+            await logger.error('Failed to count blog posts by category', error);
             throw new Error(`Failed to count blog posts by category: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async findRelated(blogPost: BlogPost, limit: number = 5): Promise<BlogPost[]> {
         try {
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(blogPosts)
                 .where(
                     and(
                         eq(blogPosts.category, blogPost.getCategory().value),
-                        sql`${blogPosts.id} != ${blogPost.getId().isNumeric() ? blogPost.getId().toNumber() : parseInt(blogPost.getId().value, 10)}`,
+                        sql`${blogPosts.id} != ${blogPost.getId().toNumber()}`,
                         eq(blogPosts.status, 'published')
                     )
                 )
@@ -342,7 +534,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
 
             return results.map(row => BlogMapper.toDomain(row));
         } catch (error) {
-            console.error('Error finding related blog posts:', error);
+            await logger.error('Failed to find related blog posts', error);
             throw new Error(`Failed to find related blog posts: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -353,17 +545,17 @@ export class DrizzleBlogRepository implements IBlogRepository {
             const whereConditions = excludeId
                 ? and(
                     like(blogPosts.title, `%${slug}%`),
-                    sql`${blogPosts.id} != ${excludeId.isNumeric() ? excludeId.toNumber() : parseInt(excludeId.value, 10)}`
+                    sql`${blogPosts.id} != ${excludeId.toNumber()}`
                 )
                 : like(blogPosts.title, `%${slug}%`);
 
-            const result = await this.db
+            const result = await this.database
                 .select({ count: count() })
                 .from(blogPosts)
                 .where(whereConditions);
             return (result[0]?.count || 0) > 0;
         } catch (error) {
-            console.error('Error checking blog post slug existence:', error);
+            await logger.error('Failed to check blog post slug existence', error, { slug });
             throw new Error(`Failed to check slug existence: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -371,7 +563,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
     async findBySlug(slug: string): Promise<BlogPost | null> {
         // Note: Current schema doesn't have slug field, so we'll use title as approximation
         try {
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(blogPosts)
                 .where(like(blogPosts.title, `%${slug}%`))
@@ -383,14 +575,14 @@ export class DrizzleBlogRepository implements IBlogRepository {
 
             return BlogMapper.toDomain(results[0]);
         } catch (error) {
-            console.error('Error finding blog post by slug:', error);
+            await logger.error('Failed to find blog post by slug', error, { slug });
             throw new Error(`Failed to find blog post by slug: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 
     async findRecent(limit: number = 10): Promise<BlogPost[]> {
         try {
-            const results = await this.db
+            const results = await this.database
                 .select()
                 .from(blogPosts)
                 .where(eq(blogPosts.status, 'published'))
@@ -399,7 +591,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
 
             return results.map(row => BlogMapper.toDomain(row));
         } catch (error) {
-            console.error('Error finding recent blog posts:', error);
+            await logger.error('Failed to find recent blog posts', error, { limit });
             throw new Error(`Failed to find recent blog posts: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -411,7 +603,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
 
     async archiveOldPosts(olderThan: Date): Promise<number> {
         try {
-            const result = await this.db
+            const result = await this.database
                 .update(blogPosts)
                 .set({ status: 'archived' })
                 .where(
@@ -423,7 +615,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
 
             return result.rowCount || 0;
         } catch (error) {
-            console.error('Error archiving old blog posts:', error);
+            await logger.error('Failed to archive old blog posts', error);
             throw new Error(`Failed to archive old posts: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -439,14 +631,14 @@ export class DrizzleBlogRepository implements IBlogRepository {
         try {
             // Get total counts by status
             const [totalResult, publishedResult, draftResult, archivedResult] = await Promise.all([
-                this.db.select({ count: count() }).from(blogPosts),
-                this.db.select({ count: count() }).from(blogPosts).where(eq(blogPosts.status, 'published')),
-                this.db.select({ count: count() }).from(blogPosts).where(eq(blogPosts.status, 'draft')),
-                this.db.select({ count: count() }).from(blogPosts).where(eq(blogPosts.status, 'archived'))
+                this.database.select({ count: count() }).from(blogPosts),
+                this.database.select({ count: count() }).from(blogPosts).where(eq(blogPosts.status, 'published')),
+                this.database.select({ count: count() }).from(blogPosts).where(eq(blogPosts.status, 'draft')),
+                this.database.select({ count: count() }).from(blogPosts).where(eq(blogPosts.status, 'archived'))
             ]);
 
             // Get posts by category
-            const categoryResults = await this.db
+            const categoryResults = await this.database
                 .select({
                     category: blogPosts.category,
                     count: count()
@@ -460,7 +652,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
             });
 
             // Get average reading time
-            const avgResult = await this.db
+            const avgResult = await this.database
                 .select({
                     avg: sql<number>`AVG(${blogPosts.readingTime})`
                 })
@@ -475,7 +667,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
                 averageReadingTime: Math.round(avgResult[0]?.avg || 0)
             };
         } catch (error) {
-            console.error('Error getting blog statistics:', error);
+            await logger.error('Failed to get blog statistics', error);
             throw new Error(`Failed to get blog statistics: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
@@ -486,24 +678,18 @@ export class DrizzleBlogRepository implements IBlogRepository {
         const conditions = [];
 
         if (filters.category) {
-            conditions.push(eq(blogPosts.category, filters.category.value));
+            conditions.push(eq(blogPosts.category, filters.category));
         }
 
         if (filters.status) {
-            conditions.push(eq(blogPosts.status, filters.status.value));
+            conditions.push(eq(blogPosts.status, filters.status));
         }
 
         if (filters.author) {
             conditions.push(eq(blogPosts.author, filters.author));
         }
 
-        if (filters.publishedAfter) {
-            conditions.push(sql`${blogPosts.createdAt} >= ${filters.publishedAfter}`);
-        }
 
-        if (filters.publishedBefore) {
-            conditions.push(sql`${blogPosts.createdAt} <= ${filters.publishedBefore}`);
-        }
 
         return conditions.length > 0 ? and(...conditions) : undefined;
     }

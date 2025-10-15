@@ -1,9 +1,13 @@
 import { z } from 'zod';
+import {
+    EmailSchema,
+    BooleanFlagSchema
+} from '@/domain/shared/schemas';
 
 const AuthenticateUserInputSchema = z.object({
-    email: z.string().email('Invalid email format').min(1, 'Email is required'),
+    email: EmailSchema,
     password: z.string().min(1, 'Password is required'),
-    rememberMe: z.boolean().default(false),
+    rememberMe: BooleanFlagSchema,
     ipAddress: z.string().optional(),
     userAgent: z.string().optional(),
 });

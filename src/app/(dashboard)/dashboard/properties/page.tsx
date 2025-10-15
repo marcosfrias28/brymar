@@ -9,16 +9,16 @@ import {
   Plus,
   FileText,
 } from "lucide-react";
-import { DashboardPageLayout } from '@/components/layout/dashboard-page-layout';
-import { useProperties } from '@/hooks/use-properties';
-import { Button } from '@/components/ui/button';
-import { RouteGuard } from '@/components/auth/route-guard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { PropertyCardList } from '@/components/properties/property-card-list';
-import { PropertyFilters } from '@/components/properties/property-filters';
-import { secondaryColorClasses } from '@/lib/utils/secondary-colors';
-import { cn } from '@/lib/utils';
+import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
+import { useProperties } from "@/presentation/hooks/use-properties";
+import { Button } from "@/components/ui/button";
+import { RouteGuard } from "@/components/auth/route-guard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { PropertyCardList } from "@/components/properties/property-card-list";
+import { PropertyFilters } from "@/components/properties/property-filters";
+import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 export default function PropertiesPage() {
@@ -27,17 +27,20 @@ export default function PropertiesPage() {
   );
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { properties, loading, error, refreshProperties } = useProperties();
+  const { properties, loading, error, refetch } = useProperties();
 
   const filteredByStatus =
     statusFilter === "all"
       ? properties
-      : properties.filter((p) => p.status === statusFilter);
+      : properties.filter((p) => p.getStatus().value === statusFilter);
 
   const filteredBySearch = filteredByStatus.filter(
     (property) =>
-      property.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      property.location?.toLowerCase().includes(searchTerm.toLowerCase())
+      property
+        .getTitle()
+        .value?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      property.address?.city?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -68,7 +71,7 @@ export default function PropertiesPage() {
               Error al cargar propiedades
             </h2>
             <p className="text-muted-foreground mb-4">{error}</p>
-            <Button onClick={refreshProperties}>Reintentar</Button>
+            <Button onClick={refetch}>Reintentar</Button>
           </div>
         </div>
       </DashboardPageLayout>
@@ -84,19 +87,19 @@ export default function PropertiesPage() {
     },
     {
       label: "En Venta",
-      value: properties.filter((p) => p.status === "sale").length,
+      value: properties.filter((p) => p.getStatus().value === "sale").length,
       icon: <DollarSign className="h-5 w-5" />,
       color: "text-green-600",
     },
     {
       label: "En Alquiler",
-      value: properties.filter((p) => p.status === "rent").length,
+      value: properties.filter((p) => p.getStatus().value === "rent").length,
       icon: <Key className="h-5 w-5" />,
       color: "text-blue-600",
     },
     {
       label: "Destacadas",
-      value: properties.filter((p) => p.id % 7 === 0).length,
+      value: properties.filter((p) => p.featured).length,
       icon: <TrendingUp className="h-5 w-5" />,
       color: "text-orange-600",
     },
@@ -208,7 +211,23 @@ export default function PropertiesPage() {
           />
 
           {/* Properties List */}
-          <PropertyCardList properties={filteredBySearch} />
+          <PropertyCardList
+            properties={filteredBySearch.map((p) => ({
+              id: parseInt(p.getId().value) || 0,
+              title: p.getTitle().value,
+              location: p.address.city,
+              price: p.getPrice().value,
+              bedrooms: p.features.bedrooms,
+              bathrooms: p.features.bathrooms,
+              area: p.features.area,
+              status: p.getStatus().value as "sale" | "rent",
+              images: p.images,
+              type: p.getType().value,
+              description: p.description,
+              createdAt: p.createdAt.toISOString(),
+              updatedAt: p.updatedAt.toISOString(),
+            }))}
+          />
 
           {/* Results Summary */}
           {filteredBySearch.length === 0 && searchTerm && (

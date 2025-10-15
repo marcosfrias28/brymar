@@ -12,18 +12,18 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-import { DashboardPageLayout } from '@/components/layout/dashboard-page-layout';
-import { BlogCardList } from '@/components/blog/blog-card-list';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { useBlogPosts } from '@/hooks/use-blog';
-import { RouteGuard } from '@/components/auth/route-guard';
-import { secondaryColorClasses } from '@/lib/utils/secondary-colors';
-import { cn } from '@/lib/utils';
+import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
+import { BlogCardList } from "@/components/blog/blog-card-list";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useBlog } from "@/presentation/hooks/use-blog";
+import { RouteGuard } from "@/components/auth/route-guard";
+import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
+import { cn } from "@/lib/utils";
 
 export default function BlogPage() {
-  const { blogPosts, loading, error, refreshBlogPosts } = useBlogPosts();
+  const { blogPosts, loading, error, refreshBlogPosts } = useBlog();
   const [statusFilter, setStatusFilter] = useState<
     "all" | "published" | "draft"
   >("all");

@@ -1,6 +1,6 @@
 import { ValueObject } from '@/domain/shared/value-objects/ValueObject';
 import { Currency } from '@/domain/shared/value-objects/Currency';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 interface PriceData {
     amount: number;
@@ -17,11 +17,11 @@ export class Price extends ValueObject<PriceData> {
 
     static create(amount: number, currencyCode: string = "USD"): Price {
         if (amount < this.MIN_AMOUNT) {
-            throw new DomainError("Price cannot be negative");
+            throw new BusinessRuleViolationError("Price cannot be negative", "PROPERTY_VALIDATION");
         }
 
         if (amount > this.MAX_AMOUNT) {
-            throw new DomainError(`Price cannot exceed ${this.MAX_AMOUNT.toLocaleString()}`);
+            throw new BusinessRuleViolationError(`Price cannot exceed ${this.MAX_AMOUNT.toLocaleString()}`, "PROPERTY_VALIDATION");
         }
 
         const currency = Currency.create(currencyCode);
@@ -38,7 +38,7 @@ export class Price extends ValueObject<PriceData> {
 
     isSignificantlyDifferent(other: Price, threshold: number = 0.1): boolean {
         if (!this.currency.equals(other.currency)) {
-            throw new DomainError("Cannot compare prices with different currencies");
+            throw new BusinessRuleViolationError("Cannot compare prices with different currencies", "PROPERTY_VALIDATION");
         }
 
         if (other.amount === 0) {
@@ -70,29 +70,28 @@ export class Price extends ValueObject<PriceData> {
 
     add(other: Price): Price {
         if (!this.currency.equals(other.currency)) {
-            throw new DomainError("Cannot add prices with different currencies");
+            throw new BusinessRuleViolationError("Cannot add prices with different currencies", "PROPERTY_VALIDATION");
         }
         return Price.create(this.amount + other.amount, this.currency.code);
     }
 
     subtract(other: Price): Price {
         if (!this.currency.equals(other.currency)) {
-            throw new DomainError("Cannot subtract prices with different currencies");
+            throw new BusinessRuleViolationError("Cannot subtract prices with different currencies", "PROPERTY_VALIDATION");
         }
         return Price.create(this.amount - other.amount, this.currency.code);
     }
 
     multiply(factor: number): Price {
         if (factor < 0) {
-            throw new DomainError("Cannot multiply price by negative factor");
+            throw new BusinessRuleViolationError("Cannot multiply price by negative factor", "PROPERTY_VALIDATION");
         }
         return Price.create(this.amount * factor, this.currency.code);
     }
 
     isValid(): boolean {
         return this.amount >= Price.MIN_AMOUNT &&
-            this.amount <= Price.MAX_AMOUNT &&
-            this.currency.isValid();
+            this.amount <= Price.MAX_AMOUNT;
     }
 
     isZero(): boolean {
@@ -101,14 +100,14 @@ export class Price extends ValueObject<PriceData> {
 
     isGreaterThan(other: Price): boolean {
         if (!this.currency.equals(other.currency)) {
-            throw new DomainError("Cannot compare prices with different currencies");
+            throw new BusinessRuleViolationError("Cannot compare prices with different currencies", "PROPERTY_VALIDATION");
         }
         return this.amount > other.amount;
     }
 
     isLessThan(other: Price): boolean {
         if (!this.currency.equals(other.currency)) {
-            throw new DomainError("Cannot compare prices with different currencies");
+            throw new BusinessRuleViolationError("Cannot compare prices with different currencies", "PROPERTY_VALIDATION");
         }
         return this.amount < other.amount;
     }

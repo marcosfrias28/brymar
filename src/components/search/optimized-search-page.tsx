@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Building2, TreePine } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PageTitle } from '@/components/ui/page-title';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageTitle } from "@/components/ui/page-title";
 import { RealTimeSearchFilters } from "./real-time-search-filters";
 import { RealTimeLandFilters } from "./real-time-land-filters";
 import { MobileSearchFilters } from "./mobile-search-filters";
@@ -12,8 +12,8 @@ import { MobileLandFilters } from "./mobile-land-filters";
 import { PropertyResults } from "./property-results";
 import { LandResults } from "./land-results";
 import { SearchMapView } from "./search-map-view";
-import { searchPropertiesAction } from '@/app/actions/property-actions';
-import { searchLandsAction } from '@/app/actions/land-actions';
+import { searchPropertiesAction } from "@/presentation/server-actions/property-actions";
+import { searchLandsAction } from "@/presentation/server-actions/land-actions";
 import Logo from "../ui/logo";
 import { AuthButtons } from "../auth/auth-buttons";
 
@@ -149,7 +149,7 @@ export function OptimizedSearchPage() {
           });
         }
       } catch (error) {
-        console.error("Search error:", error);
+        // Note: Search error - would be logged in production
         setSearchState({
           properties: [],
           lands: [],

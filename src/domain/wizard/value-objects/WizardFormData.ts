@@ -1,5 +1,5 @@
 import { ValueObject } from '@/domain/shared/value-objects/ValueObject';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 export class WizardFormData extends ValueObject<Record<string, any>> {
     private constructor(value: Record<string, any>) {
@@ -8,7 +8,7 @@ export class WizardFormData extends ValueObject<Record<string, any>> {
 
     static create(formData: Record<string, any> = {}): WizardFormData {
         if (typeof formData !== "object" || formData === null) {
-            throw new DomainError("Form data must be a valid object");
+            throw new BusinessRuleViolationError("Form data must be a valid object", "WIZARD_VALIDATION");
         }
 
         // Create a deep copy to ensure immutability
@@ -58,7 +58,7 @@ export class WizardFormData extends ValueObject<Record<string, any>> {
 
     updateField(fieldName: string, value: any): WizardFormData {
         if (!fieldName || fieldName.trim().length === 0) {
-            throw new DomainError("Field name cannot be empty");
+            throw new BusinessRuleViolationError("Field name cannot be empty", "WIZARD_VALIDATION");
         }
 
         const newData = { ...this._value };
@@ -69,7 +69,7 @@ export class WizardFormData extends ValueObject<Record<string, any>> {
 
     removeField(fieldName: string): WizardFormData {
         if (!fieldName || fieldName.trim().length === 0) {
-            throw new DomainError("Field name cannot be empty");
+            throw new BusinessRuleViolationError("Field name cannot be empty", "WIZARD_VALIDATION");
         }
 
         const newData = { ...this._value };
@@ -80,7 +80,7 @@ export class WizardFormData extends ValueObject<Record<string, any>> {
 
     merge(otherData: Record<string, any>): WizardFormData {
         if (typeof otherData !== "object" || otherData === null) {
-            throw new DomainError("Data to merge must be a valid object");
+            throw new BusinessRuleViolationError("Data to merge must be a valid object", "WIZARD_VALIDATION");
         }
 
         const mergedData = {

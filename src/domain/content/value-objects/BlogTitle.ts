@@ -1,11 +1,11 @@
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { ValueObjectValidationError } from '@/domain/shared/errors/DomainError';
 
 export class BlogTitle {
     private static readonly MIN_LENGTH = 3;
     private static readonly MAX_LENGTH = 200;
 
-    private constructor(private readonly value: string) {
-        this.validate(value);
+    private constructor(private readonly _value: string) {
+        this.validate(_value);
     }
 
     static create(title: string): BlogTitle {
@@ -14,27 +14,27 @@ export class BlogTitle {
 
     private validate(title: string): void {
         if (!title || title.trim().length === 0) {
-            throw new DomainError("Blog title cannot be empty");
+            throw new ValueObjectValidationError("Blog title cannot be empty");
         }
 
         const trimmedTitle = title.trim();
 
         if (trimmedTitle.length < BlogTitle.MIN_LENGTH) {
-            throw new DomainError(`Blog title must be at least ${BlogTitle.MIN_LENGTH} characters long`);
+            throw new ValueObjectValidationError(`Blog title must be at least ${BlogTitle.MIN_LENGTH} characters long`);
         }
 
         if (trimmedTitle.length > BlogTitle.MAX_LENGTH) {
-            throw new DomainError(`Blog title cannot exceed ${BlogTitle.MAX_LENGTH} characters`);
+            throw new ValueObjectValidationError(`Blog title cannot exceed ${BlogTitle.MAX_LENGTH} characters`);
         }
     }
 
     get value(): string {
-        return this.value.trim();
+        return this._value.trim();
     }
 
     isValid(): boolean {
         try {
-            this.validate(this.value);
+            this.validate(this._value);
             return true;
         } catch {
             return false;
@@ -42,14 +42,14 @@ export class BlogTitle {
     }
 
     getLength(): number {
-        return this.value.trim().length;
+        return this._value.trim().length;
     }
 
     equals(other: BlogTitle): boolean {
-        return this.value.trim() === other.value.trim();
+        return this._value.trim() === other._value.trim();
     }
 
     toString(): string {
-        return this.value.trim();
+        return this._value.trim();
     }
 }

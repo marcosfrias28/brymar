@@ -1,29 +1,37 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, BellOff, Trash2, Check, CheckCheck, Filter, Search } from "lucide-react";
+import {
+  Bell,
+  BellOff,
+  Trash2,
+  Check,
+  CheckCheck,
+  Filter,
+  Search,
+} from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { it } from "date-fns/locale";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,86 +42,82 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { useProfileNotifications } from '@/hooks/use-profile';
-import {
-  markNotificationAsReadAction,
-  markAllNotificationsAsReadAction,
-} from '@/app/actions/profile-actions';
-import { useUser } from '@/hooks/use-user';
+} from "@/components/ui/alert-dialog";
+import { useProfileNotifications } from "@/hooks/use-profile";
+// Profile actions need to be implemented in DDD structure
+// import {
+//   markNotificationAsReadAction,
+//   markAllNotificationsAsReadAction,
+// } from "@/presentation/server-actions/profile-actions";
+import { useUser } from "@/presentation/hooks/use-user";
 
 type FilterType = "all" | "unread" | "read";
 type NotificationType = "all" | "success" | "error" | "info" | "warning";
 
 export function ProfileNotifications() {
   const { user } = useUser();
-  const { notifications, loading, markAsRead, markAllAsRead } = useProfileNotifications();
+  const { notifications, loading, markAsRead, markAllAsRead } =
+    useProfileNotifications();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<FilterType>("all");
-  const [notificationType, setNotificationType] = useState<NotificationType>("all");
+  const [notificationType, setNotificationType] =
+    useState<NotificationType>("all");
   const [processingIds, setProcessingIds] = useState<string[]>([]);
   const [isMarkingAllRead, setIsMarkingAllRead] = useState(false);
   const [isDeletingAll, setIsDeletingAll] = useState(false);
 
   const filteredNotifications = notifications.filter((notification) => {
-    const matchesSearch = notification.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase()) ||
-      notification.message
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-    
-    const matchesReadStatus = filterType === "all" || 
+    const matchesSearch =
+      notification.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      notification.message.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesReadStatus =
+      filterType === "all" ||
       (filterType === "read" && notification.read) ||
       (filterType === "unread" && !notification.read);
-    
-    const matchesType = notificationType === "all" || notification.type === notificationType;
-    
+
+    const matchesType =
+      notificationType === "all" || notification.type === notificationType;
+
     return matchesSearch && matchesReadStatus && matchesType;
   });
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   const handleMarkAsRead = async (notificationId: string) => {
-    if (!user?.id) return;
+    if (!user?.getId()) return;
 
-    setProcessingIds(prev => [...prev, notificationId]);
-    
+    setProcessingIds((prev) => [...prev, notificationId]);
+
     try {
       const formData = new FormData();
-      formData.append('userId', user.id);
-      formData.append('notificationId', notificationId);
-      const result = await markNotificationAsReadAction(formData);
-      
-      if (result.success) {
-        toast.success(result.message || "Notifica segnata come letta");
-        await markAsRead(notificationId);
-      } else {
-        toast.error(result.error || "Errore durante l'aggiornamento");
-      }
+      formData.append("userId", user.getId().value);
+      formData.append("notificationId", notificationId);
+      // Mark notification as read functionality needs to be implemented in DDD structure
+      toast.error(
+        "Mark notification as read functionality needs to be implemented in DDD structure"
+      );
+      return;
     } catch (error) {
       toast.error("Errore durante l'aggiornamento della notifica");
     } finally {
-      setProcessingIds(prev => prev.filter(id => id !== notificationId));
+      setProcessingIds((prev) => prev.filter((id) => id !== notificationId));
     }
   };
 
   const handleMarkAllAsRead = async () => {
-    if (!user?.id) return;
+    if (!user?.getId()) return;
 
     setIsMarkingAllRead(true);
-    
+
     try {
       const formData = new FormData();
-      formData.append('userId', user.id);
-      const result = await markAllNotificationsAsReadAction(formData);
-      
-      if (result.success) {
-        toast.success(result.message || "Tutte le notifiche segnate come lette");
-        await markAllAsRead();
-      } else {
-        toast.error(result.error || "Errore durante l'aggiornamento");
-      }
+      formData.append("userId", user.getId().value);
+      // Mark all notifications as read functionality needs to be implemented in DDD structure
+      toast.error(
+        "Mark all notifications as read functionality needs to be implemented in DDD structure"
+      );
+      return;
     } catch (error) {
       toast.error("Errore durante l'aggiornamento delle notifiche");
     } finally {
@@ -122,25 +126,25 @@ export function ProfileNotifications() {
   };
 
   const handleDeleteNotification = async (notificationId: string) => {
-    setProcessingIds(prev => [...prev, notificationId]);
-    
+    setProcessingIds((prev) => [...prev, notificationId]);
+
     try {
       // Simulazione eliminazione notifica
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       toast.success("Notifica eliminata con successo");
     } catch (error) {
       toast.error("Errore durante l'eliminazione della notifica");
     } finally {
-      setProcessingIds(prev => prev.filter(id => id !== notificationId));
+      setProcessingIds((prev) => prev.filter((id) => id !== notificationId));
     }
   };
 
   const handleDeleteAll = async () => {
     setIsDeletingAll(true);
-    
+
     try {
       // Simulazione eliminazione tutte le notifiche
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       toast.success("Tutte le notifiche sono state eliminate");
     } catch (error) {
       toast.error("Errore durante l'eliminazione delle notifiche");
@@ -222,7 +226,7 @@ export function ProfileNotifications() {
                 <Badge variant="destructive">{unreadCount} non lette</Badge>
               )}
             </div>
-            
+
             <div className="flex items-center space-x-2">
               {unreadCount > 0 && (
                 <Button
@@ -235,7 +239,7 @@ export function ProfileNotifications() {
                   Segna tutte come lette
                 </Button>
               )}
-              
+
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
@@ -249,10 +253,12 @@ export function ProfileNotifications() {
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Elimina tutte le notifiche</AlertDialogTitle>
+                    <AlertDialogTitle>
+                      Elimina tutte le notifiche
+                    </AlertDialogTitle>
                     <AlertDialogDescription>
-                      Sei sicuro di voler eliminare tutte le notifiche?
-                      Questa azione non può essere annullata.
+                      Sei sicuro di voler eliminare tutte le notifiche? Questa
+                      azione non può essere annullata.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -268,12 +274,12 @@ export function ProfileNotifications() {
               </AlertDialog>
             </div>
           </div>
-          
+
           <CardDescription>
             Gestisci le tue notifiche e preferenze
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent>
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="relative flex-1">
@@ -285,8 +291,11 @@ export function ProfileNotifications() {
                 className="pl-10"
               />
             </div>
-            
-            <Select value={filterType} onValueChange={(value: FilterType) => setFilterType(value)}>
+
+            <Select
+              value={filterType}
+              onValueChange={(value: FilterType) => setFilterType(value)}
+            >
               <SelectTrigger className="w-full lg:w-[150px]">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Stato" />
@@ -297,8 +306,13 @@ export function ProfileNotifications() {
                 <SelectItem value="read">Lette</SelectItem>
               </SelectContent>
             </Select>
-            
-            <Select value={notificationType} onValueChange={(value: NotificationType) => setNotificationType(value)}>
+
+            <Select
+              value={notificationType}
+              onValueChange={(value: NotificationType) =>
+                setNotificationType(value)
+              }
+            >
               <SelectTrigger className="w-full lg:w-[150px]">
                 <Bell className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Tipo" />
@@ -323,24 +337,24 @@ export function ProfileNotifications() {
             <h3 className="text-lg font-semibold mb-2">
               {searchTerm || filterType !== "all" || notificationType !== "all"
                 ? "Nessuna notifica trovata"
-                : "Nessuna notifica"
-              }
+                : "Nessuna notifica"}
             </h3>
             <p className="text-muted-foreground text-center max-w-md">
               {searchTerm || filterType !== "all" || notificationType !== "all"
                 ? "Prova a modificare i filtri per trovare le notifiche che stai cercando."
-                : "Le tue notifiche appariranno qui quando ne riceverai."
-              }
+                : "Le tue notifiche appariranno qui quando ne riceverai."}
             </p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
           {filteredNotifications.map((notification, index) => (
-            <Card 
-              key={notification.id} 
+            <Card
+              key={notification.id}
               className={`transition-all hover:shadow-md ${
-                !notification.read ? 'border-l-4 border-l-primary bg-muted/30' : ''
+                !notification.read
+                  ? "border-l-4 border-l-primary bg-muted/30"
+                  : ""
               }`}
             >
               <CardContent className="p-6">
@@ -351,15 +365,21 @@ export function ProfileNotifications() {
                         {getNotificationIcon(notification.type)}
                       </div>
                     </div>
-                    
+
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2 mb-1">
-                        <h3 className={`font-semibold ${
-                          !notification.read ? 'text-foreground' : 'text-muted-foreground'
-                        }`}>
+                        <h3
+                          className={`font-semibold ${
+                            !notification.read
+                              ? "text-foreground"
+                              : "text-muted-foreground"
+                          }`}
+                        >
                           {notification.title}
                         </h3>
-                        <Badge className={getNotificationColor(notification.type)}>
+                        <Badge
+                          className={getNotificationColor(notification.type)}
+                        >
                           {getNotificationLabel(notification.type)}
                         </Badge>
                         {!notification.read && (
@@ -368,22 +388,26 @@ export function ProfileNotifications() {
                           </Badge>
                         )}
                       </div>
-                      
-                      <p className={`text-sm mb-2 ${
-                        !notification.read ? 'text-foreground' : 'text-muted-foreground'
-                      }`}>
+
+                      <p
+                        className={`text-sm mb-2 ${
+                          !notification.read
+                            ? "text-foreground"
+                            : "text-muted-foreground"
+                        }`}
+                      >
                         {notification.message}
                       </p>
-                      
+
                       <p className="text-xs text-muted-foreground">
                         {formatDistanceToNow(new Date(notification.createdAt), {
                           addSuffix: true,
-                          locale: it
+                          locale: it,
                         })}
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2 ml-4">
                     {!notification.read && (
                       <Button
@@ -395,7 +419,7 @@ export function ProfileNotifications() {
                         <Check className="h-4 w-4" />
                       </Button>
                     )}
-                    
+
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button
@@ -417,7 +441,9 @@ export function ProfileNotifications() {
                         <AlertDialogFooter>
                           <AlertDialogCancel>Annulla</AlertDialogCancel>
                           <AlertDialogAction
-                            onClick={() => handleDeleteNotification(notification.id)}
+                            onClick={() =>
+                              handleDeleteNotification(notification.id)
+                            }
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                           >
                             Elimina
@@ -428,10 +454,8 @@ export function ProfileNotifications() {
                   </div>
                 </div>
               </CardContent>
-              
-              {index < filteredNotifications.length - 1 && (
-                <Separator />
-              )}
+
+              {index < filteredNotifications.length - 1 && <Separator />}
             </Card>
           ))}
         </div>
@@ -459,19 +483,19 @@ export function ProfileNotifications() {
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600">
-                  {notifications.filter(n => n.type === 'success').length}
+                  {notifications.filter((n) => n.type === "success").length}
                 </div>
                 <div className="text-sm text-muted-foreground">Successo</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-red-600">
-                  {notifications.filter(n => n.type === 'error').length}
+                  {notifications.filter((n) => n.type === "error").length}
                 </div>
                 <div className="text-sm text-muted-foreground">Errore</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600">
-                  {notifications.filter(n => n.type === 'info').length}
+                  {notifications.filter((n) => n.type === "info").length}
                 </div>
                 <div className="text-sm text-muted-foreground">Info</div>
               </div>

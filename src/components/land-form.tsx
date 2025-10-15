@@ -1,13 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { toast } from "sonner";
-import { addLand } from '@/app/actions/land-actions';
+import { addLand } from "@/presentation/server-actions/land-actions";
 
 export function LandForm() {
   const [images, setImages] = useState<File[]>([]);
@@ -23,28 +29,28 @@ export function LandForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
       const formData = new FormData(e.currentTarget);
       const name = formData.get("name") as string;
       const description = formData.get("description") as string;
       const area = parseFloat(formData.get("area") as string);
       const price = parseFloat(formData.get("price") as string);
-      const address = formData.get("address") as string || "";
-      const city = formData.get("city") as string || "";
-      const province = formData.get("province") as string || "";
+      const address = (formData.get("address") as string) || "";
+      const city = (formData.get("city") as string) || "";
+      const province = (formData.get("province") as string) || "";
 
       // Add required fields for the schema
-      formData.append('location', `${address}, ${city}, ${province}`);
-      formData.append('type', 'residential');
-      
+      formData.append("location", `${address}, ${city}, ${province}`);
+      formData.append("type", "residential");
+
       await addLand(formData);
       toast.success("Terreno creado exitosamente");
       // Reset form
       e.currentTarget.reset();
       setImages([]);
     } catch (error) {
-      console.error("Error creating land:", error);
+      // Note: Error creating land - would be logged in production
       toast.error("Error al crear el terreno");
     } finally {
       setIsSubmitting(false);
@@ -63,55 +69,55 @@ export function LandForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <Label htmlFor="name">Nombre del Terreno</Label>
-        <Input id="name" name="name" required />
-      </div>
-      
-      <div>
-        <Label htmlFor="description">Descripción</Label>
-        <Textarea id="description" name="description" required />
-      </div>
-      
-      <div>
-        <Label htmlFor="area">Área (m²)</Label>
-        <Input id="area" name="area" type="number" step="0.01" required />
-      </div>
-      
-      <div>
-        <Label htmlFor="price">Precio (USD)</Label>
-        <Input id="price" name="price" type="number" step="0.01" required />
-      </div>
-      
-      <div>
-        <Label htmlFor="address">Dirección</Label>
-        <Input id="address" name="address" />
-      </div>
-      
-      <div>
-        <Label htmlFor="city">Ciudad</Label>
-        <Input id="city" name="city" />
-      </div>
-      
-      <div>
-        <Label htmlFor="province">Provincia</Label>
-        <Input id="province" name="province" />
-      </div>
-      
+          <div>
+            <Label htmlFor="name">Nombre del Terreno</Label>
+            <Input id="name" name="name" required />
+          </div>
+
+          <div>
+            <Label htmlFor="description">Descripción</Label>
+            <Textarea id="description" name="description" required />
+          </div>
+
+          <div>
+            <Label htmlFor="area">Área (m²)</Label>
+            <Input id="area" name="area" type="number" step="0.01" required />
+          </div>
+
+          <div>
+            <Label htmlFor="price">Precio (USD)</Label>
+            <Input id="price" name="price" type="number" step="0.01" required />
+          </div>
+
+          <div>
+            <Label htmlFor="address">Dirección</Label>
+            <Input id="address" name="address" />
+          </div>
+
+          <div>
+            <Label htmlFor="city">Ciudad</Label>
+            <Input id="city" name="city" />
+          </div>
+
+          <div>
+            <Label htmlFor="province">Provincia</Label>
+            <Input id="province" name="province" />
+          </div>
+
           <div className="flex gap-4 pt-4">
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isSubmitting}
               className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               {isSubmitting ? "Creando..." : "Crear Terreno"}
             </Button>
-            <Button 
-              type="button" 
+            <Button
+              type="button"
               variant="outline"
               className="border-border text-foreground hover:bg-muted hover:text-muted-foreground"
               onClick={() => {
-                const form = document.querySelector('form') as HTMLFormElement;
+                const form = document.querySelector("form") as HTMLFormElement;
                 form?.reset();
                 setImages([]);
               }}

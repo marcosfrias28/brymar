@@ -1,11 +1,14 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { AuthFormWrapper } from '@/components/auth/auth-form-wrapper';
+import { AuthFormWrapper } from "@/components/auth/auth-form-wrapper";
 import { useSearchParams, useRouter } from "next/navigation";
-import { authClient } from '@/lib/auth/auth-client';
+import { authClient } from "@/lib/auth/auth-client";
 import { toast } from "sonner";
-import { sendVerificationOTP, verifyOTP } from '@/lib/actions/auth-actions';
+import {
+  sendVerificationOTP,
+  verifyOTP,
+} from "@/presentation/server-actions/auth-actions";
 
 const VerifyEmailPage = () => {
   const searchParams = useSearchParams();
@@ -20,35 +23,34 @@ const VerifyEmailPage = () => {
     const checkSession = async () => {
       try {
         const sessionData = await authClient.getSession();
-        
+
         if (!sessionData?.data?.user) {
-          router.push('/sign-in');
+          router.push("/sign-in");
           return;
         }
 
         setSession(sessionData);
-        
+
         // Obtener email de la URL o de la sesión
         const urlEmail = searchParams?.get("email");
         const userEmail = sessionData?.data?.user.email;
-        
+
         if (urlEmail && urlEmail === userEmail) {
           setEmail(urlEmail);
         } else if (userEmail) {
           setEmail(userEmail);
           // Actualizar URL con el email correcto
           const newUrl = new URL(window.location.href);
-          newUrl.searchParams.set('email', userEmail);
-          window.history.replaceState({}, '', newUrl.toString());
+          newUrl.searchParams.set("email", userEmail);
+          window.history.replaceState({}, "", newUrl.toString());
         } else {
-          toast.error('No se pudo obtener el email del usuario');
-          router.push('/sign-in');
+          toast.error("No se pudo obtener el email del usuario");
+          router.push("/sign-in");
           return;
         }
-        
       } catch (error) {
-        console.error('Error checking session:', error);
-        router.push('/sign-in');
+        console.error("Error checking session:", error);
+        router.push("/sign-in");
       } finally {
         setIsLoading(false);
       }
@@ -60,21 +62,21 @@ const VerifyEmailPage = () => {
   // Función para reenviar código OTP
   const handleResendCode = async () => {
     if (!email || isResending) return;
-    
+
     setIsResending(true);
     try {
       const formData = new FormData();
-      formData.append('email', email);
-      
+      formData.append("email", email);
+
       const result = await sendVerificationOTP(formData);
-      
+
       if (result.success) {
-        toast.success('Código reenviado exitosamente');
+        toast.success("Código reenviado exitosamente");
       } else {
-        toast.error(result.error || 'Error al reenviar el código');
+        toast.error(result.error || "Error al reenviar el código");
       }
     } catch (error) {
-      toast.error('Error al reenviar el código');
+      toast.error("Error al reenviar el código");
     } finally {
       setIsResending(false);
     }
@@ -85,22 +87,22 @@ const VerifyEmailPage = () => {
     if (!email) {
       return { error: "Email no disponible" };
     }
-    
+
     // Agregar email al formData
-    formData.append('email', email);
-    
+    formData.append("email", email);
+
     const result = await verifyOTP(formData);
-    
+
     if (result.success) {
-      toast.success('Email verificado exitosamente');
+      toast.success("Email verificado exitosamente");
       // Refrescar la sesión
       try {
         await authClient.getSession();
       } catch (error) {
-        console.error('Error refreshing session:', error);
+        console.error("Error refreshing session:", error);
       }
     }
-    
+
     return result;
   };
 
@@ -120,7 +122,7 @@ const VerifyEmailPage = () => {
   }
 
   const otpField = {
-    id: 'otp',
+    id: "otp",
     name: "otp",
     type: "text" as const,
     label: "Código de Verificación",
@@ -129,7 +131,7 @@ const VerifyEmailPage = () => {
     maxLength: 6,
     minLength: 6,
     pattern: "[0-9]{6}",
-    autoComplete: "one-time-code"
+    autoComplete: "one-time-code",
   };
 
   return (
@@ -149,7 +151,7 @@ const VerifyEmailPage = () => {
             onClick={handleResendCode}
             disabled={isResending}
           >
-            {isResending ? 'Reenviando...' : 'Reenviar código'}
+            {isResending ? "Reenviando..." : "Reenviar código"}
           </button>
         </p>
       }

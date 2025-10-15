@@ -11,7 +11,7 @@ import type { Database } from '@/lib/db/drizzle';
  * Drizzle implementation of the Session repository
  */
 export class DrizzleSessionRepository implements ISessionRepository {
-    constructor(private readonly db: Database) { }
+    constructor(private readonly _db: Database) { }
 
     /**
      * Saves a session (create or update)

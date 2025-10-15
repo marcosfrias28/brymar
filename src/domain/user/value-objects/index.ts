@@ -7,17 +7,13 @@ export { SessionId } from './SessionId';
 export { SessionToken } from './SessionToken';
 
 export type {
-    ValidUserRole,
-    USER_PERMISSIONS
+    UserRoleValue
 } from './UserRole';
 
 export type {
-    ValidUserStatus
+    UserStatusValue
 } from './UserStatus';
 
 export type {
-    NotificationPreferences,
-    PrivacyPreferences,
-    DisplayPreferences,
     UserPreferencesData
 } from './UserPreferences';

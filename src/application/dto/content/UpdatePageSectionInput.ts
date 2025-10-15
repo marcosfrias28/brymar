@@ -1,13 +1,21 @@
 import { z } from 'zod';
+import {
+    IdSchema,
+    ShortTextSchema,
+    OptionalShortTextSchema,
+    LongTextSchema,
+    BooleanFlagSchema,
+    UrlSchema
+} from '@/domain/shared/schemas';
 
 const UpdatePageSectionInputSchema = z.object({
-    id: z.string().min(1, 'Page section ID is required'),
-    title: z.string().min(2).max(200).optional(),
+    id: IdSchema,
+    title: z.string().min(2).max(200).trim().optional(),
     content: z.object({
         subtitle: z.string().max(300).optional(),
         description: z.string().max(1000).optional(),
         content: z.record(z.any()).optional(),
-        images: z.array(z.string().url()).optional(),
+        images: z.array(UrlSchema).optional(),
     }).optional(),
     settings: z.record(z.any()).optional(),
     isActive: z.boolean().optional(),

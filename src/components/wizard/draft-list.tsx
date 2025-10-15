@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useUser } from '@/hooks/use-user';
+import { useUser } from "@/presentation/hooks/use-user";
 import {
   getUserDrafts,
   deleteDraft,
   loadDraft,
-} from '@/lib/actions/wizard-actions';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+} from "@/lib/actions/wizard-actions";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   FileText,
   Calendar,
@@ -24,10 +24,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { cn } from '@/lib/utils';
-import { secondaryColorClasses } from '@/lib/utils/secondary-colors';
+import { cn } from "@/lib/utils";
+import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
 import Link from "next/link";
 
 interface Draft {
@@ -58,10 +58,10 @@ export function DraftList({
 
   useEffect(() => {
     const fetchDrafts = async () => {
-      if (!user?.id) return;
+      if (!user?.getId()) return;
 
       try {
-        const userDrafts = await getUserDrafts(user.id);
+        const userDrafts = await getUserDrafts(user.getId().value);
         setDrafts(userDrafts as Draft[]);
       } catch (error) {
         console.error("Error fetching drafts:", error);
@@ -72,10 +72,10 @@ export function DraftList({
     };
 
     fetchDrafts();
-  }, [user?.id]);
+  }, [user?.getId().value]);
 
   const handleDeleteDraft = async (draftId: string) => {
-    if (!user?.id) return;
+    if (!user?.getId()) return;
 
     if (!confirm("¿Estás seguro de que quieres eliminar este borrador?")) {
       return;
@@ -86,7 +86,7 @@ export function DraftList({
     try {
       const formData = new FormData();
       formData.append("draftId", draftId);
-      formData.append("userId", user.id);
+      formData.append("userId", user.getId().value);
 
       const result = await deleteDraft(formData);
 

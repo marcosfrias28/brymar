@@ -33,6 +33,25 @@ export class LoadWizardDraftOutput {
         );
     }
 
+    /**
+     * Frontend compatibility methods
+     */
+    getId(): { value: string } {
+        return { value: this.draftId };
+    }
+
+    getUserId(): { value: string } {
+        return { value: this.userId };
+    }
+
+    getWizardType(): { value: string } {
+        return { value: this.wizardType };
+    }
+
+    getTitle(): { value: string | undefined } {
+        return { value: this.title };
+    }
+
     toJSON(): Record<string, any> {
         return {
             draftId: this.draftId,

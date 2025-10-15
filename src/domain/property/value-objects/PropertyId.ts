@@ -1,5 +1,5 @@
 import { ValueObject } from '@/domain/shared/value-objects/ValueObject';
-import { DomainError } from '@/domain/shared/errors/DomainError';
+import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 import { v4 as uuidv4 } from "uuid";
 
 export class PropertyId extends ValueObject<string> {
@@ -9,7 +9,7 @@ export class PropertyId extends ValueObject<string> {
 
     static create(value: string): PropertyId {
         if (!value || value.trim().length === 0) {
-            throw new DomainError("Property ID cannot be empty");
+            throw new BusinessRuleViolationError("Property ID cannot be empty", "PROPERTY_VALIDATION");
         }
 
         // Validate UUID format or numeric ID
@@ -17,7 +17,7 @@ export class PropertyId extends ValueObject<string> {
         const isNumeric = /^\d+$/.test(value);
 
         if (!isUuid && !isNumeric) {
-            throw new DomainError("Property ID must be a valid UUID or numeric ID");
+            throw new BusinessRuleViolationError("Property ID must be a valid UUID or numeric ID", "PROPERTY_VALIDATION");
         }
 
         return new PropertyId(value);
@@ -29,7 +29,7 @@ export class PropertyId extends ValueObject<string> {
 
     static fromNumber(id: number): PropertyId {
         if (id <= 0) {
-            throw new DomainError("Property ID must be a positive number");
+            throw new BusinessRuleViolationError("Property ID must be a positive number", "PROPERTY_VALIDATION");
         }
         return new PropertyId(id.toString());
     }
@@ -37,7 +37,7 @@ export class PropertyId extends ValueObject<string> {
     toNumber(): number {
         const num = parseInt(this.value);
         if (isNaN(num)) {
-            throw new DomainError("Cannot convert UUID PropertyId to number");
+            throw new BusinessRuleViolationError("Cannot convert UUID PropertyId to number", "PROPERTY_VALIDATION");
         }
         return num;
     }
