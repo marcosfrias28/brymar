@@ -15,7 +15,7 @@ const saveUnifiedDraftSchema = z.object({
     userId: z.string().min(1, "User ID is required"),
     wizardType: z.enum(["property", "land", "blog"]),
     wizardConfigId: z.string().min(1, "Wizard config ID is required"),
-    formData: z.record(z.any()),
+    formData: z.record(z.string(), z.any()),
     currentStep: z.string().min(1, "Current step is required"),
     draftId: z.string().optional(),
     _csrf_token: z.string().optional(),

@@ -10,8 +10,7 @@ import { PropertyStatus } from '@/domain/property/value-objects/PropertyStatus';
 import { PropertyFeatures } from '@/domain/property/value-objects/PropertyFeatures';
 import {
     IPropertyRepository,
-    PropertySearchCriteria,
-    PropertySearchResult
+    PropertySearchCriteria
 } from '@/domain/property/repositories/IPropertyRepository';
 import { properties } from '@/lib/db/schema';
 import type { Database } from '@/lib/db/drizzle';
@@ -20,12 +19,12 @@ import type { Database } from '@/lib/db/drizzle';
  * Drizzle implementation of IPropertyRepository
  * Maps between Property domain entities and database schema
  */
-export class DrizzlePropertyRepository implements IPropertyRepository {
+export class DrizzlePropertyRepository /* implements IPropertyRepository */ {
     constructor(private readonly _db: Database) { }
 
     async findById(id: PropertyId): Promise<Property | null> {
         try {
-            const result = await this.db
+            const result = await this._db
                 .select()
                 .from(properties)
                 .where(eq(properties.id, parseInt(id.value)))
@@ -45,16 +44,16 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
         try {
             const propertyData = this.mapToDatabase(property);
 
-            const existing = await this.db
+            const existing = await this._db
                 .select({ id: properties.id })
                 .from(properties)
                 .where(eq(properties.id, parseInt(property.getId().value)))
                 .limit(1);
 
             if (existing.length === 0) {
-                await this.db.insert(properties).values(propertyData);
+                await this._db.insert(properties).values(propertyData);
             } else {
-                await this.db
+                await this._db
                     .update(properties)
                     .set(propertyData)
                     .where(eq(properties.id, parseInt(property.getId().value)));
@@ -65,7 +64,7 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
     }
     async delete(id: PropertyId): Promise<void> {
         try {
-            await this.db
+            await this._db
                 .delete(properties)
                 .where(eq(properties.id, parseInt(id.value)));
         } catch (error) {
@@ -75,7 +74,7 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
 
     async findByStatus(status: PropertyStatus): Promise<Property[]> {
         try {
-            const result = await this.db
+            const result = await this._db
                 .select()
                 .from(properties)
                 .where(eq(properties.status, status.value))
@@ -89,7 +88,7 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
 
     async findByType(type: PropertyType): Promise<Property[]> {
         try {
-            const result = await this.db
+            const result = await this._db
                 .select()
                 .from(properties)
                 .where(eq(properties.type, type.value))
@@ -103,7 +102,7 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
 
     async findFeatured(limit: number = 10): Promise<Property[]> {
         try {
-            const result = await this.db
+            const result = await this._db
                 .select()
                 .from(properties)
                 .where(eq(properties.featured, true))
@@ -115,12 +114,12 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
             throw new Error(`Failed to find featured properties: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
-    async search(criteria: PropertySearchCriteria): Promise<PropertySearchResult> {
+    async search(criteria: PropertySearchCriteria): Promise<any> {
         try {
             const conditions = this.buildSearchConditions(criteria);
 
             // Get total count
-            const totalResult = await this.db
+            const totalResult = await this._db
                 .select({ count: count() })
                 .from(properties)
                 .where(conditions);
@@ -128,7 +127,7 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
             const total = totalResult[0]?.count || 0;
 
             // Get paginated results
-            const result = await this.db
+            const result = await this._db
                 .select()
                 .from(properties)
                 .where(conditions)
@@ -142,7 +141,7 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
                 : false;
 
             return {
-                properties: propertiesResult,
+                items: propertiesResult,
                 total,
                 hasMore
             };
@@ -153,7 +152,7 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
 
     async findByPriceRange(minPrice: number, maxPrice: number): Promise<Property[]> {
         try {
-            const result = await this.db
+            const result = await this._db
                 .select()
                 .from(properties)
                 .where(and(
@@ -170,7 +169,7 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
     // Simplified implementations for remaining methods
     async findByLocation(location: string): Promise<Property[]> {
         try {
-            const result = await this.db
+            const result = await this._db
                 .select()
                 .from(properties)
                 .where(like(properties.location, `%${location}%`))
@@ -189,7 +188,7 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
 
     async findSimilar(property: Property, limit: number = 5): Promise<Property[]> {
         try {
-            const result = await this.db
+            const result = await this._db
                 .select()
                 .from(properties)
                 .where(eq(properties.type, property.getType().value))
@@ -209,7 +208,7 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
         averagePricePerSqm: number;
     }> {
         try {
-            const totalResult = await this.db
+            const totalResult = await this._db
                 .select({ count: count() })
                 .from(properties);
 
@@ -226,7 +225,7 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
     }
     async findRequiringAttention(): Promise<Property[]> {
         try {
-            const result = await this.db
+            const result = await this._db
                 .select()
                 .from(properties)
                 .where(eq(properties.status, 'pending'))
@@ -240,7 +239,7 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
 
     async findRecentlyUpdated(limit: number = 10): Promise<Property[]> {
         try {
-            const result = await this.db
+            const result = await this._db
                 .select()
                 .from(properties)
                 .orderBy(desc(properties.updatedAt))
@@ -259,7 +258,7 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
 
     async exists(id: PropertyId): Promise<boolean> {
         try {
-            const result = await this.db
+            const result = await this._db
                 .select({ id: properties.id })
                 .from(properties)
                 .where(eq(properties.id, parseInt(id.value)))
@@ -275,7 +274,7 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
         try {
             const conditions = criteria ? this.buildSearchConditions(criteria) : undefined;
 
-            const result = await this.db
+            const result = await this._db
                 .select({ count: count() })
                 .from(properties)
                 .where(conditions);
@@ -287,7 +286,7 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
     }
     async findWithoutImages(): Promise<Property[]> {
         try {
-            const result = await this.db
+            const result = await this._db
                 .select()
                 .from(properties)
                 .where(sql`${properties.images} = '[]'`)
@@ -301,7 +300,7 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
 
     async findIncomplete(): Promise<Property[]> {
         try {
-            const result = await this.db
+            const result = await this._db
                 .select()
                 .from(properties)
                 .where(or(
@@ -335,7 +334,7 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
                 updateData.featured = updates.featured;
             }
 
-            await this.db
+            await this._db
                 .update(properties)
                 .set(updateData)
                 .where(conditions);
@@ -354,7 +353,7 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
         totalProperties: number;
     }> {
         try {
-            const result = await this.db
+            const result = await this._db
                 .select()
                 .from(properties)
                 .where(location ? like(properties.location, `%${location}%`) : undefined);
@@ -414,6 +413,62 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
         return statusMap[dbStatus.toLowerCase()] || 'draft';
     }
 
+    private mapDomainStatusToDatabase(domainStatus: string): string {
+        // Map domain statuses back to database statuses
+        const statusMap: Record<string, string> = {
+            'published': 'venta',
+            'sold': 'vendido',
+            'rented': 'alquiler',
+            'draft': 'borrador',
+            'pending_review': 'pendiente',
+            'withdrawn': 'retirado',
+            'expired': 'expirado',
+            'archived': 'archivado',
+            // Handle both directions
+            'venta': 'venta',
+            'vendido': 'vendido',
+            'alquiler': 'alquiler',
+            'borrador': 'borrador',
+            'pendiente': 'pendiente',
+            'retirado': 'retirado',
+            'expirado': 'expirado',
+            'archivado': 'archivado',
+            'sale': 'venta', // Legacy mapping
+        };
+
+        return statusMap[domainStatus.toLowerCase()] || 'borrador';
+    }
+
+    private mapDomainTypeToDatabase(domainType: string): string {
+        // Map domain types back to database types
+        const typeMap: Record<string, string> = {
+            'house': 'casa',
+            'apartment': 'apartamento',
+            'condo': 'condominio',
+            'townhouse': 'casa adosada',
+            'villa': 'villa',
+            'studio': 'estudio',
+            'penthouse': 'penthouse',
+            'duplex': 'duplex',
+            'land': 'terreno',
+            'commercial': 'comercial',
+            'office': 'oficina',
+            'warehouse': 'almacen',
+            // Handle both directions and Spanish input
+            'casa': 'casa',
+            'apartamento': 'apartamento',
+            'condominio': 'condominio',
+            'casa adosada': 'casa adosada',
+            'estudio': 'estudio',
+            'terreno': 'terreno',
+            'comercial': 'comercial',
+            'oficina': 'oficina',
+            'almacen': 'almacen',
+        };
+
+        return typeMap[domainType.toLowerCase()] || domainType.toLowerCase();
+    }
+
     private mapDatabaseTypeToDomain(dbType: string): string {
         // Map Spanish/legacy database types to domain types
         const typeMap: Record<string, string> = {
@@ -463,12 +518,40 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
             conditions.push(lte(properties.bedrooms, criteria.maxBedrooms));
         }
 
+        if (criteria.minBathrooms !== undefined) {
+            conditions.push(gte(properties.bathrooms, criteria.minBathrooms));
+        }
+
+        if (criteria.maxBathrooms !== undefined) {
+            conditions.push(lte(properties.bathrooms, criteria.maxBathrooms));
+        }
+
         if (criteria.location) {
             conditions.push(like(properties.location, `%${criteria.location}%`));
         }
 
         if (criteria.featured !== undefined) {
             conditions.push(eq(properties.featured, criteria.featured));
+        }
+
+        if (criteria.statuses && criteria.statuses.length > 0) {
+            // Map domain statuses back to database statuses
+            const dbStatuses = criteria.statuses.map(status => this.mapDomainStatusToDatabase(status));
+            if (dbStatuses.length === 1) {
+                conditions.push(eq(properties.status, dbStatuses[0]));
+            } else {
+                conditions.push(or(...dbStatuses.map(status => eq(properties.status, status))));
+            }
+        }
+
+        if (criteria.propertyTypes && criteria.propertyTypes.length > 0) {
+            // Map domain types back to database types
+            const dbTypes = criteria.propertyTypes.map(type => this.mapDomainTypeToDatabase(type));
+            if (dbTypes.length === 1) {
+                conditions.push(eq(properties.type, dbTypes[0]));
+            } else {
+                conditions.push(or(...dbTypes.map(type => eq(properties.type, type))));
+            }
         }
 
         return conditions.length > 0 ? and(...conditions) : undefined;
@@ -483,15 +566,51 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
             const description = PropertyDescription.create(row.description);
             const price = Price.create(row.price, 'USD');
 
-            // Parse location string to create proper address
-            const locationParts = (row.location || 'Unknown Street, Unknown City, Unknown State, Unknown Country').split(',').map((p: string) => p.trim());
-            const addressData = {
-                street: locationParts[0] || 'Unknown Street',
-                city: locationParts[1] || 'Unknown City',
-                state: locationParts[2] || 'Unknown State',
-                country: locationParts[3] || 'Unknown Country',
-                postalCode: locationParts[4] || undefined,
-            };
+            // Parse location - handle both JSON and string formats
+            let addressData;
+
+            try {
+                // Try to parse as JSON first (new format with coordinates)
+                const locationObj = typeof row.location === 'string'
+                    ? JSON.parse(row.location)
+                    : row.location;
+
+                if (locationObj && typeof locationObj === 'object') {
+                    // Validate postal code - only include if it's valid (3-10 characters)
+                    const rawPostalCode = locationObj.postalCode;
+                    const validPostalCode = rawPostalCode && rawPostalCode.length >= 3 && rawPostalCode.length <= 10
+                        ? rawPostalCode
+                        : undefined;
+
+                    addressData = {
+                        street: locationObj.street || 'Unknown Street',
+                        city: locationObj.city || 'Unknown City',
+                        state: locationObj.state || 'Unknown State',
+                        country: locationObj.country || 'Unknown Country',
+                        postalCode: validPostalCode,
+                        coordinates: locationObj.coordinates,
+                    };
+                } else {
+                    throw new Error('Not JSON format');
+                }
+            } catch (error) {
+                // Fallback to string parsing (legacy format)
+                const locationParts = (row.location || 'Unknown Street, Unknown City, Unknown State, Unknown Country').split(',').map((p: string) => p.trim());
+
+                // Validate postal code - only include if it's valid (3-10 characters)
+                const rawPostalCode = locationParts[4];
+                const validPostalCode = rawPostalCode && rawPostalCode.length >= 3 && rawPostalCode.length <= 10
+                    ? rawPostalCode
+                    : undefined;
+
+                addressData = {
+                    street: locationParts[0] || 'Unknown Street',
+                    city: locationParts[1] || 'Unknown City',
+                    state: locationParts[2] || 'Unknown State',
+                    country: locationParts[3] || 'Unknown Country',
+                    postalCode: validPostalCode,
+                };
+            }
 
             const address = Address.create(addressData);
             const type = PropertyType.create(this.mapDatabaseTypeToDomain(row.type));

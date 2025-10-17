@@ -1,185 +1,485 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import * as logger from "@/lib/logger";
-import {
-    RegisterUserUseCase,
-    UpdateUserProfileUseCase
-} from "@/application/use-cases/user";
-import {
-    CreateUserInput,
-    UpdateUserProfileInput
-} from "@/application/dto/user";
+import { auth } from "@/lib/auth/auth";
 import {
     createSuccessResponse,
     createErrorResponse,
     type ActionState
 } from "@/lib/validations";
-import { DomainError } from "@/domain/shared/errors/DomainError";
-import { ApplicationError } from "@/application/errors/ApplicationError";
-import { container } from "@/infrastructure/container/Container";
-import { initializeContainer } from "@/infrastructure/container/ServiceRegistration";
 
-// Initialize container if not already done
-if (!container.has('RegisterUserUseCase')) {
-    initializeContainer();
-}
-
+/**
+ * Acción para iniciar sesión con email y contraseña
+ */
 export async function signIn(formData: FormData): Promise<ActionState> {
-    // TODO: AuthenticateUserUseCase requires ISessionRepository, IPasswordService, ITokenService
-    // which are not yet implemented. For now, return a stub response.
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
     try {
         if (!email || !password) {
-            return createErrorResponse("Email and password are required");
+            return createErrorResponse("Email y contraseña son requeridos");
         }
 
-        // Stub implementation - replace with real authentication when services are available
-        await logger.info("Sign in attempt", { email });
+        // Validar formato de email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return createErrorResponse("Formato de email inválido");
+        }
 
-        // For now, redirect to dashboard (in real implementation, this would be after successful auth)
+        await logger.info("Intento de inicio de sesión", { email });
+
+        // Usar Better Auth para autenticar
+        const result = await auth.api.signInEmail({
+            body: {
+                email,
+                password,
+            },
+            headers: await headers(),
+        });
+
+        if (!result.user) {
+            await logger.warning("Credenciales inválidas", { email });
+            return createErrorResponse("Credenciales inválidas");
+        }
+
+        await logger.info("Inicio de sesión exitoso", {
+            userId: result.user.id,
+            email: result.user.email
+        });
+
+        // Redirigir al dashboard después del login exitoso
         redirect("/dashboard");
-    } catch (error) {
-        await logger.error("Sign in failed", error, { email });
-        return createErrorResponse("Sign in failed");
+    } catch (error: any) {
+        await logger.error("Error en inicio de sesión", error, { email });
+
+        // Manejar errores específicos de Better Auth
+        if (error.message?.includes("Invalid email or password")) {
+            return createErrorResponse("Email o contraseña incorrectos");
+        }
+        if (error.message?.includes("User not found")) {
+            return createErrorResponse("Usuario no encontrado");
+        }
+        if (error.message?.includes("Account not verified")) {
+            return createErrorResponse("Cuenta no verificada. Revisa tu email.");
+        }
+
+        return createErrorResponse("Error al iniciar sesión. Inténtalo de nuevo.");
     }
 }
 
+/**
+ * Acción para registrar un nuevo usuario
+ */
 export async function signUp(formData: FormData): Promise<ActionState> {
     const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const name = formData.get("name") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
 
     try {
-        const input = CreateUserInput.fromFormData(formData);
-        const registerUserUseCase = container.get<RegisterUserUseCase>('RegisterUserUseCase');
-
-        await registerUserUseCase.execute(input);
-
-        return createSuccessResponse(undefined, "Account created successfully");
-    } catch (error) {
-        if (error instanceof DomainError) {
-            return createErrorResponse(error.message);
-        }
-        if (error instanceof ApplicationError) {
-            return createErrorResponse(error.message);
+        // Validaciones básicas
+        if (!email || !password || !name) {
+            return createErrorResponse("Todos los campos son requeridos");
         }
 
-        await logger.error("Sign up failed", error, { email });
-        return createErrorResponse("Sign up failed");
+        if (password !== confirmPassword) {
+            return createErrorResponse("Las contraseñas no coinciden");
+        }
+
+        // Validar formato de email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return createErrorResponse("Formato de email inválido");
+        }
+
+        // Validar fortaleza de contraseña
+        if (password.length < 8) {
+            return createErrorResponse("La contraseña debe tener al menos 8 caracteres");
+        }
+
+        await logger.info("Intento de registro", { email, name });
+
+        // Usar Better Auth para registrar
+        const result = await auth.api.signUpEmail({
+            body: {
+                email,
+                password,
+                name,
+            },
+            headers: await headers(),
+        });
+
+        if (!result.user) {
+            return createErrorResponse("Error al crear la cuenta");
+        }
+
+        await logger.info("Registro exitoso", {
+            userId: result.user.id,
+            email: result.user.email
+        });
+
+        return createSuccessResponse(
+            undefined,
+            "Cuenta creada exitosamente. ¡Bienvenido!"
+        );
+    } catch (error: any) {
+        await logger.error("Error en registro", error, { email, name });
+
+        // Manejar errores específicos de Better Auth
+        if (error.message?.includes("User already exists")) {
+            return createErrorResponse("Ya existe una cuenta con este email");
+        }
+        if (error.message?.includes("Invalid email")) {
+            return createErrorResponse("Email inválido");
+        }
+        if (error.message?.includes("Password too weak")) {
+            return createErrorResponse("La contraseña es muy débil");
+        }
+
+        return createErrorResponse("Error al crear la cuenta. Inténtalo de nuevo.");
     }
 }
 
+/**
+ * Acción para cerrar sesión
+ */
 export async function signOut(): Promise<void> {
-    // Implementation would use auth service to sign out
+    try {
+        await logger.info("Cerrando sesión");
+
+        // Usar Better Auth para cerrar sesión
+        await auth.api.signOut({
+            headers: await headers(),
+        });
+
+        await logger.info("Sesión cerrada exitosamente");
+    } catch (error) {
+        await logger.error("Error al cerrar sesión", error);
+    }
+
+    // Redirigir a la página principal
     redirect("/");
 }
 
+/**
+ * Acción para solicitar recuperación de contraseña
+ */
 export async function forgotPassword(formData: FormData): Promise<ActionState> {
-    // TODO: ForgotPasswordUseCase requires email service and token generation
-    // which are not yet fully implemented. For now, return a stub response.
     const email = formData.get("email") as string;
 
     try {
         if (!email) {
-            return createErrorResponse("Email is required");
+            return createErrorResponse("Email es requerido");
         }
 
-        // Stub implementation - replace with real forgot password when services are available
-        await logger.info("Forgot password request", { email });
+        // Validar formato de email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return createErrorResponse("Formato de email inválido");
+        }
 
-        return createSuccessResponse(undefined, "Password reset instructions sent to your email");
-    } catch (error) {
-        await logger.error("Failed to process password reset request", error, { email });
-        return createErrorResponse("Failed to process password reset request");
+        await logger.info("Solicitud de recuperación de contraseña", { email });
+
+        // Usar Better Auth para enviar email de recuperación
+        await auth.api.forgetPassword({
+            body: { email },
+            headers: await headers(),
+        });
+
+        await logger.info("Email de recuperación enviado", { email });
+
+        return createSuccessResponse(
+            undefined,
+            "Se han enviado las instrucciones de recuperación a tu email"
+        );
+    } catch (error: any) {
+        await logger.error("Error en recuperación de contraseña", error, { email });
+
+        // Manejar errores específicos
+        if (error.message?.includes("User not found")) {
+            // Por seguridad, no revelamos si el usuario existe o no
+            return createSuccessResponse(
+                undefined,
+                "Si el email existe, recibirás las instrucciones de recuperación"
+            );
+        }
+
+        return createErrorResponse("Error al procesar la solicitud. Inténtalo de nuevo.");
     }
 }
 
+/**
+ * Acción para restablecer contraseña con token
+ */
 export async function resetPassword(formData: FormData): Promise<ActionState> {
-    // TODO: ResetPasswordUseCase requires password hashing and token validation
-    // which are not yet fully implemented. For now, return a stub response.
     const token = formData.get("token") as string;
     const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
 
     try {
-        if (!token || !password) {
-            return createErrorResponse("Token and new password are required");
+        if (!token || !password || !confirmPassword) {
+            return createErrorResponse("Todos los campos son requeridos");
         }
 
-        // Stub implementation - replace with real reset password when services are available
-        await logger.info("Reset password attempt", { token });
+        if (password !== confirmPassword) {
+            return createErrorResponse("Las contraseñas no coinciden");
+        }
 
-        return createSuccessResponse(undefined, "Password reset successfully");
-    } catch (error) {
-        await logger.error("Failed to reset password", error, { token });
-        return createErrorResponse("Failed to reset password");
+        // Validar fortaleza de contraseña
+        if (password.length < 8) {
+            return createErrorResponse("La contraseña debe tener al menos 8 caracteres");
+        }
+
+        await logger.info("Intento de restablecimiento de contraseña", { token });
+
+        // Usar Better Auth para restablecer contraseña
+        await auth.api.resetPassword({
+            body: {
+                token,
+                newPassword: password,
+            },
+            headers: await headers(),
+        });
+
+        await logger.info("Contraseña restablecida exitosamente");
+
+        return createSuccessResponse(
+            undefined,
+            "Contraseña restablecida exitosamente. Ya puedes iniciar sesión."
+        );
+    } catch (error: any) {
+        await logger.error("Error al restablecer contraseña", error, { token });
+
+        // Manejar errores específicos
+        if (error.message?.includes("Invalid token")) {
+            return createErrorResponse("Token inválido o expirado");
+        }
+        if (error.message?.includes("Token expired")) {
+            return createErrorResponse("El enlace ha expirado. Solicita uno nuevo.");
+        }
+
+        return createErrorResponse("Error al restablecer la contraseña. Inténtalo de nuevo.");
     }
 }
 
+/**
+ * Acción para enviar código de verificación OTP por email
+ */
 export async function sendVerificationOTP(formData: FormData): Promise<ActionState> {
-    // TODO: SendVerificationOTPUseCase requires OTP generation and email service
-    // which are not yet fully implemented. For now, return a stub response.
     const email = formData.get("email") as string;
 
     try {
         if (!email) {
-            return createErrorResponse("Email is required");
+            return createErrorResponse("Email es requerido");
         }
 
-        // Stub implementation - replace with real OTP sending when services are available
-        await logger.info("Send verification OTP request", { email });
+        // Validar formato de email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return createErrorResponse("Formato de email inválido");
+        }
 
-        return createSuccessResponse(undefined, "Verification code sent to your email");
-    } catch (error) {
-        await logger.error("Failed to send verification code", error, { email });
-        return createErrorResponse("Failed to send verification code");
+        await logger.info("Enviando código de verificación OTP", { email });
+
+        // Usar Better Auth para enviar OTP
+        await auth.api.sendVerificationOTP({
+            body: {
+                email,
+                type: "email-verification"
+            },
+            headers: await headers(),
+        });
+
+        await logger.info("Código OTP enviado exitosamente", { email });
+
+        return createSuccessResponse(
+            undefined,
+            "Código de verificación enviado a tu email"
+        );
+    } catch (error: any) {
+        await logger.error("Error al enviar código OTP", error, { email });
+
+        // Manejar errores específicos
+        if (error.message?.includes("User not found")) {
+            return createErrorResponse("Usuario no encontrado");
+        }
+        if (error.message?.includes("Too many requests")) {
+            return createErrorResponse("Demasiados intentos. Espera unos minutos.");
+        }
+
+        return createErrorResponse("Error al enviar el código. Inténtalo de nuevo.");
     }
 }
 
+/**
+ * Acción para verificar código OTP
+ */
 export async function verifyOTP(formData: FormData): Promise<ActionState> {
-    // TODO: VerifyOTPUseCase requires OTP validation logic
-    // which is not yet fully implemented. For now, return a stub response.
     const email = formData.get("email") as string;
     const otp = formData.get("otp") as string;
 
     try {
         if (!email || !otp) {
-            return createErrorResponse("Email and verification code are required");
+            return createErrorResponse("Email y código de verificación son requeridos");
         }
 
-        // Stub implementation - replace with real OTP verification when services are available
-        await logger.info("Verify OTP attempt", { email, otp });
+        // Validar formato de OTP (generalmente 6 dígitos)
+        if (!/^\d{6}$/.test(otp)) {
+            return createErrorResponse("El código debe tener 6 dígitos");
+        }
 
-        return createSuccessResponse(undefined, "Email verified successfully");
-    } catch (error) {
-        await logger.error("Failed to verify code", error, { email, otp });
-        return createErrorResponse("Failed to verify code");
+        await logger.info("Verificando código OTP", { email, otp });
+
+        // Usar Better Auth para verificar OTP
+        const result = await auth.api.verifyEmailOTP({
+            body: { email, otp },
+            headers: await headers(),
+        });
+
+        if (!result.user) {
+            return createErrorResponse("Código inválido o expirado");
+        }
+
+        await logger.info("Código OTP verificado exitosamente", {
+            email,
+            userId: result.user.id
+        });
+
+        return createSuccessResponse(
+            undefined,
+            "Email verificado exitosamente"
+        );
+    } catch (error: any) {
+        await logger.error("Error al verificar código OTP", error, { email, otp });
+
+        // Manejar errores específicos
+        if (error.message?.includes("Invalid OTP")) {
+            return createErrorResponse("Código inválido");
+        }
+        if (error.message?.includes("OTP expired")) {
+            return createErrorResponse("El código ha expirado. Solicita uno nuevo.");
+        }
+        if (error.message?.includes("Too many attempts")) {
+            return createErrorResponse("Demasiados intentos fallidos. Solicita un nuevo código.");
+        }
+
+        return createErrorResponse("Error al verificar el código. Inténtalo de nuevo.");
     }
 }
 
-export async function updateUserAction(formData: FormData): Promise<ActionState> {
-    const userId = formData.get("userId") as string;
+/**
+ * Acción para actualizar perfil de usuario
+ */
+export async function updateUserProfile(formData: FormData): Promise<ActionState> {
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
 
     try {
-        if (!userId) {
-            return createErrorResponse("User ID is required");
+        if (!name && !email) {
+            return createErrorResponse("Al menos un campo debe ser proporcionado");
         }
 
-        const input = UpdateUserProfileInput.fromFormData(formData, userId);
-        const updateUserProfileUseCase = container.get<UpdateUserProfileUseCase>('UpdateUserProfileUseCase');
-
-        await updateUserProfileUseCase.execute(input);
-
-        return createSuccessResponse(undefined, "User profile updated successfully");
-    } catch (error) {
-        if (error instanceof DomainError) {
-            return createErrorResponse(error.message);
-        }
-        if (error instanceof ApplicationError) {
-            return createErrorResponse(error.message);
+        // Validar email si se proporciona
+        if (email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                return createErrorResponse("Formato de email inválido");
+            }
         }
 
-        await logger.error("Failed to update user profile", error, { userId });
-        return createErrorResponse("Failed to update user profile");
+        await logger.info("Actualizando perfil de usuario", { name, email });
+
+        // Usar Better Auth para actualizar perfil
+        await auth.api.updateUser({
+            body: {
+                name: name || undefined,
+                email: email || undefined,
+            },
+            headers: await headers(),
+        });
+
+        await logger.info("Perfil actualizado exitosamente", { name, email });
+
+        return createSuccessResponse(
+            undefined,
+            "Perfil actualizado exitosamente"
+        );
+    } catch (error: any) {
+        await logger.error("Error al actualizar perfil", error, { name, email });
+
+        // Manejar errores específicos
+        if (error.message?.includes("Email already exists")) {
+            return createErrorResponse("Ya existe una cuenta con este email");
+        }
+        if (error.message?.includes("Unauthorized")) {
+            return createErrorResponse("No autorizado. Inicia sesión de nuevo.");
+        }
+
+        return createErrorResponse("Error al actualizar el perfil. Inténtalo de nuevo.");
     }
+}
+
+/**
+ * Acción para cambiar contraseña (usuario autenticado)
+ */
+export async function changePassword(formData: FormData): Promise<ActionState> {
+    const currentPassword = formData.get("currentPassword") as string;
+    const newPassword = formData.get("newPassword") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+
+    try {
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            return createErrorResponse("Todos los campos son requeridos");
+        }
+
+        if (newPassword !== confirmPassword) {
+            return createErrorResponse("Las nuevas contraseñas no coinciden");
+        }
+
+        // Validar fortaleza de nueva contraseña
+        if (newPassword.length < 8) {
+            return createErrorResponse("La nueva contraseña debe tener al menos 8 caracteres");
+        }
+
+        if (currentPassword === newPassword) {
+            return createErrorResponse("La nueva contraseña debe ser diferente a la actual");
+        }
+
+        await logger.info("Cambiando contraseña de usuario");
+
+        // Usar Better Auth para cambiar contraseña
+        await auth.api.changePassword({
+            body: {
+                currentPassword,
+                newPassword,
+            },
+            headers: await headers(),
+        });
+
+        await logger.info("Contraseña cambiada exitosamente");
+
+        return createSuccessResponse(
+            undefined,
+            "Contraseña cambiada exitosamente"
+        );
+    } catch (error: any) {
+        await logger.error("Error al cambiar contraseña", error);
+
+        // Manejar errores específicos
+        if (error.message?.includes("Invalid current password")) {
+            return createErrorResponse("Contraseña actual incorrecta");
+        }
+        if (error.message?.includes("Unauthorized")) {
+            return createErrorResponse("No autorizado. Inicia sesión de nuevo.");
+        }
+
+        return createErrorResponse("Error al cambiar la contraseña. Inténtalo de nuevo.");
+    }
+}
+
+// Mantener compatibilidad con el código existente
+export async function updateUserAction(formData: FormData): Promise<ActionState> {
+    return updateUserProfile(formData);
 }

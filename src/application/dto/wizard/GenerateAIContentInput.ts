@@ -45,12 +45,12 @@ export class GenerateAIContentInput {
 
 const GenerateAIContentInputSchema = z.object({
     wizardType: z.enum(["property", "land", "blog"], {
-        errorMap: () => ({ message: "Wizard type must be property, land, or blog" }),
+        message: "Wizard type must be property, land, or blog",
     }),
     contentType: z.enum(["title", "description", "tags", "market_insights"], {
-        errorMap: () => ({ message: "Content type must be title, description, tags, or market_insights" }),
+        message: "Content type must be title, description, tags, or market_insights",
     }),
-    baseData: z.record(z.any()),
+    baseData: z.record(z.string(), z.any()),
     language: LanguageSchema.default("es"),
     userId: z.string().uuid().optional(),
 });

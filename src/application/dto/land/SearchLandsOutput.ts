@@ -71,12 +71,24 @@ export class LandSummary {
         public readonly status: string,
         public readonly features: string[],
         public readonly mainImage?: string,
-        public readonly pricePerSquareMeter?: number
+        public readonly pricePerSquareMeter?: number,
+        public readonly coordinates?: {
+            lat: number;
+            lng: number;
+        },
+        public readonly createdAt?: string
     ) { }
 
     static from(land: Land): LandSummary {
         const price = land.getPrice();
         const images = land.getImages().getUrls();
+        const location = land.getLocation();
+
+        // Convert coordinates format for frontend compatibility
+        const coordinates = location.coordinates ? {
+            lat: location.coordinates.latitude,
+            lng: location.coordinates.longitude
+        } : undefined;
 
         return new LandSummary(
             land.getLandId().value,
@@ -84,12 +96,14 @@ export class LandSummary {
             land.getArea().getValue(),
             price.amount,
             price.currency.code,
-            land.getLocation().address,
+            location.address,
             land.getType().value,
             land.getStatus().value,
             land.getFeatures().features,
             images.length > 0 ? images[0] : undefined,
-            land.getPricePerSquareMeter()
+            land.getPricePerSquareMeter(),
+            coordinates,
+            land.getCreatedAt().toISOString()
         );
     }
 
@@ -137,6 +151,8 @@ export class LandSummary {
             features: this.features,
             mainImage: this.mainImage,
             pricePerSquareMeter: this.pricePerSquareMeter,
+            coordinates: this.coordinates,
+            createdAt: this.createdAt,
         };
     }
 }

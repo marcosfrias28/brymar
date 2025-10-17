@@ -2,11 +2,11 @@ import { eq, desc, asc, count, and, ilike, or, gte, lte, sql } from "drizzle-orm
 import type { Database } from '@/lib/db/drizzle';
 import { lands } from '@/lib/db/schema';
 import { Land } from '@/domain/land/entities/Land';
-import { LandSearchFilters, LandSearchResult } from '@/domain/land/repositories/ILandRepository';
+import { LandSearchCriteria } from '@/domain/land/repositories/ILandRepository';
 import { InfrastructureError } from '@/domain/shared/errors/DomainError';
 import { LandMapper } from "../mappers/LandMapper";
 
-export interface AdvancedLandSearchFilters extends LandSearchFilters {
+export interface AdvancedLandSearchCriteria extends LandSearchCriteria {
     // Geographic filters
     province?: string;
     city?: string;
@@ -58,7 +58,13 @@ export interface LandSearchFacets {
     features: Record<string, number>;
 }
 
-export interface AdvancedLandSearchResult extends LandSearchResult {
+export interface AdvancedLandSearchResult {
+    lands: Land[];
+    total: number;
+    totalPages: number;
+    currentPage: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
     facets?: LandSearchFacets;
     searchTime?: number;
     suggestions?: string[];
@@ -68,7 +74,7 @@ export class LandSearchService {
     constructor(private readonly _db: Database) { }
 
     async advancedSearch(
-        filters: AdvancedLandSearchFilters,
+        filters: AdvancedLandSearchCriteria,
         options: LandSearchOptions = {}
     ): Promise<AdvancedLandSearchResult> {
         const startTime = Date.now();
@@ -87,7 +93,7 @@ export class LandSearchService {
             const whereConditions = this.buildAdvancedWhereConditions(filters, includeInactive);
 
             // Build the base query
-            const baseQuery = this.db.select().from(lands);
+            const baseQuery = this._db.select().from(lands);
 
             // Apply where conditions
             const queryWithWhere = whereConditions.length > 0
@@ -122,6 +128,8 @@ export class LandSearchService {
                 total,
                 totalPages: Math.ceil(total / limit),
                 currentPage: page,
+                hasNextPage: page < Math.ceil(total / limit),
+                hasPreviousPage: page > 1,
                 facets: searchFacets,
                 searchTime,
                 suggestions,
@@ -145,7 +153,7 @@ export class LandSearchService {
                 )
             ];
 
-            const results = await this.db
+            const results = await this._db
                 .select()
                 .from(lands)
                 .where(and(...conditions))
@@ -173,7 +181,7 @@ export class LandSearchService {
             const areaMin = landArea * 0.8;
             const areaMax = landArea * 1.2;
 
-            const results = await this.db
+            const results = await this._db
                 .select()
                 .from(lands)
                 .where(
@@ -217,7 +225,7 @@ export class LandSearchService {
     }
 
     private buildAdvancedWhereConditions(
-        filters: AdvancedLandSearchFilters,
+        filters: AdvancedLandSearchCriteria,
         _includeInactive: boolean
     ): any[] {
         const conditions = [];
@@ -320,7 +328,7 @@ export class LandSearchService {
     }
 
     private async getTotalCount(whereConditions: any[]): Promise<{ count: number }[]> {
-        const totalBaseQuery = this.db.select({ count: count() }).from(lands);
+        const totalBaseQuery = this._db.select({ count: count() }).from(lands);
         const totalQueryWithWhere = whereConditions.length > 0
             ? totalBaseQuery.where(and(...whereConditions))
             : totalBaseQuery;
@@ -332,7 +340,7 @@ export class LandSearchService {
         // This is a simplified implementation
         // In a real application, you might want to use more sophisticated faceting
 
-        const baseQuery = this.db.select().from(lands);
+        const baseQuery = this._db.select().from(lands);
         const queryWithWhere = whereConditions.length > 0
             ? baseQuery.where(and(...whereConditions))
             : baseQuery;
@@ -369,7 +377,7 @@ export class LandSearchService {
         return facets;
     }
 
-    private async generateSuggestions(filters: AdvancedLandSearchFilters): Promise<string[]> {
+    private async generateSuggestions(filters: AdvancedLandSearchCriteria): Promise<string[]> {
         const suggestions: string[] = [];
 
         // Add location-based suggestions

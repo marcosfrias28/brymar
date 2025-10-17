@@ -24,7 +24,7 @@ const completePropertyWizardSchema = z.object({
 // Schema for saving a property wizard draft (very lenient for drafts)
 const savePropertyDraftSchema = z.object({
     userId: z.string().min(1, "User ID is required"),
-    data: z.record(z.any()).optional().default({}), // Accept any data structure for drafts
+    data: z.record(z.string(), z.any()).optional().default({}), // Accept any data structure for drafts
     currentStep: z.string().min(1, "Current step is required"),
     draftId: z.string().optional(),
 });
@@ -125,7 +125,7 @@ export async function savePropertyDraft(
         console.error("Error saving property draft:", error);
 
         if (error instanceof z.ZodError) {
-            console.error("Validation errors:", error.errors);
+            console.error("Validation errors:", error.issues);
             return createErrorResponse(
                 "Error de validación en el borrador. Los datos se guardarán sin validación estricta."
             ) as ActionState<{ draftId: string }>;

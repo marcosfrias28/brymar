@@ -37,5 +37,5 @@ export class PublishWizardInput {
 const PublishWizardInputSchema = z.object({
     draftId: z.string().uuid("Draft ID must be a valid UUID"),
     userId: z.string().uuid("User ID must be a valid UUID"),
-    finalFormData: z.record(z.any()).optional(),
+    finalFormData: z.record(z.string(), z.any()).optional(),
 });

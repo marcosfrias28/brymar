@@ -51,16 +51,29 @@ export class SearchPropertiesUseCase {
             }
 
             // 4. Apply text-based query filter if provided
-            if (input.query && input.query.trim().length > 0) {
-                searchResult.properties = this.applyTextSearch(searchResult.properties, input.query);
-                searchResult.total = searchResult.properties.length;
-                searchResult.hasMore = false; // Recalculate pagination after text filter
+            if (input.query && input.query.trim().length > 0 && searchResult.items) {
+                const filteredItems = this.applyTextSearch(searchResult.items, input.query);
+                const [availableFilters, statistics] = await Promise.all([
+                    this.getAvailableFilters(input),
+                    this.getSearchStatistics(filteredItems)
+                ]);
+                const appliedFilters = this.buildAppliedFiltersList(input);
+
+                return SearchPropertiesOutput.create(
+                    filteredItems,
+                    filteredItems.length,
+                    input.offset,
+                    input.limit,
+                    appliedFilters,
+                    availableFilters,
+                    statistics
+                );
             }
 
             // 5. Get additional filter data and statistics
             const [availableFilters, statistics] = await Promise.all([
                 this.getAvailableFilters(input),
-                this.getSearchStatistics(searchResult.properties)
+                this.getSearchStatistics(searchResult.items || [])
             ]);
 
             // 6. Build applied filters list
@@ -68,7 +81,7 @@ export class SearchPropertiesUseCase {
 
             // 7. Return search results
             return SearchPropertiesOutput.create(
-                searchResult.properties,
+                searchResult.items || [],
                 searchResult.total,
                 input.offset,
                 input.limit,
@@ -230,23 +243,27 @@ export class SearchPropertiesUseCase {
             let minArea = Infinity;
             let maxArea = 0;
 
-            allProperties.properties.forEach(property => {
-                propertyTypes.add(property.getType().value);
-                cities.add(property.getAddress().city);
-                states.add(property.getAddress().state);
+            // Safely handle the properties array
+            const properties = allProperties?.items || allProperties || [];
+            if (Array.isArray(properties)) {
+                properties.forEach(property => {
+                    propertyTypes.add(property.getType().value);
+                    cities.add(property.getAddress().city);
+                    states.add(property.getAddress().state);
 
-                const features = property.getFeatures();
-                if (features.amenities) {
-                    features.amenities.forEach(amenity => amenities.add(amenity));
-                }
+                    const features = property.getFeatures();
+                    if (features.amenities) {
+                        features.amenities.forEach(amenity => amenities.add(amenity));
+                    }
 
-                const price = property.getPrice().amount;
-                minPrice = Math.min(minPrice, price);
-                maxPrice = Math.max(maxPrice, price);
+                    const price = property.getPrice().amount;
+                    minPrice = Math.min(minPrice, price);
+                    maxPrice = Math.max(maxPrice, price);
 
-                minArea = Math.min(minArea, features.area);
-                maxArea = Math.max(maxArea, features.area);
-            });
+                    minArea = Math.min(minArea, features.area);
+                    maxArea = Math.max(maxArea, features.area);
+                });
+            }
 
             return {
                 propertyTypes: Array.from(propertyTypes).sort(),

@@ -6,7 +6,7 @@
  */
 
 import { runEndToEndTests } from '@/tests/e2e-functionality.test';
-import { runEndToEndTestsWithMocks } from '@/tests/e2e-functionality-mock.test';
+import { runMockEndToEndTests } from '@/tests/e2e-functionality-mock.test';
 import { verifyDeployment } from '@/scripts/verify-deployment';
 
 interface TestSuite {
@@ -29,7 +29,7 @@ const testSuites: TestSuite[] = [
     {
         name: 'e2e-mock',
         description: 'Run end-to-end functionality tests with mocks',
-        runner: runEndToEndTestsWithMocks
+        runner: runMockEndToEndTests
     }
 ];
 

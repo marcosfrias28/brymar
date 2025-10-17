@@ -1,33 +1,42 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { z } from "zod"
 import { eq, desc, count, and, ilike, or } from "drizzle-orm"
+import { z } from "zod"
 import {
   type ActionState,
   createValidatedAction,
   createSuccessResponse,
   createErrorResponse
 } from "../validations"
+import {
+  PropertyFormSchema,
+  PropertyUpdateFormSchema,
+  PropertySearchSchema,
+  validateData,
+  type PropertyFormData,
+  type PropertyUpdateFormData,
+  type PropertySearchParams
+} from "../unified-schema"
+import {
+  validatePropertyBusinessRules,
+  createDatabaseError,
+  handleError
+} from "../unified-errors"
 import db from "../db/drizzle"
 import { properties } from "../db/schema"
 
-// Schema per aggiungere una proprietà
-const propertySchema = z.object({
-  title: z.string().min(3, "El título debe tener al menos 3 caracteres").max(100, "El título no puede exceder 100 caracteres"),
-  description: z.string().min(10, "La descripción debe tener al menos 10 caracteres").max(1000, "La descripción no puede exceder 1000 caracteres"),
-  price: z.coerce.number().min(1000, "El precio debe ser al menos $1,000").max(10000000, "El precio no puede exceder $10,000,000"),
-  type: z.string().min(3, "El tipo debe tener al menos 3 caracteres").max(50, "El tipo no puede exceder 50 caracteres"),
-  bedrooms: z.coerce.number().min(1, "Debe tener al menos 1 habitación").max(10, "No puede tener más de 10 habitaciones"),
-  bathrooms: z.coerce.number().min(1, "Debe tener al menos 1 baño").max(10, "No puede tener más de 10 baños"),
-  area: z.coerce.number().min(20, "El área debe ser al menos 20 m²").max(10000, "El área no puede exceder 10,000 m²"),
-  location: z.string().min(3, "La ubicación debe tener al menos 3 caracteres").max(100, "La ubicación no puede exceder 100 caracteres"),
-  status: z.enum(["sale", "rent"], { errorMap: () => ({ message: "El estado debe ser 'sale' o 'rent'" }) }),
-  featured: z.boolean(),
-})
-
-async function addPropertyAction(data: z.infer<typeof propertySchema>): Promise<ActionState> {
+async function addPropertyAction(data: PropertyFormData): Promise<ActionState> {
   try {
+    // Validate business rules
+    validatePropertyBusinessRules({
+      type: data.type,
+      bedrooms: data.bedrooms,
+      bathrooms: data.bathrooms,
+      area: data.area,
+      price: data.price
+    });
+
     await db.insert(properties).values({
       title: data.title,
       description: data.description,
@@ -37,9 +46,9 @@ async function addPropertyAction(data: z.infer<typeof propertySchema>): Promise<
       bathrooms: data.bathrooms,
       area: data.area,
       location: data.location,
-      status: data.status,
+      status: data.status || "draft",
       featured: data.featured || false,
-      images: [], // Images will be handled separately
+      images: data.images || [],
       createdAt: new Date(),
     })
 
@@ -47,29 +56,26 @@ async function addPropertyAction(data: z.infer<typeof propertySchema>): Promise<
     return createSuccessResponse(undefined, "Propiedad agregada exitosamente!")
   } catch (error) {
     console.error("Error adding property:", error)
-    return createErrorResponse("Error al agregar la propiedad")
+    if (error instanceof Error && error.message.includes('database')) {
+      throw createDatabaseError("Error al guardar la propiedad", "INSERT", error);
+    }
+    throw handleError(error);
   }
 }
 
-export const addProperty = createValidatedAction(propertySchema, addPropertyAction)
+export const addProperty = createValidatedAction(PropertyFormSchema, addPropertyAction)
 
-// Schema per aggiornare una proprietà
-const updatePropertySchema = z.object({
-  id: z.string().min(1, "ID de propiedad requerido"),
-  title: z.string().min(3, "El título debe tener al menos 3 caracteres").max(100, "El título no puede exceder 100 caracteres"),
-  description: z.string().min(10, "La descripción debe tener al menos 10 caracteres").max(1000, "La descripción no puede exceder 1000 caracteres"),
-  price: z.coerce.number().min(1000, "El precio debe ser al menos $1,000").max(10000000, "El precio no puede exceder $10,000,000"),
-  type: z.string().min(3, "El tipo debe tener al menos 3 caracteres").max(50, "El tipo no puede exceder 50 caracteres"),
-  bedrooms: z.coerce.number().min(1, "Debe tener al menos 1 habitación").max(10, "No puede tener más de 10 habitaciones"),
-  bathrooms: z.coerce.number().min(1, "Debe tener al menos 1 baño").max(10, "No puede tener más de 10 baños"),
-  area: z.coerce.number().min(20, "El área debe ser al menos 20 m²").max(10000, "El área no puede exceder 10,000 m²"),
-  location: z.string().min(3, "La ubicación debe tener al menos 3 caracteres").max(100, "La ubicación no puede exceder 100 caracteres"),
-  status: z.enum(["sale", "rent"], { errorMap: () => ({ message: "El estado debe ser 'sale' o 'rent'" }) }),
-  featured: z.boolean(),
-})
-
-async function updatePropertyAction(data: z.infer<typeof updatePropertySchema>): Promise<ActionState> {
+async function updatePropertyAction(data: PropertyUpdateFormData): Promise<ActionState> {
   try {
+    // Validate business rules
+    validatePropertyBusinessRules({
+      type: data.type,
+      bedrooms: data.bedrooms,
+      bathrooms: data.bathrooms,
+      area: data.area,
+      price: data.price
+    });
+
     const updateData = {
       title: data.title,
       description: data.description,
@@ -81,34 +87,41 @@ async function updatePropertyAction(data: z.infer<typeof updatePropertySchema>):
       location: data.location,
       status: data.status,
       featured: data.featured,
+      images: data.images || [],
       updatedAt: new Date(),
     }
 
-    await db.update(properties).set(updateData).where(eq(properties.id, parseInt(data.id)))
+    await db.update(properties).set(updateData).where(eq(properties.id, data.id))
 
     revalidatePath("/dashboard/properties")
     return createSuccessResponse(undefined, "Propiedad actualizada exitosamente!")
   } catch (error) {
     console.error("Error updating property:", error)
-    return createErrorResponse("Error al actualizar la propiedad")
+    if (error instanceof Error && error.message.includes('database')) {
+      throw createDatabaseError("Error al actualizar la propiedad", "UPDATE", error);
+    }
+    throw handleError(error);
   }
 }
 
-export const updateProperty = createValidatedAction(updatePropertySchema, updatePropertyAction)
+export const updateProperty = createValidatedAction(PropertyUpdateFormSchema, updatePropertyAction)
 
-// Schema per eliminare una proprietà
+// Simple delete schema
 const deletePropertySchema = z.object({
-  id: z.string().min(1, "ID de propiedad requerido")
+  id: z.number().min(1, "ID de propiedad requerido")
 })
 
 async function deletePropertyAction(data: z.infer<typeof deletePropertySchema>): Promise<ActionState> {
   try {
-    await db.delete(properties).where(eq(properties.id, parseInt(data.id)))
+    await db.delete(properties).where(eq(properties.id, data.id))
     revalidatePath("/dashboard/properties")
     return createSuccessResponse(undefined, "Propiedad eliminada exitosamente!")
   } catch (error) {
     console.error("Error deleting property:", error)
-    return createErrorResponse("Error al eliminar la propiedad")
+    if (error instanceof Error && error.message.includes('database')) {
+      throw createDatabaseError("Error al eliminar la propiedad", "DELETE", error);
+    }
+    throw handleError(error);
   }
 }
 
@@ -226,13 +239,6 @@ export const getFeaturedProperties = async (limit = 6) => {
   }
 }
 
-// Schema per la ricerca con action
-const searchSchema = z.object({
-  query: z.string().min(1, "La consulta de búsqueda es requerida").max(100, "La consulta no puede exceder 100 caracteres"),
-  page: z.coerce.number(),
-  limit: z.coerce.number(),
-})
-
 type SearchResult = {
   properties: any[]
   total: number
@@ -240,9 +246,9 @@ type SearchResult = {
   currentPage: number
 }
 
-async function searchPropertiesActionHandler(data: z.infer<typeof searchSchema>): Promise<ActionState<SearchResult | void>> {
+async function searchPropertiesActionHandler(data: PropertySearchParams): Promise<ActionState<SearchResult | void>> {
   try {
-    const result = await searchProperties(data.query, data.page, data.limit)
+    const result = await searchProperties(data.query || "", data.page, data.limit)
 
     return createSuccessResponse(
       result,
@@ -250,15 +256,15 @@ async function searchPropertiesActionHandler(data: z.infer<typeof searchSchema>)
     )
   } catch (error) {
     console.error('Search properties action error:', error)
-    return createErrorResponse('Ocurrió un error al buscar propiedades')
+    throw handleError(error);
   }
 }
 
-export const searchPropertiesAction = createValidatedAction(searchSchema, searchPropertiesActionHandler)
+export const searchPropertiesAction = createValidatedAction(PropertySearchSchema, searchPropertiesActionHandler)
 
-// Schema per toggle featured
+// Toggle featured schema
 const toggleFeaturedSchema = z.object({
-  id: z.string().min(1, "ID de propiedad requerido"),
+  id: z.number().min(1, "ID de propiedad requerido"),
   featured: z.boolean()
 })
 
@@ -270,7 +276,7 @@ async function toggleFeaturedAction(data: z.infer<typeof toggleFeaturedSchema>):
         featured: data.featured,
         updatedAt: new Date()
       })
-      .where(eq(properties.id, parseInt(data.id)))
+      .where(eq(properties.id, data.id))
 
     revalidatePath("/dashboard/properties")
     const message = data.featured
@@ -280,7 +286,10 @@ async function toggleFeaturedAction(data: z.infer<typeof toggleFeaturedSchema>):
     return createSuccessResponse(undefined, message)
   } catch (error) {
     console.error("Error toggling featured status:", error)
-    return createErrorResponse("Error al actualizar el estado destacado")
+    if (error instanceof Error && error.message.includes('database')) {
+      throw createDatabaseError("Error al actualizar el estado destacado", "UPDATE", error);
+    }
+    throw handleError(error);
   }
 }
 

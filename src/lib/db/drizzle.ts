@@ -1,12 +1,7 @@
 import { sql } from '@vercel/postgres';
 import { drizzle } from 'drizzle-orm/vercel-postgres';
 
-// Simple approach - just create the connection
-// Environment variables should be loaded before importing this module
-if (!process.env.POSTGRES_URL) {
-    console.warn('POSTGRES_URL environment variable not found. Make sure .env is loaded.');
-}
-
+// Vercel Postgres automatically uses POSTGRES_URL and other environment variables
 const db = drizzle(sql);
 
 export default db;

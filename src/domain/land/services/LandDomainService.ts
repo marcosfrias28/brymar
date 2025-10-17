@@ -3,9 +3,54 @@ import { LandType } from "../value-objects/LandType";
 import { LandArea } from "../value-objects/LandArea";
 import { LandPrice } from "../value-objects/LandPrice";
 import { LandLocation } from "../value-objects/LandLocation";
+import { BaseDomainService, ValidationResult, SEOSuggestion } from '@/domain/shared/services/BaseDomainService';
 import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
-export class LandDomainService {
+export class LandDomainService extends BaseDomainService<Land> {
+
+    constructor() {
+        super('Land');
+    }
+
+    /**
+     * Validates land entity according to business rules
+     */
+    validateEntity(land: Land): ValidationResult {
+        const errors: string[] = [];
+        const warnings: string[] = [];
+
+        // Basic completeness validation
+        if (!land.isComplete()) {
+            errors.push("Land is incomplete - missing required fields");
+        }
+
+        // Validate pricing
+        try {
+            this.validatePricing(land);
+        } catch (error) {
+            if (error instanceof BusinessRuleViolationError) {
+                errors.push(error.message);
+            }
+        }
+
+        // Validate type-specific rules
+        const type = land.getType();
+        if (type.isBeachfront()) {
+            try {
+                this.validateBeachfrontLand(land);
+            } catch (error) {
+                if (error instanceof BusinessRuleViolationError) {
+                    errors.push(error.message);
+                }
+            }
+        }
+
+        return {
+            isValid: errors.length === 0,
+            errors,
+            warnings
+        };
+    }
 
     /**
      * Validates if a land meets the minimum requirements for publication
@@ -127,11 +172,7 @@ export class LandDomainService {
     /**
      * Generates SEO-friendly suggestions for a land
      */
-    generateSEOSuggestions(land: Land): {
-        title: string;
-        description: string;
-        keywords: string[];
-    } {
+    generateSEOSuggestions(land: Land): SEOSuggestion {
         const type = land.getType();
         const location = land.getLocation();
         const area = land.getArea();
@@ -155,7 +196,11 @@ export class LandDomainService {
             price.currency.code
         ].filter(keyword => keyword.length > 0);
 
-        return { title, description, keywords };
+        return {
+            title: title.substring(0, 60), // SEO title limit
+            description: this.extractExcerpt(description, 160), // Meta description limit
+            keywords
+        };
     }
 
     private validateBeachfrontLand(land: Land): void {

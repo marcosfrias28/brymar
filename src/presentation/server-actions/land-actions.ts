@@ -107,13 +107,39 @@ export const addLand = createLand;
 
 export async function searchLands(formData: FormData): Promise<ActionState<any>> {
     try {
-        const input = SearchLandsInput.fromFormData(formData);
-        const searchLandsUseCase = container.get<SearchLandsUseCase>('SearchLandsUseCase');
+        await logger.info("Starting land search", {
+            formDataKeys: Array.from(formData.keys())
+        });
 
+        const input = SearchLandsInput.fromFormData(formData);
+
+        await logger.info("Created search input", {
+            hasQuery: !!input.query,
+            hasLocation: !!input.location,
+            landTypes: input.landTypes,
+            limit: input.limit,
+            offset: input.offset
+        });
+
+        const searchLandsUseCase = container.get<SearchLandsUseCase>('SearchLandsUseCase');
         const result = await searchLandsUseCase.execute(input);
 
-        return createSuccessResponse(result, "Lands retrieved successfully");
+        await logger.info("Land search completed", {
+            landsCount: result.lands?.length || 0,
+            total: result.total
+        });
+
+        // Convert to plain object to avoid serialization issues
+        const plainResult = result.toJSON();
+
+        return createSuccessResponse(plainResult, "Lands retrieved successfully");
     } catch (error) {
+        await logger.error("Failed to search lands", error, {
+            formDataKeys: Array.from(formData.keys()),
+            errorType: error?.constructor?.name,
+            errorMessage: error instanceof Error ? error.message : 'Unknown error'
+        });
+
         if (error instanceof DomainError) {
             return createErrorResponse(error.message);
         }
@@ -121,8 +147,20 @@ export async function searchLands(formData: FormData): Promise<ActionState<any>>
             return createErrorResponse(error.message);
         }
 
-        await logger.error("Failed to search lands", error);
-        return createErrorResponse("Failed to search lands");
+        // Provide more specific error messages
+        if (error instanceof Error) {
+            if (error.message.includes('validation')) {
+                return createErrorResponse("Invalid search parameters provided");
+            }
+            if (error.message.includes('database')) {
+                return createErrorResponse("Database connection error. Please try again.");
+            }
+            if (error.message.includes('container')) {
+                return createErrorResponse("Service configuration error. Please contact support.");
+            }
+        }
+
+        return createErrorResponse("Failed to search lands. Please try again.");
     }
 }
 

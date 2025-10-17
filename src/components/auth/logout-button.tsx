@@ -4,21 +4,23 @@ import { LogOut, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { User } from "@/lib/db/schema";
-import { useUser } from "@/presentation/hooks/use-user";
+import { signOut } from "@/presentation/server-actions/auth-actions";
 
 const logoutText = "Cerrar Sesión";
 const pendingText = "Cerrando sesión...";
 
-const LogOutButton = ({ user }: { user: User | null }) => {
-  const { signOut, loading } = useUser();
-
-  if (!user) {
-    return null;
-  }
+const LogOutButton = ({ user }: { user: any }) => {
+  const [loading, setLoading] = useState(false);
 
   const handleLogout = async () => {
-    await signOut();
+    setLoading(true);
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const text = loading ? pendingText : logoutText;

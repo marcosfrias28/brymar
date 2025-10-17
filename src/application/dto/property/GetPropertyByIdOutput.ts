@@ -8,7 +8,18 @@ export class GetPropertyByIdOutput {
         public readonly price: number,
         public readonly propertyType: string,
         public readonly status: string,
-        public readonly features: string[],
+        public readonly features: {
+            bedrooms: number;
+            bathrooms: number;
+            area: number;
+            amenities?: string[];
+        },
+        public readonly address: {
+            street: string;
+            city: string;
+            state?: string;
+            country: string;
+        },
         public readonly images: string[],
         public readonly isActive: boolean,
         public readonly createdAt: Date,
@@ -16,6 +27,9 @@ export class GetPropertyByIdOutput {
     ) { }
 
     static fromProperty(property: Property): GetPropertyByIdOutput {
+        const address = property.getAddress();
+        const features = property.getFeatures();
+
         return new GetPropertyByIdOutput(
             property.getId().value,
             property.getTitle().value,
@@ -23,7 +37,18 @@ export class GetPropertyByIdOutput {
             property.getPrice().amount,
             property.getType().value,
             property.getStatus().value,
-            property.getFeatures().amenities,
+            {
+                bedrooms: features.bedrooms,
+                bathrooms: features.bathrooms,
+                area: features.area,
+                amenities: features.amenities,
+            },
+            {
+                street: address.street,
+                city: address.city,
+                state: address.state,
+                country: address.country,
+            },
             property.getImages(),
             property.isActive(),
             property.getCreatedAt(),

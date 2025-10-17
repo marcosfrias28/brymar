@@ -490,8 +490,6 @@ async function validateTestSuite() {
     // Check Jest configuration
     const jestConfigs = [
         'jest.config.js',
-        'jest.wizard.config.js',
-        'jest.layout.config.js',
     ];
 
     jestConfigs.forEach(config => {

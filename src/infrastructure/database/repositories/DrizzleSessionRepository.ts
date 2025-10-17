@@ -20,7 +20,7 @@ export class DrizzleSessionRepository implements ISessionRepository {
         const sessionData = this.mapToDatabase(sessionEntity);
 
         // Check if session exists
-        const existingSession = await this.db
+        const existingSession = await this._db
             .select({ id: session.id })
             .from(session)
             .where(eq(session.id, sessionData.id))
@@ -28,10 +28,10 @@ export class DrizzleSessionRepository implements ISessionRepository {
 
         if (existingSession.length === 0) {
             // Create new session
-            await this.db.insert(session).values(sessionData);
+            await this._db.insert(session).values(sessionData);
         } else {
             // Update existing session
-            await this.db
+            await this._db
                 .update(session)
                 .set({
                     ...sessionData,
@@ -45,7 +45,7 @@ export class DrizzleSessionRepository implements ISessionRepository {
      * Finds a session by its ID
      */
     async findById(id: SessionId): Promise<Session | null> {
-        const result = await this.db
+        const result = await this._db
             .select()
             .from(session)
             .where(eq(session.id, id.value))
@@ -62,7 +62,7 @@ export class DrizzleSessionRepository implements ISessionRepository {
      * Finds a session by its token
      */
     async findByToken(token: SessionToken): Promise<Session | null> {
-        const result = await this.db
+        const result = await this._db
             .select()
             .from(session)
             .where(eq(session.token, token.getRawValue()))
@@ -81,7 +81,7 @@ export class DrizzleSessionRepository implements ISessionRepository {
     async findActiveSessionsByUserId(userId: UserId): Promise<Session[]> {
         const now = new Date();
 
-        const results = await this.db
+        const results = await this._db
             .select()
             .from(session)
             .where(
@@ -99,7 +99,7 @@ export class DrizzleSessionRepository implements ISessionRepository {
      * Finds all sessions for a user (active and expired)
      */
     async findAllSessionsByUserId(userId: UserId): Promise<Session[]> {
-        const results = await this.db
+        const results = await this._db
             .select()
             .from(session)
             .where(eq(session.userId, userId.value))
@@ -112,7 +112,7 @@ export class DrizzleSessionRepository implements ISessionRepository {
      * Deletes a session by ID
      */
     async delete(id: SessionId): Promise<void> {
-        await this.db
+        await this._db
             .delete(session)
             .where(eq(session.id, id.value));
     }
@@ -121,7 +121,7 @@ export class DrizzleSessionRepository implements ISessionRepository {
      * Deletes a session by token
      */
     async deleteByToken(token: SessionToken): Promise<void> {
-        await this.db
+        await this._db
             .delete(session)
             .where(eq(session.token, token.getRawValue()));
     }
@@ -130,7 +130,7 @@ export class DrizzleSessionRepository implements ISessionRepository {
      * Deletes all sessions for a user
      */
     async deleteAllByUserId(userId: UserId): Promise<void> {
-        await this.db
+        await this._db
             .delete(session)
             .where(eq(session.userId, userId.value));
     }
@@ -142,7 +142,7 @@ export class DrizzleSessionRepository implements ISessionRepository {
         const now = new Date();
 
         // Get count of expired sessions first
-        const countResult = await this.db
+        const countResult = await this._db
             .select({ count: count() })
             .from(session)
             .where(lt(session.expiresAt, now));
@@ -150,7 +150,7 @@ export class DrizzleSessionRepository implements ISessionRepository {
         const expiredCount = countResult[0]?.count || 0;
 
         // Delete expired sessions
-        await this.db
+        await this._db
             .delete(session)
             .where(lt(session.expiresAt, now));
 
@@ -163,7 +163,7 @@ export class DrizzleSessionRepository implements ISessionRepository {
     async isValidSession(token: SessionToken): Promise<boolean> {
         const now = new Date();
 
-        const result = await this.db
+        const result = await this._db
             .select({ id: session.id })
             .from(session)
             .where(
@@ -183,7 +183,7 @@ export class DrizzleSessionRepository implements ISessionRepository {
     async countActiveSessionsByUserId(userId: UserId): Promise<number> {
         const now = new Date();
 
-        const result = await this.db
+        const result = await this._db
             .select({ count: count() })
             .from(session)
             .where(
@@ -200,7 +200,7 @@ export class DrizzleSessionRepository implements ISessionRepository {
      * Finds sessions by IP address (for security monitoring)
      */
     async findByIpAddress(ipAddress: string): Promise<Session[]> {
-        const results = await this.db
+        const results = await this._db
             .select()
             .from(session)
             .where(eq(session.ipAddress, ipAddress))
@@ -213,7 +213,7 @@ export class DrizzleSessionRepository implements ISessionRepository {
      * Finds sessions created within a date range
      */
     async findByCreatedDateRange(startDate: Date, endDate: Date): Promise<Session[]> {
-        const results = await this.db
+        const results = await this._db
             .select()
             .from(session)
             .where(
@@ -231,7 +231,7 @@ export class DrizzleSessionRepository implements ISessionRepository {
      * Updates session expiration time
      */
     async updateExpiration(id: SessionId, newExpiresAt: Date): Promise<void> {
-        await this.db
+        await this._db
             .update(session)
             .set({
                 expiresAt: newExpiresAt,
@@ -247,7 +247,7 @@ export class DrizzleSessionRepository implements ISessionRepository {
         const cutoffTime = new Date();
         cutoffTime.setMinutes(cutoffTime.getMinutes() + minutes);
 
-        const results = await this.db
+        const results = await this._db
             .select()
             .from(session)
             .where(

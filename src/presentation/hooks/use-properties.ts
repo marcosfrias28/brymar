@@ -77,7 +77,7 @@ export function useProperties(initialFilters?: PropertyFilters): UsePropertiesRe
                     minBedrooms: filters.bedrooms,
                     minBathrooms: filters.bathrooms,
                     location: filters.location,
-                    statuses: filters.status === 'sale' ? ['published'] : filters.status === 'rent' ? ['rented'] : undefined,
+                    statuses: filters.status === 'sale' ? ['published'] : filters.status === 'rent' ? ['rented'] : ['published'],
                     propertyTypes: filters.type ? [filters.type as any] : undefined,
                     limit: 20,
                     offset: 0,

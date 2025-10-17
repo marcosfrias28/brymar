@@ -107,13 +107,39 @@ export const addProperty = createProperty;
 
 export async function searchProperties(formData: FormData): Promise<ActionState<any>> {
     try {
-        const input = SearchPropertiesInput.fromFormData(formData);
-        const searchPropertiesUseCase = container.get<SearchPropertiesUseCase>('SearchPropertiesUseCase');
+        await logger.info("Starting property search", {
+            formDataKeys: Array.from(formData.keys())
+        });
 
+        const input = SearchPropertiesInput.fromFormData(formData);
+
+        await logger.info("Created search input", {
+            hasQuery: !!input.query,
+            hasLocation: !!input.location,
+            propertyTypes: input.propertyTypes,
+            limit: input.limit,
+            offset: input.offset
+        });
+
+        const searchPropertiesUseCase = container.get<SearchPropertiesUseCase>('SearchPropertiesUseCase');
         const result = await searchPropertiesUseCase.execute(input);
 
-        return createSuccessResponse(result, "Properties retrieved successfully");
+        await logger.info("Search completed", {
+            propertiesCount: result.properties?.length || 0,
+            total: result.total
+        });
+
+        // Convert to plain object to avoid serialization issues with Next.js
+        const plainResult = result.toJSON();
+
+        return createSuccessResponse(plainResult, "Properties retrieved successfully");
     } catch (error) {
+        await logger.error("Failed to search properties", error, {
+            formDataKeys: Array.from(formData.keys()),
+            errorType: error?.constructor?.name,
+            errorMessage: error instanceof Error ? error.message : 'Unknown error'
+        });
+
         if (error instanceof DomainError) {
             return createErrorResponse(error.message);
         }
@@ -121,8 +147,20 @@ export async function searchProperties(formData: FormData): Promise<ActionState<
             return createErrorResponse(error.message);
         }
 
-        await logger.error("Failed to search properties", error);
-        return createErrorResponse("Failed to search properties");
+        // Provide more specific error messages
+        if (error instanceof Error) {
+            if (error.message.includes('validation')) {
+                return createErrorResponse("Invalid search parameters provided");
+            }
+            if (error.message.includes('database')) {
+                return createErrorResponse("Database connection error. Please try again.");
+            }
+            if (error.message.includes('container')) {
+                return createErrorResponse("Service configuration error. Please contact support.");
+            }
+        }
+
+        return createErrorResponse("Failed to search properties. Please try again.");
     }
 }
 

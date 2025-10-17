@@ -38,7 +38,7 @@ export const LandStep1Schema = z.object({
         .positive("La superficie debe ser mayor a 0")
         .max(999999, "La superficie es demasiado grande"),
     landType: z.nativeEnum(LandType, {
-        errorMap: () => ({ message: "Selecciona un tipo de terreno válido" }),
+        message: "Selecciona un tipo de terreno válido",
     }),
     zoning: z.string().optional(),
     utilities: z.array(z.string()).optional(),

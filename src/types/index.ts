@@ -1,12 +1,16 @@
 /**
- * Wizard Framework Types - Centralized Type Exports
+ * Unified Types - Single Source of Truth
  * 
- * This file provides a single entry point for all wizard-related types,
- * ensuring consistent type usage across the application and proper
- * separation of concerns.
+ * This file provides a single entry point for all types in the application,
+ * using the unified schema system where Drizzle schemas are the source of truth.
+ * 
+ * This replaces the complex DDD type system with a simplified approach.
  */
 
-// Core Wizard Framework Types
+// Export all unified types and utilities
+export * from './unified';
+
+// Legacy wizard types for backward compatibility (will be gradually removed)
 export type {
     WizardData,
     WizardStep,
@@ -23,7 +27,7 @@ export type {
     WizardStepRendererProps,
 } from "./wizard-core";
 
-// Property Wizard Types
+// Legacy property wizard types (will be gradually removed)
 export type {
     PropertyWizardData,
     Coordinates,
@@ -42,7 +46,7 @@ export type {
 
 export { AIServiceError } from "./property-wizard";
 
-// Land Wizard Types
+// Legacy land wizard types (will be gradually removed)
 export type {
     LandWizardData,
     LandCharacteristic,
@@ -50,7 +54,7 @@ export type {
 
 export { defaultLandWizardData } from "./land-wizard";
 
-// Blog Wizard Types
+// Legacy blog wizard types (will be gradually removed)
 export type {
     BlogWizardData,
     BlogImageMetadata,
@@ -59,5 +63,5 @@ export type {
 
 export { categoryLabels, defaultBlogWizardData } from "./blog-wizard";
 
-// Re-export commonly used enums and constants
+// Legacy enums (will be gradually removed)
 export { PropertyType } from "./property-wizard";

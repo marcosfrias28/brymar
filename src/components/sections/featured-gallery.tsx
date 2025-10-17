@@ -57,7 +57,9 @@ export function FeaturedPropertiesGallery() {
               ? property.images[0]
               : placeholderImages[index % placeholderImages.length],
           price: property.price,
-          location: `${property.address.city}, ${property.address.state}`,
+          location: property.address
+            ? `${property.address.city}, ${property.address.state}`
+            : "Location not available",
         }))
       : placeholderImages.map((image, index) => ({
           id: index + 1,

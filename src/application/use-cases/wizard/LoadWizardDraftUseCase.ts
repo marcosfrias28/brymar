@@ -16,18 +16,18 @@ export class LoadWizardDraftUseCase {
             const userId = UserId.create(input.userId);
 
             // Find the draft
-            const wizardDraft = await this.wizardDraftRepository.findById(draftId);
+            const wizardDraft = await this.wizardDraftRepository.findById(draftId.value);
 
             if (!wizardDraft) {
                 throw new EntityNotFoundError('WizardDraft', input.draftId);
             }
 
             // Verify ownership
-            if (!wizardDraft.getUserId().equals(userId)) {
+            if (wizardDraft.userId !== userId.value) {
                 throw new BusinessRuleViolationError("You don't have permission to access this draft", 'UNAUTHORIZED_DRAFT_ACCESS');
             }
 
-            return LoadWizardDraftOutput.from(wizardDraft);
+            return LoadWizardDraftOutput.fromData(wizardDraft);
         } catch (error) {
             if (error instanceof EntityNotFoundError || error instanceof BusinessRuleViolationError) {
                 throw error;

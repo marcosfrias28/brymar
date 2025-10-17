@@ -272,7 +272,7 @@ export class ValidationSchemas {
         draft: z.object({
             type: z.enum(['property', 'land', 'blog']),
             step: z.number().int().min(1),
-            data: z.record(z.any()),
+            data: z.record(z.string(), z.any()),
             completionPercentage: z.number().min(0).max(100)
         })
     };

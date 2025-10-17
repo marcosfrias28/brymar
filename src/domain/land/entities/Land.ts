@@ -2,16 +2,18 @@ import { AggregateRoot } from '@/domain/shared/entities/AggregateRoot';
 import { BusinessRuleViolationError, EntityValidationError } from '@/domain/shared/errors/DomainError';
 import {
     LandId,
-    LandTitle,
+
     LandDescription,
     LandArea,
-    LandPrice,
     LandType,
     LandStatus,
     LandLocation,
     LandFeatures,
     LandImages
 } from '@/domain/land/value-objects';
+import { Price, LandPrice } from '@/domain/shared/value-objects/Price';
+import { Title } from '@/domain/shared/value-objects/Title';
+import { LandTitle } from '@/domain/land/value-objects/LandTitle';
 
 export interface CreateLandData {
     name: string;
@@ -27,10 +29,10 @@ export interface CreateLandData {
 
 export interface LandData {
     id: LandId;
-    title: LandTitle;
+    title: Title;
     description: LandDescription;
     area: LandArea;
-    price: LandPrice;
+    price: Price;
     location: LandLocation;
     type: LandType;
     status: LandStatus;
@@ -45,10 +47,10 @@ export class Land extends AggregateRoot {
 
     private constructor(
         id: LandId,
-        private title: LandTitle,
+        private title: Title,
         private description: LandDescription,
         private area: LandArea,
-        private price: LandPrice,
+        private price: Price,
         private location: LandLocation,
         private type: LandType,
         private status: LandStatus,
@@ -110,7 +112,7 @@ export class Land extends AggregateRoot {
     }
 
     // Business methods
-    updatePrice(newPrice: LandPrice): void {
+    updatePrice(newPrice: Price): void {
         // Business rule: Significant price changes on published lands require validation
         if (this.status.isPublished() && this.price.isSignificantlyDifferent(newPrice)) {
             throw new BusinessRuleViolationError("Significant price changes on published lands require approval", 'PUBLISHED_LAND_PRICE_CHANGE');
@@ -130,7 +132,7 @@ export class Land extends AggregateRoot {
         this.touchEntity();
     }
 
-    updateTitle(newTitle: LandTitle): void {
+    updateTitle(newTitle: Title): void {
         this.title = newTitle;
         this.touchEntity();
     }
@@ -228,7 +230,7 @@ export class Land extends AggregateRoot {
         return this.landId;
     }
 
-    getTitle(): LandTitle {
+    getTitle(): Title {
         return this.title;
     }
 
@@ -240,7 +242,7 @@ export class Land extends AggregateRoot {
         return this.area;
     }
 
-    getPrice(): LandPrice {
+    getPrice(): Price {
         return this.price;
     }
 

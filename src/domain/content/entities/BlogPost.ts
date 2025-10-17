@@ -1,5 +1,6 @@
 import { AggregateRoot } from '@/domain/shared/entities/AggregateRoot';
 import { BlogPostId } from "../value-objects/BlogPostId";
+import { Title } from "@/domain/shared/value-objects/Title";
 import { BlogTitle } from "../value-objects/BlogTitle";
 import { BlogContent } from "../value-objects/BlogContent";
 import { BlogCategory } from "../value-objects/BlogCategory";
@@ -19,7 +20,7 @@ export interface CreateBlogPostData {
 
 export interface BlogPostData {
     id: BlogPostId;
-    title: BlogTitle;
+    title: Title;
     content: BlogContent;
     author: BlogAuthor;
     category: BlogCategory;
@@ -33,7 +34,7 @@ export interface BlogPostData {
 export class BlogPost extends AggregateRoot {
     private constructor(
         id: BlogPostId,
-        private title: BlogTitle,
+        private title: Title,
         private content: BlogContent,
         private author: BlogAuthor,
         private category: BlogCategory,
@@ -147,7 +148,7 @@ export class BlogPost extends AggregateRoot {
         return this.id as BlogPostId;
     }
 
-    getTitle(): BlogTitle {
+    getTitle(): Title {
         return this.title;
     }
 

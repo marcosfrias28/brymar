@@ -2,8 +2,13 @@ import { PublishWizardInput } from "../../dto/wizard/PublishWizardInput";
 import { PublishWizardOutput } from "../../dto/wizard/PublishWizardOutput";
 import { IWizardDraftRepository } from '@/domain/wizard/repositories/IWizardDraftRepository';
 import { IWizardMediaRepository } from '@/domain/wizard/repositories/IWizardMediaRepository';
+import { WizardDraft } from '@/domain/wizard/entities/WizardDraft';
 import { WizardDomainService, WizardStepDefinition } from '@/domain/wizard/services/WizardDomainService';
 import { WizardDraftId } from '@/domain/wizard/value-objects/WizardDraftId';
+import { WizardType } from '@/domain/wizard/value-objects/WizardType';
+import { WizardFormData } from '@/domain/wizard/value-objects/WizardFormData';
+import { StepProgress } from '@/domain/wizard/value-objects/StepProgress';
+import { CompletionPercentage } from '@/domain/wizard/value-objects/CompletionPercentage';
 import { UserId } from '@/domain/user/value-objects/UserId';
 import { EntityNotFoundError, BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
@@ -33,27 +38,45 @@ export class PublishWizardUseCase {
             const userId = UserId.create(input.userId);
 
             // Find the draft
-            const wizardDraft = await this.wizardDraftRepository.findById(draftId);
+            const wizardDraftData = await this.wizardDraftRepository.findById(draftId.value);
 
-            if (!wizardDraft) {
+            if (!wizardDraftData) {
                 throw new EntityNotFoundError('WizardDraft', input.draftId);
             }
 
             // Verify ownership
-            if (!wizardDraft.getUserId().equals(userId)) {
+            if (wizardDraftData.userId !== userId.value) {
                 throw new BusinessRuleViolationError("You don't have permission to publish this draft", 'UNAUTHORIZED_DRAFT_PUBLISH');
             }
 
+            // Convert WizardDraftData to WizardDraft entity using reconstitute method
+            const wizardDraftEntity = WizardDraft.reconstitute({
+                id: WizardDraftId.create(wizardDraftData.id),
+                userId: UserId.create(wizardDraftData.userId),
+                wizardType: WizardType.create(wizardDraftData.wizardType || "property"),
+                wizardConfigId: wizardDraftData.wizardConfigId || "",
+                formData: WizardFormData.create(wizardDraftData.formData),
+                currentStep: wizardDraftData.stepCompleted?.toString() || "general",
+                stepProgress: StepProgress.create({}),
+                completionPercentage: CompletionPercentage.create(
+                    wizardDraftData.completionPercentage || 0
+                ),
+                title: wizardDraftData.title,
+                description: undefined, // Not available in DraftData
+                createdAt: wizardDraftData.createdAt || new Date(),
+                updatedAt: wizardDraftData.updatedAt || new Date(),
+            });
+
             // Get final form data (use provided data or draft data)
-            const finalFormData = input.finalFormData || wizardDraft.getFormData().value;
+            const finalFormData = input.finalFormData || wizardDraftData.formData;
 
             // Validate that the wizard can be published
             const stepDefinitions = this.getStepDefinitions(
-                wizardDraft.getWizardType().value,
-                wizardDraft.getWizardConfigId()
+                wizardDraftData.wizardType || 'property',
+                wizardDraftData.wizardConfigId || ''
             );
 
-            const publishValidation = this.wizardDomainService.canPublish(wizardDraft, stepDefinitions);
+            const publishValidation = this.wizardDomainService.canPublish(wizardDraftEntity, stepDefinitions);
 
             if (!publishValidation.canPublish) {
                 throw new BusinessRuleViolationError(
@@ -66,7 +89,7 @@ export class PublishWizardUseCase {
             let publishedId: number;
             let title: string;
 
-            switch (wizardDraft.getWizardType().value) {
+            switch (wizardDraftData.wizardType || 'property') {
                 case "property":
                     const propertyResult = await this.publishProperty(finalFormData, input.userId);
                     publishedId = propertyResult.id;
@@ -86,18 +109,18 @@ export class PublishWizardUseCase {
                     break;
 
                 default:
-                    throw new BusinessRuleViolationError(`Unsupported wizard type: ${wizardDraft.getWizardType().value}`, 'UNSUPPORTED_WIZARD_TYPE');
+                    throw new BusinessRuleViolationError(`Unsupported wizard type: ${wizardDraftData.wizardType}`, 'UNSUPPORTED_WIZARD_TYPE');
             }
 
             // Move media from draft to published entity
             await this.wizardMediaRepository.moveToPublished(draftId, publishedId);
 
             // Delete the draft after successful publishing
-            await this.wizardDraftRepository.delete(draftId);
+            await this.wizardDraftRepository.delete(draftId.value);
 
             return PublishWizardOutput.create({
                 publishedId,
-                wizardType: wizardDraft.getWizardType().value,
+                wizardType: wizardDraftData.wizardType || 'property',
                 title,
                 publishedAt: new Date(),
                 draftId: input.draftId,

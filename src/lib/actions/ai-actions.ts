@@ -320,7 +320,7 @@ export async function generateAllPropertyContent(
  * Build enhanced description generation prompt for rich content
  */
 function buildEnhancedDescriptionPrompt(propertyData: PropertyBasicInfo, language: "es" | "en"): string {
-    const { type, location, _price, surface, characteristics, bedrooms, bathrooms } = propertyData;
+    const { type, location, price, surface, characteristics, bedrooms, bathrooms } = propertyData;
 
     if (language === "en") {
         return `Write a detailed, compelling real estate description for a ${type} in ${location}. 
@@ -369,7 +369,7 @@ Descripción Mejorada:`;
  * Build description generation prompt
  */
 function buildDescriptionPrompt(propertyData: PropertyBasicInfo, language: "es" | "en"): string {
-    const { type, location, _price, surface, characteristics, bedrooms, bathrooms } = propertyData;
+    const { type, location, price, surface, characteristics, bedrooms, bathrooms } = propertyData;
 
     if (language === "en") {
         return `Write a compelling real estate description for a ${type} in ${location}. 
@@ -497,7 +497,7 @@ function parseTagsFromText(text: string): string[] {
 
 // Fallback template methods
 function generateTemplateDescription(propertyData: PropertyBasicInfo, language: "es" | "en"): string {
-    const { type, location, _price, surface, characteristics, bedrooms, bathrooms } = propertyData;
+    const { type, location, price, surface, characteristics, bedrooms, bathrooms } = propertyData;
 
     if (language === "en") {
         const bedroomText = bedrooms ? ` with ${bedrooms} bedroom${bedrooms > 1 ? 's' : ''}` : '';
@@ -545,7 +545,7 @@ function generateTemplateTags(propertyData: PropertyBasicInfo, language: "es" | 
  * Generate fallback title when AI service fails
  */
 function _generateFallbackTitle(propertyData: PropertyBasicInfo, language: "es" | "en"): string {
-    const { type, location, _price, surface, bedrooms, bathrooms } = propertyData;
+    const { type, location, price, surface, bedrooms, bathrooms } = propertyData;
 
     if (language === "en") {
         const bedroomText = bedrooms ? `${bedrooms} bedroom${bedrooms > 1 ? 's' : ''}` : '';
@@ -566,7 +566,7 @@ function _generateFallbackTitle(propertyData: PropertyBasicInfo, language: "es" 
  * Generate fallback description when AI service fails
  */
 function generateFallbackDescription(propertyData: PropertyBasicInfo, language: "es" | "en"): string {
-    const { type, location, _price, surface, characteristics, bedrooms, bathrooms } = propertyData;
+    const { type, location, price, surface, characteristics, bedrooms, bathrooms } = propertyData;
 
     if (language === "en") {
         let description = `Discover this beautiful ${type} located in ${location}. `;
@@ -682,7 +682,7 @@ function convertToRichTextContent(text: string, language: "es" | "en"): RichText
  * Generate enhanced fallback description with rich formatting
  */
 function generateEnhancedFallbackDescription(propertyData: PropertyBasicInfo, language: "es" | "en"): RichTextContent {
-    const { type, location, _price, surface, characteristics, bedrooms, bathrooms } = propertyData;
+    const { type, location, price, surface, characteristics, bedrooms, bathrooms } = propertyData;
 
     if (language === "en") {
         const bedroomText = bedrooms ? ` with ${bedrooms} bedroom${bedrooms > 1 ? 's' : ''}` : '';

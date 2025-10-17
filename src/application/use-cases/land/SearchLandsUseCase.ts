@@ -25,23 +25,37 @@ export class SearchLandsUseCase {
             const searchCriteria = input.toRepositoryCriteria();
 
             // 3. Execute search
-            const searchResult = await this.landRepository.search(
-                searchCriteria,
-                Math.floor(input.offset / input.limit) + 1, // Convert offset to page
-                input.limit,
-                input.sortBy
-            );
+            const searchResult = await this.landRepository.search({
+                ...searchCriteria,
+                offset: input.offset,
+                limit: input.limit,
+                sortBy: input.sortBy,
+                sortOrder: input.sortOrder || 'desc'
+            });
 
             // 4. Apply text-based query filter if provided
             if (input.query && input.query.trim().length > 0) {
-                searchResult.lands = this.applyTextSearch(searchResult.lands, input.query);
-                searchResult.total = searchResult.lands.length;
-            }
+                const filteredItems = this.applyTextSearch(searchResult.items, input.query);
+                const [availableFilters, statistics] = await Promise.all([
+                    this.getAvailableFilters(input),
+                    this.getSearchStatistics(filteredItems)
+                ]);
+                const appliedFilters = this.buildAppliedFiltersList(input);
 
-            // 5. Get additional filter data and statistics
+                return SearchLandsOutput.create(
+                    filteredItems,
+                    filteredItems.length,
+                    input.offset,
+                    input.limit,
+                    appliedFilters,
+                    availableFilters,
+                    statistics
+                );
+            }
+            // 5. Get available filters and statistics
             const [availableFilters, statistics] = await Promise.all([
                 this.getAvailableFilters(input),
-                this.getSearchStatistics(searchResult.lands)
+                this.getSearchStatistics(searchResult.items)
             ]);
 
             // 6. Build applied filters list
@@ -49,7 +63,7 @@ export class SearchLandsUseCase {
 
             // 7. Return search results
             return SearchLandsOutput.create(
-                searchResult.lands,
+                searchResult.items,
                 searchResult.total,
                 input.offset,
                 input.limit,
@@ -142,7 +156,10 @@ export class SearchLandsUseCase {
     private async getAvailableFilters(input: SearchLandsInput): Promise<AvailableFilters> {
         try {
             // Get all lands to analyze available filters
-            const allLands = await this.landRepository.search({}, 1, 1000);
+            const allLands = await this.landRepository.search({
+                offset: 0,
+                limit: 1000
+            });
 
             const landTypes = new Set<string>();
             const locations = new Set<string>();
@@ -152,7 +169,7 @@ export class SearchLandsUseCase {
             let minArea = Infinity;
             let maxArea = 0;
 
-            allLands.lands.forEach(land => {
+            allLands.items.forEach(land => {
                 landTypes.add(land.getType().value);
                 locations.add(land.getLocation().address);
 

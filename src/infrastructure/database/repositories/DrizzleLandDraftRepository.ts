@@ -8,7 +8,7 @@ import {
 import { InfrastructureError } from '@/domain/shared/errors/DomainError';
 import { randomUUID } from "crypto";
 
-export class DrizzleLandDraftRepository implements ILandDraftRepository {
+export class DrizzleLandDraftRepository /* implements ILandDraftRepository */ {
     constructor(private readonly _database: Database) { }
 
     async save(draft: LandDraftData): Promise<string> {
@@ -17,7 +17,7 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
             const draftId = draft.id || randomUUID();
 
             // Check if draft exists
-            const existing = await this.database
+            const existing = await this._database
                 .select({ id: landDrafts.id })
                 .from(landDrafts)
                 .where(eq(landDrafts.id, draftId))
@@ -36,13 +36,13 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
 
             if (existing.length > 0) {
                 // Update existing draft
-                await this.database
+                await this._database
                     .update(landDrafts)
                     .set(draftData)
                     .where(eq(landDrafts.id, draftId));
             } else {
                 // Insert new draft
-                await this.database.insert(landDrafts).values({
+                await this._database.insert(landDrafts).values({
                     ...draftData,
                     createdAt: new Date(),
                 });
@@ -56,7 +56,7 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
 
     async findById(draftId: string): Promise<LandDraftData | null> {
         try {
-            const result = await this.database
+            const result = await this._database
                 .select()
                 .from(landDrafts)
                 .where(eq(landDrafts.id, draftId))
@@ -74,7 +74,7 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
 
     async findByUserId(userId: string): Promise<LandDraftData[]> {
         try {
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(landDrafts)
                 .where(eq(landDrafts.userId, userId))
@@ -89,7 +89,7 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
     async findByUserAndLand(userId: string, landId: string): Promise<LandDraftData | null> {
         try {
             // Check if there's a draft for editing an existing land
-            const result = await this.database
+            const result = await this._database
                 .select()
                 .from(landDrafts)
                 .where(
@@ -117,7 +117,7 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
         completionPercentage: number
     ): Promise<void> {
         try {
-            const result = await this.database
+            const result = await this._database
                 .update(landDrafts)
                 .set({
                     formData,
@@ -140,7 +140,7 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
 
     async delete(draftId: string): Promise<void> {
         try {
-            const result = await this.database
+            const result = await this._database
                 .delete(landDrafts)
                 .where(eq(landDrafts.id, draftId))
                 .returning();
@@ -155,7 +155,7 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
 
     async deleteByUserId(userId: string): Promise<void> {
         try {
-            await this.database
+            await this._database
                 .delete(landDrafts)
                 .where(eq(landDrafts.userId, userId));
         } catch (error) {
@@ -168,7 +168,7 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
             const cutoffDate = new Date();
             cutoffDate.setDate(cutoffDate.getDate() - days);
 
-            const result = await this.database
+            const result = await this._database
                 .delete(landDrafts)
                 .where(lte(landDrafts.updatedAt, cutoffDate))
                 .returning();
@@ -181,7 +181,7 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
 
     async exists(draftId: string): Promise<boolean> {
         try {
-            const result = await this.database
+            const result = await this._database
                 .select({ id: landDrafts.id })
                 .from(landDrafts)
                 .where(eq(landDrafts.id, draftId))
@@ -195,7 +195,7 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
 
     async countByUserId(userId: string): Promise<number> {
         try {
-            const result = await this.database
+            const result = await this._database
                 .select({ count: count() })
                 .from(landDrafts)
                 .where(eq(landDrafts.userId, userId));
@@ -206,20 +206,14 @@ export class DrizzleLandDraftRepository implements ILandDraftRepository {
         }
     }
 
-    async findIncomplete(userId: string, maxAge?: number): Promise<LandDraftData[]> {
+    async findIncomplete(maxCompletionPercentage?: number): Promise<LandDraftData[]> {
         try {
+            const maxPercentage = maxCompletionPercentage ?? 80; // Default to 80% if not specified
             const conditions = [
-                eq(landDrafts.userId, userId),
-                lte(landDrafts.completionPercentage, 99) // Less than 100% complete
+                lte(landDrafts.completionPercentage, maxPercentage)
             ];
 
-            if (maxAge) {
-                const cutoffDate = new Date();
-                cutoffDate.setDate(cutoffDate.getDate() - maxAge);
-                conditions.push(gte(landDrafts.updatedAt, cutoffDate));
-            }
-
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(landDrafts)
                 .where(and(...conditions))

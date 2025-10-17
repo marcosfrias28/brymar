@@ -3,14 +3,59 @@ import { PageSection } from "../entities/PageSection";
 import { BlogContent } from "../value-objects/BlogContent";
 import { BlogTitle } from "../value-objects/BlogTitle";
 import { ContentStatus } from "../value-objects/ContentStatus";
+import { BaseDomainService, ValidationResult, SEOSuggestion } from '@/domain/shared/services/BaseDomainService';
 import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
-export class ContentDomainService {
+export class ContentDomainService extends BaseDomainService<BlogPost> {
+
+    constructor() {
+        super('Content');
+    }
+
+    /**
+     * Validates blog post entity according to business rules
+     */
+    validateEntity(blogPost: BlogPost): ValidationResult {
+        const errors: string[] = [];
+        const warnings: string[] = [];
+
+        // Basic validation
+        if (!blogPost.getTitle().isValid()) {
+            errors.push("Blog post title is invalid");
+        }
+
+        if (!blogPost.getContent().isValid()) {
+            errors.push("Blog post content is invalid");
+        }
+
+        if (!blogPost.getAuthor().isValid()) {
+            errors.push("Blog post author is invalid");
+        }
+
+        if (!blogPost.getCategory().isValid()) {
+            errors.push("Blog post category is invalid");
+        }
+
+        // Reading time validation
+        if (blogPost.getReadingTime().minutes < 1) {
+            warnings.push("Blog post is very short (less than 1 minute reading time)");
+        }
+
+        // SEO validation
+        const seoValidation = this.validateSEORequirements(blogPost);
+        warnings.push(...seoValidation.issues);
+
+        return {
+            isValid: errors.length === 0,
+            errors,
+            warnings
+        };
+    }
 
     /**
      * Validates if a blog post can be published based on business rules
      */
-    validateBlogPostForPublishing(blogPost: BlogPost): void {
+    validateForPublication(blogPost: BlogPost): void {
         if (!blogPost.getTitle().isValid()) {
             throw new BusinessRuleViolationError("Blog post title is invalid for publishing", "CONTENT_VALIDATION");
         }
@@ -86,6 +131,38 @@ export class ContentDomainService {
         }
 
         return cleanExcerpt;
+    }
+
+    /**
+     * Generates SEO suggestions for blog post
+     */
+    generateSEOSuggestions(blogPost: BlogPost): SEOSuggestion {
+        const title = blogPost.getTitle();
+        const content = blogPost.getContent();
+        const category = blogPost.getCategory();
+        const author = blogPost.getAuthor();
+
+        // Generate SEO title
+        const seoTitle = title.toString();
+
+        // Generate meta description
+        const description = this.generateSEOExcerpt(content, 160);
+
+        // Generate keywords
+        const keywords = [
+            category.value,
+            "blog",
+            "article",
+            author.value,
+            "Dominican Republic",
+            "real estate"
+        ].filter(keyword => keyword.length > 0);
+
+        return {
+            title: seoTitle.substring(0, 60), // SEO title limit
+            description,
+            keywords
+        };
     }
 
     /**

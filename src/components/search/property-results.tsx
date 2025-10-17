@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { PropertyCard } from "@/components/properties/property-card";
+import { PropertyCard } from "@/components/cards/property-card";
 import { PropertyMap } from "@/components/properties/property-map";
 import { LoadingSpinner } from "@/components/ui/loading-states";
 import { InlineErrorState } from "@/components/ui/error-states";
@@ -27,6 +27,10 @@ interface PropertyResultsProps {
   onRetry?: () => void;
   onViewChange?: (view: "results" | "map") => void;
   currentView?: "results" | "map";
+  onSortChange?: (sortBy: string) => void;
+  sortBy?: string;
+  view?: "grid" | "list" | "map";
+  onViewModeChange?: (view: "grid" | "list" | "map") => void;
   className?: string;
 }
 
@@ -38,10 +42,18 @@ export function PropertyResults({
   onRetry,
   onViewChange,
   currentView = "results",
+  onSortChange,
+  sortBy: externalSortBy = "newest",
+  view: externalView = "grid",
+  onViewModeChange,
   className,
 }: PropertyResultsProps) {
-  const [view, setView] = useState<"grid" | "list" | "map">("grid");
-  const [sortBy, setSortBy] = useState("newest");
+  // Use external state if provided, otherwise fall back to local state
+  const [localView, setLocalView] = useState<"grid" | "list" | "map">("grid");
+  const [localSortBy, setLocalSortBy] = useState("newest");
+
+  const view = onViewModeChange ? externalView : localView;
+  const sortBy = onSortChange ? externalSortBy : localSortBy;
 
   const sortOptions = [
     { value: "newest", label: "Más recientes" },
@@ -69,7 +81,7 @@ export function PropertyResults({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-semibold">
-                {isLoading ? "Buscando..." : `${total} propiedades encontradas`}
+                {total} propiedades encontradas
               </h2>
               {total > 0 && (
                 <Badge variant="secondary">
@@ -80,7 +92,16 @@ export function PropertyResults({
 
             <div className="flex items-center gap-2">
               {/* Sort Options */}
-              <Select value={sortBy} onValueChange={setSortBy}>
+              <Select
+                value={sortBy}
+                onValueChange={(value) => {
+                  if (onSortChange) {
+                    onSortChange(value);
+                  } else {
+                    setLocalSortBy(value);
+                  }
+                }}
+              >
                 <SelectTrigger className="w-48">
                   <SortAsc className="mr-2 h-4 w-4" />
                   <SelectValue />
@@ -103,7 +124,13 @@ export function PropertyResults({
                     "rounded-r-none",
                     view === "grid" && "bg-muted"
                   )}
-                  onClick={() => setView("grid")}
+                  onClick={() => {
+                    if (onViewModeChange) {
+                      onViewModeChange("grid");
+                    } else {
+                      setLocalView("grid");
+                    }
+                  }}
                 >
                   <LayoutGrid className="h-4 w-4" />
                 </Button>
@@ -114,7 +141,13 @@ export function PropertyResults({
                     "rounded-none border-x",
                     view === "list" && "bg-muted"
                   )}
-                  onClick={() => setView("list")}
+                  onClick={() => {
+                    if (onViewModeChange) {
+                      onViewModeChange("list");
+                    } else {
+                      setLocalView("list");
+                    }
+                  }}
                 >
                   <List className="h-4 w-4" />
                 </Button>
@@ -123,7 +156,11 @@ export function PropertyResults({
                   size="sm"
                   className={cn("rounded-l-none", view === "map" && "bg-muted")}
                   onClick={() => {
-                    setView("map");
+                    if (onViewModeChange) {
+                      onViewModeChange("map");
+                    } else {
+                      setLocalView("map");
+                    }
                     onViewChange?.("map");
                   }}
                 >
@@ -137,14 +174,7 @@ export function PropertyResults({
 
       {/* Results Content - Scrollable */}
       <div className="flex-1 overflow-y-auto">
-        {isLoading ? (
-          <div className="h-full flex items-center justify-center">
-            <div className="flex flex-col items-center justify-center space-y-4">
-              <LoadingSpinner />
-              <p className="text-muted-foreground">Buscando propiedades...</p>
-            </div>
-          </div>
-        ) : view === "map" ? (
+        {view === "map" ? (
           <div className="h-full">
             <PropertyMap properties={properties} />
           </div>
@@ -160,9 +190,19 @@ export function PropertyResults({
             >
               {properties.map((property) => (
                 <PropertyCard
-                  key={property.getId().value}
-                  property={property}
-                  variant={view === "list" ? "horizontal" : "vertical"}
+                  key={property.id}
+                  property={{
+                    id: property.id,
+                    title: property.title,
+                    price: property.price,
+                    bedrooms: property.features.bedrooms,
+                    bathrooms: property.features.bathrooms,
+                    area: property.features.area,
+                    location: `${property.address.city}, ${property.address.state}`,
+                    type: property.type,
+                    images: property.images,
+                    status: property.status,
+                  }}
                 />
               ))}
             </div>

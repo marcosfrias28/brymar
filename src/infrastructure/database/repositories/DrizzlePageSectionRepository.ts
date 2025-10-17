@@ -17,7 +17,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
     async findById(id: PageSectionId): Promise<PageSection | null> {
         try {
-            const result = await this.database
+            const result = await this._database
                 .select()
                 .from(pageSections)
                 .where(eq(pageSections.id, id.toNumber()))
@@ -43,7 +43,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
             if (existingSection) {
                 // Update existing section
-                await this.database
+                await this._database
                     .update(pageSections)
                     .set({
                         page: pageSectionData.page,
@@ -61,7 +61,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
                     .where(eq(pageSections.id, pageSectionData.id));
             } else {
                 // Create new section
-                await this.database
+                await this._database
                     .insert(pageSections)
                     .values(pageSectionData);
             }
@@ -73,7 +73,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
     async delete(id: PageSectionId): Promise<void> {
         try {
-            await this.database
+            await this._database
                 .delete(pageSections)
                 .where(eq(pageSections.id, id.toNumber()));
         } catch (error) {
@@ -84,7 +84,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
     async exists(id: PageSectionId): Promise<boolean> {
         try {
-            const result = await this.database
+            const result = await this._database
                 .select({ count: count() })
                 .from(pageSections)
                 .where(eq(pageSections.id, id.toNumber()));
@@ -103,7 +103,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
             const whereConditions = this.buildWhereConditions(filters);
             const orderBy = asc(pageSections.order);
 
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(pageSections)
                 .where(whereConditions)
@@ -125,7 +125,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
                 ? eq(pageSections.page, page.value)
                 : and(eq(pageSections.page, page.value), eq(pageSections.isActive, true));
 
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(pageSections)
                 .where(whereConditions)
@@ -147,7 +147,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
         section: SectionName
     ): Promise<PageSection | null> {
         try {
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(pageSections)
                 .where(
@@ -171,7 +171,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
     async findBySection(section: SectionName): Promise<PageSection[]> {
         try {
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(pageSections)
                 .where(eq(pageSections.section, section.value))
@@ -190,7 +190,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
     ): Promise<void> {
         try {
             // Use a transaction to update all orders atomically
-            await this.database.transaction(async (tx) => {
+            await this._database.transaction(async (tx) => {
                 for (const { id, order } of sectionOrders) {
                     await tx
                         .update(pageSections)
@@ -206,7 +206,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
     async activate(id: PageSectionId): Promise<void> {
         try {
-            await this.database
+            await this._database
                 .update(pageSections)
                 .set({ isActive: true, updatedAt: new Date() })
                 .where(eq(pageSections.id, id.toNumber()));
@@ -218,7 +218,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
     async deactivate(id: PageSectionId): Promise<void> {
         try {
-            await this.database
+            await this._database
                 .update(pageSections)
                 .set({ isActive: false, updatedAt: new Date() })
                 .where(eq(pageSections.id, id.toNumber()));
@@ -233,7 +233,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
         section: SectionName
     ): Promise<boolean> {
         try {
-            const result = await this.database
+            const result = await this._database
                 .select({ count: count() })
                 .from(pageSections)
                 .where(
@@ -252,7 +252,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
     async getNextOrderForPage(page: PageName): Promise<number> {
         try {
-            const result = await this.database
+            const result = await this._database
                 .select({
                     maxOrder: sql<number>`MAX(${pageSections.order})`
                 })
@@ -305,7 +305,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
     async findIncomplete(): Promise<PageSection[]> {
         try {
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(pageSections)
                 .where(
@@ -326,7 +326,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
     async countByPage(page: PageName): Promise<number> {
         try {
-            const result = await this.database
+            const result = await this._database
                 .select({ count: count() })
                 .from(pageSections)
                 .where(eq(pageSections.page, page.value));
@@ -340,7 +340,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
     async countBySection(section: SectionName): Promise<number> {
         try {
-            const result = await this.database
+            const result = await this._database
                 .select({ count: count() })
                 .from(pageSections)
                 .where(eq(pageSections.section, section.value));
@@ -357,7 +357,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
         propertyValue: any
     ): Promise<PageSection[]> {
         try {
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(pageSections)
                 .where(sql`${pageSections.content}->>${propertyKey} = ${propertyValue}`)
@@ -372,7 +372,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
     async findByImageUrl(imageUrl: string): Promise<PageSection[]> {
         try {
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(pageSections)
                 .where(sql`${pageSections.images} @> ${JSON.stringify([imageUrl])}`)
@@ -403,7 +403,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
                 updateData.isActive = updates.isActive;
             }
 
-            const result = await this.database
+            const result = await this._database
                 .update(pageSections)
                 .set(updateData)
                 .where(whereConditions);
@@ -427,13 +427,13 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
         try {
             // Get basic counts
             const [totalResult, activeResult, inactiveResult] = await Promise.all([
-                this.database.select({ count: count() }).from(pageSections),
-                this.database.select({ count: count() }).from(pageSections).where(eq(pageSections.isActive, true)),
-                this.database.select({ count: count() }).from(pageSections).where(eq(pageSections.isActive, false))
+                this._database.select({ count: count() }).from(pageSections),
+                this._database.select({ count: count() }).from(pageSections).where(eq(pageSections.isActive, true)),
+                this._database.select({ count: count() }).from(pageSections).where(eq(pageSections.isActive, false))
             ]);
 
             // Get sections by page
-            const pageResults = await this.database
+            const pageResults = await this._database
                 .select({
                     page: pageSections.page,
                     count: count()
@@ -447,7 +447,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
             });
 
             // Get sections by type
-            const typeResults = await this.database
+            const typeResults = await this._database
                 .select({
                     section: pageSections.section,
                     count: count()
@@ -461,13 +461,13 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
             });
 
             // Get sections with images
-            const imagesResult = await this.database
+            const imagesResult = await this._database
                 .select({ count: count() })
                 .from(pageSections)
                 .where(sql`json_array_length(${pageSections.images}) > 0`);
 
             // Get sections with custom settings
-            const settingsResult = await this.database
+            const settingsResult = await this._database
                 .select({ count: count() })
                 .from(pageSections)
                 .where(sql`${pageSections.settings} != '{}'`);
@@ -489,7 +489,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
     async findModifiedAfter(date: Date): Promise<PageSection[]> {
         try {
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(pageSections)
                 .where(sql`${pageSections.updatedAt} > ${date}`)
@@ -505,7 +505,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
     async resetPageToDefaults(page: PageName): Promise<void> {
         try {
             // Delete all existing sections for the page
-            await this.database
+            await this._database
                 .delete(pageSections)
                 .where(eq(pageSections.page, page.value));
 
@@ -563,7 +563,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
     ): Promise<void> {
         try {
             // Delete existing sections
-            await this.database
+            await this._database
                 .delete(pageSections)
                 .where(eq(pageSections.page, page.value));
 
@@ -594,7 +594,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
         try {
             const whereCondition = this.buildWhereConditions(filters);
 
-            const query = this.database
+            const query = this._database
                 .select()
                 .from(pageSections)
                 .orderBy(asc(pageSections.page), asc(pageSections.order));
@@ -611,7 +611,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
 
     async findAllOrdered(): Promise<PageSection[]> {
         try {
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(pageSections)
                 .orderBy(asc(pageSections.page), asc(pageSections.order));
@@ -628,7 +628,7 @@ export class DrizzlePageSectionRepository implements IPageSectionRepository {
     ): Promise<void> {
         try {
             for (const { sectionId, order } of sectionOrders) {
-                await this.database
+                await this._database
                     .update(pageSections)
                     .set({ order })
                     .where(and(

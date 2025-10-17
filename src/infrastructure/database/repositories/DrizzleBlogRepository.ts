@@ -6,12 +6,12 @@ import { BlogCategory } from '@/domain/content/value-objects/BlogCategory';
 import { ContentStatus } from '@/domain/content/value-objects/ContentStatus';
 import {
     IBlogRepository,
-    BlogSearchFilters,
-    BlogSearchResult
+    BlogSearchCriteria
 } from '@/domain/content/repositories/IBlogRepository';
 import { blogPosts } from '@/lib/db/schema';
 import type { Database } from '@/lib/db/drizzle';
 import { BlogMapper } from '../mappers/BlogMapper';
+import { InfrastructureError } from '@/domain/shared/errors/DomainError';
 
 export class DrizzleBlogRepository implements IBlogRepository {
     constructor(private readonly _database: Database) { }
@@ -32,7 +32,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
 
     async findById(id: BlogPostId): Promise<BlogPost | null> {
         try {
-            const result = await this.database
+            const result = await this._database
                 .select()
                 .from(blogPosts)
                 .where(eq(blogPosts.id, id.toNumber()))
@@ -58,7 +58,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
 
             if (existingPost) {
                 // Update existing post
-                await this.database
+                await this._database
                     .update(blogPosts)
                     .set({
                         title: blogPostData.title,
@@ -73,7 +73,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
                     .where(eq(blogPosts.id, blogPostData.id));
             } else {
                 // Create new post
-                await this.database
+                await this._database
                     .insert(blogPosts)
                     .values(blogPostData);
             }
@@ -85,7 +85,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
 
     async delete(id: BlogPostId): Promise<void> {
         try {
-            await this.database
+            await this._database
                 .delete(blogPosts)
                 .where(eq(blogPosts.id, id.toNumber()));
         } catch (error) {
@@ -96,7 +96,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
 
     async exists(id: BlogPostId): Promise<boolean> {
         try {
-            const result = await this.database
+            const result = await this._database
                 .select({ count: count() })
                 .from(blogPosts)
                 .where(eq(blogPosts.id, id.toNumber()));
@@ -109,16 +109,16 @@ export class DrizzleBlogRepository implements IBlogRepository {
     }
 
     async findWithFilters(
-        filters: BlogSearchFilters,
+        filters: BlogSearchCriteria,
         page: number,
         limit: number
-    ): Promise<BlogSearchResult> {
+    ): Promise<any> {
         try {
             const offset = (page - 1) * limit;
             const whereConditions = this.buildWhereConditions(filters);
 
             // Get total count
-            const totalResult = await this.database
+            const totalResult = await this._database
                 .select({ count: count() })
                 .from(blogPosts)
                 .where(whereConditions);
@@ -126,7 +126,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
             const total = totalResult[0]?.count || 0;
 
             // Get paginated results
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(blogPosts)
                 .where(whereConditions)
@@ -147,17 +147,31 @@ export class DrizzleBlogRepository implements IBlogRepository {
         }
     }
 
-    async findByStatus(
+    async findByStatus(status: ContentStatus): Promise<BlogPost[]> {
+        try {
+            const results = await this._database
+                .select()
+                .from(blogPosts)
+                .where(eq(blogPosts.status, status.value))
+                .orderBy(desc(blogPosts.createdAt));
+
+            return results.map(row => BlogMapper.toDomain(row));
+        } catch (error: any) {
+            throw new InfrastructureError(`Failed to find blog posts by status: ${error.message}`);
+        }
+    }
+
+    async findByStatusPaginated(
         status: ContentStatus,
         page: number,
         limit: number
-    ): Promise<BlogSearchResult> {
+    ): Promise<any> {
         try {
             const offset = (page - 1) * limit;
             const whereConditions = eq(blogPosts.status, status.value);
 
             // Get total count
-            const totalResult = await this.database
+            const totalResult = await this._database
                 .select({ count: count() })
                 .from(blogPosts)
                 .where(whereConditions);
@@ -165,7 +179,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
             const total = totalResult[0]?.count || 0;
 
             // Get paginated results
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(blogPosts)
                 .where(whereConditions)
@@ -186,7 +200,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
         }
     }
 
-    async search(filters: BlogSearchFilters): Promise<BlogSearchResult> {
+    async search(filters: BlogSearchCriteria): Promise<any> {
         try {
             const page = Math.max(1, Math.floor((filters.offset || 0) / (filters.limit || 10)) + 1);
             const limit = filters.limit || 10;
@@ -201,7 +215,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
             }
 
             // Get total count
-            const totalResult = await this.database
+            const totalResult = await this._database
                 .select({ count: count() })
                 .from(blogPosts)
                 .where(whereConditions);
@@ -209,7 +223,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
             const total = totalResult[0]?.count || 0;
 
             // Get paginated results
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(blogPosts)
                 .where(whereConditions)
@@ -232,7 +246,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
 
     async count(): Promise<number> {
         try {
-            const result = await this.database
+            const result = await this._database
                 .select({ count: count() })
                 .from(blogPosts);
 
@@ -244,14 +258,14 @@ export class DrizzleBlogRepository implements IBlogRepository {
     }
 
     async findAll(
-        filters?: BlogSearchFilters
-    ): Promise<BlogSearchResult> {
+        filters?: BlogSearchCriteria
+    ): Promise<any> {
         try {
             const whereConditions = this.buildWhereConditions(filters);
             const { sortBy = 'createdAt', sortOrder = 'desc', limit = 10, offset = 0 } = {};
 
             // Get total count
-            const totalResult = await this.database
+            const totalResult = await this._database
                 .select({ count: count() })
                 .from(blogPosts)
                 .where(whereConditions);
@@ -261,7 +275,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
             // Get posts with pagination
             const orderBy = this.getOrderBy(sortBy, sortOrder);
 
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(blogPosts)
                 .where(whereConditions)
@@ -282,16 +296,15 @@ export class DrizzleBlogRepository implements IBlogRepository {
         }
     }
 
-    async findPublished(
-        page: number,
-        limit: number
-    ): Promise<BlogSearchResult> {
+    async findPublished(criteria?: any): Promise<any> {
         try {
+            const page = criteria?.page || 1;
+            const limit = criteria?.limit || 10;
             const offset = (page - 1) * limit;
             const whereConditions = eq(blogPosts.status, 'published');
 
             // Get total count
-            const totalResult = await this.database
+            const totalResult = await this._database
                 .select({ count: count() })
                 .from(blogPosts)
                 .where(whereConditions);
@@ -299,7 +312,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
             const total = totalResult[0]?.count || 0;
 
             // Get paginated results
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(blogPosts)
                 .where(whereConditions)
@@ -320,17 +333,32 @@ export class DrizzleBlogRepository implements IBlogRepository {
         }
     }
 
-    async findByCategory(
+    async findByCategory(category: BlogCategory, limit?: number): Promise<BlogPost[]> {
+        try {
+            const results = await this._database
+                .select()
+                .from(blogPosts)
+                .where(eq(blogPosts.category, category.value))
+                .orderBy(desc(blogPosts.createdAt))
+                .limit(limit || 10);
+
+            return results.map(row => BlogMapper.toDomain(row));
+        } catch (error: any) {
+            throw new InfrastructureError(`Failed to find blog posts by category: ${error.message}`);
+        }
+    }
+
+    async findByCategoryPaginated(
         category: BlogCategory,
         page: number,
         limit: number
-    ): Promise<BlogSearchResult> {
+    ): Promise<any> {
         try {
             const offset = (page - 1) * limit;
             const whereConditions = eq(blogPosts.category, category.value);
 
             // Get total count
-            const totalResult = await this.database
+            const totalResult = await this._database
                 .select({ count: count() })
                 .from(blogPosts)
                 .where(whereConditions);
@@ -338,7 +366,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
             const total = totalResult[0]?.count || 0;
 
             // Get paginated results
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(blogPosts)
                 .where(whereConditions)
@@ -359,17 +387,32 @@ export class DrizzleBlogRepository implements IBlogRepository {
         }
     }
 
-    async findByAuthor(
+    async findByAuthor(author: string, limit?: number): Promise<BlogPost[]> {
+        try {
+            const results = await this._database
+                .select()
+                .from(blogPosts)
+                .where(eq(blogPosts.author, author))
+                .orderBy(desc(blogPosts.createdAt))
+                .limit(limit || 10);
+
+            return results.map(row => BlogMapper.toDomain(row));
+        } catch (error: any) {
+            throw new InfrastructureError(`Failed to find blog posts by author: ${error.message}`);
+        }
+    }
+
+    async findByAuthorPaginated(
         author: string,
         page: number,
         limit: number
-    ): Promise<BlogSearchResult> {
+    ): Promise<any> {
         try {
             const offset = (page - 1) * limit;
             const whereConditions = eq(blogPosts.author, author);
 
             // Get total count
-            const totalResult = await this.database
+            const totalResult = await this._database
                 .select({ count: count() })
                 .from(blogPosts)
                 .where(whereConditions);
@@ -377,7 +420,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
             const total = totalResult[0]?.count || 0;
 
             // Get paginated results
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(blogPosts)
                 .where(whereConditions)
@@ -402,7 +445,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
         try {
             // Since the current schema doesn't have a featured field, 
             // we'll return the most recent published posts
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(blogPosts)
                 .where(eq(blogPosts.status, 'published'))
@@ -418,8 +461,8 @@ export class DrizzleBlogRepository implements IBlogRepository {
 
     async searchByText(
         searchTerm: string,
-        filters?: BlogSearchFilters
-    ): Promise<BlogSearchResult> {
+        filters?: BlogSearchCriteria
+    ): Promise<any> {
         try {
             const whereConditions = and(
                 this.buildWhereConditions(filters),
@@ -432,7 +475,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
             const { sortBy = 'createdAt', sortOrder = 'desc', limit = 10, offset = 0 } = {};
 
             // Get total count
-            const totalResult = await this.database
+            const totalResult = await this._database
                 .select({ count: count() })
                 .from(blogPosts)
                 .where(whereConditions);
@@ -442,7 +485,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
             // Get posts with pagination
             const orderBy = this.getOrderBy(sortBy, sortOrder);
 
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(blogPosts)
                 .where(whereConditions)
@@ -476,7 +519,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
             // For now, search in content for tag-like terms
             const tagConditions = tags.map(tag => like(blogPosts.content, `%${tag}%`));
 
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(blogPosts)
                 .where(or(...tagConditions))
@@ -491,7 +534,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
 
     async countByStatus(status: ContentStatus): Promise<number> {
         try {
-            const result = await this.database
+            const result = await this._database
                 .select({ count: count() })
                 .from(blogPosts)
                 .where(eq(blogPosts.status, status.value));
@@ -505,7 +548,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
 
     async countByCategory(category: BlogCategory): Promise<number> {
         try {
-            const result = await this.database
+            const result = await this._database
                 .select({ count: count() })
                 .from(blogPosts)
                 .where(eq(blogPosts.category, category.value));
@@ -519,7 +562,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
 
     async findRelated(blogPost: BlogPost, limit: number = 5): Promise<BlogPost[]> {
         try {
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(blogPosts)
                 .where(
@@ -549,7 +592,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
                 )
                 : like(blogPosts.title, `%${slug}%`);
 
-            const result = await this.database
+            const result = await this._database
                 .select({ count: count() })
                 .from(blogPosts)
                 .where(whereConditions);
@@ -563,7 +606,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
     async findBySlug(slug: string): Promise<BlogPost | null> {
         // Note: Current schema doesn't have slug field, so we'll use title as approximation
         try {
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(blogPosts)
                 .where(like(blogPosts.title, `%${slug}%`))
@@ -582,7 +625,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
 
     async findRecent(limit: number = 10): Promise<BlogPost[]> {
         try {
-            const results = await this.database
+            const results = await this._database
                 .select()
                 .from(blogPosts)
                 .where(eq(blogPosts.status, 'published'))
@@ -603,7 +646,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
 
     async archiveOldPosts(olderThan: Date): Promise<number> {
         try {
-            const result = await this.database
+            const result = await this._database
                 .update(blogPosts)
                 .set({ status: 'archived' })
                 .where(
@@ -631,14 +674,14 @@ export class DrizzleBlogRepository implements IBlogRepository {
         try {
             // Get total counts by status
             const [totalResult, publishedResult, draftResult, archivedResult] = await Promise.all([
-                this.database.select({ count: count() }).from(blogPosts),
-                this.database.select({ count: count() }).from(blogPosts).where(eq(blogPosts.status, 'published')),
-                this.database.select({ count: count() }).from(blogPosts).where(eq(blogPosts.status, 'draft')),
-                this.database.select({ count: count() }).from(blogPosts).where(eq(blogPosts.status, 'archived'))
+                this._database.select({ count: count() }).from(blogPosts),
+                this._database.select({ count: count() }).from(blogPosts).where(eq(blogPosts.status, 'published')),
+                this._database.select({ count: count() }).from(blogPosts).where(eq(blogPosts.status, 'draft')),
+                this._database.select({ count: count() }).from(blogPosts).where(eq(blogPosts.status, 'archived'))
             ]);
 
             // Get posts by category
-            const categoryResults = await this.database
+            const categoryResults = await this._database
                 .select({
                     category: blogPosts.category,
                     count: count()
@@ -652,7 +695,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
             });
 
             // Get average reading time
-            const avgResult = await this.database
+            const avgResult = await this._database
                 .select({
                     avg: sql<number>`AVG(${blogPosts.readingTime})`
                 })
@@ -672,7 +715,7 @@ export class DrizzleBlogRepository implements IBlogRepository {
         }
     }
 
-    private buildWhereConditions(filters?: BlogSearchFilters) {
+    private buildWhereConditions(filters?: BlogSearchCriteria) {
         if (!filters) return undefined;
 
         const conditions = [];

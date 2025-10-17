@@ -25,6 +25,10 @@ interface LandResultsProps {
   onRetry?: () => void;
   onViewChange?: (view: "results" | "map") => void;
   currentView?: "results" | "map";
+  onSortChange?: (sortBy: string) => void;
+  sortBy?: string;
+  view?: "grid" | "list" | "map";
+  onViewModeChange?: (view: "grid" | "list" | "map") => void;
   className?: string;
 }
 
@@ -36,10 +40,18 @@ export function LandResults({
   onRetry,
   onViewChange,
   currentView = "results",
+  onSortChange,
+  sortBy: externalSortBy = "newest",
+  view: externalView = "grid",
+  onViewModeChange,
   className,
 }: LandResultsProps) {
-  const [view, setView] = useState<"grid" | "list">("grid");
-  const [sortBy, setSortBy] = useState("newest");
+  // Use external state if provided, otherwise fall back to local state
+  const [localView, setLocalView] = useState<"grid" | "list">("grid");
+  const [localSortBy, setLocalSortBy] = useState("newest");
+
+  const view = onViewModeChange ? externalView : localView;
+  const sortBy = onSortChange ? externalSortBy : localSortBy;
 
   const sortOptions = [
     { value: "newest", label: "Más recientes" },
@@ -67,7 +79,7 @@ export function LandResults({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-semibold">
-                {isLoading ? "Buscando..." : `${total} terrenos encontrados`}
+                {total} terrenos encontrados
               </h2>
               {total > 0 && (
                 <Badge variant="secondary">
@@ -78,7 +90,16 @@ export function LandResults({
 
             <div className="flex items-center gap-2">
               {/* Sort Options */}
-              <Select value={sortBy} onValueChange={setSortBy}>
+              <Select
+                value={sortBy}
+                onValueChange={(value) => {
+                  if (onSortChange) {
+                    onSortChange(value);
+                  } else {
+                    setLocalSortBy(value);
+                  }
+                }}
+              >
                 <SelectTrigger className="w-48">
                   <SortAsc className="mr-2 h-4 w-4" />
                   <SelectValue />
@@ -101,7 +122,13 @@ export function LandResults({
                     "rounded-r-none",
                     view === "grid" && "bg-muted"
                   )}
-                  onClick={() => setView("grid")}
+                  onClick={() => {
+                    if (onViewModeChange) {
+                      onViewModeChange("grid");
+                    } else {
+                      setLocalView("grid");
+                    }
+                  }}
                 >
                   <LayoutGrid className="h-4 w-4" />
                 </Button>
@@ -112,7 +139,13 @@ export function LandResults({
                     "rounded-none border-x",
                     view === "list" && "bg-muted"
                   )}
-                  onClick={() => setView("list")}
+                  onClick={() => {
+                    if (onViewModeChange) {
+                      onViewModeChange("list");
+                    } else {
+                      setLocalView("list");
+                    }
+                  }}
                 >
                   <List className="h-4 w-4" />
                 </Button>
@@ -121,10 +154,14 @@ export function LandResults({
                   size="sm"
                   className={cn(
                     "rounded-l-none",
-                    currentView === "map" && "bg-muted"
+                    (currentView === "map" || view === "map") && "bg-muted"
                   )}
                   onClick={() => {
-                    onViewChange?.("map");
+                    if (onViewModeChange) {
+                      onViewModeChange("map");
+                    } else {
+                      onViewChange?.("map");
+                    }
                   }}
                 >
                   <MapPin className="h-4 w-4" />

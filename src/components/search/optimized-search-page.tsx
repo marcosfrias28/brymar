@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useTransition, useOptimistic, useActionState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Building2, TreePine } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PageTitle } from "@/components/ui/page-title";
 import { RealTimeSearchFilters } from "./real-time-search-filters";
 import { RealTimeLandFilters } from "./real-time-land-filters";
 import { MobileSearchFilters } from "./mobile-search-filters";
@@ -14,188 +13,162 @@ import { LandResults } from "./land-results";
 import { SearchMapView } from "./search-map-view";
 import { searchPropertiesAction } from "@/presentation/server-actions/property-actions";
 import { searchLandsAction } from "@/presentation/server-actions/land-actions";
+import {
+  SearchSkeleton,
+  MobileSearchSkeleton,
+} from "@/components/ui/search-skeleton";
+import {
+  FiltersSkeleton,
+  MobileFiltersSkeleton,
+} from "@/components/ui/filters-skeleton";
+import { SearchLandsFilters } from "@/presentation/hooks/use-lands";
 import Logo from "../ui/logo";
 import { AuthButtons } from "../auth/auth-buttons";
 
-interface SearchState {
-  properties: any[];
-  lands: any[];
-  total: number;
-  isLoading: boolean;
-  error?: string;
+interface BaseSearchFilters {
+  location?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  bedrooms?: string;
+  bathrooms?: string;
+  minArea?: number;
+  maxArea?: number;
+  amenities?: string[];
 }
+
+interface PropertySearchFilters extends BaseSearchFilters {
+  query?: string;
+  propertyType?: string;
+  propertyTypes?: string[];
+  features?: string[];
+  status?:
+    | "draft"
+    | "published"
+    | "sold"
+    | "rented"
+    | "withdrawn"
+    | "expired"
+    | "archived";
+  sortBy?:
+    | "price"
+    | "area"
+    | "bedrooms"
+    | "bathrooms"
+    | "createdAt"
+    | "updatedAt";
+  sortOrder?: "asc" | "desc";
+}
+
+type SearchFilters = PropertySearchFilters | SearchLandsFilters;
 
 export function OptimizedSearchPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+  const [view, setView] = React.useState<"results" | "map">("results");
+  const [viewMode, setViewMode] = React.useState<"grid" | "list" | "map">(
+    "grid"
+  );
+  const [sortBy, setSortBy] = React.useState("newest");
 
-  // Get search type from URL or default to properties
+  // Get search type from URL
   const searchType =
     (searchParams.get("type") as "properties" | "lands") || "properties";
-  const [view, setView] = useState<"results" | "map">("results");
-  const [searchState, setSearchState] = useState<SearchState>({
-    properties: [],
-    lands: [],
-    total: 0,
-    isLoading: false,
-  });
 
-  // Memoize current filters to prevent unnecessary re-renders
-  const currentFilters = useMemo(() => {
-    const filters: Record<string, any> = {};
+  // Extract current filters from URL with React 19 optimizations
+  const currentFilters = React.useMemo(() => {
+    const baseFilters: BaseSearchFilters = {};
 
-    // Common filters
-    const location = searchParams.get("location");
-    const propertyType = searchParams.get("propertyType");
-    const status = searchParams.get("status");
-    const minPrice = searchParams.get("minPrice");
-    const maxPrice = searchParams.get("maxPrice");
-    const bedrooms = searchParams.get("bedrooms");
-    const bathrooms = searchParams.get("bathrooms");
-    const minArea = searchParams.get("minArea");
-    const maxArea = searchParams.get("maxArea");
-    const amenities = searchParams.get("amenities");
-    const sortBy = searchParams.get("sortBy");
-
-    if (location) filters.location = location;
-    if (propertyType) filters.propertyType = propertyType;
-    if (status) filters.status = status;
-    if (minPrice) filters.minPrice = parseInt(minPrice);
-    if (maxPrice) filters.maxPrice = parseInt(maxPrice);
-    if (bedrooms) filters.bedrooms = bedrooms;
-    if (bathrooms) filters.bathrooms = bathrooms;
-    if (minArea) filters.minArea = parseInt(minArea);
-    if (maxArea) filters.maxArea = parseInt(maxArea);
-    if (amenities) filters.amenities = amenities.split(",");
-    if (sortBy) filters.sortBy = sortBy;
-
-    return filters;
-  }, [searchParams]);
-
-  // Debounce timer ref
-  const debounceTimerRef = React.useRef<NodeJS.Timeout | null>(null);
-
-  // Stable search function
-  const performSearch = useCallback(async (filters: Record<string, any>) => {
-    // Clear existing timer
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-
-    // Set new timer
-    debounceTimerRef.current = setTimeout(async () => {
-      // Always perform search, even with empty filters to show all properties
-
-      setSearchState((prev) => ({
-        ...prev,
-        isLoading: true,
-        error: undefined,
-      }));
-
-      try {
-        // Create FormData from filters
-        const formData = new FormData();
-        Object.entries(filters).forEach(([key, value]) => {
-          if (value !== undefined && value !== null && value !== "") {
-            if (Array.isArray(value)) {
-              value.forEach((item) => formData.append(key, item));
-            } else {
-              formData.append(key, value.toString());
-            }
-          }
-        });
-
-        // Use different actions based on search type
-        const result =
-          searchType === "properties"
-            ? await searchPropertiesAction(formData)
-            : await searchLandsAction(formData);
-
-        if (result.success && result.data) {
-          if (searchType === "properties") {
-            const propertyData = result.data as {
-              properties: any[];
-              total: number;
-              totalPages: number;
-              currentPage: number;
-            };
-            setSearchState({
-              properties: propertyData.properties || [],
-              lands: [],
-              total: propertyData.total || 0,
-              isLoading: false,
-            });
-          } else {
-            const landData = result.data as {
-              lands: any[];
-              total: number;
-              totalPages: number;
-              currentPage: number;
-            };
-            setSearchState({
-              properties: [],
-              lands: landData.lands || [],
-              total: landData.total || 0,
-              isLoading: false,
-            });
+    // Extract all search parameters efficiently
+    for (const [key, value] of searchParams.entries()) {
+      if (key !== "type" && value) {
+        if (key === "amenities") {
+          baseFilters[key] = value.split(",");
+        } else if (
+          ["minPrice", "maxPrice", "minArea", "maxArea"].includes(key)
+        ) {
+          const numValue = parseInt(value);
+          if (!isNaN(numValue)) {
+            (baseFilters as any)[key] = numValue;
           }
         } else {
-          setSearchState({
-            properties: [],
-            lands: [],
-            total: 0,
-            isLoading: false,
-            error: result.error || "Error en la búsqueda",
-          });
+          (baseFilters as any)[key] = value;
         }
-      } catch (error) {
-        // Note: Search error - would be logged in production
-        setSearchState({
-          properties: [],
-          lands: [],
-          total: 0,
-          isLoading: false,
-          error: "Error inesperado en la búsqueda",
-        });
       }
-    }, 300); // 300ms debounce
-  }, []);
+    }
 
-  // Update URL with new filter values
-  const updateURL = useCallback(
-    (newFilters: Record<string, any>) => {
-      const params = new URLSearchParams();
+    // Return type-specific filters based on search type
+    if (searchType === "properties") {
+      return {
+        ...baseFilters,
+        propertyType: searchParams.get("propertyType") || undefined,
+        status: searchParams.get("status") as PropertySearchFilters["status"],
+      } as PropertySearchFilters;
+    } else {
+      return {
+        ...baseFilters,
+        landType:
+          searchParams.get("landType") ||
+          searchParams.get("propertyType") ||
+          undefined,
+        status: searchParams.get("status") as SearchLandsFilters["status"],
+      } as SearchLandsFilters;
+    }
+  }, [searchParams, searchType]);
 
-      // Always include search type
-      params.set("type", searchType);
-
-      // Add all non-empty filter values
-      Object.entries(newFilters).forEach(([key, value]) => {
-        if (
-          value !== undefined &&
-          value !== null &&
-          value !== "" &&
-          value !== 0
-        ) {
-          if (Array.isArray(value) && value.length > 0) {
-            params.set(key, value.join(","));
-          } else if (!Array.isArray(value)) {
-            params.set(key, value.toString());
-          }
-        }
-      });
-
-      // Update URL without page reload
-      const newURL = `${window.location.pathname}?${params.toString()}`;
-      router.replace(newURL, { scroll: false });
+  // Modern React 19 Actions with useActionState
+  const [propertyState, propertyAction, propertyPending] = useActionState(
+    async (prevState: any, formData: FormData) => {
+      try {
+        const result = await searchPropertiesAction(formData);
+        return result.success
+          ? { ...result.data, error: null }
+          : { properties: [], total: 0, error: result.error };
+      } catch (error) {
+        return {
+          properties: [],
+          total: 0,
+          error: "Error inesperado en la búsqueda",
+        };
+      }
     },
-    [router, searchType]
+    { properties: [], total: 0, error: null }
   );
 
-  // Handle filter changes
-  const handleFilterChange = useCallback(
+  const [landState, landAction, landPending] = useActionState(
+    async (prevState: any, formData: FormData) => {
+      try {
+        const result = await searchLandsAction(formData);
+        return result.success
+          ? { ...result.data, error: null }
+          : { lands: [], total: 0, error: result.error };
+      } catch (error) {
+        return {
+          lands: [],
+          total: 0,
+          error: "Error inesperado en la búsqueda",
+        };
+      }
+    },
+    { lands: [], total: 0, error: null }
+  );
+
+  // Optimistic updates for immediate UI feedback
+  const [optimisticFilters, setOptimisticFilters] = useOptimistic(
+    currentFilters,
+    (
+      state: PropertySearchFilters | SearchLandsFilters,
+      newFilters: Partial<PropertySearchFilters | SearchLandsFilters>
+    ) => ({
+      ...state,
+      ...newFilters,
+    })
+  );
+
+  // Handle filter changes with optimistic updates and transitions
+  const handleFilterChange = React.useCallback(
     (filterName: string, value: any) => {
-      const newFilters = { ...currentFilters, [filterName]: value };
+      const newFilters = { ...currentFilters } as any;
 
       // Remove filter if value is empty/default
       if (
@@ -207,40 +180,206 @@ export function OptimizedSearchPage() {
         (filterName.includes("Area") && value === 0)
       ) {
         delete newFilters[filterName];
+      } else {
+        // Handle type-specific mappings
+        if (filterName === "propertyType" && searchType === "lands") {
+          newFilters["landType"] = value;
+        } else if (filterName === "landType" && searchType === "properties") {
+          newFilters["propertyType"] = value;
+        } else {
+          newFilters[filterName] = value;
+        }
       }
 
-      updateURL(newFilters);
+      // Optimistic update for immediate UI feedback
+      setOptimisticFilters(newFilters);
+
+      // Update URL and trigger search in transition
+      startTransition(() => {
+        const params = new URLSearchParams();
+        params.set("type", searchType);
+
+        Object.entries(newFilters).forEach(([key, val]) => {
+          if (val !== undefined && val !== null && val !== "") {
+            // Map landType back to propertyType for URL consistency
+            const urlKey = key === "landType" ? "propertyType" : key;
+
+            if (Array.isArray(val) && val.length > 0) {
+              params.set(urlKey, val.join(","));
+            } else if (!Array.isArray(val)) {
+              params.set(urlKey, val.toString());
+            }
+          }
+        });
+
+        const newURL = `/search?${params.toString()}`;
+        router.replace(newURL, { scroll: false });
+
+        // Create FormData and trigger search action
+        const formData = new FormData();
+        Object.entries(newFilters).forEach(([key, val]) => {
+          if (val !== undefined && val !== null && val !== "") {
+            if (Array.isArray(val)) {
+              val.forEach((item) => formData.append(key, item));
+            } else {
+              formData.append(key, val.toString());
+            }
+          }
+        });
+
+        // Trigger appropriate action
+        if (searchType === "properties") {
+          propertyAction(formData);
+        } else {
+          landAction(formData);
+        }
+      });
     },
-    [currentFilters, updateURL]
+    [
+      currentFilters,
+      searchType,
+      router,
+      propertyAction,
+      landAction,
+      setOptimisticFilters,
+    ]
   );
 
   // Handle search type change
-  const handleSearchTypeChange = useCallback(
+  const handleSearchTypeChange = React.useCallback(
     (newType: "properties" | "lands") => {
-      // Clear all filters when changing search type
-      router.replace(`/search?type=${newType}`, { scroll: false });
+      startTransition(() => {
+        router.replace(`/search?type=${newType}`, { scroll: false });
+      });
     },
     [router]
   );
 
-  // Trigger search when filters change
-  useEffect(() => {
-    performSearch(currentFilters);
-  }, [currentFilters, performSearch]);
+  // Handle sort change
+  const handleSortChange = React.useCallback(
+    (newSortBy: string) => {
+      setSortBy(newSortBy);
+      // Trigger search with new sort
+      handleFilterChange("sortBy", newSortBy);
+    },
+    [handleFilterChange]
+  );
 
-  // Handle retry
-  const handleRetry = useCallback(() => {
-    performSearch(currentFilters);
-  }, [currentFilters, performSearch]);
-
-  // Cleanup debounce timer on unmount
-  useEffect(() => {
-    return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
+  // Handle view mode change
+  const handleViewModeChange = React.useCallback(
+    (newViewMode: "grid" | "list" | "map") => {
+      setViewMode(newViewMode);
+      if (newViewMode === "map") {
+        setView("map");
+      } else {
+        setView("results");
       }
-    };
-  }, []);
+    },
+    []
+  );
+
+  // Get current results and loading state
+  const currentResults =
+    searchType === "properties" ? propertyState : landState;
+  const isLoading = isPending || propertyPending || landPending;
+
+  // Handle retry with modern pattern
+  const handleRetry = React.useCallback(() => {
+    const formData = new FormData();
+    Object.entries(currentFilters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        if (Array.isArray(value)) {
+          value.forEach((item) => formData.append(key, item));
+        } else {
+          formData.append(key, value.toString());
+        }
+      }
+    });
+
+    startTransition(() => {
+      if (searchType === "properties") {
+        propertyAction(formData);
+      } else {
+        landAction(formData);
+      }
+    });
+  }, [currentFilters, searchType, propertyAction, landAction]);
+
+  // Auto-trigger search on mount and search type change
+  React.useEffect(() => {
+    const formData = new FormData();
+    Object.entries(currentFilters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        if (Array.isArray(value)) {
+          value.forEach((item) => formData.append(key, item));
+        } else {
+          formData.append(key, value.toString());
+        }
+      }
+    });
+
+    startTransition(() => {
+      if (searchType === "properties") {
+        propertyAction(formData);
+      } else {
+        landAction(formData);
+      }
+    });
+  }, [searchType]); // Only trigger on search type change
+
+  // Check if we should show skeleton (loading and no results yet)
+  const shouldShowSkeleton =
+    isLoading &&
+    (searchType === "properties"
+      ? !currentResults.properties?.length
+      : !currentResults.lands?.length);
+
+  // Sort results based on sortBy
+  const sortedResults = React.useMemo(() => {
+    if (searchType === "properties" && currentResults.properties) {
+      const sorted = [...currentResults.properties];
+
+      switch (sortBy) {
+        case "price-low":
+          return sorted.sort((a, b) => a.price.amount - b.price.amount);
+        case "price-high":
+          return sorted.sort((a, b) => b.price.amount - a.price.amount);
+        case "area-large":
+          return sorted.sort((a, b) => b.features.area - a.features.area);
+        case "area-small":
+          return sorted.sort((a, b) => a.features.area - b.features.area);
+        case "newest":
+        default:
+          return sorted.sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+      }
+    } else if (searchType === "lands" && currentResults.lands) {
+      const sorted = [...currentResults.lands];
+
+      switch (sortBy) {
+        case "price-low":
+          return sorted.sort((a, b) => a.price - b.price);
+        case "price-high":
+          return sorted.sort((a, b) => b.price - a.price);
+        case "area-large":
+          return sorted.sort((a, b) => b.area - a.area);
+        case "area-small":
+          return sorted.sort((a, b) => a.area - b.area);
+        case "newest":
+        default:
+          return sorted.sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+      }
+    }
+
+    return searchType === "properties"
+      ? currentResults.properties || []
+      : currentResults.lands || [];
+  }, [currentResults, sortBy, searchType]);
 
   return (
     <div className="h-dvh bg-background flex flex-col overflow-hidden">
@@ -277,7 +416,7 @@ export function OptimizedSearchPage() {
           </div>
         </div>
 
-        {/* Mobile Filters - Compact */}
+        {/* Mobile Filters - Compact with Suspense */}
         <div className="flex-shrink-0 border-b bg-background max-h-48 overflow-y-auto">
           <div className="p-2">
             <Tabs
@@ -288,42 +427,56 @@ export function OptimizedSearchPage() {
               className="w-full"
             >
               <TabsContent value="properties" className="mt-0">
-                <MobileSearchFilters
-                  filters={currentFilters}
-                  onFilterChange={handleFilterChange}
-                  isLoading={searchState.isLoading}
-                />
+                {shouldShowSkeleton ? (
+                  <MobileFiltersSkeleton />
+                ) : (
+                  <MobileSearchFilters
+                    filters={optimisticFilters as PropertySearchFilters}
+                    onFilterChange={handleFilterChange}
+                    isLoading={isLoading}
+                  />
+                )}
               </TabsContent>
               <TabsContent value="lands" className="mt-0">
-                <MobileLandFilters
-                  filters={currentFilters}
-                  onFilterChange={handleFilterChange}
-                  isLoading={searchState.isLoading}
-                />
+                {shouldShowSkeleton ? (
+                  <MobileFiltersSkeleton />
+                ) : (
+                  <MobileLandFilters
+                    filters={optimisticFilters as SearchLandsFilters}
+                    onFilterChange={handleFilterChange}
+                    isLoading={isLoading}
+                  />
+                )}
               </TabsContent>
             </Tabs>
           </div>
         </div>
 
-        {/* Mobile Results */}
+        {/* Mobile Results with conditional skeleton */}
         <div className="flex-1 overflow-hidden">
           {view === "results" ? (
-            searchType === "properties" ? (
+            shouldShowSkeleton ? (
+              <MobileSearchSkeleton />
+            ) : searchType === "properties" ? (
               <PropertyResults
-                properties={searchState.properties}
-                total={searchState.total}
-                isLoading={searchState.isLoading}
-                error={searchState.error}
+                properties={sortedResults as any}
+                total={currentResults.total || 0}
+                isLoading={isLoading}
+                error={currentResults.error}
                 onRetry={handleRetry}
                 onViewChange={setView}
                 currentView={view}
+                onSortChange={handleSortChange}
+                sortBy={sortBy}
+                view={viewMode}
+                onViewModeChange={handleViewModeChange}
               />
             ) : (
               <LandResults
-                lands={searchState.lands}
-                total={searchState.total}
-                isLoading={searchState.isLoading}
-                error={searchState.error}
+                lands={sortedResults as any}
+                total={currentResults.total || 0}
+                isLoading={isLoading}
+                error={currentResults.error}
                 onRetry={handleRetry}
                 onViewChange={setView}
                 currentView={view}
@@ -333,8 +486,8 @@ export function OptimizedSearchPage() {
             <SearchMapView
               properties={
                 searchType === "properties"
-                  ? searchState.properties
-                  : searchState.lands
+                  ? currentResults.properties || []
+                  : currentResults.lands || []
               }
               className="h-full"
               onViewChange={setView}
@@ -377,7 +530,7 @@ export function OptimizedSearchPage() {
               </Tabs>
             </div>
 
-            {/* Filters - Optimized for desktop */}
+            {/* Filters - Optimized for desktop with Suspense */}
             <div className="flex-1 overflow-y-auto">
               <div className="p-2">
                 <Tabs
@@ -388,18 +541,26 @@ export function OptimizedSearchPage() {
                   className="w-full"
                 >
                   <TabsContent value="properties" className="mt-0">
-                    <RealTimeSearchFilters
-                      filters={currentFilters}
-                      onFilterChange={handleFilterChange}
-                      isLoading={searchState.isLoading}
-                    />
+                    {shouldShowSkeleton ? (
+                      <FiltersSkeleton />
+                    ) : (
+                      <RealTimeSearchFilters
+                        filters={optimisticFilters as PropertySearchFilters}
+                        onFilterChange={handleFilterChange}
+                        isLoading={isLoading}
+                      />
+                    )}
                   </TabsContent>
                   <TabsContent value="lands" className="mt-0">
-                    <RealTimeLandFilters
-                      filters={currentFilters}
-                      onFilterChange={handleFilterChange}
-                      isLoading={searchState.isLoading}
-                    />
+                    {shouldShowSkeleton ? (
+                      <FiltersSkeleton />
+                    ) : (
+                      <RealTimeLandFilters
+                        filters={optimisticFilters as SearchLandsFilters}
+                        onFilterChange={handleFilterChange}
+                        isLoading={isLoading}
+                      />
+                    )}
                   </TabsContent>
                 </Tabs>
               </div>
@@ -407,25 +568,31 @@ export function OptimizedSearchPage() {
           </div>
         </div>
 
-        {/* Right Content - Results and Map */}
+        {/* Right Content - Results and Map with conditional skeleton */}
         <div className="flex-1 overflow-hidden">
           {view === "results" ? (
-            searchType === "properties" ? (
+            shouldShowSkeleton ? (
+              <SearchSkeleton />
+            ) : searchType === "properties" ? (
               <PropertyResults
-                properties={searchState.properties}
-                total={searchState.total}
-                isLoading={searchState.isLoading}
-                error={searchState.error}
+                properties={sortedResults as any}
+                total={currentResults.total || 0}
+                isLoading={isLoading}
+                error={currentResults.error}
                 onRetry={handleRetry}
                 onViewChange={setView}
                 currentView={view}
+                onSortChange={handleSortChange}
+                sortBy={sortBy}
+                view={viewMode}
+                onViewModeChange={handleViewModeChange}
               />
             ) : (
               <LandResults
-                lands={searchState.lands}
-                total={searchState.total}
-                isLoading={searchState.isLoading}
-                error={searchState.error}
+                lands={sortedResults as any}
+                total={currentResults.total || 0}
+                isLoading={isLoading}
+                error={currentResults.error}
                 onRetry={handleRetry}
                 onViewChange={setView}
                 currentView={view}
@@ -435,8 +602,8 @@ export function OptimizedSearchPage() {
             <SearchMapView
               properties={
                 searchType === "properties"
-                  ? searchState.properties
-                  : searchState.lands
+                  ? currentResults.properties || []
+                  : currentResults.lands || []
               }
               className="h-full"
               onViewChange={setView}

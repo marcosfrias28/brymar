@@ -1,5 +1,6 @@
 import { BlogPost } from '@/domain/content/entities/BlogPost';
 import { BlogPostId } from '@/domain/content/value-objects/BlogPostId';
+import { Title } from '@/domain/shared/value-objects/Title';
 import { BlogTitle } from '@/domain/content/value-objects/BlogTitle';
 import { BlogContent } from '@/domain/content/value-objects/BlogContent';
 import { BlogAuthor } from '@/domain/content/value-objects/BlogAuthor';

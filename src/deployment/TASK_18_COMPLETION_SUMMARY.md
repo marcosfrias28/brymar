@@ -61,9 +61,9 @@ Task 18 has been successfully completed with comprehensive end-to-end testing in
   - Concurrent operation testing
   - Animation performance validation
 
-- **Load Testing Infrastructure** (`scripts/load-test-wizard.js`)
-  - Multi-scenario load testing (light, moderate, heavy, stress)
-  - Concurrent user simulation with worker threads
+- **Load Testing Infrastructure** (E2E tests)
+  - Multi-scenario load testing via Playwright
+  - Concurrent user simulation
   - Performance threshold validation
   - Throughput and response time measurement
   - Error rate monitoring under load
@@ -214,13 +214,12 @@ Task 18 has been successfully completed with comprehensive end-to-end testing in
 ### New Files Created:
 
 1. `components/wizard/__tests__/wizard-e2e-integration.test.tsx` - Comprehensive E2E tests
-2. `scripts/load-test-wizard.js` - Multi-scenario load testing infrastructure
-3. `scripts/validate-deployment.js` - Deployment validation automation
-4. `deployment/wizard-deployment-config.ts` - Environment configuration management
-5. `deployment/.env.example` - Environment variable documentation
-6. `lib/monitoring/wizard-health-monitor.ts` - Health monitoring system
-7. `deployment/DEPLOYMENT_CHECKLIST.md` - Complete deployment checklist
-8. `deployment/TASK_18_COMPLETION_SUMMARY.md` - This summary document
+2. `scripts/validate-deployment.js` - Deployment validation automation
+3. `deployment/wizard-deployment-config.ts` - Environment configuration management
+4. `deployment/.env.example` - Environment variable documentation
+5. `lib/monitoring/wizard-health-monitor.ts` - Health monitoring system
+6. `deployment/DEPLOYMENT_CHECKLIST.md` - Complete deployment checklist
+7. `deployment/TASK_18_COMPLETION_SUMMARY.md` - This summary document
 
 ### Enhanced Files:
 

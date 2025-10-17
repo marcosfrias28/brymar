@@ -63,10 +63,10 @@ const SaveWizardDraftInputSchema = z.object({
     draftId: z.string().uuid().optional(),
     userId: z.string().uuid("User ID must be a valid UUID"),
     wizardType: z.enum(["property", "land", "blog"], {
-        errorMap: () => ({ message: "Wizard type must be property, land, or blog" }),
+        message: "Wizard type must be property, land, or blog",
     }),
     wizardConfigId: IdSchema,
-    formData: z.record(z.any()),
+    formData: z.record(z.string(), z.any()),
     currentStep: ShortTextSchema,
     title: z.string().min(1).max(200).optional(),
     description: z.string().min(1).max(500).optional(),

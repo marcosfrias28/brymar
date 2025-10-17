@@ -142,6 +142,16 @@ export class SearchPropertiesInput {
         if (formData.get('minArea')) data.minArea = parseFloat(formData.get('minArea') as string);
         if (formData.get('maxArea')) data.maxArea = parseFloat(formData.get('maxArea') as string);
 
+        // Handle single bedroom/bathroom parameters (from search page)
+        if (formData.get('bedrooms')) {
+            const bedrooms = parseInt(formData.get('bedrooms') as string);
+            data.minBedrooms = bedrooms;
+        }
+        if (formData.get('bathrooms')) {
+            const bathrooms = parseInt(formData.get('bathrooms') as string);
+            data.minBathrooms = bathrooms;
+        }
+
         // Parse string filters
         if (formData.get('location')) data.location = formData.get('location') as string;
         if (formData.get('city')) data.city = formData.get('city') as string;
@@ -152,6 +162,10 @@ export class SearchPropertiesInput {
         // Parse array filters
         if (formData.get('propertyTypes')) {
             data.propertyTypes = (formData.get('propertyTypes') as string).split(',').map(t => t.trim()).filter(t => t.length > 0) as any[];
+        }
+        // Handle single propertyType parameter (from search page)
+        if (formData.get('propertyType')) {
+            data.propertyTypes = [formData.get('propertyType') as any];
         }
         if (formData.get('statuses')) {
             data.statuses = (formData.get('statuses') as string).split(',').map(s => s.trim()).filter(s => s.length > 0) as any[];

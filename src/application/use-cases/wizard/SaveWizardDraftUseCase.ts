@@ -4,6 +4,10 @@ import { IWizardDraftRepository } from '@/domain/wizard/repositories/IWizardDraf
 import { WizardDomainService, WizardStepDefinition } from '@/domain/wizard/services/WizardDomainService';
 import { WizardDraft } from '@/domain/wizard/entities/WizardDraft';
 import { WizardDraftId } from '@/domain/wizard/value-objects/WizardDraftId';
+import { WizardType } from '@/domain/wizard/value-objects/WizardType';
+import { WizardFormData } from '@/domain/wizard/value-objects/WizardFormData';
+import { StepProgress } from '@/domain/wizard/value-objects/StepProgress';
+import { CompletionPercentage } from '@/domain/wizard/value-objects/CompletionPercentage';
 import { UserId } from '@/domain/user/value-objects/UserId';
 import { EntityNotFoundError, BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
@@ -20,17 +24,35 @@ export class SaveWizardDraftUseCase {
             if (input.draftId) {
                 // Update existing draft
                 const draftId = WizardDraftId.create(input.draftId);
-                const existingDraft = await this.wizardDraftRepository.findById(draftId);
+                const existingDraftData = await this.wizardDraftRepository.findById(draftId.value);
 
-                if (!existingDraft) {
+                if (!existingDraftData) {
                     throw new EntityNotFoundError('WizardDraft', input.draftId);
                 }
 
                 // Verify ownership
                 const userId = UserId.create(input.userId);
-                if (!existingDraft.getUserId().equals(userId)) {
+                if (existingDraftData.userId !== userId.value) {
                     throw new BusinessRuleViolationError("You don't have permission to update this draft", 'UNAUTHORIZED_DRAFT_UPDATE');
                 }
+
+                // Reconstitute the entity from data
+                const existingDraft = WizardDraft.reconstitute({
+                    id: WizardDraftId.create(existingDraftData.id),
+                    userId: UserId.create(existingDraftData.userId),
+                    wizardType: WizardType.create(existingDraftData.wizardType || "property"),
+                    wizardConfigId: existingDraftData.wizardConfigId || "",
+                    formData: WizardFormData.create(existingDraftData.formData),
+                    currentStep: existingDraftData.stepCompleted?.toString() || "general",
+                    stepProgress: StepProgress.create({}),
+                    completionPercentage: CompletionPercentage.create(
+                        existingDraftData.completionPercentage || 0
+                    ),
+                    title: existingDraftData.title,
+                    description: undefined, // Not available in DraftData
+                    createdAt: existingDraftData.createdAt || new Date(),
+                    updatedAt: existingDraftData.updatedAt || new Date(),
+                });
 
                 // Update the draft
                 existingDraft.updateFormData(input.formData);
@@ -98,8 +120,23 @@ export class SaveWizardDraftUseCase {
                 wizardDraft.updateCompletionPercentage(updatedCompletionPercentage.value);
             }
 
+            // Convert entity back to data for saving
+            const draftData = {
+                id: wizardDraft.getId().value,
+                userId: wizardDraft.getUserId().value,
+                wizardType: wizardDraft.getWizardType().value,
+                wizardConfigId: wizardDraft.getWizardConfigId(),
+                formData: wizardDraft.getFormData().value,
+                stepCompleted: parseInt(wizardDraft.getCurrentStep()) || 0,
+                completionPercentage: wizardDraft.getCompletionPercentage().value,
+                title: wizardDraft.getTitle(),
+                entityType: wizardDraft.getWizardType().value,
+                createdAt: wizardDraft.getCreatedAt(),
+                updatedAt: wizardDraft.getUpdatedAt(),
+            };
+
             // Save the draft
-            await this.wizardDraftRepository.save(wizardDraft);
+            await this.wizardDraftRepository.save(draftData);
 
             return SaveWizardDraftOutput.from(wizardDraft);
         } catch (error) {

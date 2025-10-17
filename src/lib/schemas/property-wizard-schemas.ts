@@ -65,7 +65,7 @@ export const PropertyGeneralSchema = z.object({
         .positive("La superficie debe ser mayor a 0")
         .max(999999, "La superficie es demasiado grande"),
     propertyType: z.nativeEnum(PropertyType, {
-        errorMap: () => ({ message: "Selecciona un tipo de propiedad válido" }),
+        message: "Selecciona un tipo de propiedad válido",
     }),
     bedrooms: z.number().min(0).max(50).optional(),
     bathrooms: z.number().min(0).max(50).optional(),

@@ -1,25 +1,22 @@
 import { z } from 'zod';
 import { User } from './db/schema';
-import type { BetterCallAPIError } from '@/utils/types/types';
+import {
+    handleError,
+    formatErrorResponse,
+    isValidationError,
+    createValidationError,
+    type AppError
+} from './unified-errors';
 
 // ============================================================================
-// GENERIC ACTION SYSTEM - TYPE DEFINITIONS
+// UNIFIED ACTION SYSTEM - TYPE DEFINITIONS
 // ============================================================================
 
 /**
- * Generic ActionState type that replaces all specific action state types.
- * Provides a consistent interface for all server action responses.
+ * Unified ActionState type that provides consistent interface for all server action responses.
+ * Replaces all specific action state types with a single, flexible interface.
  * 
  * @template T - The type of data returned by the action (defaults to void)
- * 
- * @example
- * ```typescript
- * // For actions returning user data
- * type UserActionState = ActionState<{ user: User }>;
- * 
- * // For simple actions without specific data
- * type SimpleActionState = ActionState;
- * ```
  */
 export type ActionState<T = void> = {
     success?: boolean;
@@ -28,24 +25,13 @@ export type ActionState<T = void> = {
     data?: T;
     redirect?: boolean;
     url?: string;
+    code?: string;
+    statusCode?: number;
+    details?: any;
 };
 
 /**
  * Configuration options for createValidatedAction.
- * 
- * @property withUser - When true, automatically retrieves and validates the current user,
- *                      passing it as the second parameter to the action function
- * @property getUserFn - Function to get the current user (required when withUser is true)
- * 
- * @example
- * ```typescript
- * // Action that requires authentication
- * const updateProfile = createValidatedAction(
- *   profileSchema,
- *   updateProfileAction,
- *   { withUser: true, getUserFn: getUser }
- * );
- * ```
  */
 export type ValidatedOptions = {
     withUser?: boolean;
@@ -53,7 +39,7 @@ export type ValidatedOptions = {
 };
 
 /**
- * Type for action functions that work with the new system
+ * Type for action functions that work with the unified system
  */
 export type ActionFunction<TInput, TOutput> = (
     data: TInput,
@@ -61,62 +47,43 @@ export type ActionFunction<TInput, TOutput> = (
 ) => Promise<TOutput>;
 
 // ============================================================================
-// UTILITY FUNCTIONS
+// UNIFIED ERROR HANDLING
 // ============================================================================
 
 /**
- * Centralized error handler for API errors.
- * Extracts error messages from BetterCallAPIError objects and provides consistent error formatting.
- * 
- * @param error - The error to handle (typically BetterCallAPIError)
- * @param fallbackMessage - Message to use if no specific error message is available
- * @returns Formatted error response with success: false and error message
- * 
- * @example
- * ```typescript
- * try {
- *   await apiCall();
- * } catch (error) {
- *   return handleAPIError(error, "Operation failed");
- * }
- * ```
+ * Unified error handler that replaces handleAPIError and other error handlers.
+ * Uses the new unified error system for consistent error handling.
  */
-export function handleAPIError(
+export function handleActionError(
     error: unknown,
     fallbackMessage = "Error desconocido"
-): { success: false; error: string } {
-    const apiError = error as BetterCallAPIError;
+): ActionState {
+    const appError = handleError(error);
+    const response = formatErrorResponse(appError);
+
     return {
         success: false,
-        error: apiError?.body?.message || fallbackMessage
+        error: response.error,
+        code: response.code,
+        statusCode: response.statusCode,
+        details: response.details
     };
 }
 
 /**
  * Utility function to safely parse FormData to a plain JavaScript object.
- * Handles type conversion for numbers, booleans, and files while preserving
- * string-only fields to avoid type issues.
- * 
- * @param formData - The FormData to parse
- * @returns Plain object with appropriately typed values
- * 
- * @example
- * ```typescript
- * const formData = new FormData();
- * formData.append('name', 'John');
- * formData.append('age', '25');
- * formData.append('active', 'true');
- * 
- * const parsed = parseFormData(formData);
- * // Result: { name: 'John', age: 25, active: true }
- * ```
+ * Enhanced to work with the unified schema system.
  */
 export function parseFormData(formData: FormData): Record<string, any> {
     const data: Record<string, any> = {};
     const entries = Array.from(formData.entries());
 
     // Fields that should never be converted to numbers
-    const stringOnlyFields = ['email', 'password', 'name', 'token', 'otp', 'title', 'description', 'location', 'type', 'category', 'author', 'content'];
+    const stringOnlyFields = [
+        'email', 'password', 'name', 'token', 'otp', 'title', 'description',
+        'location', 'type', 'category', 'author', 'content', 'slug', 'label',
+        'value', 'icon', 'wizardType', 'mediaType', 'itemType', 'page', 'section'
+    ];
 
     for (const [key, value] of entries) {
         if (value instanceof File) {
@@ -146,12 +113,6 @@ export function parseFormData(formData: FormData): Record<string, any> {
 
 /**
  * Utility function to create success response
- * @template T - The data type
- * @param data - Optional data to include
- * @param message - Success message
- * @param redirect - Whether to redirect
- * @param url - URL to redirect to
- * @returns Success ActionState
  */
 export function createSuccessResponse<T = void>(
     data?: T,
@@ -164,56 +125,39 @@ export function createSuccessResponse<T = void>(
         data,
         message,
         redirect,
-        url
+        url,
+        statusCode: 200
     };
 }
 
 /**
  * Utility function to create error response
- * @param error - Error message
- * @returns Error ActionState
  */
-export function createErrorResponse(error: string): ActionState {
+export function createErrorResponse(
+    error: string,
+    code?: string,
+    statusCode?: number,
+    details?: any
+): ActionState {
     return {
         success: false,
-        error
+        error,
+        code,
+        statusCode: statusCode || 400,
+        details
     };
 }
 
 /**
- * Unified validation function that replaces validatedAction and validatedActionWithUser.
- * Creates a validated server action that handles form data parsing, schema validation,
- * user authentication (if required), and error handling.
+ * Unified validation function that creates validated server actions.
+ * Uses the new unified error handling and schema system.
  * 
  * @template TInput - The validated input type from the schema
  * @template TOutput - The return type of the action function
  * @param schema - Zod schema for input validation
  * @param action - The action function to execute with validated data
- * @param options - Configuration options (e.g., { withUser: true })
+ * @param options - Configuration options
  * @returns A function that accepts FormData and returns the action result
- * 
- * @example
- * ```typescript
- * // Simple action without user
- * const contactSchema = z.object({
- *   name: z.string().min(2),
- *   email: z.string().email()
- * });
- * 
- * async function contactAction(data: { name: string; email: string }) {
- *   // Handle contact form submission
- *   return createSuccessResponse(undefined, "Message sent");
- * }
- * 
- * export const sendContact = createValidatedAction(contactSchema, contactAction);
- * 
- * // Action with user authentication
- * export const updateProfile = createValidatedAction(
- *   profileSchema,
- *   updateProfileAction,
- *   { withUser: true }
- * );
- * ```
  */
 export function createValidatedAction<TInput, TOutput>(
     schema: z.ZodType<TInput>,
@@ -227,7 +171,15 @@ export function createValidatedAction<TInput, TOutput>(
             const result = schema.safeParse(formObject);
 
             if (!result.success) {
-                return createErrorResponse(result.error.errors[0].message) as TOutput;
+                const validationError = createValidationError(result.error);
+                const errorResponse = formatErrorResponse(validationError);
+                return {
+                    success: false,
+                    error: errorResponse.error,
+                    code: errorResponse.code,
+                    statusCode: errorResponse.statusCode,
+                    details: errorResponse.details
+                } as TOutput;
             }
 
             // Handle user authentication if required
@@ -238,7 +190,11 @@ export function createValidatedAction<TInput, TOutput>(
                 }
                 const currentUser = await options.getUserFn();
                 if (!currentUser) {
-                    return createErrorResponse('User is not authenticated') as TOutput;
+                    return createErrorResponse(
+                        'User is not authenticated',
+                        'AUTH_REQUIRED',
+                        401
+                    ) as TOutput;
                 }
                 user = currentUser;
             }
@@ -246,8 +202,8 @@ export function createValidatedAction<TInput, TOutput>(
             // Execute the action
             return await action(result.data, user);
         } catch (error) {
-            // Handle unexpected errors
-            return handleAPIError(error, 'An unexpected error occurred') as TOutput;
+            // Handle unexpected errors using unified error system
+            return handleActionError(error, 'An unexpected error occurred') as TOutput;
         }
     };
 }

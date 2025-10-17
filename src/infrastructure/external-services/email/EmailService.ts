@@ -93,7 +93,7 @@ export class EmailService {
         subject: options.subject,
         html: options.htmlContent,
         text: options.textContent,
-      };
+      });
 
       // Simulate API call
       // Note: In production, would send actual email via email service

@@ -50,7 +50,7 @@ export const useBlog = (_initialFilters?: Partial<SearchBlogPostsInput>): UseBlo
     const [totalPages, setTotalPages] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [filters, setFiltersState] = useState<SearchBlogPostsInput>(
-        SearchBlogPostsInput.create(initialFilters || {})
+        SearchBlogPostsInput.create(_initialFilters || {})
     );
 
     // Get use cases from container

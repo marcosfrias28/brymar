@@ -16,7 +16,6 @@ const SECURITY_CONFIG = {
         '/api/properties',
         '/api/upload',
         '/api/ai',
-        '/api/signed-upload',
     ],
 
     // Paths that only need basic protection

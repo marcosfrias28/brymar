@@ -2,14 +2,14 @@
 
 import { WizardData } from '@/types/wizard-core';
 
-// Property type enum (currently unused but kept for future use)
-// export enum PropertyType {
-//     HOUSE = "house",
-//     APARTMENT = "apartment",
-//     LAND = "land",
-//     COMMERCIAL = "commercial",
-//     VILLA = "villa",
-// }
+// Property type enum
+export enum PropertyType {
+    HOUSE = "house",
+    APARTMENT = "apartment",
+    LAND = "land",
+    COMMERCIAL = "commercial",
+    VILLA = "villa",
+}
 
 export interface Coordinates {
     latitude: number;

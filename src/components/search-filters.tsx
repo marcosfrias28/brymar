@@ -9,16 +9,16 @@ import {
   LayoutGrid,
   List,
 } from "lucide-react";
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
+} from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { useState } from "react";
 
 interface SearchFiltersProps {
@@ -112,7 +112,8 @@ export function SearchFilters({
         <div className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">
-              Rango de Precio: ${priceRange[0].toLocaleString()} - ${priceRange[1].toLocaleString()}
+              Rango de Precio: ${priceRange[0].toLocaleString()} - $
+              {priceRange[1].toLocaleString()}
             </label>
             <Slider
               min={30}

@@ -11,7 +11,7 @@ export class SearchBlogPostsUseCase {
     async execute(input: SearchBlogPostsInput): Promise<SearchBlogPostsOutput> {
         try {
             // Search for blog posts with pagination
-            const { blogPosts, total } = await this.blogRepository.search({
+            const searchResult = await this.blogRepository.search({
                 search: input.search,
                 status: input.status,
                 category: input.category,
@@ -24,8 +24,8 @@ export class SearchBlogPostsUseCase {
 
             // Return the output
             return SearchBlogPostsOutput.create(
-                blogPosts,
-                total,
+                searchResult.items,
+                searchResult.total,
                 input.page,
                 input.limit
             );

@@ -13,21 +13,21 @@ import {
   RotateCcw,
   ArrowUpDown,
 } from "lucide-react";
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Slider } from '@/components/ui/slider';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface MobileSearchFiltersProps {
   filters: Record<string, any>;
@@ -286,16 +286,6 @@ export function MobileSearchFilters({
           </Badge>
         )}
       </div>
-
-      {/* Loading indicator */}
-      {isLoading && (
-        <div className="text-center py-1">
-          <div className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-            <div className="animate-spin rounded-full h-3 w-3 border-b border-primary"></div>
-            Buscando...
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { AggregateRoot } from '@/domain/shared/entities/AggregateRoot';
 import { PropertyId } from "../value-objects/PropertyId";
+import { Title } from "@/domain/shared/value-objects/Title";
 import { PropertyTitle } from "../value-objects/PropertyTitle";
 import { PropertyDescription } from "../value-objects/PropertyDescription";
 import { Price } from "../value-objects/Price";
@@ -45,7 +46,7 @@ export interface CreatePropertyData {
 
 export interface PropertyData {
     id: PropertyId;
-    title: PropertyTitle;
+    title: Title;
     description: PropertyDescription;
     price: Price;
     address: Address;
@@ -61,7 +62,7 @@ export interface PropertyData {
 export class Property extends AggregateRoot {
     private constructor(
         id: PropertyId,
-        private title: PropertyTitle,
+        private title: Title,
         private description: PropertyDescription,
         private price: Price,
         private address: Address,
@@ -161,7 +162,7 @@ export class Property extends AggregateRoot {
         return this.id as PropertyId;
     }
 
-    getTitle(): PropertyTitle {
+    getTitle(): Title {
         return this.title;
     }
 
@@ -331,7 +332,11 @@ export class Property extends AggregateRoot {
             throw new BusinessRuleViolationError("Property cannot be published in its current state", "PROPERTY_VALIDATION");
         }
 
-        this.status = this.status.transitionTo(PropertyStatus.published());
+        const newStatus = PropertyStatus.published();
+        if (!this.status.canTransitionTo(newStatus)) {
+            throw new BusinessRuleViolationError(`Cannot transition from ${this.status.getDisplayName()} to ${newStatus.getDisplayName()}`, "PROPERTY_VALIDATION");
+        }
+        this.status = newStatus;
         this.touch();
     }
 
@@ -340,7 +345,11 @@ export class Property extends AggregateRoot {
             throw new BusinessRuleViolationError(`Cannot withdraw property with status ${this.status.getDisplayName()}`, "PROPERTY_VALIDATION");
         }
 
-        this.status = this.status.transitionTo(PropertyStatus.withdrawn());
+        const newStatus = PropertyStatus.withdrawn();
+        if (!this.status.canTransitionTo(newStatus)) {
+            throw new BusinessRuleViolationError(`Cannot transition from ${this.status.getDisplayName()} to ${newStatus.getDisplayName()}`, "PROPERTY_VALIDATION");
+        }
+        this.status = newStatus;
         this.touch();
     }
 
@@ -349,7 +358,11 @@ export class Property extends AggregateRoot {
             throw new BusinessRuleViolationError("Only published properties can be marked as sold", "PROPERTY_VALIDATION");
         }
 
-        this.status = this.status.transitionTo(PropertyStatus.sold());
+        const newStatus = PropertyStatus.sold();
+        if (!this.status.canTransitionTo(newStatus)) {
+            throw new BusinessRuleViolationError(`Cannot transition from ${this.status.getDisplayName()} to ${newStatus.getDisplayName()}`, "PROPERTY_VALIDATION");
+        }
+        this.status = newStatus;
         this.touch();
     }
 
@@ -358,7 +371,11 @@ export class Property extends AggregateRoot {
             throw new BusinessRuleViolationError("Only published properties can be marked as rented", "PROPERTY_VALIDATION");
         }
 
-        this.status = this.status.transitionTo(PropertyStatus.rented());
+        const newStatus = PropertyStatus.rented();
+        if (!this.status.canTransitionTo(newStatus)) {
+            throw new BusinessRuleViolationError(`Cannot transition from ${this.status.getDisplayName()} to ${newStatus.getDisplayName()}`, "PROPERTY_VALIDATION");
+        }
+        this.status = newStatus;
         this.touch();
     }
 
@@ -367,7 +384,11 @@ export class Property extends AggregateRoot {
             throw new BusinessRuleViolationError(`Cannot archive property with status ${this.status.getDisplayName()}`, "PROPERTY_VALIDATION");
         }
 
-        this.status = this.status.transitionTo(PropertyStatus.archived());
+        const newStatus = PropertyStatus.archived();
+        if (!this.status.canTransitionTo(newStatus)) {
+            throw new BusinessRuleViolationError(`Cannot transition from ${this.status.getDisplayName()} to ${newStatus.getDisplayName()}`, "PROPERTY_VALIDATION");
+        }
+        this.status = newStatus;
         this.touch();
     }
 

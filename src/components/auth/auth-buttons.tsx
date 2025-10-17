@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/navigation-menu";
 import { ModeToggle } from "@/components/mode-toggle";
 import LogOutButton from "@/components/auth/logout-button";
+import { useAuth } from "@/hooks/use-auth";
 import { useAdmin } from "@/hooks/use-admin";
-import { useUser } from "@/presentation/hooks/use-user";
 import getProfileItems from "@/lib/navbar/getProfileItems";
 
 interface AuthButtonsProps {
@@ -27,9 +27,19 @@ export function AuthButtons({
   showModeToggle = true,
   variant = "default",
 }: AuthButtonsProps) {
+  const { user, isLoading } = useAuth();
   const { role, permissions } = useAdmin();
-  const { user } = useUser();
   const profileItems = user && role ? getProfileItems(role, permissions) : [];
+
+  // Mostrar loading state
+  if (isLoading) {
+    return (
+      <div className={`flex items-center gap-2 ${className}`}>
+        <div className="animate-pulse bg-muted rounded-full h-8 w-20"></div>
+        {showModeToggle && <ModeToggle />}
+      </div>
+    );
+  }
 
   // Variant styles
   const getContainerStyles = () => {
@@ -124,8 +134,7 @@ export function AuthButtons({
                   <div className="px-3 py-2 text-sm text-muted-foreground border-b border-border/50">
                     <Link href={role === "admin" ? "/dashboard" : "/profile"}>
                       <div className="font-medium text-card-foreground whitespace-nowrap truncate">
-                        {user.getProfile()?.getFullName() ||
-                          user.getEmail()?.value}
+                        {user.name || user.email}
                       </div>
                       <div className="text-xs capitalize whitespace-nowrap">
                         {role === "admin"

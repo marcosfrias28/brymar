@@ -24,7 +24,7 @@ export class WizardValidator {
                 const errors: Record<string, string> = {};
                 const warnings: Record<string, string> = {};
 
-                error.errors.forEach((err) => {
+                error.issues.forEach((err) => {
                     const path = err.path.length > 0 ? err.path.join(".") : "root";
                     const message = err.message;
 
@@ -89,7 +89,7 @@ export class WizardValidator {
         } catch (error) {
             if (error instanceof ZodError) {
                 isValid = false;
-                error.errors.forEach((err) => {
+                error.issues.forEach((err) => {
                     const path = err.path.join(".");
                     allErrors[`final.${path}`] = err.message;
                 });
@@ -235,7 +235,7 @@ export class WizardValidator {
             }
 
             // Find error for this specific field
-            const fieldError = result.error.errors.find(
+            const fieldError = result.error.issues.find(
                 err => err.path.includes(fieldName)
             );
 

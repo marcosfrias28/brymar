@@ -121,7 +121,7 @@ const publishPropertySchema = z.object({
 const saveDraftSchema = z.object({
     userId: z.string().min(1, "User ID is required"),
     formData: z.union([
-        z.record(z.any()), // Object format
+        z.record(z.string(), z.any()), // Object format
         z.string() // JSON string format - will be parsed in the action
     ]),
     stepCompleted: z.coerce.number().min(0).max(4).optional(),

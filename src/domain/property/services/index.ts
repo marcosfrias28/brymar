@@ -1,5 +1,4 @@
 export {
     PropertyDomainService,
-    type PropertyValuationData,
-    type PropertyValidationResult
+    type PropertyValuationData
 } from "./PropertyDomainService";

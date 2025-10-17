@@ -33,6 +33,23 @@ export class LoadWizardDraftOutput {
         );
     }
 
+    static fromData(data: any): LoadWizardDraftOutput {
+        return new LoadWizardDraftOutput(
+            data.id,
+            data.userId,
+            data.wizardType || 'property',
+            data.wizardConfigId || '',
+            data.formData || {},
+            data.stepCompleted?.toString() || '1',
+            data.stepProgress || {},
+            data.completionPercentage || 0,
+            data.title,
+            data.description,
+            data.createdAt,
+            data.updatedAt
+        );
+    }
+
     /**
      * Frontend compatibility methods
      */

@@ -23,7 +23,7 @@ export class DrizzleUserRepository implements IUserRepository {
         const userData = this.mapToDatabase(user);
 
         // Check if user exists
-        const existingUser = await this.db
+        const existingUser = await this._db
             .select({ id: users.id })
             .from(users)
             .where(eq(users.id, userData.id))
@@ -31,10 +31,10 @@ export class DrizzleUserRepository implements IUserRepository {
 
         if (existingUser.length === 0) {
             // Create new user
-            await this.db.insert(users).values(userData);
+            await this._db.insert(users).values(userData);
         } else {
             // Update existing user
-            await this.db
+            await this._db
                 .update(users)
                 .set({
                     ...userData,
@@ -48,7 +48,7 @@ export class DrizzleUserRepository implements IUserRepository {
      * Finds a user by their ID
      */
     async findById(id: UserId): Promise<User | null> {
-        const result = await this.db
+        const result = await this._db
             .select()
             .from(users)
             .where(eq(users.id, id.value))
@@ -65,7 +65,7 @@ export class DrizzleUserRepository implements IUserRepository {
      * Finds a user by their email address
      */
     async findByEmail(email: Email): Promise<User | null> {
-        const result = await this.db
+        const result = await this._db
             .select()
             .from(users)
             .where(eq(users.email, email.value))
@@ -82,7 +82,7 @@ export class DrizzleUserRepository implements IUserRepository {
      * Finds users by their role
      */
     async findByRole(role: UserRole): Promise<User[]> {
-        const results = await this.db
+        const results = await this._db
             .select()
             .from(users)
             .where(eq(users.role, role.value))
@@ -97,7 +97,7 @@ export class DrizzleUserRepository implements IUserRepository {
     async findByStatus(status: UserStatus): Promise<User[]> {
         // Since status is not in the current schema, we'll return all users
         // In a real implementation, you'd add a status column to the users table
-        const results = await this.db
+        const results = await this._db
             .select()
             .from(users)
             .orderBy(desc(users.createdAt));
@@ -115,14 +115,14 @@ export class DrizzleUserRepository implements IUserRepository {
         total: number;
     }> {
         // Get total count
-        const totalResult = await this.db
+        const totalResult = await this._db
             .select({ count: count() })
             .from(users);
 
         const total = totalResult[0]?.count || 0;
 
         // Get paginated results
-        const results = await this.db
+        const results = await this._db
             .select()
             .from(users)
             .orderBy(desc(users.createdAt))
@@ -155,7 +155,7 @@ export class DrizzleUserRepository implements IUserRepository {
         ];
 
         // Get total count
-        const totalResult = await this.db
+        const totalResult = await this._db
             .select({ count: count() })
             .from(users)
             .where(or(...searchConditions));
@@ -163,7 +163,7 @@ export class DrizzleUserRepository implements IUserRepository {
         const total = totalResult[0]?.count || 0;
 
         // Get paginated results
-        const results = await this.db
+        const results = await this._db
             .select()
             .from(users)
             .where(or(...searchConditions))
@@ -183,7 +183,7 @@ export class DrizzleUserRepository implements IUserRepository {
      * Checks if a user exists with the given email
      */
     async existsByEmail(email: Email): Promise<boolean> {
-        const result = await this.db
+        const result = await this._db
             .select({ id: users.id })
             .from(users)
             .where(eq(users.email, email.value))
@@ -196,7 +196,7 @@ export class DrizzleUserRepository implements IUserRepository {
      * Deletes a user by ID
      */
     async delete(id: UserId): Promise<void> {
-        await this.db
+        await this._db
             .delete(users)
             .where(eq(users.id, id.value));
     }
@@ -205,7 +205,7 @@ export class DrizzleUserRepository implements IUserRepository {
      * Counts users by role
      */
     async countByRole(role: UserRole): Promise<number> {
-        const result = await this.db
+        const result = await this._db
             .select({ count: count() })
             .from(users)
             .where(eq(users.role, role.value));
@@ -219,7 +219,7 @@ export class DrizzleUserRepository implements IUserRepository {
     async countByStatus(status: UserStatus): Promise<number> {
         // Since status is not in the current schema, we'll count all users
         // and filter in memory (not efficient for large datasets)
-        const allUsers = await this.db.select().from(users);
+        const allUsers = await this._db.select().from(users);
         const filteredUsers = allUsers
             .map(row => this.mapToDomain(row))
             .filter(user => user.getStatus().equals(status));
@@ -231,7 +231,7 @@ export class DrizzleUserRepository implements IUserRepository {
      * Finds users created within a date range
      */
     async findByCreatedDateRange(startDate: Date, endDate: Date): Promise<User[]> {
-        const results = await this.db
+        const results = await this._db
             .select()
             .from(users)
             .where(
@@ -254,7 +254,7 @@ export class DrizzleUserRepository implements IUserRepository {
         const cutoffDate = new Date();
         cutoffDate.setDate(cutoffDate.getDate() - daysSinceLastLogin);
 
-        const results = await this.db
+        const results = await this._db
             .select()
             .from(users)
             .where(lte(users.createdAt, cutoffDate))
@@ -269,7 +269,7 @@ export class DrizzleUserRepository implements IUserRepository {
     async updateLastLogin(id: UserId, timestamp: Date): Promise<void> {
         // This would require a lastLoginAt field in the schema
         // For now, we'll update the updatedAt field as a proxy
-        await this.db
+        await this._db
             .update(users)
             .set({ updatedAt: timestamp })
             .where(eq(users.id, id.value));

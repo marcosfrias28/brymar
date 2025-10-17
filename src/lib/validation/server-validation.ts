@@ -40,7 +40,7 @@ export const ServerPropertyValidationSchema = z.object({
         ),
 
     propertyType: z.nativeEnum(PropertyType, {
-        errorMap: () => ({ message: 'Tipo de propiedad no válido' })
+        message: 'Tipo de propiedad no válido'
     }),
 
     bedrooms: z.coerce.number()
@@ -104,7 +104,7 @@ export const ServerPropertyValidationSchema = z.object({
             .regex(/^\d{5}$/, 'Código postal debe tener 5 dígitos')
             .optional(),
         country: z.literal('Dominican Republic', {
-            errorMap: () => ({ message: 'Solo se permiten propiedades en República Dominicana' })
+            message: 'Solo se permiten propiedades en República Dominicana'
         }),
         formattedAddress: z.string().max(300, 'Dirección formateada demasiado larga')
     }),
@@ -128,7 +128,7 @@ export const ServerPropertyValidationSchema = z.object({
             .positive('El tamaño del archivo debe ser positivo')
             .max(10 * 1024 * 1024, 'Archivo demasiado grande (máximo 10MB)'),
         contentType: z.enum(['image/jpeg', 'image/jpg', 'image/png', 'image/webp'], {
-            errorMap: () => ({ message: 'Tipo de contenido de imagen no válido' })
+            message: 'Tipo de contenido de imagen no válido'
         }),
         displayOrder: z.coerce.number()
             .int('El orden de visualización debe ser un entero')
@@ -150,11 +150,11 @@ export const ServerPropertyValidationSchema = z.object({
 
     // Step 4: Meta
     status: z.enum(['draft', 'published'], {
-        errorMap: () => ({ message: 'Estado de propiedad no válido' })
+        message: 'Estado de propiedad no válido'
     }),
 
     language: z.enum(['es', 'en'], {
-        errorMap: () => ({ message: 'Idioma no soportado' })
+        message: 'Idioma no soportado'
     }),
 
     aiGenerated: z.object({
@@ -245,7 +245,7 @@ export async function validatePropertyFormData(
         if (error instanceof z.ZodError) {
             const fieldErrors: Record<string, string[]> = {};
 
-            error.errors.forEach(err => {
+            error.issues.forEach(err => {
                 const path = err.path.join('.');
                 if (!fieldErrors[path]) {
                     fieldErrors[path] = [];
@@ -256,7 +256,7 @@ export async function validatePropertyFormData(
             throw new ValidationError(
                 fieldErrors,
                 'Datos de formulario no válidos',
-                { zodError: error.errors }
+                { zodError: error.issues }
             );
         }
 
@@ -276,7 +276,7 @@ export async function validatePropertyBasicInfo(
         if (error instanceof z.ZodError) {
             const fieldErrors: Record<string, string[]> = {};
 
-            error.errors.forEach(err => {
+            error.issues.forEach(err => {
                 const path = err.path.join('.');
                 if (!fieldErrors[path]) {
                     fieldErrors[path] = [];
@@ -287,7 +287,7 @@ export async function validatePropertyBasicInfo(
             throw new ValidationError(
                 fieldErrors,
                 'Información básica de propiedad no válida',
-                { zodError: error.errors }
+                { zodError: error.issues }
             );
         }
 

@@ -2,7 +2,7 @@ export { LandId } from "./LandId";
 export { LandTitle } from "./LandTitle";
 export { LandDescription } from "./LandDescription";
 export { LandArea } from "./LandArea";
-export { LandPrice } from "./LandPrice";
+
 export { LandType } from "./LandType";
 export { LandStatus } from "./LandStatus";
 export { LandLocation } from "./LandLocation";

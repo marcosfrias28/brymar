@@ -1,8 +1,6 @@
 "use client";
 
 import { signIn } from "@/presentation/server-actions/auth-actions";
-import { ActionState } from "@/lib/validations";
-import { User } from "@/lib/db/schema";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useAuthFields, AuthLink, AuthFormWrapper } from "./auth-form-wrapper";
@@ -10,7 +8,6 @@ import { useAuthFields, AuthLink, AuthFormWrapper } from "./auth-form-wrapper";
 export function SignInForm() {
   const { emailField, passwordField } = useAuthFields();
 
-  // Personalizar el campo de contraseña para incluir el enlace "Olvidaste tu contraseña"
   const passwordFieldWithLink = {
     ...passwordField,
     label: (

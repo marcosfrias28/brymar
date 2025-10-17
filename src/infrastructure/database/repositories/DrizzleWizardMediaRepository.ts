@@ -22,7 +22,7 @@ export class DrizzleWizardMediaRepository implements IWizardMediaRepository {
         const mediaData = this.mapToDatabase(media);
 
         // Check if media exists
-        const existing = await this.db
+        const existing = await this._db
             .select({ id: wizardMedia.id })
             .from(wizardMedia)
             .where(eq(wizardMedia.id, mediaData.id))
@@ -30,13 +30,13 @@ export class DrizzleWizardMediaRepository implements IWizardMediaRepository {
 
         if (existing.length > 0) {
             // Update existing media
-            await this.db
+            await this._db
                 .update(wizardMedia)
                 .set(mediaData)
                 .where(eq(wizardMedia.id, mediaData.id));
         } else {
             // Insert new media
-            await this.db.insert(wizardMedia).values(mediaData);
+            await this._db.insert(wizardMedia).values(mediaData);
         }
     }
 
@@ -46,11 +46,11 @@ export class DrizzleWizardMediaRepository implements IWizardMediaRepository {
         const mediaData = mediaItems.map(media => this.mapToDatabase(media));
 
         // Use batch insert for better performance
-        await this.db.insert(wizardMedia).values(mediaData);
+        await this._db.insert(wizardMedia).values(mediaData);
     }
 
     async findById(id: WizardMediaId): Promise<WizardMedia | null> {
-        const result = await this.db
+        const result = await this._db
             .select()
             .from(wizardMedia)
             .where(eq(wizardMedia.id, id.value))
@@ -62,7 +62,7 @@ export class DrizzleWizardMediaRepository implements IWizardMediaRepository {
     }
 
     async findByDraftId(draftId: WizardDraftId): Promise<WizardMedia[]> {
-        const results = await this.db
+        const results = await this._db
             .select()
             .from(wizardMedia)
             .where(eq(wizardMedia.draftId, draftId.value))
@@ -72,7 +72,7 @@ export class DrizzleWizardMediaRepository implements IWizardMediaRepository {
     }
 
     async findByPublishedId(publishedId: number, wizardType: WizardType): Promise<WizardMedia[]> {
-        const results = await this.db
+        const results = await this._db
             .select()
             .from(wizardMedia)
             .where(
@@ -87,7 +87,7 @@ export class DrizzleWizardMediaRepository implements IWizardMediaRepository {
     }
 
     async findByWizardType(wizardType: WizardType): Promise<WizardMedia[]> {
-        const results = await this.db
+        const results = await this._db
             .select()
             .from(wizardMedia)
             .where(eq(wizardMedia.wizardType, wizardType.value))
@@ -97,7 +97,7 @@ export class DrizzleWizardMediaRepository implements IWizardMediaRepository {
     }
 
     async findByMediaType(mediaType: MediaType): Promise<WizardMedia[]> {
-        const results = await this.db
+        const results = await this._db
             .select()
             .from(wizardMedia)
             .where(eq(wizardMedia.mediaType, mediaType.value))
@@ -128,7 +128,7 @@ export class DrizzleWizardMediaRepository implements IWizardMediaRepository {
         const orderBy = sortOrder === "asc" ? asc(orderByColumn) : desc(orderByColumn);
 
         // Get total count
-        const totalResult = await this.db
+        const totalResult = await this._db
             .select({ count: count() })
             .from(wizardMedia)
             .where(conditions.length > 0 ? and(...conditions) : undefined);
@@ -136,7 +136,7 @@ export class DrizzleWizardMediaRepository implements IWizardMediaRepository {
         const total = totalResult[0]?.count || 0;
 
         // Get paginated results
-        const results = await this.db
+        const results = await this._db
             .select()
             .from(wizardMedia)
             .where(conditions.length > 0 ? and(...conditions) : undefined)
@@ -155,19 +155,19 @@ export class DrizzleWizardMediaRepository implements IWizardMediaRepository {
     }
 
     async delete(id: WizardMediaId): Promise<void> {
-        await this.db
+        await this._db
             .delete(wizardMedia)
             .where(eq(wizardMedia.id, id.value));
     }
 
     async deleteByDraftId(draftId: WizardDraftId): Promise<void> {
-        await this.db
+        await this._db
             .delete(wizardMedia)
             .where(eq(wizardMedia.draftId, draftId.value));
     }
 
     async deleteByPublishedId(publishedId: number, wizardType: WizardType): Promise<void> {
-        await this.db
+        await this._db
             .delete(wizardMedia)
             .where(
                 and(
@@ -184,7 +184,7 @@ export class DrizzleWizardMediaRepository implements IWizardMediaRepository {
 
         // Update each media item's display order
         for (let i = 0; i < mediaIds.length; i++) {
-            await this.db
+            await this._db
                 .update(wizardMedia)
                 .set({ displayOrder: newOrders[i] })
                 .where(eq(wizardMedia.id, mediaIds[i].value));
@@ -192,7 +192,7 @@ export class DrizzleWizardMediaRepository implements IWizardMediaRepository {
     }
 
     async moveToPublished(draftId: WizardDraftId, publishedId: number): Promise<void> {
-        await this.db
+        await this._db
             .update(wizardMedia)
             .set({
                 publishedId,
@@ -204,7 +204,7 @@ export class DrizzleWizardMediaRepository implements IWizardMediaRepository {
     async count(filters: WizardMediaFilters): Promise<number> {
         const conditions = this.buildWhereConditions(filters);
 
-        const result = await this.db
+        const result = await this._db
             .select({ count: count() })
             .from(wizardMedia)
             .where(conditions.length > 0 ? and(...conditions) : undefined);
@@ -213,7 +213,7 @@ export class DrizzleWizardMediaRepository implements IWizardMediaRepository {
     }
 
     async exists(id: WizardMediaId): Promise<boolean> {
-        const result = await this.db
+        const result = await this._db
             .select({ id: wizardMedia.id })
             .from(wizardMedia)
             .where(eq(wizardMedia.id, id.value))
@@ -234,7 +234,7 @@ export class DrizzleWizardMediaRepository implements IWizardMediaRepository {
             conditions.push(lte(wizardMedia.uploadedAt, cutoffDate));
         }
 
-        const results = await this.db
+        const results = await this._db
             .select()
             .from(wizardMedia)
             .where(and(...conditions))
@@ -250,7 +250,7 @@ export class DrizzleWizardMediaRepository implements IWizardMediaRepository {
         mediaByWizardType: Record<string, number>;
     }> {
         // Get all media
-        const allMedia = await this.db.select().from(wizardMedia);
+        const allMedia = await this._db.select().from(wizardMedia);
 
         const totalMedia = allMedia.length;
         const totalSize = allMedia.reduce((sum: number, media: any) => sum + media.size, 0);
@@ -276,7 +276,7 @@ export class DrizzleWizardMediaRepository implements IWizardMediaRepository {
     }
 
     async findByUrl(url: string): Promise<WizardMedia | null> {
-        const result = await this.db
+        const result = await this._db
             .select()
             .from(wizardMedia)
             .where(eq(wizardMedia.url, url))
@@ -288,7 +288,7 @@ export class DrizzleWizardMediaRepository implements IWizardMediaRepository {
     }
 
     async getNextDisplayOrder(draftId: WizardDraftId): Promise<number> {
-        const result = await this.db
+        const result = await this._db
             .select({ maxOrder: wizardMedia.displayOrder })
             .from(wizardMedia)
             .where(eq(wizardMedia.draftId, draftId.value))

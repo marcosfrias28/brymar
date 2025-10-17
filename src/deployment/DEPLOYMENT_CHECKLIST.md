@@ -124,7 +124,7 @@ This comprehensive checklist ensures the AI Property Wizard is properly deployed
 
 - [ ] **Load Testing**
 
-  - [ ] Run load tests: `node scripts/load-test-wizard.js`
+  - [ ] Run load tests: `npm run test:e2e`
   - [ ] Performance thresholds met
   - [ ] Error rates within acceptable limits
   - [ ] Concurrent user scenarios tested
@@ -252,7 +252,7 @@ Run these commands to validate the deployment:
 node scripts/validate-deployment.js
 
 # Load testing
-node scripts/load-test-wizard.js light
+npm run test:e2e
 
 # Health check
 curl https://yourdomain.com/api/health-check
@@ -340,24 +340,24 @@ curl -I https://yourdomain.com/dashboard/properties/new
 
 ---
 
-**Deployment Date**: ******\_\_\_******
+**Deployment Date**: **\*\***\_\_\_**\*\***
 
-**Deployed By**: ******\_\_\_******
+**Deployed By**: **\*\***\_\_\_**\*\***
 
-**Approved By**: ******\_\_\_******
+**Approved By**: **\*\***\_\_\_**\*\***
 
-**Version**: ******\_\_\_******
+**Version**: **\*\***\_\_\_**\*\***
 
-**Environment**: ******\_\_\_******
+**Environment**: **\*\***\_\_\_**\*\***
 
 ---
 
 ## Emergency Contacts
 
-- **Technical Lead**: ******\_\_\_******
-- **DevOps Engineer**: ******\_\_\_******
-- **Product Owner**: ******\_\_\_******
-- **On-Call Engineer**: ******\_\_\_******
+- **Technical Lead**: **\*\***\_\_\_**\*\***
+- **DevOps Engineer**: **\*\***\_\_\_**\*\***
+- **Product Owner**: **\*\***\_\_\_**\*\***
+- **On-Call Engineer**: **\*\***\_\_\_**\*\***
 
 ## Additional Notes
 

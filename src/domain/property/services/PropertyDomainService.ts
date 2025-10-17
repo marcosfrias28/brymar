@@ -3,6 +3,7 @@ import { Price } from "../value-objects/Price";
 import { PropertyType } from "../value-objects/PropertyType";
 import { PropertyFeatures } from "../value-objects/PropertyFeatures";
 import { Address } from "../value-objects/Address";
+import { BaseDomainService, ValidationResult, SEOSuggestion } from '@/domain/shared/services/BaseDomainService';
 import { BusinessRuleViolationError } from '@/domain/shared/errors/DomainError';
 
 export interface PropertyValuationData {
@@ -12,13 +13,11 @@ export interface PropertyValuationData {
     locationScore: number; // 1-10
 }
 
-export interface PropertyValidationResult {
-    isValid: boolean;
-    errors: string[];
-    warnings: string[];
-}
+export class PropertyDomainService extends BaseDomainService<Property> {
 
-export class PropertyDomainService {
+    constructor() {
+        super('Property');
+    }
 
     /**
      * Validates property creation data according to business rules
@@ -93,9 +92,43 @@ export class PropertyDomainService {
     }
 
     /**
+     * Validates property for publication
+     */
+    validateForPublication(property: Property): void {
+        // Validate that the property is still complete after updates
+        if (!property.isComplete()) {
+            throw new BusinessRuleViolationError("Property updates resulted in incomplete property data", "PROPERTY_VALIDATION");
+        }
+
+        // Validate business rules still hold
+        const type = property.getType();
+        const features = property.getFeatures();
+        const price = property.getPrice();
+
+        // Re-validate core business rules
+        if (type.isResidential() && type.requiresBedrooms()) {
+            if (features.bedrooms === 0) {
+                throw new BusinessRuleViolationError("Residential properties must have at least 1 bedroom", "PROPERTY_VALIDATION");
+            }
+            if (features.bathrooms === 0) {
+                throw new BusinessRuleViolationError("Residential properties must have at least 1 bathroom", "PROPERTY_VALIDATION");
+            }
+        }
+
+        // Validate price reasonableness
+        if (type.isLand() && price.amount < 1000) {
+            throw new BusinessRuleViolationError("Land properties must have a minimum price of $1,000", "PROPERTY_VALIDATION");
+        }
+
+        if (type.isResidential() && price.amount < 10000) {
+            throw new BusinessRuleViolationError("Residential properties must have a minimum price of $10,000", "PROPERTY_VALIDATION");
+        }
+    }
+
+    /**
      * Validates property data according to business rules
      */
-    validateProperty(property: Property): PropertyValidationResult {
+    validateEntity(property: Property): ValidationResult {
         const errors: string[] = [];
         const warnings: string[] = [];
 
@@ -456,5 +489,41 @@ export class PropertyDomainService {
         }
 
         return p1ValueRatio > p2ValueRatio ? property1 : property2;
+    }
+
+    /**
+     * Generates SEO suggestions for property
+     */
+    generateSEOSuggestions(property: Property): SEOSuggestion {
+        const title = property.getTitle();
+        const type = property.getType();
+        const address = property.getAddress();
+        const price = property.getPrice();
+        const features = property.getFeatures();
+
+        // Generate SEO title
+        const seoTitle = `${title.getDisplayValue()} - ${type.getDisplayName()} for Sale in ${address.getShortAddress()}`;
+
+        // Generate meta description
+        const description = `${type.getDisplayName()} with ${features.bedrooms} bedrooms, ${features.bathrooms} bathrooms, ${features.area}m² for ${price.format()} in ${address.getShortAddress()}. ${property.getDescription().getExcerpt(100)}`;
+
+        // Generate keywords
+        const keywords = [
+            type.value,
+            "property for sale",
+            "real estate",
+            address.city || "",
+            address.state || "",
+            "Dominican Republic",
+            `${features.bedrooms} bedroom`,
+            `${features.bathrooms} bathroom`,
+            price.currency.code
+        ].filter(keyword => keyword.length > 0);
+
+        return {
+            title: seoTitle.substring(0, 60), // SEO title limit
+            description: this.extractExcerpt(description, 160), // Meta description limit
+            keywords
+        };
     }
 }

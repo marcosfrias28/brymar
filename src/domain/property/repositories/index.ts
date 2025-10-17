@@ -1,14 +1,9 @@
 export {
     type IPropertyRepository,
-    type PropertySearchCriteria,
-    type PropertySearchResult
+    type PropertySearchCriteria
 } from "./IPropertyRepository";
 
 export {
     type IPropertyDraftRepository,
-    type PropertyDraftId,
-    type PropertyDraftData,
-    type PropertyDraft,
-    type PropertyDraftSearchCriteria,
-    type PropertyDraftSearchResult
+    type PropertyDraftData
 } from "./IPropertyDraftRepository";

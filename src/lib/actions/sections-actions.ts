@@ -19,9 +19,9 @@ const pageSectionSchema = z.object({
     title: z.string().optional(),
     subtitle: z.string().optional(),
     description: z.string().optional(),
-    content: z.record(z.any()).optional(),
+    content: z.record(z.string(), z.any()).optional(),
     images: z.array(z.string()).optional(),
-    settings: z.record(z.any()).optional(),
+    settings: z.record(z.string(), z.any()).optional(),
     isActive: z.boolean().optional(),
     order: z.number().optional(),
 })

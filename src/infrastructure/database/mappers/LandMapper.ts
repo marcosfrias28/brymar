@@ -1,16 +1,17 @@
 import { Land } from '@/domain/land/entities/Land';
 import {
     LandId,
-    LandTitle,
     LandDescription,
     LandArea,
-    LandPrice,
     LandType,
     LandStatus,
     LandLocation,
     LandFeatures,
     LandImages
 } from '@/domain/land/value-objects';
+import { Price, LandPrice } from '@/domain/shared/value-objects/Price';
+import { Title } from '@/domain/shared/value-objects/Title';
+import { LandTitle } from '@/domain/land/value-objects/LandTitle';
 import { InfrastructureError } from '@/domain/shared/errors/DomainError';
 
 export interface DatabaseLandRow {
@@ -28,10 +29,10 @@ export interface DatabaseLandRow {
 
 export interface DomainLandData {
     id: LandId;
-    title: LandTitle;
+    title: Title;
     description: LandDescription;
     area: LandArea;
-    price: LandPrice;
+    price: Price;
     location: LandLocation;
     type: LandType;
     status: LandStatus;
@@ -75,7 +76,7 @@ export class LandMapper {
                 description: LandDescription.create(row.description),
                 area: LandArea.create(row.area),
                 price: LandPrice.create(row.price, "USD"), // Default currency
-                location: LandLocation.create(row.location),
+                location: this.parseLocation(row.location),
                 type: LandType.create(row.type),
                 status: LandStatus.create("draft"), // Default status since not in DB
                 features: LandFeatures.create([]), // Default empty features since not in DB
@@ -190,6 +191,31 @@ export class LandMapper {
         if (formData.images) mapped.images = Array.isArray(formData.images) ? formData.images : [];
 
         return mapped;
+    }
+
+    /**
+     * Parse location from database - handle both JSON and string formats
+     */
+    private static parseLocation(locationData: string): LandLocation {
+        try {
+            // Try to parse as JSON first (new format with coordinates)
+            const locationObj = JSON.parse(locationData);
+
+            if (locationObj && typeof locationObj === 'object') {
+                return LandLocation.createWithDetails(
+                    locationObj.address || locationObj.street || 'Unknown Address',
+                    locationObj.city,
+                    locationObj.state || locationObj.province,
+                    locationObj.country,
+                    locationObj.coordinates
+                );
+            } else {
+                throw new Error('Not JSON format');
+            }
+        } catch (error) {
+            // Fallback to string parsing (legacy format)
+            return LandLocation.create(locationData);
+        }
     }
 
     /**

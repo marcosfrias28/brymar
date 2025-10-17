@@ -14,10 +14,10 @@ const UpdatePageSectionInputSchema = z.object({
     content: z.object({
         subtitle: z.string().max(300).optional(),
         description: z.string().max(1000).optional(),
-        content: z.record(z.any()).optional(),
+        content: z.record(z.string(), z.any()).optional(),
         images: z.array(UrlSchema).optional(),
     }).optional(),
-    settings: z.record(z.any()).optional(),
+    settings: z.record(z.string(), z.any()).optional(),
     isActive: z.boolean().optional(),
     order: z.number().min(0).optional(),
 });

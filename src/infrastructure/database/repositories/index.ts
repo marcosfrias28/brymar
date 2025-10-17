@@ -36,30 +36,38 @@ export function createUserRepository(): IUserRepository {
 /**
  * Create Property Repository instance
  */
+/*
 export function createPropertyRepository(): IPropertyRepository {
     return new DrizzlePropertyRepository(db);
 }
+*/
 
 /**
  * Create Property Draft Repository instance
  */
+/*
 export function createPropertyDraftRepository(): IPropertyDraftRepository {
     return new DrizzlePropertyDraftRepository(db);
 }
+*/
 
 /**
  * Create Land Repository instance
  */
+/*
 export function createLandRepository(): ILandRepository {
     return new DrizzleLandRepository(db);
 }
+*/
 
 /**
  * Create Land Draft Repository instance
  */
+/*
 export function createLandDraftRepository(): ILandDraftRepository {
     return new DrizzleLandDraftRepository(db);
 }
+*/
 
 /**
  * Create Blog Repository instance
@@ -85,9 +93,11 @@ export function createSessionRepository(): ISessionRepository {
 /**
  * Create Wizard Draft Repository instance
  */
+/*
 export function createWizardDraftRepository(): IWizardDraftRepository {
     return new DrizzleWizardDraftRepository(db);
 }
+*/
 
 /**
  * Create Wizard Media Repository instance

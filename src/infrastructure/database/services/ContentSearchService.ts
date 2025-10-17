@@ -102,7 +102,7 @@ export class ContentSearchService {
             const whereConditions = this.buildBlogWhereConditions(filters);
 
             // Get total count
-            const totalResult = await this.db
+            const totalResult = await this._db
                 .select({ count: count() })
                 .from(blogPosts)
                 .where(whereConditions);
@@ -136,7 +136,7 @@ export class ContentSearchService {
             }
 
             // Get posts with pagination
-            const results = await this.db
+            const results = await this._db
                 .select()
                 .from(blogPosts)
                 .where(whereConditions)
@@ -164,7 +164,7 @@ export class ContentSearchService {
             const whereConditions = this.buildPageSectionWhereConditions(filters);
 
             // Get total count
-            const totalResult = await this.db
+            const totalResult = await this._db
                 .select({ count: count() })
                 .from(pageSections)
                 .where(whereConditions);
@@ -199,7 +199,7 @@ export class ContentSearchService {
             }
 
             // Get sections with pagination
-            const results = await this.db
+            const results = await this._db
                 .select()
                 .from(pageSections)
                 .where(whereConditions)
@@ -229,19 +229,19 @@ export class ContentSearchService {
         try {
             // Get blog post statistics
             const [totalBlogResult, publishedBlogResult, draftBlogResult] = await Promise.all([
-                this.db.select({ count: count() }).from(blogPosts),
-                this.db.select({ count: count() }).from(blogPosts).where(eq(blogPosts.status, 'published')),
-                this.db.select({ count: count() }).from(blogPosts).where(eq(blogPosts.status, 'draft'))
+                this._db.select({ count: count() }).from(blogPosts),
+                this._db.select({ count: count() }).from(blogPosts).where(eq(blogPosts.status, 'published')),
+                this._db.select({ count: count() }).from(blogPosts).where(eq(blogPosts.status, 'draft'))
             ]);
 
             // Get page section statistics
             const [totalSectionResult, activeSectionResult] = await Promise.all([
-                this.db.select({ count: count() }).from(pageSections),
-                this.db.select({ count: count() }).from(pageSections).where(eq(pageSections.isActive, true))
+                this._db.select({ count: count() }).from(pageSections),
+                this._db.select({ count: count() }).from(pageSections).where(eq(pageSections.isActive, true))
             ]);
 
             // Get content by category
-            const categoryResults = await this.db
+            const categoryResults = await this._db
                 .select({
                     category: blogPosts.category,
                     count: count()
@@ -255,7 +255,7 @@ export class ContentSearchService {
             });
 
             // Get content by page
-            const pageResults = await this.db
+            const pageResults = await this._db
                 .select({
                     page: pageSections.page,
                     count: count()

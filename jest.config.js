@@ -18,18 +18,13 @@ const customJestConfig = {
   ],
   testPathIgnorePatterns: [
     '<rootDir>/src/tests/',
-    '<rootDir>/node_modules/',
-    '<rootDir>/src/lib/__tests__/action-integration.test.ts'
+    '<rootDir>/node_modules/'
   ],
   collectCoverageFrom: [
     'src/lib/**/*.{js,ts,jsx,tsx}',
     'src/components/**/*.{js,ts,jsx,tsx}',
     'src/app/**/*.{js,ts,jsx,tsx}',
     'src/hooks/**/*.{js,ts,jsx,tsx}',
-    'src/presentation/**/*.{js,ts,jsx,tsx}',
-    'src/application/**/*.{js,ts,jsx,tsx}',
-    'src/domain/**/*.{js,ts,jsx,tsx}',
-    'src/infrastructure/**/*.{js,ts,jsx,tsx}',
     '!**/*.d.ts',
     '!**/node_modules/**',
     '!**/.next/**',
