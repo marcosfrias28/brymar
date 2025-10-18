@@ -1,16 +1,16 @@
 "use client";
 
 import { useActionState, useEffect, ReactNode } from "react";
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
-import { cn } from '@/lib/utils';
-import { ActionState } from '@/lib/validations';
+import { cn } from "@/lib/utils";
+import { ActionState } from "@/lib/validations";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { User } from '@/lib/db/schema';
+import { User } from "@/lib/db/schema";
 
 interface AuthFormField {
   id: string;
@@ -50,14 +50,14 @@ export function AuthFormWrapper<T = void>({
   onSuccess,
   onError,
   className,
-  hiddenFields = []
+  hiddenFields = [],
 }: AuthFormWrapperProps<T>) {
   const initialState: ActionState<T> = {
     error: "",
     success: false,
     message: "",
   };
-  
+
   const [state, formAction, pending] = useActionState(
     async (prevState: ActionState<T>, formData: FormData) => {
       return await action(formData);
@@ -67,12 +67,6 @@ export function AuthFormWrapper<T = void>({
 
   const router = useRouter();
 
-  const redirect = (state: ActionState<T>) => {
-    if (state.redirect && state.url) {
-      router.push(state.url);
-    }
-  }
-
   // Manejo de errores con toast
   useEffect(() => {
     if (state?.error) {
@@ -81,22 +75,38 @@ export function AuthFormWrapper<T = void>({
     }
   }, [state?.error, onError]);
 
-  // Manejo de éxito
+  // Manejo de éxito y redirección
   useEffect(() => {
     if (state?.success) {
       toast.success(state.message || "Operación exitosa");
+
+      // Call onSuccess callback if provided
       if (onSuccess) {
         onSuccess(state);
-        redirect(state);
-      } else {
-        redirect(state);
+      }
+
+      // Handle redirect if specified
+      if (state.redirect && state.url) {
+        router.push(state.url);
       }
     }
-  }, [state?.success, state?.message, state?.redirect, state?.url, router, onSuccess]);
+  }, [
+    state?.success,
+    state?.message,
+    state?.redirect,
+    state?.url,
+    router,
+    onSuccess,
+  ]);
 
   // Redirección específica para email no verificado
   useEffect(() => {
-    if (state?.error === "Email not verified" && state?.data && typeof state.data === 'object' && 'email' in state.data) {
+    if (
+      state?.error === "Email not verified" &&
+      state?.data &&
+      typeof state.data === "object" &&
+      "email" in state.data
+    ) {
       router.push(`/verify-email?email=${(state.data as any).email}`);
     }
   }, [state?.error, state?.data, router]);
@@ -105,18 +115,21 @@ export function AuthFormWrapper<T = void>({
     <div className={cn("flex flex-col gap-6", className)}>
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">{title}</h1>
-        <p className="text-balance text-sm text-muted-foreground">
-          {subtitle}
-        </p>
+        <p className="text-balance text-sm text-muted-foreground">{subtitle}</p>
       </div>
 
       <form action={formAction} className="grid gap-6">
         {hiddenFields.map((field) => (
-          <input key={field.name} type="hidden" name={field.name} value={field.value} />
+          <input
+            key={field.name}
+            type="hidden"
+            name={field.name}
+            value={field.value}
+          />
         ))}
         {fields.map((field) => (
           <div key={field.id} className="grid gap-2">
-            {typeof field.label === 'string' ? (
+            {typeof field.label === "string" ? (
               <Label htmlFor={field.id}>{field.label}</Label>
             ) : (
               field.label
@@ -147,9 +160,7 @@ export function AuthFormWrapper<T = void>({
       </form>
 
       {footerContent && (
-        <div className="text-center text-sm">
-          {footerContent}
-        </div>
+        <div className="text-center text-sm">{footerContent}</div>
       )}
     </div>
   );
@@ -164,7 +175,7 @@ export const useAuthFields = () => {
     label: "Email",
     placeholder: "m@example.com",
     required: true,
-    autoComplete: "email"
+    autoComplete: "email",
   };
 
   const passwordField: AuthFormField = {
@@ -175,7 +186,7 @@ export const useAuthFields = () => {
     placeholder: "Ingresa tu contraseña",
     required: true,
     minLength: 8,
-    autoComplete: "current-password"
+    autoComplete: "current-password",
   };
 
   const newPasswordField: AuthFormField = {
@@ -184,7 +195,7 @@ export const useAuthFields = () => {
     type: "password",
     label: "Nueva Contraseña",
     required: true,
-    autoComplete: "new-password"
+    autoComplete: "new-password",
   };
 
   const confirmPasswordField: AuthFormField = {
@@ -195,7 +206,7 @@ export const useAuthFields = () => {
     placeholder: "Confirma tu contraseña",
     required: true,
     minLength: 8,
-    autoComplete: "new-password"
+    autoComplete: "new-password",
   };
 
   const nameField: AuthFormField = {
@@ -205,7 +216,7 @@ export const useAuthFields = () => {
     label: "Nombre completo",
     placeholder: "Juan Pérez",
     required: true,
-    autoComplete: "name"
+    autoComplete: "name",
   };
 
   const tokenField: AuthFormField = {
@@ -214,7 +225,7 @@ export const useAuthFields = () => {
     type: "text",
     label: "Código de verificación",
     placeholder: "123456",
-    required: true
+    required: true,
   };
 
   return {
@@ -223,7 +234,7 @@ export const useAuthFields = () => {
     newPasswordField,
     confirmPasswordField,
     nameField,
-    tokenField
+    tokenField,
   };
 };
 
@@ -238,7 +249,10 @@ export function AuthLink({ href, children, className }: AuthLinkProps) {
   return (
     <Link
       href={href}
-      className={cn("underline underline-offset-4 hover:text-primary", className)}
+      className={cn(
+        "underline underline-offset-4 hover:text-primary",
+        className
+      )}
     >
       {children}
     </Link>

@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import * as logger from "@/lib/logger";
 import { auth } from "@/lib/auth/auth";
@@ -9,11 +8,12 @@ import {
     createErrorResponse,
     type ActionState
 } from "@/lib/validations";
+import { getRedirectUrlForRole, type UserRole } from "@/lib/auth/admin-config";
 
 /**
  * Acción para iniciar sesión con email y contraseña
  */
-export async function signIn(formData: FormData): Promise<ActionState> {
+export async function signIn(formData: FormData): Promise<ActionState<any>> {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
@@ -44,13 +44,26 @@ export async function signIn(formData: FormData): Promise<ActionState> {
             return createErrorResponse("Credenciales inválidas");
         }
 
+        // El resultado de signInEmail incluye el usuario con el rol
+        // Acceder al rol directamente desde el resultado
+        const userRole = ((result.user as any).role || 'user') as UserRole;
+
         await logger.info("Inicio de sesión exitoso", {
             userId: result.user.id,
-            email: result.user.email
+            email: result.user.email,
+            role: userRole
         });
 
-        // Redirigir al dashboard después del login exitoso
-        redirect("/dashboard");
+        // Determinar URL de redirección basada en el rol del usuario
+        const redirectUrl = getRedirectUrlForRole(userRole);
+
+        // Retornar respuesta exitosa con información de redirección
+        return createSuccessResponse(
+            { user: result.user },
+            "Inicio de sesión exitoso",
+            true,
+            redirectUrl
+        );
     } catch (error: any) {
         await logger.error("Error en inicio de sesión", error, { email });
 
@@ -72,7 +85,7 @@ export async function signIn(formData: FormData): Promise<ActionState> {
 /**
  * Acción para registrar un nuevo usuario
  */
-export async function signUp(formData: FormData): Promise<ActionState> {
+export async function signUp(formData: FormData): Promise<ActionState<any>> {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const name = formData.get("name") as string;
@@ -115,14 +128,34 @@ export async function signUp(formData: FormData): Promise<ActionState> {
             return createErrorResponse("Error al crear la cuenta");
         }
 
-        await logger.info("Registro exitoso", {
-            userId: result.user.id,
-            email: result.user.email
+        // Con autoSignIn habilitado, el usuario ya está autenticado
+        // Obtener la sesión para acceder al rol del usuario
+        const session = await auth.api.getSession({
+            headers: await headers(),
         });
 
+        if (!session?.user) {
+            await logger.error("Sesión no encontrada después del registro", null, { email });
+            return createErrorResponse("Error al crear la sesión");
+        }
+
+        const userRole = (session.user as any).role as UserRole;
+
+        await logger.info("Registro exitoso", {
+            userId: result.user.id,
+            email: result.user.email,
+            role: userRole
+        });
+
+        // Determinar URL de redirección basada en el rol del usuario
+        const redirectUrl = getRedirectUrlForRole(userRole);
+
+        // Retornar respuesta exitosa con información de redirección
         return createSuccessResponse(
-            undefined,
-            "Cuenta creada exitosamente. ¡Bienvenido!"
+            { user: result.user },
+            "Cuenta creada exitosamente. ¡Bienvenido!",
+            true,
+            redirectUrl
         );
     } catch (error: any) {
         await logger.error("Error en registro", error, { email, name });
@@ -145,7 +178,7 @@ export async function signUp(formData: FormData): Promise<ActionState> {
 /**
  * Acción para cerrar sesión
  */
-export async function signOut(): Promise<void> {
+export async function signOut(): Promise<ActionState> {
     try {
         await logger.info("Cerrando sesión");
 
@@ -155,12 +188,18 @@ export async function signOut(): Promise<void> {
         });
 
         await logger.info("Sesión cerrada exitosamente");
+
+        // Retornar respuesta exitosa con información de redirección
+        return createSuccessResponse(
+            undefined,
+            "Sesión cerrada exitosamente",
+            true,
+            "/"
+        );
     } catch (error) {
         await logger.error("Error al cerrar sesión", error);
+        return createErrorResponse("Error al cerrar sesión. Inténtalo de nuevo.");
     }
-
-    // Redirigir a la página principal
-    redirect("/");
 }
 
 /**
