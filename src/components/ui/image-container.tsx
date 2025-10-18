@@ -1,16 +1,33 @@
-import { cn } from '@/lib/utils';
-import Image from "next/image";
+"use client";
 
+import { cn } from "@/lib/utils";
+import Image from "next/image";
+import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
+
+const sizes = {
+  sm: { width: 256, height: 256 },
+  md: { width: 384, height: 384 },
+  lg: { width: 600, height: 400 },
+  xl: { width: 800, height: 500 },
+  "2xl": { width: 1000, height: 600 },
+  "4xl": { width: 1200, height: 800 },
+  "6xl": { width: 1800, height: 800 },
+};
+
+type Size = keyof typeof sizes;
 interface ImageContainerProps {
   src: string;
   alt: string;
   title?: string;
   overlay?: boolean;
   rotation?: number;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: Size;
   className?: string;
   imageClassName?: string;
   children?: React.ReactNode;
+  animateOnScroll?: boolean;
+  initialSize?: Size;
 }
 
 export function ImageContainer({
@@ -22,22 +39,96 @@ export function ImageContainer({
   size = "lg",
   className,
   imageClassName,
-  children
+  children,
+  animateOnScroll = false,
+  initialSize = "2xl",
 }: ImageContainerProps) {
-  const sizes = {
-    sm: "w-64 h-64",
-    md: "w-96 h-96",
-    lg: "w-[600px] h-[400px]",
-    xl: "w-[800px] h-[500px]"
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.5 });
+
+  // Parallax effect for the image
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+
+  const y = useTransform(scrollYProgress, [0, 1], ["-20%", "20%"]);
+  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [1.1, 1, 1.1]);
+
+  const containerStyle =
+    rotation !== 0 ? { transform: `rotate(${rotation}deg)` } : {};
+
+  // Animation variants for scroll-based size change
+  const animationVariants = {
+    initial: {
+      width: sizes[initialSize].width,
+      height: sizes[initialSize].height,
+    },
+    animate: {
+      width: sizes[size].width,
+      height: sizes[size].height,
+      transition: {
+        duration: 0.8,
+        ease: [0.25, 0.1, 0.25, 1],
+      },
+    },
   };
 
-  const containerStyle = rotation !== 0 ? { transform: `rotate(${rotation}deg)` } : {};
+  if (animateOnScroll) {
+    return (
+      <motion.div
+        ref={ref}
+        className={cn(
+          "relative overflow-hidden border-4 border-white",
+          "rounded-[297px]",
+          className
+        )}
+        style={containerStyle}
+        initial="initial"
+        animate={isInView ? "animate" : "initial"}
+        variants={animationVariants}
+      >
+        <motion.div
+          className="absolute inset-0 w-full h-full"
+          style={{ y, scale }}
+        >
+          <Image
+            src={src}
+            alt={alt}
+            fill
+            className={cn("object-cover", imageClassName)}
+          />
+        </motion.div>
+
+        {overlay && (
+          <div
+            className={cn(
+              "absolute inset-x-0 bottom-0 h-3/5",
+              "rounded-[216px]",
+              "bg-gradient-to-t from-black/80 to-transparent"
+            )}
+          />
+        )}
+
+        {title && (
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+            <h3 className="font-satoshi text-white text-7xl md:text-8xl lg:text-9xl font-normal leading-tight text-center uppercase tracking-tight">
+              {title}
+            </h3>
+          </div>
+        )}
+
+        {children}
+      </motion.div>
+    );
+  }
 
   return (
-    <div 
+    <div
+      ref={ref}
       className={cn(
         "relative overflow-hidden border-4 border-white",
-        "rounded-[297px]", // 's large border radius
+        "rounded-[297px]",
         sizes[size],
         className
       )}
@@ -49,9 +140,9 @@ export function ImageContainer({
         fill
         className={cn("object-cover", imageClassName)}
       />
-      
+
       {overlay && (
-        <div 
+        <div
           className={cn(
             "absolute inset-x-0 bottom-0 h-3/5",
             "rounded-[216px]", // Smaller radius for overlay
@@ -59,7 +150,7 @@ export function ImageContainer({
           )}
         />
       )}
-      
+
       {title && (
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
           <h3 className="font-satoshi text-white text-7xl md:text-8xl lg:text-9xl font-normal leading-tight text-center uppercase tracking-tight">
@@ -67,42 +158,8 @@ export function ImageContainer({
           </h3>
         </div>
       )}
-      
+
       {children}
-    </div>
-  );
-}
-
-// Circular text component for property features
-interface CircularTextProps {
-  text: string;
-  className?: string;
-}
-
-export function CircularText({ text, className }: CircularTextProps) {
-  return (
-    <div className={cn("relative w-44 h-44", className)}>
-      <svg className="w-full h-full animate-spin" style={{ animationDuration: '20s' }}>
-        <defs>
-          <path
-            id="circle"
-            d="M 88,88 m -70,0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0"
-          />
-        </defs>
-        <text className="fill-black dark:fill-white font-poppins text-lg font-light">
-          <textPath href="#circle">
-            {text.toUpperCase()}
-          </textPath>
-        </text>
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <svg width="74" height="74" viewBox="0 0 76 76" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M38.1109 0.666626L44.4804 31.5194L75.3331 37.8888L44.4804 44.2583L38.1109 75.1111L31.7414 44.2583L0.888672 37.8888L31.7414 31.5194L38.1109 0.666626Z"
-            fill="currentColor"
-          />
-        </svg>
-      </div>
     </div>
   );
 }
