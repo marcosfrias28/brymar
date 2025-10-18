@@ -1,6 +1,6 @@
 "use client";
 
-import { ImageContainer, CircularText } from "../ui/image-container";
+import { ImageContainer } from "../ui/image-container";
 import { CircularButton } from "../ui/circular-button";
 import { ArrowUpIcon, ArrowRight } from "lucide-react";
 import { SectionWrapper, SectionHeader } from "../ui/section-wrapper";
