@@ -25,6 +25,8 @@ import { cn } from "@/lib/utils";
 import Logo from "../ui/logo";
 import { ModeToggle } from "../mode-toggle";
 import LogOutButton from "../auth/logout-button";
+import { GetCurrentUserOutput } from "@/application/dto/user/GetCurrentUserOutput";
+
 interface ProfileItem {
   icon: React.ComponentType<{ className?: string }>;
   href: string;
@@ -34,7 +36,7 @@ interface ProfileItem {
 interface MobileNavbarProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  user: any;
+  user: GetCurrentUserOutput | null;
   role: string | null;
   profileItems: ProfileItem[];
 }

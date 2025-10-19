@@ -67,7 +67,6 @@ export async function signIn(formData: FormData): Promise<ActionState<any>> {
     } catch (error: any) {
         await logger.error("Error en inicio de sesión", error, { email });
 
-        // Manejar errores específicos de Better Auth
         if (error.message?.includes("Invalid email or password")) {
             return createErrorResponse("Email o contraseña incorrectos");
         }

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAvoidRoutes } from "@/hooks/use-avoid-routes";
 import { useAdmin } from "@/hooks/use-admin";
-import { useAuth } from "@/hooks/use-auth";
+import { useUser } from "@/hooks/use-user";
 import Logo from "./ui/logo";
 import getProfileItems from "@/lib/navbar/getProfileItems";
 import { ModeToggle } from "./mode-toggle";
@@ -20,7 +20,7 @@ export function Navbar({ className }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const shouldAvoid = useAvoidRoutes();
   const { role, permissions } = useAdmin();
-  const { user } = useAuth();
+  const { user } = useUser();
 
   if (shouldAvoid) return null;
 

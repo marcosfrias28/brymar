@@ -13,7 +13,7 @@ import {
 import { PillContainer, PillLink } from "@/components/ui/pill-container";
 import { ModeToggle } from "@/components/mode-toggle";
 import LogOutButton from "@/components/auth/logout-button";
-import { useAuth } from "@/hooks/use-auth";
+import { useUser } from "@/hooks/use-user";
 import { useAdmin } from "@/hooks/use-admin";
 import getProfileItems from "@/lib/navbar/getProfileItems";
 
@@ -26,7 +26,7 @@ export function AuthButtons({
   className = "",
   showModeToggle = true,
 }: AuthButtonsProps) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading } = useUser();
   const { role, permissions } = useAdmin();
   const profileItems = user && role ? getProfileItems(role, permissions) : [];
 
@@ -65,7 +65,8 @@ export function AuthButtons({
                   <div className="px-3 py-2 text-sm text-muted-foreground border-b border-border/50">
                     <Link href={role === "admin" ? "/dashboard" : "/profile"}>
                       <div className="font-medium text-card-foreground whitespace-nowrap truncate">
-                        {user.name || user.email}
+                        {user.getProfile().getFullName() ||
+                          user.getEmail().value}
                       </div>
                       <div className="text-xs capitalize whitespace-nowrap">
                         {role === "admin"

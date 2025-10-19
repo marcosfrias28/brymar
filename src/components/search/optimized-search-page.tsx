@@ -191,11 +191,11 @@ export function OptimizedSearchPage() {
         }
       }
 
-      // Optimistic update for immediate UI feedback
-      setOptimisticFilters(newFilters);
-
-      // Update URL and trigger search in transition
+      // Update URL and trigger search in transition with optimistic update
       startTransition(() => {
+        // Optimistic update for immediate UI feedback
+        setOptimisticFilters(newFilters);
+
         const params = new URLSearchParams();
         params.set("type", searchType);
 

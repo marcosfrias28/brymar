@@ -15,8 +15,12 @@ import { Home, Building2, Landmark, Users, Mail } from "lucide-react";
 
 const menuItems = [
   { icon: Home, href: "/", label: "Inicio" },
-  { icon: Building2, href: "/search", label: "Buscar Propiedad" },
-  { icon: Landmark, href: "/land", label: "Terrenos" },
+  {
+    icon: Building2,
+    href: "/search?type=properties",
+    label: "Propiedades",
+  },
+  { icon: Landmark, href: "/search?type=lands", label: "Terrenos" },
   { icon: Users, href: "/about", label: "Nosotros" },
   { icon: Mail, href: "/contact", label: "Contacto" },
 ];
@@ -42,10 +46,10 @@ export function NavigationPills() {
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
-            <NavigationMenuTrigger className="text-white text-center font-sofia-pro font-medium transition-all hover:bg-white/20 hover:text-white rounded-full flex items-center gap-1 h-auto whitespace-nowrap px-3 py-2 text-sm">
+            <NavigationMenuTrigger className="text-white text-center font-sofia-pro font-medium transition-all rounded-full flex items-center gap-1 h-auto whitespace-nowrap px-3 py-2 text-sm">
               Más
             </NavigationMenuTrigger>
-            <NavigationMenuContent className="w-80 p-4 bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl">
+            <NavigationMenuContent className="w-80 p-4 backdrop-blur-xl border border-white/20 shadow-xl">
               <div className="grid grid-cols-2 gap-4">
                 {/* Sección Servicios */}
                 <div className="space-y-3">
