@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils";
 import Logo from "../ui/logo";
 import { ModeToggle } from "../mode-toggle";
 import LogOutButton from "../auth/logout-button";
-import { GetCurrentUserOutput } from "@/application/dto/user/GetCurrentUserOutput";
+import { User } from "@/lib/types";
 
 interface ProfileItem {
   icon: React.ComponentType<{ className?: string }>;
@@ -36,7 +36,7 @@ interface ProfileItem {
 interface MobileNavbarProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  user: GetCurrentUserOutput | null;
+  user: User | null;
   role: string | null;
   profileItems: ProfileItem[];
 }
@@ -188,7 +188,9 @@ export function MobileNavbar({
             <div className="space-y-2">
               <div className="px-3 py-2 bg-muted/50 rounded-lg">
                 <div className="font-medium text-sm truncate">
-                  {user.getProfile().getFullName() || user.getEmail().value}
+                  {user.name ||
+                    `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+                    user.email}
                 </div>
                 <div className="text-xs text-muted-foreground capitalize">
                   {role === "admin"

@@ -6,20 +6,17 @@ import { z } from "zod"
 import {
   type ActionState,
   createValidatedAction,
-  createSuccessResponse,
-  createErrorResponse
+  createSuccessResponse
 } from "../validations"
 import {
   PropertyFormSchema,
   PropertyUpdateFormSchema,
   PropertySearchSchema,
-  validateData,
   type PropertyFormData,
   type PropertyUpdateFormData,
   type PropertySearchParams
 } from "../unified-schema"
 import {
-  validatePropertyBusinessRules,
   createDatabaseError,
   handleError
 } from "../unified-errors"
@@ -28,28 +25,24 @@ import { properties } from "../db/schema"
 
 async function addPropertyAction(data: PropertyFormData): Promise<ActionState> {
   try {
-    // Validate business rules
-    validatePropertyBusinessRules({
-      type: data.type,
-      bedrooms: data.bedrooms,
-      bathrooms: data.bathrooms,
-      area: data.area,
-      price: data.price
-    });
+    // Generate UUID for the property
+    const propertyId = crypto.randomUUID();
 
     await db.insert(properties).values({
+      id: propertyId,
       title: data.title,
       description: data.description,
       price: data.price,
+      currency: data.currency || "USD",
       type: data.type,
-      bedrooms: data.bedrooms,
-      bathrooms: data.bathrooms,
-      area: data.area,
-      location: data.location,
+      address: data.address,
+      features: data.features,
       status: data.status || "draft",
       featured: data.featured || false,
       images: data.images || [],
+      userId: data.userId,
       createdAt: new Date(),
+      updatedAt: new Date(),
     })
 
     revalidatePath("/dashboard/properties")
@@ -67,24 +60,14 @@ export const addProperty = createValidatedAction(PropertyFormSchema, addProperty
 
 async function updatePropertyAction(data: PropertyUpdateFormData): Promise<ActionState> {
   try {
-    // Validate business rules
-    validatePropertyBusinessRules({
-      type: data.type,
-      bedrooms: data.bedrooms,
-      bathrooms: data.bathrooms,
-      area: data.area,
-      price: data.price
-    });
-
     const updateData = {
       title: data.title,
       description: data.description,
       price: data.price,
+      currency: data.currency || "USD",
       type: data.type,
-      bedrooms: data.bedrooms,
-      bathrooms: data.bathrooms,
-      area: data.area,
-      location: data.location,
+      address: data.address,
+      features: data.features,
       status: data.status,
       featured: data.featured,
       images: data.images || [],
@@ -108,7 +91,7 @@ export const updateProperty = createValidatedAction(PropertyUpdateFormSchema, up
 
 // Simple delete schema
 const deletePropertySchema = z.object({
-  id: z.number().min(1, "ID de propiedad requerido")
+  id: z.string().min(1, "ID de propiedad requerido")
 })
 
 async function deletePropertyAction(data: z.infer<typeof deletePropertySchema>): Promise<ActionState> {
@@ -173,7 +156,7 @@ export const getProperties = async (page = 1, limit = 12, filters?: any) => {
 
 export const getPropertyById = async (id: string) => {
   try {
-    const result = await db.select().from(properties).where(eq(properties.id, parseInt(id)))
+    const result = await db.select().from(properties).where(eq(properties.id, id))
     return result[0] || null
   } catch (error) {
     console.error("Error fetching property:", error)
@@ -188,7 +171,6 @@ export const searchProperties = async (query: string, page = 1, limit = 12) => {
       or(
         ilike(properties.title, `%${query}%`),
         ilike(properties.description, `%${query}%`),
-        ilike(properties.location, `%${query}%`),
         ilike(properties.type, `%${query}%`),
       ),
     ]
@@ -264,7 +246,7 @@ export const searchPropertiesAction = createValidatedAction(PropertySearchSchema
 
 // Toggle featured schema
 const toggleFeaturedSchema = z.object({
-  id: z.number().min(1, "ID de propiedad requerido"),
+  id: z.string().min(1, "ID de propiedad requerido"),
   featured: z.boolean()
 })
 

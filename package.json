@@ -18,6 +18,13 @@
     "db:studio": "drizzle-kit studio",
     "db:push": "drizzle-kit push",
     "db:seed": "node src/scripts/seed-properties.js",
+    "db:check": "node scripts/check-db-config.js",
+    "db:reset": "node scripts/reset-database.js",
+    "db:setup": "node scripts/setup-fresh-database.js --force",
+    "db:setup:safe": "node scripts/setup-fresh-database.js",
+    "db:force-reset": "node scripts/force-reset-database.js --force",
+    "db:drop": "drizzle-kit drop",
+    "auth:test": "node scripts/test-auth-connection.js",
     "check-env": "node scripts/check-env.js"
   },
   "dependencies": {

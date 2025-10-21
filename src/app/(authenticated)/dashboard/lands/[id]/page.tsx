@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { LoadingSpinner } from "@/components/ui/loading-states";
 import { InlineErrorState } from "@/components/ui/error-states";
-import { useLand } from "@/presentation/hooks/use-lands";
+import { useLand } from "@/hooks/use-lands";
 import { useBreadcrumbs } from "@/hooks/use-breadcrumbs";
 import { RouteGuard } from "@/components/auth/route-guard";
 import { cn } from "@/lib/utils";

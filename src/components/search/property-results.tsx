@@ -17,7 +17,7 @@ import { PropertyMap } from "@/components/properties/property-map";
 import { LoadingSpinner } from "@/components/ui/loading-states";
 import { InlineErrorState } from "@/components/ui/error-states";
 import { cn } from "@/lib/utils";
-import { PropertySearchResult } from "@/presentation/hooks/use-properties";
+import { PropertySearchResult } from "@/lib/types/properties";
 
 interface PropertyResultsProps {
   properties: PropertySearchResult[];

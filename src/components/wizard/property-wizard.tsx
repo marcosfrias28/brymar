@@ -2,10 +2,24 @@
 
 import { UnifiedWizard, WizardStep } from "./unified-wizard";
 import { PropertyForm } from "../forms/property-form";
-import { createProperty } from "@/presentation/server-actions/property-actions";
+import { createProperty } from "@/lib/actions/properties";
+import { useSaveWizardDraft, useCreateWizardDraft } from "@/hooks/use-wizard";
 
-// Simple step components for property wizard
-const PropertyBasicInfoStep = ({ data, onChange, errors }: any) => {
+interface PropertyWizardData {
+  title?: string;
+  price?: number;
+  location?: string;
+  [key: string]: unknown;
+}
+
+interface StepProps {
+  data: PropertyWizardData;
+  onChange: (data: PropertyWizardData) => void;
+  errors?: Record<string, string>;
+}
+
+// Property wizard step components
+const PropertyBasicInfoStep = ({ data, onChange, errors }: StepProps) => {
   return (
     <div className="space-y-4">
       <PropertyForm
@@ -26,7 +40,7 @@ const propertyWizardSteps: WizardStep[] = [
     title: "Información Básica",
     description: "Datos principales de la propiedad",
     component: PropertyBasicInfoStep,
-    validation: (data) => {
+    validation: (data: PropertyWizardData) => {
       const errors: Record<string, string> = {};
       if (!data.title) errors.title = "El título es requerido";
       if (!data.price) errors.price = "El precio es requerido";
@@ -37,24 +51,22 @@ const propertyWizardSteps: WizardStep[] = [
 ];
 
 interface PropertyWizardProps {
-  initialData?: any;
+  draftId?: string;
+  initialData?: PropertyWizardData;
   onComplete?: () => void;
 }
 
 export function PropertyWizard({
+  draftId,
   initialData,
   onComplete,
 }: PropertyWizardProps) {
-  const handleComplete = async (data: any) => {
-    try {
-      const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          formData.append(key, value as string);
-        }
-      });
+  const createDraft = useCreateWizardDraft();
+  const saveDraft = useSaveWizardDraft();
 
-      const result = await createProperty(formData);
+  const handleComplete = async (data: PropertyWizardData) => {
+    try {
+      const result = await createProperty(data);
 
       if (result.success) {
         onComplete?.();
@@ -70,6 +82,21 @@ export function PropertyWizard({
     }
   };
 
+  const handleSaveDraft = async (data: PropertyWizardData) => {
+    if (draftId) {
+      await saveDraft.mutateAsync({
+        id: draftId,
+        data,
+      });
+    } else {
+      await createDraft.mutateAsync({
+        type: "property",
+        title: data.title || "Nueva Propiedad",
+        initialData: data,
+      });
+    }
+  };
+
   return (
     <UnifiedWizard
       title="Crear Nueva Propiedad"
@@ -77,6 +104,7 @@ export function PropertyWizard({
       steps={propertyWizardSteps}
       initialData={initialData}
       onComplete={handleComplete}
+      onSaveDraft={handleSaveDraft}
       showDraftOption={true}
     />
   );

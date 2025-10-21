@@ -37,7 +37,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useProfileMessages } from "@/hooks/use-profile";
-import { useUser } from "@/presentation/hooks/use-user";
+import { useUser } from "@/hooks/use-user";
 
 type FilterType = "all" | "unread" | "read" | "starred" | "archived";
 type MessageStatus = "sent" | "delivered" | "read";

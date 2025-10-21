@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { forgotPassword } from "@/presentation/server-actions/auth-actions";
+import { forgotPasswordAction } from "@/lib/actions/auth";
 import {
   useAuthFields,
   AuthLink,
@@ -21,7 +21,7 @@ const ForgotPasswordPage = () => {
     <AuthFormWrapper
       title="Recuperar Contraseña"
       subtitle="Ingresa tu correo para recibir un enlace de recuperación"
-      action={forgotPassword}
+      action={forgotPasswordAction}
       fields={[emailField]}
       submitText="Enviar enlace"
       loadingText="Enviando..."

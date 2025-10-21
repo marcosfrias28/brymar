@@ -3,19 +3,19 @@
 import type React from "react";
 
 import { useState } from "react";
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import { Grid, List, LayoutGrid } from "lucide-react";
-import { cn } from '@/lib/utils';
-import { PropertyCardList } from '@/components/properties/property-card-list';
-import { LandCardList } from '@/components/lands/land-card-list';
-import { BlogCardList } from '@/components/blog/blog-card-list';
+import { cn } from "@/lib/utils";
+import { PropertyCardList } from "@/components/properties/property-card-list";
+import { LandCardList } from "@/components/lands/land-card-list";
+import { BlogCard } from "@/components/blog/blog-card";
 
 interface AdaptiveGridProps {
   children: React.ReactNode[];
@@ -93,7 +93,7 @@ export function AdaptiveGrid({
       );
     }
     if (childProps.post) {
-      return <BlogCardList key={startIndex + index} post={childProps.post} />;
+      return <BlogCard key={startIndex + index} post={childProps.post} />;
     }
 
     return child;

@@ -2,10 +2,24 @@
 
 import { UnifiedWizard, WizardStep } from "./unified-wizard";
 import { LandForm } from "../forms/land-form";
-import { createLand } from "@/presentation/server-actions/land-actions";
+import { createLand } from "@/lib/actions/lands";
+import { useSaveWizardDraft, useCreateWizardDraft } from "@/hooks/use-wizard";
 
-// Simple step components for land wizard
-const LandBasicInfoStep = ({ data, onChange, errors }: any) => {
+interface LandWizardData {
+  name?: string;
+  price?: number;
+  area?: number;
+  [key: string]: unknown;
+}
+
+interface LandStepProps {
+  data: LandWizardData;
+  onChange: (data: LandWizardData) => void;
+  errors?: Record<string, string>;
+}
+
+// Land wizard step components
+const LandBasicInfoStep = ({ data, onChange, errors }: LandStepProps) => {
   return (
     <div className="space-y-4">
       <LandForm
@@ -26,7 +40,7 @@ const landWizardSteps: WizardStep[] = [
     title: "Información Básica",
     description: "Datos principales del terreno",
     component: LandBasicInfoStep,
-    validation: (data) => {
+    validation: (data: LandWizardData) => {
       const errors: Record<string, string> = {};
       if (!data.name) errors.name = "El nombre es requerido";
       if (!data.price) errors.price = "El precio es requerido";
@@ -37,21 +51,22 @@ const landWizardSteps: WizardStep[] = [
 ];
 
 interface LandWizardProps {
-  initialData?: any;
+  draftId?: string;
+  initialData?: LandWizardData;
   onComplete?: () => void;
 }
 
-export function LandWizard({ initialData, onComplete }: LandWizardProps) {
-  const handleComplete = async (data: any) => {
-    try {
-      const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          formData.append(key, value as string);
-        }
-      });
+export function LandWizard({
+  draftId,
+  initialData,
+  onComplete,
+}: LandWizardProps) {
+  const createDraft = useCreateWizardDraft();
+  const saveDraft = useSaveWizardDraft();
 
-      const result = await createLand(formData);
+  const handleComplete = async (data: LandWizardData) => {
+    try {
+      const result = await createLand(data);
 
       if (result.success) {
         onComplete?.();
@@ -67,6 +82,21 @@ export function LandWizard({ initialData, onComplete }: LandWizardProps) {
     }
   };
 
+  const handleSaveDraft = async (data: LandWizardData) => {
+    if (draftId) {
+      await saveDraft.mutateAsync({
+        id: draftId,
+        data,
+      });
+    } else {
+      await createDraft.mutateAsync({
+        type: "land",
+        title: data.name || "Nuevo Terreno",
+        initialData: data,
+      });
+    }
+  };
+
   return (
     <UnifiedWizard
       title="Crear Nuevo Terreno"
@@ -74,6 +104,7 @@ export function LandWizard({ initialData, onComplete }: LandWizardProps) {
       steps={landWizardSteps}
       initialData={initialData}
       onComplete={handleComplete}
+      onSaveDraft={handleSaveDraft}
       showDraftOption={true}
     />
   );

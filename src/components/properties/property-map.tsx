@@ -1,4 +1,4 @@
-import { PropertySearchResult } from "@/presentation/hooks/use-properties";
+import { PropertySearchResult } from "@/lib/types/properties";
 
 interface PropertyMapProps {
   properties: PropertySearchResult[];

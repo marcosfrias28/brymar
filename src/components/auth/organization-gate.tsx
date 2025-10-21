@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from "@/presentation/hooks/use-user";
+import { useUser } from "@/hooks/use-user";
 import { Loader2 } from "lucide-react";
 
 interface OrganizationRoleGateProps {
@@ -24,11 +24,7 @@ export function OrganizationRoleGate({
 }: OrganizationRoleGateProps) {
   const { user, loading } = useUser();
 
-  if (
-    !user ||
-    !user.getRole() ||
-    !allowedRoles.includes(user.getRole().value)
-  ) {
+  if (!user || !user.role || !allowedRoles.includes(user.role)) {
     return fallback || null;
   }
 
@@ -66,14 +62,13 @@ export function OrganizationPermissionGate({
 }: OrganizationPermissionGateProps) {
   const { user, loading } = useUser();
 
-  if (!user || !user.getRole()) {
+  if (!user || !user.role) {
     return fallback || null;
   }
 
   // Verificar si el rol tiene todos los permisos requeridos
   const rolePermissions =
-    ROLE_PERMISSIONS[user.getRole().value as keyof typeof ROLE_PERMISSIONS] ||
-    [];
+    ROLE_PERMISSIONS[user.role as keyof typeof ROLE_PERMISSIONS] || [];
   const hasAllPermissions = requiredPermissions.every((permission) =>
     rolePermissions.includes(permission as any)
   );

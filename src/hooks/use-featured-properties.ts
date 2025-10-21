@@ -2,17 +2,34 @@
 
 import { useState, useEffect } from 'react'
 import { getFeaturedProperties } from '@/lib/actions/property-actions';
-import { PropertySearchResult } from '@/presentation/hooks/use-properties'
+// Use the database schema type instead of the domain type to avoid casting issues
+type DatabaseProperty = {
+    id: string;
+    title: string;
+    description: string;
+    price: number;
+    currency: string;
+    address: any;
+    type: string;
+    features: any;
+    images: any;
+    status: string;
+    featured: boolean | null;
+    userId: string;
+    publishedAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+}
 
 export interface UseFeaturedPropertiesReturn {
-    properties: PropertySearchResult[]
+    properties: DatabaseProperty[]
     loading: boolean
     error: string | null
     refreshFeaturedProperties: () => Promise<void>
 }
 
 export const useFeaturedProperties = (limit = 6): UseFeaturedPropertiesReturn => {
-    const [properties, setProperties] = useState<PropertySearchResult[]>([])
+    const [properties, setProperties] = useState<DatabaseProperty[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
@@ -22,7 +39,7 @@ export const useFeaturedProperties = (limit = 6): UseFeaturedPropertiesReturn =>
             setError(null)
 
             const result = await getFeaturedProperties(limit)
-            setProperties(result as unknown as PropertySearchResult[])
+            setProperties(result)
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Error loading featured properties'
             setError(errorMessage)

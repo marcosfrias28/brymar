@@ -16,45 +16,45 @@ import { cn } from "@/lib/utils";
 import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
 import { toast } from "sonner";
 
-export interface WizardStep {
+export interface WizardStep<T = Record<string, unknown>> {
   id: string;
   title: string;
   description?: string;
   component: React.ComponentType<{
-    data: any;
-    onChange: (data: any) => void;
+    data: T;
+    onChange: (data: T) => void;
     onValidate?: () => boolean;
     errors?: Record<string, string>;
   }>;
-  validation?: (data: any) => Record<string, string> | null;
+  validation?: (data: T) => Record<string, string> | null;
   optional?: boolean;
 }
 
-export interface UnifiedWizardProps {
+export interface UnifiedWizardProps<T = Record<string, unknown>> {
   title: string;
   description?: string;
-  steps: WizardStep[];
-  initialData?: any;
+  steps: WizardStep<T>[];
+  initialData?: T;
   onComplete: (
-    data: any
+    data: T
   ) => Promise<{ success: boolean; message?: string; error?: string }>;
-  onSaveDraft?: (data: any) => Promise<void>;
+  onSaveDraft?: (data: T) => Promise<void>;
   showDraftOption?: boolean;
   className?: string;
 }
 
-export function UnifiedWizard({
+export function UnifiedWizard<T = Record<string, unknown>>({
   title,
   description,
   steps,
-  initialData = {},
+  initialData = {} as T,
   onComplete,
   onSaveDraft,
   showDraftOption = false,
   className,
-}: UnifiedWizardProps) {
+}: UnifiedWizardProps<T>) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [data, setData] = useState(initialData);
+  const [data, setData] = useState<T>(initialData);
   const [errors, setErrors] = useState<Record<string, Record<string, string>>>(
     {}
   );
@@ -67,7 +67,7 @@ export function UnifiedWizard({
   const progress = ((currentStep + 1) / steps.length) * 100;
 
   const validateStep = useCallback(
-    (stepIndex: number, stepData: any) => {
+    (stepIndex: number, stepData: T) => {
       const step = steps[stepIndex];
       if (!step.validation) return null;
 
@@ -78,11 +78,11 @@ export function UnifiedWizard({
   );
 
   const handleStepChange = useCallback(
-    (stepData: any) => {
-      setData((prev: any) => ({ ...prev, ...stepData }));
+    (stepData: Partial<T>) => {
+      setData((prev: T) => ({ ...prev, ...stepData }));
 
       // Clear errors for current step when data changes
-      setErrors((prev: any) => ({
+      setErrors((prev) => ({
         ...prev,
         [currentStep]: {},
       }));

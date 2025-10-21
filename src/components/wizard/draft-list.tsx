@@ -1,12 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useUser } from "@/presentation/hooks/use-user";
-import {
-  getUserDrafts,
-  deleteDraft,
-  loadDraft,
-} from "@/lib/actions/wizard-actions";
+import { useWizardDrafts, useDeleteWizardDraft } from "@/hooks/use-wizard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,82 +23,33 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
 import Link from "next/link";
-
-interface Draft {
-  id: string;
-  title: string;
-  propertyType: string | null;
-  stepCompleted: number;
-  completionPercentage: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { WizardType } from "@/lib/types";
 
 interface DraftListProps {
+  type?: WizardType;
   onSelectDraft?: (draftId: string) => void;
   showActions?: boolean;
   maxItems?: number;
 }
 
 export function DraftList({
+  type,
   onSelectDraft,
   showActions = true,
   maxItems,
 }: DraftListProps) {
-  const { user } = useUser();
-  const [drafts, setDrafts] = useState<Draft[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchDrafts = async () => {
-      if (!user?.getId()) return;
-
-      try {
-        const userDrafts = await getUserDrafts(user.getId().value);
-        setDrafts(userDrafts as Draft[]);
-      } catch (error) {
-        console.error("Error fetching drafts:", error);
-        toast.error("Error al cargar los borradores");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDrafts();
-  }, [user?.getId().value]);
+  const { data: drafts = [], isLoading } = useWizardDrafts(type);
+  const deleteDraft = useDeleteWizardDraft();
 
   const handleDeleteDraft = async (draftId: string) => {
-    if (!user?.getId()) return;
-
     if (!confirm("¿Estás seguro de que quieres eliminar este borrador?")) {
       return;
     }
 
-    setDeletingId(draftId);
-
-    try {
-      const formData = new FormData();
-      formData.append("draftId", draftId);
-      formData.append("userId", user.getId().value);
-
-      const result = await deleteDraft(formData);
-
-      if (result.success) {
-        setDrafts((prev) => prev.filter((draft) => draft.id !== draftId));
-        toast.success("Borrador eliminado exitosamente");
-      } else {
-        toast.error(result.error || "Error al eliminar el borrador");
-      }
-    } catch (error) {
-      console.error("Error deleting draft:", error);
-      toast.error("Error inesperado al eliminar el borrador");
-    } finally {
-      setDeletingId(null);
-    }
+    deleteDraft.mutate(draftId);
   };
 
-  const handleSelectDraft = async (draftId: string) => {
+  const handleSelectDraft = (draftId: string) => {
     if (onSelectDraft) {
       onSelectDraft(draftId);
     }
@@ -134,7 +79,7 @@ export function DraftList({
     return "text-red-600";
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Card>
         <CardHeader>
@@ -203,9 +148,9 @@ export function DraftList({
                       <h4 className="font-medium text-foreground truncate">
                         {draft.title || "Borrador sin título"}
                       </h4>
-                      {draft.propertyType && (
+                      {draft.type && (
                         <Badge variant="outline" className="text-xs">
-                          {draft.propertyType}
+                          {draft.type}
                         </Badge>
                       )}
                     </div>
@@ -213,16 +158,12 @@ export function DraftList({
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
                       <div className="flex items-center gap-1">
                         <CheckCircle2 className="h-3 w-3" />
-                        <span>{getStepName(draft.stepCompleted)}</span>
+                        <span>{getStepName(draft.currentStep || 0)}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        <span
-                          className={getCompletionColor(
-                            draft.completionPercentage
-                          )}
-                        >
-                          {draft.completionPercentage}% completo
+                        <span className="text-muted-foreground">
+                          {draft.status}
                         </span>
                       </div>
                     </div>
@@ -259,34 +200,32 @@ export function DraftList({
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleDeleteDraft(draft.id)}
-                          disabled={deletingId === draft.id}
+                          disabled={deleteDraft.isPending}
                           className="cursor-pointer text-destructive focus:text-destructive"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
-                          {deletingId === draft.id
-                            ? "Eliminando..."
-                            : "Eliminar"}
+                          {deleteDraft.isPending ? "Eliminando..." : "Eliminar"}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   )}
                 </div>
 
-                {/* Progress bar */}
+                {/* Status indicator */}
                 <div className="mt-3">
                   <div className="w-full bg-muted rounded-full h-1.5">
                     <div
                       className={cn(
                         "h-1.5 rounded-full transition-all duration-300",
-                        draft.completionPercentage >= 75
+                        draft.status === "published"
                           ? "bg-green-500"
-                          : draft.completionPercentage >= 50
-                          ? "bg-yellow-500"
-                          : draft.completionPercentage >= 25
-                          ? "bg-orange-500"
-                          : "bg-red-500"
+                          : draft.status === "completed"
+                          ? "bg-blue-500"
+                          : "bg-yellow-500"
                       )}
-                      style={{ width: `${draft.completionPercentage}%` }}
+                      style={{
+                        width: draft.status === "draft" ? "50%" : "100%",
+                      }}
                     />
                   </div>
                 </div>

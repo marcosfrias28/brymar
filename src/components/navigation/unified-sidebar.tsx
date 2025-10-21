@@ -40,7 +40,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import Logo from "../ui/logo";
-import { useUser } from "@/presentation/hooks/use-user";
+import { useUser } from "@/hooks/use-user";
 import { useAdmin } from "@/hooks/use-admin";
 import { PageTransition } from "@/components/ui/page-transition";
 import { hoverAnimations, focusAnimations } from "@/lib/utils/animations";
@@ -288,7 +288,7 @@ export const UnifiedSidebar = memo(function UnifiedSidebar({
     } else {
       // Auto-detect based on route or user role
       const isAdminRoute = pathname?.startsWith("/dashboard");
-      const userRoleValue = user?.getRole()?.value;
+      const userRoleValue = user?.role;
 
       if (
         isAdminRoute ||
@@ -310,7 +310,7 @@ export const UnifiedSidebar = memo(function UnifiedSidebar({
   }, [
     variant,
     pathname,
-    user?.getRole()?.value,
+    user?.role,
     canManageUsers,
     canAccessDashboard,
     canViewAnalytics,
@@ -323,15 +323,11 @@ export const UnifiedSidebar = memo(function UnifiedSidebar({
   // Memoize user data
   const userData = useMemo(
     () => ({
-      name: user?.getProfile()?.getFullName() || "Usuario",
-      email: user?.getEmail()?.value || "usuario@brymar.com",
-      avatar: user?.getProfile()?.getAvatar() || "/avatars/default.jpg",
+      name: user?.name || "Usuario",
+      email: user?.email || "usuario@brymar.com",
+      avatar: user?.image || "/avatars/default.jpg",
     }),
-    [
-      user?.getProfile()?.getFullName(),
-      user?.getEmail()?.value,
-      user?.getProfile()?.getAvatar(),
-    ]
+    [user?.name, user?.email, user?.image]
   );
 
   return (

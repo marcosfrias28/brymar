@@ -15,10 +15,11 @@ import { Badge } from "@/components/ui/badge";
 import { LoadingSpinner } from "@/components/ui/loading-states";
 import { InlineErrorState } from "@/components/ui/error-states";
 import { cn } from "@/lib/utils";
-import { LandSummary } from "@/application/dto/land/SearchLandsOutput";
+import { Land } from "@/lib/types";
+import { LandCard } from "@/components/lands/land-card";
 
 interface LandResultsProps {
-  lands: LandSummary[];
+  lands: Land[];
   total: number;
   isLoading?: boolean;
   error?: string;
@@ -220,67 +221,5 @@ export function LandResults({
         )}
       </div>
     </div>
-  );
-}
-
-// Simple Land Card Component
-function LandCard({
-  land,
-  variant = "vertical",
-}: {
-  land: LandSummary;
-  variant?: "vertical" | "horizontal";
-}) {
-  const isHorizontal = variant === "horizontal";
-
-  return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-      <div className={cn("flex", isHorizontal ? "flex-row" : "flex-col")}>
-        {/* Image */}
-        <div
-          className={cn(
-            "relative bg-muted",
-            isHorizontal ? "w-48 h-32" : "w-full h-48"
-          )}
-        >
-          {land.mainImage ? (
-            <img
-              src={land.mainImage}
-              alt={land.title}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <MapPin className="h-8 w-8 text-muted-foreground" />
-            </div>
-          )}
-          <Badge className="absolute top-2 right-2 capitalize">
-            {land.type}
-          </Badge>
-        </div>
-
-        {/* Content */}
-        <CardContent className={cn("p-4", isHorizontal && "flex-1")}>
-          <div className="space-y-2">
-            <h3 className="font-semibold text-lg line-clamp-2">{land.title}</h3>
-            <p className="text-sm text-muted-foreground line-clamp-2">
-              {land.features.join(", ") || "Sin características especificadas"}
-            </p>
-
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span>{land.area.toLocaleString()} m²</span>
-              <span>{land.location}</span>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold text-primary">
-                ${land.price.toLocaleString()}
-              </div>
-              <Button size="sm">Ver Detalles</Button>
-            </div>
-          </div>
-        </CardContent>
-      </div>
-    </Card>
   );
 }

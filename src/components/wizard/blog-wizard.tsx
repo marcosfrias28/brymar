@@ -1,11 +1,26 @@
 "use client";
 
 import { UnifiedWizard, WizardStep } from "./unified-wizard";
-import { BlogForm } from "../forms/blog-form";
-import { createBlogPost } from "@/presentation/server-actions/blog-actions";
+import { BlogForm } from "../blog/blog-form";
+import { createBlogPost } from "@/lib/actions/blog";
+import { useSaveWizardDraft, useCreateWizardDraft } from "@/hooks/use-wizard";
 
-// Simple step components for blog wizard
-const BlogBasicInfoStep = ({ data, onChange, errors }: any) => {
+interface BlogWizardData {
+  title?: string;
+  content?: string;
+  author?: string;
+  status?: string;
+  [key: string]: unknown;
+}
+
+interface BlogStepProps {
+  data: BlogWizardData;
+  onChange: (data: BlogWizardData) => void;
+  errors?: Record<string, string>;
+}
+
+// Blog wizard step components
+const BlogBasicInfoStep = ({ data, onChange, errors }: BlogStepProps) => {
   return (
     <div className="space-y-4">
       <BlogForm
@@ -27,7 +42,7 @@ const blogWizardSteps: WizardStep[] = [
     title: "Información del Post",
     description: "Datos principales del artículo",
     component: BlogBasicInfoStep,
-    validation: (data) => {
+    validation: (data: BlogWizardData) => {
       const errors: Record<string, string> = {};
       if (!data.title) errors.title = "El título es requerido";
       if (!data.content) errors.content = "El contenido es requerido";
@@ -38,25 +53,22 @@ const blogWizardSteps: WizardStep[] = [
 ];
 
 interface BlogWizardProps {
-  initialData?: any;
+  draftId?: string;
+  initialData?: BlogWizardData;
   onComplete?: () => void;
 }
 
-export function BlogWizard({ initialData, onComplete }: BlogWizardProps) {
-  const handleComplete = async (data: any) => {
-    try {
-      const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          if (key === "coverImage" && value instanceof File) {
-            formData.append(key, value);
-          } else {
-            formData.append(key, value as string);
-          }
-        }
-      });
+export function BlogWizard({
+  draftId,
+  initialData,
+  onComplete,
+}: BlogWizardProps) {
+  const createDraft = useCreateWizardDraft();
+  const saveDraft = useSaveWizardDraft();
 
-      const result = await createBlogPost(formData);
+  const handleComplete = async (data: BlogWizardData) => {
+    try {
+      const result = await createBlogPost(data);
 
       if (result.success) {
         onComplete?.();
@@ -72,6 +84,21 @@ export function BlogWizard({ initialData, onComplete }: BlogWizardProps) {
     }
   };
 
+  const handleSaveDraft = async (data: BlogWizardData) => {
+    if (draftId) {
+      await saveDraft.mutateAsync({
+        id: draftId,
+        data,
+      });
+    } else {
+      await createDraft.mutateAsync({
+        type: "blog",
+        title: data.title || "Nuevo Post",
+        initialData: data,
+      });
+    }
+  };
+
   return (
     <UnifiedWizard
       title="Crear Nuevo Post"
@@ -79,6 +106,7 @@ export function BlogWizard({ initialData, onComplete }: BlogWizardProps) {
       steps={blogWizardSteps}
       initialData={initialData}
       onComplete={handleComplete}
+      onSaveDraft={handleSaveDraft}
       showDraftOption={true}
     />
   );

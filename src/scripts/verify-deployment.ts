@@ -3,8 +3,8 @@
  * Tests that the application works properly in production environment
  */
 
-import { container } from '@/infrastructure/container/Container';
-import { initializeContainer } from '@/infrastructure/container/ServiceRegistration';
+// TODO: Replace container system with simplified dependency injection
+// Container system has been removed with DDD architecture
 
 interface DeploymentCheck {
     name: string;
@@ -137,7 +137,7 @@ async function checkUseCaseAvailability(): Promise<DeploymentCheck> {
             'LoadWizardDraftUseCase',
             'PublishWizardUseCase',
             'CreatePropertyUseCase',
-            'CreateLandUseCase',
+
             'SearchPropertiesUseCase'
         ];
 

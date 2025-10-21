@@ -1,1 +1,0 @@
-export { PropertyTitle } from '@/domain/shared/value-objects/Title';

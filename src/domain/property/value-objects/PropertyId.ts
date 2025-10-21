@@ -1,1 +1,0 @@
-export { PropertyId } from '@/domain/shared/value-objects/EntityId';

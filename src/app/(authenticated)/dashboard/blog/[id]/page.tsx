@@ -30,8 +30,12 @@ import {
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 
-import { useBlogPost } from "@/presentation/hooks/use-blog";
-import type { GetBlogPostByIdOutput } from "@/application/dto/content";
+import {
+  useBlogPost,
+  useUpdateBlogPost,
+  useDeleteBlogPost,
+} from "@/hooks/use-blog-posts";
+import type { BlogPost } from "@/lib/types/blog";
 import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -42,16 +46,14 @@ export default function BlogDetailPage() {
 
   // Sempre chiamare gli hooks prima di qualsiasi early return
   const {
-    blogPost,
-    loading,
+    data: blogPost,
+    isLoading: loading,
     error,
-    updateBlogPost,
-    deleteBlogPost,
-    refreshBlogPost,
   } = useBlogPost(params?.id as string);
+  const updateMutation = useUpdateBlogPost();
+  const deleteMutation = useDeleteBlogPost();
   const [isEditing, setIsEditing] = useState(false);
-  const [editedPost, setEditedPost] =
-    useState<Partial<GetBlogPostByIdOutput> | null>(null);
+  const [editedPost, setEditedPost] = useState<Partial<BlogPost> | null>(null);
 
   useEffect(() => {
     if (blogPost) {
@@ -109,7 +111,8 @@ export default function BlogDetailPage() {
               Post no encontrado
             </h2>
             <p className="text-muted-foreground mb-4">
-              {error || "El post que buscas no existe o ha sido eliminado."}
+              {error?.message ||
+                "El post que buscas no existe o ha sido eliminado."}
             </p>
             <Button asChild className={secondaryColorClasses.focusRing}>
               <Link href="/dashboard/blog">Volver al Blog</Link>
@@ -122,25 +125,20 @@ export default function BlogDetailPage() {
 
   const handleSave = async () => {
     if (editedPost && blogPost) {
-      const { UpdateBlogPostInput } = await import("@/application/dto/content");
-
-      const input = UpdateBlogPostInput.create({
-        id: blogPost.getId().value,
+      const input = {
+        id: blogPost.id,
         title: editedPost.title || blogPost.title,
         content: editedPost.content || blogPost.content,
-        author: editedPost.author || blogPost.author,
-        category: (editedPost.category || blogPost.category) as
-          | "market-analysis"
-          | "investment-tips"
-          | "property-news"
-          | "legal-advice"
-          | "lifestyle",
-      });
+        category: editedPost.category || blogPost.category,
+        excerpt: editedPost.excerpt || blogPost.excerpt || undefined,
+        tags: (editedPost.tags || blogPost.tags) as string[],
+      };
 
-      const result = await updateBlogPost(input);
-      if (result) {
-        setIsEditing(false);
-      }
+      updateMutation.mutate(input, {
+        onSuccess: () => {
+          setIsEditing(false);
+        },
+      });
     }
   };
 
@@ -153,9 +151,8 @@ export default function BlogDetailPage() {
 
   const handleDelete = async () => {
     if (confirm("¿Estás seguro de que quieres eliminar este post?")) {
-      const success = await deleteBlogPost();
-      if (success) {
-        router.push("/dashboard/blog");
+      if (blogPost?.id) {
+        deleteMutation.mutate(blogPost.id);
       }
     }
   };
@@ -401,7 +398,7 @@ export default function BlogDetailPage() {
                 <>
                   <div className="flex items-center gap-2 text-sm text-blackCoral">
                     <User className="h-4 w-4" />
-                    <span>{currentData.author || "Unknown Author"}</span>
+                    <span>{currentData.authorId || "Unknown Author"}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-blackCoral">
                     <Calendar className="h-4 w-4" />
@@ -413,7 +410,7 @@ export default function BlogDetailPage() {
                   </div>
                   <div className="flex items-center gap-2 text-sm text-blackCoral">
                     <Clock className="h-4 w-4" />
-                    <span>{currentData.readingTime} min de lectura</span>
+                    <span>{currentData.readTime} min de lectura</span>
                   </div>
                 </>
               )}
@@ -434,12 +431,12 @@ export default function BlogDetailPage() {
                     <Label htmlFor="author">Autor</Label>
                     <Input
                       id="author"
-                      value={editedPost?.author || ""}
+                      value={editedPost?.authorId || ""}
                       onChange={(e) =>
                         editedPost &&
                         setEditedPost({
                           ...editedPost,
-                          author: e.target.value,
+                          authorId: e.target.value,
                         })
                       }
                     />
@@ -470,12 +467,12 @@ export default function BlogDetailPage() {
                     <Input
                       id="readTime"
                       type="number"
-                      value={editedPost?.readingTime || 0}
+                      value={editedPost?.readTime || 0}
                       onChange={(e) =>
                         editedPost &&
                         setEditedPost({
                           ...editedPost,
-                          readingTime: Number(e.target.value),
+                          readTime: Number(e.target.value),
                         })
                       }
                     />

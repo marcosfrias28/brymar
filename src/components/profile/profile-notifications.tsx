@@ -49,7 +49,7 @@ import { useProfileNotifications } from "@/hooks/use-profile";
 //   markNotificationAsReadAction,
 //   markAllNotificationsAsReadAction,
 // } from "@/presentation/server-actions/profile-actions";
-import { useUser } from "@/presentation/hooks/use-user";
+import { useUser } from "@/hooks/use-user";
 
 type FilterType = "all" | "unread" | "read";
 type NotificationType = "all" | "success" | "error" | "info" | "warning";
@@ -85,13 +85,13 @@ export function ProfileNotifications() {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const handleMarkAsRead = async (notificationId: string) => {
-    if (!user?.getId()) return;
+    if (!user?.id) return;
 
     setProcessingIds((prev) => [...prev, notificationId]);
 
     try {
       const formData = new FormData();
-      formData.append("userId", user.getId().value);
+      formData.append("userId", user.id);
       formData.append("notificationId", notificationId);
       // Mark notification as read functionality needs to be implemented in DDD structure
       toast.error(
@@ -106,13 +106,13 @@ export function ProfileNotifications() {
   };
 
   const handleMarkAllAsRead = async () => {
-    if (!user?.getId()) return;
+    if (!user?.id) return;
 
     setIsMarkingAllRead(true);
 
     try {
       const formData = new FormData();
-      formData.append("userId", user.getId().value);
+      formData.append("userId", user.id);
       // Mark all notifications as read functionality needs to be implemented in DDD structure
       toast.error(
         "Mark all notifications as read functionality needs to be implemented in DDD structure"

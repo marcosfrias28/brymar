@@ -1,1 +1,0 @@
-export { Property, type CreatePropertyData, type PropertyData } from "./Property";

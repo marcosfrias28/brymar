@@ -12,7 +12,7 @@ import {
 import { PropertyWizardData } from '@/types/property-wizard';
 import { PropertyCompleteSchema, PropertyDraftSchema } from '@/lib/schemas/property-wizard-schemas';
 import { saveUnifiedDraft, loadUnifiedDraft, deleteUnifiedDraft } from "./unified-wizard-actions";
-import { createProperty, updateProperty } from '@/presentation/server-actions/property-actions';
+import { createProperty, updateProperty } from './properties';
 
 // Schema for completing a property wizard
 const completePropertyWizardSchema = z.object({

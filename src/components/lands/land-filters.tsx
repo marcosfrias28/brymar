@@ -1,31 +1,25 @@
 "use client";
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   secondaryColorClasses,
   badgeVariants,
   interactiveClasses,
-} from '@/lib/utils/secondary-colors';
+} from "@/lib/utils/secondary-colors";
+import { LandType } from "@/lib/types";
 
 interface LandFiltersProps {
-  currentFilter:
-    | "all"
-    | "commercial"
-    | "residential"
-    | "agricultural"
-    | "beachfront";
-  onFilterChange: (
-    filter: "all" | "commercial" | "residential" | "agricultural" | "beachfront"
-  ) => void;
-  totalCount: number;
+  currentFilter: "all" | LandType;
+  onFilterChange: (filter: "all" | LandType) => void;
+  totalCount?: number;
 }
 
 export function LandFilters({
   currentFilter,
   onFilterChange,
-  totalCount,
+  totalCount = 0,
 }: LandFiltersProps) {
   const filters = [
     {
@@ -49,8 +43,18 @@ export function LandFilters({
       count: 0, // This would be calculated from actual data
     },
     {
-      label: "Frente al Mar",
-      value: "beachfront" as const,
+      label: "Industriales",
+      value: "industrial" as const,
+      count: 0, // This would be calculated from actual data
+    },
+    {
+      label: "Recreativos",
+      value: "recreational" as const,
+      count: 0, // This would be calculated from actual data
+    },
+    {
+      label: "Uso Mixto",
+      value: "mixed-use" as const,
       count: 0, // This would be calculated from actual data
     },
   ];

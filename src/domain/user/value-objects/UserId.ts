@@ -1,1 +1,0 @@
-export { UserId } from '@/domain/shared/value-objects/EntityId';

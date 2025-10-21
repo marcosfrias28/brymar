@@ -3,7 +3,7 @@
 import { UnifiedSidebar } from "@/components/navigation/unified-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { useUser } from "@/presentation/hooks/use-user";
+import { useUser } from "@/hooks/use-user";
 import { useAdmin } from "@/hooks/use-admin";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -56,8 +56,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               Debes iniciar sesión para acceder a tu perfil.
             </p>
             <p className="text-sm text-gray-500">
-              Rol actual: {user?.getRole().value || "No definido"} | Permisos
-              dashboard: {canAccessDashboard ? "Sí" : "No"}
+              Rol actual: {user?.role || "No definido"} | Permisos dashboard:{" "}
+              {canAccessDashboard ? "Sí" : "No"}
             </p>
             <Link
               href="/profile"

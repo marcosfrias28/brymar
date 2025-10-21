@@ -23,8 +23,8 @@ import { cn } from "@/lib/utils";
 import {
   useProperty,
   type GetPropertyByIdOutput,
-} from "@/presentation/hooks/use-properties";
-import { updateProperty as updatePropertyAction } from "@/presentation/server-actions/property-actions";
+} from "@/hooks/use-properties";
+import { updateProperty as updatePropertyAction } from "@/lib/actions/properties";
 import { toast } from "sonner";
 import Link from "next/link";
 

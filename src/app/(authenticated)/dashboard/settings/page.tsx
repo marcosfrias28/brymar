@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useActionState } from "react";
-import { useUser } from "@/presentation/hooks/use-user";
-import { updateUserAction } from "@/presentation/server-actions/auth-actions";
+import { useUser } from "@/hooks/use-user";
+import { updateUserProfileAction } from "@/lib/actions/auth";
 import { ActionState } from "@/lib/validations";
 import { Button } from "@/components/ui/button";
 import {
@@ -70,7 +70,7 @@ export default function SettingsPage() {
   const { user, loading: userLoading } = useUser();
   const [updateState, updateUserFormAction] = useActionState(
     async (prevState: ActionState, formData: FormData) => {
-      return await updateUserAction(formData);
+      return await updateUserProfileAction(formData);
     },
     {
       success: false,
@@ -79,9 +79,9 @@ export default function SettingsPage() {
     }
   );
   const [formData, setFormData] = useState<any>({
-    name: user?.getProfile().getFullName() || "",
-    email: user?.getEmail().value || "",
-    role: user?.getRole().value || "user",
+    name: user?.name || "",
+    email: user?.email || "",
+    role: user?.role || "user",
   });
   const [notifications, setNotifications] = useState({
     email: true,
@@ -127,7 +127,7 @@ export default function SettingsPage() {
   }
 
   const currentRole = user
-    ? rolePermissions[user.getRole().value as keyof typeof rolePermissions]
+    ? rolePermissions[user.role as keyof typeof rolePermissions]
     : null;
 
   const breadcrumbs = [
@@ -316,7 +316,7 @@ export default function SettingsPage() {
                           <Card
                             key={roleKey}
                             className={
-                              user?.getRole().value === roleKey
+                              user?.role === roleKey
                                 ? "ring-2 ring-arsenic"
                                 : ""
                             }

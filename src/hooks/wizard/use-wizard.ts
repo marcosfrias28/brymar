@@ -11,19 +11,15 @@ import {
 import { WizardValidator } from '@/lib/wizard/wizard-validator';
 import { WizardPersistence } from '@/lib/wizard/wizard-persistence';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { container } from '@/infrastructure/container/Container';
-import { initializeContainer } from '@/infrastructure/container/ServiceRegistration';
-import { SaveWizardDraftUseCase } from '@/application/use-cases/wizard/SaveWizardDraftUseCase';
-import { LoadWizardDraftUseCase } from '@/application/use-cases/wizard/LoadWizardDraftUseCase';
-import { PublishWizardUseCase } from '@/application/use-cases/wizard/PublishWizardUseCase';
-import { SaveWizardDraftInput } from '@/application/dto/wizard/SaveWizardDraftInput';
-import { LoadWizardDraftInput } from '@/application/dto/wizard/LoadWizardDraftInput';
-import { PublishWizardInput } from '@/application/dto/wizard/PublishWizardInput';
-
-// Initialize container on first import
-if (!container.has('SaveWizardDraftUseCase')) {
-    initializeContainer();
-}
+import {
+    saveWizardDraft,
+    loadWizardDraft,
+    publishWizard
+} from '@/lib/actions/wizard';
+import {
+    UpdateWizardDraftInput,
+    PublishWizardInput
+} from '@/lib/types/wizard';
 
 export function useWizard<T extends WizardData>(
     options: UseWizardOptions<T>

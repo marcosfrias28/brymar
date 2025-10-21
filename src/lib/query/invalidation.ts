@@ -68,26 +68,7 @@ export function getInvalidationKeys(
             }
             return [queryKeys.sections.all];
 
-        // Contact info invalidations
-        case 'contact.create':
-        case 'contact.update':
-            if (context.contactType) {
-                return [
-                    queryKeys.contactInfo.type(context.contactType),
-                    queryKeys.contactInfo.list(),
-                    queryKeys.contactInfo.all,
-                ];
-            }
-            return [
-                queryKeys.contactInfo.list(),
-                queryKeys.contactInfo.all,
-            ];
-
-        case 'contact.delete':
-            return [
-                queryKeys.contactInfo.list(),
-                queryKeys.contactInfo.all,
-            ];
+        // Note: Contact info is now static content, no cache invalidation needed
 
         // Property invalidations
         case 'property.create':

@@ -2,7 +2,7 @@
  * Simple test to verify wizard publishing functionality
  */
 
-import { PublishWizardUseCase } from '../application/use-cases/wizard/PublishWizardUseCase';
+import { publishWizard } from '../lib/actions/wizard';
 
 // Mock data for testing
 const mockWizardDraftRepository = {
@@ -25,9 +25,7 @@ const mockCreatePropertyUseCase = {
     execute: jest.fn(),
 };
 
-const mockCreateLandUseCase = {
-    execute: jest.fn(),
-};
+
 
 const mockCreateBlogPostUseCase = {
     execute: jest.fn(),
@@ -46,7 +44,7 @@ describe('Wizard Publishing Functionality', () => {
             mockWizardMediaRepository as any,
             mockWizardDomainService as any,
             mockCreatePropertyUseCase as any,
-            mockCreateLandUseCase as any,
+
             mockCreateBlogPostUseCase as any
         );
     });

@@ -35,7 +35,7 @@ import {
 import { useProfileFavorites } from "@/hooks/use-profile";
 // Profile actions need to be implemented in DDD structure
 // import { removeFavoriteAction } from "@/presentation/server-actions/profile-actions";
-import { useUser } from "@/presentation/hooks/use-user";
+import { useUser } from "@/hooks/use-user";
 
 type FilterType = "all" | "property" | "search";
 
@@ -59,13 +59,13 @@ export function ProfileFavorites() {
   });
 
   const handleRemoveFavorite = async (favoriteId: string) => {
-    if (!user?.getId()) return;
+    if (!user?.id) return;
 
     setRemovingId(favoriteId);
 
     try {
       const formData = new FormData();
-      formData.append("userId", user.getId().value);
+      formData.append("userId", user.id);
       formData.append("favoriteId", favoriteId);
       // Remove favorite functionality needs to be implemented in DDD structure
       toast.error(

@@ -1,1 +1,0 @@
-export { BlogPostId } from '@/domain/shared/value-objects/EntityId';

@@ -1,20 +1,22 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import db from "../db/drizzle";
-import { accounts, session, users, verification } from "../db/schema";
+import { accounts, sessions, users, verificationTokens } from "../db/schema";
 import { nextCookies } from "better-auth/next-js";
 import { emailOTP } from "better-auth/plugins";
 import { error as logError, getSafeUserMessage } from "../logger";
 import { sendVerificationOTP } from "../email";
+import db from "../db/drizzle"; // Usar la instancia principal que ya está configurada correctamente
 
 export const auth = betterAuth({
+  secret: process.env.BETTER_AUTH_SECRET || 'P2MTvnMR37nfWXt11MUGS5AT45mTjTlZ',
+  baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
       user: users,
-      session,
+      session: sessions,
       account: accounts,
-      verification,
+      verification: verificationTokens,
     },
   }),
   session: {
@@ -29,9 +31,9 @@ export const auth = betterAuth({
     additionalFields: {
       role: {
         type: "string",
-        required: true,
+        required: false,
         defaultValue: "user",
-        input: false,
+        input: true,
       },
     },
   },

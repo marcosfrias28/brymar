@@ -13,40 +13,20 @@ import {
     properties,
     lands,
     blogPosts,
-    categories,
-    userFavorites,
-    pageSections,
-    contactInfo,
+    blogCategories,
     wizardDrafts,
     wizardMedia,
-    propertyDrafts,
     aiGenerations,
-    propertyImages,
-    propertyVideos,
-    propertyCharacteristics,
-    propertyDraftCharacteristics,
     wizardAnalytics,
-    landDrafts,
-    blogDrafts,
     type User,
     type Property,
     type Land,
     type BlogPost,
-    type Category,
-    type UserFavorite,
-    type PageSection,
-    type ContactInfo,
+    type BlogCategory,
     type WizardDraft,
     type WizardMedia,
-    type PropertyDraft,
     type AIGeneration,
-    type PropertyImage,
-    type PropertyVideo,
-    type PropertyCharacteristic,
-    type PropertyDraftCharacteristic,
     type WizardAnalytic,
-    type LandDraft,
-    type BlogDraft,
 } from './db/schema';
 
 // ============================================================================
@@ -64,12 +44,8 @@ export const PropertyInsertSchema = createInsertSchema(properties, {
     price: z.number().min(1000, "El precio debe ser al menos $1,000").max(10000000, "El precio no puede exceder $10,000,000"),
     title: z.string().min(3, "El título debe tener al menos 3 caracteres").max(100, "El título no puede exceder 100 caracteres"),
     description: z.string().min(10, "La descripción debe tener al menos 10 caracteres").max(1000, "La descripción no puede exceder 1000 caracteres"),
-    bedrooms: z.number().min(1, "Debe tener al menos 1 habitación").max(10, "No puede tener más de 10 habitaciones"),
-    bathrooms: z.number().min(1, "Debe tener al menos 1 baño").max(10, "No puede tener más de 10 baños"),
-    area: z.number().min(20, "El área debe ser al menos 20 m²").max(10000, "El área no puede exceder 10,000 m²"),
-    location: z.string().min(3, "La ubicación debe tener al menos 3 caracteres").max(100, "La ubicación no puede exceder 100 caracteres"),
     type: z.string().min(3, "El tipo debe tener al menos 3 caracteres").max(50, "El tipo no puede exceder 50 caracteres"),
-    status: z.enum(["draft", "published", "sold", "rented", "withdrawn", "archived"]),
+    status: z.enum(["draft", "published", "sold", "rented", "archived"]),
 });
 
 // Land schemas
@@ -97,14 +73,12 @@ export const BlogPostInsertSchema = createInsertSchema(blogPosts, {
     readingTime: z.number().min(1, "El tiempo de lectura debe ser al menos 1 minuto").max(60, "El tiempo de lectura no puede exceder 60 minutos"),
 });
 
-// Category schemas
-export const CategorySelectSchema = createSelectSchema(categories);
-export const CategoryInsertSchema = createInsertSchema(categories, {
+// Blog Category schemas
+export const BlogCategorySelectSchema = createSelectSchema(blogCategories);
+export const BlogCategoryInsertSchema = createInsertSchema(blogCategories, {
     name: z.string().min(2, "El nombre debe tener al menos 2 caracteres").max(50, "El nombre no puede exceder 50 caracteres"),
     slug: z.string().min(2, "El slug debe tener al menos 2 caracteres").max(50, "El slug no puede exceder 50 caracteres").regex(/^[a-z0-9-]+$/, "El slug solo puede contener letras minúsculas, números y guiones"),
-    title: z.string().min(2, "El título debe tener al menos 2 caracteres").max(100, "El título no puede exceder 100 caracteres"),
     description: z.string().min(10, "La descripción debe tener al menos 10 caracteres").max(500, "La descripción no puede exceder 500 caracteres"),
-    status: z.enum(["active", "inactive"]),
 });
 
 // Wizard schemas
@@ -122,25 +96,18 @@ export const WizardMediaInsertSchema = createInsertSchema(wizardMedia, {
     contentType: z.string().min(1, "El tipo de contenido es requerido"),
 });
 
-// User Favorites schemas
-export const UserFavoriteSelectSchema = createSelectSchema(userFavorites);
-export const UserFavoriteInsertSchema = createInsertSchema(userFavorites, {
-    itemType: z.enum(["property", "land"]),
+// AI Generation schemas
+export const AIGenerationSelectSchema = createSelectSchema(aiGenerations);
+export const AIGenerationInsertSchema = createInsertSchema(aiGenerations, {
+    generationType: z.string().min(1, "El tipo de generación es requerido"),
+    prompt: z.string().min(1, "El prompt es requerido"),
+    success: z.boolean().default(true),
 });
 
-// Page Sections schemas
-export const PageSectionSelectSchema = createSelectSchema(pageSections);
-export const PageSectionInsertSchema = createInsertSchema(pageSections, {
-    page: z.string().min(1, "La página es requerida"),
-    section: z.string().min(1, "La sección es requerida"),
-});
-
-// Contact Info schemas
-export const ContactInfoSelectSchema = createSelectSchema(contactInfo);
-export const ContactInfoInsertSchema = createInsertSchema(contactInfo, {
-    type: z.enum(["phone", "email", "address", "social"]),
-    label: z.string().min(1, "La etiqueta es requerida"),
-    value: z.string().min(1, "El valor es requerido"),
+// Wizard Analytics schemas
+export const WizardAnalyticSelectSchema = createSelectSchema(wizardAnalytics);
+export const WizardAnalyticInsertSchema = createInsertSchema(wizardAnalytics, {
+    eventType: z.string().min(1, "El tipo de evento es requerido"),
 });
 
 // ============================================================================
@@ -159,7 +126,7 @@ export const PropertyFormSchema = PropertyInsertSchema.omit({
 });
 
 export const PropertyUpdateFormSchema = PropertyFormSchema.extend({
-    id: z.number().min(1, "ID de propiedad requerido"),
+    id: z.string().min(1, "ID de propiedad requerido"),
 });
 
 // Land form schemas
@@ -197,15 +164,8 @@ export const PropertySearchSchema = z.object({
     query: z.string().optional(),
     minPrice: z.number().min(0).optional(),
     maxPrice: z.number().min(0).optional(),
-    minBedrooms: z.number().min(0).optional(),
-    maxBedrooms: z.number().min(0).optional(),
-    minBathrooms: z.number().min(0).optional(),
-    maxBathrooms: z.number().min(0).optional(),
-    minArea: z.number().min(0).optional(),
-    maxArea: z.number().min(0).optional(),
     type: z.string().optional(),
-    status: z.enum(["draft", "published", "sold", "rented", "withdrawn", "archived"]).optional(),
-    location: z.string().optional(),
+    status: z.enum(["draft", "published", "sold", "rented", "archived"]).optional(),
     featured: z.boolean().optional(),
     page: z.coerce.number().min(1).default(1),
     limit: z.coerce.number().min(1).max(100).default(12),
@@ -261,21 +221,11 @@ export type {
     Property,
     Land,
     BlogPost,
-    Category,
-    UserFavorite,
-    PageSection,
-    ContactInfo,
+    BlogCategory,
     WizardDraft,
     WizardMedia,
-    PropertyDraft,
     AIGeneration,
-    PropertyImage,
-    PropertyVideo,
-    PropertyCharacteristic,
-    PropertyDraftCharacteristic,
     WizardAnalytic,
-    LandDraft,
-    BlogDraft,
 } from './db/schema';
 
 // Form data types derived from schemas

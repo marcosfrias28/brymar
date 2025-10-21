@@ -7,13 +7,9 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion';
+} from "@/components/ui/accordion";
 import Image from "next/image";
-import {
-  useSectionFromPage,
-  getSectionContent,
-  getSectionCustomContent,
-} from '@/hooks/queries/use-sections-query';
+import { useSection } from "@/hooks/use-static-content";
 import { FAQSkeleton } from "../skeletons/home/faq-skeleton";
 
 // Preparado para i18n - Solo 4 FAQ principales
@@ -68,7 +64,7 @@ const propertyImages = [
 
 // Componente separado para el header que usa el hook
 function FAQSectionHeader() {
-  const { section, isLoading } = useSectionFromPage("home", "faq");
+  const { data: section, loading: isLoading } = useSection("home", "faq");
 
   if (isLoading) {
     return (
@@ -80,17 +76,11 @@ function FAQSectionHeader() {
     );
   }
 
-  const subtitle = getSectionContent(section, "subtitle", "FAQs");
-  const title = getSectionContent(
-    section,
-    "title",
-    "Todo sobre Marbry Inmobiliaria"
-  );
-  const description = getSectionContent(
-    section,
-    "description",
-    "Sabemos que comprar, vender o invertir en bienes raíces puede ser abrumador. Aquí tienes las preguntas más frecuentes para guiarte en el proceso."
-  );
+  const subtitle = section?.subtitle || "FAQs";
+  const title = section?.title || "Todo sobre Marbry Inmobiliaria";
+  const description =
+    section?.description ||
+    "Sabemos que comprar, vender o invertir en bienes raíces puede ser abrumador. Aquí tienes las preguntas más frecuentes para guiarte en el proceso.";
 
   return (
     <SectionHeader
@@ -118,15 +108,14 @@ function FAQSectionHeader() {
 }
 
 export function FAQSection() {
-  const { section, isLoading } = useSectionFromPage("home", "faq");
+  const { data: section, loading: isLoading } = useSection("home", "faq");
 
   if (isLoading) {
     return <FAQSkeleton />;
   }
 
-  // Obtener FAQ personalizadas del contenido de la sección
-  const customFAQs = getSectionCustomContent(section, "faqs", null);
-  const displayFAQs = customFAQs || faqData;
+  // Use static FAQ data
+  const displayFAQs = section?.content?.faqs || faqData;
 
   return (
     <SectionWrapper className="bg-muted/30">

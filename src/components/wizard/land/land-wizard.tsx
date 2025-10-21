@@ -1,107 +1,138 @@
 "use client";
 
-import React from "react";
-import { Wizard } from '@/components/wizard/core/wizard';
-import { landWizardConfig } from '@/lib/wizard/land-wizard-config';
-import { LandWizardData, defaultLandWizardData } from '@/types/land-wizard';
-import {
-  createLandFromWizard,
-  updateLandFromWizard,
-  saveLandDraft,
-  loadLandDraft,
-  deleteLandDraft,
-} from '@/lib/actions/land-wizard-actions';
+import { useState } from "react";
+import { Land } from "@/lib/types/lands";
 
 interface LandWizardProps {
-  initialData?: Partial<LandWizardData>;
-  landId?: string;
-  draftId?: string;
-  userId: string;
-  onComplete?: (landId: string) => void;
-  onCancel?: () => void;
+  onComplete?: (land: Partial<Land>) => void;
+  initialData?: Partial<Land>;
 }
 
-export function LandWizard({
-  initialData,
-  landId,
-  draftId,
-  userId,
-  onComplete,
-  onCancel,
-}: LandWizardProps) {
-  // Handle completion
-  const handleComplete = async (data: LandWizardData) => {
-    try {
-      let result;
+export function LandWizard({ onComplete, initialData }: LandWizardProps) {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [formData, setFormData] = useState<Partial<Land>>(initialData || {});
 
-      if (landId) {
-        // Update existing land
-        result = await updateLandFromWizard({ ...data, id: landId } as any);
-      } else {
-        // Create new land
-        result = await createLandFromWizard(data as any);
-      }
-
-      if (result.success && (result.data as any)?.landId) {
-        // Delete draft if it exists
-        if (draftId) {
-          await deleteLandDraft({ draftId, userId });
-        }
-
-        onComplete?.((result.data as any)?.landId);
-      } else {
-        throw new Error(result.message || "Error al guardar el terreno");
-      }
-    } catch (error) {
-      console.error("Error completing land wizard:", error);
-      throw error;
+  const handleNext = () => {
+    if (currentStep < 2) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      onComplete?.(formData);
     }
   };
 
-  // Handle draft saving
-  const handleSaveDraft = async (
-    data: Partial<LandWizardData>,
-    step: string
-  ) => {
-    try {
-      const stepIndex = landWizardConfig.steps.findIndex((s) => s.id === step);
-      const completionPercentage = Math.round(
-        ((stepIndex + 1) / landWizardConfig.steps.length) * 100
-      );
-
-      const result = await saveLandDraft({
-        draftId,
-        userId,
-        formData: data as any,
-        stepCompleted: stepIndex + 1,
-        completionPercentage,
-      });
-
-      if (result.success) {
-        return (result.data as any)?.draftId || draftId || "";
-      } else {
-        throw new Error(result.message || "Error al guardar borrador");
-      }
-    } catch (error) {
-      console.error("Error saving land draft:", error);
-      throw error;
+  const handleBack = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
     }
-  };
-
-  // Merge initial data with defaults
-  const mergedInitialData = {
-    ...defaultLandWizardData,
-    ...initialData,
   };
 
   return (
-    <Wizard<LandWizardData>
-      config={landWizardConfig}
-      initialData={mergedInitialData}
-      draftId={draftId}
-      onComplete={handleComplete}
-      onSaveDraft={handleSaveDraft}
-      onCancel={onCancel}
-    />
+    <div className="max-w-2xl mx-auto p-6">
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold">Land Wizard</h2>
+        <p className="text-gray-600">Step {currentStep + 1} of 3</p>
+      </div>
+
+      <div className="space-y-6">
+        {currentStep === 0 && (
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Land Name"
+                className="w-full p-3 border rounded-lg"
+                value={formData.name || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+              />
+              <textarea
+                placeholder="Land Description"
+                className="w-full p-3 border rounded-lg h-32"
+                value={formData.description || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+              />
+            </div>
+          </div>
+        )}
+
+        {currentStep === 1 && (
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Land Details</h3>
+            <div className="space-y-4">
+              <input
+                type="number"
+                placeholder="Area (sq ft)"
+                className="w-full p-3 border rounded-lg"
+                value={formData.area || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, area: Number(e.target.value) })
+                }
+              />
+              <input
+                type="number"
+                placeholder="Price"
+                className="w-full p-3 border rounded-lg"
+                value={formData.price || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, price: Number(e.target.value) })
+                }
+              />
+              <select
+                className="w-full p-3 border rounded-lg"
+                value={formData.type || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, type: e.target.value as any })
+                }
+              >
+                <option value="">Select Land Type</option>
+                <option value="residential">Residential</option>
+                <option value="commercial">Commercial</option>
+                <option value="agricultural">Agricultural</option>
+              </select>
+            </div>
+          </div>
+        )}
+
+        {currentStep === 2 && (
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Review & Submit</h3>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p>
+                <strong>Name:</strong> {formData.name}
+              </p>
+              <p>
+                <strong>Area:</strong> {formData.area} sq ft
+              </p>
+              <p>
+                <strong>Price:</strong> ${formData.price}
+              </p>
+              <p>
+                <strong>Type:</strong> {formData.type}
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div className="flex justify-between pt-6">
+          <button
+            onClick={handleBack}
+            disabled={currentStep === 0}
+            className="px-4 py-2 border rounded-lg disabled:opacity-50"
+          >
+            Back
+          </button>
+          <button
+            onClick={handleNext}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+          >
+            {currentStep === 2 ? "Complete" : "Next"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -10,14 +10,14 @@ import {
   FileText,
 } from "lucide-react";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
-import { useProperties } from "@/presentation/hooks/use-properties";
+import { useProperties } from "@/hooks/use-properties";
 import { Button } from "@/components/ui/button";
 import { RouteGuard } from "@/components/auth/route-guard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PropertyCardList } from "@/components/properties/property-card-list";
 import { PropertyFilters } from "@/components/properties/property-filters";
-import { PropertySearchResult } from "@/application/dto/property/SearchPropertiesOutput";
+import { PropertySearchResult } from "@/lib/types/properties";
 import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
 import { cn } from "@/lib/utils";
 import Link from "next/link";

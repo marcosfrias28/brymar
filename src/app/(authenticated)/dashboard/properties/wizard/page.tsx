@@ -1,7 +1,7 @@
 "use client";
 
-import { PropertyWizard } from '@/components/wizard/property';
-import { PropertyWizardData } from '@/types/property-wizard';
+import { PropertyWizard } from "@/components/wizard";
+import { PropertyWizardData } from "@/types/property-wizard";
 
 export default function PropertyWizardPage() {
   const handleComplete = async (data: PropertyWizardData) => {

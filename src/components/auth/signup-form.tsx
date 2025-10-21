@@ -1,7 +1,7 @@
 "use client";
 
 import { AuthFormWrapper, useAuthFields, AuthLink } from "./auth-form-wrapper";
-import { signUp } from "@/presentation/server-actions/auth-actions";
+import { signUpAction } from "@/lib/actions/auth";
 
 export function SignUpForm() {
   const { nameField, emailField, newPasswordField, confirmPasswordField } =
@@ -11,7 +11,7 @@ export function SignUpForm() {
     <AuthFormWrapper
       title="Crear Cuenta"
       subtitle="Ingresa tus datos para crear una nueva cuenta"
-      action={signUp}
+      action={signUpAction}
       fields={[nameField, emailField, newPasswordField, confirmPasswordField]}
       submitText="Crear Cuenta"
       loadingText="Creando cuenta..."

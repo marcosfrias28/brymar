@@ -1,1 +1,0 @@
-export { LandPrice } from '@/domain/shared/value-objects/Price';

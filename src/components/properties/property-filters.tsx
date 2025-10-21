@@ -7,12 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
 import { cn } from "@/lib/utils";
 
-import { PropertySearchResult } from "@/presentation/hooks/use-properties";
+import { Property } from "@/lib/types/properties";
 
 interface PropertyFiltersProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
-  properties: PropertySearchResult[];
+  properties: Property[];
 }
 
 export function PropertyFilters({

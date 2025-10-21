@@ -1,105 +1,128 @@
 "use client";
 
-import React from "react";
-import { Wizard } from '@/components/wizard/core/wizard';
-import { blogWizardConfig } from '@/lib/wizard/blog-wizard-config';
-import { BlogWizardData, defaultBlogWizardData } from '@/types/blog-wizard';
-import {
-  createBlogFromWizard,
-  updateBlogFromWizard,
-  saveBlogDraft,
-  deleteBlogDraft,
-  loadBlogDraft,
-} from '@/lib/actions/blog-wizard-actions';
+import { useState } from "react";
+import { BlogPost } from "@/lib/types/blog";
 
 interface BlogWizardProps {
-  initialData?: Partial<BlogWizardData>;
-  draftId?: string;
-  blogId?: string;
-  userId: string;
-  onComplete?: (data: BlogWizardData) => void;
-  onUpdate?: (data: Partial<BlogWizardData>) => void;
-  onCancel?: () => void;
+  onComplete?: (blogPost: Partial<BlogPost>) => void;
+  initialData?: Partial<BlogPost>;
 }
 
-export function BlogWizard({
-  initialData,
-  draftId,
-  blogId,
-  userId,
-  onComplete,
-  onUpdate,
-  onCancel,
-}: BlogWizardProps) {
-  // Handle completion
-  const handleComplete = async (data: BlogWizardData) => {
-    try {
-      let result;
-      if (blogId) {
-        result = await updateBlogFromWizard({ ...data, id: blogId });
-      } else {
-        result = await createBlogFromWizard(data as any);
-      }
+export function BlogWizard({ onComplete, initialData }: BlogWizardProps) {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [formData, setFormData] = useState<Partial<BlogPost>>(
+    initialData || {}
+  );
 
-      if (result.success) {
-        // Delete draft if it exists
-        if (draftId) {
-          await deleteBlogDraft({ draftId, userId });
-        }
-        onComplete?.(data);
-      } else {
-        throw new Error(result.message || "Error al guardar el artículo");
-      }
-    } catch (error) {
-      console.error("Error completing blog wizard:", error);
-      throw error;
+  const handleNext = () => {
+    if (currentStep < 2) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      onComplete?.(formData);
     }
   };
 
-  // Handle draft saving
-  const handleSaveDraft = async (
-    data: Partial<BlogWizardData>,
-    step: string
-  ) => {
-    try {
-      const stepIndex = blogWizardConfig.steps.findIndex((s) => s.id === step);
-      const completionPercentage = Math.round(
-        ((stepIndex + 1) / blogWizardConfig.steps.length) * 100
-      );
-
-      const result = await saveBlogDraft({
-        ...data,
-        draftId,
-        userId,
-        stepCompleted: stepIndex + 1,
-        completionPercentage,
-      } as any);
-
-      if (result.success && result.data) {
-        return result.data.draftId;
-      } else {
-        throw new Error(result.message || "Error al guardar el borrador");
-      }
-    } catch (error) {
-      console.error("Error saving blog draft:", error);
-      throw error;
+  const handleBack = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
     }
-  };
-
-  // Merge initial data with defaults
-  const mergedInitialData = {
-    ...defaultBlogWizardData,
-    ...initialData,
   };
 
   return (
-    <Wizard<BlogWizardData>
-      config={blogWizardConfig}
-      initialData={mergedInitialData}
-      draftId={draftId}
-      onComplete={handleComplete}
-      onSaveDraft={handleSaveDraft}
-      onCancel={onCancel}
-    />
+    <div className="max-w-2xl mx-auto p-6">
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold">Blog Wizard</h2>
+        <p className="text-gray-600">Step {currentStep + 1} of 3</p>
+      </div>
+
+      <div className="space-y-6">
+        {currentStep === 0 && (
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Blog Post Title"
+                className="w-full p-3 border rounded-lg"
+                value={formData.title || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
+              />
+              <textarea
+                placeholder="Blog Post Excerpt"
+                className="w-full p-3 border rounded-lg h-24"
+                value={formData.excerpt || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, excerpt: e.target.value })
+                }
+              />
+            </div>
+          </div>
+        )}
+
+        {currentStep === 1 && (
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Content</h3>
+            <div className="space-y-4">
+              <textarea
+                placeholder="Blog Post Content"
+                className="w-full p-3 border rounded-lg h-48"
+                value={formData.content || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, content: e.target.value })
+                }
+              />
+              <select
+                className="w-full p-3 border rounded-lg"
+                value={formData.category || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, category: e.target.value })
+                }
+              >
+                <option value="">Select Category</option>
+                <option value="real-estate">Real Estate</option>
+                <option value="market-trends">Market Trends</option>
+                <option value="investment">Investment</option>
+              </select>
+            </div>
+          </div>
+        )}
+
+        {currentStep === 2 && (
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Review & Submit</h3>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p>
+                <strong>Title:</strong> {formData.title}
+              </p>
+              <p>
+                <strong>Category:</strong> {formData.category}
+              </p>
+              <p>
+                <strong>Content Length:</strong> {formData.content?.length || 0}{" "}
+                characters
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div className="flex justify-between pt-6">
+          <button
+            onClick={handleBack}
+            disabled={currentStep === 0}
+            className="px-4 py-2 border rounded-lg disabled:opacity-50"
+          >
+            Back
+          </button>
+          <button
+            onClick={handleNext}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+          >
+            {currentStep === 2 ? "Complete" : "Next"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

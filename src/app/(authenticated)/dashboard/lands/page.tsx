@@ -10,7 +10,7 @@ import { LandFilters } from "@/components/lands/land-filters";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useLands } from "@/presentation/hooks/use-lands";
+import { useLands } from "@/hooks/use-lands";
 import { useBreadcrumbs } from "@/hooks/use-breadcrumbs";
 import { RouteGuard } from "@/components/auth/route-guard";
 import { cn } from "@/lib/utils";

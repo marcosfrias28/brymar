@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from '@/presentation/hooks/use-user';
+import { useUser } from '@/hooks/use-user';
 import { PERMISSIONS, ROUTE_PERMISSIONS, type Permission, type UserRole } from '@/lib/auth/admin-config';
 
 /**
@@ -25,13 +25,13 @@ export function useAdmin() {
     };
   }
 
-  const userRole = user.getRole().value as UserRole;
+  const userRole = user.role as UserRole;
 
   /**
    * Verifica si el usuario tiene un permiso específico
    */
   const hasPermission = (permission: Permission): boolean => {
-    if (!user || !user.getRole()) return false;
+    if (!user || !user.role) return false;
 
     // Usar la lógica nativa del plugin admin si está disponible
     // Por ahora, usar nuestra configuración local
@@ -70,7 +70,7 @@ export function useAdmin() {
    * Verifica si el usuario tiene un rol específico
    */
   const hasRole = (role: UserRole): boolean => {
-    return user?.getRole().value === role;
+    return user?.role === role;
   };
 
   /**

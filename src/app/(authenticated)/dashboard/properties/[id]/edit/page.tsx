@@ -2,12 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useUser } from "@/presentation/hooks/use-user";
-import { PropertyWizard } from "@/components/wizard/property";
-import {
-  getPropertyById,
-  updateProperty,
-} from "@/presentation/server-actions/property-actions";
+import { useUser } from "@/hooks/use-user";
+import { PropertyWizard } from "@/components/wizard";
+import { getPropertyById, updateProperty } from "@/lib/actions/properties";
 import { RouteGuard } from "@/components/auth/route-guard";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { toast } from "sonner";

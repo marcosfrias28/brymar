@@ -2,14 +2,11 @@
 
 import { FeaturedPropertiesGallery } from "./featured-gallery";
 import { SectionWrapper, SectionHeader } from "../ui/section-wrapper";
-import {
-  useSectionFromPage,
-  getSectionContent,
-} from '@/hooks/queries/use-sections-query';
+import { useSection } from "@/hooks/use-static-content";
 import { FeaturedPropertiesSkeleton } from "../skeletons/home/featured-properties-skeleton";
 
 export function FeaturedPropertiesSection() {
-  const { section, isLoading } = useSectionFromPage(
+  const { data: section, loading: isLoading } = useSection(
     "home",
     "featured-properties"
   );
@@ -18,22 +15,12 @@ export function FeaturedPropertiesSection() {
     return <FeaturedPropertiesSkeleton />;
   }
 
-  // Fallbacks si no hay datos en la base de datos
-  const subtitle = getSectionContent(
-    section,
-    "subtitle",
-    "Propiedades Destacadas"
-  );
-  const title = getSectionContent(
-    section,
-    "title",
-    "Últimas Propiedades Destacadas"
-  );
-  const description = getSectionContent(
-    section,
-    "description",
-    "Descubre nuestra selección cuidadosamente elegida de propiedades premium - cada una seleccionada por su valor excepcional y características únicas."
-  );
+  // Use static content with fallbacks
+  const subtitle = section?.subtitle || "Propiedades Destacadas";
+  const title = section?.title || "Últimas Propiedades Destacadas";
+  const description =
+    section?.description ||
+    "Descubre nuestra selección cuidadosamente elegida de propiedades premium - cada una seleccionada por su valor excepcional y características únicas.";
 
   return (
     <SectionWrapper>

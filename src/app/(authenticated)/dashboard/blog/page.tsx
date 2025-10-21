@@ -13,17 +13,18 @@ import {
 import Link from "next/link";
 
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
-import { BlogCardList } from "@/components/blog/blog-card-list";
+import { BlogCard } from "@/components/blog/blog-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useBlog } from "@/presentation/hooks/use-blog";
+import { useBlogPosts } from "@/hooks/use-blog-posts";
 import { RouteGuard } from "@/components/auth/route-guard";
 import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
 import { cn } from "@/lib/utils";
 
 export default function BlogPage() {
-  const { blogPosts, loading, error, refreshBlogPosts } = useBlog();
+  const { data: blogPostsData, isLoading: loading, error } = useBlogPosts();
+  const blogPosts = blogPostsData?.posts || [];
   const [statusFilter, setStatusFilter] = useState<
     "all" | "published" | "draft"
   >("all");
@@ -222,7 +223,7 @@ export default function BlogPage() {
         ) : (
           <div className="space-y-4">
             {filteredByStatus.map((post: any) => (
-              <BlogCardList key={post.id} post={post} />
+              <BlogCard key={post.id} post={post} />
             ))}
           </div>
         )}

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useUser } from "@/presentation/hooks/use-user";
+import { useUser } from "@/hooks/use-user";
 import { LazyWizardWrapper } from "@/components/wizard/lazy-wizard-wrapper";
 import { RouteGuard } from "@/components/auth/route-guard";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";

@@ -2,12 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useUser } from "@/presentation/hooks/use-user";
-import { PropertyWizard } from "@/components/wizard/property";
-import {
-  createProperty,
-  updateProperty,
-} from "@/presentation/server-actions/property-actions";
+import { useUser } from "@/hooks/use-user";
+import { PropertyWizard } from "@/components/wizard";
+import { createProperty, updateProperty } from "@/lib/actions/properties";
 import {
   loadPropertyDraft,
   savePropertyDraft,

@@ -1,1 +1,0 @@
-export { LandSearchService } from './LandSearchService';

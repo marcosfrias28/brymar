@@ -54,12 +54,19 @@ export function FeaturedPropertiesGallery() {
           title: property.title,
           image:
             Array.isArray(property.images) && property.images.length > 0
-              ? property.images[0]
+              ? typeof property.images[0] === "string"
+                ? property.images[0]
+                : property.images[0]?.url ||
+                  placeholderImages[index % placeholderImages.length]
               : placeholderImages[index % placeholderImages.length],
           price: property.price,
-          location: property.address
-            ? `${property.address.city}, ${property.address.state}`
-            : "Location not available",
+          location:
+            property.address &&
+            typeof property.address === "object" &&
+            "city" in property.address &&
+            "state" in property.address
+              ? `${property.address.city}, ${property.address.state}`
+              : "Location not available",
         }))
       : placeholderImages.map((image, index) => ({
           id: index + 1,

@@ -25,11 +25,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { SearchLandsFilters } from "@/presentation/hooks/use-lands";
+import { LandSearchFilters } from "@/lib/types";
 
 interface RealTimeLandFiltersProps {
-  filters: SearchLandsFilters;
-  onFilterChange: (filterName: keyof SearchLandsFilters, value: any) => void;
+  filters: LandSearchFilters;
+  onFilterChange: (filterName: keyof LandSearchFilters, value: any) => void;
   isLoading?: boolean;
   className?: string;
 }
@@ -87,7 +87,7 @@ export function RealTimeLandFilters({
 
   const resetFilters = () => {
     // Clear all filters by setting them to undefined
-    (Object.keys(filters) as Array<keyof SearchLandsFilters>).forEach((key) => {
+    (Object.keys(filters) as Array<keyof LandSearchFilters>).forEach((key) => {
       onFilterChange(key, undefined);
     });
     setLocalPriceRange([10000, 1000000]);

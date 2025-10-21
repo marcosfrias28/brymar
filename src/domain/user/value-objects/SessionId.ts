@@ -1,1 +1,0 @@
-export { SessionId } from '@/domain/shared/value-objects/EntityId';

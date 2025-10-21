@@ -11,38 +11,7 @@
 // Base query key types
 export type QueryKey = readonly unknown[];
 
-// Sections query keys
-export const sectionsKeys = {
-    // All sections queries
-    all: ['sections'] as const,
-
-    // Sections by page
-    pages: () => [...sectionsKeys.all, 'pages'] as const,
-    page: (page: string) => [...sectionsKeys.pages(), page] as const,
-
-    // Individual section
-    sections: (page: string) => [...sectionsKeys.page(page), 'sections'] as const,
-    section: (page: string, section: string) =>
-        [...sectionsKeys.sections(page), section] as const,
-} as const;
-
-// Contact Info query keys
-export const contactInfoKeys = {
-    // All contact info queries
-    all: ['contact-info'] as const,
-
-    // Contact info lists
-    lists: () => [...contactInfoKeys.all, 'lists'] as const,
-    list: () => [...contactInfoKeys.lists()] as const,
-
-    // Contact info by type
-    types: () => [...contactInfoKeys.all, 'types'] as const,
-    type: (type: string) => [...contactInfoKeys.types(), type] as const,
-
-    // Individual contact info
-    details: () => [...contactInfoKeys.all, 'details'] as const,
-    detail: (id: number) => [...contactInfoKeys.details(), id] as const,
-} as const;
+// Note: Sections and Contact Info are now static content, no longer using query keys
 
 // Properties query keys
 export const propertiesKeys = {
@@ -140,8 +109,6 @@ export const userKeys = {
 
 // Aggregate all query keys for easy access
 export const queryKeys = {
-    sections: sectionsKeys,
-    contactInfo: contactInfoKeys,
     properties: propertiesKeys,
     lands: landsKeys,
     blog: blogKeys,

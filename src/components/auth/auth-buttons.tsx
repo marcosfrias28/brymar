@@ -65,8 +65,11 @@ export function AuthButtons({
                   <div className="px-3 py-2 text-sm text-muted-foreground border-b border-border/50">
                     <Link href={role === "admin" ? "/dashboard" : "/profile"}>
                       <div className="font-medium text-card-foreground whitespace-nowrap truncate">
-                        {user.getProfile().getFullName() ||
-                          user.getEmail().value}
+                        {user.name ||
+                          `${user.firstName || ""} ${
+                            user.lastName || ""
+                          }`.trim() ||
+                          user.email}
                       </div>
                       <div className="text-xs capitalize whitespace-nowrap">
                         {role === "admin"

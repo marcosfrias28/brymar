@@ -1,1 +1,0 @@
-export { BlogTitle } from '@/domain/shared/value-objects/Title';

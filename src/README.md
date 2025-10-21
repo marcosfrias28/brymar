@@ -106,7 +106,8 @@ export class DrizzlePropertyRepository implements IPropertyRepository {
 Services are registered in the IoC container:
 
 ```typescript
-import { container } from "./infrastructure/config/container";
+// Container system has been removed - using simplified architecture
+// import { actions } from "./lib/actions";
 
 // Register services
 container.register("PropertyRepository", DrizzlePropertyRepository);

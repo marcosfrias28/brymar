@@ -1,10 +1,11 @@
 "use client";
 
 import { UnifiedForm, FormConfig } from "./unified-form";
+import { useCreateProperty, useUpdateProperty } from "@/hooks/use-properties";
 import {
-  createProperty,
-  updateProperty,
-} from "@/presentation/server-actions/property-actions";
+  CreatePropertyInput,
+  UpdatePropertyInput,
+} from "@/lib/types/properties";
 
 const propertyFormConfig: FormConfig = {
   title: "Información de la Propiedad",
@@ -95,26 +96,64 @@ export function PropertyForm({
   onCancel,
   onSubmit,
 }: PropertyFormProps) {
+  const createMutation = useCreateProperty();
+  const updateMutation = useUpdateProperty();
+
   const handleSubmit = async (formData: FormData) => {
     // If onSubmit prop is provided (wizard context), use it
     if (onSubmit) {
       return await onSubmit(formData);
     }
 
-    // Otherwise, use default behavior (form context)
-    let result;
-    if (isEditing) {
-      result = await updateProperty(formData);
-    } else {
-      result = await createProperty(formData);
-    }
-
-    // Adapt ActionState to expected return type
-    return {
-      success: result.success ?? false,
-      message: result.message,
-      error: result.error,
+    // Convert FormData to proper input type
+    const propertyData = {
+      title: formData.get("title") as string,
+      description: formData.get("description") as string,
+      price: Number(formData.get("price")),
+      currency: "USD" as const,
+      type: formData.get("type") as any,
+      address: {
+        street: "",
+        city: formData.get("location") as string,
+        state: "",
+        country: "Dominican Republic",
+      },
+      features: {
+        bedrooms: Number(formData.get("bedrooms")),
+        bathrooms: Number(formData.get("bathrooms")),
+        area: Number(formData.get("area")),
+        amenities: [],
+        features: [],
+      },
+      images: [], // Handle images separately
+      featured: false,
     };
+
+    try {
+      let result;
+      if (isEditing && initialData?.id) {
+        const updateData: UpdatePropertyInput = {
+          id: initialData.id,
+          ...propertyData,
+        };
+        result = await updateMutation.mutateAsync(updateData);
+      } else {
+        result = await createMutation.mutateAsync(
+          propertyData as CreatePropertyInput
+        );
+      }
+
+      return {
+        success: result.success,
+        message: result.success ? "Property saved successfully" : undefined,
+        error: result.error,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: "Failed to save property",
+      };
+    }
   };
 
   return (

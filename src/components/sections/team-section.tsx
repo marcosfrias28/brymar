@@ -16,11 +16,8 @@ import {
   Target,
 } from "lucide-react";
 import Image from "next/image";
-import { cn } from '@/lib/utils';
-import {
-  useSectionFromPage,
-  getSectionContent,
-} from '@/hooks/queries/use-sections-query';
+import { cn } from "@/lib/utils";
+import { useSection } from "@/hooks/use-static-content";
 import { TeamSkeleton } from "../skeletons/home/team-skeleton";
 
 // Preparado para i18n - datos del equipo
@@ -95,7 +92,7 @@ const teamMembers = [
 
 // Componente separado para el header que usa el hook
 function TeamSectionHeader() {
-  const { section, isLoading } = useSectionFromPage("home", "team");
+  const { data: section, loading: isLoading } = useSection("home", "team");
 
   if (isLoading) {
     return (
@@ -107,17 +104,11 @@ function TeamSectionHeader() {
     );
   }
 
-  const subtitle = getSectionContent(section, "subtitle", "Nuestro Equipo");
-  const title = getSectionContent(
-    section,
-    "title",
-    "Conoce a los Visionarios Detrás de Tu Éxito"
-  );
-  const description = getSectionContent(
-    section,
-    "description",
-    "Un equipo poderoso de expertos inmobiliarios, cada uno aportando experiencia única y pasión para transformar tus sueños de propiedad en realidad."
-  );
+  const subtitle = section?.subtitle || "Nuestro Equipo";
+  const title = section?.title || "Conoce a los Visionarios Detrás de Tu Éxito";
+  const description =
+    section?.description ||
+    "Un equipo poderoso de expertos inmobiliarios, cada uno aportando experiencia única y pasión para transformar tus sueños de propiedad en realidad.";
 
   return (
     <SectionHeader
@@ -131,7 +122,7 @@ function TeamSectionHeader() {
 
 export function TeamSection() {
   const [activeCard, setActiveCard] = useState<number | null>(null);
-  const { isLoading } = useSectionFromPage("home", "team");
+  const { loading: isLoading } = useSection("home", "team");
 
   if (isLoading) {
     return <TeamSkeleton />;

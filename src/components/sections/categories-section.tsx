@@ -3,7 +3,20 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Category } from '@/lib/db/schema';
+// Using static categories instead of database categories
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  title: string;
+  description: string;
+  image: string;
+  href: string;
+  status: string;
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
 import {
   Home,
   Building,
@@ -13,13 +26,10 @@ import {
   Briefcase,
 } from "lucide-react";
 import Logo from "../ui/logo";
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { SectionWrapper, SectionHeader } from "../ui/section-wrapper";
-import {
-  useSectionFromPage,
-  getSectionContent,
-} from '@/hooks/queries/use-sections-query';
+import { useSection } from "@/hooks/use-static-content";
 import { CategoriesSkeleton } from "../skeletons/home/categories-skeleton";
 
 interface CategoriesSectionProps {
@@ -28,7 +38,10 @@ interface CategoriesSectionProps {
 
 // Componente separado para el header que usa el hook
 function CategoriesSectionHeader() {
-  const { section, isLoading } = useSectionFromPage("home", "categories");
+  const { data: section, loading: isLoading } = useSection(
+    "home",
+    "categories"
+  );
 
   if (isLoading) {
     return (
@@ -40,17 +53,12 @@ function CategoriesSectionHeader() {
     );
   }
 
-  const subtitle = getSectionContent(section, "subtitle", "Categorías");
-  const title = getSectionContent(
-    section,
-    "title",
-    "Explora las mejores propiedades con servicios expertos"
-  );
-  const description = getSectionContent(
-    section,
-    "description",
-    "Descubre una amplia gama de propiedades premium, desde apartamentos de lujo hasta villas espaciosas, adaptadas a tus necesidades"
-  );
+  const subtitle = section?.subtitle || "Categorías";
+  const title =
+    section?.title || "Explora las mejores propiedades con servicios expertos";
+  const description =
+    section?.description ||
+    "Descubre una amplia gama de propiedades premium, desde apartamentos de lujo hasta villas espaciosas, adaptadas a tus necesidades";
 
   return (
     <SectionHeader
@@ -83,7 +91,7 @@ function CategoriesSectionHeader() {
 
 export function CategoriesSection({ categories = [] }: CategoriesSectionProps) {
   const [mounted, setMounted] = useState(false);
-  const { isLoading } = useSectionFromPage("home", "categories");
+  const { loading: isLoading } = useSection("home", "categories");
 
   useEffect(() => {
     setMounted(true);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useUser } from '@/presentation/hooks/use-user';
+import { useUser } from '@/hooks/use-user';
 import { toast } from "sonner";
 import { User } from '@/lib/db/schema';
 
@@ -74,20 +74,20 @@ export function useProfile() {
   useEffect(() => {
     if (user) {
       setProfile({
-        id: user.getId().value,
-        name: user.getProfile().getFullName() || '',
-        email: user.getEmail().value || '',
-        firstName: user.getProfile().getFirstName() || '',
-        lastName: user.getProfile().getLastName() || '',
-        phone: user.getProfile().getPhone() || '',
-        bio: user.getProfile().getBio() || '',
-        location: user.getProfile().getLocation() || '',
+        id: user.id,
+        name: user.name || '',
+        email: user.email || '',
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        phone: user.phone || '',
+        bio: user.bio || '',
+        location: user.location || '',
         website: '',
-        image: user.getProfile().getAvatar() || '',
-        role: user.getRole().value || '',
-        emailVerified: user.getStatus().isActive() || null,
-        createdAt: user.getCreatedAt()?.value || null,
-        updatedAt: user.getUpdatedAt()?.value || null,
+        image: user.image || '',
+        role: user.role || '',
+        emailVerified: user.emailVerified || false,
+        createdAt: user.createdAt || null,
+        updatedAt: user.updatedAt || null,
         preferences: {
           notifications: {
             email: true,

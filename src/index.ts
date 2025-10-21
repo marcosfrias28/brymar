@@ -3,7 +3,8 @@
 export * from './domain';
 export * from './infrastructure';
 
-// Export application layer selectively to avoid conflicts
-export * from './application/use-cases';
-export * from './application/services';
-export * from './application/errors';
+// DDD layers have been removed - exports now come from simplified structure
+// TODO: Update exports to use new simplified structure from lib/
+// export * from './lib/actions';
+// export * from './lib/types';
+// export * from './hooks';

@@ -11,8 +11,8 @@ import { MobileLandFilters } from "./mobile-land-filters";
 import { PropertyResults } from "./property-results";
 import { LandResults } from "./land-results";
 import { SearchMapView } from "./search-map-view";
-import { searchPropertiesAction } from "@/presentation/server-actions/property-actions";
-import { searchLandsAction } from "@/presentation/server-actions/land-actions";
+import { searchPropertiesAction } from "@/lib/actions/property-actions";
+import { searchLands } from "@/lib/actions/lands";
 import {
   SearchSkeleton,
   MobileSearchSkeleton,
@@ -21,7 +21,7 @@ import {
   FiltersSkeleton,
   MobileFiltersSkeleton,
 } from "@/components/ui/filters-skeleton";
-import { SearchLandsFilters } from "@/presentation/hooks/use-lands";
+import { LandSearchFilters } from "@/lib/types";
 import Logo from "../ui/logo";
 import { AuthButtons } from "../auth/auth-buttons";
 

@@ -26,12 +26,13 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { useUser } from "@/presentation/hooks/use-user";
+import { useUser } from "@/hooks/use-user";
 import { cn } from "@/lib/utils";
 // Profile actions need to be implemented in DDD structure
 // import { updateProfileAction } from "@/presentation/server-actions/profile-actions";
 import { AvatarUpload } from "./avatar-upload";
-import { UserPreferences } from "@/domain";
+// TODO: Move UserPreferences type to lib/types
+// import { UserPreferences } from "@/lib/types/user";
 
 const initialState = {
   success: false,
@@ -146,26 +147,21 @@ export function ProfileForm() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Avatar className="h-20 w-20">
-                <AvatarImage
-                  src={user.getProfile().getAvatar() || ""}
-                  alt={user.getProfile().getFullName() || ""}
-                />
+                <AvatarImage src={user.image || ""} alt={user.name || ""} />
                 <AvatarFallback className="text-lg">
-                  {user.getProfile().getFullName()
-                    ? user.getProfile().getFullName().slice(0, 2).toUpperCase()
-                    : "U"}
+                  {user.name ? user.name.slice(0, 2).toUpperCase() : "U"}
                 </AvatarFallback>
               </Avatar>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  {user.getProfile().getFullName()}
+                  {user.name}
                 </h1>
-                <p className="text-gray-600">{user.getEmail().value}</p>
+                <p className="text-gray-600">{user.email}</p>
                 <div className="flex items-center gap-2 mt-2">
-                  <Badge className={getRoleColor(user.getRole().value)}>
-                    {user.getRole().value || "user"}
+                  <Badge className={getRoleColor(user.role)}>
+                    {user.role || "user"}
                   </Badge>
-                  {user.getStatus().isActive() && (
+                  {user.emailVerified && (
                     <Badge
                       variant="outline"
                       className="text-green-600 border-green-600"
@@ -246,13 +242,13 @@ export function ProfileForm() {
                   id="name"
                   name="name"
                   type="text"
-                  defaultValue={user?.getProfile().getFullName() || ""}
+                  defaultValue={user?.name || ""}
                   placeholder="Tu nombre completo"
                   required
                 />
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  {user?.getProfile().getFullName() || "No especificado"}
+                  {user?.name || "No especificado"}
                 </p>
               )}
               {state.error && (
@@ -267,13 +263,13 @@ export function ProfileForm() {
                   id="email"
                   name="email"
                   type="email"
-                  defaultValue={user?.getEmail().value || ""}
+                  defaultValue={user?.email || ""}
                   placeholder="tu@email.com"
                   required
                 />
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  {user?.getEmail().value || "No especificado"}
+                  {user?.email || "No especificado"}
                 </p>
               )}
               {state.error && (
@@ -286,33 +282,26 @@ export function ProfileForm() {
                 <AvatarUpload
                   label="Avatar"
                   name="image"
-                  defaultValue={user?.getProfile().getAvatar() || ""}
+                  defaultValue={user?.image || ""}
                   error={state.error}
                 />
               ) : (
                 <div className="space-y-2">
                   <Label>Avatar</Label>
-                  {user?.getProfile().getAvatar() ? (
+                  {user?.image ? (
                     <div className="flex items-center gap-3">
                       <Avatar className="h-16 w-16">
-                        <AvatarImage
-                          src={user.getProfile().getAvatar()}
-                          alt="Avatar"
-                        />
+                        <AvatarImage src={user.image} alt="Avatar" />
                         <AvatarFallback>
-                          {user
-                            .getProfile()
-                            .getFullName()
-                            ?.charAt(0)
-                            ?.toUpperCase() ||
-                            user.getEmail().value?.charAt(0)?.toUpperCase() ||
+                          {user.name?.charAt(0)?.toUpperCase() ||
+                            user.email?.charAt(0)?.toUpperCase() ||
                             "U"}
                         </AvatarFallback>
                       </Avatar>
                       <div className="space-y-1">
                         <p className="text-sm font-medium">Imagen actual</p>
                         <a
-                          href={user.getProfile().getAvatar()}
+                          href={user.image}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-sm text-blue-600 hover:text-blue-800 underline"
@@ -325,12 +314,8 @@ export function ProfileForm() {
                     <div className="flex items-center gap-3">
                       <Avatar className="h-16 w-16">
                         <AvatarFallback>
-                          {user
-                            ?.getProfile()
-                            .getFullName()
-                            ?.charAt(0)
-                            ?.toUpperCase() ||
-                            user?.getEmail().value?.charAt(0)?.toUpperCase() ||
+                          {user?.name?.charAt(0)?.toUpperCase() ||
+                            user?.email?.charAt(0)?.toUpperCase() ||
                             "U"}
                         </AvatarFallback>
                       </Avatar>
@@ -351,21 +336,19 @@ export function ProfileForm() {
           icon={<Shield className="h-5 w-5" />}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <InfoField label="ID de Usuario" value={user.getId().value} />
-            <InfoField label="Rol" value={user.getRole().value || "user"} />
+            <InfoField label="ID de Usuario" value={user.id} />
+            <InfoField label="Rol" value={user.role || "user"} />
             <InfoField
               label="Estado de Email"
-              value={
-                user.getStatus().isActive() ? "Verificado" : "No verificado"
-              }
+              value={user.emailVerified ? "Verificado" : "No verificado"}
             />
             <InfoField
               label="Fecha de Creación"
-              value={formatDate(user.getCreatedAt().value)}
+              value={formatDate(user.createdAt)}
             />
             <InfoField
               label="Última Actualización"
-              value={formatDate(user.getUpdatedAt().value)}
+              value={formatDate(user.updatedAt)}
               className="md:col-span-2"
             />
           </div>
@@ -384,12 +367,12 @@ export function ProfileForm() {
                   id="firstName"
                   name="firstName"
                   type="text"
-                  defaultValue={user?.getProfile().getFirstName() || ""}
+                  defaultValue={user?.firstName || ""}
                   placeholder="Tu primer nombre"
                 />
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  {user?.getProfile().getFirstName() || "No especificado"}
+                  {user?.firstName || "No especificado"}
                 </p>
               )}
               {state.error && (
@@ -404,12 +387,12 @@ export function ProfileForm() {
                   id="lastName"
                   name="lastName"
                   type="text"
-                  defaultValue={user?.getProfile().getLastName() || ""}
+                  defaultValue={user?.lastName || ""}
                   placeholder="Tu apellido"
                 />
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  {user?.getProfile().getLastName() || "No especificado"}
+                  {user?.lastName || "No especificado"}
                 </p>
               )}
               {state.error && (
@@ -424,12 +407,12 @@ export function ProfileForm() {
                   id="phone"
                   name="phone"
                   type="tel"
-                  defaultValue={user?.getProfile().getPhone() || ""}
+                  defaultValue={user?.phone || ""}
                   placeholder="Tu número de teléfono"
                 />
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  {user?.getProfile().getPhone() || "No especificado"}
+                  {user?.phone || "No especificado"}
                 </p>
               )}
               {state.error && (
@@ -444,12 +427,12 @@ export function ProfileForm() {
                   id="location"
                   name="location"
                   type="text"
-                  defaultValue={user?.getProfile().getLocation() || ""}
+                  defaultValue={user?.location || ""}
                   placeholder="Tu ubicación"
                 />
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  {user?.getProfile().getLocation() || "No especificado"}
+                  {user?.location || "No especificado"}
                 </p>
               )}
               {state.error && (
@@ -484,12 +467,12 @@ export function ProfileForm() {
                   id="bio"
                   name="bio"
                   type="text"
-                  defaultValue={user?.getProfile().getBio() || ""}
+                  defaultValue={user?.bio || ""}
                   placeholder="Cuéntanos sobre ti"
                 />
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  {user?.getProfile().getBio() || "No especificado"}
+                  {user?.bio || "No especificado"}
                 </p>
               )}
               {state.error && (

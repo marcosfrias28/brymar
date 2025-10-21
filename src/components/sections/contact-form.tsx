@@ -6,20 +6,18 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Mail, Phone, MapPin } from "lucide-react";
 import {
   useContactInfo,
-  getContactInfoValue,
-} from '@/hooks/queries/use-contact-info-query';
+  getContactInfoValueHelper,
+} from "@/hooks/use-static-content";
 
 export function ContactForm() {
-  const contactQuery = useContactInfo() as any;
-  const contactInfo = contactQuery.data || [];
-  const isLoading = contactQuery.isLoading;
+  const { data: contactInfo, loading: isLoading } = useContactInfo();
 
   return (
     <section className="py-16 px-4 bg-gray-50">
@@ -61,7 +59,7 @@ export function ContactForm() {
                   <div className="flex items-center text-gray-700">
                     <MapPin className="h-5 w-5 mr-3 text-gray-500" />
                     <p>
-                      {getContactInfoValue(
+                      {getContactInfoValueHelper(
                         contactInfo,
                         "address",
                         "Av. Principal 123, Ciudad, País"
@@ -71,7 +69,7 @@ export function ContactForm() {
                   <div className="flex items-center text-gray-700">
                     <Phone className="h-5 w-5 mr-3 text-gray-500" />
                     <p>
-                      {getContactInfoValue(
+                      {getContactInfoValueHelper(
                         contactInfo,
                         "phone",
                         "+1 (555) 123-4567"
@@ -81,7 +79,7 @@ export function ContactForm() {
                   <div className="flex items-center text-gray-700">
                     <Mail className="h-5 w-5 mr-3 text-gray-500" />
                     <p>
-                      {getContactInfoValue(
+                      {getContactInfoValueHelper(
                         contactInfo,
                         "email",
                         "contacto@brymar.com"

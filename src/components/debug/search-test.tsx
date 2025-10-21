@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { searchPropertiesAction } from "@/presentation/server-actions/property-actions";
-import { searchLandsAction } from "@/presentation/server-actions/land-actions";
+import { searchPropertiesAction } from "@/lib/actions/property-actions";
+import { searchLands } from "@/lib/actions/lands";
 
 export function SearchTest() {
   const [propertyResult, setPropertyResult] = useState<any>(null);

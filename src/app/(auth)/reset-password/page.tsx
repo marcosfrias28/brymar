@@ -7,7 +7,7 @@ import {
   AuthLink,
 } from "@/components/auth/auth-form-wrapper";
 import { useSearchParams } from "next/navigation";
-import { resetPassword } from "@/presentation/server-actions/auth-actions";
+import { resetPasswordAction } from "@/lib/actions/auth";
 import Link from "next/link";
 
 const ResetPasswordPage = () => {
@@ -41,7 +41,7 @@ const ResetPasswordPage = () => {
     <AuthFormWrapper
       title="Restablecer Contraseña"
       subtitle="Ingresa tu nueva contraseña"
-      action={resetPassword}
+      action={resetPasswordAction}
       fields={[passwordField, confirmPasswordField]}
       submitText="Restablecer Contraseña"
       loadingText="Restableciendo..."

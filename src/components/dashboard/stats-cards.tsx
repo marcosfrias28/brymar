@@ -3,14 +3,15 @@
 import { Building2, MapPin, FileText, TrendingUp } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useProperties } from "@/presentation/hooks/use-properties";
-import { useLands } from "@/presentation/hooks/use-lands";
-import { useBlogPosts } from "@/presentation/hooks/use-blog";
+import { useProperties } from "@/hooks/use-properties";
+import { useLands } from "@/hooks/use-lands";
+import { useBlogPosts } from "@/hooks/use-blog-posts";
 
 export function StatsCards() {
   const { properties, loading: propertiesLoading } = useProperties();
   const { lands, loading: landsLoading } = useLands();
-  const { blogPosts, loading: postsLoading } = useBlogPosts();
+  const { data: blogPostsData, isLoading: postsLoading } = useBlogPosts();
+  const blogPosts = blogPostsData?.posts || [];
 
   const isLoading = propertiesLoading || landsLoading || postsLoading;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { signIn } from "@/presentation/server-actions/auth-actions";
+import { signInAction } from "@/lib/actions/auth";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useAuthFields, AuthLink, AuthFormWrapper } from "./auth-form-wrapper";
@@ -33,7 +33,7 @@ export function SignInForm() {
     <AuthFormWrapper
       title="Iniciar Sesión"
       subtitle="Ingresa tu email para acceder a tu cuenta"
-      action={signIn}
+      action={signInAction}
       fields={[emailField, passwordFieldWithLink]}
       submitText="Iniciar Sesión"
       loadingText="Iniciando sesión..."
