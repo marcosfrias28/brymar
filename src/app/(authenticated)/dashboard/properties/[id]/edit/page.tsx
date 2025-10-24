@@ -1,269 +1,338 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { useUser } from "@/hooks/use-user";
-import { PropertyWizard } from "@/components/wizard";
-import { getPropertyById, updateProperty } from "@/lib/actions/properties";
-import { RouteGuard } from "@/components/auth/route-guard";
-import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import type { PropertyWizardData } from "@/types/property-wizard";
+import { useParams, useRouter } from "next/navigation";
+import { useActionState, useEffect, useState } from "react";
+import { toast } from "sonner";
+import { RouteGuard } from "@/components/auth/route-guard";
+import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
+import { Button } from "@/components/ui/button";
+import {
+	getPropertyById,
+	updatePropertyAction,
+} from "@/lib/actions/properties";
+import type { Property } from "@/lib/types/properties";
 
 export default function EditPropertyPage() {
-  const params = useParams();
-  const router = useRouter();
-  const { user } = useUser();
-  const [initialData, setInitialData] =
-    useState<Partial<PropertyWizardData> | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+	// All hooks must be called before any conditional returns
+	const params = useParams();
+	const router = useRouter();
+	const [property, setProperty] = useState<Property | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	const propertyId = params?.id as string;
 
-  const propertyId = params?.id ? parseInt(params.id as string) : null;
+	// useActionState for handling property updates
+	const [updateState, updateAction, isPending] = useActionState(
+		updatePropertyAction,
+		{ success: false },
+	);
 
-  useEffect(() => {
-    const loadPropertyData = async () => {
-      if (!propertyId) {
-        setError("ID de propiedad inválido");
-        setLoading(false);
-        return;
-      }
+	useEffect(() => {
+		const loadPropertyData = async () => {
+			if (!propertyId) {
+				setError("ID de propiedad inválido");
+				setLoading(false);
+				return;
+			}
 
-      try {
-        const result = await getPropertyById(propertyId.toString());
+			try {
+				const result = await getPropertyById(propertyId);
 
-        if (!result.success || !result.data) {
-          setError("Propiedad no encontrada");
-          setLoading(false);
-          return;
-        }
+				if (!result.success || !result.data) {
+					setError("Propiedad no encontrada");
+					setLoading(false);
+					return;
+				}
 
-        const property = result.data;
+				setProperty(result.data);
+			} catch (err) {
+				console.error("Error loading property:", err);
+				setError("Error al cargar la propiedad");
+			} finally {
+				setLoading(false);
+			}
+		};
 
-        // Convert property data to wizard format
-        const wizardData: Partial<PropertyWizardData> = {
-          id: property.id?.toString(),
-          title: property.title,
-          description: property.description,
-          price: property.price,
-          surface: property.area, // Map area to surface
-          propertyType: property.type as any, // Map type to propertyType
-          bedrooms: property.bedrooms,
-          bathrooms: property.bathrooms,
-          characteristics: [], // Default empty characteristics
-          coordinates: undefined, // Not available in current schema
-          address: {
-            street: "",
-            city: property.location || "",
-            province: "",
-            country: "Dominican Republic",
-            formattedAddress: property.location || "",
-          },
-          images: Array.isArray(property.images) ? property.images : [],
-          videos: [],
-          status: (property.status as "draft" | "published") || "draft",
-          language: "es",
-          aiGenerated: {
-            title: false,
-            description: false,
-            tags: false,
-          },
-        };
+		loadPropertyData();
+	}, [propertyId]);
 
-        setInitialData(wizardData);
-      } catch (err) {
-        console.error("Error loading property:", err);
-        setError("Error al cargar la propiedad");
-      } finally {
-        setLoading(false);
-      }
-    };
+	// Define breadcrumbs after hooks
+	const breadcrumbs = [
+		{ label: "Dashboard", href: "/dashboard" },
+		{ label: "Propiedades", href: "/dashboard/properties" },
+		{
+			label: `Propiedad #${propertyId}`,
+			href: `/dashboard/properties/${propertyId}`,
+		},
+		{ label: "Editar" },
+	];
 
-    loadPropertyData();
-  }, [propertyId]);
+	// Conditional rendering after all hooks are called
+	if (!params || !params.id) {
+		return (
+			<RouteGuard requiredPermission="properties.manage">
+				<DashboardPageLayout
+					title="Error"
+					description="Propiedad no encontrada"
+					breadcrumbs={breadcrumbs}
+				>
+					<div className="flex items-center justify-center min-h-[400px]">
+						<div className="text-center">
+							<h2 className="text-xl font-semibold mb-2">
+								ID de propiedad no válido
+							</h2>
+							<p className="text-muted-foreground mb-4">
+								No se pudo encontrar la propiedad solicitada
+							</p>
+							<Button variant="outline" asChild>
+								<Link href="/dashboard/properties">
+									<ArrowLeft className="h-4 w-4 mr-2" />
+									Volver a Propiedades
+								</Link>
+							</Button>
+						</div>
+					</div>
+				</DashboardPageLayout>
+			</RouteGuard>
+		);
+	}
 
-  const handleComplete = async (data: PropertyWizardData) => {
-    if (!user?.getId() || !propertyId) {
-      toast.error("Usuario no autenticado o ID de propiedad inválido");
-      return;
-    }
+	// Handle update state changes
+	useEffect(() => {
+		if (updateState.success && updateState.data) {
+			toast.success("¡Propiedad actualizada exitosamente!");
+			router.push(`/dashboard/properties/${propertyId}`);
+		} else if (!updateState.success && updateState.error) {
+			toast.error(updateState.error);
+		}
+	}, [updateState, router, propertyId]);
 
-    try {
-      // Convert wizard data to FormData for DDD server action
-      const formData = new FormData();
-      formData.append("id", propertyId.toString());
-      formData.append("title", data.title || "");
-      formData.append("description", data.description || "");
-      formData.append("price", data.price?.toString() || "0");
-      formData.append("propertyType", data.propertyType || "residential");
-      formData.append("status", "published");
+	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		const formData = new FormData(e.currentTarget);
+		updateAction(formData);
+	};
 
-      // Add address fields
-      if (data.address) {
-        formData.append("address.street", data.address.street || "");
-        formData.append("address.city", data.address.city || "");
-        formData.append("address.province", data.address.province || "");
-        formData.append(
-          "address.country",
-          data.address.country || "Dominican Republic"
-        );
-        formData.append("address.postalCode", data.address.postalCode || "");
-      }
+	if (loading) {
+		return (
+			<RouteGuard requiredPermission="properties.manage">
+				<DashboardPageLayout
+					title="Cargando..."
+					description="Cargando datos de la propiedad"
+					breadcrumbs={breadcrumbs}
+				>
+					<div className="flex items-center justify-center min-h-[400px]">
+						<div className="text-center">
+							<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+							<h2 className="text-xl font-semibold mb-2">
+								Cargando propiedad...
+							</h2>
+							<p className="text-muted-foreground">
+								Preparando el editor para la propiedad
+							</p>
+						</div>
+					</div>
+				</DashboardPageLayout>
+			</RouteGuard>
+		);
+	}
 
-      // Add features
-      formData.append("features.bedrooms", data.bedrooms?.toString() || "0");
-      formData.append("features.bathrooms", data.bathrooms?.toString() || "0");
-      formData.append("features.area", data.surface?.toString() || "0");
-      if (data.characteristics) {
-        data.characteristics.forEach((characteristic, index) => {
-          formData.append(`features.amenities[${index}]`, characteristic.name);
-        });
-      }
+	if (error || !property) {
+		return (
+			<RouteGuard requiredPermission="properties.manage">
+				<DashboardPageLayout
+					title="Error"
+					description="No se pudo cargar la propiedad"
+					breadcrumbs={breadcrumbs}
+				>
+					<div className="flex items-center justify-center min-h-[400px]">
+						<div className="text-center">
+							<h2 className="text-xl font-semibold mb-2">
+								Error al cargar la propiedad
+							</h2>
+							<p className="text-muted-foreground mb-4">
+								{error || "La propiedad no se pudo cargar para edición"}
+							</p>
+							<div className="flex gap-2 justify-center">
+								<Button variant="outline" asChild>
+									<Link href="/dashboard/properties">
+										<ArrowLeft className="h-4 w-4 mr-2" />
+										Volver a Propiedades
+									</Link>
+								</Button>
+								<Button asChild>
+									<Link href={`/dashboard/properties/${propertyId}`}>
+										Ver Propiedad
+									</Link>
+								</Button>
+							</div>
+						</div>
+					</div>
+				</DashboardPageLayout>
+			</RouteGuard>
+		);
+	}
 
-      // Add images
-      if (data.images) {
-        data.images.forEach((image, index) => {
-          formData.append(`images[${index}]`, image.url);
-        });
-      }
+	return (
+		<RouteGuard requiredPermission="properties.manage">
+			<DashboardPageLayout
+				title="Editar Propiedad"
+				description="Edita la información de la propiedad"
+				breadcrumbs={breadcrumbs}
+			>
+				<div className="max-w-4xl mx-auto">
+					<form onSubmit={handleSubmit} className="space-y-6">
+						<input type="hidden" name="id" value={propertyId} />
+						
+						<div className="bg-white rounded-lg shadow p-6 space-y-6">
+							<div>
+								<label htmlFor="title" className="block text-sm font-medium mb-2">
+									Título
+								</label>
+								<input
+									type="text"
+									id="title"
+									name="title"
+									defaultValue={property.title}
+									className="w-full px-3 py-2 border rounded-md"
+									required
+								/>
+							</div>
 
-      const result = await updateProperty(formData);
+							<div>
+								<label htmlFor="description" className="block text-sm font-medium mb-2">
+									Descripción
+								</label>
+								<textarea
+									id="description"
+									name="description"
+									defaultValue={property.description || ""}
+									rows={4}
+									className="w-full px-3 py-2 border rounded-md"
+								/>
+							</div>
 
-      if (result.success) {
-        toast.success("¡Propiedad actualizada exitosamente!");
-        router.push(`/dashboard/properties/${propertyId}`);
-      } else {
-        toast.error(result.error || "Error al actualizar la propiedad");
-      }
-    } catch (error) {
-      console.error("Error updating property:", error);
-      toast.error("Error inesperado al actualizar la propiedad");
-    }
-  };
+							<div className="grid grid-cols-2 gap-4">
+								<div>
+									<label htmlFor="price" className="block text-sm font-medium mb-2">
+										Precio
+									</label>
+									<input
+										type="number"
+										id="price"
+										name="price"
+										defaultValue={property.price}
+										className="w-full px-3 py-2 border rounded-md"
+										required
+									/>
+								</div>
 
-  const handleSaveDraft = async (
-    data: Partial<PropertyWizardData>,
-    currentStep: string
-  ): Promise<string> => {
-    if (!user?.getId()) {
-      toast.error("Usuario no autenticado");
-      throw new Error("Usuario no autenticado");
-    }
+								<div>
+									<label htmlFor="type" className="block text-sm font-medium mb-2">
+										Tipo
+									</label>
+									<select
+										id="type"
+										name="type"
+										defaultValue={property.type}
+										className="w-full px-3 py-2 border rounded-md"
+										required
+									>
+										<option value="house">Casa</option>
+										<option value="apartment">Apartamento</option>
+										<option value="condo">Condominio</option>
+										<option value="townhouse">Casa Adosada</option>
+										<option value="villa">Villa</option>
+										<option value="land">Terreno</option>
+										<option value="commercial">Comercial</option>
+									</select>
+								</div>
+							</div>
 
-    try {
-      // Convert wizard data to FormData for DDD server action
-      const formData = new FormData();
-      if (propertyId) formData.append("id", propertyId.toString());
-      if (data.title) formData.append("title", data.title);
-      if (data.description) formData.append("description", data.description);
-      if (data.price) formData.append("price", data.price.toString());
-      if (data.propertyType) formData.append("propertyType", data.propertyType);
-      formData.append("status", "draft");
+							<div className="grid grid-cols-3 gap-4">
+								<div>
+									<label htmlFor="bedrooms" className="block text-sm font-medium mb-2">
+										Habitaciones
+									</label>
+									<input
+										type="number"
+										id="bedrooms"
+										name="bedrooms"
+										defaultValue={property.features?.bedrooms || 0}
+										className="w-full px-3 py-2 border rounded-md"
+									/>
+								</div>
 
-      const result = await updateProperty(formData);
+								<div>
+									<label htmlFor="bathrooms" className="block text-sm font-medium mb-2">
+										Baños
+									</label>
+									<input
+										type="number"
+										id="bathrooms"
+										name="bathrooms"
+										defaultValue={property.features?.bathrooms || 0}
+										className="w-full px-3 py-2 border rounded-md"
+									/>
+								</div>
 
-      if (result.success) {
-        toast.success("Cambios guardados como borrador");
-        return result.data?.draftId || "";
-      } else {
-        toast.error(result.error || "Error al guardar el borrador");
-        throw new Error(result.error || "Error al guardar el borrador");
-      }
-    } catch (error) {
-      console.error("Error saving draft:", error);
-      toast.error("Error inesperado al guardar el borrador");
-      throw error;
-    }
-  };
+								<div>
+									<label htmlFor="area" className="block text-sm font-medium mb-2">
+										Área (m²)
+									</label>
+									<input
+										type="number"
+										id="area"
+										name="area"
+										defaultValue={property.features?.area || 0}
+										className="w-full px-3 py-2 border rounded-md"
+									/>
+								</div>
+							</div>
 
-  const breadcrumbs = [
-    { label: "Dashboard", href: "/dashboard" },
-    { label: "Propiedades", href: "/dashboard/properties" },
-    {
-      label: `Propiedad #${propertyId}`,
-      href: `/dashboard/properties/${propertyId}`,
-    },
-    { label: "Editar" },
-  ];
+							<div>
+								<label htmlFor="status" className="block text-sm font-medium mb-2">
+									Estado
+								</label>
+								<select
+									id="status"
+									name="status"
+									defaultValue={property.status}
+									className="w-full px-3 py-2 border rounded-md"
+								>
+									<option value="draft">Borrador</option>
+									<option value="published">Publicado</option>
+								</select>
+							</div>
+						</div>
 
-  if (loading) {
-    return (
-      <RouteGuard requiredPermission="properties.manage">
-        <DashboardPageLayout
-          title="Cargando..."
-          description="Cargando datos de la propiedad"
-          breadcrumbs={breadcrumbs}
-        >
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <h2 className="text-xl font-semibold mb-2">
-                Cargando propiedad...
-              </h2>
-              <p className="text-muted-foreground">
-                Preparando el editor para la propiedad
-              </p>
-            </div>
-          </div>
-        </DashboardPageLayout>
-      </RouteGuard>
-    );
-  }
+						<div className="flex justify-end gap-3">
+							<Button
+								type="button"
+								variant="outline"
+								onClick={() => router.push(`/dashboard/properties/${propertyId}`)}
+								disabled={isPending}
+							>
+								Cancelar
+							</Button>
+							<Button type="submit" disabled={isPending}>
+								{isPending ? "Guardando..." : "Guardar Cambios"}
+							</Button>
+						</div>
+					</form>
 
-  if (error || !initialData) {
-    return (
-      <RouteGuard requiredPermission="properties.manage">
-        <DashboardPageLayout
-          title="Error"
-          description="No se pudo cargar la propiedad"
-          breadcrumbs={breadcrumbs}
-        >
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center">
-              <h2 className="text-xl font-semibold mb-2">
-                Error al cargar la propiedad
-              </h2>
-              <p className="text-muted-foreground mb-4">
-                {error || "La propiedad no se pudo cargar para edición"}
-              </p>
-              <div className="flex gap-2 justify-center">
-                <Button variant="outline" asChild>
-                  <Link href="/dashboard/properties">
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Volver a Propiedades
-                  </Link>
-                </Button>
-                <Button asChild>
-                  <Link href={`/dashboard/properties/${propertyId}`}>
-                    Ver Propiedad
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </DashboardPageLayout>
-      </RouteGuard>
-    );
-  }
-
-  return (
-    <RouteGuard requiredPermission="properties.manage">
-      <DashboardPageLayout
-        title="Editar Propiedad"
-        description="Edita la propiedad usando el asistente inteligente"
-        breadcrumbs={breadcrumbs}
-      >
-        <div className="max-w-6xl mx-auto">
-          <PropertyWizard
-            initialData={initialData}
-            onComplete={handleComplete}
-            onSaveDraft={handleSaveDraft}
-          />
-        </div>
-      </DashboardPageLayout>
-    </RouteGuard>
-  );
+					{isPending && (
+						<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+							<div className="bg-white rounded-lg p-6 flex items-center gap-3">
+								<div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+								<span>Guardando cambios...</span>
+							</div>
+						</div>
+					)}
+				</div>
+			</DashboardPageLayout>
+		</RouteGuard>
+	);
 }

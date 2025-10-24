@@ -3,49 +3,38 @@
  * This replaces the scattered domain entities across the application
  */
 
-// User and authentication schemas
-export * from "./users";
-
+export * from "./blog";
+export {
+	blogCategories,
+	blogPosts,
+} from "./blog";
+export * from "./lands";
+export {
+	lands,
+} from "./lands";
 // Feature-specific schemas
 export * from "./properties";
-export * from "./lands";
-export * from "./blog";
-export * from "./wizard";
-
+export {
+	properties,
+	propertyInquiries,
+	propertyViews,
+} from "./properties";
+// User and authentication schemas
+export * from "./users";
+export * from "./activities";
+export * from "./user-profiles";
 // Re-export commonly used tables for convenience
 export {
-    users,
-    sessions,
-    accounts,
-    verificationTokens,
-    notifications,
+	accounts,
+	sessions,
+	users,
+	verificationTokens,
 } from "./users";
-
 export {
-    properties,
-    propertyFavorites,
-    propertyViews,
-    propertyInquiries,
-} from "./properties";
-
+	userActivities,
+} from "./activities";
 export {
-    lands,
-    landFavorites,
-    landViews,
-    landInquiries,
-} from "./lands";
+	userProfiles,
+} from "./user-profiles";
 
-export {
-    blogPosts,
-    blogCategories,
-    blogPostViews,
-    blogPostComments,
-} from "./blog";
-
-export {
-    wizardDrafts,
-    wizardTemplates,
-    aiGenerations,
-    wizardMedia,
-    wizardAnalytics,
-} from "./wizard";
+// Note: Removed wizard table exports since tables were removed

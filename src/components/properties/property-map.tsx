@@ -1,15 +1,15 @@
-import { PropertySearchResult } from "@/lib/types/properties";
+import type { PropertySearchResult } from "@/lib/types/properties";
 
 interface PropertyMapProps {
-  properties: PropertySearchResult[];
+	properties: PropertySearchResult[];
 }
 
 export function PropertyMap({ properties }: PropertyMapProps) {
-  return (
-    <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
-      <p className="text-muted-foreground">
-        Map would render here ({properties.length} properties)
-      </p>
-    </div>
-  );
+	return (
+		<div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
+			<p className="text-muted-foreground">
+				Map would render here ({properties.length} properties)
+			</p>
+		</div>
+	);
 }

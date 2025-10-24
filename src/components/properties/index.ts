@@ -7,13 +7,11 @@
 export { PropertyCard } from "../cards/property-card";
 export { PropertyForm } from "../forms/property-form";
 export { PropertyList } from "../lists/property-list";
-
-// Enhanced property components with hooks
-export { PropertyListWithHooks } from "./property-list-with-hooks";
-export { PropertyFilters } from "./property-filters";
-
+export { ImageUpload } from "./image-upload";
 // Specialized property components
 export { PropertyBentoGrid } from "./property-bento-grid";
+export { PropertyFilters } from "./property-filters";
 export { PropertyListView } from "./property-list-view";
+// Enhanced property components with hooks
+export { PropertyListWithHooks } from "./property-list-with-hooks";
 export { PropertyMap } from "./property-map";
-export { ImageUpload } from "./image-upload";

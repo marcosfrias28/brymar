@@ -2,87 +2,112 @@
  * Land-related types consolidating all land DTOs
  */
 
-import { Address, AddressInput, BaseEntity, Currency, Image, ImageInput, SearchResult, ActionResult } from "./shared";
+import type {
+	ActionResult,
+	Address,
+	AddressInput,
+	BaseEntity,
+	Currency,
+	Image,
+	ImageInput,
+	SearchResult,
+} from "./shared";
 
 export type LandType =
-    | "residential"
-    | "commercial"
-    | "agricultural"
-    | "industrial"
-    | "recreational"
-    | "mixed-use"
-    | "vacant";
+	| "residential"
+	| "commercial"
+	| "agricultural"
+	| "industrial"
+	| "recreational"
+	| "mixed-use"
+	| "vacant";
 
-export type LandStatus = "available" | "sold" | "reserved" | "under-contract" | "archived";
+export type LandStatus =
+	| "available"
+	| "sold"
+	| "reserved"
+	| "under-contract"
+	| "archived";
 
 export interface LandFeatures {
-    zoning?: string;
-    utilities: string[]; // water, electricity, gas, sewer, etc.
-    access: string[]; // road access, utilities access, etc.
-    topography?: string; // flat, sloped, hilly, etc.
-    soilType?: string;
-    waterRights?: boolean;
-    mineralRights?: boolean;
-    restrictions?: string[];
-    developmentPotential?: string;
+	zoning?: string;
+	utilities: string[]; // water, electricity, gas, sewer, etc.
+	access: string[]; // road access, utilities access, etc.
+	topography?: string; // flat, sloped, hilly, etc.
+	soilType?: string;
+	waterRights?: boolean;
+	mineralRights?: boolean;
+	restrictions?: string[];
+	developmentPotential?: string;
 }
 
 export interface Land extends BaseEntity {
-    name: string;
-    description: string;
-    area: number; // in acres or square meters
-    price: number;
-    currency: Currency;
-    location: string; // general location description
-    address?: Address; // specific address if available
-    type: LandType;
-    features: LandFeatures;
-    images: Image[];
-    status: LandStatus;
-    userId: string;
+	name: string;
+	description: string;
+	area: number; // in acres or square meters
+	price: number;
+	currency: Currency;
+	location: string; // general location description
+	address?: Address; // specific address if available
+	type: LandType;
+	features: LandFeatures;
+	images: Image[];
+	status: LandStatus;
+	userId: string;
 }
 
 export interface CreateLandInput {
-    name: string;
-    description: string;
-    area: number;
-    price: number;
-    currency: Currency;
-    location: string;
-    address?: AddressInput;
-    type: LandType;
-    features: LandFeatures;
-    images?: ImageInput[];
+	name: string;
+	description: string;
+	area: number;
+	price: number;
+	currency: Currency;
+	location: string;
+	address?: AddressInput;
+	type: LandType;
+	features: LandFeatures;
+	images?: ImageInput[];
 }
 
 export interface UpdateLandInput extends Partial<CreateLandInput> {
-    id: string;
+	id: string;
+}
+
+export interface SearchLandsFilters {
+	query?: string;
+	landTypes?: string[];
+	minPrice?: number;
+	maxPrice?: number;
+	minArea?: number;
+	maxArea?: number;
+	location?: string;
+	status?: "draft" | "published" | "sold" | "withdrawn" | "archived";
 }
 
 export interface LandSearchFilters {
-    minPrice?: number;
-    maxPrice?: number;
-    landTypes?: LandType[];
-    location?: string;
-    minArea?: number;
-    maxArea?: number;
-    utilities?: string[];
-    zoning?: string[];
-    status?: LandStatus[];
-    userId?: string;
+	minPrice?: number;
+	maxPrice?: number;
+	landTypes?: LandType[];
+	location?: string;
+	minArea?: number;
+	maxArea?: number;
+	utilities?: string[];
+	zoning?: string[];
+	status?: LandStatus[];
+	userId?: string;
 }
 
 export interface LandSearchResult extends SearchResult<Land> {
-    filters: {
-        applied: string[];
-        available: {
-            landTypes: LandType[];
-            priceRanges: { min: number; max: number; label: string }[];
-            locations: string[];
-            utilities: string[];
-            zoning: string[];
-        };
-    };
+	filters: {
+		applied: string[];
+		available: {
+			landTypes: LandType[];
+			priceRanges: { min: number; max: number; label: string }[];
+			locations: string[];
+			utilities: string[];
+			zoning: string[];
+		};
+	};
 }
 
 // Action result types

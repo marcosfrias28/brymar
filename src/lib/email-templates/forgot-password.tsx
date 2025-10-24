@@ -1,23 +1,23 @@
-import React from 'react';
+import type React from "react";
 
 interface ForgotPasswordEmailProps {
-  userName?: string;
-  resetUrl: string;
-  companyName?: string;
+	userName?: string;
+	resetUrl: string;
+	companyName?: string;
 }
 
 export const ForgotPasswordEmail: React.FC<ForgotPasswordEmailProps> = ({
-  userName = 'Usuario',
-  resetUrl,
-  companyName = 'Brymar'
+	userName = "Usuario",
+	resetUrl,
+	companyName = "Brymar",
 }) => {
-  return (
-    <html>
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Recuperación de Contraseña - {companyName}</title>
-        <style>{`
+	return (
+		<html>
+			<head>
+				<meta charSet="utf-8" />
+				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+				<title>Recuperación de Contraseña - {companyName}</title>
+				<style>{`
           * {
             margin: 0;
             padding: 0;
@@ -160,71 +160,71 @@ export const ForgotPasswordEmail: React.FC<ForgotPasswordEmailProps> = ({
             }
           }
         `}</style>
-      </head>
-      <body>
-        <div className="container">
-          <div className="header">
-            <h1>{companyName}</h1>
-            <p>Recuperación de Contraseña</p>
-          </div>
-          
-          <div className="content">
-            <div className="greeting">
-              ¡Hola {userName}!
-            </div>
-            
-            <div className="message">
-              Hemos recibido una solicitud para restablecer la contraseña de tu cuenta. 
-              Si fuiste tú quien realizó esta solicitud, haz clic en el botón de abajo para 
-              crear una nueva contraseña.
-            </div>
-            
-            <div style={{textAlign: 'center'}}>
-              <a href={resetUrl} className="cta-button">
-                Restablecer Contraseña
-              </a>
-            </div>
-            
-            <div className="divider"></div>
-            
-            <div className="security-notice">
-              <h3>🔒 Aviso de Seguridad</h3>
-              <p>
-                Este enlace expirará en 24 horas por tu seguridad. Si no solicitaste 
-                este cambio, puedes ignorar este correo de forma segura.
-              </p>
-            </div>
-            
-            <div className="message">
-              Si tienes problemas con el botón, también puedes copiar y pegar el siguiente 
-              enlace en tu navegador:
-            </div>
-            
-            <div style={{
-              backgroundColor: '#f7fafc',
-              padding: '15px',
-              borderRadius: '6px',
-              wordBreak: 'break-all',
-              fontSize: '14px',
-              color: '#4a5568'
-            }}>
-              {resetUrl}
-            </div>
-          </div>
-          
-          <div className="footer">
-            <p>
-              Este correo fue enviado por {companyName}. Si tienes alguna pregunta, 
-              no dudes en <a href="mailto:support@brymar.com">contactarnos</a>.
-            </p>
-            <p>
-              © 2024 {companyName}. Todos los derechos reservados.
-            </p>
-          </div>
-        </div>
-      </body>
-    </html>
-  );
+			</head>
+			<body>
+				<div className="container">
+					<div className="header">
+						<h1>{companyName}</h1>
+						<p>Recuperación de Contraseña</p>
+					</div>
+
+					<div className="content">
+						<div className="greeting">¡Hola {userName}!</div>
+
+						<div className="message">
+							Hemos recibido una solicitud para restablecer la contraseña de tu
+							cuenta. Si fuiste tú quien realizó esta solicitud, haz clic en el
+							botón de abajo para crear una nueva contraseña.
+						</div>
+
+						<div style={{ textAlign: "center" }}>
+							<a href={resetUrl} className="cta-button">
+								Restablecer Contraseña
+							</a>
+						</div>
+
+						<div className="divider"></div>
+
+						<div className="security-notice">
+							<h3>🔒 Aviso de Seguridad</h3>
+							<p>
+								Este enlace expirará en 24 horas por tu seguridad. Si no
+								solicitaste este cambio, puedes ignorar este correo de forma
+								segura.
+							</p>
+						</div>
+
+						<div className="message">
+							Si tienes problemas con el botón, también puedes copiar y pegar el
+							siguiente enlace en tu navegador:
+						</div>
+
+						<div
+							style={{
+								backgroundColor: "#f7fafc",
+								padding: "15px",
+								borderRadius: "6px",
+								wordBreak: "break-all",
+								fontSize: "14px",
+								color: "#4a5568",
+							}}
+						>
+							{resetUrl}
+						</div>
+					</div>
+
+					<div className="footer">
+						<p>
+							Este correo fue enviado por {companyName}. Si tienes alguna
+							pregunta, no dudes en{" "}
+							<a href="mailto:support@brymar.com">contactarnos</a>.
+						</p>
+						<p>© 2024 {companyName}. Todos los derechos reservados.</p>
+					</div>
+				</div>
+			</body>
+		</html>
+	);
 };
 
 export default ForgotPasswordEmail;

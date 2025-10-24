@@ -1,27 +1,26 @@
 "use client";
 
-import React from "react";
+import type { BlogWizardData } from "@/types/blog-wizard";
 import { BlogPreviewStep } from "./steps/blog-preview-step";
-import type { BlogWizardData } from '@/types/blog-wizard';
 
 interface BlogPreviewWrapperProps {
-  data: BlogWizardData;
+	data: BlogWizardData;
 }
 
 export function BlogPreviewWrapper({ data }: BlogPreviewWrapperProps) {
-  const handleUpdate = () => {
-    // Preview component doesn't need to update data
-  };
+	const handleUpdate = () => {
+		// Preview component doesn't need to update data
+	};
 
-  return (
-    <BlogPreviewStep
-      data={data}
-      onUpdate={handleUpdate}
-      onNext={() => {}}
-      onPrevious={() => {}}
-      errors={{}}
-      isLoading={false}
-      isMobile={false}
-    />
-  );
+	return (
+		<BlogPreviewStep
+			data={data}
+			onUpdate={handleUpdate}
+			onNext={() => {}}
+			onPrevious={() => {}}
+			errors={{}}
+			isLoading={false}
+			isMobile={false}
+		/>
+	);
 }

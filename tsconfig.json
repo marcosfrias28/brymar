@@ -39,6 +39,12 @@
     "scripts/**/*",
     "src/scripts/**/*",
     "*.config.ts",
-    "**/*.config.ts"
+    "**/*.config.ts",
+    "src/tests/**/*.spec.ts",
+    "src/tests/**/*.test.ts",
+    "**/__tests__/**/*",
+    "playwright.config.ts",
+    "jest.config.js",
+    "jest.setup.js"
   ]
 }

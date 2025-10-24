@@ -1,15 +1,24 @@
 import { usePathname } from "next/navigation";
 
 export const useAvoidRoutes = () => {
-    const avoidRoutes = ["/dashboard", "/profile", "/sign-in", "/sign-up", "/verify-email", "/forgot-password", "/reset-password", "/search"];
-    const pathname = usePathname();
+	const avoidRoutes = [
+		"/dashboard",
+		"/profile",
+		"/sign-in",
+		"/sign-up",
+		"/verify-email",
+		"/forgot-password",
+		"/reset-password",
+		"/search",
+	];
+	const pathname = usePathname();
 
-    // Verificar que pathname no sea null
-    if (!pathname) {
-        return false;
-    }
+	// Verificar que pathname no sea null
+	if (!pathname) {
+		return false;
+	}
 
-    const shouldAvoid = avoidRoutes.some((route) => pathname.includes(route));
+	const shouldAvoid = avoidRoutes.some((route) => pathname.includes(route));
 
-    return shouldAvoid;
+	return shouldAvoid;
 };

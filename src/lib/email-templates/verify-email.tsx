@@ -1,25 +1,25 @@
-import React from 'react';
+import type React from "react";
 
 interface VerifyEmailProps {
-  userName?: string;
-  verificationUrl: string;
-  otp?: string;
-  companyName?: string;
+	userName?: string;
+	verificationUrl: string;
+	otp?: string;
+	companyName?: string;
 }
 
 export const VerifyEmailTemplate: React.FC<VerifyEmailProps> = ({
-  userName = 'Usuario',
-  verificationUrl,
-  otp,
-  companyName = 'Brymar'
+	userName = "Usuario",
+	verificationUrl,
+	otp,
+	companyName = "Brymar",
 }) => {
-  return (
-    <html>
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Verificación de Email - {companyName}</title>
-        <style>{`
+	return (
+		<html>
+			<head>
+				<meta charSet="utf-8" />
+				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+				<title>Verificación de Email - {companyName}</title>
+				<style>{`
           * {
             margin: 0;
             padding: 0;
@@ -235,94 +235,104 @@ export const VerifyEmailTemplate: React.FC<VerifyEmailProps> = ({
             }
           }
         `}</style>
-      </head>
-      <body>
-        <div className="container">
-          <div className="header">
-            <h1>{companyName}</h1>
-            <p>Verificación de Email</p>
-          </div>
-          
-          <div className="content">
-            <div className="greeting">
-              ¡Bienvenido {userName}!
-            </div>
-            
-            <div className="message">
-              Gracias por registrarte en {companyName}. Para completar tu registro y 
-              activar tu cuenta, necesitamos verificar tu dirección de correo electrónico.
-            </div>
-            
-            {otp && (
-              <div className="otp-section">
-                <div className="otp-label">Tu código de verificación</div>
-                <div className="otp-code">{otp}</div>
-                <p style={{color: '#718096', fontSize: '14px', margin: '10px 0 0 0'}}>
-                  Ingresa este código en la aplicación
-                </p>
-              </div>
-            )}
-            
-            <div className="verification-section">
-              <a href={verificationUrl} className="cta-button">
-                Verificar Email
-              </a>
-            </div>
-            
-            <div className="steps">
-              <h3>
-                <span className="icon">📋</span>
-                Pasos para verificar tu cuenta:
-              </h3>
-              <ol>
-                <li>Haz clic en el botón &quot;Verificar Email&quot; de arriba</li>
-                {otp && <li>O ingresa el código de verificación en la aplicación</li>}
-                <li>Serás redirigido a una página de confirmación</li>
-                <li>¡Tu cuenta estará lista para usar!</li>
-              </ol>
-            </div>
-            
-            <div className="divider"></div>
-            
-            <div className="security-notice">
-              <h3>🔐 Información Importante</h3>
-              <p>
-                Este enlace de verificación expirará en 24 horas. 
-                {otp && ' El código de verificación expirará en 10 minutos.'}
-                Si no completaste el registro, puedes ignorar este correo.
-              </p>
-            </div>
-            
-            <div className="message">
-              Si tienes problemas con el botón, también puedes copiar y pegar el siguiente 
-              enlace en tu navegador:
-            </div>
-            
-            <div style={{
-              backgroundColor: '#f7fafc',
-              padding: '15px',
-              borderRadius: '6px',
-              wordBreak: 'break-all',
-              fontSize: '14px',
-              color: '#4a5568'
-            }}>
-              {verificationUrl}
-            </div>
-          </div>
-          
-          <div className="footer">
-            <p>
-              Este correo fue enviado por {companyName}. Si tienes alguna pregunta, 
-              no dudes en <a href="mailto:support@brymar.com">contactarnos</a>.
-            </p>
-            <p>
-              © 2024 {companyName}. Todos los derechos reservados.
-            </p>
-          </div>
-        </div>
-      </body>
-    </html>
-  );
+			</head>
+			<body>
+				<div className="container">
+					<div className="header">
+						<h1>{companyName}</h1>
+						<p>Verificación de Email</p>
+					</div>
+
+					<div className="content">
+						<div className="greeting">¡Bienvenido {userName}!</div>
+
+						<div className="message">
+							Gracias por registrarte en {companyName}. Para completar tu
+							registro y activar tu cuenta, necesitamos verificar tu dirección
+							de correo electrónico.
+						</div>
+
+						{otp && (
+							<div className="otp-section">
+								<div className="otp-label">Tu código de verificación</div>
+								<div className="otp-code">{otp}</div>
+								<p
+									style={{
+										color: "#718096",
+										fontSize: "14px",
+										margin: "10px 0 0 0",
+									}}
+								>
+									Ingresa este código en la aplicación
+								</p>
+							</div>
+						)}
+
+						<div className="verification-section">
+							<a href={verificationUrl} className="cta-button">
+								Verificar Email
+							</a>
+						</div>
+
+						<div className="steps">
+							<h3>
+								<span className="icon">📋</span>
+								Pasos para verificar tu cuenta:
+							</h3>
+							<ol>
+								<li>
+									Haz clic en el botón &quot;Verificar Email&quot; de arriba
+								</li>
+								{otp && (
+									<li>O ingresa el código de verificación en la aplicación</li>
+								)}
+								<li>Serás redirigido a una página de confirmación</li>
+								<li>¡Tu cuenta estará lista para usar!</li>
+							</ol>
+						</div>
+
+						<div className="divider"></div>
+
+						<div className="security-notice">
+							<h3>🔐 Información Importante</h3>
+							<p>
+								Este enlace de verificación expirará en 24 horas.
+								{otp && " El código de verificación expirará en 10 minutos."}
+								Si no completaste el registro, puedes ignorar este correo.
+							</p>
+						</div>
+
+						<div className="message">
+							Si tienes problemas con el botón, también puedes copiar y pegar el
+							siguiente enlace en tu navegador:
+						</div>
+
+						<div
+							style={{
+								backgroundColor: "#f7fafc",
+								padding: "15px",
+								borderRadius: "6px",
+								wordBreak: "break-all",
+								fontSize: "14px",
+								color: "#4a5568",
+							}}
+						>
+							{verificationUrl}
+						</div>
+					</div>
+
+					<div className="footer">
+						<p>
+							Este correo fue enviado por {companyName}. Si tienes alguna
+							pregunta, no dudes en{" "}
+							<a href="mailto:support@brymar.com">contactarnos</a>.
+						</p>
+						<p>© 2024 {companyName}. Todos los derechos reservados.</p>
+					</div>
+				</div>
+			</body>
+		</html>
+	);
 };
 
 export default VerifyEmailTemplate;

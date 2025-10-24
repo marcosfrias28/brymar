@@ -3,113 +3,118 @@
  */
 
 export interface EnvironmentConfig {
-    // Database
-    POSTGRES_URL: string;
-    POSTGRES_PRISMA_URL: string;
-    POSTGRES_USER: string;
-    POSTGRES_HOST: string;
-    POSTGRES_PASSWORD: string;
-    POSTGRES_DATABASE: string;
+	// Database
+	POSTGRES_URL: string;
+	POSTGRES_PRISMA_URL: string;
+	POSTGRES_USER: string;
+	POSTGRES_HOST: string;
+	POSTGRES_PASSWORD: string;
+	POSTGRES_DATABASE: string;
 
-    // Authentication
-    BETTER_AUTH_URL: string;
-    BETTER_AUTH_SECRET: string;
+	// Authentication
+	BETTER_AUTH_URL: string;
+	BETTER_AUTH_SECRET: string;
 
-    // External Services
-    RESEND_API_KEY: string;
-    GEMINI_API_KEY?: string;
-    BLOB_READ_WRITE_TOKEN: string;
+	// External Services
+	RESEND_API_KEY: string;
+	GEMINI_API_KEY?: string;
+	BLOB_READ_WRITE_TOKEN: string;
 
-    // App Configuration
-    NEXT_PUBLIC_APP_URL: string;
-    NODE_ENV: string;
+	// App Configuration
+	NEXT_PUBLIC_APP_URL: string;
+	NODE_ENV: string;
 }
 
 /**
  * Validates that all required environment variables are present
  */
 export function validateEnvironmentVariables(): {
-    isValid: boolean;
-    missingVars: string[];
-    config?: Partial<EnvironmentConfig>;
+	isValid: boolean;
+	missingVars: string[];
+	config?: Partial<EnvironmentConfig>;
 } {
-    const requiredVars: (keyof EnvironmentConfig)[] = [
-        'POSTGRES_URL',
-        'POSTGRES_PRISMA_URL',
-        'POSTGRES_USER',
-        'POSTGRES_HOST',
-        'POSTGRES_PASSWORD',
-        'POSTGRES_DATABASE',
-        'BETTER_AUTH_URL',
-        'BETTER_AUTH_SECRET',
-        'RESEND_API_KEY',
-        'BLOB_READ_WRITE_TOKEN',
-        'NEXT_PUBLIC_APP_URL'
-    ];
+	const requiredVars: (keyof EnvironmentConfig)[] = [
+		"POSTGRES_URL",
+		"POSTGRES_PRISMA_URL",
+		"POSTGRES_USER",
+		"POSTGRES_HOST",
+		"POSTGRES_PASSWORD",
+		"POSTGRES_DATABASE",
+		"BETTER_AUTH_URL",
+		"BETTER_AUTH_SECRET",
+		"RESEND_API_KEY",
+		"BLOB_READ_WRITE_TOKEN",
+		"NEXT_PUBLIC_APP_URL",
+	];
 
-    const missingVars: string[] = [];
-    const config: Partial<EnvironmentConfig> = {};
+	const missingVars: string[] = [];
+	const config: Partial<EnvironmentConfig> = {};
 
-    // Check each required variable
-    for (const varName of requiredVars) {
-        const value = process.env[varName];
-        if (!value) {
-            missingVars.push(varName);
-        } else {
-            config[varName] = value;
-        }
-    }
+	// Check each required variable
+	for (const varName of requiredVars) {
+		const value = process.env[varName];
+		if (!value) {
+			missingVars.push(varName);
+		} else {
+			config[varName] = value;
+		}
+	}
 
-    // Add optional variables
-    config.GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-    config.NODE_ENV = process.env.NODE_ENV || 'development';
+	// Add optional variables
+	config.GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+	config.NODE_ENV = process.env.NODE_ENV || "development";
 
-    return {
-        isValid: missingVars.length === 0,
-        missingVars,
-        config: missingVars.length === 0 ? config as EnvironmentConfig : config
-    };
+	return {
+		isValid: missingVars.length === 0,
+		missingVars,
+		config: missingVars.length === 0 ? (config as EnvironmentConfig) : config,
+	};
 }
 
 /**
  * Gets environment configuration with validation
  */
 export function getEnvironmentConfig(): EnvironmentConfig {
-    const validation = validateEnvironmentVariables();
+	const validation = validateEnvironmentVariables();
 
-    if (!validation.isValid) {
-        const errorMessage = `Missing required environment variables: ${validation.missingVars.join(', ')}`;
-        console.error('❌ Environment Configuration Error:', errorMessage);
+	if (!validation.isValid) {
+		const errorMessage = `Missing required environment variables: ${validation.missingVars.join(", ")}`;
+		console.error("❌ Environment Configuration Error:", errorMessage);
 
-        if (process.env.NODE_ENV === 'production') {
-            throw new Error(`Production deployment failed: ${errorMessage}`);
-        } else {
-            console.warn('⚠️  Development mode: Some features may not work without proper environment variables');
-        }
-    }
+		if (process.env.NODE_ENV === "production") {
+			throw new Error(`Production deployment failed: ${errorMessage}`);
+		} else {
+			console.warn(
+				"⚠️  Development mode: Some features may not work without proper environment variables",
+			);
+		}
+	}
 
-    return validation.config as EnvironmentConfig;
+	return validation.config as EnvironmentConfig;
 }
 
 /**
  * Database-specific environment validation
  */
 export function validateDatabaseConfig(): boolean {
-    const dbVars = [
-        'POSTGRES_URL',
-        'POSTGRES_PRISMA_URL',
-        'POSTGRES_USER',
-        'POSTGRES_HOST',
-        'POSTGRES_PASSWORD',
-        'POSTGRES_DATABASE'
-    ];
+	const dbVars = [
+		"POSTGRES_URL",
+		"POSTGRES_PRISMA_URL",
+		"POSTGRES_USER",
+		"POSTGRES_HOST",
+		"POSTGRES_PASSWORD",
+		"POSTGRES_DATABASE",
+	];
 
-    const missing = dbVars.filter(varName => !process.env[varName]);
+	const missing = dbVars.filter((varName) => !process.env[varName]);
 
-    if (missing.length > 0) {
-        console.error('❌ Database configuration incomplete. Missing variables:', missing.join(', '));
-        return false;
-    }
+	if (missing.length > 0) {
+		console.error(
+			"❌ Database configuration incomplete. Missing variables:",
+			missing.join(", "),
+		);
+		return false;
+	}
 
-    return true;
+	return true;
 }

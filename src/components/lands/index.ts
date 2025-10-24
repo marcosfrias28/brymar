@@ -4,6 +4,6 @@
  */
 
 export { LandCard } from "./land-card";
-export { LandList } from "./land-list";
-export { LandFilters } from "./land-filters";
 export { LandCardList } from "./land-card-list";
+export { LandFilters } from "./land-filters";
+export { LandList } from "./land-list";

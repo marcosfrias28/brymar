@@ -1,54 +1,58 @@
 "use client";
 
-import React from "react";
-import {
-  AuthFormWrapper,
-  useAuthFields,
-  AuthLink,
-} from "@/components/auth/auth-form-wrapper";
-import { useSearchParams } from "next/navigation";
-import { resetPasswordAction } from "@/lib/actions/auth";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import {
+	AuthFormWrapper,
+	AuthLink,
+	useAuthFields,
+} from "@/components/auth/auth-form-wrapper";
+import { resetPasswordAction } from "@/lib/actions/auth";
 
 const ResetPasswordPage = () => {
-  const searchParams = useSearchParams();
-  const token = searchParams?.get("token");
-  const { passwordField, confirmPasswordField } = useAuthFields();
+	const searchParams = useSearchParams();
+	const token = searchParams?.get("token");
+	const { passwordField, confirmPasswordField } = useAuthFields();
 
-  if (!token) {
-    return (
-      <div className="flex flex-col gap-6 text-center">
-        <h1 className="text-2xl font-bold text-destructive">Token Inválido</h1>
-        <p className="text-balance text-sm text-muted-foreground">
-          El enlace de restablecimiento de contraseña no es válido o ha
-          expirado.
-        </p>
-        <Link href="/forgot-password" className="underline underline-offset-4">
-          Solicitar nuevo enlace
-        </Link>
-      </div>
-    );
-  }
+	if (!token) {
+		return (
+			<div className="flex flex-col gap-6 text-center">
+				<h1 className="text-2xl font-bold text-destructive">Token Inválido</h1>
+				<p className="text-balance text-sm text-muted-foreground">
+					El enlace de restablecimiento de contraseña no es válido o ha
+					expirado.
+				</p>
+				<Link href="/forgot-password" className="underline underline-offset-4">
+					Solicitar nuevo enlace
+				</Link>
+			</div>
+		);
+	}
 
-  const footerContent = (
-    <div className="text-center text-sm">
-      ¿Recordaste tu contraseña?{" "}
-      <AuthLink href="/sign-in">Iniciar sesión</AuthLink>
-    </div>
-  );
+	const footerContent = (
+		<div className="text-center text-sm">
+			¿Recordaste tu contraseña?{" "}
+			<AuthLink href="/sign-in">Iniciar sesión</AuthLink>
+		</div>
+	);
 
-  return (
-    <AuthFormWrapper
-      title="Restablecer Contraseña"
-      subtitle="Ingresa tu nueva contraseña"
-      action={resetPasswordAction}
-      fields={[passwordField, confirmPasswordField]}
-      submitText="Restablecer Contraseña"
-      loadingText="Restableciendo..."
-      footerContent={footerContent}
-      hiddenFields={[{ name: "token", value: token }]}
-    />
-  );
+	// Wrap the action to match the expected signature
+	const wrappedAction = async (_prevState: unknown, formData: FormData) => {
+		return await resetPasswordAction(formData);
+	};
+
+	return (
+		<AuthFormWrapper
+			title="Restablecer Contraseña"
+			subtitle="Ingresa tu nueva contraseña"
+			action={wrappedAction}
+			fields={[passwordField, confirmPasswordField]}
+			submitText="Restablecer Contraseña"
+			loadingText="Restableciendo..."
+			footerContent={footerContent}
+			hiddenFields={[{ name: "token", value: token }]}
+		/>
+	);
 };
 
 export default ResetPasswordPage;

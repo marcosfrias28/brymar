@@ -1,249 +1,366 @@
-"use server"
+"use server";
 
-import { revalidatePath } from "next/cache"
-import { z } from "zod"
-import { eq, desc, count, and, ilike, or } from "drizzle-orm"
-import {
-    type ActionState,
-    createValidatedAction,
-    createSuccessResponse,
-    createErrorResponse
-} from "../validations"
-import {
-    LandFormSchema,
-    LandUpdateFormSchema,
-    LandSearchSchema,
-    type LandFormData,
-    type LandUpdateFormData,
-    type LandSearchParams
-} from "../unified-schema"
-import {
-    validateLandBusinessRules,
-    createDatabaseError,
-    handleError
-} from "../unified-errors"
-import db from "../db/drizzle"
-import { lands } from "../db/schema"
+import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth/auth";
+import { db } from "@/lib/db";
+import { lands } from "@/lib/db/schema";
+import { LandFormDataSchema } from "@/lib/schemas/land-wizard-schemas";
+import { extractValidationErrors, type FormState } from "@/lib/types/forms";
 
-// ============================================================================
-// LAND CRUD ACTIONS
-// ============================================================================
+/**
+ * Create a new land using FormState pattern
+ */
+export async function createLandAction(
+	_prevState: FormState<{ id: string }>,
+	formData: FormData,
+): Promise<FormState<{ id: string }>> {
+	try {
+		// Check authentication
+		const session = await auth.api.getSession({
+			headers: await headers(),
+		});
 
-async function addLandAction(data: LandFormData): Promise<ActionState> {
-    try {
-        // Validate business rules
-        validateLandBusinessRules({
-            type: data.type,
-            area: data.area,
-            price: data.price
-        });
+		if (!session?.user?.id) {
+			return {
+				success: false,
+				message: "You must be logged in to create a land listing",
+			};
+		}
 
-        await db.insert(lands).values({
-            name: data.name,
-            description: data.description,
-            area: data.area,
-            price: data.price,
-            location: data.location,
-            type: data.type,
-            status: data.status || "draft",
-            features: data.features || [],
-            images: data.images || [],
-            createdAt: new Date(),
-        })
+		// Parse form data
+		const data = {
+			name: formData.get("name") as string,
+			title:
+				(formData.get("title") as string) || (formData.get("name") as string),
+			description: formData.get("description") as string,
+			price: parseFloat(formData.get("price") as string),
+			surface: parseFloat(formData.get("surface") as string),
+			landType: formData.get("landType") as string,
+			zoning: formData.get("zoning") as string,
+			utilities: formData.get("utilities")
+				? JSON.parse(formData.get("utilities") as string)
+				: [],
+			characteristics: formData.get("characteristics")
+				? JSON.parse(formData.get("characteristics") as string)
+				: [],
+			location: formData.get("location") as string,
+			coordinates: formData.get("coordinates")
+				? JSON.parse(formData.get("coordinates") as string)
+				: undefined,
+			address: formData.get("address")
+				? JSON.parse(formData.get("address") as string)
+				: undefined,
+			accessRoads: formData.get("accessRoads")
+				? JSON.parse(formData.get("accessRoads") as string)
+				: [],
+			nearbyLandmarks: formData.get("nearbyLandmarks")
+				? JSON.parse(formData.get("nearbyLandmarks") as string)
+				: [],
+			images: formData.get("images")
+				? JSON.parse(formData.get("images") as string)
+				: [],
+			aerialImages: formData.get("aerialImages")
+				? JSON.parse(formData.get("aerialImages") as string)
+				: [],
+			documentImages: formData.get("documentImages")
+				? JSON.parse(formData.get("documentImages") as string)
+				: [],
+			status: (formData.get("status") as string) || "draft",
+			language: (formData.get("language") as string) || "es",
+			aiGenerated: formData.get("aiGenerated")
+				? JSON.parse(formData.get("aiGenerated") as string)
+				: {
+						name: false,
+						description: false,
+						characteristics: false,
+					},
+			tags: formData.get("tags")
+				? JSON.parse(formData.get("tags") as string)
+				: [],
+			seoTitle: formData.get("seoTitle") as string,
+			seoDescription: formData.get("seoDescription") as string,
+		};
 
-        revalidatePath("/dashboard/lands")
-        return createSuccessResponse(undefined, "Terreno agregado exitosamente!")
-    } catch (error) {
-        console.error("Error adding land:", error)
-        if (error instanceof Error && error.message.includes('database')) {
-            throw createDatabaseError("Error al guardar el terreno", "INSERT", error);
-        }
-        throw handleError(error);
-    }
+		// Validate with Zod schema
+		const validation = LandFormDataSchema.safeParse(data);
+
+		if (!validation.success) {
+			return {
+				success: false,
+				errors: extractValidationErrors(validation.error),
+			};
+		}
+
+		// Create land - map to database schema
+		const [land] = await db
+			.insert(lands)
+			.values({
+				id: crypto.randomUUID(),
+				name: validation.data.name,
+				description: validation.data.description,
+				area: Math.round(validation.data.surface), // Convert to integer
+				price: Math.round(validation.data.price), // Convert to integer
+				currency: "USD",
+				type: validation.data.landType,
+				location: validation.data.location,
+				address: validation.data.address || {},
+				features: {
+					zoning: validation.data.zoning,
+					utilities: validation.data.utilities,
+					characteristics: validation.data.characteristics,
+					coordinates: validation.data.coordinates,
+					accessRoads: validation.data.accessRoads,
+					nearbyLandmarks: validation.data.nearbyLandmarks,
+					aerialImages: validation.data.aerialImages,
+					documentImages: validation.data.documentImages,
+					aiGenerated: validation.data.aiGenerated,
+					tags: validation.data.tags,
+					seoTitle: validation.data.seoTitle,
+					seoDescription: validation.data.seoDescription,
+				},
+				images: validation.data.images,
+				status:
+					validation.data.status === "published" ? "available" : "archived",
+				userId: session.user.id,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning();
+
+		revalidatePath("/dashboard/lands");
+		revalidatePath("/lands");
+
+		// Redirect to the land edit page
+		redirect(`/dashboard/lands/${land.id}/edit`);
+	} catch (error) {
+		if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
+			throw error; // Re-throw redirect errors
+		}
+
+		return {
+			success: false,
+			message:
+				error instanceof Error
+					? error.message
+					: "Failed to create land listing",
+		};
+	}
 }
 
-export const addLand = createValidatedAction(LandFormSchema, addLandAction)
+/**
+ * Update an existing land using FormState pattern
+ */
+export async function updateLandAction(
+	_prevState: FormState<{ id: string }>,
+	formData: FormData,
+): Promise<FormState<{ id: string }>> {
+	try {
+		// Check authentication
+		const session = await auth.api.getSession({
+			headers: await headers(),
+		});
 
-async function updateLandAction(data: LandUpdateFormData): Promise<ActionState> {
-    try {
-        // Validate business rules
-        validateLandBusinessRules({
-            type: data.type,
-            area: data.area,
-            price: data.price
-        });
+		if (!session?.user?.id) {
+			return {
+				success: false,
+				message: "You must be logged in to update a land listing",
+			};
+		}
 
-        const updateData = {
-            name: data.name,
-            description: data.description,
-            area: data.area,
-            price: data.price,
-            location: data.location,
-            type: data.type,
-            status: data.status,
-            features: data.features || [],
-            images: data.images || [],
-            updatedAt: new Date(),
-        }
+		const id = formData.get("id") as string;
 
-        await db.update(lands).set(updateData).where(eq(lands.id, data.id))
+		if (!id) {
+			return {
+				success: false,
+				errors: {
+					id: ["Land ID is required"],
+				},
+			};
+		}
 
-        revalidatePath("/dashboard/lands")
-        return createSuccessResponse(undefined, "Terreno actualizado exitosamente!")
-    } catch (error) {
-        console.error("Error updating land:", error)
-        if (error instanceof Error && error.message.includes('database')) {
-            throw createDatabaseError("Error al actualizar el terreno", "UPDATE", error);
-        }
-        throw handleError(error);
-    }
+		// Check if land exists and user owns it
+		const existingLand = await db
+			.select()
+			.from(lands)
+			.where(eq(lands.id, id))
+			.limit(1);
+
+		if (existingLand.length === 0) {
+			return {
+				success: false,
+				message: "Land listing not found",
+			};
+		}
+
+		if (existingLand[0].userId !== session.user.id) {
+			return {
+				success: false,
+				message: "You are not authorized to update this land listing",
+			};
+		}
+
+		// Parse form data
+		const data = {
+			name: formData.get("name") as string,
+			title:
+				(formData.get("title") as string) || (formData.get("name") as string),
+			description: formData.get("description") as string,
+			price: parseFloat(formData.get("price") as string),
+			surface: parseFloat(formData.get("surface") as string),
+			landType: formData.get("landType") as string,
+			zoning: formData.get("zoning") as string,
+			utilities: formData.get("utilities")
+				? JSON.parse(formData.get("utilities") as string)
+				: [],
+			characteristics: formData.get("characteristics")
+				? JSON.parse(formData.get("characteristics") as string)
+				: [],
+			location: formData.get("location") as string,
+			coordinates: formData.get("coordinates")
+				? JSON.parse(formData.get("coordinates") as string)
+				: undefined,
+			address: formData.get("address")
+				? JSON.parse(formData.get("address") as string)
+				: undefined,
+			accessRoads: formData.get("accessRoads")
+				? JSON.parse(formData.get("accessRoads") as string)
+				: [],
+			nearbyLandmarks: formData.get("nearbyLandmarks")
+				? JSON.parse(formData.get("nearbyLandmarks") as string)
+				: [],
+			images: formData.get("images")
+				? JSON.parse(formData.get("images") as string)
+				: [],
+			aerialImages: formData.get("aerialImages")
+				? JSON.parse(formData.get("aerialImages") as string)
+				: [],
+			documentImages: formData.get("documentImages")
+				? JSON.parse(formData.get("documentImages") as string)
+				: [],
+			status: (formData.get("status") as string) || "draft",
+			language: (formData.get("language") as string) || "es",
+			aiGenerated: formData.get("aiGenerated")
+				? JSON.parse(formData.get("aiGenerated") as string)
+				: {
+						name: false,
+						description: false,
+						characteristics: false,
+					},
+			tags: formData.get("tags")
+				? JSON.parse(formData.get("tags") as string)
+				: [],
+			seoTitle: formData.get("seoTitle") as string,
+			seoDescription: formData.get("seoDescription") as string,
+		};
+
+		// Validate with Zod schema
+		const validation = LandFormDataSchema.safeParse(data);
+
+		if (!validation.success) {
+			return {
+				success: false,
+				errors: extractValidationErrors(validation.error),
+			};
+		}
+
+		// Update land - map to database schema
+		const [updatedLand] = await db
+			.update(lands)
+			.set({
+				name: validation.data.name,
+				description: validation.data.description,
+				area: Math.round(validation.data.surface), // Convert to integer
+				price: Math.round(validation.data.price), // Convert to integer
+				type: validation.data.landType,
+				location: validation.data.location,
+				address: validation.data.address || {},
+				features: {
+					zoning: validation.data.zoning,
+					utilities: validation.data.utilities,
+					characteristics: validation.data.characteristics,
+					coordinates: validation.data.coordinates,
+					accessRoads: validation.data.accessRoads,
+					nearbyLandmarks: validation.data.nearbyLandmarks,
+					aerialImages: validation.data.aerialImages,
+					documentImages: validation.data.documentImages,
+					aiGenerated: validation.data.aiGenerated,
+					tags: validation.data.tags,
+					seoTitle: validation.data.seoTitle,
+					seoDescription: validation.data.seoDescription,
+				},
+				images: validation.data.images,
+				status:
+					validation.data.status === "published" ? "available" : "archived",
+				updatedAt: new Date(),
+			})
+			.where(eq(lands.id, id))
+			.returning();
+
+		revalidatePath("/dashboard/lands");
+		revalidatePath("/lands");
+		revalidatePath(`/lands/${updatedLand.id}`);
+
+		return {
+			success: true,
+			message: "Land listing updated successfully",
+			data: { id: updatedLand.id },
+		};
+	} catch (error) {
+		return {
+			success: false,
+			message:
+				error instanceof Error
+					? error.message
+					: "Failed to update land listing",
+		};
+	}
 }
 
-export const updateLand = createValidatedAction(LandUpdateFormSchema, updateLandAction)
+/**
+ * Search lands action for useActionState
+ */
+export async function searchLandsAction(
+	_prevState: FormState<{ lands: any[] }>,
+	formData: FormData,
+): Promise<FormState<{ lands: any[] }>> {
+	try {
+		// Parse search filters from formData
+		const filters = {
+			location: formData.get("location") as string,
+			minPrice: formData.get("minPrice")
+				? Number.parseFloat(formData.get("minPrice") as string)
+				: undefined,
+			maxPrice: formData.get("maxPrice")
+				? Number.parseFloat(formData.get("maxPrice") as string)
+				: undefined,
+			landType: formData.get("landType") as string,
+			minSurface: formData.get("minSurface")
+				? Number.parseFloat(formData.get("minSurface") as string)
+				: undefined,
+			maxSurface: formData.get("maxSurface")
+				? Number.parseFloat(formData.get("maxSurface") as string)
+				: undefined,
+		};
 
-// Simple delete schema
-const deleteLandSchema = z.object({
-    id: z.number().min(1, "ID de terreno requerido")
-})
+		// Build query
+		const query = db.select().from(lands).where(eq(lands.status, "available"));
 
-async function deleteLandAction(data: z.infer<typeof deleteLandSchema>): Promise<ActionState> {
-    try {
-        await db.delete(lands).where(eq(lands.id, data.id))
-        revalidatePath("/dashboard/lands")
-        return createSuccessResponse(undefined, "Terreno eliminado exitosamente!")
-    } catch (error) {
-        console.error("Error deleting land:", error)
-        if (error instanceof Error && error.message.includes('database')) {
-            throw createDatabaseError("Error al eliminar el terreno", "DELETE", error);
-        }
-        throw handleError(error);
-    }
+		// Apply filters
+		// Note: This is a simplified version. You'll need to add proper filtering logic
+		const results = await query.limit(50);
+
+		return {
+			success: true,
+			data: { lands: results },
+		};
+	} catch (error) {
+		return {
+			success: false,
+			message:
+				error instanceof Error ? error.message : "Failed to search lands",
+		};
+	}
 }
-
-export const deleteLand = createValidatedAction(deleteLandSchema, deleteLandAction)
-
-// ============================================================================
-// LAND QUERY FUNCTIONS
-// ============================================================================
-
-export const getLands = async (page = 1, limit = 12, filters?: any) => {
-    try {
-        const offset = (page - 1) * limit
-
-        // Build where conditions
-        const whereConditions = []
-
-        if (filters?.status && filters.status !== "all") {
-            whereConditions.push(eq(lands.status, filters.status))
-        }
-
-        if (filters?.type && filters.type !== "all") {
-            whereConditions.push(eq(lands.type, filters.type))
-        }
-
-        // Get lands with pagination
-        const landsQuery = db.select().from(lands)
-        if (whereConditions.length > 0) {
-            landsQuery.where(whereConditions.length === 1 ? whereConditions[0] : and(...whereConditions))
-        }
-        const landsResult = await landsQuery
-            .orderBy(desc(lands.createdAt))
-            .limit(limit)
-            .offset(offset)
-
-        // Get total count
-        const totalQuery = db.select({ count: count() }).from(lands)
-        if (whereConditions.length > 0) {
-            totalQuery.where(whereConditions.length === 1 ? whereConditions[0] : and(...whereConditions))
-        }
-        const totalResult = await totalQuery
-
-        return {
-            lands: landsResult,
-            total: totalResult[0].count,
-            totalPages: Math.ceil(totalResult[0].count / limit),
-        }
-    } catch (error) {
-        console.error("Error fetching lands:", error)
-        return { lands: [], total: 0, totalPages: 0 }
-    }
-}
-
-export const getLandById = async (id: string) => {
-    try {
-        const result = await db.select().from(lands).where(eq(lands.id, parseInt(id)))
-        return result[0] || null
-    } catch (error) {
-        console.error("Error fetching land:", error)
-        return null
-    }
-}
-
-export const searchLands = async (query: string, page = 1, limit = 12) => {
-    try {
-        const offset = (page - 1) * limit
-        const whereConditions = [
-            or(
-                ilike(lands.name, `%${query}%`),
-                ilike(lands.description, `%${query}%`),
-                ilike(lands.location, `%${query}%`),
-                ilike(lands.type, `%${query}%`),
-            ),
-        ]
-
-        const landsResult = await db
-            .select()
-            .from(lands)
-            .where(and(...whereConditions))
-            .orderBy(desc(lands.createdAt))
-            .limit(limit)
-            .offset(offset)
-
-        const totalResult = await db
-            .select({ count: count() })
-            .from(lands)
-            .where(and(...whereConditions))
-
-        return {
-            lands: landsResult,
-            total: totalResult[0].count,
-            totalPages: Math.ceil(totalResult[0].count / limit),
-            currentPage: page,
-        }
-    } catch (error) {
-        console.error("Error searching lands:", error)
-        return {
-            lands: [],
-            total: 0,
-            totalPages: 0,
-            currentPage: page,
-        }
-    }
-}
-
-// ============================================================================
-// LAND SEARCH ACTION
-// ============================================================================
-
-type SearchResult = {
-    lands: any[]
-    total: number
-    totalPages: number
-    currentPage: number
-}
-
-async function searchLandsActionHandler(data: LandSearchParams): Promise<ActionState<SearchResult | void>> {
-    try {
-        const result = await searchLands(data.query || "", data.page, data.limit)
-
-        return createSuccessResponse(
-            result,
-            `Se encontraron ${result.total} terrenos`
-        )
-    } catch (error) {
-        console.error('Search lands action error:', error)
-        throw handleError(error);
-    }
-}
-
-export const searchLandsAction = createValidatedAction(LandSearchSchema, searchLandsActionHandler)

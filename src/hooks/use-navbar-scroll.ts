@@ -1,20 +1,20 @@
-import { useState, useEffect } from 'react';
-import { useScroll } from 'framer-motion';
+import { useScroll } from "framer-motion";
+import { useEffect, useState } from "react";
 
 export const useNavbarScroll = () => {
-    const { scrollY } = useScroll();
-    const [isVisible, setIsVisible] = useState<boolean>(true);
+	const { scrollY } = useScroll();
+	const [isVisible, setIsVisible] = useState<boolean>(true);
 
-    useEffect(() => {
-        const handleScroll = () => {
-            const prev = scrollY.getPrevious();
-            const curr = scrollY.get();
-            setIsVisible(prev! > curr);
-        };
+	useEffect(() => {
+		const handleScroll = () => {
+			const prev = scrollY.getPrevious();
+			const curr = scrollY.get();
+			setIsVisible(prev! > curr);
+		};
 
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, [scrollY]);
+		window.addEventListener("scroll", handleScroll);
+		return () => window.removeEventListener("scroll", handleScroll);
+	}, [scrollY]);
 
-    return isVisible;
+	return isVisible;
 };

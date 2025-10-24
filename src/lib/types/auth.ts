@@ -2,155 +2,155 @@
  * Authentication and user-related types consolidating all user DTOs
  */
 
-import { BaseEntity, ActionResult, Language, Currency } from "./shared";
+import type { ActionResult, BaseEntity, Currency, Language } from "./shared";
 
 export type UserRole = "admin" | "editor" | "super_admin" | "user" | "agent";
 
 export interface UserPreferences {
-    notifications?: {
-        email: boolean;
-        push: boolean;
-        marketing: boolean;
-    };
-    privacy?: {
-        profileVisible: boolean;
-        showEmail: boolean;
-        showPhone: boolean;
-    };
-    display?: {
-        theme: "light" | "dark" | "system";
-        language: Language;
-        currency: Currency;
-    };
+	notifications?: {
+		email: boolean;
+		push: boolean;
+		marketing: boolean;
+	};
+	privacy?: {
+		profileVisible: boolean;
+		showEmail: boolean;
+		showPhone: boolean;
+	};
+	display?: {
+		theme: "light" | "dark" | "system";
+		language: Language;
+		currency: Currency;
+	};
 }
 
 export interface User extends BaseEntity {
-    email: string;
-    name?: string;
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
-    avatar?: string;
-    bio?: string;
-    location?: string;
-    website?: string;
-    role: UserRole;
-    emailVerified?: Date;
-    phoneVerified?: Date;
-    preferences: UserPreferences;
-    lastLoginAt?: Date;
-    isActive: boolean;
+	email: string;
+	name?: string;
+	firstName?: string;
+	lastName?: string;
+	phone?: string;
+	avatar?: string;
+	bio?: string;
+	location?: string;
+	website?: string;
+	role: UserRole;
+	emailVerified?: Date;
+	phoneVerified?: Date;
+	preferences: UserPreferences;
+	lastLoginAt?: Date;
+	isActive: boolean;
 }
 
 export interface CreateUserInput {
-    email: string;
-    name?: string;
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
-    role?: UserRole;
-    preferences?: UserPreferences;
+	email: string;
+	name?: string;
+	firstName?: string;
+	lastName?: string;
+	phone?: string;
+	role?: UserRole;
+	preferences?: UserPreferences;
 }
 
 export interface UpdateUserProfileInput {
-    id: string;
-    name?: string;
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-    phone?: string;
-    avatar?: string;
-    bio?: string;
-    location?: string;
-    website?: string;
-    preferences?: UserPreferences;
+	id: string;
+	name?: string;
+	firstName?: string;
+	lastName?: string;
+	email?: string;
+	phone?: string;
+	avatar?: string;
+	bio?: string;
+	location?: string;
+	website?: string;
+	preferences?: UserPreferences;
 }
 
 export interface AuthenticateUserInput {
-    email: string;
-    password: string;
-    rememberMe?: boolean;
+	email: string;
+	password: string;
+	rememberMe?: boolean;
 }
 
 export interface SignUpInput {
-    email: string;
-    password: string;
-    name?: string;
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
+	email: string;
+	password: string;
+	name?: string;
+	firstName?: string;
+	lastName?: string;
+	phone?: string;
 }
 
 export interface ForgotPasswordInput {
-    email: string;
+	email: string;
 }
 
 export interface ResetPasswordInput {
-    token: string;
-    password: string;
-    confirmPassword: string;
+	token: string;
+	password: string;
+	confirmPassword: string;
 }
 
 export interface VerifyEmailInput {
-    token: string;
+	token: string;
 }
 
 export interface SendVerificationOTPInput {
-    email: string;
+	email: string;
 }
 
 export interface VerifyOTPInput {
-    email: string;
-    otp: string;
+	email: string;
+	otp: string;
 }
 
 export interface ChangePasswordInput {
-    currentPassword: string;
-    newPassword: string;
-    confirmPassword: string;
+	currentPassword: string;
+	newPassword: string;
+	confirmPassword: string;
 }
 
 export interface Session {
-    user: User;
-    accessToken: string;
-    refreshToken?: string;
-    expiresAt: Date;
+	user: User;
+	accessToken: string;
+	refreshToken?: string;
+	expiresAt: Date;
 }
 
 // Notification types
 export interface Notification extends BaseEntity {
-    userId: string;
-    title: string;
-    message: string;
-    type: "info" | "success" | "warning" | "error";
-    read: boolean;
-    readAt?: Date;
-    actionUrl?: string;
+	userId: string;
+	title: string;
+	message: string;
+	type: "info" | "success" | "warning" | "error";
+	read: boolean;
+	readAt?: Date;
+	actionUrl?: string;
 }
 
 export interface MarkNotificationAsReadInput {
-    id: string;
+	id: string;
 }
 
 export interface MarkAllNotificationsAsReadInput {
-    userId: string;
+	userId: string;
 }
 
 // Favorite types
 export interface Favorite extends BaseEntity {
-    userId: string;
-    itemId: string;
-    itemType: "property" | "land" | "blog";
+	userId: string;
+	itemId: string;
+	itemType: "property" | "land" | "blog";
 }
 
 export interface AddFavoriteInput {
-    itemId: string;
-    itemType: "property" | "land" | "blog";
+	itemId: string;
+	itemType: "property" | "land" | "blog";
 }
 
 export interface RemoveFavoriteInput {
-    itemId: string;
-    itemType: "property" | "land" | "blog";
+	itemId: string;
+	itemType: "property" | "land" | "blog";
 }
 
 // Action result types

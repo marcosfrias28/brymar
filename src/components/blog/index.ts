@@ -4,6 +4,6 @@
  */
 
 export { BlogCard } from "./blog-card";
-export { BlogList } from "./blog-list";
-export { BlogForm } from "./blog-form";
 export { BlogFilters } from "./blog-filters";
+export { BlogForm } from "./blog-form";
+export { BlogList } from "./blog-list";
