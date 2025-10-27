@@ -71,6 +71,15 @@ function shouldBypassMiddleware(request: NextRequest): boolean {
 }
 
 /**
+ * Check if this is likely a redirect from an auth action
+ */
+function isLikelyAuthRedirect(pathname: string): boolean {
+    // Check if this is a protected route that users get redirected to after auth
+    const authRedirectTargets = ['/profile', '/dashboard'];
+    return authRedirectTargets.some(route => pathname.startsWith(route));
+}
+
+/**
  * Main middleware for authentication and authorization
  */
 export async function middleware(request: NextRequest) {
@@ -101,6 +110,12 @@ export async function middleware(request: NextRequest) {
             // For POST requests, allow them through to API routes to handle authentication
             if (request.method === 'POST') {
                 console.log(`[Middleware] No session for POST request to ${pathname}, allowing through to API route`);
+                return NextResponse.next();
+            }
+
+            // Check if this might be a redirect from an auth action
+            if (isLikelyAuthRedirect(pathname)) {
+                console.log(`[Middleware] No session found for likely auth redirect to ${pathname}, allowing through`);
                 return NextResponse.next();
             }
 
@@ -205,6 +220,12 @@ export async function middleware(request: NextRequest) {
             pathname,
             method: request.method
         });
+
+        // Check if this might be a redirect from an auth action
+        if (isLikelyAuthRedirect(pathname)) {
+            console.log(`[Middleware] Session validation failed for likely auth redirect to ${pathname}, allowing through`);
+            return NextResponse.next();
+        }
 
         // For GET requests, redirect to sign-in
         if (request.method === 'GET') {

@@ -23,7 +23,7 @@ import {
 
 import { useProperty } from "@/hooks/use-properties";
 import { updateProperty as updatePropertyAction } from "@/lib/actions/properties";
-import type { Property } from "@/lib/types/properties";
+import type { Property, PropertyType } from "@/lib/types/properties";
 import { cn } from "@/lib/utils";
 import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
 
@@ -139,39 +139,23 @@ export default function PropertyDetailPage() {
 		if (editedProperty && property) {
 			setIsUpdating(true);
 			try {
-				const formData = new FormData();
-				formData.append("id", property.getId().value);
-				formData.append(
-					"title",
-					editedProperty.title || property.getTitle().value,
-				);
-				formData.append(
-					"description",
-					editedProperty.description || property.description,
-				);
-				formData.append(
-					"price",
-					(editedProperty.price || property.getPrice().value).toString(),
-				);
-				formData.append(
-					"type",
-					editedProperty.propertyType || property.getType().value,
-				);
-				// Note: bedrooms, bathrooms, area, and location are not available in current DTO
-				// These would need to be added to GetPropertyByIdOutput if required
-				formData.append(
-					"status",
-					(editedProperty.status || property.getStatus().value) as string,
-				);
+				const updateInput = {
+					id: property.id,
+					title: editedProperty.title || property.title,
+					description: editedProperty.description || property.description,
+					price: editedProperty.price || property.price,
+					type: editedProperty.type || property.type,
+					status: editedProperty.status || property.status,
+				};
 
-				const result = await updatePropertyAction(formData);
+				const result = await updatePropertyAction(updateInput);
 
 				if (result.success) {
 					setUpdateState({ success: true });
 					toast.success("Propiedad actualizada exitosamente");
 					await refetch();
 				} else {
-					toast.error(result.message || "Error al actualizar la propiedad");
+					toast.error(result.error || "Error al actualizar la propiedad");
 				}
 			} catch (error) {
 				console.error("Error updating property:", error);
@@ -203,10 +187,7 @@ export default function PropertyDetailPage() {
 		{ label: "Dashboard", href: "/dashboard" },
 		{ label: "Propiedades", href: "/dashboard/properties" },
 		{
-			label:
-				(currentData && "getTitle" in currentData && currentData.getTitle
-					? currentData.getTitle().value
-					: currentData?.title) || "Propiedad",
+			label: currentData?.title || "Propiedad",
 		},
 	];
 
@@ -230,32 +211,16 @@ export default function PropertyDetailPage() {
 							<h1 className="text-3xl font-bold font-serif">
 								{isEditing
 									? "Editando Propiedad"
-									: currentData &&
-											"getTitle" in currentData &&
-											currentData.getTitle
-										? currentData.getTitle().value
-										: currentData?.title}
+									: currentData?.title}
 							</h1>
 							<div className="flex items-center gap-2 mt-1">
 								<Badge
 									className={cn(
-										(currentData &&
-										"getType" in currentData &&
-										currentData.getType
-											? currentData.getType().value
-											: currentData?.propertyType) === "sale"
-											? "bg-green-500 text-white"
-											: "bg-blue-500 text-white",
+										"bg-blue-500 text-white",
 										secondaryColorClasses.badge,
 									)}
 								>
-									{(currentData &&
-									"getType" in currentData &&
-									currentData.getType
-										? currentData.getType().value
-										: currentData?.propertyType) === "sale"
-										? "En Venta"
-										: "En Alquiler"}
+									{currentData?.type || "Propiedad"}
 								</Badge>
 							</div>
 						</div>
@@ -471,12 +436,12 @@ export default function PropertyDetailPage() {
 										<div>
 											<Label htmlFor="type">Tipo</Label>
 											<Select
-												value={editedProperty?.propertyType || "sale"}
-												onValueChange={(value: "sale" | "rent") =>
+												value={editedProperty?.type || "house"}
+												onValueChange={(value: PropertyType) =>
 													editedProperty &&
 													setEditedProperty({
 														...editedProperty,
-														propertyType: value,
+														type: value,
 													})
 												}
 											>
@@ -517,12 +482,7 @@ export default function PropertyDetailPage() {
 											</Label>
 											<p className="text-2xl font-bold text-foreground">
 												$
-												{(currentData &&
-												"getPrice" in currentData &&
-												currentData.getPrice
-													? currentData.getPrice().value
-													: currentData?.price
-												)?.toLocaleString() || 0}{" "}
+												{currentData?.price?.toLocaleString() || 0}{" "}
 												USD
 											</p>
 										</div>
@@ -590,11 +550,7 @@ export default function PropertyDetailPage() {
 											ID de Propiedad
 										</Label>
 										<p className="text-foreground font-mono">
-											{currentData &&
-											"getId" in currentData &&
-											currentData.getId
-												? currentData.getId().value
-												: currentData?.id}
+											{currentData?.id}
 										</p>
 									</div>
 								</div>

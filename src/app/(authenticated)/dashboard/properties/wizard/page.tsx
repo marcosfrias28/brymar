@@ -4,10 +4,9 @@ import { PropertyWizard } from "@/components/wizard";
 import type { PropertyWizardData } from "@/types/property-wizard";
 
 export default function PropertyWizardPage() {
-	const handleComplete = async (data: PropertyWizardData) => {
-		console.log("Property completed:", data);
-		// This will be implemented in future tasks
-		alert("Property creation completed! (Implementation pending)");
+	const handleComplete = async () => {
+		// Property creation is handled by the PropertyWizard component
+		alert("Property creation completed!");
 	};
 
 	const handleSaveDraft = async (
@@ -23,7 +22,6 @@ export default function PropertyWizardPage() {
 		<div className="container mx-auto py-8">
 			<PropertyWizard
 				onComplete={handleComplete}
-				onSaveDraft={handleSaveDraft}
 			/>
 		</div>
 	);

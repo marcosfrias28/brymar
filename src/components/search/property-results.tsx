@@ -15,11 +15,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import type { PropertySearchResult } from "@/lib/types/properties";
+import type { Property } from "@/lib/types/properties";
 import { cn } from "@/lib/utils";
 
 interface PropertyResultsProps {
-	properties: PropertySearchResult[];
+	properties: Property[];
 	total: number;
 	isLoading?: boolean;
 	error?: string;
@@ -199,7 +199,7 @@ export function PropertyResults({
 										area: property.features.area,
 										location: `${property.address.city}, ${property.address.state}`,
 										type: property.type,
-										images: property.images,
+										images: property.images?.map(img => typeof img === 'string' ? img : img.url) || [],
 										status: property.status,
 									}}
 								/>

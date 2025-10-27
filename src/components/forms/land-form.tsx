@@ -34,7 +34,7 @@ export function LandForm({
 	onSuccess,
 	className,
 }: LandFormProps) {
-	const [landType, setLandType] = useState(initialData?.landType || "");
+	const [landType, setLandType] = useState(initialData?.type || "");
 
 	const action = isEditing ? updateLandAction : createLandAction;
 	const [state, formAction, isPending] = useActionState(action, {
@@ -159,7 +159,7 @@ export function LandForm({
 								id="surface"
 								name="surface"
 								type="number"
-								defaultValue={initialData?.surface || ""}
+								defaultValue={initialData?.area || ""}
 								placeholder="2500"
 								required
 							/>

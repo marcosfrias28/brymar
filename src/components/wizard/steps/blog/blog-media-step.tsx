@@ -39,7 +39,9 @@ export function BlogMediaStep({ data, onChange, errors }: BlogMediaStepProps) {
 							accept="image/*"
 							onChange={(e) => {
 								const file = e.target.files?.[0];
-								handleChange("coverImage", file);
+								if (file) {
+									handleChange("coverImage", file);
+								}
 							}}
 						/>
 						<p className="text-sm text-muted-foreground">

@@ -33,7 +33,7 @@ export type { PropertyWizardData } from "@/types/property-wizard";
 // Main Property Wizard Component
 export { PropertyWizard } from "./property-wizard";
 // Property Wizard Steps
-export { PropertyGeneralStep } from "./steps/property-general-step";
-export { PropertyLocationStep } from "./steps/property-location-step";
-export { PropertyMediaStep } from "./steps/property-media-step";
-export { PropertyPreviewStep } from "./steps/property-preview-step";
+// export { PropertyGeneralStep } from "./steps/property-general-step"; // TODO: Create step
+// export { PropertyLocationStep } from "./steps/property-location-step"; // TODO: Create step
+// export { PropertyMediaStep } from "./steps/property-media-step"; // TODO: Create step
+// export { PropertyPreviewStep } from "./steps/property-preview-step"; // TODO: Create step

@@ -14,8 +14,8 @@ export function StatsCards() {
 	const { data: blogPostsData, isLoading: postsLoading } = useBlogPosts();
 
 	const properties = propertiesData?.data?.items || [];
-	const lands = landsData?.data?.items || [];
-	const blogPosts = blogPostsData?.data?.posts || [];
+	const lands = landsData?.items || [];
+	const blogPosts = blogPostsData?.posts || [];
 
 	const isLoading = propertiesLoading || landsLoading || postsLoading;
 
@@ -52,7 +52,7 @@ export function StatsCards() {
 
 	if (isLoading) {
 		return (
-			<div className="grid grid-cols-1 smartphone:grid-cols-2 laptop:grid-cols-4 gap-4">
+			<div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
 				{[1, 2, 3, 4].map((index) => (
 					<Card key={index} className="border-blackCoral shadow-lg">
 						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -70,7 +70,7 @@ export function StatsCards() {
 	}
 
 	return (
-		<div className="grid grid-cols-1 smartphone:grid-cols-2 laptop:grid-cols-4 gap-4">
+		<div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
 			{statsData.map((stat, index) => (
 				<Card
 					key={index}

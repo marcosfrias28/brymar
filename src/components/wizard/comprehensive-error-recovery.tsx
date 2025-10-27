@@ -78,48 +78,6 @@ export function ComprehensiveErrorRecovery({
 
 	const networkStatus = useNetworkStatus();
 
-	// Add error to state
-	const addError = useCallback(
-		(error: unknown, context?: Record<string, any>) => {
-			const wizardError = ErrorFactory.createFromError(error, context);
-
-			setErrorState((prev) => ({
-				...prev,
-				errors: [
-					...prev.errors.filter((e) => e.code !== wizardError.code),
-					wizardError,
-				],
-				retryAttempts: {
-					...prev.retryAttempts,
-					[wizardError.code]: prev.retryAttempts[wizardError.code] || 0,
-				},
-			}));
-
-			onError?.(wizardError);
-
-			// Auto-retry for retryable errors
-			if (
-				enableAutoRetry &&
-				wizardError.retryable &&
-				(errorState.retryAttempts[wizardError.code] || 0) < maxRetries
-			) {
-				setTimeout(
-					() => {
-						handleRetry(wizardError.code);
-					},
-					1000 * 2 ** (errorState.retryAttempts[wizardError.code] || 0),
-				);
-			}
-		},
-		[
-			onError,
-			enableAutoRetry,
-			maxRetries,
-			errorState.retryAttempts,
-			handleRetry,
-		],
-	);
-
 	// Remove error from state
 	const removeError = useCallback((errorCode: string) => {
 		setErrorState((prev) => ({
@@ -186,6 +144,48 @@ export function ComprehensiveErrorRecovery({
 			maxRetries,
 			removeError,
 			onRecovery,
+		],
+	);
+
+	// Add error to state
+	const addError = useCallback(
+		(error: unknown, context?: Record<string, any>) => {
+			const wizardError = ErrorFactory.createFromError(error, context);
+
+			setErrorState((prev) => ({
+				...prev,
+				errors: [
+					...prev.errors.filter((e) => e.code !== wizardError.code),
+					wizardError,
+				],
+				retryAttempts: {
+					...prev.retryAttempts,
+					[wizardError.code]: prev.retryAttempts[wizardError.code] || 0,
+				},
+			}));
+
+			onError?.(wizardError);
+
+			// Auto-retry for retryable errors
+			if (
+				enableAutoRetry &&
+				wizardError.retryable &&
+				(errorState.retryAttempts[wizardError.code] || 0) < maxRetries
+			) {
+				setTimeout(
+					() => {
+						handleRetry(wizardError.code);
+					},
+					1000 * 2 ** (errorState.retryAttempts[wizardError.code] || 0),
+				);
+			}
+		},
+		[
+			onError,
+			enableAutoRetry,
+			maxRetries,
+			errorState.retryAttempts,
+			handleRetry,
 		],
 	);
 

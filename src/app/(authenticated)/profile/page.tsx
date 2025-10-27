@@ -16,34 +16,33 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export default function ProfilePage() {
 	const breadcrumbs = [
 		{ label: "Dashboard", href: "/dashboard", icon: Home },
-		{ label: "Il Mio Profilo", icon: User },
+		{ label: "Mi Perfil", icon: User },
 	];
 
 	return (
 		<DashboardPageLayout
-			title="Il Mio Profilo"
-			description="Gestisci le tue informazioni personali e le impostazioni dell'account"
+			title="Mi Perfil"
+			description="Gestiona tu información personal y configuración de la cuenta"
 			breadcrumbs={breadcrumbs}
 		>
 			<Tabs defaultValue="profile" className="space-y-6">
 				<TabsList className="grid w-full grid-cols-2">
 					<TabsTrigger value="profile" className="flex items-center gap-2">
 						<User className="h-4 w-4" />
-						Informazioni Personali
+						Información Personal
 					</TabsTrigger>
 					<TabsTrigger value="activity" className="flex items-center gap-2">
 						<Activity className="h-4 w-4" />
-						Attività Recente
+						Actividad Reciente
 					</TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="profile" className="space-y-6">
 					<Card>
 						<CardHeader>
-							<CardTitle>Profilo Utente</CardTitle>
+							<CardTitle>Perfil del Usuario</CardTitle>
 							<CardDescription>
-								Aggiorna le tue informazioni personali e l&apos;immagine del
-								profilo
+								Actualiza tu información personal y la imagen de perfil
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -55,9 +54,9 @@ export default function ProfilePage() {
 				<TabsContent value="activity" className="space-y-6">
 					<Card>
 						<CardHeader>
-							<CardTitle>Attività Recente</CardTitle>
+							<CardTitle>Actividad Reciente</CardTitle>
 							<CardDescription>
-								Visualizza la cronologia delle tue attività e azioni
+								Visualiza el historial de tus actividades y acciones
 							</CardDescription>
 						</CardHeader>
 						<CardContent>

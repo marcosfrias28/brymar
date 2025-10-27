@@ -95,9 +95,18 @@ export async function getUserActivities(
 			total,
 		});
 
+		// Transform null values to undefined for type compatibility
+		const transformedActivities = activities.map(activity => ({
+			...activity,
+			details: activity.details ?? undefined,
+			ipAddress: activity.ipAddress ?? undefined,
+			userAgent: activity.userAgent ?? undefined,
+			metadata: activity.metadata as Record<string, any> | undefined,
+		}));
+
 		return {
 			success: true,
-			data: { activities, total },
+			data: { activities: transformedActivities, total },
 		};
 	} catch (error) {
 		await logger.error("Get user activities error", error, { userId });

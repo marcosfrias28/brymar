@@ -46,11 +46,11 @@ export function NavigationPills() {
 			<NavigationMenu>
 				<NavigationMenuList>
 					<NavigationMenuItem>
-						<NavigationMenuTrigger className="text-white text-center font-sofia-pro font-medium transition-all rounded-full flex items-center gap-1 h-auto whitespace-nowrap px-3 py-2 text-sm">
+						<NavigationMenuTrigger className="text-foreground text-center font-sofia-pro font-medium transition-all rounded-full flex items-center gap-1 h-auto whitespace-nowrap px-3 py-2 text-sm">
 							Más
 						</NavigationMenuTrigger>
-						<NavigationMenuContent className="w-80 p-4 backdrop-blur-xl border border-white/20 shadow-xl">
-							<div className="grid grid-cols-2 gap-4">
+						<NavigationMenuContent className="p-4 backdrop-blur-xl border border-white/20 shadow-xl">
+							<div className="grid grid-cols-2 gap-4 max-w-2xl w-full">
 								{/* Sección Servicios */}
 								<div className="space-y-3">
 									<h4 className="text-sm font-semibold text-card-foreground whitespace-nowrap">

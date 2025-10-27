@@ -76,7 +76,7 @@ const getNavigationData = (config: SidebarConfig) => {
 			title: "Propiedades",
 			url: "/dashboard/properties",
 			icon: BuildingIcon,
-			children: [
+			items: [
 				{
 					title: "Ver Todas",
 					url: "/dashboard/properties",
@@ -99,7 +99,7 @@ const getNavigationData = (config: SidebarConfig) => {
 			title: "Terrenos",
 			url: "/dashboard/lands",
 			icon: MapPinIcon,
-			children: [
+			items: [
 				{
 					title: "Ver Todos",
 					url: "/dashboard/lands",
@@ -118,7 +118,7 @@ const getNavigationData = (config: SidebarConfig) => {
 				title: "Blog",
 				url: "/dashboard/blog",
 				icon: FileTextIcon,
-				children: [
+				items: [
 					{
 						title: "Ver Artículos",
 						url: "/dashboard/blog",
@@ -325,9 +325,9 @@ export const UnifiedSidebar = memo(function UnifiedSidebar({
 		() => ({
 			name: user?.name || "Usuario",
 			email: user?.email || "usuario@brymar.com",
-			avatar: user?.image || "/avatars/default.jpg",
+			avatar: user?.avatar || "/avatars/default.jpg",
 		}),
-		[user?.name, user?.email, user?.image],
+		[user?.name, user?.email, user?.avatar],
 	);
 
 	return (

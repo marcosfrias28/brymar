@@ -23,7 +23,9 @@ export default function SyncRolePage() {
 	const handleUpdateRole = async () => {
 		setLoading(true);
 		try {
-			const result = await updateUserRole(userId, newRole);
+			// TODO: Implement updateUserRole function
+			// const result = await updateUserRole(userId, newRole);
+			const result = { success: false, error: "Function not implemented yet" };
 			setResult(result);
 
 			// Forzar refresh de la sesión después de actualizar
@@ -45,7 +47,9 @@ export default function SyncRolePage() {
 	const handleSyncRole = async () => {
 		setLoading(true);
 		try {
-			const result = await syncUserRoleFromDatabase(userId);
+			// TODO: Implement syncUserRoleFromDatabase function
+			// const result = await syncUserRoleFromDatabase(userId);
+			const result = { success: false, error: "Function not implemented yet" };
 			setResult(result);
 		} catch (error) {
 			setResult({

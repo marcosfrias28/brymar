@@ -70,13 +70,10 @@ export default function SettingsPage() {
 
 	const { user, loading: userLoading } = useUser();
 	const [updateState, updateUserFormAction] = useActionState(
-		async (_prevState: ActionState, formData: FormData) => {
-			return await updateUserProfileAction(formData);
-		},
+		updateUserProfileAction,
 		{
 			success: false,
 			error: undefined,
-			message: undefined,
 		},
 	);
 	const [formData, setFormData] = useState<{
@@ -99,14 +96,18 @@ export default function SettingsPage() {
 	// Update form data when user loads
 	useEffect(() => {
 		if (user) {
-			setFormData({ ...user });
+			setFormData({
+				name: user.name || "",
+				email: user.email || "",
+				role: user.role || "user",
+			});
 		}
 	}, [user]);
 
 	// Handle update action state
 	useEffect(() => {
 		if (updateState.success) {
-			toast.success(updateState.message || "Usuario actualizado");
+			toast.success("Usuario actualizado exitosamente");
 		} else if (updateState.error) {
 			toast.error(updateState.error);
 		}
@@ -191,13 +192,11 @@ export default function SettingsPage() {
 									<div className="flex items-center gap-4">
 										<Avatar className="h-20 w-20">
 											<AvatarImage
-												src={
-													user?.getProfile().getAvatar() || "/placeholder.svg"
-												}
-												alt={user?.getProfile().getFullName() || "Usuario"}
+												src={user?.avatar || "/placeholder.svg"}
+												alt={user?.name || "Usuario"}
 											/>
 											<AvatarFallback className="text-lg">
-												{(user?.getProfile().getFullName() || "Usuario")
+												{(user?.name || "Usuario")
 													.split(" ")
 													.map((n) => n[0])
 													.join("")}

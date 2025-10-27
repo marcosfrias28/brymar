@@ -220,7 +220,7 @@ export function useLandStats() {
 				throw new Error(result.error || "Failed to fetch land statistics");
 			}
 
-			const lands = result.data?.items;
+			const lands = result.data?.items || [];
 
 			// Calculate basic statistics
 			const stats = {

@@ -53,15 +53,6 @@ export function SystemHealthMonitor() {
 	const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 	const [autoRefresh, setAutoRefresh] = useState(true);
 
-	useEffect(() => {
-		fetchHealthData();
-
-		if (autoRefresh) {
-			const interval = setInterval(fetchHealthData, 30000); // Refresh every 30 seconds
-			return () => clearInterval(interval);
-		}
-	}, [autoRefresh, fetchHealthData]);
-
 	const fetchHealthData = async () => {
 		try {
 			setError(null);
@@ -123,6 +114,15 @@ export function SystemHealthMonitor() {
 			setLoading(false);
 		}
 	};
+
+	useEffect(() => {
+		fetchHealthData();
+
+		if (autoRefresh) {
+			const interval = setInterval(fetchHealthData, 30000); // Refresh every 30 seconds
+			return () => clearInterval(interval);
+		}
+	}, [autoRefresh, fetchHealthData]);
 
 	const calculateUptime = (errorRate: number): number => {
 		return Math.max(0, 100 - errorRate);

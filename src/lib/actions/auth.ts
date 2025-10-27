@@ -117,6 +117,10 @@ export async function verifyOTP(
 			userId: result.user.id,
 		});
 
+		// Revalidate profile page to show updated verification status
+		revalidatePath("/profile");
+		revalidatePath("/dashboard");
+
 		return {
 			success: true,
 			data: undefined,
@@ -323,10 +327,20 @@ export async function forgotPassword(
 
 		await logger.info("Password reset request", { email: input.email });
 
+		// Get the base URL from environment or headers
+		const headersList = await headers();
+		const host = headersList.get("host") || "localhost:3000";
+		const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+		const baseUrl = process.env.BETTER_AUTH_URL || `${protocol}://${host}`;
+		const callbackURL = `${baseUrl}/reset-password`;
+
 		// Use Better Auth to send password reset email
 		await auth.api.forgetPassword({
-			body: { email: input.email },
-			headers: await headers(),
+			body: { 
+				email: input.email,
+				redirectTo: callbackURL,
+			},
+			headers: headersList,
 		});
 
 		await logger.info("Password reset email sent", { email: input.email });
@@ -709,11 +723,12 @@ export async function signInAction(
 		// Redirect on success
 		redirect(redirectUrl);
 	} catch (error) {
-		await logger.error("Sign in error", error);
-
+		// Re-throw redirect errors immediately without logging
 		if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
-			throw error; // Re-throw redirect errors
+			throw error;
 		}
+
+		await logger.error("Sign in error", error);
 
 		return {
 			success: false,
@@ -801,11 +816,12 @@ export async function signUpAction(
 		// Redirect on success
 		redirect(redirectUrl);
 	} catch (error) {
-		await logger.error("Sign up error", error);
-
+		// Re-throw redirect errors immediately without logging
 		if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
-			throw error; // Re-throw redirect errors
+			throw error;
 		}
+
+		await logger.error("Sign up error", error);
 
 		return {
 			success: false,
@@ -824,20 +840,36 @@ export async function signOutAction() {
 	return result;
 }
 
-export async function forgotPasswordAction(formData: FormData) {
+export async function forgotPasswordAction(
+	prevState: ActionResult<void>,
+	formData: FormData,
+): Promise<ActionResult<void>> {
 	const email = formData.get("email") as string;
 	return forgotPassword({ email });
 }
 
-export async function resetPasswordAction(formData: FormData) {
+export async function resetPasswordAction(
+	prevState: ActionResult<void>,
+	formData: FormData,
+): Promise<ActionResult<void>> {
 	const token = formData.get("token") as string;
 	const password = formData.get("password") as string;
 	const confirmPassword = formData.get("confirmPassword") as string;
 
-	return resetPassword({ token, password, confirmPassword });
+	const result = await resetPassword({ token, password, confirmPassword });
+
+	// Redirect to sign-in page on success
+	if (result.success) {
+		redirect("/sign-in");
+	}
+
+	return result;
 }
 
-export async function updateUserProfileAction(formData: FormData) {
+export async function updateUserProfileAction(
+	prevState: ActionResult<User>,
+	formData: FormData,
+): Promise<ActionResult<User>> {
 	const id = formData.get("id") as string;
 	const name = formData.get("name") as string;
 	const email = formData.get("email") as string;

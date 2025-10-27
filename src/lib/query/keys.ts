@@ -11,7 +11,15 @@
 // Base query key types
 export type QueryKey = readonly unknown[];
 
-// Note: Sections and Contact Info are now static content, no longer using query keys
+// Contact Info query keys (placeholder)
+export const contactInfoKeys = {
+	all: ["contactInfo"] as const,
+	lists: () => [...contactInfoKeys.all, "lists"] as const,
+	list: (filters?: Record<string, any>) =>
+		[...contactInfoKeys.lists(), filters] as const,
+	details: () => [...contactInfoKeys.all, "details"] as const,
+	detail: (id: number) => [...contactInfoKeys.details(), id] as const,
+};
 
 // Properties query keys
 export const propertiesKeys = {
@@ -112,6 +120,7 @@ export const queryKeys = {
 	blog: blogKeys,
 	categories: categoriesKeys,
 	user: userKeys,
+	contactInfo: contactInfoKeys,
 } as const;
 
 // Type helpers for query keys (simplified)

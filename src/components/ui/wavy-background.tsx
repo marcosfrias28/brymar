@@ -86,21 +86,23 @@ export const WavyBackground = ({
 		}
 	};
 
-	let animationId: number;
+	const animationIdRef = useRef<number | undefined>(undefined);
 	const render = () => {
 		ctx.fillStyle = backgroundFill || "hsl(var(--background))";
 		ctx.globalAlpha = waveOpacity || 0.5;
 		ctx.fillRect(0, 0, w, h);
 		drawWave(5);
-		animationId = requestAnimationFrame(render);
+		animationIdRef.current = requestAnimationFrame(render);
 	};
 
 	useEffect(() => {
 		init();
 		return () => {
-			cancelAnimationFrame(animationId);
+			if (animationIdRef.current) {
+				cancelAnimationFrame(animationIdRef.current);
+			}
 		};
-	}, [animationId, init]);
+	}, [init]);
 
 	const [isSafari, setIsSafari] = useState(false);
 	useEffect(() => {

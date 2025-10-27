@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { searchPropertiesAction } from "@/lib/actions/property-actions";
+import { searchLandsAction } from "@/lib/actions/land-actions";
 
 export function SearchTest() {
 	const [propertyResult, setPropertyResult] = useState<any>(null);
@@ -23,7 +24,7 @@ export function SearchTest() {
 			formData.append("offset", "0");
 
 			console.log("🏠 Testing property search...");
-			const result = await searchPropertiesAction(formData);
+			const result = await searchPropertiesAction({ success: false, data: { properties: [] } }, formData);
 			console.log("🏠 Property search result:", result);
 			setPropertyResult(result);
 		} catch (error) {
@@ -50,7 +51,7 @@ export function SearchTest() {
 			formData.append("offset", "0");
 
 			console.log("🏞️ Testing land search...");
-			const result = await searchLandsAction(formData);
+			const result = await searchLandsAction({ success: false, data: { lands: [] } }, formData);
 			console.log("🏞️ Land search result:", result);
 			setLandResult(result);
 		} catch (error) {

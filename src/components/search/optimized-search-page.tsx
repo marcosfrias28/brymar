@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Building2, TreePine } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -120,39 +120,39 @@ export function OptimizedSearchPage() {
 
 	// Modern React 19 Actions with useActionState
 	const [propertyState, propertyAction, propertyPending] = useActionState(
-		async (_prevState: any, formData: FormData) => {
+		async (prevState: any, formData: FormData) => {
 			try {
-				const result = await searchPropertiesAction(formData);
-				return result.success
-					? { ...result.data, error: null }
-					: { properties: [], total: 0, error: result.error };
+				const result = await searchPropertiesAction(prevState, formData);
+				return result.success && result.data
+					? { properties: result.data.properties || [], total: 0, error: undefined }
+					: { properties: [], total: 0, error: result.message || "Error en la bÃºsqueda" };
 			} catch (_error) {
 				return {
 					properties: [],
 					total: 0,
-					error: "Error inesperado en la búsqueda",
+					error: "Error inesperado en la bÃºsqueda",
 				};
 			}
 		},
-		{ properties: [], total: 0, error: null },
+		{ properties: [], total: 0, error: undefined },
 	);
 
 	const [landState, landAction, landPending] = useActionState(
-		async (_prevState: any, formData: FormData) => {
+		async (prevState: any, formData: FormData) => {
 			try {
-				const result = await searchLandsAction(formData);
-				return result.success
-					? { ...result.data, error: null }
-					: { lands: [], total: 0, error: result.error };
+				const result = await searchLandsAction(prevState, formData);
+				return result.success && result.data
+					? { lands: result.data.lands || [], total: 0, error: undefined }
+					: { lands: [], total: 0, error: result.message || "Error en la bÃºsqueda" };
 			} catch (_error) {
 				return {
 					lands: [],
 					total: 0,
-					error: "Error inesperado en la búsqueda",
+					error: "Error inesperado en la bÃºsqueda",
 				};
 			}
 		},
-		{ lands: [], total: 0, error: null },
+		{ lands: [], total: 0, error: undefined },
 	);
 
 	// Optimistic updates for immediate UI feedback
@@ -333,13 +333,13 @@ export function OptimizedSearchPage() {
 	const shouldShowSkeleton =
 		isLoading &&
 		(searchType === "properties"
-			? !currentResults.properties?.length
-			: !currentResults.lands?.length);
+			? !(currentResults as any).properties?.length
+			: !(currentResults as any).lands?.length);
 
 	// Sort results based on sortBy
 	const sortedResults = React.useMemo(() => {
-		if (searchType === "properties" && currentResults.properties) {
-			const sorted = [...currentResults.properties];
+		if (searchType === "properties" && (currentResults as any).properties) {
+			const sorted = [...(currentResults as any).properties];
 
 			switch (sortBy) {
 				case "price-low":
@@ -356,8 +356,8 @@ export function OptimizedSearchPage() {
 							new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
 					);
 			}
-		} else if (searchType === "lands" && currentResults.lands) {
-			const sorted = [...currentResults.lands];
+		} else if (searchType === "lands" && (currentResults as any).lands) {
+			const sorted = [...(currentResults as any).lands];
 
 			switch (sortBy) {
 				case "price-low":
@@ -377,9 +377,14 @@ export function OptimizedSearchPage() {
 		}
 
 		return searchType === "properties"
-			? currentResults.properties || []
-			: currentResults.lands || [];
+			? (currentResults as any).properties || []
+			: (currentResults as any).lands || [];
 	}, [currentResults, sortBy, searchType]);
+
+	// Helper to get current results for map view
+	const mapResults = searchType === "properties"
+		? (currentResults as any).properties || []
+		: (currentResults as any).lands || [];
 
 	return (
 		<div className="h-dvh bg-background flex flex-col overflow-hidden">
@@ -394,7 +399,7 @@ export function OptimizedSearchPage() {
 				{/* Mobile Header with Tabs */}
 				<div className="flex-shrink-0 border-b bg-background">
 					<div className="p-2">
-						<h1 className="text-lg font-bold mb-2">Búsqueda Inmobiliaria</h1>
+						<h1 className="text-lg font-bold mb-2">BÃºsqueda Inmobiliaria</h1>
 						<Tabs
 							value={searchType}
 							onValueChange={(value) =>
@@ -486,8 +491,8 @@ export function OptimizedSearchPage() {
 						<SearchMapView
 							properties={
 								searchType === "properties"
-									? currentResults.properties || []
-									: currentResults.lands || []
+									? (currentResults as any).properties || []
+									: (currentResults as any).lands || []
 							}
 							className="h-full"
 							onViewChange={setView}
@@ -602,8 +607,8 @@ export function OptimizedSearchPage() {
 						<SearchMapView
 							properties={
 								searchType === "properties"
-									? currentResults.properties || []
-									: currentResults.lands || []
+									? (currentResults as any).properties || []
+									: (currentResults as any).lands || []
 							}
 							className="h-full"
 							onViewChange={setView}

@@ -14,7 +14,7 @@ import { extractValidationErrors, type FormState } from "@/lib/types/forms";
  * Create a new land using FormState pattern
  */
 export async function createLandAction(
-	_prevState: FormState<{ id: string }>,
+	prevState: FormState<{ id: string }>,
 	formData: FormData,
 ): Promise<FormState<{ id: string }>> {
 	try {
@@ -154,7 +154,7 @@ export async function createLandAction(
  * Update an existing land using FormState pattern
  */
 export async function updateLandAction(
-	_prevState: FormState<{ id: string }>,
+	prevState: FormState<{ id: string }>,
 	formData: FormData,
 ): Promise<FormState<{ id: string }>> {
 	try {
@@ -323,7 +323,7 @@ export async function updateLandAction(
  * Search lands action for useActionState
  */
 export async function searchLandsAction(
-	_prevState: FormState<{ lands: any[] }>,
+	prevState: FormState<{ lands: any[] }>,
 	formData: FormData,
 ): Promise<FormState<{ lands: any[] }>> {
 	try {

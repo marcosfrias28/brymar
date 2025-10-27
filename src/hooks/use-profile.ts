@@ -92,28 +92,11 @@ export function useProfile() {
 				phone: user.phone || "",
 				bio: user.bio || "",
 				location: user.location || "",
-				website: "",
-				image: user.image || "",
+				image: user.avatar || "",
 				role: user.role || "",
-				emailVerified: user.emailVerified || false,
+				emailVerified: !!user.emailVerified,
 				createdAt: user.createdAt || null,
 				updatedAt: user.updatedAt || null,
-				preferences: {
-					notifications: {
-						email: true,
-						push: true,
-						marketing: false,
-					},
-					privacy: {
-						profileVisible: true,
-						showEmail: false,
-						showPhone: false,
-					},
-					display: {
-						theme: "system" as const,
-						language: "es",
-					},
-				},
 			});
 		} else {
 			setProfile(null);

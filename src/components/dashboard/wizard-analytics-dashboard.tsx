@@ -101,10 +101,6 @@ export function WizardAnalyticsDashboard() {
 	const [error, setError] = useState<string | null>(null);
 	const [timeRange, setTimeRange] = useState<"24h" | "7d" | "30d">("24h");
 
-	useEffect(() => {
-		fetchAnalytics();
-	}, [fetchAnalytics]);
-
 	const fetchAnalytics = async () => {
 		try {
 			setLoading(true);
@@ -147,6 +143,10 @@ export function WizardAnalyticsDashboard() {
 			setLoading(false);
 		}
 	};
+
+	useEffect(() => {
+		fetchAnalytics();
+	}, [fetchAnalytics]);
 
 	const getStatusColor = (status: string) => {
 		switch (status) {

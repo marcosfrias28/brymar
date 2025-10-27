@@ -9,7 +9,7 @@ import {
 	Store,
 	TreePine,
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -187,7 +187,7 @@ export function PropertyGeneralStep({
 	};
 
 	// Update parent when form data changes
-	React.useEffect(() => {
+	useEffect(() => {
 		onChange({ ...watchedValues, characteristics: selectedCharacteristics });
 	}, [watchedValues, selectedCharacteristics, onChange]);
 

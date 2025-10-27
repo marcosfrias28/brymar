@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, FileText, Sparkles } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Badge } from "@/components/ui/badge";
@@ -89,7 +89,7 @@ export function BlogContentStep({
 	const watchedValues = watch();
 
 	// Calculate word count and reading time
-	React.useEffect(() => {
+	useEffect(() => {
 		const content = watchedValues.content || "";
 		const words = content.split(/\s+/).filter((word) => word.length > 0).length;
 		setWordCount(words);
@@ -159,7 +159,7 @@ export function BlogContentStep({
 	}, [watchedValues, generateAI, setValue]);
 
 	// Update parent when form data changes
-	React.useEffect(() => {
+	useEffect(() => {
 		onChange(watchedValues);
 	}, [watchedValues, onChange]);
 

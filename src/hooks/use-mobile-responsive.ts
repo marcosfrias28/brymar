@@ -186,7 +186,7 @@ export function useMobileKeyboard() {
 		if (window.visualViewport) {
 			const handleViewportChange = () => {
 				const heightDifference =
-					window.innerHeight - window.visualViewport?.height;
+					window.innerHeight - (window.visualViewport?.height || window.innerHeight);
 				const isOpen = heightDifference > 150;
 
 				setIsKeyboardOpen(isOpen);

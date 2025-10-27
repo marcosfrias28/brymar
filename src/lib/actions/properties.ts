@@ -132,7 +132,7 @@ export async function updateProperty(
  * Update property action for useActionState
  */
 export async function updatePropertyAction(
-	_prevState: UpdatePropertyResult,
+	prevState: UpdatePropertyResult,
 	formData: FormData,
 ): Promise<UpdatePropertyResult> {
 	try {

@@ -16,16 +16,13 @@ const ForgotPasswordPage = () => {
 		</div>
 	);
 
-	// Wrap the action to match the expected signature
-	const wrappedAction = async (_prevState: unknown, formData: FormData) => {
-		return await forgotPasswordAction(formData);
-	};
+	// Use the action directly since it now has the correct signature
 
 	return (
 		<AuthFormWrapper
 			title="Recuperar Contraseña"
 			subtitle="Ingresa tu correo para recibir un enlace de recuperación"
-			action={wrappedAction}
+			action={forgotPasswordAction}
 			fields={[emailField]}
 			submitText="Enviar enlace"
 			loadingText="Enviando..."

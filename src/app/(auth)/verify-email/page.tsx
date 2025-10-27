@@ -85,7 +85,7 @@ const VerifyEmailPage = () => {
 	};
 
 	// Función personalizada para manejar la verificación usando el hook
-	const handleVerifyOTP = async (_prevState: unknown, formData: FormData) => {
+	const handleVerifyOTP = async (prevState: unknown, formData: FormData) => {
 		if (!email) {
 			return { error: "Email no disponible", success: false };
 		}

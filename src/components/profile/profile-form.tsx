@@ -32,7 +32,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useUser } from "@/hooks/use-user";
-import { cn } from "@/lib/utils";
+import { useFormChanges } from "@/hooks/use-form-changes";
 import { getUserPreferences } from "@/lib/utils/user-helpers";
 import { getUserProfile, updateProfileAction } from "@/lib/actions/profile-actions";
 import { AvatarUpload } from "./avatar-upload";
@@ -83,6 +83,12 @@ export function ProfileForm() {
 	// Use useActionState for form handling
 	const [state, formAction, isPending] = useActionState(updateProfileAction, initialState);
 
+	// Use form changes detection hook
+	const { formRef, hasChanges, resetChanges, notifyChange } = useFormChanges({
+		debounceMs: 150,
+		autoReset: true,
+	});
+
 	// Get user preferences using helper function
 	const preferences = user ? getUserPreferences(user) : null;
 
@@ -102,8 +108,10 @@ export function ProfileForm() {
 			queryClient.removeQueries({ queryKey: ["auth", "currentUser"] });
 			// Force refetch immediately
 			queryClient.refetchQueries({ queryKey: ["auth", "currentUser"] });
+			// Reset changes state after successful save
+			resetChanges();
 		}
-	}, [state, queryClient]);
+	}, [state, queryClient, resetChanges]);
 
 	const formatDate = (date: string | Date | null | undefined) => {
 		if (!date) return "No especificado";
@@ -140,19 +148,34 @@ export function ProfileForm() {
 	}
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-6 relative">
+
 			<Card>
+
 				<CardContent className="pt-6">
+
 					<div className="flex items-center justify-between">
 						<div className="flex items-center space-x-4">
-							<Avatar className="h-20 w-20">
-								<AvatarImage src={user.avatar || ""} alt={user.name || ""} />
-								<AvatarFallback className="text-lg">
-									{user.name ? user.name.slice(0, 2).toUpperCase() : "U"}
-								</AvatarFallback>
-							</Avatar>
+							<div className="relative">
+								<Avatar className="h-20 w-20">
+									<AvatarImage src={user.avatar || ""} alt={user.name || ""} />
+									<AvatarFallback className="text-lg">
+										{user.name ? user.name.slice(0, 2).toUpperCase() : "U"}
+									</AvatarFallback>
+								</Avatar>
+								<div className="absolute -bottom-2 -right-2">
+									<AvatarUpload
+										label=""
+										name="avatar"
+										defaultValue={user?.avatar || ""}
+										error={state.error}
+										compact={true}
+										onFileChange={() => notifyChange()}
+									/>
+								</div>
+							</div>
 							<div>
-								<h1 className="text-2xl font-bold text-gray-900">
+								<h1 className="text-2xl font-bold text-foreground">
 									{user.name}
 								</h1>
 								<p className="text-gray-600">{user.email}</p>
@@ -176,6 +199,20 @@ export function ProfileForm() {
 								</div>
 							</div>
 						</div>
+						<div className="flex justify-end pt-6">
+							<Button
+								type="submit"
+								disabled={isPending || !hasChanges}
+								className="flex items-center gap-2"
+							>
+								{isPending ? (
+									<Loader2 className="h-4 w-4 animate-spin" />
+								) : (
+									<Save className="h-4 w-4" />
+								)}
+								{isPending ? "Guardando..." : hasChanges ? "Guardar Cambios" : "Sin Cambios"}
+							</Button>
+						</div>
 					</div>
 				</CardContent>
 			</Card>
@@ -196,7 +233,7 @@ export function ProfileForm() {
 				</Card>
 			)}
 
-			<form id="profile-form" action={formAction} className="space-y-6">
+			<form ref={formRef} id="profile-form" action={formAction} className="space-y-6">
 				<ProfileSection
 					title="Información Personal"
 					description="Datos básicos de tu perfil"
@@ -227,14 +264,7 @@ export function ProfileForm() {
 							/>
 						</div>
 
-						<div className="space-y-2 md:col-span-2">
-							<AvatarUpload
-								label="Avatar"
-								name="avatar"
-								defaultValue={user?.avatar || ""}
-								error={state.error}
-							/>
-						</div>
+
 					</div>
 				</ProfileSection>
 
@@ -546,7 +576,7 @@ export function ProfileForm() {
 				<div className="flex justify-end pt-6">
 					<Button
 						type="submit"
-						disabled={isPending}
+						disabled={isPending || !hasChanges}
 						className="flex items-center gap-2"
 					>
 						{isPending ? (
@@ -554,7 +584,7 @@ export function ProfileForm() {
 						) : (
 							<Save className="h-4 w-4" />
 						)}
-						{isPending ? "Guardando..." : "Guardar Cambios"}
+						{isPending ? "Guardando..." : hasChanges ? "Guardar Cambios" : "Sin Cambios"}
 					</Button>
 				</div>
 			</form>

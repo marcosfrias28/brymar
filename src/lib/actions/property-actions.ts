@@ -14,7 +14,7 @@ import { extractValidationErrors, type FormState } from "@/lib/types/forms";
  * Create a new property using FormState pattern
  */
 export async function createPropertyAction(
-	_prevState: FormState<{ id: string }>,
+	prevState: FormState<{ id: string }>,
 	formData: FormData,
 ): Promise<FormState<{ id: string }>> {
 	try {
@@ -140,7 +140,7 @@ export async function getFeaturedProperties(limit = 6) {
  * Search properties action for useActionState
  */
 export async function searchPropertiesAction(
-	_prevState: FormState<{ properties: any[] }>,
+	prevState: FormState<{ properties: any[] }>,
 	formData: FormData,
 ): Promise<FormState<{ properties: any[] }>> {
 	try {

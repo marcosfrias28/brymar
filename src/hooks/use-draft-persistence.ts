@@ -1,7 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ClientDraftManager } from "@/lib/utils/draft-management";
+// import { createDraftManager } from "@/lib/utils/draft-management";
+
+// Placeholder ClientDraftManager since draft functionality is disabled
+const ClientDraftManager = {
+	hasDraft: (type: any, userId: any, draftId: any) => false,
+	loadDraft: (type: any, userId: any, draftId: any) => null,
+	saveDraft: (type: any, userId: any, data: any, draftId?: any) => {},
+	deleteDraft: (type: any, userId: any, draftId: any) => {},
+	clearExpiredDrafts: () => {},
+};
 
 interface UseDraftPersistenceOptions {
 	type: "property" | "land" | "blog";
@@ -44,11 +53,11 @@ export function useDraftPersistence(options: UseDraftPersistenceOptions) {
 			const hasLocal = ClientDraftManager.hasDraft(type, userId, draftId);
 			if (hasLocal) {
 				const localData = ClientDraftManager.loadDraft(type, userId, draftId);
-				if (localData) {
+				if (localData && typeof localData === 'object' && 'timestamp' in localData) {
 					setState((prev) => ({
 						...prev,
 						hasLocalDraft: true,
-						localDraftTimestamp: new Date(localData.timestamp || Date.now()),
+						localDraftTimestamp: new Date((localData as any).timestamp || Date.now()),
 					}));
 				}
 			}

@@ -15,7 +15,7 @@ import { calculateReadTime, generateSlug } from "@/lib/utils";
  * Create a new blog post using FormState pattern
  */
 export async function createBlogPostAction(
-	_prevState: FormState<{ id: string }>,
+	prevState: FormState<{ id: string }>,
 	formData: FormData,
 ): Promise<FormState<{ id: string }>> {
 	try {
@@ -130,7 +130,7 @@ export async function createBlogPostAction(
  * Update an existing blog post using FormState pattern
  */
 export async function updateBlogPostAction(
-	_prevState: FormState<{ id: string }>,
+	prevState: FormState<{ id: string }>,
 	formData: FormData,
 ): Promise<FormState<{ id: string }>> {
 	try {

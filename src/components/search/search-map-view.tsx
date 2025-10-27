@@ -288,8 +288,8 @@ export function SearchMapView({
 							<Marker
 								key={property.id}
 								position={[
-									property.coordinates?.lat,
-									property.coordinates?.lng,
+									property.coordinates?.lat || 0,
+									property.coordinates?.lng || 0,
 								]}
 							>
 								<Popup>

@@ -50,10 +50,10 @@ export async function GET(request: NextRequest) {
 
 		await logger.info("Activities API success", {
 			userId: session.user.id,
-			count: result.data.activities.length,
+			count: result.data?.activities?.length || 0,
 		});
 
-		return NextResponse.json(result.data);
+		return NextResponse.json(result.data || { activities: [] });
 	} catch (error) {
 		await logger.error("Activities API error", error);
 		return NextResponse.json(

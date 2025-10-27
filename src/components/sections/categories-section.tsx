@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 // Using static categories instead of database categories
-interface Category {
+export interface Category {
 	id: number;
 	name: string;
 	slug: string;
@@ -191,7 +191,7 @@ export function CategoriesSection({ categories = [] }: CategoriesSectionProps) {
 						: "lg:col-span-3 col-span-6";
 
 					return (
-						<div key={category.id} className={cn(colSpan, "w-full")}>
+						<div key={category.id} className={cn(colSpan, "w-full bg-background")}>
 							<Link href={category.href} className="w-full">
 								<div
 									style={{
@@ -207,7 +207,7 @@ export function CategoriesSection({ categories = [] }: CategoriesSectionProps) {
 									/>
 									<div className="absolute w-full h-full bg-gradient-to-b from-black/0 to-black/80 top-full flex flex-col justify-between pl-10 pb-10 group-hover:top-0 transition-all duration-500">
 										<div className="flex justify-end mt-6 mr-6">
-											<div className="bg-white text-dark rounded-full w-fit p-4">
+											<div className="bg-background text-foreground rounded-full w-fit p-4">
 												{(() => {
 													const IconComponent =
 														categoryIcons[category.name] ||

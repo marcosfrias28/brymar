@@ -275,7 +275,7 @@ export default function AdminPage() {
 				</Card>
 
 				{/* Quick Actions & Recent Activity */}
-				<div className="grid gap-6 md:grid-cols-2">
+				<div className="grid gap-6 grid-cols-2">
 					<Card>
 						<CardHeader>
 							<CardTitle>Acciones Rápidas</CardTitle>

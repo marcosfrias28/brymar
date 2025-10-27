@@ -1,12 +1,35 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import {
-	createContactInfo,
-	deleteContactInfo,
-	updateContactInfo,
-} from "@/lib/actions/sections-actions";
-import type { ContactInfo } from "@/lib/db/schema";
+// import {
+// 	createContactInfo,
+// 	deleteContactInfo,
+// 	updateContactInfo,
+// } from "@/lib/actions/sections-actions"; // TODO: Create sections-actions
+
+// Placeholder functions until sections-actions is implemented
+const createContactInfo = async (formData: FormData) => {
+	console.warn("createContactInfo not implemented");
+	return { success: false, error: "Not implemented", data: null };
+};
+
+const updateContactInfo = async (formData: FormData) => {
+	console.warn("updateContactInfo not implemented");
+	return { success: false, error: "Not implemented", data: null };
+};
+
+const deleteContactInfo = async (formData: FormData) => {
+	console.warn("deleteContactInfo not implemented");
+	return { success: false, error: "Not implemented", data: null };
+};
+// import type { ContactInfo } from "@/lib/db/schema"; // TODO: Create ContactInfo type
+type ContactInfo = {
+	id: number;
+	type: string;
+	label: string;
+	value: string;
+	icon?: string;
+};
 import { queryKeys } from "@/lib/query/keys";
 import {
 	useCreateMutation,

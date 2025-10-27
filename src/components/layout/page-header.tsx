@@ -8,6 +8,10 @@ interface PageHeaderProps {
 	description?: string;
 	children?: ReactNode;
 	className?: string;
+	breadcrumbs?: any;
+	actions?: ReactNode;
+	showSearch?: boolean;
+	searchPlaceholder?: string;
 }
 
 export function PageHeader({
@@ -15,6 +19,10 @@ export function PageHeader({
 	description,
 	children,
 	className,
+	breadcrumbs,
+	actions,
+	showSearch,
+	searchPlaceholder,
 }: PageHeaderProps) {
 	return (
 		<div className={cn("flex flex-col space-y-4 pb-6", className)}>

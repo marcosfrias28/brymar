@@ -53,62 +53,11 @@ export default function NewPropertyPage() {
 		loadDraftData();
 	}, [draftId, user?.id, router]);
 
-	const handleComplete = async (data: PropertyWizardData) => {
-		if (!user?.id) {
-			toast.error("Usuario no autenticado");
-			return;
-		}
-
-		try {
-			// Convert wizard data to FormData for DDD server action
-			const formData = new FormData();
-			formData.append("title", data.title || "");
-			formData.append("description", data.description || "");
-			formData.append("price", data.price?.toString() || "0");
-			formData.append("propertyType", data.propertyType || "residential");
-			formData.append("status", "published");
-
-			// Add address fields
-			if (data.address) {
-				formData.append("address.street", data.address.street || "");
-				formData.append("address.city", data.address.city || "");
-				formData.append("address.province", data.address.province || "");
-				formData.append(
-					"address.country",
-					data.address.country || "Dominican Republic",
-				);
-				formData.append("address.postalCode", data.address.postalCode || "");
-			}
-
-			// Add features
-			formData.append("features.bedrooms", data.bedrooms?.toString() || "0");
-			formData.append("features.bathrooms", data.bathrooms?.toString() || "0");
-			formData.append("features.area", data.surface?.toString() || "0");
-			if (data.characteristics) {
-				data.characteristics.forEach((characteristic, index) => {
-					formData.append(`features.amenities[${index}]`, characteristic.name);
-				});
-			}
-
-			// Add images
-			if (data.images) {
-				data.images.forEach((image, index) => {
-					formData.append(`images[${index}]`, image.url);
-				});
-			}
-
-			const result = await createProperty(formData);
-
-			if (result.success) {
-				toast.success("¡Propiedad publicada exitosamente!");
-				router.push(`/dashboard/properties/${result.data?.id}`);
-			} else {
-				toast.error(result.error || "Error al publicar la propiedad");
-			}
-		} catch (error) {
-			console.error("Error publishing property:", error);
-			toast.error("Error inesperado al publicar la propiedad");
-		}
+	const handleComplete = async () => {
+		// Property creation is handled by the PropertyWizard component
+		// Just navigate to the properties list
+		toast.success("¡Propiedad publicada exitosamente!");
+		router.push("/dashboard/properties");
 	};
 
 	const handleSaveDraft = async (
@@ -197,7 +146,6 @@ export default function NewPropertyPage() {
 						initialData={initialData}
 						draftId={draftId || undefined}
 						onComplete={handleComplete}
-						onSaveDraft={handleSaveDraft}
 					/>
 				</div>
 			</DashboardPageLayout>

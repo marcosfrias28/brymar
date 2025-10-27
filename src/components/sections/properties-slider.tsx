@@ -18,7 +18,7 @@ gsap.registerPlugin(ScrollTrigger);
 interface PropertyCardProps {
   property: any;
   index: number;
-  imageRef: React.RefObject<HTMLImageElement>;
+  imageRef: React.RefObject<HTMLImageElement | null>;
 }
 
 function PropertyCard({ property, index, imageRef }: PropertyCardProps) {
@@ -105,7 +105,7 @@ export function PropertiesSlider() {
   const { data: propertiesResult, isLoading, error } = useFeaturedProperties();
   
   // Create refs for each property image
-  const imageRefs = Array.from({ length: 6 }, () => useRef<HTMLImageElement>(null));
+  const imageRefs = Array.from({ length: 6 }, () => useRef<HTMLImageElement | null>(null));
 
   useGSAP(() => {
     if (!titleRef.current || !sectionRef.current) return;
@@ -190,7 +190,7 @@ export function PropertiesSlider() {
     );
   }
 
-  const properties = propertiesResult?.data || [];
+  const properties = propertiesResult?.data?.items || [];
 
   return (
     <section

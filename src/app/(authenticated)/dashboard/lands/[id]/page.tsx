@@ -227,7 +227,7 @@ export default function LandDetailPage() {
 						</Card>
 
 						{/* Features */}
-						{land.features.length > 0 && (
+						{land.features && Object.keys(land.features).length > 0 && (
 							<Card
 								className={cn(
 									"border-blackCoral/20 shadow-lg transition-all duration-200",
@@ -241,13 +241,13 @@ export default function LandDetailPage() {
 								</CardHeader>
 								<CardContent>
 									<div className="flex flex-wrap gap-2">
-										{land.features.map((feature) => (
+										{Object.entries(land.features).map(([key, value]) => (
 											<Badge
-												key={feature}
+												key={key}
 												variant="secondary"
 												className={badgeVariants.secondarySubtle}
 											>
-												{feature}
+												{typeof value === 'string' ? value : key}
 											</Badge>
 										))}
 									</div>
@@ -274,8 +274,8 @@ export default function LandDetailPage() {
 								<div className="text-center">
 									<div className="text-3xl font-bold text-arsenic">
 										{formatPrice(
-											land.getPrice().value,
-											land.getPrice().currency,
+											land.price,
+											land.currency || "USD",
 										)}
 									</div>
 									<div className="text-sm text-blackCoral/70">
@@ -292,7 +292,7 @@ export default function LandDetailPage() {
 											<span className="text-sm">Área</span>
 										</div>
 										<span className="font-medium text-arsenic">
-											{land.getArea().value.toLocaleString()} m²
+											{land.area?.toLocaleString() || 0} m²
 										</span>
 									</div>
 
@@ -327,7 +327,7 @@ export default function LandDetailPage() {
 								<div className="flex items-start gap-2">
 									<MapPin className="h-4 w-4 text-blackCoral mt-1" />
 									<span className="text-sm text-blackCoral">
-										{land.getLocation().value}
+										{land.location || "Ubicación no especificada"}
 									</span>
 								</div>
 							</CardContent>
@@ -345,14 +345,14 @@ export default function LandDetailPage() {
 							</CardHeader>
 							<CardContent>
 								<Badge
-									variant={land.isActive ? "default" : "secondary"}
+									variant={land.status === "available" ? "default" : "secondary"}
 									className={
-										land.isActive
+										land.status === "available"
 											? "bg-green-100 text-green-800"
 											: badgeVariants.secondary
 									}
 								>
-									{land.isActive ? "Activo" : "Inactivo"}
+									{land.status === "available" ? "Disponible" : "No Disponible"}
 								</Badge>
 							</CardContent>
 						</Card>

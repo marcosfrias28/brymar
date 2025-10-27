@@ -1,7 +1,7 @@
-import type { PropertySearchResult } from "@/lib/types/properties";
+import type { Property } from "@/lib/types/properties";
 
 interface PropertyMapProps {
-	properties: PropertySearchResult[];
+	properties: Property[];
 }
 
 export function PropertyMap({ properties }: PropertyMapProps) {

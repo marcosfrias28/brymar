@@ -180,7 +180,7 @@ export function LandList({
 			{/* Empty State */}
 			{!isLoading && lands.length === 0 && (
 				<LandEmptyState
-					hasFilters={searchQuery || Object.keys(filters).length > 0}
+					hasFilters={!!searchQuery || Object.keys(filters).length > 0}
 					showAddButton={showAddButton}
 				/>
 			)}

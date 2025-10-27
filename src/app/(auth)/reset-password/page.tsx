@@ -36,16 +36,13 @@ const ResetPasswordPage = () => {
 		</div>
 	);
 
-	// Wrap the action to match the expected signature
-	const wrappedAction = async (_prevState: unknown, formData: FormData) => {
-		return await resetPasswordAction(formData);
-	};
+	// Use the action directly since it now has the correct signature
 
 	return (
 		<AuthFormWrapper
 			title="Restablecer Contraseña"
 			subtitle="Ingresa tu nueva contraseña"
-			action={wrappedAction}
+			action={resetPasswordAction}
 			fields={[passwordField, confirmPasswordField]}
 			submitText="Restablecer Contraseña"
 			loadingText="Restableciendo..."
