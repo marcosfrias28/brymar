@@ -32,9 +32,9 @@ export async function generateAIContent(): Promise<WizardFallbackResult<{ conten
     return { success: false, error: "AI generation not available" };
 }
 
-export async function getWizardDrafts(): Promise<WizardFallbackResult<{ drafts: any[] }>> {
-    // Return empty list to keep dashboard working without 500
-    return { success: true, data: { drafts: [] } };
+export async function getWizardDrafts(): Promise<WizardFallbackResult<any[]>> {
+    // Return empty array so hooks/components can safely call array methods
+    return { success: true, data: [] };
 }
 
 export async function loadWizardDraft(): Promise<WizardFallbackResult<{ draft?: Record<string, any> }>> {
