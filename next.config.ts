@@ -1,13 +1,9 @@
 import type { NextConfig } from "next";
-import path from "path";
 
 const nextConfig: NextConfig = {
   // Configure Next.js to use src directory structure
   pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
 
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
 
   // Ensure environment variables are available
   env: {
@@ -18,32 +14,29 @@ const nextConfig: NextConfig = {
 
   images: {
     unoptimized: true,
-    domains: ['localhost'],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: '*.public.blob.vercel-storage.com',
       },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
     ],
   },
 
+  // React Compiler moved out of experimental in Next.js 16
+  reactCompiler: false,
+
   experimental: {
-    reactCompiler: false,
     serverActions: {
       bodySizeLimit: '5mb',
     },
   },
 
-  // Configure webpack to handle the new structure
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // Add alias for cleaner imports
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@': path.resolve(__dirname, 'src'),
-    };
-
-    return config;
-  },
+  // Add empty Turbopack config to silence error under Next.js 16
+  turbopack: {},
 };
 
 export default nextConfig;
