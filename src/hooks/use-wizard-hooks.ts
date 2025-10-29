@@ -30,7 +30,7 @@ export function useWizardDrafts(type?: WizardType) {
 				return { data: [] };
 			}
 		},
-		select: (data) => data.data || [],
+    select: (data) => (Array.isArray((data as any)?.data) ? (data as any).data : []),
 		staleTime: 5 * 60 * 1000, // 5 minutes
 		gcTime: 10 * 60 * 1000, // 10 minutes
 	});
