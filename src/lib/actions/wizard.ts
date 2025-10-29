@@ -1,54 +1,42 @@
 "use server";
 
-// TEMPORARILY DISABLED - wizard tables were removed from schema
-// TODO: Re-implement wizard functionality with new architecture
+// TEMP: Safe fallbacks while wizard persistence is being rebuilt
 
-/*
-All wizard functionality has been temporarily disabled because the wizard tables
-were removed from the database schema. This needs to be re-implemented with a
-new architecture that doesn't rely on separate wizard tables.
+type WizardFallbackResult<T = any> = {
+    success: boolean;
+    data?: T;
+    error?: string;
+};
 
-The following functions were available:
-- saveWizardDraft
-- createWizardDraft  
-- getWizardDraft
-- deleteWizardDraft
-- publishWizard
-- generateAIContent
-
-These should be re-implemented using the existing properties, lands, and blog tables
-directly, or a new simplified wizard approach.
-*/
-
-// Placeholder exports to prevent import errors
-export async function saveWizardDraft(): Promise<any> {
-	throw new Error("Wizard functionality temporarily disabled");
+export async function saveWizardDraft(): Promise<WizardFallbackResult<{ draftId?: string }>> {
+    return { success: false, error: "Wizard draft save not available" };
 }
 
-export async function createWizardDraft(): Promise<any> {
-	throw new Error("Wizard functionality temporarily disabled");
+export async function createWizardDraft(): Promise<WizardFallbackResult<{ draftId?: string }>> {
+    return { success: false, error: "Wizard draft creation not available" };
 }
 
-export async function getWizardDraft(): Promise<any> {
-	throw new Error("Wizard functionality temporarily disabled");
+export async function getWizardDraft(): Promise<WizardFallbackResult<{ draft?: Record<string, any> }>> {
+    return { success: false, error: "Wizard draft not found" };
 }
 
-export async function deleteWizardDraft(): Promise<any> {
-	throw new Error("Wizard functionality temporarily disabled");
+export async function deleteWizardDraft(): Promise<WizardFallbackResult<void>> {
+    return { success: false, error: "Wizard draft deletion not available" };
 }
 
-export async function publishWizard(): Promise<any> {
-	throw new Error("Wizard functionality temporarily disabled");
+export async function publishWizard(): Promise<WizardFallbackResult<{ id?: string }>> {
+    return { success: false, error: "Wizard publish not available" };
 }
 
-export async function generateAIContent(): Promise<any> {
-	throw new Error("Wizard functionality temporarily disabled");
+export async function generateAIContent(): Promise<WizardFallbackResult<{ content?: string }>> {
+    return { success: false, error: "AI generation not available" };
 }
 
-export async function getWizardDrafts(): Promise<any> {
-	throw new Error("Wizard functionality temporarily disabled");
+export async function getWizardDrafts(): Promise<WizardFallbackResult<{ drafts: any[] }>> {
+    // Return empty list to keep dashboard working without 500
+    return { success: true, data: { drafts: [] } };
 }
 
-export async function loadWizardDraft(): Promise<any> {
-	throw new Error("Wizard functionality temporarily disabled");
+export async function loadWizardDraft(): Promise<WizardFallbackResult<{ draft?: Record<string, any> }>> {
+    return { success: false, error: "No draft available" };
 }
