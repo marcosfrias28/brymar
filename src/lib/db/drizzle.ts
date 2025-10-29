@@ -1,36 +1,44 @@
-import { createPool, sql } from "@vercel/postgres";
+import { createPool, createClient, sql } from "@vercel/postgres";
 import { drizzle } from "drizzle-orm/vercel-postgres";
 import * as schema from "./schema";
 
-// Verificar que tenemos las variables de entorno necesarias
-const connectionString =
-	process.env.POSTGRES_PRISMA_URL ||
-	process.env.POSTGRES_URL_NON_POOLING ||
-	process.env.POSTGRES_URL;
+// Detección robusta de pooled/direct
+const prismaUrl = process.env.POSTGRES_PRISMA_URL;
+const pooledUrl = process.env.POSTGRES_URL;
+const directUrl = process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL_NO_SSL;
 
-if (!connectionString) {
-	console.error("No PostgreSQL connection string found");
-	console.error(
-		"Available env vars:",
-		Object.keys(process.env).filter((key) => key.includes("POSTGRES")),
-	);
-	throw new Error(
-		"POSTGRES_PRISMA_URL, POSTGRES_URL_NON_POOLING or POSTGRES_URL environment variable is required",
-	);
+function isPooled(url?: string | null): boolean {
+    if (!url) return false;
+    return /pooler/i.test(url) || /pgbouncer=true/i.test(url);
 }
 
-console.log("Using pooled connection:", !!process.env.POSTGRES_PRISMA_URL);
-console.log(
-	"Connection type:",
-	process.env.POSTGRES_PRISMA_URL ? "pooled" : "direct",
-);
+let client:
+    | ReturnType<typeof createPool>
+    | ReturnType<typeof createClient>
+    | typeof sql
+    | null = null;
 
-// Usar el cliente correcto según el tipo de conexión
-const db = process.env.POSTGRES_PRISMA_URL
-	? drizzle(createPool({ connectionString: process.env.POSTGRES_PRISMA_URL }), {
-			schema,
-		})
-	: drizzle(sql, { schema });
+if (prismaUrl) {
+    client = createPool({ connectionString: prismaUrl });
+    console.log("DB(drizzle): using pooled connection via POSTGRES_PRISMA_URL");
+} else if (directUrl) {
+    client = createClient({ connectionString: directUrl });
+    console.log("DB(drizzle): using direct connection via POSTGRES_URL_NON_POOLING/NO_SSL");
+} else if (pooledUrl) {
+    if (isPooled(pooledUrl)) {
+        client = createPool({ connectionString: pooledUrl });
+        console.log("DB(drizzle): using pooled connection via POSTGRES_URL");
+    } else {
+        client = createClient({ connectionString: pooledUrl });
+        console.log("DB(drizzle): using direct connection via POSTGRES_URL");
+    }
+} else {
+    // Fallback to env-based sql if nothing else is set
+    client = sql;
+    console.log("DB(drizzle): fallback to sql env client");
+}
+
+const db = drizzle(client as any, { schema });
 
 export default db;
 
