@@ -23,17 +23,12 @@ const nextConfig: NextConfig = {
 		],
 	},
 
-	// React Compiler moved out of experimental in Next.js 16
-	reactCompiler: false,
-
 	experimental: {
 		serverActions: {
 			bodySizeLimit: "5mb",
 		},
 	},
 
-	// Add empty Turbopack config to silence error under Next.js 16
-	turbopack: {},
 };
 
 export default nextConfig;

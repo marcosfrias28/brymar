@@ -20,8 +20,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getStatsAdapter } from "@/lib/adapters/stats-adapters";
 
 export default function ProfilePage() {
-	const _router = useRouter();
-
 	const breadcrumbs = [
 		{ label: "Dashboard", href: "/dashboard", icon: Home },
 		{ label: "Mi Perfil", icon: User },

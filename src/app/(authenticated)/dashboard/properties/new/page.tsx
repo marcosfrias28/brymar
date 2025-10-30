@@ -5,9 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { RouteGuard } from "@/components/auth/route-guard";
+import { PropertyForm } from "@/components/forms/property-form";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { Button } from "@/components/ui/button";
-import { PropertyWizard } from "@/components/wizard";
 import { useUser } from "@/hooks/use-user";
 import {
 	loadPropertyForWizard,
@@ -56,17 +56,7 @@ export default function NewPropertyPage() {
 		loadDraftData();
 	}, [draftId, user?.id, router]);
 
-	const handleComplete = async () => {
-		// Property creation is handled by the PropertyWizard component
-		// Just navigate to the properties list
-		toast.success("¡Propiedad publicada exitosamente!");
-		router.push("/dashboard/properties");
-	};
-
-	const _handleSaveDraft = async (
-		data: Partial<PropertyWizardData>,
-		_currentStep: string
-	): Promise<string> => {
+	const handleSubmit = async (data: any) => {
 		if (!user?.id) {
 			toast.error("Usuario no autenticado");
 			throw new Error("Usuario no autenticado");
@@ -77,10 +67,9 @@ export default function NewPropertyPage() {
 				userId: user.id,
 				data: {
 					...data,
-					// Garantisce compatibilità con l’enum centralizzato
-					propertyType: (data.propertyType as PropertyType) || undefined,
-					status: data.status || "draft",
-					language: data.language || "es", // Ensure language is set
+					propertyType: data.propertyType as PropertyType,
+					status: "published", // Publicar directamente
+					language: data.language || "es",
 					aiGenerated: data.aiGenerated || {
 						title: false,
 						description: false,
@@ -91,20 +80,64 @@ export default function NewPropertyPage() {
 								...data.address,
 								country: "Dominican Republic" as const,
 							}
-						: undefined,
+						: data.address,
+				},
+				propertyId: draftId || undefined,
+			});
+
+			if (result.success) {
+				toast.success("¡Propiedad creada exitosamente!");
+				router.push("/dashboard/properties");
+			} else {
+				toast.error(result.error || "Error al crear la propiedad");
+			}
+		} catch (error) {
+			console.error("Error creating property:", error);
+			toast.error("Error inesperado al crear la propiedad");
+		}
+	};
+
+	const handleSaveDraft = async (data: any) => {
+		if (!user?.id) {
+			toast.error("Usuario no autenticado");
+			throw new Error("Usuario no autenticado");
+		}
+
+		try {
+			const result = await savePropertyFromWizard({
+				userId: user.id,
+				data: {
+					...data,
+					propertyType: data.propertyType as PropertyType,
+					status: "draft",
+					language: data.language || "es",
+					aiGenerated: data.aiGenerated || {
+						title: false,
+						description: false,
+						tags: false,
+					},
+					address: data.address
+						? {
+								...data.address,
+								country: "Dominican Republic" as const,
+							}
+						: data.address,
 				},
 				propertyId: draftId || undefined,
 			});
 
 			if (result.success) {
 				toast.success("Borrador guardado exitosamente");
-				return result.data?.propertyId || "";
+				// Actualizar la URL con el ID del borrador si es nuevo
+				if (!draftId && result.data?.propertyId) {
+					router.replace(`/dashboard/properties/new?draft=${result.data.propertyId}`);
+				}
+			} else {
+				toast.error(result.error || "Error al guardar el borrador");
 			}
-			toast.error(result.error || "Error al guardar el borrador");
-			throw new Error(result.error || "Error al guardar el borrador");
 		} catch (error) {
+			console.error("Error saving draft:", error);
 			toast.error("Error inesperado al guardar el borrador");
-			throw error;
 		}
 	};
 
@@ -147,32 +180,31 @@ export default function NewPropertyPage() {
 	}
 
 	return (
-		<RouteGuard requiredPermission="properties.manage">
-			<DashboardPageLayout
-				actions={
-					<Button asChild variant="outline">
-						<a href="/dashboard/properties">
-							<ArrowLeft className="mr-2 h-4 w-4" />
-							Volver a Propiedades
-						</a>
-					</Button>
-				}
-				breadcrumbs={breadcrumbs}
-				description={
-					draftId
-						? "Continúa editando tu borrador guardado"
-						: "Crea una nueva propiedad usando el asistente inteligente"
-				}
-				title={draftId ? "Continuar Borrador" : "Nueva Propiedad"}
-			>
-				<div className="mx-auto max-w-6xl">
-					<PropertyWizard
-						draftId={draftId || undefined}
-						initialData={initialData}
-						onComplete={handleComplete}
-					/>
-				</div>
-			</DashboardPageLayout>
-		</RouteGuard>
-	);
+			<RouteGuard requiredPermission="properties.manage">
+				<DashboardPageLayout
+					actions={
+						<Button asChild variant="outline">
+							<a href="/dashboard/properties">
+								<ArrowLeft className="mr-2 h-4 w-4" />
+								Volver a Propiedades
+							</a>
+						</Button>
+					}
+					breadcrumbs={breadcrumbs}
+					description={
+						draftId
+							? "Continúa editando tu borrador guardado"
+							: "Crea una nueva propiedad usando el asistente inteligente"
+					}
+					title={draftId ? "Continuar Borrador" : "Nueva Propiedad"}
+				>
+						<PropertyForm
+							initialData={initialData}
+							onSubmit={handleSubmit}
+							onSaveDraft={handleSaveDraft}
+							isLoading={loading}
+						/>
+				</DashboardPageLayout>
+			</RouteGuard>
+		);
 }

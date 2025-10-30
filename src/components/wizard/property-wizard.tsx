@@ -25,8 +25,8 @@ const PropertyBasicInfoStep = ({ data, onChange, errors }: StepProps) => {
 		<div className="space-y-4">
 			<PropertyForm
 				initialData={data as any}
-				onSuccess={() => {
-					// Handle success if needed
+				onSubmit={async (formData) => {
+					onChange(formData as any);
 				}}
 			/>
 		</div>

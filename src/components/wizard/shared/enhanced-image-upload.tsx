@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-// import { uploadPropertyImages } from "@/lib/services/image-upload-service"; // TODO: Create service
+import { uploadPropertyImages } from "@/lib/services/image-upload-service";
 import { cn } from "@/lib/utils";
 import {
 	formatFileSize,
@@ -152,21 +152,8 @@ export function EnhancedImageUpload({
 					);
 				}, 500);
 
-				// Upload files
-				// TODO: Implement uploadPropertyImages service
-				const result = {
-					successful: files.map(() => ({
-						id: "placeholder-id",
-						url: "/placeholder-image.jpg",
-						filename: "placeholder.jpg",
-						size: 1024,
-						type: "image/jpeg",
-						contentType: "image/jpeg",
-						displayOrder: 0,
-					})),
-					failed: [] as any[],
-					urls: files.map(() => "/placeholder-image.jpg"),
-				};
+				// Upload files using the real service
+				const result = await uploadPropertyImages(files);
 
 				clearInterval(progressInterval);
 
@@ -217,7 +204,7 @@ export function EnhancedImageUpload({
 				// Show errors for failed uploads
 				if (result.failed.length > 0) {
 					result.failed.forEach((failed) => {
-						toast.error(`Error al subir ${failed.file.name}: ${failed.error}`);
+						toast.error(`Error al subir ${failed.filename}: ${failed.error}`);
 					});
 				}
 
