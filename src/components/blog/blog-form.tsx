@@ -21,12 +21,12 @@ import {
 } from "@/lib/actions/blog-actions";
 import type { BlogPost } from "@/lib/types/blog";
 
-interface BlogFormProps {
+type BlogFormProps = {
 	initialData?: BlogPost;
 	isEditing?: boolean;
 	onCancel?: () => void;
 	onSuccess?: () => void;
-}
+};
 
 const categoryOptions = [
 	{ value: "property-news", label: "Noticias de Propiedades" },
@@ -44,7 +44,7 @@ export function BlogForm({
 	onSuccess,
 }: BlogFormProps) {
 	const [tags, setTags] = useState<string[]>(
-		Array.isArray(initialData?.tags) ? initialData.tags : [],
+		Array.isArray(initialData?.tags) ? initialData.tags : []
 	);
 	const [tagInput, setTagInput] = useState("");
 	const [category, setCategory] = useState(initialData?.category || "");
@@ -91,26 +91,26 @@ export function BlogForm({
 				<form action={formAction} className="space-y-6">
 					{/* Hidden fields */}
 					{isEditing && initialData?.id && (
-						<input type="hidden" name="id" value={initialData.id} />
+						<input name="id" type="hidden" value={initialData.id} />
 					)}
-					<input type="hidden" name="tags" value={JSON.stringify(tags)} />
-					<input type="hidden" name="images" value={JSON.stringify([])} />
-					<input type="hidden" name="videos" value={JSON.stringify([])} />
-					<input type="hidden" name="featured" value="false" />
-					<input type="hidden" name="status" value="draft" />
+					<input name="tags" type="hidden" value={JSON.stringify(tags)} />
+					<input name="images" type="hidden" value={JSON.stringify([])} />
+					<input name="videos" type="hidden" value={JSON.stringify([])} />
+					<input name="featured" type="hidden" value="false" />
+					<input name="status" type="hidden" value="draft" />
 
 					{/* Title */}
 					<div className="space-y-2">
 						<Label htmlFor="title">Título *</Label>
 						<Input
+							defaultValue={initialData?.title || ""}
 							id="title"
 							name="title"
-							defaultValue={initialData?.title || ""}
 							placeholder="Título del post del blog"
 							required
 						/>
 						{state?.errors?.title && (
-							<p className="text-sm text-red-600">{state.errors.title[0]}</p>
+							<p className="text-red-600 text-sm">{state.errors.title[0]}</p>
 						)}
 					</div>
 
@@ -118,15 +118,15 @@ export function BlogForm({
 					<div className="space-y-2">
 						<Label htmlFor="description">Descripción *</Label>
 						<Textarea
+							defaultValue={initialData?.excerpt || ""}
 							id="description"
 							name="description"
-							defaultValue={initialData?.excerpt || ""}
 							placeholder="Breve descripción del contenido del post..."
-							rows={3}
 							required
+							rows={3}
 						/>
 						{state?.errors?.description && (
-							<p className="text-sm text-red-600">
+							<p className="text-red-600 text-sm">
 								{state.errors.description[0]}
 							</p>
 						)}
@@ -136,22 +136,22 @@ export function BlogForm({
 					<div className="space-y-2">
 						<Label htmlFor="author">Autor *</Label>
 						<Input
+							defaultValue={initialData?.authorId || ""}
 							id="author"
 							name="author"
-							defaultValue={initialData?.authorId || ""}
 							placeholder="Nombre del autor"
 							required
 						/>
 						{state?.errors?.author && (
-							<p className="text-sm text-red-600">{state.errors.author[0]}</p>
+							<p className="text-red-600 text-sm">{state.errors.author[0]}</p>
 						)}
 					</div>
 
 					{/* Category */}
 					<div className="space-y-2">
 						<Label htmlFor="category">Categoría *</Label>
-						<input type="hidden" name="category" value={category} />
-						<Select value={category} onValueChange={setCategory} required>
+						<input name="category" type="hidden" value={category} />
+						<Select onValueChange={setCategory} required value={category}>
 							<SelectTrigger>
 								<SelectValue placeholder="Seleccionar categoría" />
 							</SelectTrigger>
@@ -164,7 +164,7 @@ export function BlogForm({
 							</SelectContent>
 						</Select>
 						{state?.errors?.category && (
-							<p className="text-sm text-red-600">{state.errors.category[0]}</p>
+							<p className="text-red-600 text-sm">{state.errors.category[0]}</p>
 						)}
 					</div>
 
@@ -172,14 +172,14 @@ export function BlogForm({
 					<div className="space-y-2">
 						<Label htmlFor="excerpt">Resumen</Label>
 						<Textarea
+							defaultValue={initialData?.excerpt || ""}
 							id="excerpt"
 							name="excerpt"
-							defaultValue={initialData?.excerpt || ""}
 							placeholder="Breve descripción del contenido del post..."
 							rows={3}
 						/>
 						{state?.errors?.excerpt && (
-							<p className="text-sm text-red-600">{state.errors.excerpt[0]}</p>
+							<p className="text-red-600 text-sm">{state.errors.excerpt[0]}</p>
 						)}
 					</div>
 
@@ -187,8 +187,6 @@ export function BlogForm({
 					<div className="space-y-2">
 						<Label htmlFor="coverImage">URL de Imagen de Portada</Label>
 						<Input
-							id="coverImage"
-							name="coverImage"
 							defaultValue={
 								initialData?.coverImage &&
 								typeof initialData.coverImage === "object" &&
@@ -196,10 +194,12 @@ export function BlogForm({
 									? (initialData.coverImage as any).url || ""
 									: ""
 							}
+							id="coverImage"
+							name="coverImage"
 							placeholder="https://ejemplo.com/imagen.jpg"
 						/>
 						{state?.errors?.coverImage && (
-							<p className="text-sm text-red-600">
+							<p className="text-red-600 text-sm">
 								{state.errors.coverImage[0]}
 							</p>
 						)}
@@ -210,32 +210,32 @@ export function BlogForm({
 						<Label>Etiquetas *</Label>
 						<div className="flex gap-2">
 							<Input
-								value={tagInput}
 								onChange={(e) => setTagInput(e.target.value)}
-								placeholder="Agregar etiqueta"
 								onKeyPress={(e) => {
 									if (e.key === "Enter") {
 										e.preventDefault();
 										addTag();
 									}
 								}}
+								placeholder="Agregar etiqueta"
+								value={tagInput}
 							/>
-							<Button type="button" onClick={addTag} variant="outline">
+							<Button onClick={addTag} type="button" variant="outline">
 								Agregar
 							</Button>
 						</div>
 						{tags.length > 0 && (
-							<div className="flex flex-wrap gap-2 mt-2">
+							<div className="mt-2 flex flex-wrap gap-2">
 								{tags.map((tag) => (
 									<span
+										className="flex items-center gap-1 rounded-md bg-secondary px-2 py-1 text-secondary-foreground text-sm"
 										key={tag}
-										className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-sm flex items-center gap-1"
 									>
 										{tag}
 										<button
-											type="button"
-											onClick={() => removeTag(tag)}
 											className="text-red-500 hover:text-red-700"
+											onClick={() => removeTag(tag)}
+											type="button"
 										>
 											×
 										</button>
@@ -244,7 +244,7 @@ export function BlogForm({
 							</div>
 						)}
 						{state?.errors?.tags && (
-							<p className="text-sm text-red-600">{state.errors.tags[0]}</p>
+							<p className="text-red-600 text-sm">{state.errors.tags[0]}</p>
 						)}
 					</div>
 
@@ -252,24 +252,24 @@ export function BlogForm({
 					<div className="space-y-2">
 						<Label htmlFor="content">Contenido *</Label>
 						<Textarea
+							defaultValue={initialData?.content || ""}
 							id="content"
 							name="content"
-							defaultValue={initialData?.content || ""}
 							placeholder="Escribe el contenido completo del post aquí..."
-							rows={10}
 							required
+							rows={10}
 						/>
 						{state?.errors?.content && (
-							<p className="text-sm text-red-600">{state.errors.content[0]}</p>
+							<p className="text-red-600 text-sm">{state.errors.content[0]}</p>
 						)}
 					</div>
 
 					{/* Actions */}
 					<div className="flex gap-4">
-						<Button type="submit" disabled={isPending}>
+						<Button disabled={isPending} type="submit">
 							{isPending ? (
 								<>
-									<Loader2 className="animate-spin mr-2 h-4 w-4" />
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 									Guardando...
 								</>
 							) : isEditing ? (
@@ -279,7 +279,7 @@ export function BlogForm({
 							)}
 						</Button>
 						{onCancel && (
-							<Button type="button" variant="outline" onClick={onCancel}>
+							<Button onClick={onCancel} type="button" variant="outline">
 								Cancelar
 							</Button>
 						)}

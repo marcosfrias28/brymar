@@ -10,13 +10,13 @@ import {
 	UnifiedCard,
 } from "../cards/unified-card";
 
-interface BlogCardProps {
+type BlogCardProps = {
 	post: BlogPost;
 	showActions?: boolean;
 	onEdit?: (id: string) => void;
 	onView?: (id: string) => void;
 	onDelete?: (id: string) => void;
-}
+};
 
 export function BlogCard({
 	post,
@@ -97,8 +97,10 @@ export function BlogCard({
 
 	return (
 		<UnifiedCard
-			title={post.title}
+			actions={actions}
+			badges={badges}
 			description={post.excerpt || undefined}
+			href={showActions ? undefined : `/blog/${post.slug}`}
 			image={
 				post.coverImage &&
 				typeof post.coverImage === "object" &&
@@ -107,10 +109,8 @@ export function BlogCard({
 					: undefined
 			}
 			imageAlt={post.title}
-			badges={badges}
 			metadata={metadata}
-			actions={actions}
-			href={!showActions ? `/blog/${post.slug}` : undefined}
+			title={post.title}
 		/>
 	);
 }

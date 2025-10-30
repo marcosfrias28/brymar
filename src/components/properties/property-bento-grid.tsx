@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-interface Property {
+type Property = {
 	id: string;
 	title: string;
 	type: string;
@@ -20,20 +20,19 @@ interface Property {
 	images: string[];
 	createdAt: string;
 	featured?: boolean;
-}
+};
 
-interface PropertyBentoGridProps {
+type PropertyBentoGridProps = {
 	properties: Property[];
-}
+};
 
 export function PropertyBentoGrid({ properties }: PropertyBentoGridProps) {
-	const formatPrice = (price: number) => {
-		return new Intl.NumberFormat("es-DO", {
+	const formatPrice = (price: number) =>
+		new Intl.NumberFormat("es-DO", {
 			style: "currency",
 			currency: "DOP",
 			minimumFractionDigits: 0,
 		}).format(price);
-	};
 
 	// Create bento layout pattern
 	const getBentoClass = (index: number) => {
@@ -61,21 +60,21 @@ export function PropertyBentoGrid({ properties }: PropertyBentoGridProps) {
 	};
 
 	return (
-		<div className="grid grid-cols-1 tablet:grid-cols-2 desktop:grid-cols-3 widescreen:grid-cols-4 gap-4 auto-rows-max">
+		<div className="grid auto-rows-max desktop:grid-cols-3 grid-cols-1 tablet:grid-cols-2 widescreen:grid-cols-4 gap-4">
 			{properties.map((property, index) => (
 				<Card
+					className={`${getBentoClass(index)} group overflow-hidden transition-all duration-300 hover:shadow-xl`}
 					key={property.id}
-					className={`${getBentoClass(index)} overflow-hidden hover:shadow-xl transition-all duration-300 group`}
 				>
 					<div className="relative">
 						<div
 							className={`relative ${getImageHeight(index)} overflow-hidden`}
 						>
 							<Image
-								src={property.images[0] || "/placeholder.svg"}
 								alt={property.title}
+								className="object-cover transition-transform duration-300 group-hover:scale-105"
 								fill
-								className="object-cover group-hover:scale-105 transition-transform duration-300"
+								src={property.images[0] || "/placeholder.svg"}
 							/>
 
 							{/* Overlays */}
@@ -84,7 +83,7 @@ export function PropertyBentoGrid({ properties }: PropertyBentoGridProps) {
 							{/* Badges */}
 							<div className="absolute top-3 left-3 flex gap-2">
 								{property.featured && (
-									<Badge className="bg-gradient-aurora text-white border-0">
+									<Badge className="border-0 bg-gradient-aurora text-white">
 										Destacada
 									</Badge>
 								)}
@@ -100,13 +99,13 @@ export function PropertyBentoGrid({ properties }: PropertyBentoGridProps) {
 							</div>
 
 							{/* Actions */}
-							<div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-								<Button variant="secondary" size="sm" asChild>
+							<div className="absolute top-3 right-3 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+								<Button asChild size="sm" variant="secondary">
 									<Link href={`/dashboard/properties/${property.id}`}>
 										<Eye className="h-4 w-4" />
 									</Link>
 								</Button>
-								<Button variant="secondary" size="sm" asChild>
+								<Button asChild size="sm" variant="secondary">
 									<Link href={`/dashboard/properties/${property.id}/edit`}>
 										<Edit className="h-4 w-4" />
 									</Link>
@@ -115,29 +114,29 @@ export function PropertyBentoGrid({ properties }: PropertyBentoGridProps) {
 
 							{/* Price */}
 							<div className="absolute bottom-3 left-3 text-white">
-								<div className="text-xl font-bold">
+								<div className="font-bold text-xl">
 									{formatPrice(property.price)}
 									{property.type === "rent" && (
-										<span className="text-sm font-normal">/mes</span>
+										<span className="font-normal text-sm">/mes</span>
 									)}
 								</div>
 							</div>
 						</div>
 
 						{/* Content */}
-						<div className="p-4 space-y-3">
+						<div className="space-y-3 p-4">
 							<div>
-								<h3 className="font-semibold text-arsenic font-serif line-clamp-1 mb-1">
+								<h3 className="mb-1 line-clamp-1 font-semibold font-serif text-arsenic">
 									{property.title}
 								</h3>
-								<div className="flex items-center text-blackCoral text-sm mb-2">
-									<MapPin className="h-3 w-3 mr-1" />
+								<div className="mb-2 flex items-center text-blackCoral text-sm">
+									<MapPin className="mr-1 h-3 w-3" />
 									<span className="line-clamp-1">{property.location}</span>
 								</div>
 							</div>
 
 							{/* Property Details */}
-							<div className="flex justify-between text-xs text-blackCoral">
+							<div className="flex justify-between text-blackCoral text-xs">
 								<div className="flex items-center gap-1">
 									<Bed className="h-3 w-3" />
 									{property.bedrooms}

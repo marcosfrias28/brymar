@@ -8,43 +8,59 @@ import { twMerge } from "tailwind-merge";
 
 // Mobile detection utilities
 export function isMobile(): boolean {
-	if (typeof window === "undefined") return false;
+	if (typeof window === "undefined") {
+		return false;
+	}
 	return window.innerWidth < 640;
 }
 
 export function isTablet(): boolean {
-	if (typeof window === "undefined") return false;
+	if (typeof window === "undefined") {
+		return false;
+	}
 	return window.innerWidth >= 640 && window.innerWidth < 1024;
 }
 
 export function isDesktop(): boolean {
-	if (typeof window === "undefined") return true;
+	if (typeof window === "undefined") {
+		return true;
+	}
 	return window.innerWidth >= 1024;
 }
 
 export function isTouchDevice(): boolean {
-	if (typeof window === "undefined") return false;
+	if (typeof window === "undefined") {
+		return false;
+	}
 	return "ontouchstart" in window || navigator.maxTouchPoints > 0;
 }
 
 export function isIOS(): boolean {
-	if (typeof window === "undefined") return false;
+	if (typeof window === "undefined") {
+		return false;
+	}
 	return /iPad|iPhone|iPod/.test(navigator.userAgent);
 }
 
 export function isAndroid(): boolean {
-	if (typeof window === "undefined") return false;
+	if (typeof window === "undefined") {
+		return false;
+	}
 	return /Android/.test(navigator.userAgent);
 }
 
 export function isSafari(): boolean {
-	if (typeof window === "undefined") return false;
+	if (typeof window === "undefined") {
+		return false;
+	}
 	return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 }
 
 // Viewport utilities
 export function getViewportSize() {
-	if (typeof window === "undefined") return { width: 1280, height: 800 };
+	if (typeof window === "undefined") {
+		return { width: 1280, height: 800 };
+	}
 	return {
 		width: window.innerWidth,
 		height: window.innerHeight,
@@ -52,7 +68,9 @@ export function getViewportSize() {
 }
 
 export function getDevicePixelRatio(): number {
-	if (typeof window === "undefined") return 1;
+	if (typeof window === "undefined") {
+		return 1;
+	}
 	return window.devicePixelRatio || 1;
 }
 
@@ -65,7 +83,7 @@ export function preventZoom(element: HTMLElement) {
 				e.preventDefault();
 			}
 		},
-		{ passive: false },
+		{ passive: false }
 	);
 
 	let lastTouchEnd = 0;
@@ -78,7 +96,7 @@ export function preventZoom(element: HTMLElement) {
 			}
 			lastTouchEnd = now;
 		},
-		{ passive: false },
+		{ passive: false }
 	);
 }
 
@@ -152,7 +170,7 @@ export const mobileClasses = {
 export function responsiveClass(
 	mobile: string,
 	tablet?: string,
-	desktop?: string,
+	desktop?: string
 ): string {
 	const classes = [mobile];
 
@@ -184,9 +202,11 @@ export function getOptimizedImageUrl(
 	url: string,
 	width: number,
 	height?: number,
-	_quality: number = 80,
+	_quality = 80
 ): string {
-	if (!url) return "";
+	if (!url) {
+		return "";
+	}
 
 	// For mobile devices, use smaller images
 	const devicePixelRatio = getDevicePixelRatio();
@@ -202,36 +222,46 @@ export function getOptimizedImageUrl(
 
 // Performance utilities
 export function shouldReduceMotion(): boolean {
-	if (typeof window === "undefined") return false;
+	if (typeof window === "undefined") {
+		return false;
+	}
 	return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 export function shouldUseHighContrast(): boolean {
-	if (typeof window === "undefined") return false;
+	if (typeof window === "undefined") {
+		return false;
+	}
 	return window.matchMedia("(prefers-contrast: high)").matches;
 }
 
 export function getConnectionSpeed(): string {
-	if (typeof navigator === "undefined") return "unknown";
+	if (typeof navigator === "undefined") {
+		return "unknown";
+	}
 	const connection = (navigator as any).connection;
 	return connection?.effectiveType || "unknown";
 }
 
 // Form utilities
 export function preventIOSZoom() {
-	if (!isIOS()) return;
+	if (!isIOS()) {
+		return;
+	}
 
 	const viewport = document.querySelector("meta[name=viewport]");
 	if (viewport) {
 		viewport.setAttribute(
 			"content",
-			"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",
+			"width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
 		);
 	}
 }
 
 export function restoreIOSZoom() {
-	if (!isIOS()) return;
+	if (!isIOS()) {
+		return;
+	}
 
 	const viewport = document.querySelector("meta[name=viewport]");
 	if (viewport) {
@@ -241,9 +271,11 @@ export function restoreIOSZoom() {
 
 // Haptic feedback (if supported)
 export function triggerHapticFeedback(
-	type: "light" | "medium" | "heavy" = "light",
+	type: "light" | "medium" | "heavy" = "light"
 ) {
-	if (typeof navigator === "undefined") return;
+	if (typeof navigator === "undefined") {
+		return;
+	}
 
 	const vibrator = (navigator as any).vibrate;
 	if (vibrator) {
@@ -265,21 +297,21 @@ export function getSafeAreaInsets() {
 	const computedStyle = getComputedStyle(document.documentElement);
 
 	return {
-		top: parseInt(
+		top: Number.parseInt(
 			computedStyle.getPropertyValue("env(safe-area-inset-top)") || "0",
-			10,
+			10
 		),
-		right: parseInt(
+		right: Number.parseInt(
 			computedStyle.getPropertyValue("env(safe-area-inset-right)") || "0",
-			10,
+			10
 		),
-		bottom: parseInt(
+		bottom: Number.parseInt(
 			computedStyle.getPropertyValue("env(safe-area-inset-bottom)") || "0",
-			10,
+			10
 		),
-		left: parseInt(
+		left: Number.parseInt(
 			computedStyle.getPropertyValue("env(safe-area-inset-left)") || "0",
-			10,
+			10
 		),
 	};
 }
@@ -294,21 +326,24 @@ export function isFileAPISupported(): boolean {
 }
 
 export async function requestCameraPermission(): Promise<boolean> {
-	if (!isCameraSupported()) return false;
+	if (!isCameraSupported()) {
+		return false;
+	}
 
 	try {
 		const stream = await navigator.mediaDevices.getUserMedia({ video: true });
 		stream.getTracks().forEach((track) => track.stop());
 		return true;
-	} catch (error) {
-		console.warn("Camera permission denied:", error);
+	} catch (_error) {
 		return false;
 	}
 }
 
 // Keyboard utilities
 export function isVirtualKeyboardOpen(): boolean {
-	if (typeof window === "undefined") return false;
+	if (typeof window === "undefined") {
+		return false;
+	}
 
 	// Use Visual Viewport API if available
 	if (window.visualViewport) {
@@ -321,8 +356,10 @@ export function isVirtualKeyboardOpen(): boolean {
 }
 
 // Scroll utilities
-export function scrollToTop(smooth: boolean = true) {
-	if (typeof window === "undefined") return;
+export function scrollToTop(smooth = true) {
+	if (typeof window === "undefined") {
+		return;
+	}
 
 	window.scrollTo({
 		top: 0,
@@ -332,9 +369,11 @@ export function scrollToTop(smooth: boolean = true) {
 
 export function scrollIntoView(
 	element: HTMLElement,
-	options?: ScrollIntoViewOptions,
+	options?: ScrollIntoViewOptions
 ) {
-	if (!element) return;
+	if (!element) {
+		return;
+	}
 
 	element.scrollIntoView({
 		behavior: "smooth",
@@ -345,23 +384,24 @@ export function scrollIntoView(
 
 // Local storage utilities for mobile
 export function setMobilePreference(key: string, value: any) {
-	if (typeof localStorage === "undefined") return;
+	if (typeof localStorage === "undefined") {
+		return;
+	}
 
 	try {
 		localStorage.setItem(`mobile_${key}`, JSON.stringify(value));
-	} catch (error) {
-		console.warn("Failed to save mobile preference:", error);
-	}
+	} catch (_error) {}
 }
 
 export function getMobilePreference<T>(key: string, defaultValue: T): T {
-	if (typeof localStorage === "undefined") return defaultValue;
+	if (typeof localStorage === "undefined") {
+		return defaultValue;
+	}
 
 	try {
 		const stored = localStorage.getItem(`mobile_${key}`);
 		return stored ? JSON.parse(stored) : defaultValue;
-	} catch (error) {
-		console.warn("Failed to load mobile preference:", error);
+	} catch (_error) {
 		return defaultValue;
 	}
 }
@@ -384,8 +424,8 @@ export const performanceUtils = {
 	},
 
 	// Frame rate monitoring
-	measureFrameRate: (): Promise<number> => {
-		return new Promise((resolve) => {
+	measureFrameRate: (): Promise<number> =>
+		new Promise((resolve) => {
 			let frames = 0;
 			const startTime = performance.now();
 
@@ -401,13 +441,14 @@ export const performanceUtils = {
 			}
 
 			requestAnimationFrame(countFrames);
-		});
-	},
+		}),
 
 	// Network performance
 	getConnectionInfo: () => {
 		const connection = (navigator as any).connection;
-		if (!connection) return null;
+		if (!connection) {
+			return null;
+		}
 
 		return {
 			effectiveType: connection.effectiveType,
@@ -441,7 +482,7 @@ export const performanceUtils = {
 	// Throttle function calls
 	throttle: <T extends (...args: any[]) => any>(
 		func: T,
-		limit: number,
+		limit: number
 	): ((...args: Parameters<T>) => void) => {
 		let inThrottle: boolean;
 		return function (this: any, ...args: Parameters<T>) {
@@ -456,7 +497,7 @@ export const performanceUtils = {
 	// Debounce function calls
 	debounce: <T extends (...args: any[]) => any>(
 		func: T,
-		delay: number,
+		delay: number
 	): ((...args: Parameters<T>) => void) => {
 		let timeoutId: NodeJS.Timeout;
 		return function (this: any, ...args: Parameters<T>) {
@@ -468,14 +509,13 @@ export const performanceUtils = {
 	// Lazy loading utilities
 	createIntersectionObserver: (
 		callback: (entries: IntersectionObserverEntry[]) => void,
-		options?: IntersectionObserverInit,
-	): IntersectionObserver => {
-		return new IntersectionObserver(callback, {
+		options?: IntersectionObserverInit
+	): IntersectionObserver =>
+		new IntersectionObserver(callback, {
 			rootMargin: "50px",
 			threshold: 0.1,
 			...options,
-		});
-	},
+		}),
 
 	// Image optimization
 	getOptimalImageSize: (containerWidth: number, containerHeight?: number) => {
@@ -509,15 +549,13 @@ export const performanceUtils = {
 					chargingTime: battery.chargingTime,
 					dischargingTime: battery.dischargingTime,
 				};
-			} catch (error) {
-				console.warn("Battery API not available:", error);
-			}
+			} catch (_error) {}
 		}
 		return null;
 	},
 
 	// Resource preloading
-	preloadResource: (href: string, as: string = "script") => {
+	preloadResource: (href: string, as = "script") => {
 		const link = document.createElement("link");
 		link.rel = "preload";
 		link.href = href;
@@ -528,7 +566,7 @@ export const performanceUtils = {
 	// Critical resource hints
 	addResourceHints: (
 		urls: string[],
-		type: "preload" | "prefetch" | "preconnect" = "preload",
+		type: "preload" | "prefetch" | "preconnect" = "preload"
 	) => {
 		urls.forEach((url) => {
 			const link = document.createElement("link");
@@ -541,7 +579,7 @@ export const performanceUtils = {
 	// Memoization utility
 	memoize: <T extends (...args: any[]) => any>(
 		func: T,
-		ttl: number = 60000, // 1 minute default TTL
+		ttl = 60_000 // 1 minute default TTL
 	): T => {
 		const cache = new Map<
 			string,

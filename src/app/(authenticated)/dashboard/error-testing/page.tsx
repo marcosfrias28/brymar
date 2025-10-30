@@ -41,11 +41,11 @@ export default function ErrorTestingPage() {
 	// Don't render in production
 	if (process.env.NODE_ENV === "production") {
 		return (
-			<div className="min-h-screen flex items-center justify-center p-4">
+			<div className="flex min-h-screen items-center justify-center p-4">
 				<Card>
 					<CardContent className="p-6 text-center">
-						<AlertTriangle className="w-12 h-12 mx-auto mb-4 text-yellow-500" />
-						<h2 className="text-xl font-semibold mb-2">Página no disponible</h2>
+						<AlertTriangle className="mx-auto mb-4 h-12 w-12 text-yellow-500" />
+						<h2 className="mb-2 font-semibold text-xl">Página no disponible</h2>
 						<p className="text-muted-foreground">
 							Esta página solo está disponible en modo de desarrollo.
 						</p>
@@ -112,7 +112,7 @@ export default function ErrorTestingPage() {
 					"Network failure",
 					"NETWORK_ERROR",
 					true,
-					"Error de red",
+					"Error de red"
 				);
 			},
 		});
@@ -128,7 +128,7 @@ export default function ErrorTestingPage() {
 					"Server failure",
 					"SERVER_ERROR",
 					true,
-					"Error del servidor",
+					"Error del servidor"
 				);
 			},
 		});
@@ -144,7 +144,7 @@ export default function ErrorTestingPage() {
 					"Access denied",
 					"PERMISSION_DENIED",
 					false,
-					"Acceso denegado",
+					"Acceso denegado"
 				);
 			},
 		});
@@ -153,28 +153,27 @@ export default function ErrorTestingPage() {
 	};
 
 	return (
-		<div className="container mx-auto p-6 space-y-6">
+		<div className="container mx-auto space-y-6 p-6">
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold flex items-center gap-2">
-						<TestTube className="w-8 h-8" />
+					<h1 className="flex items-center gap-2 font-bold text-3xl">
+						<TestTube className="h-8 w-8" />
 						Pruebas de Manejo de Errores
 					</h1>
-					<p className="text-muted-foreground mt-2">
+					<p className="mt-2 text-muted-foreground">
 						Herramientas para probar y validar el sistema de recuperación de
 						errores del asistente.
 					</p>
 				</div>
-				<Badge variant="outline" className="bg-orange-100 text-orange-800">
+				<Badge className="bg-orange-100 text-orange-800" variant="outline">
 					Solo Desarrollo
 				</Badge>
 			</div>
 
-			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+			<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 				{/* Error Testing Panel */}
 				<div className="space-y-4">
 					<ErrorTestingPanel
-						scenarios={scenarios}
 						onScenarioTrigger={(scenario) => {
 							try {
 								scenario.trigger();
@@ -184,13 +183,14 @@ export default function ErrorTestingPage() {
 								}
 							}
 						}}
+						scenarios={scenarios}
 					/>
 
 					{/* Automated Testing */}
 					<Card>
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
-								<TestTube className="w-5 h-5" />
+								<TestTube className="h-5 w-5" />
 								Pruebas Automatizadas
 							</CardTitle>
 						</CardHeader>
@@ -202,16 +202,16 @@ export default function ErrorTestingPage() {
 
 							<div className="flex gap-2">
 								<Button
-									onClick={runAutomatedTests}
-									disabled={isRunning}
 									className="flex-1"
+									disabled={isRunning}
+									onClick={runAutomatedTests}
 								>
 									{isRunning ? "Ejecutando..." : "Ejecutar Pruebas"}
 								</Button>
 								<Button
-									variant="outline"
-									onClick={clearScenarios}
 									disabled={isRunning}
+									onClick={clearScenarios}
+									variant="outline"
 								>
 									Limpiar
 								</Button>
@@ -222,13 +222,13 @@ export default function ErrorTestingPage() {
 									<h4 className="font-medium text-sm">Resultados:</h4>
 									{results.map((result) => (
 										<div
-											key={`${result.scenario}-${result.success}`}
 											className="flex items-center gap-2 text-sm"
+											key={`${result.scenario}-${result.success}`}
 										>
 											{result.success ? (
-												<CheckCircle className="w-4 h-4 text-green-500" />
+												<CheckCircle className="h-4 w-4 text-green-500" />
 											) : (
-												<XCircle className="w-4 h-4 text-red-500" />
+												<XCircle className="h-4 w-4 text-red-500" />
 											)}
 											<span className="flex-1">{result.scenario}</span>
 										</div>
@@ -250,27 +250,25 @@ export default function ErrorTestingPage() {
 								<ComprehensiveErrorRecovery
 									enableAutoRetry={true}
 									enableOfflineMode={true}
-									maxRetries={3}
-									onError={(error) => {
-										console.log("Error caught:", error);
-									}}
-									onRecovery={handleErrorRecovery}
 									fallbackComponent={({ error, onRetry }) => (
 										<WizardFallbackUI
 											error={error}
-											onRetry={onRetry}
 											onGoBack={clearCurrentError}
 											onGoHome={clearCurrentError}
+											onRetry={onRetry}
 											showDetails={true}
 										/>
 									)}
+									maxRetries={3}
+									onError={(_error) => {}}
+									onRecovery={handleErrorRecovery}
 								>
-									<div className="p-4 border border-green-200 bg-green-50 rounded-lg text-center">
-										<CheckCircle className="w-8 h-8 mx-auto mb-2 text-green-600" />
+									<div className="rounded-lg border border-green-200 bg-green-50 p-4 text-center">
+										<CheckCircle className="mx-auto mb-2 h-8 w-8 text-green-600" />
 										<p className="font-medium text-green-900">
 											Sistema Funcionando
 										</p>
-										<p className="text-sm text-green-700">
+										<p className="text-green-700 text-sm">
 											No hay errores activos
 										</p>
 									</div>
@@ -285,19 +283,19 @@ export default function ErrorTestingPage() {
 										toast.success("Red recuperada");
 									}}
 								>
-									<div className="p-4 border border-green-200 bg-green-50 rounded-lg text-center">
-										<CheckCircle className="w-8 h-8 mx-auto mb-2 text-green-600" />
+									<div className="rounded-lg border border-green-200 bg-green-50 p-4 text-center">
+										<CheckCircle className="mx-auto mb-2 h-8 w-8 text-green-600" />
 										<p className="font-medium text-green-900">
 											Sistema Funcionando
 										</p>
-										<p className="text-sm text-green-700">
+										<p className="text-green-700 text-sm">
 											No hay errores activos
 										</p>
 										<Button
-											variant="outline"
-											size="sm"
-											onClick={clearCurrentError}
 											className="mt-2"
+											onClick={clearCurrentError}
+											size="sm"
+											variant="outline"
 										>
 											Limpiar Estado
 										</Button>
@@ -312,37 +310,37 @@ export default function ErrorTestingPage() {
 						<CardHeader>
 							<CardTitle className="flex items-center justify-between">
 								Historial de Pruebas
-								<Button variant="ghost" size="sm" onClick={clearTestResults}>
+								<Button onClick={clearTestResults} size="sm" variant="ghost">
 									Limpiar
 								</Button>
 							</CardTitle>
 						</CardHeader>
 						<CardContent>
 							{testResults.length === 0 ? (
-								<p className="text-sm text-muted-foreground text-center py-4">
+								<p className="py-4 text-center text-muted-foreground text-sm">
 									No hay resultados de pruebas aún
 								</p>
 							) : (
-								<div className="space-y-2 max-h-64 overflow-y-auto">
+								<div className="max-h-64 space-y-2 overflow-y-auto">
 									{testResults
 										.slice()
 										.reverse()
 										.map((result) => (
 											<div
+												className="flex items-start gap-2 rounded border p-2 text-sm"
 												key={`${result.name}-${result.timestamp.getTime()}`}
-												className="flex items-start gap-2 p-2 border rounded text-sm"
 											>
 												{result.success ? (
-													<CheckCircle className="w-4 h-4 text-green-500 mt-0.5" />
+													<CheckCircle className="mt-0.5 h-4 w-4 text-green-500" />
 												) : (
-													<XCircle className="w-4 h-4 text-red-500 mt-0.5" />
+													<XCircle className="mt-0.5 h-4 w-4 text-red-500" />
 												)}
 												<div className="flex-1">
 													<div className="font-medium">{result.name}</div>
 													<div className="text-muted-foreground">
 														{result.message}
 													</div>
-													<div className="text-xs text-muted-foreground">
+													<div className="text-muted-foreground text-xs">
 														{result.timestamp.toLocaleTimeString()}
 													</div>
 												</div>
@@ -364,16 +362,16 @@ export default function ErrorTestingPage() {
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<Alert>
-						<AlertTriangle className="w-4 h-4" />
+						<AlertTriangle className="h-4 w-4" />
 						<AlertDescription>
 							Esta página permite probar todos los mecanismos de recuperación de
 							errores implementados en el sistema de asistentes.
 						</AlertDescription>
 					</Alert>
 
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+					<div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
 						<div>
-							<h4 className="font-medium mb-2">Tipos de Error Soportados:</h4>
+							<h4 className="mb-2 font-medium">Tipos de Error Soportados:</h4>
 							<ul className="space-y-1 text-muted-foreground">
 								<li>• Errores de red y conectividad</li>
 								<li>• Errores del servidor (5xx)</li>
@@ -386,7 +384,7 @@ export default function ErrorTestingPage() {
 						</div>
 
 						<div>
-							<h4 className="font-medium mb-2">Mecanismos de Recuperación:</h4>
+							<h4 className="mb-2 font-medium">Mecanismos de Recuperación:</h4>
 							<ul className="space-y-1 text-muted-foreground">
 								<li>• Reintentos automáticos con backoff exponencial</li>
 								<li>• Modo sin conexión con cola de operaciones</li>

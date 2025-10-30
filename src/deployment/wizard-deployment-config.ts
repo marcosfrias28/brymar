@@ -5,7 +5,7 @@
  * including environment variables, service endpoints, and deployment settings.
  */
 
-export interface DeploymentConfig {
+export type DeploymentConfig = {
 	environment: "development" | "staging" | "production";
 	services: {
 		ai: AIServiceConfig;
@@ -17,9 +17,9 @@ export interface DeploymentConfig {
 	security: SecurityConfig;
 	performance: PerformanceConfig;
 	monitoring: MonitoringConfig;
-}
+};
 
-export interface AIServiceConfig {
+export type AIServiceConfig = {
 	provider: "huggingface" | "openai" | "anthropic";
 	apiKey: string;
 	baseUrl: string;
@@ -36,9 +36,9 @@ export interface AIServiceConfig {
 	timeout: number;
 	retryAttempts: number;
 	fallbackEnabled: boolean;
-}
+};
 
-export interface StorageConfig {
+export type StorageConfig = {
 	provider: "vercel-blob" | "aws-s3" | "cloudinary";
 	apiKey: string;
 	bucketName?: string;
@@ -47,9 +47,9 @@ export interface StorageConfig {
 	allowedTypes: string[];
 	cdnUrl?: string;
 	signedUrlExpiration: number;
-}
+};
 
-export interface MapServiceConfig {
+export type MapServiceConfig = {
 	provider: "mapbox" | "google-maps" | "leaflet-osm";
 	apiKey?: string;
 	defaultBounds: {
@@ -60,9 +60,9 @@ export interface MapServiceConfig {
 	};
 	defaultZoom: number;
 	geocodingProvider: "mapbox" | "nominatim" | "google";
-}
+};
 
-export interface AnalyticsConfig {
+export type AnalyticsConfig = {
 	enabled: boolean;
 	provider: "custom" | "google-analytics" | "mixpanel";
 	trackingId?: string;
@@ -73,9 +73,9 @@ export interface AnalyticsConfig {
 		errors: boolean;
 		performance: boolean;
 	};
-}
+};
 
-export interface DatabaseConfig {
+export type DatabaseConfig = {
 	provider: "neon" | "vercel-postgres" | "supabase";
 	connectionString: string;
 	poolSize: number;
@@ -84,9 +84,9 @@ export interface DatabaseConfig {
 		autoRun: boolean;
 		directory: string;
 	};
-}
+};
 
-export interface SecurityConfig {
+export type SecurityConfig = {
 	csrf: {
 		enabled: boolean;
 		secret: string;
@@ -105,9 +105,9 @@ export interface SecurityConfig {
 		origins: string[];
 		credentials: boolean;
 	};
-}
+};
 
-export interface PerformanceConfig {
+export type PerformanceConfig = {
 	caching: {
 		enabled: boolean;
 		ttl: number;
@@ -122,9 +122,9 @@ export interface PerformanceConfig {
 		lazyLoading: boolean;
 		treeshaking: boolean;
 	};
-}
+};
 
-export interface MonitoringConfig {
+export type MonitoringConfig = {
 	logging: {
 		level: "debug" | "info" | "warn" | "error";
 		provider: "console" | "winston" | "pino";
@@ -144,7 +144,7 @@ export interface MonitoringConfig {
 		endpoints: string[];
 		interval: number;
 	};
-}
+};
 
 // Environment-specific configurations
 export const deploymentConfigs: Record<string, DeploymentConfig> = {
@@ -165,7 +165,7 @@ export const deploymentConfigs: Record<string, DeploymentConfig> = {
 					requestsPerHour: 100,
 					requestsPerDay: 1000,
 				},
-				timeout: 30000,
+				timeout: 30_000,
 				retryAttempts: 3,
 				fallbackEnabled: true,
 			},
@@ -262,7 +262,7 @@ export const deploymentConfigs: Record<string, DeploymentConfig> = {
 			healthChecks: {
 				enabled: true,
 				endpoints: ["/api/health-check"],
-				interval: 30000,
+				interval: 30_000,
 			},
 		},
 	},
@@ -284,7 +284,7 @@ export const deploymentConfigs: Record<string, DeploymentConfig> = {
 					requestsPerHour: 500,
 					requestsPerDay: 5000,
 				},
-				timeout: 30000,
+				timeout: 30_000,
 				retryAttempts: 3,
 				fallbackEnabled: true,
 			},
@@ -382,7 +382,7 @@ export const deploymentConfigs: Record<string, DeploymentConfig> = {
 			healthChecks: {
 				enabled: true,
 				endpoints: ["/api/health-check", "/api/analytics/wizard/health"],
-				interval: 60000,
+				interval: 60_000,
 			},
 		},
 	},
@@ -402,9 +402,9 @@ export const deploymentConfigs: Record<string, DeploymentConfig> = {
 				rateLimits: {
 					requestsPerMinute: 60,
 					requestsPerHour: 1000,
-					requestsPerDay: 10000,
+					requestsPerDay: 10_000,
 				},
-				timeout: 30000,
+				timeout: 30_000,
 				retryAttempts: 3,
 				fallbackEnabled: true,
 			},
@@ -506,7 +506,7 @@ export const deploymentConfigs: Record<string, DeploymentConfig> = {
 					"/api/analytics/wizard/health",
 					"/api/analytics/wizard/ai",
 				],
-				interval: 30000,
+				interval: 30_000,
 			},
 		},
 	},
@@ -543,10 +543,8 @@ export function validateEnvironmentVariables(): {
 	}
 
 	// Check security configuration for non-development environments
-	if (config.environment !== "development") {
-		if (!config.security.csrf.secret) {
-			missing.push("CSRF_SECRET");
-		}
+	if (config.environment !== "development" && !config.security.csrf.secret) {
+		missing.push("CSRF_SECRET");
 	}
 
 	// Check monitoring configuration
@@ -626,7 +624,7 @@ export async function checkServiceHealth(): Promise<{
 	}
 
 	const allHealthy = Object.values(services).every(
-		(service) => service.status === "healthy",
+		(service) => service.status === "healthy"
 	);
 
 	return {

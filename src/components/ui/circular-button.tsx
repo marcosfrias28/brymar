@@ -1,4 +1,4 @@
-import { type ButtonHTMLAttributes, forwardRef } from "react";
+import type { ButtonHTMLAttributes, RefObject } from "react";
 import { cn } from "@/lib/utils";
 
 interface CircularButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -6,44 +6,49 @@ interface CircularButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	icon?: React.ReactNode;
 }
 
-const CircularButton = forwardRef<HTMLButtonElement, CircularButtonProps>(
-	({ className, size = "lg", icon, children, ...props }, ref) => {
-		const sizes = {
-			sm: "w-16 h-16",
-			md: "w-24 h-24",
-			lg: "w-[153px] h-[153px]",
-		};
+const CircularButton = ({
+	className,
+	size = "lg",
+	icon,
+	children,
+	ref,
+	...props
+}: CircularButtonProps & { ref?: RefObject<HTMLButtonElement | null> }) => {
+	const sizes = {
+		sm: "w-16 h-16",
+		md: "w-24 h-24",
+		lg: "w-[153px] h-[153px]",
+	};
 
-		const iconSizes = {
-			sm: "w-8 h-8",
-			md: "w-12 h-12",
-			lg: "w-[107px] h-[107px]",
-		};
+	const iconSizes = {
+		sm: "w-8 h-8",
+		md: "w-12 h-12",
+		lg: "w-[107px] h-[107px]",
+	};
 
-		return (
-			<button
-				className={cn(
-					"rounded-full bg-primary flex items-center justify-center",
-					"transition-all duration-300 ease-in-out hover:scale-105",
-					"shadow-[0_30.667px_76.667px_rgba(0,0,0,0.4)]",
-					sizes[size],
-					className,
-				)}
-				ref={ref}
-				{...props}
-			>
-				{icon && (
-					<div
-						className={cn("flex items-center justify-center", iconSizes[size])}
-					>
-						{icon}
-					</div>
-				)}
-				{children}
-			</button>
-		);
-	},
-);
+	return (
+		<button
+			className={cn(
+				"flex items-center justify-center rounded-full bg-primary",
+				"transition-all duration-300 ease-in-out hover:scale-105",
+				"shadow-[0_30.667px_76.667px_rgba(0,0,0,0.4)]",
+				sizes[size],
+				className
+			)}
+			ref={ref}
+			{...props}
+		>
+			{icon && (
+				<div
+					className={cn("flex items-center justify-center", iconSizes[size])}
+				>
+					{icon}
+				</div>
+			)}
+			{children}
+		</button>
+	);
+};
 
 CircularButton.displayName = "CircularButton";
 
@@ -51,8 +56,8 @@ CircularButton.displayName = "CircularButton";
 const ArrowIcon = ({ className }: { className?: string }) => (
 	<svg
 		className={cn("fill-current", className)}
-		viewBox="0 0 108 109"
 		fill="none"
+		viewBox="0 0 108 109"
 		xmlns="http://www.w3.org/2000/svg"
 	>
 		<path

@@ -1,9 +1,9 @@
-import * as DOMPurify from "isomorphic-dompurify";
+import DOMPurify from "isomorphic-dompurify";
 
-export interface SanitizeOptions {
+export type SanitizeOptions = {
 	allowedTags?: string[];
 	allowedAttributes?: string[];
-}
+};
 
 /**
  * Sanitizes HTML content to prevent XSS attacks
@@ -27,8 +27,7 @@ export function sanitizeHtml(html: string, options?: SanitizeOptions): string {
 		});
 
 		return String(sanitized);
-	} catch (error) {
-		console.error("HTML sanitization failed:", error);
+	} catch (_error) {
 		// Fallback: strip all HTML tags if sanitization fails
 		return html.replace(/<[^>]*>/g, "");
 	}

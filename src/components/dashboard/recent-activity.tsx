@@ -107,8 +107,8 @@ const getStatusText = (status: string) => {
 
 export function RecentActivity() {
 	return (
-		<Card className="hover:border-secondary/20 hover:shadow-md transition-all duration-200">
-			<CardHeader className="flex flex-row items-center border-b border-secondary/10">
+		<Card className="transition-all duration-200 hover:border-secondary/20 hover:shadow-md">
+			<CardHeader className="flex flex-row items-center border-secondary/10 border-b">
 				<div className="grid gap-2">
 					<CardTitle className="flex items-center gap-2">
 						<Clock className="h-5 w-5 text-secondary" />
@@ -117,9 +117,9 @@ export function RecentActivity() {
 				</div>
 				<Button
 					asChild
+					className="ml-auto gap-1 transition-colors hover:border-secondary/30 hover:bg-secondary/10"
 					size="sm"
 					variant="outline"
-					className="ml-auto gap-1 hover:bg-secondary/10 hover:border-secondary/30 transition-colors"
 				>
 					<a href="/dashboard/activity">
 						Ver Todo
@@ -132,30 +132,30 @@ export function RecentActivity() {
 					{recentActivities.map((activity) => {
 						const Icon = getIcon(activity.type);
 						return (
-							<div key={activity.id} className="flex items-center">
+							<div className="flex items-center" key={activity.id}>
 								<Avatar className="h-9 w-9">
 									<AvatarFallback>
 										<Icon className="h-4 w-4" />
 									</AvatarFallback>
 								</Avatar>
 								<div className="ml-4 space-y-1">
-									<p className="text-sm font-medium leading-none">
+									<p className="font-medium text-sm leading-none">
 										{activity.title}
 									</p>
-									<p className="text-sm text-muted-foreground">
+									<p className="text-muted-foreground text-sm">
 										{activity.action} • {activity.time}
 									</p>
 								</div>
 								<div className="ml-auto flex items-center gap-2">
 									<Badge
-										variant="outline"
 										className={getStatusColor(activity.status)}
+										variant="outline"
 									>
 										{getStatusText(activity.status)}
 									</Badge>
 									<DropdownMenu>
 										<DropdownMenuTrigger asChild>
-											<Button variant="ghost" className="h-8 w-8 p-0">
+											<Button className="h-8 w-8 p-0" variant="ghost">
 												<span className="sr-only">Abrir menú</span>
 												<MoreHorizontal className="h-4 w-4" />
 											</Button>

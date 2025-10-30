@@ -19,11 +19,11 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 // Interface removed as it's not currently used
 
-interface GenerationOptions {
+type GenerationOptions = {
 	maxLength?: number;
 	temperature?: number;
 	language?: "es" | "en";
-}
+};
 
 /**
  * Server action to generate property title using AI
@@ -31,7 +31,7 @@ interface GenerationOptions {
 export async function generatePropertyTitle(
 	propertyData: PropertyBasicInfo,
 	options: GenerationOptions = {},
-	userId?: string,
+	userId?: string
 ): Promise<{ success: boolean; data?: string; error?: string }> {
 	const clientId = userId ? `user:${userId}` : "anonymous";
 
@@ -47,9 +47,6 @@ export async function generatePropertyTitle(
 		const aiEnabled = process.env.ENABLE_AI_GENERATION === "true";
 
 		if (!aiEnabled) {
-			console.log(
-				"AI service disabled via environment variable - using fallback content",
-			);
 			throw new AIServiceError("AI service disabled", "API_ERROR", false);
 		}
 
@@ -65,7 +62,7 @@ export async function generatePropertyTitle(
 					throw new AIServiceError(
 						"Generated title too short",
 						"API_ERROR",
-						true,
+						true
 					);
 				}
 
@@ -76,14 +73,13 @@ export async function generatePropertyTitle(
 
 		await recordSuccessfulOperation("aiGeneration", clientId);
 		return { success: true, data: result };
-	} catch (error) {
-		console.error("AI title generation failed:", error);
+	} catch (_error) {
 		await recordFailedOperation("aiGeneration", clientId);
 
 		// Return fallback title
 		const fallbackTitle = generateTemplateTitle(
 			propertyData,
-			options.language || "es",
+			options.language || "es"
 		);
 		return { success: true, data: fallbackTitle };
 	}
@@ -125,11 +121,11 @@ export async function generatePropertyTitle(
 /**
  * Enhanced rich text content interface
  */
-interface RichTextContent {
+type RichTextContent = {
 	html: string;
 	plainText: string;
 	formatted: boolean;
-}
+};
 
 /**
  * Server action to generate enhanced property description with rich formatting
@@ -137,7 +133,7 @@ interface RichTextContent {
 export async function generateEnhancedPropertyDescription(
 	propertyData: PropertyBasicInfo,
 	options: GenerationOptions = {},
-	userId?: string,
+	userId?: string
 ): Promise<{ success: boolean; data?: RichTextContent; error?: string }> {
 	const clientId = userId ? `user:${userId}` : "anonymous";
 
@@ -149,47 +145,37 @@ export async function generateEnhancedPropertyDescription(
 		const validatedData = await validatePropertyBasicInfo(propertyData);
 		const { language = "es", maxLength = 500 } = options;
 
-		const result = await retryAIOperation(async () => {
-			return await circuitBreakers.aiService.execute(async () => {
-				try {
-					const prompt = buildEnhancedDescriptionPrompt(
-						validatedData,
-						language,
-					);
-					const generatedText = await callGeminiAPI(prompt, maxLength, 0.7);
+		const result = await retryAIOperation(
+			async () =>
+				await circuitBreakers.aiService.execute(async () => {
+					try {
+						const prompt = buildEnhancedDescriptionPrompt(
+							validatedData,
+							language
+						);
+						const generatedText = await callGeminiAPI(prompt, maxLength, 0.7);
 
-					const cleanedText = cleanGeneratedText(generatedText, prompt);
-					const richContent = convertToRichTextContent(cleanedText, language);
-
-					console.log(
-						`✅ Enhanced description generation successful with Gemini`,
-					);
-					return richContent;
-				} catch (error) {
-					// Si falla la IA, usar contenido predeterminado rico
-					console.warn(
-						"AI service failed, using enhanced fallback content:",
-						error,
-					);
-					return generateEnhancedFallbackDescription(validatedData, language);
-				}
-			});
-		});
+						const cleanedText = cleanGeneratedText(generatedText, prompt);
+						const richContent = convertToRichTextContent(cleanedText, language);
+						return richContent;
+					} catch (_error) {
+						return generateEnhancedFallbackDescription(validatedData, language);
+					}
+				})
+		);
 
 		// Record successful operation
 		await recordSuccessfulOperation("aiGeneration", clientId);
 
 		return { success: true, data: result };
 	} catch (error) {
-		console.error("Enhanced AI description generation failed:", error);
-
 		// Record failed operation
 		await recordFailedOperation("aiGeneration", clientId);
 
 		// Fallback to enhanced template generation
 		const enhancedTemplate = generateEnhancedFallbackDescription(
 			propertyData,
-			options.language || "es",
+			options.language || "es"
 		);
 
 		return {
@@ -209,7 +195,7 @@ export async function generateEnhancedPropertyDescription(
 export async function generatePropertyDescription(
 	propertyData: PropertyBasicInfo,
 	options: GenerationOptions = {},
-	userId?: string,
+	userId?: string
 ): Promise<{ success: boolean; data?: string; error?: string }> {
 	const clientId = userId ? `user:${userId}` : "anonymous";
 
@@ -221,42 +207,37 @@ export async function generatePropertyDescription(
 		const validatedData = await validatePropertyBasicInfo(propertyData);
 		const { language = "es", maxLength = 300 } = options;
 
-		const result = await retryAIOperation(async () => {
-			return await circuitBreakers.aiService.execute(async () => {
-				try {
-					const prompt = buildDescriptionPrompt(validatedData, language);
-					const generatedText = await callGeminiAPI(prompt, maxLength, 0.7);
-					const cleanedText = cleanGeneratedText(generatedText, prompt);
-					const sanitizedText = sanitizeAIContent(cleanedText, "description");
-
-					console.log(`✅ Description generation successful with Gemini`);
-					return sanitizedText;
-				} catch (error) {
-					// Si falla la IA, usar contenido predeterminado
-					console.warn("AI service failed, using fallback content:", error);
-					return generateFallbackDescription(validatedData, language);
-				}
-			});
-		});
+		const result = await retryAIOperation(
+			async () =>
+				await circuitBreakers.aiService.execute(async () => {
+					try {
+						const prompt = buildDescriptionPrompt(validatedData, language);
+						const generatedText = await callGeminiAPI(prompt, maxLength, 0.7);
+						const cleanedText = cleanGeneratedText(generatedText, prompt);
+						const sanitizedText = sanitizeAIContent(cleanedText, "description");
+						return sanitizedText;
+					} catch (_error) {
+						return generateFallbackDescription(validatedData, language);
+					}
+				})
+		);
 
 		// Record successful operation
 		await recordSuccessfulOperation("aiGeneration", clientId);
 
 		return { success: true, data: result };
 	} catch (error) {
-		console.error("AI description generation failed:", error);
-
 		// Record failed operation
 		await recordFailedOperation("aiGeneration", clientId);
 
 		// Fallback to template generation
 		const templateDescription = generateTemplateDescription(
 			propertyData,
-			options.language || "es",
+			options.language || "es"
 		);
 		const sanitizedTemplate = sanitizeAIContent(
 			templateDescription,
-			"description",
+			"description"
 		);
 
 		return {
@@ -275,7 +256,7 @@ export async function generatePropertyDescription(
  */
 export async function generatePropertyTags(
 	propertyData: PropertyBasicInfo,
-	options: GenerationOptions = {},
+	options: GenerationOptions = {}
 ): Promise<{ success: boolean; data?: string[]; error?: string }> {
 	try {
 		const { language = "es" } = options;
@@ -284,16 +265,12 @@ export async function generatePropertyTags(
 		const generatedText = await callGeminiAPI(prompt, 150, 0.5);
 		const cleanText = cleanGeneratedText(generatedText, prompt);
 		const tags = parseTagsFromText(cleanText);
-
-		console.log(`✅ Tags generation successful with Gemini`);
 		return { success: true, data: tags };
-	} catch (error) {
-		console.error("AI tags generation failed:", error);
-
+	} catch (_error) {
 		// Fallback to template generation
 		const templateTags = generateTemplateTags(
 			propertyData,
-			options.language || "es",
+			options.language || "es"
 		);
 		return { success: true, data: templateTags };
 	}
@@ -304,7 +281,7 @@ export async function generatePropertyTags(
  */
 export async function generateAllPropertyContent(
 	propertyData: PropertyBasicInfo,
-	options: GenerationOptions = {},
+	options: GenerationOptions = {}
 ): Promise<{
 	success: boolean;
 	data?: { title: string; description: string; tags: string[] };
@@ -338,8 +315,7 @@ export async function generateAllPropertyContent(
 			success: true,
 			data: { title, description, tags },
 		};
-	} catch (error) {
-		console.error("AI content generation failed:", error);
+	} catch (_error) {
 		return {
 			success: false,
 			error: "Error al generar contenido con IA",
@@ -352,7 +328,7 @@ export async function generateAllPropertyContent(
  */
 function buildEnhancedDescriptionPrompt(
 	propertyData: PropertyBasicInfo,
-	language: "es" | "en",
+	language: "es" | "en"
 ): string {
 	const {
 		type,
@@ -412,7 +388,7 @@ Descripción Mejorada:`;
  */
 function buildDescriptionPrompt(
 	propertyData: PropertyBasicInfo,
-	language: "es" | "en",
+	language: "es" | "en"
 ): string {
 	const {
 		type,
@@ -450,7 +426,7 @@ Descripción:`;
  */
 function buildTitlePrompt(
 	propertyData: PropertyBasicInfo,
-	language: "es" | "en",
+	language: "es" | "en"
 ): string {
 	const { type, location, characteristics } = propertyData;
 	const mainFeatures = characteristics.slice(0, 2).join(", ");
@@ -475,7 +451,7 @@ Título:`;
  */
 function buildTagsPrompt(
 	propertyData: PropertyBasicInfo,
-	language: "es" | "en",
+	language: "es" | "en"
 ): string {
 	const { type, location, characteristics } = propertyData;
 
@@ -497,7 +473,7 @@ Etiquetas:`;
  */
 function cleanGeneratedText(
 	generatedText: string,
-	originalPrompt: string,
+	originalPrompt: string
 ): string {
 	let cleaned = generatedText;
 
@@ -505,7 +481,7 @@ function cleanGeneratedText(
 	const promptLines = originalPrompt.split("\n");
 	const lastPromptLine = promptLines[promptLines.length - 1];
 
-	if (cleaned.includes(lastPromptLine)) {
+	if (typeof lastPromptLine === "string" && cleaned.includes(lastPromptLine)) {
 		cleaned = cleaned.split(lastPromptLine)[1] || cleaned;
 	}
 
@@ -567,7 +543,7 @@ function parseTagsFromText(text: string): string[] {
 // Fallback template methods
 function generateTemplateDescription(
 	propertyData: PropertyBasicInfo,
-	language: "es" | "en",
+	language: "es" | "en"
 ): string {
 	const {
 		type,
@@ -610,7 +586,7 @@ function generateTemplateDescription(
 
 function generateTemplateTitle(
 	propertyData: PropertyBasicInfo,
-	language: "es" | "en",
+	language: "es" | "en"
 ): string {
 	const { type, location, characteristics } = propertyData;
 	const mainFeature = characteristics[0] || "";
@@ -628,7 +604,7 @@ function generateTemplateTitle(
 
 function generateTemplateTags(
 	propertyData: PropertyBasicInfo,
-	language: "es" | "en",
+	language: "es" | "en"
 ): string[] {
 	const { type, characteristics } = propertyData;
 
@@ -647,7 +623,7 @@ function generateTemplateTags(
  */
 function _generateFallbackTitle(
 	propertyData: PropertyBasicInfo,
-	language: "es" | "en",
+	language: "es" | "en"
 ): string {
 	const { type, location, price, surface, bedrooms, bathrooms } = propertyData;
 
@@ -683,7 +659,7 @@ function _generateFallbackTitle(
  */
 function generateFallbackDescription(
 	propertyData: PropertyBasicInfo,
-	language: "es" | "en",
+	language: "es" | "en"
 ): string {
 	const {
 		type,
@@ -706,13 +682,14 @@ function generateFallbackDescription(
 			description += `featuring ${bedrooms} bedroom${bedrooms > 1 ? "s" : ""} and ${bathrooms} bathroom${bathrooms > 1 ? "s" : ""}, `;
 		}
 
-		description += `this property offers comfort and style. `;
+		description += "this property offers comfort and style. ";
 
 		if (characteristics.length > 0) {
 			description += `Notable features include ${characteristics.slice(0, 3).join(", ")}. `;
 		}
 
-		description += `Perfect for those seeking quality living in a prime location. Contact us today to schedule a viewing!`;
+		description +=
+			"Perfect for those seeking quality living in a prime location. Contact us today to schedule a viewing!";
 
 		return description;
 	}
@@ -727,13 +704,14 @@ function generateFallbackDescription(
 		description += `cuenta con ${bedrooms} habitacion${bedrooms > 1 ? "es" : ""} y ${bathrooms} baño${bathrooms > 1 ? "s" : ""}, `;
 	}
 
-	description += `esta propiedad ofrece comodidad y estilo. `;
+	description += "esta propiedad ofrece comodidad y estilo. ";
 
 	if (characteristics.length > 0) {
 		description += `Entre sus características destacadas se encuentran ${characteristics.slice(0, 3).join(", ")}. `;
 	}
 
-	description += `Perfecta para quienes buscan calidad de vida en una ubicación privilegiada. ¡Contáctanos hoy para agendar una visita!`;
+	description +=
+		"Perfecta para quienes buscan calidad de vida en una ubicación privilegiada. ¡Contáctanos hoy para agendar una visita!";
 
 	return description;
 }
@@ -743,7 +721,7 @@ function generateFallbackDescription(
  */
 function _generateFallbackTags(
 	propertyData: PropertyBasicInfo,
-	language: "es" | "en",
+	language: "es" | "en"
 ): string[] {
 	const { type, location, characteristics } = propertyData;
 
@@ -763,7 +741,7 @@ function _generateFallbackTags(
  */
 function convertToRichTextContent(
 	text: string,
-	language: "es" | "en",
+	language: "es" | "en"
 ): RichTextContent {
 	// Split text into paragraphs
 	const paragraphs = text.split("\n\n").filter((p) => p.trim().length > 0);
@@ -804,7 +782,7 @@ function convertToRichTextContent(
 			emphasisPatterns.forEach((pattern) => {
 				formattedParagraph = formattedParagraph.replace(
 					pattern,
-					"<strong>$1</strong>",
+					"<strong>$1</strong>"
 				);
 			});
 
@@ -824,7 +802,7 @@ function convertToRichTextContent(
  */
 function generateEnhancedFallbackDescription(
 	propertyData: PropertyBasicInfo,
-	language: "es" | "en",
+	language: "es" | "en"
 ): RichTextContent {
 	const {
 		type,
@@ -892,14 +870,14 @@ function generateEnhancedFallbackDescription(
  */
 async function callGeminiAPI(
 	prompt: string,
-	maxTokens: number = 500,
-	temperature: number = 0.7,
+	maxTokens = 500,
+	temperature = 0.7
 ): Promise<string> {
 	if (!GEMINI_API_KEY) {
 		throw new AIServiceError(
 			"Gemini API key not configured",
 			"API_ERROR",
-			false,
+			false
 		);
 	}
 
@@ -929,7 +907,7 @@ async function callGeminiAPI(
 			throw new AIServiceError(
 				`Gemini API error: ${response.status}`,
 				"API_ERROR",
-				response.status >= 500,
+				response.status >= 500
 			);
 		}
 
@@ -968,17 +946,15 @@ async function callGeminiAPI(
 		// Debug logging removed for production
 
 		if (!generatedText || generatedText.length < 10) {
-			console.error("Gemini response structure:", data);
 			throw new AIServiceError(
 				"No valid text generated by Gemini",
 				"INVALID_RESPONSE",
-				true,
+				true
 			);
 		}
 
 		return generatedText;
 	} catch (error) {
-		console.error("Gemini API call failed:", error);
 		throw error instanceof AIServiceError
 			? error
 			: new AIServiceError("Gemini service unavailable", "NETWORK_ERROR", true);
@@ -995,7 +971,7 @@ async function callGeminiAPI(
 export async function generateLandDescription(
 	landData: any,
 	options: GenerationOptions = {},
-	userId?: string,
+	userId?: string
 ): Promise<{ success: boolean; data?: string; error?: string }> {
 	const clientId = userId ? `user:${userId}` : "anonymous";
 
@@ -1011,55 +987,41 @@ export async function generateLandDescription(
 		const aiEnabled = process.env.ENABLE_AI_GENERATION === "true";
 
 		if (!aiEnabled) {
-			console.log(
-				"AI service disabled via environment variable - using fallback content",
-			);
 			throw new AIServiceError("AI service disabled", "API_ERROR", false);
 		}
 
 		// Generate with Gemini AI
-		const result = await retryAIOperation(async () => {
-			return await circuitBreakers.aiService.execute(async () => {
-				const prompt = buildLandDescriptionPrompt(validatedData, language);
-				const generatedText = await callGeminiAPI(prompt, maxLength, 0.7);
+		const result = await retryAIOperation(
+			async () =>
+				await circuitBreakers.aiService.execute(async () => {
+					const prompt = buildLandDescriptionPrompt(validatedData, language);
+					const generatedText = await callGeminiAPI(prompt, maxLength, 0.7);
 
-				const cleanedText = cleanGeneratedText(generatedText, prompt);
-				const sanitizedText = sanitizeAIContent(cleanedText, "description");
+					const cleanedText = cleanGeneratedText(generatedText, prompt);
+					const sanitizedText = sanitizeAIContent(cleanedText, "description");
 
-				if (sanitizedText.length < 50) {
-					throw new AIServiceError(
-						"Generated text too short",
-						"API_ERROR",
-						true,
-					);
-				}
-
-				console.log(`✅ AI generation successful with Gemini`);
-				return sanitizedText;
-			});
-		});
+					if (sanitizedText.length < 50) {
+						throw new AIServiceError(
+							"Generated text too short",
+							"API_ERROR",
+							true
+						);
+					}
+					return sanitizedText;
+				})
+		);
 
 		await recordSuccessfulOperation("aiGeneration", clientId);
 		return { success: true, data: result };
 	} catch (error) {
 		await recordFailedOperation("aiGeneration", clientId);
-		console.error("Land description generation failed:", error);
 
 		// Log detailed error information for debugging
 		if (error instanceof AIServiceError) {
-			console.error("AI Service Error Details:", {
-				code: error.code,
-				retryable: error.retryable,
-				context: error.context,
-				userMessage: error.userMessage,
-			});
 		}
-
-		// Return fallback description with success flag
-		console.log("Using fallback land description due to AI service failure");
 		const fallbackDescription = generateLandFallbackDescription(
 			landData,
-			options.language || "es",
+			options.language || "es"
 		);
 		return { success: true, data: fallbackDescription };
 	}
@@ -1071,7 +1033,7 @@ export async function generateLandDescription(
 export async function generateLandTitle(
 	landData: any,
 	options: GenerationOptions = {},
-	userId?: string,
+	userId?: string
 ): Promise<{ success: boolean; data?: string; error?: string }> {
 	const clientId = userId ? `user:${userId}` : "anonymous";
 
@@ -1083,36 +1045,34 @@ export async function generateLandTitle(
 		const validatedData = LandBasicInfoSchema.parse(landData);
 		const { language = "es", maxLength = 100 } = options;
 
-		const result = await retryAIOperation(async () => {
-			return await circuitBreakers.aiService.execute(async () => {
-				const prompt = buildLandTitlePrompt(validatedData, language);
-				const generatedText = await callGeminiAPI(prompt, maxLength, 0.6);
-				const cleanedText = cleanGeneratedText(generatedText, prompt);
-				const sanitizedText = sanitizeAIContent(cleanedText, "title");
+		const result = await retryAIOperation(
+			async () =>
+				await circuitBreakers.aiService.execute(async () => {
+					const prompt = buildLandTitlePrompt(validatedData, language);
+					const generatedText = await callGeminiAPI(prompt, maxLength, 0.6);
+					const cleanedText = cleanGeneratedText(generatedText, prompt);
+					const sanitizedText = sanitizeAIContent(cleanedText, "title");
 
-				if (sanitizedText.length < 10) {
-					throw new AIServiceError(
-						"Generated title too short",
-						"API_ERROR",
-						true,
-					);
-				}
-
-				console.log(`✅ Land title generation successful with Gemini`);
-				return sanitizedText;
-			});
-		});
+					if (sanitizedText.length < 10) {
+						throw new AIServiceError(
+							"Generated title too short",
+							"API_ERROR",
+							true
+						);
+					}
+					return sanitizedText;
+				})
+		);
 
 		await recordSuccessfulOperation("aiGeneration", clientId);
 		return { success: true, data: result };
-	} catch (error) {
+	} catch (_error) {
 		await recordFailedOperation("aiGeneration", clientId);
-		console.error("Land title generation failed:", error);
 
 		// Return fallback title
 		const fallbackTitle = generateLandFallbackTitle(
 			landData,
-			options.language || "es",
+			options.language || "es"
 		);
 		return { success: true, data: fallbackTitle };
 	}
@@ -1123,7 +1083,7 @@ export async function generateLandTitle(
  */
 function buildLandDescriptionPrompt(
 	landData: any,
-	language: "es" | "en",
+	language: "es" | "en"
 ): string {
 	const {
 		landType,
@@ -1138,7 +1098,7 @@ function buildLandDescriptionPrompt(
 	if (language === "en") {
 		return `Write a compelling real estate description for a ${landType} land in ${location}.
 Price: ${price.toLocaleString()} USD
-Surface: ${surface}m² (${(surface / 10000).toFixed(2)} hectares)
+Surface: ${surface}m² (${(surface / 10_000).toFixed(2)} hectares)
 ${zoning ? `Zoning: ${zoning}` : ""}
 ${utilities && utilities.length > 0 ? `Utilities: ${utilities.join(", ")}` : ""}
 ${characteristics && characteristics.length > 0 ? `Features: ${characteristics.join(", ")}` : ""}
@@ -1150,7 +1110,7 @@ Description:`;
 
 	return `Escribe una descripción atractiva para un terreno ${landType} en ${location}.
 Precio: ${price.toLocaleString()} USD
-Superficie: ${surface}m² (${(surface / 10000).toFixed(2)} hectáreas)
+Superficie: ${surface}m² (${(surface / 10_000).toFixed(2)} hectáreas)
 ${zoning ? `Zonificación: ${zoning}` : ""}
 ${utilities && utilities.length > 0 ? `Servicios: ${utilities.join(", ")}` : ""}
 ${characteristics && characteristics.length > 0 ? `Características: ${characteristics.join(", ")}` : ""}
@@ -1188,7 +1148,7 @@ Título:`;
  */
 function generateLandFallbackDescription(
 	landData: any,
-	language: "es" | "en",
+	language: "es" | "en"
 ): string {
 	const {
 		landType,
@@ -1203,8 +1163,9 @@ function generateLandFallbackDescription(
 	if (language === "en") {
 		let description = `Discover this exceptional ${landType} land located in ${location}. `;
 
-		description += `With ${surface.toLocaleString()} square meters (${(surface / 10000).toFixed(2)} hectares) of prime real estate, `;
-		description += `this property offers endless possibilities for development and investment. `;
+		description += `With ${surface.toLocaleString()} square meters (${(surface / 10_000).toFixed(2)} hectares) of prime real estate, `;
+		description +=
+			"this property offers endless possibilities for development and investment. ";
 
 		if (zoning) {
 			description += `The land is zoned for ${zoning}, providing flexibility for various projects. `;
@@ -1220,15 +1181,16 @@ function generateLandFallbackDescription(
 
 		description += `Strategically positioned in ${location}, this land offers excellent access and growth potential. `;
 		description += `Priced at ${price.toLocaleString()} USD, this represents a valuable investment opportunity. `;
-		description += `Contact us today to explore the possibilities!`;
+		description += "Contact us today to explore the possibilities!";
 
 		return description;
 	}
 
 	let description = `Descubre este excepcional terreno ${landType} ubicado en ${location}. `;
 
-	description += `Con ${surface.toLocaleString()} metros cuadrados (${(surface / 10000).toFixed(2)} hectáreas) de propiedad inmobiliaria privilegiada, `;
-	description += `esta propiedad ofrece infinitas posibilidades para desarrollo e inversión. `;
+	description += `Con ${surface.toLocaleString()} metros cuadrados (${(surface / 10_000).toFixed(2)} hectáreas) de propiedad inmobiliaria privilegiada, `;
+	description +=
+		"esta propiedad ofrece infinitas posibilidades para desarrollo e inversión. ";
 
 	if (zoning) {
 		description += `El terreno está zonificado para ${zoning}, proporcionando flexibilidad para diversos proyectos. `;
@@ -1244,7 +1206,7 @@ function generateLandFallbackDescription(
 
 	description += `Estratégicamente posicionado en ${location}, este terreno ofrece excelente acceso y potencial de crecimiento. `;
 	description += `Con un precio de ${price.toLocaleString()} USD, representa una valiosa oportunidad de inversión. `;
-	description += `¡Contáctanos hoy para explorar las posibilidades!`;
+	description += "¡Contáctanos hoy para explorar las posibilidades!";
 
 	return description;
 }
@@ -1254,10 +1216,10 @@ function generateLandFallbackDescription(
  */
 function generateLandFallbackTitle(
 	landData: any,
-	language: "es" | "en",
+	language: "es" | "en"
 ): string {
 	const { landType, location, surface } = landData;
-	const hectares = (surface / 10000).toFixed(1);
+	const hectares = (surface / 10_000).toFixed(1);
 
 	if (language === "en") {
 		return `${landType} Land in ${location} - ${hectares} Hectares`;

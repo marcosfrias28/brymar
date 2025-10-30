@@ -1,6 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
+
 // import {
 // 	createContactInfo,
 // 	deleteContactInfo,
@@ -8,20 +9,23 @@ import { useQueryClient } from "@tanstack/react-query";
 // } from "@/lib/actions/sections-actions"; // TODO: Create sections-actions
 
 // Placeholder functions until sections-actions is implemented
-const createContactInfo = async (formData: FormData) => {
-	console.warn("createContactInfo not implemented");
-	return { success: false, error: "Not implemented", data: null };
-};
+const createContactInfo = async (_formData: FormData) => ({
+	success: false,
+	error: "Not implemented",
+	data: null,
+});
 
-const updateContactInfo = async (formData: FormData) => {
-	console.warn("updateContactInfo not implemented");
-	return { success: false, error: "Not implemented", data: null };
-};
+const updateContactInfo = async (_formData: FormData) => ({
+	success: false,
+	error: "Not implemented",
+	data: null,
+});
 
-const deleteContactInfo = async (formData: FormData) => {
-	console.warn("deleteContactInfo not implemented");
-	return { success: false, error: "Not implemented", data: null };
-};
+const deleteContactInfo = async (_formData: FormData) => ({
+	success: false,
+	error: "Not implemented",
+	data: null,
+});
 // import type { ContactInfo } from "@/lib/db/schema"; // TODO: Create ContactInfo type
 type ContactInfo = {
 	id: number;
@@ -30,6 +34,7 @@ type ContactInfo = {
 	value: string;
 	icon?: string;
 };
+
 import { queryKeys } from "@/lib/query/keys";
 import {
 	useCreateMutation,
@@ -38,14 +43,14 @@ import {
 } from "./use-base-mutation";
 
 // Types for contact info mutations
-export interface CreateContactInfoData {
+export type CreateContactInfoData = {
 	type: string;
 	label: string;
 	value: string;
 	icon?: string;
 	isActive?: boolean;
 	order?: number;
-}
+};
 
 export interface UpdateContactInfoData extends CreateContactInfoData {
 	id: number;
@@ -67,7 +72,7 @@ export function useCreateContactInfo() {
 			const result = await createContactInfo(formData);
 			if (!result.success) {
 				throw new Error(
-					result.error || "Error al crear la información de contacto",
+					result.error || "Error al crear la información de contacto"
 				);
 			}
 			return result.data;
@@ -79,7 +84,7 @@ export function useCreateContactInfo() {
 			}),
 			successMessage: "Información de contacto creada exitosamente",
 			errorMessage: "Error al crear la información de contacto",
-		},
+		}
 	);
 }
 
@@ -101,7 +106,7 @@ export function useUpdateContactInfo() {
 			const result = await updateContactInfo(formData);
 			if (!result.success) {
 				throw new Error(
-					result.error || "Error al actualizar la información de contacto",
+					result.error || "Error al actualizar la información de contacto"
 				);
 			}
 			return result.data;
@@ -127,7 +132,7 @@ export function useUpdateContactInfo() {
 					const updatedList = previousList.map((item) =>
 						item.id === variables.id
 							? { ...item, ...variables, updatedAt: new Date() }
-							: item,
+							: item
 					);
 					queryClient.setQueryData(listQueryKey, updatedList);
 				}
@@ -152,7 +157,7 @@ export function useUpdateContactInfo() {
 				if (context?.previousDetail && context?.detailQueryKey) {
 					queryClient.setQueryData(
 						context.detailQueryKey,
-						context.previousDetail,
+						context.previousDetail
 					);
 				}
 			},
@@ -163,7 +168,7 @@ export function useUpdateContactInfo() {
 			}),
 			successMessage: "Información de contacto actualizada exitosamente",
 			errorMessage: "Error al actualizar la información de contacto",
-		},
+		}
 	);
 }
 
@@ -181,7 +186,7 @@ export function useDeleteContactInfo() {
 			const result = await deleteContactInfo(formData);
 			if (!result.success) {
 				throw new Error(
-					result.error || "Error al eliminar la información de contacto",
+					result.error || "Error al eliminar la información de contacto"
 				);
 			}
 			return result.data;
@@ -201,7 +206,7 @@ export function useDeleteContactInfo() {
 				// Optimistically remove the item
 				if (previousList) {
 					const updatedList = previousList.filter(
-						(item) => item.id !== variables.id,
+						(item) => item.id !== variables.id
 					);
 					queryClient.setQueryData(listQueryKey, updatedList);
 				}
@@ -219,7 +224,7 @@ export function useDeleteContactInfo() {
 			invalidateOn: "contact.delete",
 			successMessage: "Información de contacto eliminada exitosamente",
 			errorMessage: "Error al eliminar la información de contacto",
-		},
+		}
 	);
 }
 

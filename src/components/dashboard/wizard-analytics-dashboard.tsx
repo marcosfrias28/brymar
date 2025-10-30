@@ -34,7 +34,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-interface AnalyticsSummary {
+type AnalyticsSummary = {
 	totalSessions: number;
 	completedWizards: number;
 	averageCompletionTime: number;
@@ -43,36 +43,36 @@ interface AnalyticsSummary {
 	uploadSuccessRate: number;
 	mostCommonDropoffStep: number;
 	activeUsers: number;
-}
+};
 
-interface StepAnalytics {
+type StepAnalytics = {
 	step: number;
 	stepName: string;
 	started: number;
 	completed: number;
 	averageTime: number;
 	dropoffRate: number;
-}
+};
 
-interface AIAnalytics {
+type AIAnalytics = {
 	type: string;
 	attempts: number;
 	successes: number;
 	failures: number;
 	averageResponseTime: number;
 	successRate: number;
-}
+};
 
-interface UploadAnalytics {
+type UploadAnalytics = {
 	totalUploads: number;
 	successfulUploads: number;
 	failedUploads: number;
 	averageUploadTime: number;
 	averageFileSize: number;
 	successRate: number;
-}
+};
 
-interface SystemHealthMetrics {
+type SystemHealthMetrics = {
 	huggingfaceStatus: "healthy" | "degraded" | "down";
 	vercelBlobStatus: "healthy" | "degraded" | "down";
 	geocodingStatus: "healthy" | "degraded" | "down";
@@ -86,7 +86,7 @@ interface SystemHealthMetrics {
 		vercelBlob: number;
 		geocoding: number;
 	};
-}
+};
 
 export function WizardAnalyticsDashboard() {
 	const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
@@ -95,7 +95,7 @@ export function WizardAnalyticsDashboard() {
 	const [uploadAnalytics, setUploadAnalytics] =
 		useState<UploadAnalytics | null>(null);
 	const [systemHealth, setSystemHealth] = useState<SystemHealthMetrics | null>(
-		null,
+		null
 	);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -112,14 +112,24 @@ export function WizardAnalyticsDashboard() {
 					fetch(`/api/analytics/wizard/steps?timeRange=${timeRange}`),
 					fetch(`/api/analytics/wizard/ai?timeRange=${timeRange}`),
 					fetch(`/api/analytics/wizard/uploads?timeRange=${timeRange}`),
-					fetch(`/api/analytics/wizard/health`),
+					fetch("/api/analytics/wizard/health"),
 				]);
 
-			if (!summaryRes.ok) throw new Error("Failed to fetch summary");
-			if (!stepsRes.ok) throw new Error("Failed to fetch step analytics");
-			if (!aiRes.ok) throw new Error("Failed to fetch AI analytics");
-			if (!uploadRes.ok) throw new Error("Failed to fetch upload analytics");
-			if (!healthRes.ok) throw new Error("Failed to fetch system health");
+			if (!summaryRes.ok) {
+				throw new Error("Failed to fetch summary");
+			}
+			if (!stepsRes.ok) {
+				throw new Error("Failed to fetch step analytics");
+			}
+			if (!aiRes.ok) {
+				throw new Error("Failed to fetch AI analytics");
+			}
+			if (!uploadRes.ok) {
+				throw new Error("Failed to fetch upload analytics");
+			}
+			if (!healthRes.ok) {
+				throw new Error("Failed to fetch system health");
+			}
 
 			const [summaryData, stepsData, aiData, uploadData, healthData] =
 				await Promise.all([
@@ -137,7 +147,7 @@ export function WizardAnalyticsDashboard() {
 			setSystemHealth(healthData);
 		} catch (err) {
 			setError(
-				err instanceof Error ? err.message : "Failed to fetch analytics",
+				err instanceof Error ? err.message : "Failed to fetch analytics"
 			);
 		} finally {
 			setLoading(false);
@@ -177,12 +187,12 @@ export function WizardAnalyticsDashboard() {
 	if (loading) {
 		return (
 			<div className="space-y-6">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-					{[...Array(4)].map((_, i) => (
+				<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+					{[...new Array(4)].map((_, i) => (
 						<Card key={i}>
 							<CardHeader className="animate-pulse">
-								<div className="h-4 bg-gray-200 rounded w-3/4"></div>
-								<div className="h-8 bg-gray-200 rounded w-1/2"></div>
+								<div className="h-4 w-3/4 rounded bg-gray-200" />
+								<div className="h-8 w-1/2 rounded bg-gray-200" />
 							</CardHeader>
 						</Card>
 					))}
@@ -203,15 +213,15 @@ export function WizardAnalyticsDashboard() {
 	return (
 		<div className="space-y-6">
 			{/* Time Range Selector */}
-			<div className="flex justify-between items-center">
-				<h2 className="text-2xl font-bold">Wizard Analytics</h2>
+			<div className="flex items-center justify-between">
+				<h2 className="font-bold text-2xl">Wizard Analytics</h2>
 				<div className="flex gap-2">
 					{(["24h", "7d", "30d"] as const).map((range) => (
 						<Button
 							key={range}
-							variant={timeRange === range ? "default" : "outline"}
-							size="sm"
 							onClick={() => setTimeRange(range)}
+							size="sm"
+							variant={timeRange === range ? "default" : "outline"}
 						>
 							{range === "24h"
 								? "24 Hours"
@@ -225,17 +235,17 @@ export function WizardAnalyticsDashboard() {
 
 			{/* Summary Cards */}
 			{summary && (
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+				<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
 					<Card>
 						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium">
+							<CardTitle className="font-medium text-sm">
 								Total Sessions
 							</CardTitle>
 							<Users className="h-4 w-4 text-muted-foreground" />
 						</CardHeader>
 						<CardContent>
-							<div className="text-2xl font-bold">{summary.totalSessions}</div>
-							<p className="text-xs text-muted-foreground">
+							<div className="font-bold text-2xl">{summary.totalSessions}</div>
+							<p className="text-muted-foreground text-xs">
 								{summary.activeUsers} active users
 							</p>
 						</CardContent>
@@ -243,55 +253,55 @@ export function WizardAnalyticsDashboard() {
 
 					<Card>
 						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium">
+							<CardTitle className="font-medium text-sm">
 								Completion Rate
 							</CardTitle>
 							<TrendingUp className="h-4 w-4 text-muted-foreground" />
 						</CardHeader>
 						<CardContent>
-							<div className="text-2xl font-bold">
+							<div className="font-bold text-2xl">
 								{summary.completionRate.toFixed(1)}%
 							</div>
-							<Progress value={summary.completionRate} className="mt-2" />
+							<Progress className="mt-2" value={summary.completionRate} />
 						</CardContent>
 					</Card>
 
 					<Card>
 						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium">
+							<CardTitle className="font-medium text-sm">
 								AI Success Rate
 							</CardTitle>
 							<Brain className="h-4 w-4 text-muted-foreground" />
 						</CardHeader>
 						<CardContent>
-							<div className="text-2xl font-bold">
+							<div className="font-bold text-2xl">
 								{summary.aiGenerationSuccessRate.toFixed(1)}%
 							</div>
 							<Progress
-								value={summary.aiGenerationSuccessRate}
 								className="mt-2"
+								value={summary.aiGenerationSuccessRate}
 							/>
 						</CardContent>
 					</Card>
 
 					<Card>
 						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium">
+							<CardTitle className="font-medium text-sm">
 								Upload Success Rate
 							</CardTitle>
 							<Upload className="h-4 w-4 text-muted-foreground" />
 						</CardHeader>
 						<CardContent>
-							<div className="text-2xl font-bold">
+							<div className="font-bold text-2xl">
 								{summary.uploadSuccessRate.toFixed(1)}%
 							</div>
-							<Progress value={summary.uploadSuccessRate} className="mt-2" />
+							<Progress className="mt-2" value={summary.uploadSuccessRate} />
 						</CardContent>
 					</Card>
 				</div>
 			)}
 
-			<Tabs defaultValue="steps" className="space-y-4">
+			<Tabs className="space-y-4" defaultValue="steps">
 				<TabsList>
 					<TabsTrigger value="steps">Step Analysis</TabsTrigger>
 					<TabsTrigger value="ai">AI Performance</TabsTrigger>
@@ -299,7 +309,7 @@ export function WizardAnalyticsDashboard() {
 					<TabsTrigger value="health">System Health</TabsTrigger>
 				</TabsList>
 
-				<TabsContent value="steps" className="space-y-4">
+				<TabsContent className="space-y-4" value="steps">
 					<Card>
 						<CardHeader>
 							<CardTitle>Step Completion Analysis</CardTitle>
@@ -308,7 +318,7 @@ export function WizardAnalyticsDashboard() {
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<ResponsiveContainer width="100%" height={300}>
+							<ResponsiveContainer height={300} width="100%">
 								<BarChart data={stepAnalytics}>
 									<CartesianGrid strokeDasharray="3 3" />
 									<XAxis dataKey="stepName" />
@@ -321,7 +331,7 @@ export function WizardAnalyticsDashboard() {
 						</CardContent>
 					</Card>
 
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 						{stepAnalytics.map((step) => (
 							<Card key={step.step}>
 								<CardHeader>
@@ -351,8 +361,8 @@ export function WizardAnalyticsDashboard() {
 										</span>
 									</div>
 									<Progress
-										value={(step.completed / step.started) * 100}
 										className="mt-2"
+										value={(step.completed / step.started) * 100}
 									/>
 								</CardContent>
 							</Card>
@@ -360,7 +370,7 @@ export function WizardAnalyticsDashboard() {
 					</div>
 				</TabsContent>
 
-				<TabsContent value="ai" className="space-y-4">
+				<TabsContent className="space-y-4" value="ai">
 					<Card>
 						<CardHeader>
 							<CardTitle>AI Generation Performance</CardTitle>
@@ -369,7 +379,7 @@ export function WizardAnalyticsDashboard() {
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+							<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 								{aiAnalytics.map((ai) => (
 									<Card key={ai.type}>
 										<CardHeader>
@@ -414,7 +424,7 @@ export function WizardAnalyticsDashboard() {
 													{ai.averageResponseTime}ms
 												</span>
 											</div>
-											<Progress value={ai.successRate} className="mt-2" />
+											<Progress className="mt-2" value={ai.successRate} />
 										</CardContent>
 									</Card>
 								))}
@@ -423,9 +433,9 @@ export function WizardAnalyticsDashboard() {
 					</Card>
 				</TabsContent>
 
-				<TabsContent value="uploads" className="space-y-4">
+				<TabsContent className="space-y-4" value="uploads">
 					{uploadAnalytics && (
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 							<Card>
 								<CardHeader>
 									<CardTitle>Upload Statistics</CardTitle>
@@ -479,14 +489,14 @@ export function WizardAnalyticsDashboard() {
 										<span>Avg File Size:</span>
 										<span className="font-semibold">
 											{(uploadAnalytics.averageFileSize / 1024 / 1024).toFixed(
-												1,
+												1
 											)}
 											MB
 										</span>
 									</div>
 									<Progress
-										value={uploadAnalytics.successRate}
 										className="mt-4"
+										value={uploadAnalytics.successRate}
 									/>
 								</CardContent>
 							</Card>
@@ -494,9 +504,9 @@ export function WizardAnalyticsDashboard() {
 					)}
 				</TabsContent>
 
-				<TabsContent value="health" className="space-y-4">
+				<TabsContent className="space-y-4" value="health">
 					{systemHealth && (
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+						<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 							<Card>
 								<CardHeader>
 									<CardTitle className="flex items-center gap-2">
@@ -507,7 +517,7 @@ export function WizardAnalyticsDashboard() {
 								<CardContent>
 									<div
 										className={`flex items-center gap-2 ${getStatusColor(
-											systemHealth.huggingfaceStatus,
+											systemHealth.huggingfaceStatus
 										)}`}
 									>
 										{getStatusIcon(systemHealth.huggingfaceStatus)}
@@ -542,7 +552,7 @@ export function WizardAnalyticsDashboard() {
 								<CardContent>
 									<div
 										className={`flex items-center gap-2 ${getStatusColor(
-											systemHealth.vercelBlobStatus,
+											systemHealth.vercelBlobStatus
 										)}`}
 									>
 										{getStatusIcon(systemHealth.vercelBlobStatus)}
@@ -577,7 +587,7 @@ export function WizardAnalyticsDashboard() {
 								<CardContent>
 									<div
 										className={`flex items-center gap-2 ${getStatusColor(
-											systemHealth.geocodingStatus,
+											systemHealth.geocodingStatus
 										)}`}
 									>
 										{getStatusIcon(systemHealth.geocodingStatus)}

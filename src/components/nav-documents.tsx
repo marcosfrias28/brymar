@@ -1,8 +1,8 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { LucideIcon } from "lucide-react";
 import {
 	SidebarGroup,
 	SidebarGroupLabel,
@@ -11,15 +11,15 @@ import {
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-interface NavDocument {
+type NavDocument = {
 	name: string;
 	url: string;
 	icon?: LucideIcon;
-}
+};
 
-interface NavDocumentsProps {
+type NavDocumentsProps = {
 	items: NavDocument[];
-}
+};
 
 export function NavDocuments({ items }: NavDocumentsProps) {
 	const pathname = usePathname();

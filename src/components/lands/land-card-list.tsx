@@ -4,14 +4,14 @@ import type { Land } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { LandCard } from "./land-card";
 
-interface LandCardListProps {
+type LandCardListProps = {
 	lands: Land[];
 	variant?: "horizontal" | "vertical";
 	showActions?: boolean;
 	onEdit?: (id: string) => void;
 	onView?: (id: string) => void;
 	className?: string;
-}
+};
 
 export function LandCardList({
 	lands,
@@ -32,17 +32,17 @@ export function LandCardList({
 				variant === "vertical"
 					? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
 					: "space-y-4",
-				className,
+				className
 			)}
 		>
 			{lands.map((land) => (
 				<LandCard
 					key={land.id}
 					land={land}
-					variant={variant}
-					showActions={showActions}
 					onEdit={onEdit}
 					onView={onView}
+					showActions={showActions}
+					variant={variant}
 				/>
 			))}
 		</div>

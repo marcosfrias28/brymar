@@ -43,7 +43,7 @@ test.describe("Authentication Flows", () => {
 
 		await expect(page.locator("body")).toContainText(
 			/created|creada|successful|verify|verificar|check/i,
-			{ timeout: 15000 },
+			{ timeout: 15_000 }
 		);
 	});
 
@@ -116,7 +116,7 @@ test.describe("Authentication Flows", () => {
 
 		// Verify page elements
 		await expect(page.locator("h1, h2")).toContainText(
-			/Recuperar|Forgot|Reset/,
+			/Recuperar|Forgot|Reset/
 		);
 		await expect(page.locator('input[name="email"]')).toBeVisible();
 
@@ -158,7 +158,7 @@ test.describe("Authentication Flows", () => {
 				"auth-session",
 				JSON.stringify({
 					user: { email: "test@example.com", id: "123", emailVerified: false },
-				}),
+				})
 			);
 		});
 
@@ -257,7 +257,7 @@ test.describe("Authentication Flows", () => {
 				// Should show some response (error for invalid code is expected)
 				await expect(page.locator("body")).toContainText(
 					/invalid|inválido|verified|verificado|error/i,
-					{ timeout: 10000 },
+					{ timeout: 10_000 }
 				);
 			}
 		}

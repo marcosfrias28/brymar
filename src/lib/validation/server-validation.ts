@@ -20,7 +20,7 @@ export const ServerPropertyValidationSchema = z.object({
 		.max(100, "El título no puede exceder 100 caracteres")
 		.regex(
 			/^[a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\s\-.,()]+$/,
-			"El título contiene caracteres no permitidos",
+			"El título contiene caracteres no permitidos"
 		),
 
 	description: z
@@ -29,25 +29,25 @@ export const ServerPropertyValidationSchema = z.object({
 		.max(5000, "La descripción no puede exceder 5000 caracteres")
 		.refine(
 			(desc) => !containsMaliciousContent(desc),
-			"La descripción contiene contenido no permitido",
+			"La descripción contiene contenido no permitido"
 		),
 
 	price: z.coerce
 		.number()
 		.positive("El precio debe ser mayor a 0")
-		.max(100000000, "El precio excede el límite máximo")
+		.max(100_000_000, "El precio excede el límite máximo")
 		.refine(
 			(price) => Number.isFinite(price) && price > 0,
-			"El precio debe ser un número válido",
+			"El precio debe ser un número válido"
 		),
 
 	surface: z.coerce
 		.number()
 		.positive("La superficie debe ser mayor a 0")
-		.max(100000, "La superficie excede el límite máximo")
+		.max(100_000, "La superficie excede el límite máximo")
 		.refine(
 			(surface) => Number.isFinite(surface) && surface > 0,
-			"La superficie debe ser un número válido",
+			"La superficie debe ser un número válido"
 		),
 
 	propertyType: z.nativeEnum(PropertyType, {
@@ -75,13 +75,13 @@ export const ServerPropertyValidationSchema = z.object({
 				name: z.string().max(50, "Característica demasiado larga"),
 				category: z.enum(["amenity", "feature", "location"]),
 				selected: z.boolean(),
-			}),
+			})
 		)
 		.min(1, "Debe seleccionar al menos una característica")
 		.max(20, "Demasiadas características seleccionadas")
 		.refine(
 			(chars) => chars.every((char) => !containsMaliciousContent(char.name)),
-			"Las características contienen contenido no permitido",
+			"Las características contienen contenido no permitido"
 		),
 
 	// Step 2: Location
@@ -103,7 +103,7 @@ export const ServerPropertyValidationSchema = z.object({
 			.max(200, "La dirección es demasiado larga")
 			.refine(
 				(street) => !containsMaliciousContent(street),
-				"La dirección contiene caracteres no permitidos",
+				"La dirección contiene caracteres no permitidos"
 			),
 		city: z
 			.string()
@@ -111,7 +111,7 @@ export const ServerPropertyValidationSchema = z.object({
 			.max(100, "El nombre de la ciudad es demasiado largo")
 			.refine(
 				(city) => /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s-]+$/.test(city),
-				"El nombre de la ciudad contiene caracteres no válidos",
+				"El nombre de la ciudad contiene caracteres no válidos"
 			),
 		province: z
 			.string()
@@ -119,7 +119,7 @@ export const ServerPropertyValidationSchema = z.object({
 			.max(100, "El nombre de la provincia es demasiado largo")
 			.refine(
 				(province) => isValidDominicanProvince(province),
-				"Provincia no válida para República Dominicana",
+				"Provincia no válida para República Dominicana"
 			),
 		postalCode: z
 			.string()
@@ -148,7 +148,7 @@ export const ServerPropertyValidationSchema = z.object({
 					.max(255, "Nombre de archivo demasiado largo")
 					.refine(
 						(filename) => /\.(jpg|jpeg|png|webp)$/i.test(filename),
-						"Tipo de archivo de imagen no válido",
+						"Tipo de archivo de imagen no válido"
 					),
 				size: z.coerce
 					.number()
@@ -158,7 +158,7 @@ export const ServerPropertyValidationSchema = z.object({
 					["image/jpeg", "image/jpg", "image/png", "image/webp"],
 					{
 						message: "Tipo de contenido de imagen no válido",
-					},
+					}
 				),
 				displayOrder: z.coerce
 					.number()
@@ -166,7 +166,7 @@ export const ServerPropertyValidationSchema = z.object({
 					.min(0, "El orden de visualización no puede ser negativo"),
 				width: z.coerce.number().positive().optional(),
 				height: z.coerce.number().positive().optional(),
-			}),
+			})
 		)
 		.min(1, "Debe incluir al menos una imagen")
 		.max(20, "Demasiadas imágenes (máximo 20)"),
@@ -180,7 +180,7 @@ export const ServerPropertyValidationSchema = z.object({
 				size: z.coerce.number().max(100 * 1024 * 1024), // 100MB max for videos
 				contentType: z.string().regex(/^video\//),
 				displayOrder: z.coerce.number().int().min(0),
-			}),
+			})
 		)
 		.optional(),
 
@@ -291,7 +291,7 @@ function isValidDominicanProvince(province: string): boolean {
 	];
 
 	return dominicanProvinces.some(
-		(validProvince) => validProvince.toLowerCase() === province.toLowerCase(),
+		(validProvince) => validProvince.toLowerCase() === province.toLowerCase()
 	);
 }
 
@@ -299,7 +299,7 @@ function isValidDominicanProvince(province: string): boolean {
  * Validate complete property form data on server
  */
 export async function validatePropertyFormData(
-	data: unknown,
+	data: unknown
 ): Promise<PropertyFormData> {
 	try {
 		return ServerPropertyValidationSchema.parse(data);
@@ -328,7 +328,7 @@ export async function validatePropertyFormData(
  * Validate property basic info for AI generation
  */
 export async function validatePropertyBasicInfo(
-	data: unknown,
+	data: unknown
 ): Promise<PropertyBasicInfo> {
 	try {
 		return PropertyBasicInfoSchema.parse(data);
@@ -347,7 +347,7 @@ export async function validatePropertyBasicInfo(
 			throw new ValidationError(
 				fieldErrors,
 				"Información básica de propiedad no válida",
-				{ zodError: error.issues },
+				{ zodError: error.issues }
 			);
 		}
 
@@ -380,14 +380,14 @@ export function validateFileUpload(file: {
 	if (!allowedTypes.includes(file.type)) {
 		throw new ValidationError(
 			{ fileType: ["Tipo de archivo no permitido"] },
-			"Tipo de archivo no válido",
+			"Tipo de archivo no válido"
 		);
 	}
 
 	if (file.size > maxSize) {
 		throw new ValidationError(
 			{ fileSize: ["Archivo demasiado grande"] },
-			"Archivo excede el tamaño máximo",
+			"Archivo excede el tamaño máximo"
 		);
 	}
 
@@ -395,7 +395,7 @@ export function validateFileUpload(file: {
 	if (containsMaliciousContent(file.name)) {
 		throw new ValidationError(
 			{ fileName: ["Nombre de archivo no válido"] },
-			"Nombre de archivo contiene caracteres no permitidos",
+			"Nombre de archivo contiene caracteres no permitidos"
 		);
 	}
 }
@@ -404,11 +404,11 @@ export function validateFileUpload(file: {
  * Rate limiting validation
  */
 export class RateLimiter {
-	private requests: Map<string, number[]> = new Map();
+	private readonly requests: Map<string, number[]> = new Map();
 
 	constructor(
-		private maxRequests: number = 10,
-		private windowMs: number = 60000, // 1 minute
+		private readonly maxRequests = 10,
+		private readonly windowMs = 60_000 // 1 minute
 	) {}
 
 	isAllowed(identifier: string): boolean {
@@ -452,7 +452,7 @@ export class RateLimiter {
 
 // Global rate limiters for different operations
 export const rateLimiters = {
-	aiGeneration: new RateLimiter(5, 60000), // 5 requests per minute
-	imageUpload: new RateLimiter(20, 60000), // 20 uploads per minute
-	draftSave: new RateLimiter(30, 60000), // 30 saves per minute
+	aiGeneration: new RateLimiter(5, 60_000), // 5 requests per minute
+	imageUpload: new RateLimiter(20, 60_000), // 20 uploads per minute
+	draftSave: new RateLimiter(30, 60_000), // 30 saves per minute
 } as const;

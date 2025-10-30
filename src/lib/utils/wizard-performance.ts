@@ -3,7 +3,7 @@
  * Provides performance tracking, lazy loading, and cleanup functionality
  */
 
-export interface WizardPerformanceMetrics {
+export type WizardPerformanceMetrics = {
 	loadTime: number;
 	stepTransitionTime: number;
 	completionTime: number;
@@ -11,9 +11,9 @@ export interface WizardPerformanceMetrics {
 	networkRequests: number;
 	errorCount: number;
 	retryCount: number;
-}
+};
 
-export interface WizardSession {
+export type WizardSession = {
 	id: string;
 	type: string;
 	startTime: number;
@@ -22,11 +22,11 @@ export interface WizardSession {
 	userAgent: string;
 	viewport: { width: number; height: number };
 	connectionType?: string;
-}
+};
 
 class WizardPerformanceMonitor {
-	private sessions = new Map<string, WizardSession>();
-	private observers = new Map<string, PerformanceObserver>();
+	private readonly sessions = new Map<string, WizardSession>();
+	private readonly observers = new Map<string, PerformanceObserver>();
 
 	/**
 	 * Start monitoring a wizard session
@@ -74,7 +74,7 @@ class WizardPerformanceMonitor {
 	recordStepTransition(
 		wizardId: string,
 		fromStep: number,
-		toStep: number,
+		toStep: number
 	): void {
 		const session = this.sessions.get(wizardId);
 		if (session) {
@@ -85,7 +85,7 @@ class WizardPerformanceMonitor {
 			this.trackCustomMetric(
 				wizardId,
 				`step_${fromStep}_to_${toStep}`,
-				transitionTime,
+				transitionTime
 			);
 		}
 	}
@@ -107,17 +107,10 @@ class WizardPerformanceMonitor {
 	/**
 	 * Record error occurrence
 	 */
-	recordError(wizardId: string, error: Error): void {
+	recordError(wizardId: string, _error: Error): void {
 		const session = this.sessions.get(wizardId);
 		if (session) {
 			session.metrics.errorCount++;
-
-			// Track error details
-			console.warn(`Wizard ${wizardId} error:`, {
-				message: error.message,
-				stack: error.stack,
-				timestamp: Date.now(),
-			});
 		}
 	}
 
@@ -156,12 +149,16 @@ class WizardPerformanceMonitor {
 	 * Setup performance observer for detailed metrics
 	 */
 	private setupPerformanceObserver(wizardId: string): void {
-		if (!("PerformanceObserver" in window)) return;
+		if (!("PerformanceObserver" in window)) {
+			return;
+		}
 
 		try {
 			const observer = new PerformanceObserver((list) => {
 				const session = this.sessions.get(wizardId);
-				if (!session) return;
+				if (!session) {
+					return;
+				}
 
 				for (const entry of list.getEntries()) {
 					if (entry.entryType === "navigation") {
@@ -178,9 +175,7 @@ class WizardPerformanceMonitor {
 
 			observer.observe({ entryTypes: ["navigation", "resource", "measure"] });
 			this.observers.set(wizardId, observer);
-		} catch (error) {
-			console.warn("Performance observer setup failed:", error);
-		}
+		} catch (_error) {}
 	}
 
 	/**
@@ -189,13 +184,13 @@ class WizardPerformanceMonitor {
 	private trackCustomMetric(
 		wizardId: string,
 		name: string,
-		_value: number,
+		_value: number
 	): void {
 		try {
 			performance.mark(`wizard-${wizardId}-${name}`);
 			performance.measure(
 				`wizard-${wizardId}-${name}-duration`,
-				`wizard-${wizardId}-${name}`,
+				`wizard-${wizardId}-${name}`
 			);
 		} catch (_error) {
 			// Silently fail if performance API is not available
@@ -217,7 +212,7 @@ class WizardPerformanceMonitor {
 	 * Log session metrics for analysis
 	 */
 	private logSessionMetrics(session: WizardSession): void {
-		const metrics = {
+		const _metrics = {
 			sessionId: session.id,
 			type: session.type,
 			duration: session.metrics.completionTime,
@@ -232,7 +227,6 @@ class WizardPerformanceMonitor {
 
 		// In production, send to analytics service
 		if (process.env.NODE_ENV === "development") {
-			console.log("Wizard Performance Metrics:", metrics);
 		}
 
 		// Could integrate with analytics services here
@@ -247,15 +241,15 @@ export const wizardPerformanceMonitor = new WizardPerformanceMonitor();
  * Lazy loading utilities for wizard components
  */
 export class WizardLazyLoader {
-	private loadedComponents = new Set<string>();
-	private loadingPromises = new Map<string, Promise<any>>();
+	private readonly loadedComponents = new Set<string>();
+	private readonly loadingPromises = new Map<string, Promise<any>>();
 
 	/**
 	 * Lazy load a wizard step component
 	 */
 	async loadStepComponent(
 		stepId: string,
-		loader: () => Promise<any>,
+		loader: () => Promise<any>
 	): Promise<any> {
 		if (this.loadedComponents.has(stepId)) {
 			return; // Already loaded
@@ -314,10 +308,13 @@ export class WizardLazyLoader {
  * Memory cleanup utilities
  */
 export class WizardMemoryManager {
-	private cleanupTasks = new Set<() => void>();
-	private intervals = new Set<NodeJS.Timeout>();
-	private timeouts = new Set<NodeJS.Timeout>();
-	private eventListeners = new Map<EventTarget, Map<string, EventListener>>();
+	private readonly cleanupTasks = new Set<() => void>();
+	private readonly intervals = new Set<NodeJS.Timeout>();
+	private readonly timeouts = new Set<NodeJS.Timeout>();
+	private readonly eventListeners = new Map<
+		EventTarget,
+		Map<string, EventListener>
+	>();
 
 	/**
 	 * Register cleanup task
@@ -346,7 +343,7 @@ export class WizardMemoryManager {
 	registerEventListener(
 		target: EventTarget,
 		event: string,
-		listener: EventListener,
+		listener: EventListener
 	): void {
 		if (!this.eventListeners.has(target)) {
 			this.eventListeners.set(target, new Map());
@@ -379,9 +376,7 @@ export class WizardMemoryManager {
 		this.cleanupTasks.forEach((task) => {
 			try {
 				task();
-			} catch (error) {
-				console.warn("Cleanup task failed:", error);
-			}
+			} catch (_error) {}
 		});
 		this.cleanupTasks.clear();
 	}
@@ -408,7 +403,7 @@ export const browserCompatibility = {
 	 */
 	isMobile(): boolean {
 		return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-			navigator.userAgent,
+			navigator.userAgent
 		);
 	},
 

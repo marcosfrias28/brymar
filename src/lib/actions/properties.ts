@@ -1,11 +1,11 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import { eq, sql } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth/auth";
-import db from "@/lib/db/drizzle";
+import { db } from "@/lib/db";
 import {
 	properties,
 	propertyInquiries,
@@ -18,11 +18,9 @@ import type {
 	CreatePropertyResult,
 	GetPropertyResult,
 	Property,
-	PropertySearchFilters,
-	PropertySearchResult,
+	PropertyType,
 	PublishPropertyInput,
 	PublishPropertyResult,
-	SearchPropertiesResult,
 	UpdatePropertyInput,
 	UpdatePropertyResult,
 } from "@/lib/types/properties";
@@ -32,7 +30,7 @@ import { handleActionError } from "@/lib/utils/errors";
  * Create a new property
  */
 export async function createProperty(
-	input: CreatePropertyInput,
+	input: CreatePropertyInput
 ): Promise<CreatePropertyResult> {
 	try {
 		const session = await auth.api.getSession({
@@ -57,7 +55,7 @@ export async function createProperty(
 				type: input.type,
 				features: input.features,
 				images: input.images || [],
-				featured: input.featured || false,
+				featured: input.featured,
 				userId: session.user.id,
 				status: "draft",
 				createdAt: now,
@@ -78,7 +76,7 @@ export async function createProperty(
  * Update an existing property
  */
 export async function updateProperty(
-	input: UpdatePropertyInput,
+	input: UpdatePropertyInput
 ): Promise<UpdatePropertyResult> {
 	try {
 		const session = await auth.api.getSession({
@@ -132,16 +130,16 @@ export async function updateProperty(
  * Update property action for useActionState
  */
 export async function updatePropertyAction(
-	prevState: UpdatePropertyResult,
-	formData: FormData,
+	_prevState: UpdatePropertyResult,
+	formData: FormData
 ): Promise<UpdatePropertyResult> {
 	try {
 		const id = formData.get("id") as string;
 		const title = formData.get("title") as string;
 		const description = formData.get("description") as string;
 		const price = formData.get("price") as string;
-		const type = formData.get("type") as string;
-		const status = formData.get("status") as string;
+		const typeStr = formData.get("type") as string;
+		const _status = formData.get("status") as string;
 		const bedrooms = formData.get("bedrooms") as string;
 		const bathrooms = formData.get("bathrooms") as string;
 		const area = formData.get("area") as string;
@@ -166,13 +164,31 @@ export async function updatePropertyAction(
 					features: [],
 				};
 
+		// Validate and cast property type to union
+		const allowedTypes: PropertyType[] = [
+			"house",
+			"apartment",
+			"condo",
+			"townhouse",
+			"villa",
+			"studio",
+			"penthouse",
+			"duplex",
+			"land",
+			"commercial",
+			"office",
+			"warehouse",
+		];
+		const type = allowedTypes.includes(typeStr as PropertyType)
+			? (typeStr as PropertyType)
+			: undefined;
+
 		const input: UpdatePropertyInput = {
 			id,
 			title,
 			description,
 			price: price ? Number.parseFloat(price) : undefined,
 			type,
-			status,
 			address,
 			features,
 			images,
@@ -224,8 +240,10 @@ export async function getPropertyById(id: string): Promise<GetPropertyResult> {
 }
 
 /**
- * Search properties with filters
+ * Search properties with filters - DEPRECATED
+ * Use searchProperties from property-actions.ts instead
  */
+/*
 export async function searchProperties(
 	filters: PropertySearchFilters = {},
 ): Promise<SearchPropertiesResult> {
@@ -240,73 +258,91 @@ export async function searchProperties(
 		const limit = Math.min(filters.limit || 20, 100); // Cap at 100
 		const offset = (page - 1) * limit;
 
-		// Build where conditions using raw SQL for simplicity
-		const whereConditions = [];
+		// Use Drizzle ORM query builder
+		let query = db.select().from(properties);
+		let countQuery = db.select({ count: sql`count(*)` }).from(properties);
 
+		// Apply filters using Drizzle ORM
+		const conditions = [];
+		
 		// Only show published properties for non-owners/non-admins
 		if (!session?.user?.id || session.user.role !== "admin") {
-			whereConditions.push(`status = 'published'`);
+			conditions.push(eq(properties.status, "published"));
 		}
-
+		
 		if (filters.minPrice !== undefined) {
-			whereConditions.push(`price >= ${filters.minPrice}`);
+			conditions.push(gte(properties.price, filters.minPrice));
 		}
-
 		if (filters.maxPrice !== undefined) {
-			whereConditions.push(`price <= ${filters.maxPrice}`);
+			conditions.push(lte(properties.price, filters.maxPrice));
 		}
-
 		if (filters.propertyTypes && filters.propertyTypes.length > 0) {
-			const types = filters.propertyTypes.map((t) => `'${t}'`).join(",");
-			whereConditions.push(`type IN (${types})`);
+			const typeConditions = filters.propertyTypes.map(type => eq(properties.type, type));
+			conditions.push(or(...typeConditions));
 		}
-
-		if (filters.location) {
-			whereConditions.push(`address->>'city' ILIKE '%${filters.location}%'`);
+		if (filters.bedrooms !== undefined) {
+			conditions.push(sql`${properties.features}->>'bedrooms' = ${filters.bedrooms.toString()}`);
 		}
-
+		if (filters.bathrooms !== undefined) {
+			conditions.push(sql`${properties.features}->>'bathrooms' = ${filters.bathrooms.toString()}`);
+		}
 		if (filters.featured !== undefined) {
-			whereConditions.push(`featured = ${filters.featured}`);
+			conditions.push(eq(properties.featured, filters.featured));
 		}
-
+		if (filters.location) {
+			conditions.push(sql`${properties.address}->>'city' ILIKE ${'%' + filters.location + '%'}`);
+		}
 		if (filters.userId) {
-			whereConditions.push(`user_id = '${filters.userId}'`);
+			conditions.push(eq(properties.userId, filters.userId));
 		}
-
 		if (filters.status && filters.status.length > 0) {
-			const statuses = filters.status.map((s) => `'${s}'`).join(",");
-			whereConditions.push(`status IN (${statuses})`);
+			const statusConditions = filters.status.map(status => eq(properties.status, status));
+			conditions.push(or(...statusConditions));
 		}
 
-		const whereClause =
-			whereConditions.length > 0
-				? `WHERE ${whereConditions.join(" AND ")}`
-				: "";
+		// Apply conditions if any
+		if (conditions.length > 0) {
+			const whereCondition = conditions.length === 1 ? conditions[0] : and(...conditions);
+			query = query.where(whereCondition);
+			countQuery = countQuery.where(whereCondition);
+		}
 
 		// Apply sorting
-		const sortBy = filters.sortBy || "created_at";
+		const sortBy = filters.sortBy || "createdAt";
 		const sortOrder = filters.sortOrder || "desc";
-		const orderClause = `ORDER BY ${sortBy} ${sortOrder.toUpperCase()}`;
+		
+		if (sortOrder === "desc") {
+			if (sortBy === "createdAt") {
+				query = query.orderBy(desc(properties.createdAt));
+			} else if (sortBy === "price") {
+				query = query.orderBy(desc(properties.price));
+			} else if (sortBy === "publishedAt") {
+				query = query.orderBy(desc(properties.publishedAt));
+			} else {
+				query = query.orderBy(desc(properties.createdAt));
+			}
+		} else {
+			if (sortBy === "createdAt") {
+				query = query.orderBy(properties.createdAt);
+			} else if (sortBy === "price") {
+				query = query.orderBy(properties.price);
+			} else if (sortBy === "publishedAt") {
+				query = query.orderBy(properties.publishedAt);
+			} else {
+				query = query.orderBy(properties.createdAt);
+			}
+		}
 
-		// Execute queries using raw SQL for better compatibility
-		const propertiesQuery = `
-            SELECT * FROM properties 
-            ${whereClause} 
-            ${orderClause} 
-            LIMIT ${limit} OFFSET ${offset}
-        `;
+		// Apply pagination
+		query = query.limit(limit).offset(offset);
 
-		const countQuery = `
-            SELECT COUNT(*) as count FROM properties 
-            ${whereClause}
-        `;
-
+		// Execute queries
 		const [propertiesResult, countResult] = await Promise.all([
-			db.execute(sql.raw(propertiesQuery)),
-			db.execute(sql.raw(countQuery)),
+			query,
+			countQuery,
 		]);
 
-		const total = Number(countResult.rows[0]?.count || 0);
+		const total = Number(countResult[0]?.count || 0);
 		const totalPages = Math.ceil(total / limit);
 
 		// Build applied filters list
@@ -320,7 +356,7 @@ export async function searchProperties(
 		});
 
 		const result: PropertySearchResult = {
-			items: propertiesResult.rows as unknown as Property[],
+			items: propertiesResult as Property[],
 			total,
 			hasMore: page < totalPages,
 			page,
@@ -361,12 +397,13 @@ export async function searchProperties(
 		return handleActionError(error);
 	}
 }
+*/
 
 /**
  * Publish a property
  */
 export async function publishProperty(
-	input: PublishPropertyInput,
+	input: PublishPropertyInput
 ): Promise<PublishPropertyResult> {
 	try {
 		const session = await auth.api.getSession({
@@ -421,7 +458,7 @@ export async function publishProperty(
  * Delete a property
  */
 export async function deleteProperty(
-	id: string,
+	id: string
 ): Promise<{ success: boolean; error?: string }> {
 	try {
 		const session = await auth.api.getSession({
@@ -461,10 +498,30 @@ export async function deleteProperty(
 }
 
 /**
+ * Get featured properties
+ */
+export async function getFeaturedProperties(limit = 6): Promise<Property[]> {
+	try {
+		const result = await db
+			.select()
+			.from(properties)
+			.where(
+				and(eq(properties.featured, true), eq(properties.status, "published"))
+			)
+			.orderBy(desc(properties.publishedAt))
+			.limit(limit);
+
+		return result as Property[];
+	} catch (_error) {
+		throw new Error("Failed to fetch featured properties");
+	}
+}
+
+/**
  * Create a property inquiry
  */
 export async function createPropertyInquiry(
-	input: CreatePropertyInquiryInput,
+	input: CreatePropertyInquiryInput
 ): Promise<CreatePropertyInquiryResult> {
 	try {
 		const session = await auth.api.getSession({

@@ -2,7 +2,7 @@
  * Environment variables configuration and validation
  */
 
-export interface EnvironmentConfig {
+export type EnvironmentConfig = {
 	// Database
 	POSTGRES_URL: string;
 	POSTGRES_PRISMA_URL: string;
@@ -23,7 +23,7 @@ export interface EnvironmentConfig {
 	// App Configuration
 	NEXT_PUBLIC_APP_URL: string;
 	NODE_ENV: string;
-}
+};
 
 /**
  * Validates that all required environment variables are present
@@ -53,10 +53,10 @@ export function validateEnvironmentVariables(): {
 	// Check each required variable
 	for (const varName of requiredVars) {
 		const value = process.env[varName];
-		if (!value) {
-			missingVars.push(varName);
-		} else {
+		if (value) {
 			config[varName] = value;
+		} else {
+			missingVars.push(varName);
 		}
 	}
 
@@ -79,14 +79,9 @@ export function getEnvironmentConfig(): EnvironmentConfig {
 
 	if (!validation.isValid) {
 		const errorMessage = `Missing required environment variables: ${validation.missingVars.join(", ")}`;
-		console.error("❌ Environment Configuration Error:", errorMessage);
 
 		if (process.env.NODE_ENV === "production") {
 			throw new Error(`Production deployment failed: ${errorMessage}`);
-		} else {
-			console.warn(
-				"⚠️  Development mode: Some features may not work without proper environment variables",
-			);
 		}
 	}
 
@@ -109,10 +104,6 @@ export function validateDatabaseConfig(): boolean {
 	const missing = dbVars.filter((varName) => !process.env[varName]);
 
 	if (missing.length > 0) {
-		console.error(
-			"❌ Database configuration incomplete. Missing variables:",
-			missing.join(", "),
-		);
 		return false;
 	}
 

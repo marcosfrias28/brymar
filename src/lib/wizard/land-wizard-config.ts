@@ -68,7 +68,7 @@ export const landWizardConfig: WizardConfig<LandWizardData> = {
 	},
 	persistence: {
 		autoSave: true,
-		autoSaveInterval: 30000,
+		autoSaveInterval: 30_000,
 		storageKey: "land-wizard",
 	},
 	navigation: {

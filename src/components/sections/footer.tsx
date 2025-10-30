@@ -18,12 +18,14 @@ export function Footer() {
 	const [cookiesDialogOpen, setCookiesDialogOpen] = useState(false);
 	const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);
 
-	if (shouldAvoid) return null;
+	if (shouldAvoid) {
+		return null;
+	}
 
 	return (
-		<footer className="bg-background border-t py-12">
+		<footer className="border-t bg-background py-12">
 			<div className="container mx-auto px-4">
-				<div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+				<div className="grid grid-cols-1 gap-8 md:grid-cols-4">
 					<div className="col-span-1 md:col-span-2">
 						<Logo />
 						<p className="text-muted-foreground">
@@ -32,30 +34,30 @@ export function Footer() {
 						</p>
 					</div>
 					<div>
-						<h3 className="text-lg font-semibold mb-4">Legal</h3>
+						<h3 className="mb-4 font-semibold text-lg">Legal</h3>
 						<ul className="space-y-2">
 							<li>
 								<Button
-									variant="link"
-									className="text-muted-foreground hover:text-foreground p-0"
+									className="p-0 text-muted-foreground hover:text-foreground"
 									onClick={() => setCookiesDialogOpen(true)}
+									variant="link"
 								>
 									Cookies
 								</Button>
 							</li>
 							<li>
 								<Button
-									variant="link"
-									className="text-muted-foreground hover:text-foreground p-0"
+									className="p-0 text-muted-foreground hover:text-foreground"
 									onClick={() => setPrivacyDialogOpen(true)}
+									variant="link"
 								>
 									Privacidad
 								</Button>
 							</li>
 							<li>
 								<Button
+									className="p-0 text-muted-foreground hover:text-foreground"
 									variant="link"
-									className="text-muted-foreground hover:text-foreground p-0"
 								>
 									Términos
 								</Button>
@@ -63,33 +65,33 @@ export function Footer() {
 						</ul>
 					</div>
 					<div>
-						<h3 className="text-lg font-semibold mb-4">Follow Us</h3>
+						<h3 className="mb-4 font-semibold text-lg">Follow Us</h3>
 						<div className="flex space-x-4">
 							<a
-								href="#"
-								className="text-muted-foreground hover:text-foreground"
 								aria-label="Facebook"
+								className="text-muted-foreground hover:text-foreground"
+								href="#"
 							>
 								<Facebook />
 							</a>
 							<a
-								href="#"
-								className="text-muted-foreground hover:text-foreground"
 								aria-label="Instagram"
+								className="text-muted-foreground hover:text-foreground"
+								href="#"
 							>
 								<Instagram />
 							</a>
 							<a
-								href="#"
-								className="text-muted-foreground hover:text-foreground"
 								aria-label="Twitter"
+								className="text-muted-foreground hover:text-foreground"
+								href="#"
 							>
 								<Twitter />
 							</a>
 							<a
-								href="#"
-								className="text-muted-foreground hover:text-foreground"
 								aria-label="LinkedIn"
+								className="text-muted-foreground hover:text-foreground"
+								href="#"
 							>
 								<Linkedin />
 							</a>
@@ -98,7 +100,7 @@ export function Footer() {
 				</div>
 			</div>
 
-			<Dialog open={cookiesDialogOpen} onOpenChange={setCookiesDialogOpen}>
+			<Dialog onOpenChange={setCookiesDialogOpen} open={cookiesDialogOpen}>
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>Política de Cookies</DialogTitle>
@@ -109,7 +111,7 @@ export function Footer() {
 				</DialogContent>
 			</Dialog>
 
-			<Dialog open={privacyDialogOpen} onOpenChange={setPrivacyDialogOpen}>
+			<Dialog onOpenChange={setPrivacyDialogOpen} open={privacyDialogOpen}>
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>Política de Privacidad</DialogTitle>

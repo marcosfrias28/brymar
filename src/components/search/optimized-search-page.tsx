@@ -25,7 +25,7 @@ import { RealTimeLandFilters } from "./real-time-land-filters";
 import { RealTimeSearchFilters } from "./real-time-search-filters";
 import { SearchMapView } from "./search-map-view";
 
-interface BaseSearchFilters {
+type BaseSearchFilters = {
 	location?: string;
 	minPrice?: number;
 	maxPrice?: number;
@@ -34,7 +34,7 @@ interface BaseSearchFilters {
 	minArea?: number;
 	maxArea?: number;
 	amenities?: string[];
-}
+};
 
 interface PropertySearchFilters extends BaseSearchFilters {
 	query?: string;
@@ -67,7 +67,7 @@ export function OptimizedSearchPage() {
 	const [isPending, startTransition] = useTransition();
 	const [view, setView] = React.useState<"results" | "map">("results");
 	const [viewMode, setViewMode] = React.useState<"grid" | "list" | "map">(
-		"grid",
+		"grid"
 	);
 	const [sortBy, setSortBy] = React.useState("newest");
 
@@ -88,7 +88,7 @@ export function OptimizedSearchPage() {
 					} else if (
 						["minPrice", "maxPrice", "minArea", "maxArea"].includes(key)
 					) {
-						const numValue = parseInt(value, 10);
+						const numValue = Number.parseInt(value, 10);
 						if (!Number.isNaN(numValue)) {
 							(baseFilters as any)[key] = numValue;
 						}
@@ -106,16 +106,15 @@ export function OptimizedSearchPage() {
 				propertyType: searchParams?.get("propertyType") || undefined,
 				status: searchParams?.get("status") as PropertySearchFilters["status"],
 			} as PropertySearchFilters;
-		} else {
-			return {
-				...baseFilters,
-				landType:
-					searchParams?.get("landType") ||
-					searchParams?.get("propertyType") ||
-					undefined,
-				status: searchParams?.get("status") as SearchLandsFilters["status"],
-			} as SearchLandsFilters;
 		}
+		return {
+			...baseFilters,
+			landType:
+				searchParams?.get("landType") ||
+				searchParams?.get("propertyType") ||
+				undefined,
+			status: searchParams?.get("status") as SearchLandsFilters["status"],
+		} as SearchLandsFilters;
 	}, [searchParams, searchType]);
 
 	// Modern React 19 Actions with useActionState
@@ -124,8 +123,16 @@ export function OptimizedSearchPage() {
 			try {
 				const result = await searchPropertiesAction(prevState, formData);
 				return result.success && result.data
-					? { properties: result.data.properties || [], total: 0, error: undefined }
-					: { properties: [], total: 0, error: result.message || "Error en la bÃºsqueda" };
+					? {
+							properties: result.data.properties || [],
+							total: 0,
+							error: undefined,
+						}
+					: {
+							properties: [],
+							total: 0,
+							error: result.message || "Error en la bÃºsqueda",
+						};
 			} catch (_error) {
 				return {
 					properties: [],
@@ -134,7 +141,7 @@ export function OptimizedSearchPage() {
 				};
 			}
 		},
-		{ properties: [], total: 0, error: undefined },
+		{ properties: [], total: 0, error: undefined }
 	);
 
 	const [landState, landAction, landPending] = useActionState(
@@ -143,7 +150,11 @@ export function OptimizedSearchPage() {
 				const result = await searchLandsAction(prevState, formData);
 				return result.success && result.data
 					? { lands: result.data.lands || [], total: 0, error: undefined }
-					: { lands: [], total: 0, error: result.message || "Error en la bÃºsqueda" };
+					: {
+							lands: [],
+							total: 0,
+							error: result.message || "Error en la bÃºsqueda",
+						};
 			} catch (_error) {
 				return {
 					lands: [],
@@ -152,7 +163,7 @@ export function OptimizedSearchPage() {
 				};
 			}
 		},
-		{ lands: [], total: 0, error: undefined },
+		{ lands: [], total: 0, error: undefined }
 	);
 
 	// Optimistic updates for immediate UI feedback
@@ -160,11 +171,11 @@ export function OptimizedSearchPage() {
 		currentFilters,
 		(
 			state: PropertySearchFilters | SearchLandsFilters,
-			newFilters: Partial<PropertySearchFilters | SearchLandsFilters>,
+			newFilters: Partial<PropertySearchFilters | SearchLandsFilters>
 		) => ({
 			...state,
 			...newFilters,
-		}),
+		})
 	);
 
 	// Handle filter changes with optimistic updates and transitions
@@ -244,7 +255,7 @@ export function OptimizedSearchPage() {
 			propertyAction,
 			landAction,
 			setOptimisticFilters,
-		],
+		]
 	);
 
 	// Handle search type change
@@ -254,7 +265,7 @@ export function OptimizedSearchPage() {
 				router.replace(`/search?type=${newType}`, { scroll: false });
 			});
 		},
-		[router],
+		[router]
 	);
 
 	// Handle sort change
@@ -264,7 +275,7 @@ export function OptimizedSearchPage() {
 			// Trigger search with new sort
 			handleFilterChange("sortBy", newSortBy);
 		},
-		[handleFilterChange],
+		[handleFilterChange]
 	);
 
 	// Handle view mode change
@@ -277,7 +288,7 @@ export function OptimizedSearchPage() {
 				setView("results");
 			}
 		},
-		[],
+		[]
 	);
 
 	// Get current results and loading state
@@ -353,10 +364,11 @@ export function OptimizedSearchPage() {
 				default:
 					return sorted.sort(
 						(a, b) =>
-							new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+							new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
 					);
 			}
-		} else if (searchType === "lands" && (currentResults as any).lands) {
+		}
+		if (searchType === "lands" && (currentResults as any).lands) {
 			const sorted = [...(currentResults as any).lands];
 
 			switch (sortBy) {
@@ -371,7 +383,7 @@ export function OptimizedSearchPage() {
 				default:
 					return sorted.sort(
 						(a, b) =>
-							new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+							new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
 					);
 			}
 		}
@@ -382,38 +394,39 @@ export function OptimizedSearchPage() {
 	}, [currentResults, sortBy, searchType]);
 
 	// Helper to get current results for map view
-	const mapResults = searchType === "properties"
-		? (currentResults as any).properties || []
-		: (currentResults as any).lands || [];
+	const _mapResults =
+		searchType === "properties"
+			? (currentResults as any).properties || []
+			: (currentResults as any).lands || [];
 
 	return (
-		<div className="h-dvh bg-background flex flex-col overflow-hidden">
+		<div className="flex h-dvh flex-col overflow-hidden bg-background">
 			{/* Header Section - Compact for mobile, hidden on small screens */}
-			<div className="flex justify-between px-10 flex-shrink-0 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+			<div className="flex flex-shrink-0 justify-between border-b bg-background/95 px-10 backdrop-blur supports-[backdrop-filter]:bg-background/60">
 				<Logo />
 				<AuthButtons />
 			</div>
 
 			{/* Mobile Layout - Stacked vertically */}
-			<div className="flex-1 flex flex-col md:hidden overflow-hidden">
+			<div className="flex flex-1 flex-col overflow-hidden md:hidden">
 				{/* Mobile Header with Tabs */}
 				<div className="flex-shrink-0 border-b bg-background">
 					<div className="p-2">
-						<h1 className="text-lg font-bold mb-2">BÃºsqueda Inmobiliaria</h1>
+						<h1 className="mb-2 font-bold text-lg">BÃºsqueda Inmobiliaria</h1>
 						<Tabs
-							value={searchType}
+							className="w-full"
 							onValueChange={(value) =>
 								handleSearchTypeChange(value as "properties" | "lands")
 							}
-							className="w-full"
+							value={searchType}
 						>
-							<TabsList className="grid w-full grid-cols-2 h-8">
-								<TabsTrigger value="properties" className="text-xs">
-									<Building2 className="h-3 w-3 mr-1" />
+							<TabsList className="grid h-8 w-full grid-cols-2">
+								<TabsTrigger className="text-xs" value="properties">
+									<Building2 className="mr-1 h-3 w-3" />
 									Propiedades
 								</TabsTrigger>
-								<TabsTrigger value="lands" className="text-xs">
-									<TreePine className="h-3 w-3 mr-1" />
+								<TabsTrigger className="text-xs" value="lands">
+									<TreePine className="mr-1 h-3 w-3" />
 									Terrenos
 								</TabsTrigger>
 							</TabsList>
@@ -422,34 +435,34 @@ export function OptimizedSearchPage() {
 				</div>
 
 				{/* Mobile Filters - Compact with Suspense */}
-				<div className="flex-shrink-0 border-b bg-background max-h-48 overflow-y-auto">
+				<div className="max-h-48 flex-shrink-0 overflow-y-auto border-b bg-background">
 					<div className="p-2">
 						<Tabs
-							value={searchType}
+							className="w-full"
 							onValueChange={(value) =>
 								handleSearchTypeChange(value as "properties" | "lands")
 							}
-							className="w-full"
+							value={searchType}
 						>
-							<TabsContent value="properties" className="mt-0">
+							<TabsContent className="mt-0" value="properties">
 								{shouldShowSkeleton ? (
 									<MobileFiltersSkeleton />
 								) : (
 									<MobileSearchFilters
 										filters={optimisticFilters as PropertySearchFilters}
-										onFilterChange={handleFilterChange}
 										isLoading={isLoading}
+										onFilterChange={handleFilterChange}
 									/>
 								)}
 							</TabsContent>
-							<TabsContent value="lands" className="mt-0">
+							<TabsContent className="mt-0" value="lands">
 								{shouldShowSkeleton ? (
 									<MobileFiltersSkeleton />
 								) : (
 									<MobileLandFilters
 										filters={optimisticFilters as SearchLandsFilters}
-										onFilterChange={handleFilterChange}
 										isLoading={isLoading}
+										onFilterChange={handleFilterChange}
 									/>
 								)}
 							</TabsContent>
@@ -464,69 +477,69 @@ export function OptimizedSearchPage() {
 							<MobileSearchSkeleton />
 						) : searchType === "properties" ? (
 							<PropertyResults
-								properties={sortedResults as any}
-								total={currentResults.total || 0}
-								isLoading={isLoading}
-								error={currentResults.error}
-								onRetry={handleRetry}
-								onViewChange={setView}
 								currentView={view}
+								error={currentResults.error}
+								isLoading={isLoading}
+								onRetry={handleRetry}
 								onSortChange={handleSortChange}
-								sortBy={sortBy}
-								view={viewMode}
+								onViewChange={setView}
 								onViewModeChange={handleViewModeChange}
+								properties={sortedResults as any}
+								sortBy={sortBy}
+								total={currentResults.total || 0}
+								view={viewMode}
 							/>
 						) : (
 							<LandResults
-								lands={sortedResults as any}
-								total={currentResults.total || 0}
-								isLoading={isLoading}
+								currentView={view}
 								error={currentResults.error}
+								isLoading={isLoading}
+								lands={sortedResults as any}
 								onRetry={handleRetry}
 								onViewChange={setView}
-								currentView={view}
+								total={currentResults.total || 0}
 							/>
 						)
 					) : (
 						<SearchMapView
+							className="h-full"
+							currentView={view}
+							onViewChange={setView}
 							properties={
 								searchType === "properties"
 									? (currentResults as any).properties || []
 									: (currentResults as any).lands || []
 							}
-							className="h-full"
-							onViewChange={setView}
-							currentView={view}
 						/>
 					)}
 				</div>
 			</div>
 
 			{/* Desktop Layout - Side by side */}
-			<div className="hidden md:flex flex-1 overflow-hidden">
+			<div className="hidden flex-1 overflow-hidden md:flex">
 				{/* Left Sidebar - Responsive width to fit all filters */}
-				<div className="w-full md:w-2/5 xl:w-1/3 flex-shrink-0 border-r bg-background">
-					<div className="h-full flex flex-col">
+				<div className="w-full flex-shrink-0 border-r bg-background md:w-2/5 xl:w-1/3">
+					<div className="flex h-full flex-col">
 						{/* Tabs - Fixed at top of sidebar */}
-						<div className="flex-shrink-0 p-2 border-b">
+						<div className="flex-shrink-0 border-b p-2">
 							<Tabs
-								value={searchType}
+								className="w-full"
 								onValueChange={(value) =>
 									handleSearchTypeChange(value as "properties" | "lands")
 								}
-								className="w-full"
+								value={searchType}
 							>
-								<TabsList className="grid w-full grid-cols-2 h-9">
+								<TabsList className="grid h-9 w-full grid-cols-2">
 									<TabsTrigger
-										value="properties"
 										className="flex items-center gap-1 text-sm"
+										value="properties"
 									>
 										<Building2 className="h-4 w-4" />
 										Propiedades
 									</TabsTrigger>
 									<TabsTrigger
-										value="lands"
 										className="flex items-center gap-1 text-sm"
+										value="lands"
 									>
 										<TreePine className="h-4 w-4" />
 										Terrenos
@@ -539,31 +552,31 @@ export function OptimizedSearchPage() {
 						<div className="flex-1 overflow-y-auto">
 							<div className="p-2">
 								<Tabs
-									value={searchType}
+									className="w-full"
 									onValueChange={(value) =>
 										handleSearchTypeChange(value as "properties" | "lands")
 									}
-									className="w-full"
+									value={searchType}
 								>
-									<TabsContent value="properties" className="mt-0">
+									<TabsContent className="mt-0" value="properties">
 										{shouldShowSkeleton ? (
 											<FiltersSkeleton />
 										) : (
 											<RealTimeSearchFilters
 												filters={optimisticFilters as PropertySearchFilters}
-												onFilterChange={handleFilterChange}
 												isLoading={isLoading}
+												onFilterChange={handleFilterChange}
 											/>
 										)}
 									</TabsContent>
-									<TabsContent value="lands" className="mt-0">
+									<TabsContent className="mt-0" value="lands">
 										{shouldShowSkeleton ? (
 											<FiltersSkeleton />
 										) : (
 											<RealTimeLandFilters
 												filters={optimisticFilters as SearchLandsFilters}
-												onFilterChange={handleFilterChange}
 												isLoading={isLoading}
+												onFilterChange={handleFilterChange}
 											/>
 										)}
 									</TabsContent>
@@ -580,39 +593,39 @@ export function OptimizedSearchPage() {
 							<SearchSkeleton />
 						) : searchType === "properties" ? (
 							<PropertyResults
-								properties={sortedResults as any}
-								total={currentResults.total || 0}
-								isLoading={isLoading}
-								error={currentResults.error}
-								onRetry={handleRetry}
-								onViewChange={setView}
 								currentView={view}
+								error={currentResults.error}
+								isLoading={isLoading}
+								onRetry={handleRetry}
 								onSortChange={handleSortChange}
-								sortBy={sortBy}
-								view={viewMode}
+								onViewChange={setView}
 								onViewModeChange={handleViewModeChange}
+								properties={sortedResults as any}
+								sortBy={sortBy}
+								total={currentResults.total || 0}
+								view={viewMode}
 							/>
 						) : (
 							<LandResults
-								lands={sortedResults as any}
-								total={currentResults.total || 0}
-								isLoading={isLoading}
+								currentView={view}
 								error={currentResults.error}
+								isLoading={isLoading}
+								lands={sortedResults as any}
 								onRetry={handleRetry}
 								onViewChange={setView}
-								currentView={view}
+								total={currentResults.total || 0}
 							/>
 						)
 					) : (
 						<SearchMapView
+							className="h-full"
+							currentView={view}
+							onViewChange={setView}
 							properties={
 								searchType === "properties"
 									? (currentResults as any).properties || []
 									: (currentResults as any).lands || []
 							}
-							className="h-full"
-							onViewChange={setView}
-							currentView={view}
 						/>
 					)}
 				</div>

@@ -16,12 +16,12 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
-interface AdaptiveGridProps {
+type AdaptiveGridProps = {
 	children: React.ReactNode[];
 	itemsPerPage?: number;
 	onItemsPerPageChange?: (value: number) => void;
 	className?: string;
-}
+};
 
 type ViewMode = "grid" | "list" | "bento";
 
@@ -53,7 +53,9 @@ export function AdaptiveGrid({
 	};
 
 	const getBentoItemClass = (index: number) => {
-		if (viewMode !== "bento") return "";
+		if (viewMode !== "bento") {
+			return "";
+		}
 
 		// Patrón Apple-style para el bento grid
 		const patterns = [
@@ -72,11 +74,15 @@ export function AdaptiveGrid({
 	};
 
 	const renderListItem = (child: React.ReactNode, index: number) => {
-		if (viewMode !== "list") return child;
+		if (viewMode !== "list") {
+			return child;
+		}
 
 		// Extract props from the child to render appropriate list component
 		const childProps = (child as any)?.props;
-		if (!childProps) return child;
+		if (!childProps) {
+			return child;
+		}
 
 		if (childProps.property) {
 			return (
@@ -101,40 +107,40 @@ export function AdaptiveGrid({
 	return (
 		<div className={cn("space-y-6", className)}>
 			{/* Controls */}
-			<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+			<div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
 				<div className="flex items-center gap-2">
-					<span className="text-sm text-arsenic font-medium">Vista:</span>
-					<div className="flex border border-blackCoral rounded-lg p-1">
+					<span className="font-medium text-arsenic text-sm">Vista:</span>
+					<div className="flex rounded-lg border border-blackCoral p-1">
 						<Button
-							variant="ghost"
-							size="sm"
-							onClick={() => setViewMode("list")}
 							className={cn(
 								"h-8 w-8 p-0",
-								viewMode === "list" ? "bg-arsenic text-white" : "",
+								viewMode === "list" ? "bg-arsenic text-white" : ""
 							)}
+							onClick={() => setViewMode("list")}
+							size="sm"
+							variant="ghost"
 						>
 							<List className="h-4 w-4" />
 						</Button>
 						<Button
-							variant="ghost"
-							size="sm"
-							onClick={() => setViewMode("grid")}
 							className={cn(
 								"h-8 w-8 p-0",
-								viewMode === "grid" ? "bg-arsenic text-white" : "",
+								viewMode === "grid" ? "bg-arsenic text-white" : ""
 							)}
+							onClick={() => setViewMode("grid")}
+							size="sm"
+							variant="ghost"
 						>
 							<Grid className="h-4 w-4" />
 						</Button>
 						<Button
-							variant="ghost"
-							size="sm"
-							onClick={() => setViewMode("bento")}
 							className={cn(
 								"h-8 w-8 p-0",
-								viewMode === "bento" ? "bg-arsenic text-white" : "",
+								viewMode === "bento" ? "bg-arsenic text-white" : ""
 							)}
+							onClick={() => setViewMode("bento")}
+							size="sm"
+							variant="ghost"
 						>
 							<LayoutGrid className="h-4 w-4" />
 						</Button>
@@ -143,15 +149,15 @@ export function AdaptiveGrid({
 
 				<div className="flex items-center gap-4">
 					<div className="flex items-center gap-2">
-						<span className="text-sm text-arsenic">Items por página:</span>
+						<span className="text-arsenic text-sm">Items por página:</span>
 						<Select
-							value={itemsPerPage.toString()}
 							onValueChange={(value) => {
 								onItemsPerPageChange?.(Number.parseInt(value, 10));
 								setCurrentPage(1);
 							}}
+							value={itemsPerPage.toString()}
 						>
-							<SelectTrigger className="w-20 h-8">
+							<SelectTrigger className="h-8 w-20">
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
@@ -164,7 +170,7 @@ export function AdaptiveGrid({
 						</Select>
 					</div>
 
-					<div className="text-sm text-arsenic">
+					<div className="text-arsenic text-sm">
 						{startIndex + 1}-{Math.min(endIndex, children.length)} de{" "}
 						{children.length}
 					</div>
@@ -174,7 +180,7 @@ export function AdaptiveGrid({
 			{/* Grid */}
 			<div className={getGridClasses()}>
 				{currentItems.map((child, index) => (
-					<div key={startIndex + index} className={getBentoItemClass(index)}>
+					<div className={getBentoItemClass(index)} key={startIndex + index}>
 						{renderListItem(child, index)}
 					</div>
 				))}
@@ -182,13 +188,13 @@ export function AdaptiveGrid({
 
 			{/* Pagination */}
 			{totalPages > 1 && (
-				<div className="flex justify-center items-center gap-2">
+				<div className="flex items-center justify-center gap-2">
 					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-						disabled={currentPage === 1}
 						className="border-blackCoral"
+						disabled={currentPage === 1}
+						onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+						size="sm"
+						variant="outline"
 					>
 						Anterior
 					</Button>
@@ -196,16 +202,16 @@ export function AdaptiveGrid({
 					<div className="flex gap-1">
 						{Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
 							<Button
-								key={page}
-								variant={currentPage === page ? "default" : "outline"}
-								size="sm"
-								onClick={() => setCurrentPage(page)}
 								className={cn(
-									"w-8 h-8 p-0",
+									"h-8 w-8 p-0",
 									currentPage === page
 										? "bg-arsenic text-white"
-										: "border-blackCoral",
+										: "border-blackCoral"
 								)}
+								key={page}
+								onClick={() => setCurrentPage(page)}
+								size="sm"
+								variant={currentPage === page ? "default" : "outline"}
 							>
 								{page}
 							</Button>
@@ -213,13 +219,13 @@ export function AdaptiveGrid({
 					</div>
 
 					<Button
-						variant="outline"
-						size="sm"
+						className="border-blackCoral"
+						disabled={currentPage === totalPages}
 						onClick={() =>
 							setCurrentPage((prev) => Math.min(totalPages, prev + 1))
 						}
-						disabled={currentPage === totalPages}
-						className="border-blackCoral"
+						size="sm"
+						variant="outline"
 					>
 						Siguiente
 					</Button>

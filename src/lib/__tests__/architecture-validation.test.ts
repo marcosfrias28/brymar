@@ -193,7 +193,7 @@ describe("Architecture Validation Tests", () => {
 			const mockProperty = {
 				title: "Test Property",
 				description: "A test property",
-				price: 250000,
+				price: 250_000,
 				currency: "USD",
 				type: "house" as const,
 				address: {
@@ -257,8 +257,8 @@ describe("Architecture Validation Tests", () => {
 			(searchProperties as jest.Mock).mockResolvedValue(mockResult);
 
 			const result = await searchProperties({
-				minPrice: 200000,
-				maxPrice: 300000,
+				minPrice: 200_000,
+				maxPrice: 300_000,
 			});
 
 			expect(searchProperties).toHaveBeenCalled();
@@ -298,7 +298,7 @@ describe("Architecture Validation Tests", () => {
 				name: "Test Land",
 				description: "A test land",
 				area: 5000,
-				price: 150000,
+				price: 150_000,
 				currency: "USD",
 				location: "Test Location",
 				type: "residential" as const,
@@ -356,8 +356,8 @@ describe("Architecture Validation Tests", () => {
 			(searchLands as jest.Mock).mockResolvedValue(mockResult);
 
 			const result = await searchLands({
-				minPrice: 100000,
-				maxPrice: 200000,
+				minPrice: 100_000,
+				maxPrice: 200_000,
 			});
 
 			expect(searchLands).toHaveBeenCalled();

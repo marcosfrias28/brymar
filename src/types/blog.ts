@@ -6,7 +6,7 @@
 
 export type BlogPostStatus = "draft" | "published" | "archived";
 
-export interface BlogPost {
+export type BlogPost = {
 	id: string;
 	title: string;
 	content: string;
@@ -19,4 +19,4 @@ export interface BlogPost {
 	tags?: string[];
 	createdAt: string;
 	updatedAt: string;
-}
+};

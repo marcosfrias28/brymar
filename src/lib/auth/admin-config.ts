@@ -173,7 +173,7 @@ export function getRedirectUrlForRole(role: UserRole): string {
  */
 export function shouldRedirectUser(
 	pathname: string,
-	role: UserRole,
+	role: UserRole
 ): string | null {
 	// Admin y Agent intentando acceder a /profile → redirigir a /dashboard
 	if (

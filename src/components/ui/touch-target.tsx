@@ -32,7 +32,7 @@ export function TouchTarget({
 	const touchClasses = cn(
 		isTouch && sizeClasses[minSize],
 		"touch-manipulation", // Optimize for touch
-		className,
+		className
 	);
 
 	if (asChild && React.isValidElement(children)) {
@@ -75,7 +75,7 @@ export function TouchButton({
 		"disabled:pointer-events-none disabled:opacity-50",
 		"touch-manipulation", // Optimize for touch
 		// Enhanced touch targets
-		isTouch && "min-h-[44px] min-w-[44px]",
+		isTouch && "min-h-[44px] min-w-[44px]"
 	);
 
 	const variantClasses = {
@@ -96,7 +96,7 @@ export function TouchButton({
 				baseClasses,
 				variantClasses[variant],
 				sizeClasses[size],
-				className,
+				className
 			)}
 			{...props}
 		>

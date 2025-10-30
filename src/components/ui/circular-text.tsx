@@ -2,11 +2,11 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 // Circular text component for property features
-interface CircularTextProps {
+type CircularTextProps = {
 	text: string;
 	className?: string;
 	animate?: boolean;
-}
+};
 
 export function CircularText({
 	text,
@@ -29,29 +29,29 @@ export function CircularText({
 
 	return (
 		<Component
-			className={cn("relative w-44 h-44 text-white", className)}
+			className={cn("relative h-44 w-44 text-white", className)}
 			{...animationProps}
 		>
 			<svg
-				className="w-full h-full animate-spin"
+				className="h-full w-full animate-spin"
 				style={{ animationDuration: "20s" }}
 			>
 				<defs>
 					<path
-						id="circle"
 						d="M 88,88 m -70,0 a 70,70 0 1,1 140,0 a 70,70 0 1,1 -140,0"
+						id="circle"
 					/>
 				</defs>
-				<text className="fill-white font-poppins text-lg font-light">
+				<text className="fill-white font-light font-poppins text-lg">
 					<textPath href="#circle">{text.toUpperCase()}</textPath>
 				</text>
 			</svg>
 			<div className="absolute inset-0 flex items-center justify-center">
 				<svg
-					width="74"
+					fill="none"
 					height="74"
 					viewBox="0 0 76 76"
-					fill="none"
+					width="74"
 					xmlns="http://www.w3.org/2000/svg"
 				>
 					<path

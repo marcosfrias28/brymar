@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-interface UseFormChangesOptions {
+type UseFormChangesOptions = {
 	/**
 	 * Delay in milliseconds before checking for changes after an event
 	 * @default 100
@@ -13,9 +13,9 @@ interface UseFormChangesOptions {
 	 * @default true
 	 */
 	autoReset?: boolean;
-}
+};
 
-interface UseFormChangesReturn {
+type UseFormChangesReturn = {
 	/**
 	 * Ref to attach to the form element
 	 */
@@ -36,54 +36,68 @@ interface UseFormChangesReturn {
 	 * Manually notify that a change has occurred (useful for programmatic updates)
 	 */
 	notifyChange: () => void;
-}
+};
 
 /**
  * Hook to detect changes in a form compared to its initial state
  */
-export function useFormChanges(options: UseFormChangesOptions = {}): UseFormChangesReturn {
+export function useFormChanges(
+	options: UseFormChangesOptions = {}
+): UseFormChangesReturn {
 	const { debounceMs = 100, autoReset = true } = options;
-	
+
 	const formRef = useRef<HTMLFormElement>(null);
 	const initialFormDataRef = useRef<FormData | null>(null);
 	const [hasChanges, setHasChanges] = useState(false);
 
 	// Function to serialize FormData for comparison
-	const serializeFormData = useCallback((formData: FormData): Record<string, string> => {
-		const serialized: Record<string, string> = {};
-		
-		for (const [key, value] of formData.entries()) {
-			// Handle different input types
-			if (typeof value === 'string') {
-				serialized[key] = value;
-			} else if (value instanceof File) {
-				// For files, we compare by name and size
-				serialized[key] = `${value.name}:${value.size}`;
-			} else {
-				serialized[key] = String(value);
+	const serializeFormData = useCallback(
+		(formData: FormData): Record<string, string> => {
+			const serialized: Record<string, string> = {};
+
+			for (const [key, value] of formData.entries()) {
+				// Handle different input types
+				if (typeof value === "string") {
+					serialized[key] = value;
+				} else if (value instanceof File) {
+					// For files, we compare by name and size
+					serialized[key] = `${value.name}:${value.size}`;
+				} else {
+					serialized[key] = String(value);
+				}
 			}
-		}
-		
-		return serialized;
-	}, []);
+
+			return serialized;
+		},
+		[]
+	);
 
 	// Function to compare two serialized form data objects
-	const compareFormData = useCallback((data1: Record<string, string>, data2: Record<string, string>): boolean => {
-		const keys1 = Object.keys(data1).sort();
-		const keys2 = Object.keys(data2).sort();
-		
-		// Compare keys first
-		if (keys1.length !== keys2.length) return false;
-		if (!keys1.every((key, index) => key === keys2[index])) return false;
-		
-		// Compare values
-		return keys1.every(key => data1[key] === data2[key]);
-	}, []);
+	const compareFormData = useCallback(
+		(data1: Record<string, string>, data2: Record<string, string>): boolean => {
+			const keys1 = Object.keys(data1).sort();
+			const keys2 = Object.keys(data2).sort();
+
+			// Compare keys first
+			if (keys1.length !== keys2.length) {
+				return false;
+			}
+			if (!keys1.every((key, index) => key === keys2[index])) {
+				return false;
+			}
+
+			// Compare values
+			return keys1.every((key) => data1[key] === data2[key]);
+		},
+		[]
+	);
 
 	// Function to capture initial form state
 	const captureInitialState = useCallback(() => {
-		if (!formRef.current) return;
-		
+		if (!formRef.current) {
+			return;
+		}
+
 		const formData = new FormData(formRef.current);
 		initialFormDataRef.current = formData;
 		setHasChanges(false);
@@ -91,12 +105,14 @@ export function useFormChanges(options: UseFormChangesOptions = {}): UseFormChan
 
 	// Function to check for changes
 	const checkForChanges = useCallback(() => {
-		if (!formRef.current || !initialFormDataRef.current) return;
-		
+		if (!(formRef.current && initialFormDataRef.current)) {
+			return;
+		}
+
 		const currentFormData = new FormData(formRef.current);
 		const initialSerialized = serializeFormData(initialFormDataRef.current);
 		const currentSerialized = serializeFormData(currentFormData);
-		
+
 		const areEqual = compareFormData(initialSerialized, currentSerialized);
 		setHasChanges(!areEqual);
 	}, [serializeFormData, compareFormData]);
@@ -125,7 +141,9 @@ export function useFormChanges(options: UseFormChangesOptions = {}): UseFormChan
 	// Set up event listeners when form ref is available
 	useEffect(() => {
 		const form = formRef.current;
-		if (!form) return;
+		if (!form) {
+			return;
+		}
 
 		// Capture initial state when form is first available
 		if (!initialFormDataRef.current) {
@@ -142,16 +160,18 @@ export function useFormChanges(options: UseFormChangesOptions = {}): UseFormChan
 		};
 
 		// Listen to various form events that indicate changes
-		const events = ['input', 'change', 'select', 'paste', 'keyup'];
+		const events = ["input", "change", "select", "paste", "keyup"];
 		const cleanupFunctions: (() => void)[] = [];
 
-		events.forEach(eventType => {
+		events.forEach((eventType) => {
 			const handler = () => {
 				const cleanup = handleFormChange();
-				if (cleanup) cleanupFunctions.push(cleanup);
+				if (cleanup) {
+					cleanupFunctions.push(cleanup);
+				}
 			};
 			form.addEventListener(eventType, handler);
-			
+
 			// Store the cleanup function for this event
 			cleanupFunctions.push(() => form.removeEventListener(eventType, handler));
 		});
@@ -159,9 +179,12 @@ export function useFormChanges(options: UseFormChangesOptions = {}): UseFormChan
 		// Set up MutationObserver to detect programmatic changes to hidden inputs
 		const observer = new MutationObserver((mutations) => {
 			mutations.forEach((mutation) => {
-				if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+				if (
+					mutation.type === "attributes" &&
+					mutation.attributeName === "value"
+				) {
 					const target = mutation.target as HTMLInputElement;
-					if (target.type === 'hidden' && form.contains(target)) {
+					if (target.type === "hidden" && form.contains(target)) {
 						handleFormChange();
 					}
 				}
@@ -170,15 +193,15 @@ export function useFormChanges(options: UseFormChangesOptions = {}): UseFormChan
 
 		// Observe all hidden inputs in the form
 		const hiddenInputs = form.querySelectorAll('input[type="hidden"]');
-		hiddenInputs.forEach(input => {
-			observer.observe(input, { attributes: true, attributeFilter: ['value'] });
+		hiddenInputs.forEach((input) => {
+			observer.observe(input, { attributes: true, attributeFilter: ["value"] });
 		});
 
 		cleanupFunctions.push(() => observer.disconnect());
 
 		// Cleanup function
 		return () => {
-			cleanupFunctions.forEach(cleanup => cleanup());
+			cleanupFunctions.forEach((cleanup) => cleanup());
 		};
 	}, [captureInitialState, debouncedCheckForChanges]);
 

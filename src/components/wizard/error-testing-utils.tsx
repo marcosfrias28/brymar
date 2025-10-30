@@ -18,20 +18,20 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 
-export interface ErrorScenario {
+export type ErrorScenario = {
 	id: string;
 	name: string;
 	description: string;
 	type: "validation" | "network" | "storage" | "permission";
 	severity: "low" | "medium" | "high" | "critical";
 	trigger: () => Promise<void> | void;
-}
+};
 
-interface ErrorTestingPanelProps {
+type ErrorTestingPanelProps = {
 	scenarios: ErrorScenario[];
 	onScenarioTrigger?: (scenario: ErrorScenario) => void;
 	className?: string;
-}
+};
 
 export function ErrorTestingPanel({
 	scenarios,
@@ -43,7 +43,9 @@ export function ErrorTestingPanel({
 
 	const handleTriggerScenario = useCallback(async () => {
 		const scenario = scenarios.find((s) => s.id === selectedScenario);
-		if (!scenario) return;
+		if (!scenario) {
+			return;
+		}
 
 		setIsRunning(true);
 		try {
@@ -96,8 +98,8 @@ export function ErrorTestingPanel({
 			</CardHeader>
 			<CardContent className="space-y-4">
 				<div className="space-y-2">
-					<label className="text-sm font-medium">Escenario de Error</label>
-					<Select value={selectedScenario} onValueChange={setSelectedScenario}>
+					<label className="font-medium text-sm">Escenario de Error</label>
+					<Select onValueChange={setSelectedScenario} value={selectedScenario}>
 						<SelectTrigger>
 							<SelectValue placeholder="Selecciona un escenario de error" />
 						</SelectTrigger>
@@ -119,15 +121,15 @@ export function ErrorTestingPanel({
 
 				{selectedScenario && (
 					<div className="space-y-2">
-						<div className="p-3 bg-muted rounded-lg">
+						<div className="rounded-lg bg-muted p-3">
 							<p className="text-sm">
 								{scenarios.find((s) => s.id === selectedScenario)?.description}
 							</p>
 						</div>
 						<Button
-							onClick={handleTriggerScenario}
-							disabled={isRunning}
 							className="w-full"
+							disabled={isRunning}
+							onClick={handleTriggerScenario}
 						>
 							{isRunning ? "Ejecutando..." : "Ejecutar Escenario"}
 						</Button>
@@ -193,8 +195,8 @@ export function ErrorScenarioRunner() {
 	return (
 		<div className="space-y-4">
 			<ErrorTestingPanel
-				scenarios={defaultScenarios}
 				onScenarioTrigger={handleScenarioTrigger}
+				scenarios={defaultScenarios}
 			/>
 
 			{activeScenarios.length > 0 && (
@@ -206,8 +208,8 @@ export function ErrorScenarioRunner() {
 						<div className="space-y-2">
 							{activeScenarios.map((scenario, index) => (
 								<div
+									className="flex items-center justify-between rounded bg-muted p-2"
 									key={`${scenario.id}-${index}`}
-									className="flex items-center justify-between p-2 bg-muted rounded"
 								>
 									<div className="flex items-center space-x-2">
 										{getTypeIcon(scenario.type)}
@@ -243,7 +245,7 @@ export function useErrorTesting() {
 				throw error;
 			}
 		},
-		[isTestingMode],
+		[isTestingMode]
 	);
 
 	const clearErrors = useCallback(() => {

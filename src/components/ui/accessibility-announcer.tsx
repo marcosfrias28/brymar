@@ -2,11 +2,11 @@
 
 import { useEffect, useRef } from "react";
 
-interface AccessibilityAnnouncerProps {
+type AccessibilityAnnouncerProps = {
 	message: string;
 	priority?: "polite" | "assertive";
 	clearAfter?: number;
-}
+};
 
 /**
  * Component for announcing messages to screen readers
@@ -32,14 +32,16 @@ export function AccessibilityAnnouncer({
 		}
 	}, [message, clearAfter]);
 
-	if (!message) return null;
+	if (!message) {
+		return null;
+	}
 
 	return (
 		<div
-			ref={announcementRef}
-			aria-live={priority}
 			aria-atomic="true"
+			aria-live={priority}
 			className="sr-only"
+			ref={announcementRef}
 			role="status"
 		>
 			{message}
@@ -53,7 +55,7 @@ export function AccessibilityAnnouncer({
 export function useAccessibilityAnnouncer() {
 	const announce = (
 		message: string,
-		priority: "polite" | "assertive" = "polite",
+		priority: "polite" | "assertive" = "polite"
 	) => {
 		// Create temporary announcement element
 		const announcement = document.createElement("div");
@@ -84,19 +86,19 @@ export function GlobalLiveRegion() {
 		<>
 			{/* Polite announcements */}
 			<div
-				id="polite-announcer"
-				aria-live="polite"
 				aria-atomic="true"
+				aria-live="polite"
 				className="sr-only"
+				id="polite-announcer"
 				role="status"
 			/>
 
 			{/* Assertive announcements */}
 			<div
-				id="assertive-announcer"
-				aria-live="assertive"
 				aria-atomic="true"
+				aria-live="assertive"
 				className="sr-only"
+				id="assertive-announcer"
 				role="alert"
 			/>
 		</>
@@ -108,7 +110,7 @@ export function GlobalLiveRegion() {
  */
 export const announceGlobally = (
 	message: string,
-	priority: "polite" | "assertive" = "polite",
+	priority: "polite" | "assertive" = "polite"
 ) => {
 	const announcerId =
 		priority === "assertive" ? "assertive-announcer" : "polite-announcer";

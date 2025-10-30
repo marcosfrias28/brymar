@@ -3,7 +3,7 @@
 import { useCallback, useRef } from "react";
 import { toast } from "sonner";
 
-export interface NotificationOptions {
+export type NotificationOptions = {
 	type: "success" | "error" | "loading" | "info";
 	title: string;
 	description?: string;
@@ -12,9 +12,9 @@ export interface NotificationOptions {
 		label: string;
 		onClick: () => void;
 	};
-}
+};
 
-export interface UseNotificationsReturn {
+export type UseNotificationsReturn = {
 	notify: (options: NotificationOptions) => any;
 	dismiss: (id: string) => void;
 	dismissAll: () => void;
@@ -28,7 +28,7 @@ export interface UseNotificationsReturn {
 		error: (message?: string) => void;
 		refetchSuccess: (message?: string) => void;
 	};
-}
+};
 
 export function useNotifications(): UseNotificationsReturn {
 	const activeToasts = useRef<Set<string>>(new Set());
@@ -69,7 +69,7 @@ export function useNotifications(): UseNotificationsReturn {
 			case "loading":
 				toastId = toast.loading(title, {
 					description,
-					duration: Infinity, // Loading toasts don't auto-dismiss
+					duration: Number.POSITIVE_INFINITY, // Loading toasts don't auto-dismiss
 				});
 				break;
 			default:
@@ -110,7 +110,7 @@ export function useNotifications(): UseNotificationsReturn {
 				return notify(options as NotificationOptions);
 			}
 		},
-		[dismiss, notify],
+		[dismiss, notify]
 	);
 
 	// Specialized methods for common mutation patterns

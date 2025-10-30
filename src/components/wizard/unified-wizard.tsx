@@ -16,7 +16,7 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
 
-export interface WizardStep<T = Record<string, unknown>> {
+export type WizardStep<T = Record<string, unknown>> = {
 	id: string;
 	title: string;
 	description?: string;
@@ -28,20 +28,20 @@ export interface WizardStep<T = Record<string, unknown>> {
 	}>;
 	validation?: (data: T) => Record<string, string> | null;
 	optional?: boolean;
-}
+};
 
-export interface UnifiedWizardProps<T = Record<string, unknown>> {
+export type UnifiedWizardProps<T = Record<string, unknown>> = {
 	title: string;
 	description?: string;
 	steps: WizardStep<T>[];
 	initialData?: T;
 	onComplete: (
-		data: T,
+		data: T
 	) => Promise<{ success: boolean; message?: string; error?: string }>;
 	onSaveDraft?: (data: T) => Promise<void>;
 	showDraftOption?: boolean;
 	className?: string;
-}
+};
 
 export function UnifiedWizard<T = Record<string, unknown>>({
 	title,
@@ -56,7 +56,7 @@ export function UnifiedWizard<T = Record<string, unknown>>({
 	const [currentStep, setCurrentStep] = useState(0);
 	const [data, setData] = useState<T>(initialData);
 	const [errors, setErrors] = useState<Record<string, Record<string, string>>>(
-		{},
+		{}
 	);
 	const [isLoading, setIsLoading] = useState(false);
 	const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
@@ -69,12 +69,14 @@ export function UnifiedWizard<T = Record<string, unknown>>({
 	const validateStep = useCallback(
 		(stepIndex: number, stepData: T) => {
 			const step = steps[stepIndex];
-			if (!step.validation) return null;
+			if (!step.validation) {
+				return null;
+			}
 
 			const stepErrors = step.validation(stepData);
 			return stepErrors;
 		},
-		[steps],
+		[steps]
 	);
 
 	const handleStepChange = useCallback(
@@ -87,7 +89,7 @@ export function UnifiedWizard<T = Record<string, unknown>>({
 				[currentStep]: {},
 			}));
 		},
-		[currentStep],
+		[currentStep]
 	);
 
 	const handleNext = useCallback(() => {
@@ -117,7 +119,7 @@ export function UnifiedWizard<T = Record<string, unknown>>({
 				setCurrentStep(stepIndex);
 			}
 		},
-		[currentStep, completedSteps],
+		[currentStep, completedSteps]
 	);
 
 	const handleComplete = useCallback(async () => {
@@ -157,7 +159,9 @@ export function UnifiedWizard<T = Record<string, unknown>>({
 	}, [data, onComplete, steps, validateStep]);
 
 	const handleSaveDraft = useCallback(async () => {
-		if (!onSaveDraft) return;
+		if (!onSaveDraft) {
+			return;
+		}
 
 		setIsLoading(true);
 		try {
@@ -174,7 +178,7 @@ export function UnifiedWizard<T = Record<string, unknown>>({
 	const hasStepErrors = Object.keys(stepErrors).length > 0;
 
 	return (
-		<div className={cn("max-w-4xl mx-auto space-y-6", className)}>
+		<div className={cn("mx-auto max-w-4xl space-y-6", className)}>
 			{/* Header */}
 			<Card className={cn("border-border", secondaryColorClasses.cardHover)}>
 				<CardHeader>
@@ -182,17 +186,17 @@ export function UnifiedWizard<T = Record<string, unknown>>({
 						<div>
 							<CardTitle className="text-2xl">{title}</CardTitle>
 							{description && (
-								<p className="text-muted-foreground mt-1">{description}</p>
+								<p className="mt-1 text-muted-foreground">{description}</p>
 							)}
 						</div>
-						<Badge variant="outline" className="text-sm">
+						<Badge className="text-sm" variant="outline">
 							Paso {currentStep + 1} de {steps.length}
 						</Badge>
 					</div>
 
 					<div className="space-y-2">
-						<Progress value={progress} className="h-2" />
-						<div className="flex justify-between text-xs text-muted-foreground">
+						<Progress className="h-2" value={progress} />
+						<div className="flex justify-between text-muted-foreground text-xs">
 							<span>Progreso: {Math.round(progress)}%</span>
 							<span>
 								{completedSteps.size} de {steps.length} completados
@@ -216,7 +220,15 @@ export function UnifiedWizard<T = Record<string, unknown>>({
 
 							return (
 								<Button
+									className={cn(
+										"flex items-center gap-2",
+										hasErrors && "border-destructive text-destructive",
+										!isAccessible && "cursor-not-allowed opacity-50"
+									)}
+									disabled={!isAccessible}
 									key={step.id}
+									onClick={() => handleStepClick(index)}
+									size="sm"
 									variant={
 										isCurrent
 											? "default"
@@ -224,14 +236,6 @@ export function UnifiedWizard<T = Record<string, unknown>>({
 												? "secondary"
 												: "outline"
 									}
-									size="sm"
-									onClick={() => handleStepClick(index)}
-									disabled={!isAccessible}
-									className={cn(
-										"flex items-center gap-2",
-										hasErrors && "border-destructive text-destructive",
-										!isAccessible && "opacity-50 cursor-not-allowed",
-									)}
 								>
 									{isCompleted ? (
 										<Check className="h-4 w-4" />
@@ -242,7 +246,7 @@ export function UnifiedWizard<T = Record<string, unknown>>({
 									)}
 									<span className="hidden sm:inline">{step.title}</span>
 									{step.optional && (
-										<Badge variant="outline" className="text-xs ml-1">
+										<Badge className="ml-1 text-xs" variant="outline">
 											Opcional
 										</Badge>
 									)}
@@ -259,7 +263,7 @@ export function UnifiedWizard<T = Record<string, unknown>>({
 					<CardTitle className="flex items-center gap-2">
 						{currentStepConfig.title}
 						{currentStepConfig.optional && (
-							<Badge variant="outline" className="text-xs">
+							<Badge className="text-xs" variant="outline">
 								Opcional
 							</Badge>
 						)}
@@ -279,8 +283,8 @@ export function UnifiedWizard<T = Record<string, unknown>>({
 				<CardContent>
 					<currentStepConfig.component
 						data={data}
-						onChange={handleStepChange}
 						errors={stepErrors}
+						onChange={handleStepChange}
 					/>
 				</CardContent>
 			</Card>
@@ -290,10 +294,10 @@ export function UnifiedWizard<T = Record<string, unknown>>({
 				<CardContent className="p-4">
 					<div className="flex items-center justify-between">
 						<Button
-							variant="outline"
-							onClick={handlePrevious}
-							disabled={isFirstStep || isLoading}
 							className="flex items-center gap-2"
+							disabled={isFirstStep || isLoading}
+							onClick={handlePrevious}
+							variant="outline"
 						>
 							<ChevronLeft className="h-4 w-4" />
 							Anterior
@@ -302,10 +306,10 @@ export function UnifiedWizard<T = Record<string, unknown>>({
 						<div className="flex items-center gap-2">
 							{showDraftOption && onSaveDraft && (
 								<Button
-									variant="outline"
-									onClick={handleSaveDraft}
-									disabled={isLoading}
 									className="flex items-center gap-2"
+									disabled={isLoading}
+									onClick={handleSaveDraft}
+									variant="outline"
 								>
 									<Save className="h-4 w-4" />
 									Guardar Borrador
@@ -314,18 +318,18 @@ export function UnifiedWizard<T = Record<string, unknown>>({
 
 							{isLastStep ? (
 								<Button
-									onClick={handleComplete}
-									disabled={isLoading}
 									className="flex items-center gap-2"
+									disabled={isLoading}
+									onClick={handleComplete}
 								>
 									<Check className="h-4 w-4" />
 									{isLoading ? "Completando..." : "Completar"}
 								</Button>
 							) : (
 								<Button
-									onClick={handleNext}
-									disabled={isLoading}
 									className="flex items-center gap-2"
+									disabled={isLoading}
+									onClick={handleNext}
 								>
 									Siguiente
 									<ChevronRight className="h-4 w-4" />

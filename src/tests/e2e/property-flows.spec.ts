@@ -21,7 +21,7 @@ test.describe("Property Management Flows", () => {
 							"canEditProperties",
 						],
 					},
-				}),
+				})
 			);
 		});
 	});
@@ -295,7 +295,7 @@ test.describe("Property Management Flows", () => {
 		const descriptionInput = page.locator('textarea[name="description"]');
 		if (await descriptionInput.isVisible()) {
 			await descriptionInput.fill(
-				"This is a test property created by E2E tests",
+				"This is a test property created by E2E tests"
 			);
 		}
 
@@ -466,7 +466,7 @@ test.describe("Property Form Validation", () => {
 						role: "admin",
 						permissions: ["canManageProperties", "canCreateProperties"],
 					},
-				}),
+				})
 			);
 		});
 	});
@@ -725,7 +725,7 @@ test.describe("Property Image Upload", () => {
 						role: "admin",
 						permissions: ["canManageProperties", "canCreateProperties"],
 					},
-				}),
+				})
 			);
 		});
 	});
@@ -967,7 +967,9 @@ test.describe("Property Search and Filters", () => {
 					}
 				}
 
-				if (searchPageFound) break;
+				if (searchPageFound) {
+					break;
+				}
 			} catch (_e) {
 				// Continue to next URL
 			}
@@ -1100,7 +1102,7 @@ test.describe("Property Search and Filters", () => {
 
 			for (const type of propertyTypes) {
 				const matchingOption = options.find((option) =>
-					option.toLowerCase().includes(type.toLowerCase()),
+					option.toLowerCase().includes(type.toLowerCase())
 				);
 
 				if (matchingOption) {
@@ -1112,7 +1114,7 @@ test.describe("Property Search and Filters", () => {
 					const filterResults = [
 						page.locator(`text=${type}`),
 						page.locator(
-							`text=${type.charAt(0).toUpperCase() + type.slice(1)}`,
+							`text=${type.charAt(0).toUpperCase() + type.slice(1)}`
 						),
 						page.locator('[data-testid="property-card"]'),
 						page.locator(".property-card"),
@@ -1198,7 +1200,7 @@ test.describe("Property Search and Filters", () => {
 					// Get available options and select one
 					const options = await element.locator("option").allTextContents();
 					const validOptions = options.filter(
-						(option) => option.trim() && option !== "Select...",
+						(option) => option.trim() && option !== "Select..."
 					);
 
 					if (validOptions.length > 0) {
@@ -1271,7 +1273,7 @@ test.describe("Property Search and Filters", () => {
 							option.toLowerCase().includes("name") ||
 							option.toLowerCase().includes("precio") ||
 							option.toLowerCase().includes("fecha") ||
-							option.toLowerCase().includes("nombre"),
+							option.toLowerCase().includes("nombre")
 					);
 
 					if (sortOptions.length > 0) {

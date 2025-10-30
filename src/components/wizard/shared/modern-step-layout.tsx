@@ -43,13 +43,13 @@ const itemVariants = {
 };
 
 // Main step layout container
-interface ModernStepLayoutProps {
+type ModernStepLayoutProps = {
 	title: string;
 	description: string;
 	icon?: React.ReactNode;
 	children: React.ReactNode;
 	className?: string;
-}
+};
 
 export function ModernStepLayout({
 	title,
@@ -60,28 +60,28 @@ export function ModernStepLayout({
 }: ModernStepLayoutProps) {
 	return (
 		<motion.div
-			variants={containerVariants}
-			initial="hidden"
 			animate="visible"
 			className={cn("space-y-8", className)}
+			initial="hidden"
+			variants={containerVariants}
 		>
 			{/* Header */}
-			<motion.div variants={itemVariants} className="text-center space-y-4">
+			<motion.div className="space-y-4 text-center" variants={itemVariants}>
 				{icon && (
 					<div className="flex justify-center">
-						<div className="p-3 bg-primary/10 rounded-full">{icon}</div>
+						<div className="rounded-full bg-primary/10 p-3">{icon}</div>
 					</div>
 				)}
 				<div className="space-y-2">
-					<h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-					<p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+					<h1 className="font-bold text-3xl tracking-tight">{title}</h1>
+					<p className="mx-auto max-w-2xl text-lg text-muted-foreground">
 						{description}
 					</p>
 				</div>
 			</motion.div>
 
 			{/* Content */}
-			<motion.div variants={itemVariants} className="space-y-6">
+			<motion.div className="space-y-6" variants={itemVariants}>
 				{children}
 			</motion.div>
 		</motion.div>
@@ -89,7 +89,7 @@ export function ModernStepLayout({
 }
 
 // Section card component
-interface ModernSectionCardProps {
+type ModernSectionCardProps = {
 	title: string;
 	description?: string;
 	icon?: React.ReactNode;
@@ -97,7 +97,7 @@ interface ModernSectionCardProps {
 	variant?: "default" | "ghost";
 	children: React.ReactNode;
 	className?: string;
-}
+};
 
 export function ModernSectionCard({
 	title,
@@ -113,11 +113,11 @@ export function ModernSectionCard({
 			<CardHeader className="pb-4">
 				<div className="flex items-center justify-between">
 					<div className="flex items-center space-x-3">
-						{icon && <div className="p-2 bg-primary/10 rounded-lg">{icon}</div>}
+						{icon && <div className="rounded-lg bg-primary/10 p-2">{icon}</div>}
 						<div>
 							<CardTitle className="text-xl">{title}</CardTitle>
 							{description && (
-								<p className="text-sm text-muted-foreground mt-1">
+								<p className="mt-1 text-muted-foreground text-sm">
 									{description}
 								</p>
 							)}
@@ -133,15 +133,15 @@ export function ModernSectionCard({
 	if (variant === "ghost") {
 		return (
 			<motion.div
-				variants={itemVariants}
 				className={cn("space-y-4", className)}
+				variants={itemVariants}
 			>
-				<div className="flex items-center space-x-3 mb-4">
-					{icon && <div className="p-2 bg-primary/10 rounded-lg">{icon}</div>}
+				<div className="mb-4 flex items-center space-x-3">
+					{icon && <div className="rounded-lg bg-primary/10 p-2">{icon}</div>}
 					<div>
-						<h3 className="text-xl font-semibold">{title}</h3>
+						<h3 className="font-semibold text-xl">{title}</h3>
 						{description && (
-							<p className="text-sm text-muted-foreground">{description}</p>
+							<p className="text-muted-foreground text-sm">{description}</p>
 						)}
 					</div>
 					{badge && <Badge variant="secondary">{badge}</Badge>}
@@ -153,7 +153,7 @@ export function ModernSectionCard({
 
 	return (
 		<motion.div variants={itemVariants}>
-			<Card className={cn("shadow-sm border-border/50", className)}>
+			<Card className={cn("border-border/50 shadow-sm", className)}>
 				{content}
 			</Card>
 		</motion.div>
@@ -161,12 +161,12 @@ export function ModernSectionCard({
 }
 
 // Grid section for organizing form fields
-interface ModernGridSectionProps {
+type ModernGridSectionProps = {
 	columns?: 1 | 2 | 3;
 	gap?: "sm" | "md" | "lg";
 	children: React.ReactNode;
 	className?: string;
-}
+};
 
 export function ModernGridSection({
 	columns = 2,
@@ -196,13 +196,13 @@ export function ModernGridSection({
 }
 
 // Info box for highlighting information
-interface ModernInfoBoxProps {
+type ModernInfoBoxProps = {
 	title: string;
 	children: React.ReactNode;
 	icon?: React.ReactNode;
 	variant?: "default" | "success" | "warning" | "info" | "error";
 	className?: string;
-}
+};
 
 export function ModernInfoBox({
 	title,
@@ -237,7 +237,7 @@ export function ModernInfoBox({
 				className={cn(
 					"rounded-lg border p-4",
 					variantStyles[variant],
-					className,
+					className
 				)}
 			>
 				<div className="flex items-start space-x-3">
@@ -255,10 +255,10 @@ export function ModernInfoBox({
 }
 
 // Divider with optional label
-interface ModernDividerProps {
+type ModernDividerProps = {
 	label?: string;
 	className?: string;
-}
+};
 
 export function ModernDivider({ label, className }: ModernDividerProps) {
 	if (label) {
@@ -280,14 +280,14 @@ export function ModernDivider({ label, className }: ModernDividerProps) {
 }
 
 // Stats card for displaying metrics
-interface ModernStatsCardProps {
+type ModernStatsCardProps = {
 	title: string;
 	value: string | number;
 	icon?: React.ReactNode;
 	trend?: "up" | "down" | "neutral";
 	trendValue?: string;
 	className?: string;
-}
+};
 
 export function ModernStatsCard({
 	title,
@@ -315,32 +315,32 @@ export function ModernStatsCard({
 		<Card className={cn("p-4", className)}>
 			<div className="flex items-center justify-between">
 				<div className="space-y-1">
-					<p className="text-sm font-medium text-muted-foreground">{title}</p>
-					<p className="text-2xl font-bold">{value}</p>
+					<p className="font-medium text-muted-foreground text-sm">{title}</p>
+					<p className="font-bold text-2xl">{value}</p>
 					{trend && trendValue && TrendIcon && (
 						<div
 							className={cn("flex items-center text-sm", trendColors[trend])}
 						>
-							<TrendIcon className="h-4 w-4 mr-1" />
+							<TrendIcon className="mr-1 h-4 w-4" />
 							{trendValue}
 						</div>
 					)}
 				</div>
-				{icon && <div className="p-2 bg-primary/10 rounded-full">{icon}</div>}
+				{icon && <div className="rounded-full bg-primary/10 p-2">{icon}</div>}
 			</div>
 		</Card>
 	);
 }
 
 // AI Generation Button Component
-interface ModernAIButtonProps {
+type ModernAIButtonProps = {
 	onGenerate: () => void;
 	isGenerating?: boolean;
 	label?: string;
 	size?: "sm" | "md" | "lg";
 	variant?: "default" | "outline" | "ghost";
 	className?: string;
-}
+};
 
 export function ModernAIButton({
 	onGenerate,
@@ -355,22 +355,22 @@ export function ModernAIButton({
 
 	return (
 		<Button
-			type="button"
-			variant={variant}
-			size={buttonSize}
-			onClick={onGenerate}
-			disabled={isGenerating}
 			className={cn(
 				"gap-2 transition-all duration-200",
 				isGenerating && "animate-pulse",
-				className,
+				className
 			)}
+			disabled={isGenerating}
+			onClick={onGenerate}
+			size={buttonSize}
+			type="button"
+			variant={variant}
 		>
 			<Sparkles
 				className={cn(
 					"transition-transform duration-200",
 					isGenerating ? "animate-spin" : "group-hover:scale-110",
-					size === "sm" ? "h-3 w-3" : size === "lg" ? "h-5 w-5" : "h-4 w-4",
+					size === "sm" ? "h-3 w-3" : size === "lg" ? "h-5 w-5" : "h-4 w-4"
 				)}
 			/>
 			{isGenerating ? "Generando..." : label}
@@ -379,7 +379,7 @@ export function ModernAIButton({
 }
 
 // Selection Grid for property types, etc.
-interface ModernSelectionGridProps {
+type ModernSelectionGridProps = {
 	items: Array<{
 		id: string;
 		label: string;
@@ -390,7 +390,7 @@ interface ModernSelectionGridProps {
 	onSelect: (id: string) => void;
 	columns?: 2 | 3 | 4;
 	className?: string;
-}
+};
 
 export function ModernSelectionGrid({
 	items,
@@ -422,19 +422,19 @@ export function ModernSelectionGrid({
 							className={cn(
 								"cursor-pointer transition-all duration-200 hover:shadow-md",
 								isSelected
-									? "ring-2 ring-primary border-primary bg-primary/5"
-									: "hover:border-primary/50",
+									? "border-primary bg-primary/5 ring-2 ring-primary"
+									: "hover:border-primary/50"
 							)}
 							onClick={() => onSelect(item.id)}
 						>
-							<CardContent className="p-4 text-center space-y-2">
+							<CardContent className="space-y-2 p-4 text-center">
 								{IconComponent && (
 									<div
 										className={cn(
-											"mx-auto p-2 rounded-lg transition-colors",
+											"mx-auto rounded-lg p-2 transition-colors",
 											isSelected
 												? "bg-primary text-primary-foreground"
-												: "bg-muted",
+												: "bg-muted"
 										)}
 									>
 										<IconComponent className="h-6 w-6" />
@@ -443,7 +443,7 @@ export function ModernSelectionGrid({
 								<div>
 									<p className="font-medium">{item.label}</p>
 									{item.description && (
-										<p className="text-xs text-muted-foreground mt-1">
+										<p className="mt-1 text-muted-foreground text-xs">
 											{item.description}
 										</p>
 									)}

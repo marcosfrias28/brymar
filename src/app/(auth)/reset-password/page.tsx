@@ -17,12 +17,12 @@ const ResetPasswordPage = () => {
 	if (!token) {
 		return (
 			<div className="flex flex-col gap-6 text-center">
-				<h1 className="text-2xl font-bold text-destructive">Token Inválido</h1>
-				<p className="text-balance text-sm text-muted-foreground">
+				<h1 className="font-bold text-2xl text-destructive">Token Inválido</h1>
+				<p className="text-balance text-muted-foreground text-sm">
 					El enlace de restablecimiento de contraseña no es válido o ha
 					expirado.
 				</p>
-				<Link href="/forgot-password" className="underline underline-offset-4">
+				<Link className="underline underline-offset-4" href="/forgot-password">
 					Solicitar nuevo enlace
 				</Link>
 			</div>
@@ -40,14 +40,14 @@ const ResetPasswordPage = () => {
 
 	return (
 		<AuthFormWrapper
-			title="Restablecer Contraseña"
-			subtitle="Ingresa tu nueva contraseña"
 			action={resetPasswordAction}
 			fields={[passwordField, confirmPasswordField]}
-			submitText="Restablecer Contraseña"
-			loadingText="Restableciendo..."
 			footerContent={footerContent}
 			hiddenFields={[{ name: "token", value: token }]}
+			loadingText="Restableciendo..."
+			submitText="Restablecer Contraseña"
+			subtitle="Ingresa tu nueva contraseña"
+			title="Restablecer Contraseña"
 		/>
 	);
 };

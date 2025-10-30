@@ -88,7 +88,7 @@ class MapServiceImpl implements MapService {
 					{
 						coordinates: { latitude, longitude },
 						bounds: DOMINICAN_REPUBLIC_BOUNDS,
-					},
+					}
 				);
 			}
 
@@ -98,7 +98,7 @@ class MapServiceImpl implements MapService {
 					headers: {
 						"User-Agent": "Brymar-Inmobiliaria/1.0",
 					},
-				},
+				}
 			);
 
 			if (!response.ok) {
@@ -109,7 +109,7 @@ class MapServiceImpl implements MapService {
 
 			if (!data || data.error) {
 				throw new Error(
-					"No se pudo obtener la dirección para estas coordenadas",
+					"No se pudo obtener la dirección para estas coordenadas"
 				);
 			}
 
@@ -156,11 +156,8 @@ class MapServiceImpl implements MapService {
 
 			return address;
 		} catch (error) {
-			console.error("Reverse geocoding error:", error);
 			throw new Error(
-				error instanceof Error
-					? error.message
-					: "Error al obtener la dirección",
+				error instanceof Error ? error.message : "Error al obtener la dirección"
 			);
 		}
 	}
@@ -176,13 +173,13 @@ class MapServiceImpl implements MapService {
 
 			const response = await fetch(
 				`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-					searchQuery,
+					searchQuery
 				)}&limit=1&countrycodes=do&addressdetails=1&accept-language=es`,
 				{
 					headers: {
 						"User-Agent": "Brymar-Inmobiliaria/1.0",
 					},
-				},
+				}
 			);
 
 			if (!response.ok) {
@@ -196,8 +193,8 @@ class MapServiceImpl implements MapService {
 			}
 
 			const result = data[0];
-			const latitude = parseFloat(result.lat);
-			const longitude = parseFloat(result.lon);
+			const latitude = Number.parseFloat(result.lat);
+			const longitude = Number.parseFloat(result.lon);
 
 			// Validate coordinates are within Dominican Republic bounds
 			if (
@@ -214,11 +211,10 @@ class MapServiceImpl implements MapService {
 				longitude,
 			};
 		} catch (error) {
-			console.error("Geocoding error:", error);
 			throw new Error(
 				error instanceof Error
 					? error.message
-					: "Error al obtener las coordenadas",
+					: "Error al obtener las coordenadas"
 			);
 		}
 	}

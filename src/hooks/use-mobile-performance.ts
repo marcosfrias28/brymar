@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useResponsive } from "./use-mobile-responsive";
 
 // Performance metrics interface
-export interface PerformanceMetrics {
+export type PerformanceMetrics = {
 	renderTime: number;
 	memoryUsage: number;
 	batteryLevel: number;
@@ -16,7 +16,7 @@ export interface PerformanceMetrics {
 	isLowEndDevice: boolean;
 	frameRate: number;
 	loadTime: number;
-}
+};
 
 // Lazy loading hook
 export function useLazyLoading<T>(
@@ -26,7 +26,7 @@ export function useLazyLoading<T>(
 		enabled?: boolean;
 		delay?: number;
 		retries?: number;
-	} = {},
+	} = {}
 ) {
 	const { enabled = true, delay = 0, retries = 3 } = options;
 	const [data, setData] = useState<T | null>(null);
@@ -36,7 +36,9 @@ export function useLazyLoading<T>(
 	const mountedRef = useRef(true);
 
 	const load = useCallback(async () => {
-		if (!enabled || loading) return;
+		if (!enabled || loading) {
+			return;
+		}
 
 		setLoading(true);
 		setError(null);
@@ -66,7 +68,7 @@ export function useLazyLoading<T>(
 								load();
 							}
 						},
-						2 ** retryCount * 1000,
+						2 ** retryCount * 1000
 					);
 				}
 			}
@@ -81,11 +83,12 @@ export function useLazyLoading<T>(
 		load();
 	}, [...dependencies, load]);
 
-	useEffect(() => {
-		return () => {
+	useEffect(
+		() => () => {
 			mountedRef.current = false;
-		};
-	}, []);
+		},
+		[]
+	);
 
 	const retry = useCallback(() => {
 		setRetryCount(0);
@@ -106,7 +109,7 @@ export function useImageOptimization() {
 	const { isMobile, devicePixelRatio } = useResponsive();
 
 	const getOptimizedImageProps = useCallback(
-		(src: string, width: number, height?: number, _quality: number = 80) => {
+		(src: string, width: number, height?: number, _quality = 80) => {
 			// Calculate optimal dimensions for device
 			const dpr = devicePixelRatio || 1;
 			const optimizedWidth = Math.round(width * dpr);
@@ -133,17 +136,19 @@ export function useImageOptimization() {
 				},
 			};
 		},
-		[isMobile, devicePixelRatio],
+		[isMobile, devicePixelRatio]
 	);
 
-	const preloadImage = useCallback((src: string): Promise<void> => {
-		return new Promise((resolve, reject) => {
-			const img = new Image();
-			img.onload = () => resolve();
-			img.onerror = reject;
-			img.src = src;
-		});
-	}, []);
+	const preloadImage = useCallback(
+		(src: string): Promise<void> =>
+			new Promise((resolve, reject) => {
+				const img = new Image();
+				img.onload = () => resolve();
+				img.onerror = reject;
+				img.src = src;
+			}),
+		[]
+	);
 
 	return {
 		getOptimizedImageProps,
@@ -177,7 +182,9 @@ export function useMemoryManagement() {
 	}, [updateMemoryInfo]);
 
 	const isMemoryPressure = useMemo(() => {
-		if (!memoryInfo) return false;
+		if (!memoryInfo) {
+			return false;
+		}
 		return memoryInfo.used / memoryInfo.limit > 0.8;
 	}, [memoryInfo]);
 
@@ -200,7 +207,7 @@ export function useVirtualScrolling<T>(
 	items: T[],
 	itemHeight: number,
 	containerHeight: number,
-	overscan: number = 5,
+	overscan = 5
 ) {
 	const [scrollTop, setScrollTop] = useState(0);
 
@@ -212,14 +219,14 @@ export function useVirtualScrolling<T>(
 		return { start, end };
 	}, [scrollTop, itemHeight, containerHeight, overscan, items.length]);
 
-	const visibleItems = useMemo(() => {
-		return items
-			.slice(visibleRange.start, visibleRange.end)
-			.map((item, index) => ({
+	const visibleItems = useMemo(
+		() =>
+			items.slice(visibleRange.start, visibleRange.end).map((item, index) => ({
 				item,
 				index: visibleRange.start + index,
-			}));
-	}, [items, visibleRange]);
+			})),
+		[items, visibleRange]
+	);
 
 	const totalHeight = items.length * itemHeight;
 	const offsetY = visibleRange.start * itemHeight;
@@ -239,7 +246,7 @@ export function useVirtualScrolling<T>(
 // Debounced state hook for performance
 export function useDebouncedState<T>(
 	initialValue: T,
-	delay: number = 300,
+	delay = 300
 ): [T, T, (value: T) => void] {
 	const [immediateValue, setImmediateValue] = useState(initialValue);
 	const [debouncedValue, setDebouncedValue] = useState(initialValue);
@@ -257,16 +264,17 @@ export function useDebouncedState<T>(
 				setDebouncedValue(value);
 			}, delay);
 		},
-		[delay],
+		[delay]
 	);
 
-	useEffect(() => {
-		return () => {
+	useEffect(
+		() => () => {
 			if (timeoutRef.current) {
 				clearTimeout(timeoutRef.current);
 			}
-		};
-	}, []);
+		},
+		[]
+	);
 
 	return [immediateValue, debouncedValue, setValue];
 }
@@ -325,7 +333,7 @@ export function usePerformanceMonitoring() {
 
 // Intersection observer hook for lazy loading
 export function useIntersectionObserver(
-	options: IntersectionObserverInit = {},
+	options: IntersectionObserverInit = {}
 ) {
 	const [isIntersecting, setIsIntersecting] = useState(false);
 	const [entry, setEntry] = useState<IntersectionObserverEntry | null>(null);
@@ -334,7 +342,9 @@ export function useIntersectionObserver(
 
 	useEffect(() => {
 		const element = elementRef.current;
-		if (!element) return;
+		if (!element) {
+			return;
+		}
 
 		observerRef.current = new IntersectionObserver(
 			([entry]) => {
@@ -345,7 +355,7 @@ export function useIntersectionObserver(
 				threshold: 0.1,
 				rootMargin: "50px",
 				...options,
-			},
+			}
 		);
 
 		observerRef.current.observe(element);
@@ -366,8 +376,8 @@ export function useIntersectionObserver(
 
 // Optimized animation hook
 export function useOptimizedAnimation(
-	shouldAnimate: boolean = true,
-	reducedMotionFallback: any = {},
+	shouldAnimate = true,
+	reducedMotionFallback: any = {}
 ) {
 	const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
@@ -398,7 +408,9 @@ export function useResourcePreloading() {
 
 	const preloadResource = useCallback(
 		(href: string, as: "script" | "style" | "image" | "font" = "script") => {
-			if (preloadedResources.current.has(href)) return;
+			if (preloadedResources.current.has(href)) {
+				return;
+			}
 
 			const link = document.createElement("link");
 			link.rel = "preload";
@@ -412,7 +424,7 @@ export function useResourcePreloading() {
 			document.head.appendChild(link);
 			preloadedResources.current.add(href);
 		},
-		[],
+		[]
 	);
 
 	const preloadImages = useCallback((urls: string[]) => {
@@ -434,7 +446,7 @@ export function useResourcePreloading() {
 // Bundle splitting hook
 export function useDynamicImport<T>(
 	importFunction: () => Promise<{ default: T }>,
-	dependencies: any[] = [],
+	dependencies: any[] = []
 ) {
 	const [component, setComponent] = useState<T | null>(null);
 	const [loading, setLoading] = useState(false);
@@ -502,7 +514,7 @@ export function useMobilePerformance() {
 			imageQuality: isLowEndDevice ? 60 : 80,
 			enableVirtualScrolling: isMobile && isLowEndDevice,
 		}),
-		[isMobile, isLowEndDevice, connectionType],
+		[isMobile, isLowEndDevice, connectionType]
 	);
 
 	const optimizeForDevice = useCallback(() => {

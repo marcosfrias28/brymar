@@ -14,21 +14,21 @@ import {
 	useOfflineQueue,
 } from "@/lib/utils/network-detection";
 
-export interface NetworkAwareWizardProps {
+export type NetworkAwareWizardProps = {
 	children: React.ReactNode;
 	onNetworkError?: (error: NetworkError) => void;
 	onNetworkRecovery?: () => void;
 	enableOfflineMode?: boolean;
 	autoSaveInterval?: number;
 	className?: string;
-}
+};
 
 export function NetworkAwareWizard({
 	children,
 	onNetworkError,
 	onNetworkRecovery,
 	enableOfflineMode = true,
-	autoSaveInterval = 30000,
+	autoSaveInterval = 30_000,
 	className,
 }: NetworkAwareWizardProps) {
 	const networkStatus = useNetworkStatus();
@@ -39,7 +39,7 @@ export function NetworkAwareWizard({
 
 	// Handle network status changes
 	useEffect(() => {
-		if (!networkStatus.isOnline && !wasOffline) {
+		if (!(networkStatus.isOnline || wasOffline)) {
 			// Just went offline
 			setWasOffline(true);
 			setShowOfflineMode(enableOfflineMode);
@@ -55,7 +55,7 @@ export function NetworkAwareWizard({
 			} else {
 				toast.error("Sin conexión a internet", {
 					description: "Algunas funciones no estarán disponibles",
-					duration: Infinity,
+					duration: Number.POSITIVE_INFINITY,
 				});
 			}
 		} else if (networkStatus.isOnline && wasOffline) {
@@ -89,7 +89,7 @@ export function NetworkAwareWizard({
 				description: string;
 				fallback?: () => T;
 				showToast?: boolean;
-			},
+			}
 		): Promise<T> => {
 			try {
 				return await executeWithOfflineSupport(operation, {
@@ -106,7 +106,7 @@ export function NetworkAwareWizard({
 				throw error;
 			}
 		},
-		[],
+		[]
 	);
 
 	// Retry failed operations
@@ -130,19 +130,19 @@ export function NetworkAwareWizard({
 		<div className={cn("relative", className)}>
 			{/* Network Status Bar */}
 			<NetworkStatusBar
-				isOnline={networkStatus.isOnline}
 				connectionType={networkStatus.effectiveType}
-				queuedOperations={queuedOperations.length}
+				isOnline={networkStatus.isOnline}
 				onRetry={retryFailedOperations}
+				queuedOperations={queuedOperations.length}
 				showOfflineMode={showOfflineMode}
 			/>
 
 			{/* Offline Mode Alert */}
 			{showOfflineMode && (
 				<OfflineModeAlert
-					queuedOperations={queuedOperations}
 					onClearQueue={clearQueue}
 					onRetry={retryFailedOperations}
+					queuedOperations={queuedOperations}
 				/>
 			)}
 
@@ -162,13 +162,13 @@ export function NetworkAwareWizard({
 }
 
 // Network Status Bar Component
-interface NetworkStatusBarProps {
+type NetworkStatusBarProps = {
 	isOnline: boolean;
 	connectionType?: string;
 	queuedOperations: number;
 	onRetry: () => void;
 	showOfflineMode: boolean;
-}
+};
 
 function NetworkStatusBar({
 	isOnline,
@@ -185,31 +185,31 @@ function NetworkStatusBar({
 		<div
 			className={cn(
 				"sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
-				!isOnline
-					? "border-orange-200 bg-orange-50/95"
-					: "border-green-200 bg-green-50/95",
+				isOnline
+					? "border-green-200 bg-green-50/95"
+					: "border-orange-200 bg-orange-50/95"
 			)}
 		>
 			<div className="flex items-center justify-between px-4 py-2">
 				<div className="flex items-center gap-2">
 					{isOnline ? (
-						<Wifi className="w-4 h-4 text-green-600" />
+						<Wifi className="h-4 w-4 text-green-600" />
 					) : (
-						<WifiOff className="w-4 h-4 text-orange-600" />
+						<WifiOff className="h-4 w-4 text-orange-600" />
 					)}
 
-					<span className="text-sm font-medium">
+					<span className="font-medium text-sm">
 						{isOnline ? "Conectado" : "Sin conexión"}
 					</span>
 
 					{connectionType && isOnline && (
-						<Badge variant="outline" className="text-xs">
+						<Badge className="text-xs" variant="outline">
 							{connectionType}
 						</Badge>
 					)}
 
 					{queuedOperations > 0 && (
-						<Badge variant="secondary" className="text-xs">
+						<Badge className="text-xs" variant="secondary">
 							{queuedOperations} pendiente{queuedOperations !== 1 ? "s" : ""}
 						</Badge>
 					)}
@@ -217,12 +217,12 @@ function NetworkStatusBar({
 
 				{queuedOperations > 0 && (
 					<Button
-						variant="ghost"
-						size="sm"
-						onClick={onRetry}
 						className="h-6 px-2"
+						onClick={onRetry}
+						size="sm"
+						variant="ghost"
 					>
-						<RefreshCw className="w-3 h-3 mr-1" />
+						<RefreshCw className="mr-1 h-3 w-3" />
 						Reintentar
 					</Button>
 				)}
@@ -232,7 +232,7 @@ function NetworkStatusBar({
 }
 
 // Offline Mode Alert Component
-interface OfflineModeAlertProps {
+type OfflineModeAlertProps = {
 	queuedOperations: Array<{
 		id: string;
 		description: string;
@@ -240,7 +240,7 @@ interface OfflineModeAlertProps {
 	}>;
 	onClearQueue: () => void;
 	onRetry: () => void;
-}
+};
 
 function OfflineModeAlert({
 	queuedOperations,
@@ -249,7 +249,7 @@ function OfflineModeAlert({
 }: OfflineModeAlertProps) {
 	return (
 		<Alert className="m-4 border-orange-200 bg-orange-50">
-			<CloudOff className="w-4 h-4" />
+			<CloudOff className="h-4 w-4" />
 			<AlertDescription>
 				<div className="space-y-3">
 					<div>
@@ -262,14 +262,14 @@ function OfflineModeAlert({
 
 					{queuedOperations.length > 0 && (
 						<div>
-							<p className="text-sm font-medium mb-2">
+							<p className="mb-2 font-medium text-sm">
 								Operaciones pendientes ({queuedOperations.length}):
 							</p>
-							<div className="space-y-1 max-h-32 overflow-y-auto">
+							<div className="max-h-32 space-y-1 overflow-y-auto">
 								{queuedOperations.slice(0, 5).map((op) => (
 									<div
+										className="rounded border bg-white p-2 text-xs"
 										key={op.id}
-										className="text-xs p-2 bg-white rounded border"
 									>
 										<div className="font-medium">{op.description}</div>
 										<div className="text-gray-500">
@@ -278,7 +278,7 @@ function OfflineModeAlert({
 									</div>
 								))}
 								{queuedOperations.length > 5 && (
-									<div className="text-xs text-gray-500 text-center">
+									<div className="text-center text-gray-500 text-xs">
 										... y {queuedOperations.length - 5} más
 									</div>
 								)}
@@ -288,21 +288,21 @@ function OfflineModeAlert({
 
 					<div className="flex gap-2">
 						<Button
-							variant="outline"
-							size="sm"
-							onClick={onRetry}
 							className="flex-1"
+							onClick={onRetry}
+							size="sm"
+							variant="outline"
 						>
-							<RefreshCw className="w-4 h-4 mr-2" />
+							<RefreshCw className="mr-2 h-4 w-4" />
 							Verificar conexión
 						</Button>
 
 						{queuedOperations.length > 0 && (
 							<Button
-								variant="ghost"
-								size="sm"
-								onClick={onClearQueue}
 								className="flex-1"
+								onClick={onClearQueue}
+								size="sm"
+								variant="ghost"
 							>
 								Limpiar cola
 							</Button>
@@ -319,7 +319,7 @@ const NetworkAwareContext = React.createContext<{
 	isOnline: boolean;
 	executeNetworkOperation: <T>(
 		operation: () => Promise<T>,
-		options: { description: string; fallback?: () => T; showToast?: boolean },
+		options: { description: string; fallback?: () => T; showToast?: boolean }
 	) => Promise<T>;
 	queueOperation: (
 		operation: () => Promise<any>,
@@ -328,7 +328,7 @@ const NetworkAwareContext = React.createContext<{
 			description: string;
 			data?: any;
 			maxRetries?: number;
-		},
+		}
 	) => Promise<string>;
 	queuedOperations: Array<{
 		id: string;
@@ -342,7 +342,7 @@ export function useNetworkAwareOperations() {
 	const context = React.useContext(NetworkAwareContext);
 	if (!context) {
 		throw new Error(
-			"useNetworkAwareOperations must be used within NetworkAwareWizard",
+			"useNetworkAwareOperations must be used within NetworkAwareWizard"
 		);
 	}
 	return context;
@@ -359,12 +359,12 @@ export function useNetworkAwareFetch() {
 				description?: string;
 				fallback?: () => any;
 				timeout?: number;
-			},
+			}
 		) => {
 			const {
 				description = "Operación de red",
 				fallback,
-				timeout = 10000,
+				timeout = 10_000,
 				...fetchOptions
 			} = options || {};
 
@@ -381,7 +381,7 @@ export function useNetworkAwareFetch() {
 
 						if (!response.ok) {
 							throw new Error(
-								`HTTP ${response.status}: ${response.statusText}`,
+								`HTTP ${response.status}: ${response.statusText}`
 							);
 						}
 
@@ -390,17 +390,17 @@ export function useNetworkAwareFetch() {
 						clearTimeout(timeoutId);
 					}
 				},
-				{ description, fallback },
+				{ description, fallback }
 			);
 		},
-		[executeNetworkOperation],
+		[executeNetworkOperation]
 	);
 }
 
 // HOC for wrapping components with network awareness
 export function withNetworkAwareness<P extends object>(
 	Component: React.ComponentType<P>,
-	options?: Partial<NetworkAwareWizardProps>,
+	options?: Partial<NetworkAwareWizardProps>
 ) {
 	const WrappedComponent = (props: P) => (
 		<NetworkAwareWizard {...options}>

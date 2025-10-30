@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 // Using static categories instead of database categories
-export interface Category {
+export type Category = {
 	id: number;
 	name: string;
 	slug: string;
@@ -17,7 +17,7 @@ export interface Category {
 	order: number;
 	createdAt: Date;
 	updatedAt: Date;
-}
+};
 
 import { Briefcase, Building, Home, MapPin } from "lucide-react";
 import { useSection } from "@/hooks/use-static-content";
@@ -26,23 +26,23 @@ import { CategoriesSkeleton } from "../skeletons/home/categories-skeleton";
 import { Button } from "../ui/button";
 import { SectionHeader, SectionWrapper } from "../ui/section-wrapper";
 
-interface CategoriesSectionProps {
+type CategoriesSectionProps = {
 	categories?: Category[];
-}
+};
 
 // Componente separado para el header que usa el hook
 function CategoriesSectionHeader() {
 	const { data: section, loading: isLoading } = useSection(
 		"home",
-		"categories",
+		"categories"
 	);
 
 	if (isLoading) {
 		return (
 			<div className="animate-pulse space-y-4">
-				<div className="h-4 bg-muted rounded w-1/4"></div>
-				<div className="h-8 bg-muted rounded w-3/4"></div>
-				<div className="h-4 bg-muted rounded w-full"></div>
+				<div className="h-4 w-1/4 rounded bg-muted" />
+				<div className="h-8 w-3/4 rounded bg-muted" />
+				<div className="h-4 w-full rounded bg-muted" />
 			</div>
 		);
 	}
@@ -56,29 +56,29 @@ function CategoriesSectionHeader() {
 
 	return (
 		<SectionHeader
-			subtitle={subtitle}
-			title={title}
+			className="mb-8 text-left"
 			description={description}
+			descriptionClassName="text-left max-w-none"
 			icon={
 				<svg
-					xmlns="http://www.w3.org/2000/svg"
 					aria-hidden="true"
-					role="img"
 					className="text-2xl text-primary"
-					width="1em"
 					height="1em"
+					role="img"
 					viewBox="0 0 256 256"
+					width="1em"
+					xmlns="http://www.w3.org/2000/svg"
 				>
 					<path
-						fill="currentColor"
 						d="M224 120v96a8 8 0 0 1-8 8H40a8 8 0 0 1-8-8v-96a15.87 15.87 0 0 1 4.69-11.32l80-80a16 16 0 0 1 22.62 0l80 80A15.87 15.87 0 0 1 224 120"
+						fill="currentColor"
 					/>
 				</svg>
 			}
-			className="text-left mb-8"
+			subtitle={subtitle}
 			subtitleClassName="text-left justify-start"
+			title={title}
 			titleClassName="text-left text-3xl md:text-4xl lg:text-5xl"
-			descriptionClassName="text-left max-w-none"
 		/>
 	);
 }
@@ -175,7 +175,7 @@ export function CategoriesSection({ categories = [] }: CategoriesSectionProps) {
 		<SectionWrapper className="relative overflow-hidden">
 			<div className="grid grid-cols-12 items-center gap-10">
 				{/* Header Section */}
-				<div className="lg:col-span-6 col-span-12">
+				<div className="col-span-12 lg:col-span-6">
 					<CategoriesSectionHeader />
 					<Button asChild>
 						<Link href="/properties">Ver Propiedades</Link>
@@ -191,23 +191,26 @@ export function CategoriesSection({ categories = [] }: CategoriesSectionProps) {
 						: "lg:col-span-3 col-span-6";
 
 					return (
-						<div key={category.id} className={cn(colSpan, "w-full bg-background")}>
-							<Link href={category.href} className="w-full">
+						<div
+							className={cn(colSpan, "w-full bg-background")}
+							key={category.id}
+						>
+							<Link className="w-full" href={category.href}>
 								<div
+									className={cn("group relative overflow-hidden rounded-2xl")}
 									style={{
 										height: "25rem",
 									}}
-									className={cn("relative rounded-2xl overflow-hidden group")}
 								>
 									<Image
 										alt={category.title}
+										className="object-cover"
 										fill
 										src={category.image}
-										className="object-cover"
 									/>
-									<div className="absolute w-full h-full bg-gradient-to-b from-black/0 to-black/80 top-full flex flex-col justify-between pl-10 pb-10 group-hover:top-0 transition-all duration-500">
-										<div className="flex justify-end mt-6 mr-6">
-											<div className="bg-background text-foreground rounded-full w-fit p-4">
+									<div className="absolute top-full flex h-full w-full flex-col justify-between bg-gradient-to-b from-black/0 to-black/80 pb-10 pl-10 transition-all duration-500 group-hover:top-0">
+										<div className="mt-6 mr-6 flex justify-end">
+											<div className="w-fit rounded-full bg-background p-4 text-foreground">
 												{(() => {
 													const IconComponent =
 														categoryIcons[category.name] ||
@@ -217,8 +220,8 @@ export function CategoriesSection({ categories = [] }: CategoriesSectionProps) {
 											</div>
 										</div>
 										<div className="flex flex-col gap-2.5">
-											<h3 className="text-white text-2xl">{category.title}</h3>
-											<p className="text-white/80 text-base leading-6">
+											<h3 className="text-2xl text-white">{category.title}</h3>
+											<p className="text-base text-white/80 leading-6">
 												{category.description}
 											</p>
 										</div>

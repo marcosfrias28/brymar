@@ -10,14 +10,14 @@ import {
 } from "@/lib/actions/characteristics-actions";
 import type { PropertyCharacteristic, PropertyType } from "@/types/wizard";
 
-export interface UseCharacteristicsServerOptions {
+export type UseCharacteristicsServerOptions = {
 	propertyType?: PropertyType;
 	draftId?: string;
 	autoSave?: boolean;
 	autoSaveDelay?: number;
-}
+};
 
-export interface UseCharacteristicsServerReturn {
+export type UseCharacteristicsServerReturn = {
 	// Data
 	characteristics: PropertyCharacteristic[];
 	selectedCharacteristics: PropertyCharacteristic[];
@@ -34,13 +34,13 @@ export interface UseCharacteristicsServerReturn {
 	setCharacteristicSelected: (id: string, selected: boolean) => void;
 	addCustomCharacteristic: (
 		name: string,
-		category?: "amenity" | "feature" | "location",
+		category?: "amenity" | "feature" | "location"
 	) => Promise<PropertyCharacteristic | null>;
 	removeCustomCharacteristic: (id: string) => Promise<boolean>;
 	saveCharacteristics: (draftId?: string) => Promise<void>;
 	searchCharacteristics: (
 		query: string,
-		category?: "amenity" | "feature" | "location",
+		category?: "amenity" | "feature" | "location"
 	) => Promise<PropertyCharacteristic[]>;
 
 	// Utilities
@@ -51,10 +51,10 @@ export interface UseCharacteristicsServerReturn {
 	// Validation
 	isValid: boolean;
 	validationMessage?: string;
-}
+};
 
 export function useCharacteristicsServer(
-	options: UseCharacteristicsServerOptions = {},
+	options: UseCharacteristicsServerOptions = {}
 ): UseCharacteristicsServerReturn {
 	const {
 		propertyType,
@@ -73,17 +73,17 @@ export function useCharacteristicsServer(
 	const [isSaving, setIsSaving] = useState(false);
 	const [isSearching, setIsSearching] = useState(false);
 	const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(
-		null,
+		null
 	);
 
 	// Computed values
 	const selectedCharacteristics = characteristics.filter(
-		(char) => char.selected,
+		(char) => char.selected
 	);
 	const isValid = selectedCharacteristics.length > 0;
-	const validationMessage = !isValid
-		? "Please select at least one characteristic"
-		: undefined;
+	const validationMessage = isValid
+		? undefined
+		: "Please select at least one characteristic";
 
 	// Load characteristics from server
 	const loadCharacteristics = useCallback(async () => {
@@ -91,8 +91,7 @@ export function useCharacteristicsServer(
 			setIsLoading(true);
 			const serverCharacteristics = await getCharacteristics(propertyType);
 			setCharacteristics(serverCharacteristics);
-		} catch (error) {
-			console.error("Error loading characteristics:", error);
+		} catch (_error) {
 			toast({
 				title: "Error",
 				description: "Failed to load characteristics",
@@ -117,7 +116,7 @@ export function useCharacteristicsServer(
 
 					draftCharacteristics.forEach((draftChar) => {
 						const existingIndex = merged.findIndex(
-							(char) => char.id === draftChar.id,
+							(char) => char.id === draftChar.id
 						);
 						if (existingIndex >= 0) {
 							merged[existingIndex] = {
@@ -131,8 +130,7 @@ export function useCharacteristicsServer(
 
 					return merged;
 				});
-			} catch (error) {
-				console.error("Error loading draft characteristics:", error);
+			} catch (_error) {
 				toast({
 					title: "Error",
 					description: "Failed to load draft characteristics",
@@ -142,12 +140,14 @@ export function useCharacteristicsServer(
 				setIsLoading(false);
 			}
 		},
-		[toast],
+		[toast]
 	);
 
 	// Auto-save functionality
 	const triggerAutoSave = useCallback(() => {
-		if (!autoSave || !draftId) return;
+		if (!(autoSave && draftId)) {
+			return;
+		}
 
 		if (autoSaveTimeout) {
 			clearTimeout(autoSaveTimeout);
@@ -156,9 +156,7 @@ export function useCharacteristicsServer(
 		const timeout = setTimeout(async () => {
 			try {
 				await saveDraftCharacteristics(draftId, characteristics);
-			} catch (error) {
-				console.error("Auto-save failed:", error);
-			}
+			} catch (_error) {}
 		}, autoSaveDelay);
 
 		setAutoSaveTimeout(timeout);
@@ -168,8 +166,8 @@ export function useCharacteristicsServer(
 	const toggleCharacteristic = useCallback((id: string) => {
 		setCharacteristics((prev) =>
 			prev.map((char) =>
-				char.id === id ? { ...char, selected: !char.selected } : char,
-			),
+				char.id === id ? { ...char, selected: !char.selected } : char
+			)
 		);
 	}, []);
 
@@ -177,22 +175,22 @@ export function useCharacteristicsServer(
 	const setCharacteristicSelected = useCallback(
 		(id: string, selected: boolean) => {
 			setCharacteristics((prev) =>
-				prev.map((char) => (char.id === id ? { ...char, selected } : char)),
+				prev.map((char) => (char.id === id ? { ...char, selected } : char))
 			);
 		},
-		[],
+		[]
 	);
 
 	// Add custom characteristic
 	const addCustomCharacteristic = useCallback(
 		async (
 			name: string,
-			category: "amenity" | "feature" | "location" = "feature",
+			category: "amenity" | "feature" | "location" = "feature"
 		): Promise<PropertyCharacteristic | null> => {
 			try {
 				const newCharacteristic = await createCustomCharacteristic(
 					name,
-					category,
+					category
 				);
 
 				setCharacteristics((prev) => [
@@ -206,8 +204,7 @@ export function useCharacteristicsServer(
 				});
 
 				return newCharacteristic;
-			} catch (error) {
-				console.error("Error adding custom characteristic:", error);
+			} catch (_error) {
 				toast({
 					title: "Error",
 					description: "Failed to add custom characteristic",
@@ -216,7 +213,7 @@ export function useCharacteristicsServer(
 				return null;
 			}
 		},
-		[toast],
+		[toast]
 	);
 
 	// Remove custom characteristic
@@ -233,8 +230,7 @@ export function useCharacteristicsServer(
 				});
 
 				return true;
-			} catch (error) {
-				console.error("Error removing custom characteristic:", error);
+			} catch (_error) {
 				toast({
 					title: "Error",
 					description: "Failed to remove custom characteristic",
@@ -243,7 +239,7 @@ export function useCharacteristicsServer(
 				return false;
 			}
 		},
-		[toast],
+		[toast]
 	);
 
 	// Save characteristics
@@ -263,7 +259,6 @@ export function useCharacteristicsServer(
 					description: "Characteristics saved",
 				});
 			} catch (error) {
-				console.error("Error saving characteristics:", error);
 				toast({
 					title: "Error",
 					description: "Failed to save characteristics",
@@ -274,25 +269,24 @@ export function useCharacteristicsServer(
 				setIsSaving(false);
 			}
 		},
-		[draftId, characteristics, toast],
+		[draftId, characteristics, toast]
 	);
 
 	// Search characteristics
 	const searchCharacteristicsAction = useCallback(
 		async (
 			query: string,
-			category?: "amenity" | "feature" | "location",
+			category?: "amenity" | "feature" | "location"
 		): Promise<PropertyCharacteristic[]> => {
 			try {
 				setIsSearching(true);
 				const results = await searchCharacteristics(
 					query,
 					propertyType,
-					category,
+					category
 				);
 				return results;
-			} catch (error) {
-				console.error("Error searching characteristics:", error);
+			} catch (_error) {
 				toast({
 					title: "Error",
 					description: "Failed to search characteristics",
@@ -303,39 +297,38 @@ export function useCharacteristicsServer(
 				setIsSearching(false);
 			}
 		},
-		[propertyType, toast],
+		[propertyType, toast]
 	);
 
 	// Clear all selections
 	const clearAllSelections = useCallback(() => {
 		setCharacteristics((prev) =>
-			prev.map((char) => ({ ...char, selected: false })),
+			prev.map((char) => ({ ...char, selected: false }))
 		);
 	}, []);
 
 	// Select all characteristics
 	const selectAll = useCallback(() => {
 		setCharacteristics((prev) =>
-			prev.map((char) => ({ ...char, selected: true })),
+			prev.map((char) => ({ ...char, selected: true }))
 		);
 	}, []);
 
 	// Get characteristics by category
-	const getCharacteristicsByCategory = useCallback((): Record<
-		string,
-		PropertyCharacteristic[]
-	> => {
-		return characteristics.reduce(
-			(acc, char) => {
-				if (!acc[char.category]) {
-					acc[char.category] = [];
-				}
-				acc[char.category].push(char);
-				return acc;
-			},
-			{} as Record<string, PropertyCharacteristic[]>,
-		);
-	}, [characteristics]);
+	const getCharacteristicsByCategory = useCallback(
+		(): Record<string, PropertyCharacteristic[]> =>
+			characteristics.reduce(
+				(acc, char) => {
+					if (!acc[char.category]) {
+						acc[char.category] = [];
+					}
+					acc[char.category].push(char);
+					return acc;
+				},
+				{} as Record<string, PropertyCharacteristic[]>
+			),
+		[characteristics]
+	);
 
 	// Load initial data
 	useEffect(() => {
@@ -355,13 +348,14 @@ export function useCharacteristicsServer(
 	}, [triggerAutoSave]);
 
 	// Cleanup auto-save timeout on unmount
-	useEffect(() => {
-		return () => {
+	useEffect(
+		() => () => {
 			if (autoSaveTimeout) {
 				clearTimeout(autoSaveTimeout);
 			}
-		};
-	}, [autoSaveTimeout]);
+		},
+		[autoSaveTimeout]
+	);
 
 	return {
 		// Data

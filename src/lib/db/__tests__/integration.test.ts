@@ -49,7 +49,7 @@ jest.mock("@/lib/db/schema", () => ({
 	},
 }));
 
-import db from "@/lib/db/drizzle";
+import { db } from "@/lib/db";
 import { blogPosts, properties, users } from "@/lib/db/schema";
 
 describe("Database Integration Tests", () => {
@@ -66,7 +66,7 @@ describe("Database Integration Tests", () => {
 			id: "prop-123",
 			title: "Test Property",
 			description: "A beautiful test property",
-			price: 250000,
+			price: 250_000,
 			currency: "USD",
 			address: {
 				street: "123 Test St",
@@ -179,7 +179,7 @@ describe("Database Integration Tests", () => {
 			(db.insert as jest.Mock).mockReturnValue(mockInsert);
 
 			await expect(
-				db.insert(properties).values(mockProperty).returning(),
+				db.insert(properties).values(mockProperty).returning()
 			).rejects.toThrow("Database connection failed");
 		});
 
@@ -189,14 +189,14 @@ describe("Database Integration Tests", () => {
 				returning: jest
 					.fn()
 					.mockRejectedValue(
-						new Error("duplicate key value violates unique constraint"),
+						new Error("duplicate key value violates unique constraint")
 					),
 			};
 
 			(db.insert as jest.Mock).mockReturnValue(mockInsert);
 
 			await expect(
-				db.insert(properties).values(mockProperty).returning(),
+				db.insert(properties).values(mockProperty).returning()
 			).rejects.toThrow("duplicate key value violates unique constraint");
 		});
 	});
@@ -331,9 +331,9 @@ describe("Database Integration Tests", () => {
 
 	describe("Transaction Operations", () => {
 		it("should handle transactions successfully", async () => {
-			const mockTransaction = jest.fn().mockImplementation(async (callback) => {
-				return await callback(mockDb);
-			});
+			const mockTransaction = jest
+				.fn()
+				.mockImplementation(async (callback) => await callback(mockDb));
 
 			(db.transaction as jest.Mock).mockImplementation(mockTransaction);
 
@@ -347,16 +347,16 @@ describe("Database Integration Tests", () => {
 		});
 
 		it("should rollback transaction on error", async () => {
-			const mockTransaction = jest.fn().mockImplementation(async (callback) => {
-				return await callback(mockDb);
-			});
+			const mockTransaction = jest
+				.fn()
+				.mockImplementation(async (callback) => await callback(mockDb));
 
 			(db.transaction as jest.Mock).mockImplementation(mockTransaction);
 
 			await expect(
 				db.transaction(async (_tx) => {
 					throw new Error("Transaction failed");
-				}),
+				})
 			).rejects.toThrow("Transaction failed");
 
 			expect(mockTransaction).toHaveBeenCalled();
@@ -420,7 +420,7 @@ describe("Database Integration Tests", () => {
 			const mockProperties = Array.from({ length: 10 }, (_, i) => ({
 				id: `prop-${i}`,
 				title: `Property ${i}`,
-				price: 200000 + i * 10000,
+				price: 200_000 + i * 10_000,
 			}));
 
 			const mockSelect = {
@@ -481,7 +481,7 @@ describe("Database Integration Tests", () => {
 				db
 					.insert(properties)
 					.values({ id: `prop-${i}`, title: `Property ${i}` })
-					.returning(),
+					.returning()
 			);
 
 			const results = await Promise.all(concurrentOperations);

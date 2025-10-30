@@ -117,7 +117,7 @@ async function seedUsers() {
 				const roleIcon =
 					user.role === "admin" ? "👑" : user.role === "agent" ? "🏠" : "👤";
 				console.log(
-					`${roleIcon} ✅ ${user.name} (${user.role}) - ${user.email}`,
+					`${roleIcon} ✅ ${user.name} (${user.role}) - ${user.email}`
 				);
 				insertedCount++;
 			} catch (error) {
@@ -127,7 +127,7 @@ async function seedUsers() {
 
 		console.log("\n🎉 Usuarios creados exitosamente!");
 		console.log(
-			`📊 Total insertados: ${insertedCount}/${sampleUsers.length}\n`,
+			`📊 Total insertados: ${insertedCount}/${sampleUsers.length}\n`
 		);
 	} catch (error) {
 		console.error("❌ Error durante el seed de usuarios:", error.message);

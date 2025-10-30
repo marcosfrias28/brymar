@@ -53,7 +53,7 @@ export type SignedUrlOperation =
 export type FileType = "image" | "video";
 export type ResourceType = keyof typeof SIGNED_URL_CONFIG.PATH_PREFIXES;
 
-export interface SignedUrlOptions {
+export type SignedUrlOptions = {
 	operation: SignedUrlOperation;
 	expiresIn?: number;
 	userId?: string;
@@ -62,9 +62,9 @@ export interface SignedUrlOptions {
 	maxSize?: number;
 	allowedMimeTypes?: string[];
 	metadata?: Record<string, any>;
-}
+};
 
-export interface SignedUrlResult {
+export type SignedUrlResult = {
 	url: string;
 	expires: Date;
 	token: string;
@@ -74,14 +74,14 @@ export interface SignedUrlResult {
 		allowedMimeTypes?: string[];
 		operation: SignedUrlOperation;
 	};
-}
+};
 
 /**
  * Generate a secure signed URL for cloud storage operations
  */
 export async function generateSignedUrl(
 	filename: string,
-	options: SignedUrlOptions,
+	options: SignedUrlOptions
 ): Promise<SignedUrlResult> {
 	// Validate inputs
 	validateSignedUrlInputs(filename, options);
@@ -114,7 +114,7 @@ export async function generateSignedUrl(
 		operation,
 		expires,
 		userId,
-		metadata,
+		metadata
 	);
 
 	// Construct upload path
@@ -146,20 +146,20 @@ export async function generateSignedUrl(
  */
 function validateSignedUrlInputs(
 	filename: string,
-	options: SignedUrlOptions,
+	options: SignedUrlOptions
 ): void {
 	// Validate filename
 	if (!filename || typeof filename !== "string") {
 		throw new ValidationError(
 			{ filename: ["Nombre de archivo requerido"] },
-			"Nombre de archivo no válido",
+			"Nombre de archivo no válido"
 		);
 	}
 
 	if (filename.length > 255) {
 		throw new ValidationError(
 			{ filename: ["Nombre de archivo demasiado largo"] },
-			"El nombre del archivo excede la longitud máxima",
+			"El nombre del archivo excede la longitud máxima"
 		);
 	}
 
@@ -167,7 +167,7 @@ function validateSignedUrlInputs(
 	if (!SIGNED_URL_CONFIG.ALLOWED_OPERATIONS.includes(options.operation)) {
 		throw new ValidationError(
 			{ operation: ["Operación no permitida"] },
-			"Operación de URL firmada no válida",
+			"Operación de URL firmada no válida"
 		);
 	}
 
@@ -176,7 +176,7 @@ function validateSignedUrlInputs(
 		if (typeof options.expiresIn !== "number" || options.expiresIn <= 0) {
 			throw new ValidationError(
 				{ expiresIn: ["Tiempo de expiración inválido"] },
-				"El tiempo de expiración debe ser un número positivo",
+				"El tiempo de expiración debe ser un número positivo"
 			);
 		}
 
@@ -186,7 +186,7 @@ function validateSignedUrlInputs(
 		if (options.expiresIn > maxExpiry) {
 			throw new ValidationError(
 				{ expiresIn: ["Tiempo de expiración demasiado largo"] },
-				"El tiempo de expiración excede el máximo permitido",
+				"El tiempo de expiración excede el máximo permitido"
 			);
 		}
 	}
@@ -196,7 +196,7 @@ function validateSignedUrlInputs(
 		const allowedTypes = SIGNED_URL_CONFIG.ALLOWED_FILE_TYPES[options.fileType];
 		if (options.allowedMimeTypes) {
 			const invalidTypes = options.allowedMimeTypes.filter(
-				(type) => !allowedTypes.includes(type),
+				(type) => !allowedTypes.includes(type)
 			);
 			if (invalidTypes.length > 0) {
 				throw new ValidationError(
@@ -205,7 +205,7 @@ function validateSignedUrlInputs(
 							`Tipos MIME no válidos: ${invalidTypes.join(", ")}`,
 						],
 					},
-					"Algunos tipos MIME especificados no están permitidos",
+					"Algunos tipos MIME especificados no están permitidos"
 				);
 			}
 		}
@@ -216,17 +216,17 @@ function validateSignedUrlInputs(
 		if (typeof options.maxSize !== "number" || options.maxSize <= 0) {
 			throw new ValidationError(
 				{ maxSize: ["Tamaño máximo inválido"] },
-				"El tamaño máximo debe ser un número positivo",
+				"El tamaño máximo debe ser un número positivo"
 			);
 		}
 
 		const absoluteMaxSize = Math.max(
-			...Object.values(SIGNED_URL_CONFIG.SIZE_LIMITS),
+			...Object.values(SIGNED_URL_CONFIG.SIZE_LIMITS)
 		);
 		if (options.maxSize > absoluteMaxSize) {
 			throw new ValidationError(
 				{ maxSize: ["Tamaño máximo demasiado grande"] },
-				"El tamaño máximo excede el límite absoluto",
+				"El tamaño máximo excede el límite absoluto"
 			);
 		}
 	}
@@ -240,7 +240,7 @@ function generateSecureToken(
 	operation: SignedUrlOperation,
 	expires: Date,
 	userId?: string,
-	metadata: Record<string, any> = {},
+	metadata: Record<string, any> = {}
 ): string {
 	const secret =
 		process.env.SIGNED_URL_SECRET ||
@@ -248,9 +248,6 @@ function generateSecureToken(
 		"fallback-secret";
 
 	if (!secret || secret === "fallback-secret") {
-		console.warn(
-			"Using fallback secret for signed URLs. Set SIGNED_URL_SECRET in production.",
-		);
 	}
 
 	// Create payload
@@ -272,7 +269,7 @@ function generateSecureToken(
 
 	// Combine payload and signature
 	const token = Buffer.from(JSON.stringify({ payload, signature })).toString(
-		"base64url",
+		"base64url"
 	);
 
 	return token;
@@ -291,7 +288,7 @@ export function verifySignedUrlToken(token: string): {
 		const decoded = JSON.parse(Buffer.from(token, "base64url").toString());
 		const { payload, signature } = decoded;
 
-		if (!payload || !signature) {
+		if (!(payload && signature)) {
 			return { valid: false, error: "Token malformado" };
 		}
 
@@ -309,7 +306,7 @@ export function verifySignedUrlToken(token: string): {
 		if (
 			!crypto.timingSafeEqual(
 				Buffer.from(signature, "hex"),
-				Buffer.from(expectedSignature, "hex"),
+				Buffer.from(expectedSignature, "hex")
 			)
 		) {
 			return { valid: false, error: "Firma inválida" };
@@ -332,7 +329,7 @@ export function verifySignedUrlToken(token: string): {
 function constructUploadPath(
 	filename: string,
 	resourceType: ResourceType,
-	userId?: string,
+	userId?: string
 ): string {
 	const timestamp = Date.now();
 	const randomId = crypto.randomBytes(8).toString("hex");
@@ -372,7 +369,7 @@ function constructSignedUrl(
 	uploadPath: string,
 	token: string,
 	expires: Date,
-	operation: SignedUrlOperation,
+	operation: SignedUrlOperation
 ): string {
 	// For Vercel Blob, we'll return a structured URL that our upload service can use
 	const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -391,17 +388,17 @@ function constructSignedUrl(
  */
 export async function generateBatchSignedUrls(
 	filenames: string[],
-	options: SignedUrlOptions,
+	options: SignedUrlOptions
 ): Promise<SignedUrlResult[]> {
 	if (filenames.length > 20) {
 		throw new ValidationError(
 			{ batch: ["Demasiados archivos en lote"] },
-			"No se pueden generar más de 20 URLs firmadas a la vez",
+			"No se pueden generar más de 20 URLs firmadas a la vez"
 		);
 	}
 
 	const results = await Promise.all(
-		filenames.map((filename) => generateSignedUrl(filename, options)),
+		filenames.map((filename) => generateSignedUrl(filename, options))
 	);
 
 	return results;
@@ -416,7 +413,7 @@ export function revokeSignedUrl(token: string): void {
 	revokedTokens.add(token);
 
 	// Clean up old revoked tokens periodically
-	if (revokedTokens.size > 10000) {
+	if (revokedTokens.size > 10_000) {
 		// In production, implement proper cleanup with expiration tracking
 		revokedTokens.clear();
 	}
@@ -435,7 +432,7 @@ export function isTokenRevoked(token: string): boolean {
 export async function validateSignedUrlRequest(
 	token: string,
 	operation: SignedUrlOperation,
-	filename?: string,
+	filename?: string
 ): Promise<{
 	valid: boolean;
 	payload?: any;
@@ -473,7 +470,7 @@ export async function validateSignedUrlRequest(
 export async function generatePresignedUploadUrl(
 	filename: string,
 	contentType: string,
-	options: Omit<SignedUrlOptions, "operation"> = {},
+	options: Omit<SignedUrlOptions, "operation"> = {}
 ): Promise<SignedUrlResult> {
 	return generateSignedUrl(filename, {
 		...options,
@@ -487,7 +484,7 @@ export async function generatePresignedUploadUrl(
  */
 export async function generatePresignedDownloadUrl(
 	filename: string,
-	options: Omit<SignedUrlOptions, "operation"> = {},
+	options: Omit<SignedUrlOptions, "operation"> = {}
 ): Promise<SignedUrlResult> {
 	return generateSignedUrl(filename, {
 		...options,
@@ -500,7 +497,7 @@ export async function generatePresignedDownloadUrl(
  */
 export async function generatePresignedPreviewUrl(
 	filename: string,
-	options: Omit<SignedUrlOptions, "operation"> = {},
+	options: Omit<SignedUrlOptions, "operation"> = {}
 ): Promise<SignedUrlResult> {
 	return generateSignedUrl(filename, {
 		...options,

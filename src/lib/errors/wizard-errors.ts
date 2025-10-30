@@ -13,9 +13,9 @@ export class WizardError extends Error {
 	constructor(
 		message: string,
 		code: string,
-		retryable: boolean = false,
+		retryable = false,
 		userMessage?: string,
-		context?: Record<string, any>,
+		context?: Record<string, any>
 	) {
 		super(message);
 		this.name = this.constructor.name;
@@ -38,8 +38,8 @@ export class AIServiceError extends WizardError {
 			| "TIMEOUT"
 			| "QUOTA_EXCEEDED"
 			| "MODEL_NOT_FOUND",
-		retryable: boolean = false,
-		context?: Record<string, any>,
+		retryable = false,
+		context?: Record<string, any>
 	) {
 		const userMessages = {
 			RATE_LIMIT:
@@ -72,8 +72,8 @@ export class UploadError extends WizardError {
 			| "QUOTA_EXCEEDED"
 			| "PROCESSING_ERROR"
 			| "SECURITY_VALIDATION_FAILED",
-		retryable: boolean = false,
-		context?: Record<string, any>,
+		retryable = false,
+		context?: Record<string, any>
 	) {
 		const userMessages = {
 			FILE_TOO_LARGE:
@@ -100,15 +100,15 @@ export class ValidationError extends WizardError {
 
 	constructor(
 		fieldErrors: Record<string, string[]>,
-		message: string = "Error de validación",
-		context?: Record<string, any>,
+		message = "Error de validación",
+		context?: Record<string, any>
 	) {
 		super(
 			message,
 			"VALIDATION_ERROR",
 			false,
 			"Por favor corrige los errores en el formulario.",
-			context,
+			context
 		);
 		this.fieldErrors = fieldErrors;
 	}
@@ -123,8 +123,8 @@ export class MapServiceError extends WizardError {
 			| "COORDINATES_OUT_OF_BOUNDS"
 			| "NETWORK_ERROR"
 			| "SERVICE_UNAVAILABLE",
-		retryable: boolean = false,
-		context?: Record<string, any>,
+		retryable = false,
+		context?: Record<string, any>
 	) {
 		const userMessages = {
 			GEOCODING_FAILED:
@@ -150,8 +150,8 @@ export class DraftServiceError extends WizardError {
 			| "DELETE_FAILED"
 			| "NOT_FOUND"
 			| "PERMISSION_DENIED",
-		retryable: boolean = false,
-		context?: Record<string, any>,
+		retryable = false,
+		context?: Record<string, any>
 	) {
 		const userMessages = {
 			SAVE_FAILED: "Error al guardar el borrador. Inténtalo nuevamente.",
@@ -167,16 +167,13 @@ export class DraftServiceError extends WizardError {
 
 // Network Connectivity Error
 export class NetworkError extends WizardError {
-	constructor(
-		message: string = "Error de conexión",
-		context?: Record<string, any>,
-	) {
+	constructor(message = "Error de conexión", context?: Record<string, any>) {
 		super(
 			message,
 			"NETWORK_ERROR",
 			true,
 			"Sin conexión a internet. Verifica tu conexión y vuelve a intentar.",
-			context,
+			context
 		);
 	}
 }
@@ -185,7 +182,7 @@ export class NetworkError extends WizardError {
 export class ErrorFactory {
 	static createFromResponse(
 		response: Response,
-		context?: Record<string, any>,
+		context?: Record<string, any>
 	): WizardError {
 		const status = response.status;
 
@@ -195,7 +192,7 @@ export class ErrorFactory {
 				"SERVER_ERROR",
 				true,
 				"Error interno del servidor. Inténtalo más tarde.",
-				{ status, ...context },
+				{ status, ...context }
 			);
 		}
 
@@ -204,7 +201,7 @@ export class ErrorFactory {
 				"Rate limit exceeded",
 				"RATE_LIMIT",
 				true,
-				context,
+				context
 			);
 		}
 
@@ -213,7 +210,7 @@ export class ErrorFactory {
 				"Payload too large",
 				"FILE_TOO_LARGE",
 				false,
-				context,
+				context
 			);
 		}
 
@@ -223,7 +220,7 @@ export class ErrorFactory {
 				"CLIENT_ERROR",
 				false,
 				"Error en la solicitud. Verifica los datos ingresados.",
-				{ status, ...context },
+				{ status, ...context }
 			);
 		}
 
@@ -232,13 +229,13 @@ export class ErrorFactory {
 			"UNKNOWN_ERROR",
 			true,
 			"Ha ocurrido un error inesperado.",
-			{ status, ...context },
+			{ status, ...context }
 		);
 	}
 
 	static createFromError(
 		error: unknown,
-		context?: Record<string, any>,
+		context?: Record<string, any>
 	): WizardError {
 		if (error instanceof WizardError) {
 			return error;
@@ -263,7 +260,7 @@ export class ErrorFactory {
 				"UNKNOWN_ERROR",
 				true,
 				"Ha ocurrido un error inesperado.",
-				context,
+				context
 			);
 		}
 
@@ -272,7 +269,7 @@ export class ErrorFactory {
 			"UNKNOWN_ERROR",
 			true,
 			"Ha ocurrido un error inesperado.",
-			context,
+			context
 		);
 	}
 }

@@ -14,34 +14,34 @@ import {
 	WizardError,
 } from "../errors/wizard-errors";
 
-export interface RecoveryAction {
+export type RecoveryAction = {
 	label: string;
 	action: () => void | Promise<void>;
 	primary?: boolean;
-}
+};
 
-export interface ErrorRecoveryOptions {
+export type ErrorRecoveryOptions = {
 	showToast?: boolean;
 	autoRetry?: boolean;
 	retryDelay?: number;
 	maxAutoRetries?: number;
 	customActions?: RecoveryAction[];
 	context?: string;
-}
+};
 
-export interface ErrorRecoveryResult {
+export type ErrorRecoveryResult = {
 	message: string;
 	actions: RecoveryAction[];
 	severity: "error" | "warning" | "info";
 	canAutoRecover: boolean;
-}
+};
 
 /**
  * Main error recovery handler that provides user-friendly messages and actions
  */
 export function handleErrorWithRecovery(
 	error: unknown,
-	options: ErrorRecoveryOptions = {},
+	options: ErrorRecoveryOptions = {}
 ): ErrorRecoveryResult {
 	const wizardError =
 		error instanceof WizardError
@@ -51,7 +51,7 @@ export function handleErrorWithRecovery(
 					error instanceof Error ? error.message : String(error),
 					"UNKNOWN_ERROR",
 					true,
-					"Ha ocurrido un error inesperado.",
+					"Ha ocurrido un error inesperado."
 				);
 
 	const recovery = createRecoveryStrategy(wizardError, options);
@@ -68,7 +68,7 @@ export function handleErrorWithRecovery(
  */
 function createRecoveryStrategy(
 	error: WizardError,
-	options: ErrorRecoveryOptions,
+	options: ErrorRecoveryOptions
 ): ErrorRecoveryResult {
 	const baseActions: RecoveryAction[] = [];
 	let severity: "error" | "warning" | "info" = "error";
@@ -134,7 +134,7 @@ function createRecoveryStrategy(
 function handleAIServiceError(
 	error: AIServiceError,
 	baseActions: RecoveryAction[],
-	_options: ErrorRecoveryOptions,
+	_options: ErrorRecoveryOptions
 ): ErrorRecoveryResult {
 	const actions = [...baseActions];
 
@@ -210,7 +210,7 @@ function handleAIServiceError(
 function handleUploadError(
 	error: UploadError,
 	baseActions: RecoveryAction[],
-	_options: ErrorRecoveryOptions,
+	_options: ErrorRecoveryOptions
 ): ErrorRecoveryResult {
 	const actions = [...baseActions];
 
@@ -296,7 +296,7 @@ function handleUploadError(
 function handleValidationError(
 	error: ValidationError,
 	baseActions: RecoveryAction[],
-	_options: ErrorRecoveryOptions,
+	_options: ErrorRecoveryOptions
 ): ErrorRecoveryResult {
 	const actions = [...baseActions];
 	const fieldCount = Object.keys(error.fieldErrors).length;
@@ -307,7 +307,7 @@ function handleValidationError(
 			// Focus on first error field
 			const firstField = Object.keys(error.fieldErrors)[0];
 			const element = document.querySelector(
-				`[name="${firstField}"]`,
+				`[name="${firstField}"]`
 			) as HTMLElement;
 			element?.focus();
 		},
@@ -328,7 +328,7 @@ function handleValidationError(
 function handleMapServiceError(
 	error: MapServiceError,
 	baseActions: RecoveryAction[],
-	_options: ErrorRecoveryOptions,
+	_options: ErrorRecoveryOptions
 ): ErrorRecoveryResult {
 	const actions = [...baseActions];
 
@@ -395,7 +395,7 @@ function handleMapServiceError(
 function handleDraftServiceError(
 	error: DraftServiceError,
 	baseActions: RecoveryAction[],
-	_options: ErrorRecoveryOptions,
+	_options: ErrorRecoveryOptions
 ): ErrorRecoveryResult {
 	const actions = [...baseActions];
 
@@ -460,7 +460,7 @@ function handleDraftServiceError(
 function handleNetworkError(
 	error: NetworkError,
 	baseActions: RecoveryAction[],
-	_options: ErrorRecoveryOptions,
+	_options: ErrorRecoveryOptions
 ): ErrorRecoveryResult {
 	const actions = [...baseActions];
 
@@ -486,13 +486,13 @@ function handleNetworkError(
 function showErrorToast(
 	_error: WizardError,
 	recovery: ErrorRecoveryResult,
-	options: ErrorRecoveryOptions,
+	options: ErrorRecoveryOptions
 ): void {
 	const primaryAction = recovery.actions.find((a) => a.primary);
 
 	toast.error(recovery.message, {
 		description: options.context ? `Contexto: ${options.context}` : undefined,
-		duration: recovery.severity === "error" ? Infinity : 5000,
+		duration: recovery.severity === "error" ? Number.POSITIVE_INFINITY : 5000,
 		action: primaryAction
 			? {
 					label: primaryAction.label,
@@ -506,7 +506,7 @@ function showErrorToast(
  * Report error to monitoring service
  */
 function reportError(error: WizardError, context?: string): void {
-	const errorReport = {
+	const _errorReport = {
 		message: error.message,
 		code: error.code,
 		context: context || "unknown",
@@ -518,10 +518,7 @@ function reportError(error: WizardError, context?: string): void {
 
 	// In production, send to error tracking service
 	if (process.env.NODE_ENV === "production") {
-		// Example: Sentry.captureException(error, { extra: errorReport });
-		console.error("Error reported:", errorReport);
 	} else {
-		console.error("Error report:", errorReport);
 	}
 
 	toast.success("Problema reportado", {
@@ -537,7 +534,7 @@ export async function autoRetryWithRecovery<T>(
 	options: ErrorRecoveryOptions & {
 		maxRetries?: number;
 		baseDelay?: number;
-	} = {},
+	} = {}
 ): Promise<T> {
 	const maxRetries = options.maxRetries || 3;
 	const baseDelay = options.baseDelay || 1000;
@@ -581,7 +578,7 @@ export async function autoRetryWithRecovery<T>(
 export function withGracefulDegradation<T>(
 	operation: () => Promise<T>,
 	fallback: () => T,
-	options: ErrorRecoveryOptions = {},
+	options: ErrorRecoveryOptions = {}
 ): Promise<T> {
 	return operation().catch((error) => {
 		handleErrorWithRecovery(error, {

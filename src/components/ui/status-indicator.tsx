@@ -3,24 +3,24 @@ import type * as React from "react";
 import { cn } from "@/lib/utils";
 
 const statusIndicatorVariants = cva(
-	"inline-flex items-center gap-2 px-2 py-1 rounded-md text-xs font-medium transition-colors",
+	"inline-flex items-center gap-2 rounded-md px-2 py-1 font-medium text-xs transition-colors",
 	{
 		variants: {
 			variant: {
 				active:
-					"bg-secondary/20 text-secondary-foreground border border-secondary/40",
+					"border border-secondary/40 bg-secondary/20 text-secondary-foreground",
 				pending:
-					"bg-secondary/10 text-secondary-foreground/80 border border-secondary/20",
+					"border border-secondary/20 bg-secondary/10 text-secondary-foreground/80",
 				highlighted:
-					"bg-secondary text-secondary-foreground border border-secondary/30",
+					"border border-secondary/30 bg-secondary text-secondary-foreground",
 				success:
-					"bg-green-50 text-green-700 border border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800",
+					"border border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-900/20 dark:text-green-400",
 				warning:
-					"bg-yellow-50 text-yellow-700 border border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800",
+					"border border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400",
 				error:
-					"bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800",
+					"border border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400",
 				neutral:
-					"bg-gray-50 text-gray-700 border border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800",
+					"border border-gray-200 bg-gray-50 text-gray-700 dark:border-gray-800 dark:bg-gray-900/20 dark:text-gray-400",
 			},
 			size: {
 				sm: "px-1.5 py-0.5 text-xs",
@@ -32,7 +32,7 @@ const statusIndicatorVariants = cva(
 			variant: "neutral",
 			size: "default",
 		},
-	},
+	}
 );
 
 interface StatusIndicatorProps
@@ -93,7 +93,7 @@ function StatusDot({
 				"inline-block size-2 rounded-full border",
 				dotVariants[variant],
 				pulse && "animate-pulse",
-				className,
+				className
 			)}
 			{...props}
 		/>

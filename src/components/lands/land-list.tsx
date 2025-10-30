@@ -18,7 +18,7 @@ import {
 import { LandCard } from "./land-card";
 import { LandFilters } from "./land-filters";
 
-interface LandListProps {
+type LandListProps = {
 	initialFilters?: LandSearchFilters;
 	showActions?: boolean;
 	showFilters?: boolean;
@@ -26,7 +26,7 @@ interface LandListProps {
 	showAddButton?: boolean;
 	showViewToggle?: boolean;
 	className?: string;
-}
+};
 
 export function LandList({
 	initialFilters = {},
@@ -52,7 +52,7 @@ export function LandList({
 
 	const handleFilterChange = (
 		filterName: keyof LandSearchFilters,
-		value: any,
+		value: any
 	) => {
 		setFilters((prev) => ({
 			...prev,
@@ -83,18 +83,18 @@ export function LandList({
 		return (
 			<Card className={className}>
 				<CardContent className="p-8 text-center">
-					<div className="text-red-500 mb-4">
-						<Square className="h-12 w-12 mx-auto mb-4 opacity-50" />
+					<div className="mb-4 text-red-500">
+						<Square className="mx-auto mb-4 h-12 w-12 opacity-50" />
 					</div>
-					<h3 className="text-lg font-semibold text-red-600 mb-2">
+					<h3 className="mb-2 font-semibold text-lg text-red-600">
 						Error al cargar terrenos
 					</h3>
-					<p className="text-gray-600 mb-4">
+					<p className="mb-4 text-gray-600">
 						{error instanceof Error
 							? error.message
 							: "Ocurrió un error inesperado"}
 					</p>
-					<Button variant="outline" onClick={() => window.location.reload()}>
+					<Button onClick={() => window.location.reload()} variant="outline">
 						Reintentar
 					</Button>
 				</CardContent>
@@ -105,35 +105,35 @@ export function LandList({
 	return (
 		<div className={className}>
 			{/* Header */}
-			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+			<div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
 				<div>
-					<h2 className="text-2xl font-bold">Terrenos</h2>
+					<h2 className="font-bold text-2xl">Terrenos</h2>
 					<p className="text-gray-600">
 						{isLoading ? "Cargando..." : `${total} terrenos encontrados`}
 					</p>
 				</div>
 				<div className="flex items-center gap-2">
 					{showViewToggle && (
-						<div className="flex border rounded-lg">
+						<div className="flex rounded-lg border">
 							<Button
-								variant="ghost"
-								size="sm"
 								className={cn(
 									"rounded-r-none",
-									viewMode === "grid" && "bg-muted",
+									viewMode === "grid" && "bg-muted"
 								)}
 								onClick={() => setViewMode("grid")}
+								size="sm"
+								variant="ghost"
 							>
 								<LayoutGrid className="h-4 w-4" />
 							</Button>
 							<Button
-								variant="ghost"
-								size="sm"
 								className={cn(
 									"rounded-l-none",
-									viewMode === "list" && "bg-muted",
+									viewMode === "list" && "bg-muted"
 								)}
 								onClick={() => setViewMode("list")}
+								size="sm"
+								variant="ghost"
 							>
 								<List className="h-4 w-4" />
 							</Button>
@@ -142,7 +142,7 @@ export function LandList({
 					{showAddButton && (
 						<Button asChild className={cn(interactiveClasses.button)}>
 							<Link href="/dashboard/lands/new">
-								<Plus className="h-4 w-4 mr-2" />
+								<Plus className="mr-2 h-4 w-4" />
 								Nuevo Terreno
 							</Link>
 						</Button>
@@ -153,12 +153,12 @@ export function LandList({
 			{/* Search */}
 			{showSearch && (
 				<div className="relative mb-4">
-					<Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+					<Search className="absolute top-3 left-3 h-4 w-4 text-gray-400" />
 					<Input
-						placeholder="Buscar por ubicación..."
 						className="pl-10"
-						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
+						placeholder="Buscar por ubicación..."
+						value={searchQuery}
 					/>
 				</div>
 			)}
@@ -192,17 +192,17 @@ export function LandList({
 						"gap-4",
 						viewMode === "grid"
 							? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-							: "space-y-4",
+							: "space-y-4"
 					)}
 				>
 					{lands.map((land) => (
 						<LandCard
 							key={land.id}
 							land={land}
-							variant={viewMode === "grid" ? "vertical" : "horizontal"}
-							showActions={showActions}
 							onEdit={handleEdit}
 							onView={handleView}
+							showActions={showActions}
+							variant={viewMode === "grid" ? "vertical" : "horizontal"}
 						/>
 					))}
 				</div>
@@ -216,14 +216,14 @@ function LandListSkeleton() {
 	return (
 		<div className="space-y-4">
 			{Array.from({ length: 3 }).map((_, i) => (
-				<Card key={i} className="border-gray-200 shadow-sm">
+				<Card className="border-gray-200 shadow-sm" key={i}>
 					<CardContent className="p-0">
 						<div className="flex flex-col sm:flex-row">
-							<div className="w-full sm:w-48 h-32 sm:h-auto flex-shrink-0">
-								<Skeleton className="w-full h-full rounded-l-lg" />
+							<div className="h-32 w-full flex-shrink-0 sm:h-auto sm:w-48">
+								<Skeleton className="h-full w-full rounded-l-lg" />
 							</div>
-							<div className="flex-1 p-4 space-y-3">
-								<div className="flex justify-between items-start gap-4">
+							<div className="flex-1 space-y-3 p-4">
+								<div className="flex items-start justify-between gap-4">
 									<div className="flex-1 space-y-2">
 										<Skeleton className="h-4 w-3/4" />
 										<Skeleton className="h-3 w-1/2" />
@@ -263,13 +263,13 @@ function LandEmptyState({
 	return (
 		<Card className={cn("border-gray-200", secondaryColorClasses.accent)}>
 			<CardContent className="p-8 text-center">
-				<div className="text-gray-400 mb-4">
-					<Square className="h-12 w-12 mx-auto mb-4 opacity-50" />
+				<div className="mb-4 text-gray-400">
+					<Square className="mx-auto mb-4 h-12 w-12 opacity-50" />
 				</div>
-				<h3 className="text-lg font-semibold text-gray-900 mb-2">
+				<h3 className="mb-2 font-semibold text-gray-900 text-lg">
 					No hay terrenos disponibles
 				</h3>
-				<p className="text-gray-600 mb-4">
+				<p className="mb-4 text-gray-600">
 					{hasFilters
 						? "No se encontraron terrenos que coincidan con los filtros seleccionados."
 						: "Aún no has agregado ningún terreno."}
@@ -277,7 +277,7 @@ function LandEmptyState({
 				{showAddButton && (
 					<Button asChild className={cn(interactiveClasses.button)}>
 						<Link href="/dashboard/lands/new">
-							<Plus className="h-4 w-4 mr-2" />
+							<Plus className="mr-2 h-4 w-4" />
 							Agregar primer terreno
 						</Link>
 					</Button>

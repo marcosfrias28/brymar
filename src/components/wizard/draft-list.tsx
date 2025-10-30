@@ -20,16 +20,16 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useDeleteWizardDraft, useWizardDrafts } from "@/hooks/use-wizard";
-import type { WizardType } from "@/lib/types";
+import type { WizardDraft, WizardType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
 
-interface DraftListProps {
+type DraftListProps = {
 	type?: WizardType;
 	onSelectDraft?: (draftId: string) => void;
 	showActions?: boolean;
 	maxItems?: number;
-}
+};
 
 export function DraftList({
 	type,
@@ -37,7 +37,9 @@ export function DraftList({
 	showActions = true,
 	maxItems,
 }: DraftListProps) {
-	const { data: drafts = [], isLoading } = useWizardDrafts(type);
+	const draftsQuery = useWizardDrafts(type);
+	const drafts = (draftsQuery.data ?? []) as WizardDraft[];
+	const isLoading = draftsQuery.isLoading;
 	const deleteDraft = useDeleteWizardDraft();
 
 	const handleDeleteDraft = async (draftId: string) => {
@@ -46,10 +48,8 @@ export function DraftList({
 		}
 
 		try {
-			deleteDraft.mutate();
-		} catch (error) {
-			console.warn("Draft deletion functionality is temporarily disabled:", error);
-		}
+			deleteDraft.mutate(draftId);
+		} catch (_error) {}
 	};
 
 	const handleSelectDraft = (draftId: string) => {
@@ -76,9 +76,15 @@ export function DraftList({
 	};
 
 	const _getCompletionColor = (percentage: number) => {
-		if (percentage >= 75) return "text-green-600";
-		if (percentage >= 50) return "text-yellow-600";
-		if (percentage >= 25) return "text-orange-600";
+		if (percentage >= 75) {
+			return "text-green-600";
+		}
+		if (percentage >= 50) {
+			return "text-yellow-600";
+		}
+		if (percentage >= 25) {
+			return "text-orange-600";
+		}
 		return "text-red-600";
 	};
 
@@ -94,8 +100,8 @@ export function DraftList({
 				<CardContent>
 					<div className="flex items-center justify-center py-8">
 						<div className="text-center">
-							<div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
-							<p className="text-sm text-muted-foreground">
+							<div className="mx-auto mb-2 h-6 w-6 animate-spin rounded-full border-primary border-b-2" />
+							<p className="text-muted-foreground text-sm">
 								Cargando borradores...
 							</p>
 						</div>
@@ -111,7 +117,7 @@ export function DraftList({
 		<Card
 			className={cn(
 				"transition-all duration-200",
-				secondaryColorClasses.cardHover,
+				secondaryColorClasses.cardHover
 			)}
 		>
 			<CardHeader>
@@ -119,7 +125,7 @@ export function DraftList({
 					<FileText className="h-5 w-5 text-secondary" />
 					Borradores Guardados
 					{drafts.length > 0 && (
-						<Badge variant="secondary" className={secondaryColorClasses.badge}>
+						<Badge className={secondaryColorClasses.badge} variant="secondary">
 							{drafts.length}
 						</Badge>
 					)}
@@ -127,9 +133,9 @@ export function DraftList({
 			</CardHeader>
 			<CardContent>
 				{displayDrafts.length === 0 ? (
-					<div className="text-center py-8">
-						<FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-						<h3 className="text-lg font-semibold mb-2">No hay borradores</h3>
+					<div className="py-8 text-center">
+						<FileText className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+						<h3 className="mb-2 font-semibold text-lg">No hay borradores</h3>
 						<p className="text-muted-foreground text-sm">
 							Los borradores que guardes aparecerán aquí
 						</p>
@@ -138,27 +144,27 @@ export function DraftList({
 					<div className="space-y-3">
 						{displayDrafts.map((draft: any) => (
 							<div
-								key={draft.id}
 								className={cn(
-									"border rounded-lg p-4 transition-all duration-200",
+									"rounded-lg border p-4 transition-all duration-200",
 									secondaryColorClasses.cardHover,
-									"hover:shadow-sm",
+									"hover:shadow-sm"
 								)}
+								key={draft.id}
 							>
 								<div className="flex items-start justify-between">
-									<div className="flex-1 min-w-0">
-										<div className="flex items-center gap-2 mb-2">
-											<h4 className="font-medium text-foreground truncate">
+									<div className="min-w-0 flex-1">
+										<div className="mb-2 flex items-center gap-2">
+											<h4 className="truncate font-medium text-foreground">
 												{draft.title || "Borrador sin título"}
 											</h4>
 											{draft.type && (
-												<Badge variant="outline" className="text-xs">
+												<Badge className="text-xs" variant="outline">
 													{draft.type}
 												</Badge>
 											)}
 										</div>
 
-										<div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
+										<div className="mb-2 flex items-center gap-4 text-muted-foreground text-sm">
 											<div className="flex items-center gap-1">
 												<CheckCircle2 className="h-3 w-3" />
 												<span>{getStepName(draft.currentStep || 0)}</span>
@@ -171,7 +177,7 @@ export function DraftList({
 											</div>
 										</div>
 
-										<div className="flex items-center gap-4 text-xs text-muted-foreground">
+										<div className="flex items-center gap-4 text-muted-foreground text-xs">
 											<div className="flex items-center gap-1">
 												<Calendar className="h-3 w-3" />
 												<span>
@@ -186,27 +192,27 @@ export function DraftList({
 										<DropdownMenu>
 											<DropdownMenuTrigger asChild>
 												<Button
-													variant="ghost"
-													size="sm"
 													className="h-8 w-8 p-0"
+													size="sm"
+													variant="ghost"
 												>
 													<MoreHorizontal className="h-4 w-4" />
 												</Button>
 											</DropdownMenuTrigger>
 											<DropdownMenuContent align="end">
 												<DropdownMenuItem
-													onClick={() => handleSelectDraft(draft.id)}
 													className="cursor-pointer"
+													onClick={() => handleSelectDraft(draft.id)}
 												>
-													<Edit3 className="h-4 w-4 mr-2" />
+													<Edit3 className="mr-2 h-4 w-4" />
 													Continuar editando
 												</DropdownMenuItem>
 												<DropdownMenuItem
-													onClick={() => handleDeleteDraft(draft.id)}
-													disabled={deleteDraft.isPending}
 													className="cursor-pointer text-destructive focus:text-destructive"
+													disabled={deleteDraft.isPending}
+													onClick={() => handleDeleteDraft(draft.id)}
 												>
-													<Trash2 className="h-4 w-4 mr-2" />
+													<Trash2 className="mr-2 h-4 w-4" />
 													{deleteDraft.isPending ? "Eliminando..." : "Eliminar"}
 												</DropdownMenuItem>
 											</DropdownMenuContent>
@@ -216,7 +222,7 @@ export function DraftList({
 
 								{/* Status indicator */}
 								<div className="mt-3">
-									<div className="w-full bg-muted rounded-full h-1.5">
+									<div className="h-1.5 w-full rounded-full bg-muted">
 										<div
 											className={cn(
 												"h-1.5 rounded-full transition-all duration-300",
@@ -224,7 +230,7 @@ export function DraftList({
 													? "bg-green-500"
 													: draft.status === "completed"
 														? "bg-blue-500"
-														: "bg-yellow-500",
+														: "bg-yellow-500"
 											)}
 											style={{
 												width: draft.status === "draft" ? "50%" : "100%",
@@ -236,8 +242,8 @@ export function DraftList({
 						))}
 
 						{maxItems && drafts.length > maxItems && (
-							<div className="text-center pt-2">
-								<Button variant="outline" size="sm" asChild>
+							<div className="pt-2 text-center">
+								<Button asChild size="sm" variant="outline">
 									<Link href="/dashboard/properties/drafts">
 										Ver todos los borradores ({drafts.length})
 									</Link>

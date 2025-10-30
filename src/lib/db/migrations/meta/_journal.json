@@ -50,6 +50,13 @@
       "when": 1761261595743,
       "tag": "0006_fantastic_wonder_man",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1761763421367,
+      "tag": "0007_orange_joystick",
+      "breakpoints": true
     }
   ]
 }

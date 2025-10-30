@@ -58,7 +58,7 @@ const fieldIcons: Record<string, LucideIcon> = {
 	land: TreePine,
 };
 
-interface ModernWizardFormFieldProps {
+type ModernWizardFormFieldProps = {
 	label: string;
 	description?: string;
 	type?: "text" | "email" | "password" | "number" | "textarea" | "tel";
@@ -83,7 +83,7 @@ interface ModernWizardFormFieldProps {
 	maxLength?: number;
 	rows?: number;
 	disabled?: boolean;
-}
+};
 
 export function ModernWizardFormField({
 	label,
@@ -127,7 +127,9 @@ export function ModernWizardFormField({
 
 	// Handle AI generation
 	const handleAIGeneration = async () => {
-		if (!aiData || !aiType) return;
+		if (!(aiData && aiType)) {
+			return;
+		}
 
 		try {
 			let result: string | null = null;
@@ -165,7 +167,7 @@ export function ModernWizardFormField({
 			suffix && "pr-16",
 			error && "border-red-500 focus:border-red-500",
 			isFocused && !error && "border-primary",
-			className,
+			className
 		),
 		onFocus: () => setIsFocused(true),
 		onBlur: () => setIsFocused(false),
@@ -176,9 +178,9 @@ export function ModernWizardFormField({
 	const controlledProps =
 		value !== undefined && onChange
 			? {
-					value: value,
+					value,
 					onChange: (
-						e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+						e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
 					) => {
 						const newValue =
 							type === "number" ? Number(e.target.value) : e.target.value;
@@ -191,13 +193,13 @@ export function ModernWizardFormField({
 
 	return (
 		<motion.div
-			initial={{ opacity: 0, y: 10 }}
 			animate={{ opacity: 1, y: 0 }}
 			className="space-y-2"
+			initial={{ opacity: 0, y: 10 }}
 		>
 			{/* Label */}
 			<div className="flex items-center justify-between">
-				<Label className="text-sm font-medium flex items-center gap-2">
+				<Label className="flex items-center gap-2 font-medium text-sm">
 					{label}
 					{required && <span className="text-red-500">*</span>}
 				</Label>
@@ -205,38 +207,38 @@ export function ModernWizardFormField({
 				{/* AI Generation Button */}
 				{aiEnabled && aiData && (
 					<ModernAIButton
-						onGenerate={handleAIGeneration}
+						className="h-6 px-2 text-xs"
 						isGenerating={isGenerating}
 						label={`Generar ${aiType}`}
+						onGenerate={handleAIGeneration}
 						size="sm"
 						variant="ghost"
-						className="h-6 px-2 text-xs"
 					/>
 				)}
 			</div>
 
 			{/* Description */}
 			{description && (
-				<p className="text-xs text-muted-foreground">{description}</p>
+				<p className="text-muted-foreground text-xs">{description}</p>
 			)}
 
 			{/* Input Container */}
 			<div className="relative">
 				{/* Icon */}
-				<div className="absolute left-3 top-1/2 -translate-y-1/2 z-10">
+				<div className="-translate-y-1/2 absolute top-1/2 left-3 z-10">
 					<IconComponent
 						className={cn(
 							"h-4 w-4 transition-colors duration-200",
 							isFocused ? "text-primary" : "text-muted-foreground",
-							error && "text-red-500",
+							error && "text-red-500"
 						)}
 					/>
 				</div>
 
 				{/* Prefix */}
 				{prefix && (
-					<div className="absolute left-10 top-1/2 -translate-y-1/2 z-10">
-						<span className="text-sm text-muted-foreground">{prefix}</span>
+					<div className="-translate-y-1/2 absolute top-1/2 left-10 z-10">
+						<span className="text-muted-foreground text-sm">{prefix}</span>
 					</div>
 				)}
 
@@ -244,8 +246,8 @@ export function ModernWizardFormField({
 				{type === "textarea" ? (
 					<Textarea
 						{...finalInputProps}
-						rows={rows}
 						className={cn(finalInputProps.className, "resize-none")}
+						rows={rows}
 					/>
 				) : (
 					<Input
@@ -259,11 +261,11 @@ export function ModernWizardFormField({
 				{/* Password Toggle */}
 				{type === "password" && (
 					<Button
+						className="-translate-y-1/2 absolute top-1/2 right-2 h-8 w-8 p-0"
+						onClick={() => setShowPassword(!showPassword)}
+						size="sm"
 						type="button"
 						variant="ghost"
-						size="sm"
-						className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
-						onClick={() => setShowPassword(!showPassword)}
 					>
 						{showPassword ? (
 							<EyeOff className="h-4 w-4" />
@@ -275,8 +277,8 @@ export function ModernWizardFormField({
 
 				{/* Suffix */}
 				{suffix && (
-					<div className="absolute right-3 top-1/2 -translate-y-1/2">
-						<Badge variant="secondary" className="text-xs">
+					<div className="-translate-y-1/2 absolute top-1/2 right-3">
+						<Badge className="text-xs" variant="secondary">
 							{suffix}
 						</Badge>
 					</div>
@@ -286,7 +288,7 @@ export function ModernWizardFormField({
 			{/* Character Count */}
 			{maxLength && type === "textarea" && (
 				<div className="flex justify-end">
-					<span className="text-xs text-muted-foreground">
+					<span className="text-muted-foreground text-xs">
 						{value?.toString().length || 0} / {maxLength}
 					</span>
 				</div>
@@ -295,11 +297,11 @@ export function ModernWizardFormField({
 			{/* Error Message */}
 			{error && (
 				<motion.p
-					initial={{ opacity: 0, height: 0 }}
 					animate={{ opacity: 1, height: "auto" }}
-					className="text-sm text-red-500 flex items-center gap-1"
+					className="flex items-center gap-1 text-red-500 text-sm"
+					initial={{ opacity: 0, height: 0 }}
 				>
-					<span className="h-1 w-1 bg-red-500 rounded-full" />
+					<span className="h-1 w-1 rounded-full bg-red-500" />
 					{error}
 				</motion.p>
 			)}
@@ -309,88 +311,88 @@ export function ModernWizardFormField({
 
 // Specialized form fields for common use cases
 export function ModernPriceField(
-	props: Omit<ModernWizardFormFieldProps, "type" | "icon" | "prefix">,
+	props: Omit<ModernWizardFormFieldProps, "type" | "icon" | "prefix">
 ) {
 	return (
 		<ModernWizardFormField
 			{...props}
-			type="number"
 			icon="price"
-			prefix="$"
 			placeholder="150,000"
+			prefix="$"
+			type="number"
 		/>
 	);
 }
 
 export function ModernSurfaceField(
-	props: Omit<ModernWizardFormFieldProps, "type" | "icon" | "suffix">,
+	props: Omit<ModernWizardFormFieldProps, "type" | "icon" | "suffix">
 ) {
 	return (
 		<ModernWizardFormField
 			{...props}
-			type="number"
 			icon="surface"
-			suffix="m²"
 			placeholder="200"
+			suffix="m²"
+			type="number"
 		/>
 	);
 }
 
 export function ModernTitleField(
-	props: Omit<ModernWizardFormFieldProps, "type" | "icon" | "aiType">,
+	props: Omit<ModernWizardFormFieldProps, "type" | "icon" | "aiType">
 ) {
 	return (
 		<ModernWizardFormField
 			{...props}
-			type="text"
-			icon="title"
 			aiType="title"
+			icon="title"
 			maxLength={100}
 			placeholder="Hermosa casa con jardín en zona residencial"
+			type="text"
 		/>
 	);
 }
 
 export function ModernDescriptionField(
-	props: Omit<ModernWizardFormFieldProps, "type" | "icon" | "aiType">,
+	props: Omit<ModernWizardFormFieldProps, "type" | "icon" | "aiType">
 ) {
 	return (
 		<ModernWizardFormField
 			{...props}
-			type="textarea"
-			icon="description"
 			aiType="description"
+			icon="description"
 			maxLength={2000}
-			rows={6}
 			placeholder="Describe las características principales de la propiedad..."
+			rows={6}
+			type="textarea"
 		/>
 	);
 }
 
 export function ModernTagsField(
-	props: Omit<ModernWizardFormFieldProps, "type" | "icon" | "aiType">,
+	props: Omit<ModernWizardFormFieldProps, "type" | "icon" | "aiType">
 ) {
 	return (
 		<ModernWizardFormField
 			{...props}
-			type="text"
-			icon="tags"
 			aiType="tags"
-			placeholder="piscina, jardín, garaje, cerca del metro"
 			description="Separa las etiquetas con comas"
+			icon="tags"
+			placeholder="piscina, jardín, garaje, cerca del metro"
+			type="text"
 		/>
 	);
 }
 
 export function ModernLocationField(
-	props: Omit<ModernWizardFormFieldProps, "type" | "icon">,
+	props: Omit<ModernWizardFormFieldProps, "type" | "icon">
 ) {
 	return (
 		<ModernWizardFormField
 			{...props}
-			type="text"
 			icon="location"
 			placeholder="Santo Domingo, Distrito Nacional"
+			type="text"
 		/>
 	);
 }

@@ -15,7 +15,7 @@ export function LocationTest() {
 	});
 
 	return (
-		<div className="max-w-4xl mx-auto p-6 space-y-6">
+		<div className="mx-auto max-w-4xl space-y-6 p-6">
 			<Card>
 				<CardHeader>
 					<CardTitle>Test de Ubicación Simple</CardTitle>
@@ -23,16 +23,16 @@ export function LocationTest() {
 				<CardContent>
 					<SimpleLocationPicker
 						data={locationData}
+						description="Prueba el selector de ubicación simple"
 						onUpdate={(data) => {
 							setLocationData((prev) => ({ ...prev, ...data }));
 						}}
 						title="Ubicación de Prueba"
-						description="Prueba el selector de ubicación simple"
 					/>
 
-					<div className="mt-6 p-4 bg-muted rounded-lg">
-						<h4 className="font-medium mb-2">Datos actuales:</h4>
-						<pre className="text-xs overflow-auto">
+					<div className="mt-6 rounded-lg bg-muted p-4">
+						<h4 className="mb-2 font-medium">Datos actuales:</h4>
+						<pre className="overflow-auto text-xs">
 							{JSON.stringify(locationData, null, 2)}
 						</pre>
 					</div>

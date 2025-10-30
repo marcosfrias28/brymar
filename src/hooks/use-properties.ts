@@ -12,11 +12,12 @@ import {
 	deleteProperty,
 	getPropertyById,
 	publishProperty,
-	searchProperties,
 	updateProperty,
 } from "@/lib/actions/properties";
+import { searchProperties } from "@/lib/actions/property-actions";
 import type {
 	CreatePropertyInput,
+	Property,
 	PropertySearchFilters,
 } from "@/lib/types/properties";
 
@@ -24,9 +25,9 @@ import type {
  * Hook for property listing and search
  */
 export function useProperties(filters?: PropertySearchFilters) {
-	return useQuery({
+	return useQuery<Property[]>({
 		queryKey: ["properties", filters],
-		queryFn: () => searchProperties(filters || {}),
+		queryFn: async () => (await searchProperties(filters || {})) as Property[],
 		staleTime: 5 * 60 * 1000, // 5 minutes
 		gcTime: 10 * 60 * 1000, // 10 minutes
 	});
@@ -62,8 +63,7 @@ export function useCreateProperty() {
 				toast.error(result.error || "Failed to create property");
 			}
 		},
-		onError: (error) => {
-			console.error("Create property error:", error);
+		onError: (_error) => {
 			toast.error("Failed to create property");
 		},
 	});
@@ -90,8 +90,7 @@ export function useUpdateProperty() {
 				toast.error(result.error || "Failed to update property");
 			}
 		},
-		onError: (error) => {
-			console.error("Update property error:", error);
+		onError: (_error) => {
 			toast.error("Failed to update property");
 		},
 	});
@@ -118,8 +117,7 @@ export function usePublishProperty() {
 				toast.error(result.error || "Failed to publish property");
 			}
 		},
-		onError: (error) => {
-			console.error("Publish property error:", error);
+		onError: (_error) => {
 			toast.error("Failed to publish property");
 		},
 	});
@@ -142,8 +140,7 @@ export function useDeleteProperty() {
 				toast.error(result.error || "Failed to delete property");
 			}
 		},
-		onError: (error) => {
-			console.error("Delete property error:", error);
+		onError: (_error) => {
 			toast.error("Failed to delete property");
 		},
 	});
@@ -162,8 +159,7 @@ export function useCreatePropertyInquiry() {
 				toast.error(result.error || "Failed to send inquiry");
 			}
 		},
-		onError: (error) => {
-			console.error("Create inquiry error:", error);
+		onError: (_error) => {
 			toast.error("Failed to send inquiry");
 		},
 	});
@@ -173,24 +169,12 @@ export function useCreatePropertyInquiry() {
  * Hook for user's own properties
  */
 export function useMyProperties(userId?: string) {
-	return useQuery({
+	return useQuery<Property[]>({
 		queryKey: ["properties", "my", userId],
-		queryFn: () => searchProperties({ userId }),
+		queryFn: async () => (await searchProperties({ userId })) as Property[],
 		enabled: !!userId,
 		staleTime: 2 * 60 * 1000, // 2 minutes
 		gcTime: 5 * 60 * 1000, // 5 minutes
-	});
-}
-
-/**
- * Hook for featured properties
- */
-export function useFeaturedProperties() {
-	return useQuery({
-		queryKey: ["properties", "featured"],
-		queryFn: () => searchProperties({ featured: true, limit: 10 }),
-		staleTime: 10 * 60 * 1000, // 10 minutes
-		gcTime: 30 * 60 * 1000, // 30 minutes
 	});
 }
 
@@ -199,7 +183,7 @@ export function useFeaturedProperties() {
  */
 export function usePropertySearch(
 	filters: PropertySearchFilters,
-	debounceMs: number = 500,
+	debounceMs = 500
 ) {
 	const [debouncedFilters, setDebouncedFilters] = useState(filters);
 
@@ -232,7 +216,7 @@ export function usePropertyForm(initialData?: Partial<CreatePropertyInput>) {
 			},
 			images: [],
 			featured: false,
-		},
+		}
 	);
 
 	const updateFormData = (updates: Partial<CreatePropertyInput>) => {
@@ -256,7 +240,7 @@ export function usePropertyForm(initialData?: Partial<CreatePropertyInput>) {
 				},
 				images: [],
 				featured: false,
-			},
+			}
 		);
 	};
 

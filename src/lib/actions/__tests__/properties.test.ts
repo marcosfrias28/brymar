@@ -41,7 +41,7 @@ jest.mock("crypto", () => ({
 }));
 
 import { auth } from "@/lib/auth/auth";
-import db from "@/lib/db/drizzle";
+import { db } from "@/lib/db";
 import {
 	createProperty,
 	createPropertyInquiry,
@@ -63,7 +63,7 @@ describe("Property Server Actions", () => {
 		id: "property-123",
 		title: "Test Property",
 		description: "A beautiful test property",
-		price: 250000,
+		price: 250_000,
 		currency: "USD",
 		address: {
 			street: "123 Test St",
@@ -105,7 +105,7 @@ describe("Property Server Actions", () => {
 			const input = {
 				title: "Test Property",
 				description: "A beautiful test property",
-				price: 250000,
+				price: 250_000,
 				currency: "USD",
 				address: {
 					street: "123 Test St",
@@ -135,7 +135,7 @@ describe("Property Server Actions", () => {
 			const input = {
 				title: "Test Property",
 				description: "A beautiful test property",
-				price: 250000,
+				price: 250_000,
 				currency: "USD",
 				address: {
 					street: "123 Test St",
@@ -172,7 +172,7 @@ describe("Property Server Actions", () => {
 			const input = {
 				title: "Test Property",
 				description: "A beautiful test property",
-				price: 250000,
+				price: 250_000,
 				currency: "USD",
 				address: {
 					street: "123 Test St",
@@ -337,8 +337,8 @@ describe("Property Server Actions", () => {
 				.mockResolvedValueOnce(mockCountResult);
 
 			const result = await searchProperties({
-				minPrice: 200000,
-				maxPrice: 300000,
+				minPrice: 200_000,
+				maxPrice: 300_000,
 				propertyTypes: ["house"],
 				location: "Test City",
 			});
@@ -362,7 +362,7 @@ describe("Property Server Actions", () => {
 				.mockResolvedValueOnce(mockCountResult);
 
 			const result = await searchProperties({
-				minPrice: 1000000,
+				minPrice: 1_000_000,
 			});
 
 			expect(result.success).toBe(true);

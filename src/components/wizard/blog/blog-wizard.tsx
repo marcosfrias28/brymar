@@ -3,15 +3,15 @@
 import { useState } from "react";
 import type { BlogPost } from "@/lib/types/blog";
 
-interface BlogWizardProps {
+type BlogWizardProps = {
 	onComplete?: (blogPost: Partial<BlogPost>) => void;
 	initialData?: Partial<BlogPost>;
-}
+};
 
 export function BlogWizard({ onComplete, initialData }: BlogWizardProps) {
 	const [currentStep, setCurrentStep] = useState(0);
 	const [formData, setFormData] = useState<Partial<BlogPost>>(
-		initialData || {},
+		initialData || {}
 	);
 
 	const handleNext = () => {
@@ -29,33 +29,33 @@ export function BlogWizard({ onComplete, initialData }: BlogWizardProps) {
 	};
 
 	return (
-		<div className="max-w-2xl mx-auto p-6">
+		<div className="mx-auto max-w-2xl p-6">
 			<div className="mb-8">
-				<h2 className="text-2xl font-bold">Blog Wizard</h2>
+				<h2 className="font-bold text-2xl">Blog Wizard</h2>
 				<p className="text-gray-600">Step {currentStep + 1} of 3</p>
 			</div>
 
 			<div className="space-y-6">
 				{currentStep === 0 && (
 					<div>
-						<h3 className="text-lg font-semibold mb-4">Basic Information</h3>
+						<h3 className="mb-4 font-semibold text-lg">Basic Information</h3>
 						<div className="space-y-4">
 							<input
-								type="text"
-								placeholder="Blog Post Title"
-								className="w-full p-3 border rounded-lg"
-								value={formData.title || ""}
+								className="w-full rounded-lg border p-3"
 								onChange={(e) =>
 									setFormData({ ...formData, title: e.target.value })
 								}
+								placeholder="Blog Post Title"
+								type="text"
+								value={formData.title || ""}
 							/>
 							<textarea
-								placeholder="Blog Post Excerpt"
-								className="w-full p-3 border rounded-lg h-24"
-								value={formData.excerpt || ""}
+								className="h-24 w-full rounded-lg border p-3"
 								onChange={(e) =>
 									setFormData({ ...formData, excerpt: e.target.value })
 								}
+								placeholder="Blog Post Excerpt"
+								value={formData.excerpt || ""}
 							/>
 						</div>
 					</div>
@@ -63,22 +63,22 @@ export function BlogWizard({ onComplete, initialData }: BlogWizardProps) {
 
 				{currentStep === 1 && (
 					<div>
-						<h3 className="text-lg font-semibold mb-4">Content</h3>
+						<h3 className="mb-4 font-semibold text-lg">Content</h3>
 						<div className="space-y-4">
 							<textarea
-								placeholder="Blog Post Content"
-								className="w-full p-3 border rounded-lg h-48"
-								value={formData.content || ""}
+								className="h-48 w-full rounded-lg border p-3"
 								onChange={(e) =>
 									setFormData({ ...formData, content: e.target.value })
 								}
+								placeholder="Blog Post Content"
+								value={formData.content || ""}
 							/>
 							<select
-								className="w-full p-3 border rounded-lg"
-								value={formData.category || ""}
+								className="w-full rounded-lg border p-3"
 								onChange={(e) =>
 									setFormData({ ...formData, category: e.target.value })
 								}
+								value={formData.category || ""}
 							>
 								<option value="">Select Category</option>
 								<option value="real-estate">Real Estate</option>
@@ -91,8 +91,8 @@ export function BlogWizard({ onComplete, initialData }: BlogWizardProps) {
 
 				{currentStep === 2 && (
 					<div>
-						<h3 className="text-lg font-semibold mb-4">Review & Submit</h3>
-						<div className="bg-gray-50 p-4 rounded-lg">
+						<h3 className="mb-4 font-semibold text-lg">Review & Submit</h3>
+						<div className="rounded-lg bg-gray-50 p-4">
 							<p>
 								<strong>Title:</strong> {formData.title}
 							</p>
@@ -109,15 +109,15 @@ export function BlogWizard({ onComplete, initialData }: BlogWizardProps) {
 
 				<div className="flex justify-between pt-6">
 					<button
-						onClick={handleBack}
+						className="rounded-lg border px-4 py-2 disabled:opacity-50"
 						disabled={currentStep === 0}
-						className="px-4 py-2 border rounded-lg disabled:opacity-50"
+						onClick={handleBack}
 					>
 						Back
 					</button>
 					<button
+						className="rounded-lg bg-blue-600 px-4 py-2 text-white"
 						onClick={handleNext}
-						className="px-4 py-2 bg-blue-600 text-white rounded-lg"
 					>
 						{currentStep === 2 ? "Complete" : "Next"}
 					</button>

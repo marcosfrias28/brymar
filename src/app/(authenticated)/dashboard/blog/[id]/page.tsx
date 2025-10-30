@@ -74,24 +74,32 @@ export default function BlogDetailPage() {
 	];
 
 	// Check if params and params.id exist after hooks
-	if (!params || !params.id) {
+	if (!params?.id) {
 		return (
 			<DashboardPageLayout
-				title="Error"
-				description="ID de blog no encontrado"
+				actions={
+					<Button asChild variant="outline">
+						<Link href="/dashboard/blog">
+							<ArrowLeft className="mr-2 h-4 w-4" />
+							Volver al Blog
+						</Link>
+					</Button>
+				}
 				breadcrumbs={breadcrumbs}
+				description="ID de blog no encontrado"
+				title="Error"
 			>
-				<div className="flex items-center justify-center min-h-[400px]">
+				<div className="flex min-h-[400px] items-center justify-center">
 					<div className="text-center">
-						<h2 className="text-xl font-semibold text-foreground mb-2">
+						<h2 className="mb-2 font-semibold text-foreground text-xl">
 							ID de blog no válido
 						</h2>
-						<p className="text-muted-foreground mb-4">
+						<p className="mb-4 text-muted-foreground">
 							No se pudo encontrar el blog solicitado
 						</p>
 						<Button asChild className={secondaryColorClasses.focusRing}>
 							<Link href="/dashboard/blog">
-								<ArrowLeft className="h-4 w-4 mr-2" />
+								<ArrowLeft className="mr-2 h-4 w-4" />
 								Volver al Blog
 							</Link>
 						</Button>
@@ -104,13 +112,21 @@ export default function BlogDetailPage() {
 	if (loading) {
 		return (
 			<DashboardPageLayout
-				title="Cargando..."
-				description="Cargando información del post"
+				actions={
+					<Button asChild variant="outline">
+						<Link href="/dashboard/blog">
+							<ArrowLeft className="mr-2 h-4 w-4" />
+							Volver al Blog
+						</Link>
+					</Button>
+				}
 				breadcrumbs={breadcrumbs}
+				description="Cargando información del post"
+				title="Cargando..."
 			>
-				<div className="flex items-center justify-center min-h-[400px]">
+				<div className="flex min-h-[400px] items-center justify-center">
 					<div className="text-center">
-						<h2 className="text-xl font-semibold text-foreground mb-2">
+						<h2 className="mb-2 font-semibold text-foreground text-xl">
 							Cargando...
 						</h2>
 					</div>
@@ -122,16 +138,24 @@ export default function BlogDetailPage() {
 	if (error || !blogPost) {
 		return (
 			<DashboardPageLayout
-				title="Post no encontrado"
-				description="El post que buscas no existe"
+				actions={
+					<Button asChild variant="outline">
+						<Link href="/dashboard/blog">
+							<ArrowLeft className="mr-2 h-4 w-4" />
+							Volver al Blog
+						</Link>
+					</Button>
+				}
 				breadcrumbs={breadcrumbs}
+				description="El post que buscas no existe"
+				title="Post no encontrado"
 			>
-				<div className="flex items-center justify-center min-h-[400px]">
+				<div className="flex min-h-[400px] items-center justify-center">
 					<div className="text-center">
-						<h2 className="text-xl font-semibold text-foreground mb-2">
+						<h2 className="mb-2 font-semibold text-foreground text-xl">
 							Post no encontrado
 						</h2>
-						<p className="text-muted-foreground mb-4">
+						<p className="mb-4 text-muted-foreground">
 							{error?.message ||
 								"El post que buscas no existe o ha sido eliminado."}
 						</p>
@@ -171,10 +195,11 @@ export default function BlogDetailPage() {
 	};
 
 	const handleDelete = async () => {
-		if (confirm("¿Estás seguro de que quieres eliminar este post?")) {
-			if (blogPost?.id) {
-				deleteMutation.mutate(blogPost.id);
-			}
+		if (
+			confirm("¿Estás seguro de que quieres eliminar este post?") &&
+			blogPost?.id
+		) {
+			deleteMutation.mutate(blogPost.id);
 		}
 	};
 
@@ -182,9 +207,9 @@ export default function BlogDetailPage() {
 
 	if (!currentData) {
 		return (
-			<div className="flex items-center justify-center min-h-screen">
+			<div className="flex min-h-screen items-center justify-center">
 				<div className="text-center">
-					<h2 className="text-xl font-semibold mb-2">Cargando...</h2>
+					<h2 className="mb-2 font-semibold text-xl">Cargando...</h2>
 				</div>
 			</div>
 		);
@@ -192,51 +217,51 @@ export default function BlogDetailPage() {
 
 	const actions = (
 		<div className="flex gap-2">
-			{!isEditing ? (
+			{isEditing ? (
 				<>
 					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => setIsEditing(true)}
 						className={secondaryColorClasses.focusRing}
+						onClick={handleCancel}
+						size="sm"
+						variant="outline"
 					>
-						<Edit3 className="h-4 w-4 mr-2" />
-						Editar
+						<X className="mr-2 h-4 w-4" />
+						Cancelar
 					</Button>
 					<Button
-						variant="outline"
+						className={cn(
+							"bg-primary hover:bg-primary/90",
+							secondaryColorClasses.focusRing
+						)}
+						onClick={handleSave}
 						size="sm"
-						className={secondaryColorClasses.focusRing}
 					>
-						<Eye className="h-4 w-4 mr-2" />
-						Vista Previa
-					</Button>
-					<Button variant="destructive" size="sm" onClick={handleDelete}>
-						<Trash2 className="h-4 w-4 mr-2" />
-						Eliminar
+						<Save className="mr-2 h-4 w-4" />
+						Guardar
 					</Button>
 				</>
 			) : (
 				<>
 					<Button
-						variant="outline"
-						size="sm"
-						onClick={handleCancel}
 						className={secondaryColorClasses.focusRing}
+						onClick={() => setIsEditing(true)}
+						size="sm"
+						variant="outline"
 					>
-						<X className="h-4 w-4 mr-2" />
-						Cancelar
+						<Edit3 className="mr-2 h-4 w-4" />
+						Editar
 					</Button>
 					<Button
+						className={secondaryColorClasses.focusRing}
 						size="sm"
-						onClick={handleSave}
-						className={cn(
-							"bg-primary hover:bg-primary/90",
-							secondaryColorClasses.focusRing,
-						)}
+						variant="outline"
 					>
-						<Save className="h-4 w-4 mr-2" />
-						Guardar
+						<Eye className="mr-2 h-4 w-4" />
+						Vista Previa
+					</Button>
+					<Button onClick={handleDelete} size="sm" variant="destructive">
+						<Trash2 className="mr-2 h-4 w-4" />
+						Eliminar
 					</Button>
 				</>
 			)}
@@ -245,38 +270,38 @@ export default function BlogDetailPage() {
 
 	return (
 		<DashboardPageLayout
-			title={isEditing ? "Editando Post" : currentData.title || "Post"}
+			actions={actions}
+			breadcrumbs={breadcrumbs}
 			description={
 				isEditing
 					? "Editando información del post"
 					: "Detalles del post del blog"
 			}
-			breadcrumbs={breadcrumbs}
-			actions={actions}
+			title={isEditing ? "Editando Post" : currentData.title || "Post"}
 		>
 			{/* Status Badges */}
-			<div className="flex items-center gap-2 mb-6">
+			<div className="mb-6 flex items-center gap-2">
 				<Badge
-					variant={currentData.status === "published" ? "default" : "secondary"}
 					className={cn(
 						currentData.status === "published"
 							? "bg-green-600 text-white"
-							: secondaryColorClasses.badge,
+							: secondaryColorClasses.badge
 					)}
+					variant={currentData.status === "published" ? "default" : "secondary"}
 				>
 					{currentData.status === "published" ? "Publicado" : "Borrador"}
 				</Badge>
 				<Badge
-					variant="outline"
 					className={secondaryColorClasses.badgeWithBorder}
+					variant="outline"
 				>
 					{currentData.category}
 				</Badge>
 			</div>
 
-			<div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+			<div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
 				{/* Main Content */}
-				<div className="lg:col-span-3 space-y-6">
+				<div className="space-y-6 lg:col-span-3">
 					{/* Cover Image */}
 					<Card
 						className={cn("border-border", secondaryColorClasses.cardHover)}
@@ -290,28 +315,28 @@ export default function BlogDetailPage() {
 									<div>
 										<Label htmlFor={coverImageId}>URL de Imagen</Label>
 										<Input
-											id={coverImageId}
-											value=""
 											disabled
+											id={coverImageId}
 											placeholder="Image functionality not implemented"
+											value=""
 										/>
 									</div>
-									<div className="aspect-video rounded-lg overflow-hidden bg-gray-100 relative">
+									<div className="relative aspect-video overflow-hidden rounded-lg bg-gray-100">
 										<Image
-											src="/placeholder.svg"
 											alt="Vista previa"
-											fill
 											className="object-cover"
+											fill
+											src="/placeholder.svg"
 										/>
 									</div>
 								</div>
 							) : (
-								<div className="aspect-video rounded-lg overflow-hidden relative">
+								<div className="relative aspect-video overflow-hidden rounded-lg">
 									<Image
-										src="/placeholder.svg"
 										alt={currentData.title || "Blog post cover"}
-										fill
 										className="object-cover"
+										fill
+										src="/placeholder.svg"
 									/>
 								</div>
 							)}
@@ -364,22 +389,22 @@ export default function BlogDetailPage() {
 										<Label htmlFor={titleId}>Título</Label>
 										<Input
 											id={titleId}
-											value={editedPost?.title || ""}
 											onChange={(e) =>
 												editedPost &&
 												setEditedPost({ ...editedPost, title: e.target.value })
 											}
+											value={editedPost?.title || ""}
 										/>
 									</div>
 
 									<div>
 										<Label htmlFor="status">Estado</Label>
 										<Select
-											value={editedPost?.status || ""}
 											onValueChange={(value: "draft" | "published") =>
 												editedPost &&
 												setEditedPost({ ...editedPost, status: value })
 											}
+											value={editedPost?.status || ""}
 										>
 											<SelectTrigger>
 												<SelectValue />
@@ -393,18 +418,18 @@ export default function BlogDetailPage() {
 									<div>
 										<Label htmlFor="category">Categoría</Label>
 										<Select
-											value={editedPost?.category || ""}
 											onValueChange={(
 												value:
 													| "market-analysis"
 													| "investment-tips"
 													| "property-news"
 													| "legal-advice"
-													| "lifestyle",
+													| "lifestyle"
 											) =>
 												editedPost &&
 												setEditedPost({ ...editedPost, category: value })
 											}
+											value={editedPost?.category || ""}
 										>
 											<SelectTrigger>
 												<SelectValue />
@@ -421,19 +446,19 @@ export default function BlogDetailPage() {
 								</>
 							) : (
 								<>
-									<div className="flex items-center gap-2 text-sm text-blackCoral">
+									<div className="flex items-center gap-2 text-blackCoral text-sm">
 										<User className="h-4 w-4" />
 										<span>{currentData.authorId || "Unknown Author"}</span>
 									</div>
-									<div className="flex items-center gap-2 text-sm text-blackCoral">
+									<div className="flex items-center gap-2 text-blackCoral text-sm">
 										<Calendar className="h-4 w-4" />
 										<span>
 											{new Date(
-												currentData.createdAt || "",
+												currentData.createdAt || ""
 											).toLocaleDateString()}
 										</span>
 									</div>
-									<div className="flex items-center gap-2 text-sm text-blackCoral">
+									<div className="flex items-center gap-2 text-blackCoral text-sm">
 										<Clock className="h-4 w-4" />
 										<span>{currentData.readTime} min de lectura</span>
 									</div>
@@ -456,7 +481,6 @@ export default function BlogDetailPage() {
 										<Label htmlFor={authorId}>Autor</Label>
 										<Input
 											id={authorId}
-											value={editedPost?.authorId || ""}
 											onChange={(e) =>
 												editedPost &&
 												setEditedPost({
@@ -464,6 +488,7 @@ export default function BlogDetailPage() {
 													authorId: e.target.value,
 												})
 											}
+											value={editedPost?.authorId || ""}
 										/>
 									</div>
 									<div>
@@ -472,6 +497,13 @@ export default function BlogDetailPage() {
 										</Label>
 										<Input
 											id={publishedDateId}
+											onChange={(e) =>
+												editedPost &&
+												setEditedPost({
+													...editedPost,
+													createdAt: new Date(e.target.value),
+												})
+											}
 											type="date"
 											value={
 												editedPost?.createdAt
@@ -480,21 +512,12 @@ export default function BlogDetailPage() {
 															.split("T")[0]
 													: ""
 											}
-											onChange={(e) =>
-												editedPost &&
-												setEditedPost({
-													...editedPost,
-													createdAt: new Date(e.target.value),
-												})
-											}
 										/>
 									</div>
 									<div>
 										<Label htmlFor={readTimeId}>Tiempo de Lectura (min)</Label>
 										<Input
 											id={readTimeId}
-											type="number"
-											value={editedPost?.readTime || 0}
 											onChange={(e) =>
 												editedPost &&
 												setEditedPost({
@@ -502,18 +525,20 @@ export default function BlogDetailPage() {
 													readTime: Number(e.target.value),
 												})
 											}
+											type="number"
+											value={editedPost?.readTime || 0}
 										/>
 									</div>
 								</>
 							) : (
 								<div className="space-y-2">
 									<div>
-										<Label className="text-sm font-medium text-blackCoral">
+										<Label className="font-medium text-blackCoral text-sm">
 											Fecha de creación
 										</Label>
-										<p className="text-sm text-blackCoral leading-relaxed">
+										<p className="text-blackCoral text-sm leading-relaxed">
 											{new Date(
-												currentData.createdAt || "",
+												currentData.createdAt || ""
 											).toLocaleDateString()}
 										</p>
 									</div>
@@ -532,10 +557,10 @@ export default function BlogDetailPage() {
 						<CardContent>
 							<div className="space-y-2">
 								<div>
-									<Label className="text-sm font-medium text-blackCoral">
+									<Label className="font-medium text-blackCoral text-sm">
 										ID del Post
 									</Label>
-									<p className="text-blackCoral font-mono">{currentData.id}</p>
+									<p className="font-mono text-blackCoral">{currentData.id}</p>
 								</div>
 							</div>
 						</CardContent>

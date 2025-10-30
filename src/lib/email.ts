@@ -38,10 +38,9 @@ export const sendVerificationOTP = async ({
 				success: false,
 				error: await getSafeUserMessage("EMAIL_SEND_ERROR"),
 			};
-		} else {
-			await info("Email sent successfully", { to, subject });
-			return { success: true };
 		}
+		await info("Email sent successfully", { to, subject });
+		return { success: true };
 	} catch (error) {
 		// Log crítico para errores inesperados
 		await critical("Unexpected error during email sending", error, {

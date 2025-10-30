@@ -1,8 +1,11 @@
 "use client";
 
-import { Home, MessageSquare, User } from "lucide-react";
+import { ArrowLeft, Home, MessageSquare, User } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { ProfileMessages } from "@/components/profile/profile-messages";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -12,23 +15,32 @@ import {
 } from "@/components/ui/card";
 
 export default function ProfileMessagesPage() {
+	const _router = useRouter();
 	const breadcrumbs = [
 		{ label: "Dashboard", href: "/dashboard", icon: Home },
-		{ label: "Profilo", href: "/profile", icon: User },
-		{ label: "I Miei Messaggi", icon: MessageSquare },
+		{ label: "Perfil", href: "/profile", icon: User },
+		{ label: "Mis Mensajes", icon: MessageSquare },
 	];
 
 	return (
 		<DashboardPageLayout
-			title="I Miei Messaggi"
-			description="Gestisci la tua casella di posta e invia nuovi messaggi"
+			actions={
+				<Button asChild variant="outline">
+					<Link href="/profile">
+						<ArrowLeft className="mr-2 h-4 w-4" />
+						Volver al Perfil
+					</Link>
+				</Button>
+			}
 			breadcrumbs={breadcrumbs}
+			description="Gestiona tu bandeja de entrada y envía nuevos mensajes"
+			title="Mis Mensajes"
 		>
 			<Card>
 				<CardHeader>
-					<CardTitle>Centro Messaggi</CardTitle>
+					<CardTitle>Centro de Mensajes</CardTitle>
 					<CardDescription>
-						Visualizza, invia e gestisci tutti i tuoi messaggi
+						Visualiza, envía y gestiona todos tus mensajes
 					</CardDescription>
 				</CardHeader>
 				<CardContent>

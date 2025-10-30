@@ -25,7 +25,7 @@ export const lands = pgTable("lands", {
 	type: text("type").notNull(), // LandType enum
 	features: jsonb("features").notNull(), // LandFeatures object
 	images: jsonb("images").default([]), // Array of Image objects
-	status: text("status").notNull().default("available"), // available, sold, reserved, under-contract, archived
+	status: text("status").notNull().default("draft"), // draft, published, sold, reserved, under-contract, archived
 	userId: varchar("user_id", { length: 36 })
 		.notNull()
 		.references(() => users.id, { onDelete: "cascade" }),

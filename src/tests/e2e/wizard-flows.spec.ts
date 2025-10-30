@@ -22,7 +22,7 @@ test.describe("Wizard Functionality Flows", () => {
 							"canCreateBlogs",
 						],
 					},
-				}),
+				})
 			);
 		});
 	});
@@ -55,7 +55,9 @@ test.describe("Wizard Functionality Flows", () => {
 					}
 				}
 
-				if (wizardPageFound) break;
+				if (wizardPageFound) {
+					break;
+				}
 			} catch (_e) {
 				// Continue to next URL
 			}
@@ -364,7 +366,7 @@ test.describe("Wizard Functionality Flows", () => {
 		const contentInput = page.locator('textarea[name="content"]');
 		if (await contentInput.isVisible()) {
 			await contentInput.fill(
-				"This is test content created through the blog wizard.",
+				"This is test content created through the blog wizard."
 			);
 		}
 
@@ -538,7 +540,9 @@ test.describe("Wizard Functionality Flows", () => {
 					}
 				}
 
-				if (publishButton) break;
+				if (publishButton) {
+					break;
+				}
 				attempts++;
 			}
 		}
@@ -587,7 +591,7 @@ test.describe("AI Content Generation", () => {
 						role: "admin",
 						permissions: ["canUseWizard", "canUseAI"],
 					},
-				}),
+				})
 			);
 		});
 	});
@@ -678,7 +682,7 @@ test.describe("AI Content Generation", () => {
 		let resultFound = false;
 		for (const result of generationResults) {
 			try {
-				await result.waitFor({ timeout: 10000 });
+				await result.waitFor({ timeout: 10_000 });
 				resultFound = true;
 				break;
 			} catch (_e) {
@@ -782,7 +786,9 @@ test.describe("AI Content Generation", () => {
 				}
 			}
 
-			if (onMediaStep) break;
+			if (onMediaStep) {
+				break;
+			}
 			attempts++;
 		}
 
@@ -847,7 +853,7 @@ test.describe("Wizard Navigation and Validation", () => {
 						role: "admin",
 						permissions: ["canUseWizard"],
 					},
-				}),
+				})
 			);
 		});
 	});
@@ -971,7 +977,7 @@ test.describe("Wizard Navigation and Validation", () => {
 			.or(
 				page
 					.locator('button:has-text("Land")')
-					.or(page.locator('button:has-text("Blog")')),
+					.or(page.locator('button:has-text("Blog")'))
 			);
 		if (await wizardButton.isVisible()) {
 			await wizardButton.click();

@@ -1,0 +1,1 @@
+ALTER TABLE "lands" ALTER COLUMN "status" SET DEFAULT 'draft';

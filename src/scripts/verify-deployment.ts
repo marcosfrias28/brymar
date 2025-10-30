@@ -6,12 +6,12 @@
 // TODO: Replace container system with simplified dependency injection
 // Container system has been removed with DDD architecture
 
-interface DeploymentCheck {
+type DeploymentCheck = {
 	name: string;
 	passed: boolean;
 	error?: string;
 	details?: any;
-}
+};
 
 /**
  * Check environment variables
@@ -66,7 +66,7 @@ async function checkDatabaseConnectivity(): Promise<DeploymentCheck> {
 		const propertyRepo = container.get("IPropertyRepository");
 		const landRepo = container.get("ILandRepository");
 
-		if (!userRepo || !propertyRepo || !landRepo) {
+		if (!(userRepo && propertyRepo && landRepo)) {
 			return {
 				name: "Database Connectivity",
 				passed: false,
@@ -99,7 +99,7 @@ async function checkExternalServices(): Promise<DeploymentCheck> {
 		const imageService = container.get("IImageService");
 		const notificationService = container.get("INotificationService");
 
-		if (!imageService || !notificationService) {
+		if (!(imageService && notificationService)) {
 			return {
 				name: "External Services",
 				passed: false,
@@ -234,7 +234,10 @@ function checkBuildAndRuntime(): DeploymentCheck {
 	try {
 		// Check Node.js version
 		const nodeVersion = process.version;
-		const majorVersion = parseInt(nodeVersion.slice(1).split(".")[0], 10);
+		const majorVersion = Number.parseInt(
+			nodeVersion.slice(1).split(".")[0],
+			10
+		);
 
 		if (majorVersion < 18) {
 			return {
@@ -249,7 +252,7 @@ function checkBuildAndRuntime(): DeploymentCheck {
 		const isProduction = process.env.NODE_ENV === "production";
 
 		console.log(
-			`  ✅ Node.js ${nodeVersion} (${isProduction ? "production" : "development"} mode)`,
+			`  ✅ Node.js ${nodeVersion} (${isProduction ? "production" : "development"} mode)`
 		);
 		return {
 			name: "Build and Runtime",

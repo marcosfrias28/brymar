@@ -1,8 +1,10 @@
 "use client";
 
-import { Heart, Home, User } from "lucide-react";
+import { ArrowLeft, Heart, Home, User } from "lucide-react";
+import Link from "next/link";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { ProfileFavorites } from "@/components/profile/profile-favorites";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -14,22 +16,30 @@ import {
 export default function ProfileFavoritesPage() {
 	const breadcrumbs = [
 		{ label: "Dashboard", href: "/dashboard", icon: Home },
-		{ label: "Profilo", href: "/profile", icon: User },
-		{ label: "I Miei Preferiti", icon: Heart },
+		{ label: "Perfil", href: "/profile", icon: User },
+		{ label: "Mis Favoritos", icon: Heart },
 	];
 
 	return (
 		<DashboardPageLayout
-			title="I Miei Preferiti"
-			description="Visualizza e gestisci tutti i tuoi elementi preferiti"
+			actions={
+				<Button asChild variant="outline">
+					<Link href="/profile">
+						<ArrowLeft className="mr-2 h-4 w-4" />
+						Volver al Perfil
+					</Link>
+				</Button>
+			}
 			breadcrumbs={breadcrumbs}
+			description="Visualiza y gestiona todos tus elementos favoritos"
+			title="Mis Favoritos"
 		>
 			<Card>
 				<CardHeader>
-					<CardTitle>Elementi Preferiti</CardTitle>
+					<CardTitle>Elementos Favoritos</CardTitle>
 					<CardDescription>
-						Tutti gli elementi che hai aggiunto ai tuoi preferiti, organizzati
-						per categoria
+						Todos los elementos que has añadido a tus favoritos, organizados por
+						categoría
 					</CardDescription>
 				</CardHeader>
 				<CardContent>

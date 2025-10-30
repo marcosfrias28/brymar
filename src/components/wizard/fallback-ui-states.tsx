@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-interface WizardFallbackUIProps {
+type WizardFallbackUIProps = {
 	loading?: boolean;
 	error?: Error | string;
 	empty?: boolean;
@@ -20,7 +20,7 @@ interface WizardFallbackUIProps {
 	title?: string;
 	description?: string;
 	showDetails?: boolean;
-}
+};
 
 export function WizardFallbackUI({
 	loading = false,
@@ -36,7 +36,7 @@ export function WizardFallbackUI({
 	// Loading State
 	if (loading) {
 		return (
-			<Card className="w-full max-w-4xl mx-auto">
+			<Card className="mx-auto w-full max-w-4xl">
 				<CardHeader>
 					<div className="flex items-center space-x-2">
 						<Loader2 className="h-5 w-5 animate-spin" />
@@ -57,7 +57,7 @@ export function WizardFallbackUI({
 					</div>
 
 					{/* Form skeleton */}
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 						<div className="space-y-4">
 							<Skeleton className="h-4 w-24" />
 							<Skeleton className="h-10 w-full" />
@@ -87,9 +87,9 @@ export function WizardFallbackUI({
 		const errorMessage = typeof error === "string" ? error : error.message;
 
 		return (
-			<Card className="w-full max-w-2xl mx-auto">
+			<Card className="mx-auto w-full max-w-2xl">
 				<CardHeader className="text-center">
-					<div className="flex justify-center mb-4">
+					<div className="mb-4 flex justify-center">
 						<AlertCircle className="h-12 w-12 text-destructive" />
 					</div>
 					<CardTitle className="text-destructive">
@@ -102,8 +102,8 @@ export function WizardFallbackUI({
 				</CardHeader>
 				<CardContent className="space-y-4">
 					{showDetails && (
-						<div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
-							<p className="text-sm text-destructive font-mono">
+						<div className="rounded-lg border border-destructive/20 bg-destructive/10 p-4">
+							<p className="font-mono text-destructive text-sm">
 								{errorMessage}
 							</p>
 						</div>
@@ -112,7 +112,7 @@ export function WizardFallbackUI({
 					<div className="flex justify-center space-x-4">
 						{onRetry && (
 							<Button onClick={onRetry} variant="default">
-								<RefreshCw className="h-4 w-4 mr-2" />
+								<RefreshCw className="mr-2 h-4 w-4" />
 								Reintentar
 							</Button>
 						)}
@@ -135,7 +135,7 @@ export function WizardFallbackUI({
 	// Empty State
 	if (empty) {
 		return (
-			<Card className="w-full max-w-2xl mx-auto">
+			<Card className="mx-auto w-full max-w-2xl">
 				<CardHeader className="text-center">
 					<CardTitle>{title || "No hay datos disponibles"}</CardTitle>
 					<p className="text-muted-foreground">
@@ -156,7 +156,7 @@ export function WizardFallbackUI({
 
 	// Default fallback
 	return (
-		<Card className="w-full max-w-2xl mx-auto">
+		<Card className="mx-auto w-full max-w-2xl">
 			<CardContent className="p-8 text-center">
 				<p className="text-muted-foreground">Cargando asistente...</p>
 			</CardContent>
@@ -178,10 +178,10 @@ export function WizardErrorFallback({
 }) {
 	return (
 		<WizardFallbackUI
+			description="Ha ocurrido un error al cargar el asistente. Por favor, inténtalo de nuevo."
 			error={error}
 			onRetry={onRetry}
 			title="Error en el Asistente"
-			description="Ha ocurrido un error al cargar el asistente. Por favor, inténtalo de nuevo."
 		/>
 	);
 }
@@ -197,10 +197,10 @@ export function WizardEmptyState({
 }) {
 	return (
 		<WizardFallbackUI
-			empty={true}
-			title={title}
 			description={description}
+			empty={true}
 			onGoBack={onGoBack}
+			title={title}
 		/>
 	);
 }

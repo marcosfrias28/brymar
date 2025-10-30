@@ -20,15 +20,15 @@ const LogOutButton = ({ user }: { user: any }) => {
 
 	return (
 		<Button
-			onClick={handleLogout}
-			variant="ghost"
 			className={cn(
-				"w-full justify-start flex items-center gap-2",
+				"flex w-full items-center justify-start gap-2",
 				"hover:bg-red-50 hover:text-red-600",
 				"dark:hover:bg-red-900/20 dark:hover:text-red-400",
-				"transition-colors duration-200",
+				"transition-colors duration-200"
 			)}
 			disabled={loading}
+			onClick={handleLogout}
+			variant="ghost"
 		>
 			{loading ? (
 				<>

@@ -23,25 +23,16 @@ export {
 	loadLandDraft,
 	saveLandDraft,
 } from "./land-wizard-actions";
-// Property Wizard Actions
-export {
-	autoSavePropertyDraft,
-	completePropertyWizard,
-	deletePropertyDraft,
-	loadPropertyDraft,
-	savePropertyDraft,
-	validatePropertyStep,
-} from "./property-wizard-actions";
-// Unified Wizard Actions (Cross-Domain)
-export {
-	deleteUnifiedDraft,
-	listUnifiedDrafts,
-	loadUnifiedDraft,
-	saveUnifiedDraft,
-} from "./unified-wizard-actions";
-
 // Profile Actions
 export {
 	getUserProfile,
 	updateProfileAction,
 } from "./profile-actions";
+// Property Wizard Actions
+export {
+	autoSaveProperty,
+	loadPropertyForWizard,
+	publishProperty,
+	savePropertyFromWizard,
+	validatePropertyStep,
+} from "./property-wizard-actions";

@@ -3,13 +3,13 @@
 import { Loader2 } from "lucide-react";
 import { useUser } from "@/hooks/use-user";
 
-interface OrganizationRoleGateProps {
+type OrganizationRoleGateProps = {
 	children: React.ReactNode;
 	organizationId?: string; // Opcional por ahora
 	allowedRoles: string[];
 	fallback?: React.ReactNode;
 	loadingFallback?: React.ReactNode;
-}
+};
 
 /**
  * Componente para mostrar contenido solo si el usuario tiene un rol específico
@@ -24,20 +24,20 @@ export function OrganizationRoleGate({
 }: OrganizationRoleGateProps) {
 	const { user, loading } = useUser();
 
-	if (!user || !user.role || !allowedRoles.includes(user.role)) {
+	if (!(user?.role && allowedRoles.includes(user.role))) {
 		return fallback || null;
 	}
 
 	return <>{children}</>;
 }
 
-interface OrganizationPermissionGateProps {
+type OrganizationPermissionGateProps = {
 	children: React.ReactNode;
 	organizationId?: string; // Opcional por ahora
 	requiredPermissions: string[];
 	fallback?: React.ReactNode;
 	loadingFallback?: React.ReactNode;
-}
+};
 
 /**
  * Mapeo de roles a permisos
@@ -62,7 +62,7 @@ export function OrganizationPermissionGate({
 }: OrganizationPermissionGateProps) {
 	const { user, loading } = useUser();
 
-	if (!user || !user.role) {
+	if (!user?.role) {
 		return fallback || null;
 	}
 
@@ -70,7 +70,7 @@ export function OrganizationPermissionGate({
 	const rolePermissions =
 		ROLE_PERMISSIONS[user.role as keyof typeof ROLE_PERMISSIONS] || [];
 	const hasAllPermissions = requiredPermissions.every((permission) =>
-		rolePermissions.includes(permission as any),
+		rolePermissions.includes(permission as any)
 	);
 
 	if (!hasAllPermissions) {
@@ -80,12 +80,12 @@ export function OrganizationPermissionGate({
 	return <>{children}</>;
 }
 
-interface OrganizationMemberGateProps {
+type OrganizationMemberGateProps = {
 	children: React.ReactNode;
 	organizationId?: string; // Opcional por ahora
 	fallback?: React.ReactNode;
 	loadingFallback?: React.ReactNode;
-}
+};
 
 /**
  * Componente para mostrar contenido solo si el usuario es miembro de la organización
@@ -104,7 +104,7 @@ export function OrganizationMemberGate({
 			loadingFallback || (
 				<div className="flex items-center justify-center p-4">
 					<Loader2 className="h-4 w-4 animate-spin" />
-					<span className="ml-2 text-sm text-muted-foreground">
+					<span className="ml-2 text-muted-foreground text-sm">
 						Verificando membresía...
 					</span>
 				</div>
@@ -136,31 +136,26 @@ export const organizationUtils = {
 	/**
 	 * Obtiene todos los permisos de un rol
 	 */
-	getRolePermissions: (role: string): string[] => {
-		return [...(ROLE_PERMISSIONS[role as keyof typeof ROLE_PERMISSIONS] || [])];
-	},
+	getRolePermissions: (role: string): string[] => [
+		...(ROLE_PERMISSIONS[role as keyof typeof ROLE_PERMISSIONS] || []),
+	],
 
 	/**
 	 * Verifica si un rol puede invitar usuarios
 	 */
-	canInvite: (role: string): boolean => {
-		return organizationUtils.hasPermission(role, "invite");
-	},
+	canInvite: (role: string): boolean =>
+		organizationUtils.hasPermission(role, "invite"),
 
 	/**
 	 * Verifica si un rol puede remover usuarios
 	 */
-	canRemove: (role: string): boolean => {
-		return organizationUtils.hasPermission(role, "remove");
-	},
+	canRemove: (role: string): boolean =>
+		organizationUtils.hasPermission(role, "remove"),
 
 	/**
 	 * Verifica si un rol puede gestionar la organización
 	 */
-	canManage: (role: string): boolean => {
-		return (
-			organizationUtils.hasPermission(role, "delete") &&
-			organizationUtils.hasPermission(role, "update")
-		);
-	},
+	canManage: (role: string): boolean =>
+		organizationUtils.hasPermission(role, "delete") &&
+		organizationUtils.hasPermission(role, "update"),
 };

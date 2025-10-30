@@ -22,7 +22,7 @@ export const BlogContentStepSchema = z.object({
 	content: z
 		.string()
 		.min(100, "El contenido debe tener al menos 100 caracteres")
-		.max(10000, "El contenido no puede exceder 10,000 caracteres"),
+		.max(10_000, "El contenido no puede exceder 10,000 caracteres"),
 	author: z
 		.string()
 		.min(2, "El autor debe tener al menos 2 caracteres")
@@ -55,7 +55,7 @@ export const BlogMediaStepSchema = z.object({
 			height: z.number().optional(),
 			alt: z.string().optional(),
 			caption: z.string().optional(),
-		}),
+		})
 	),
 	videos: z.array(
 		z.object({
@@ -64,7 +64,7 @@ export const BlogMediaStepSchema = z.object({
 			title: z.string(),
 			duration: z.number().optional(),
 			thumbnail: z.string().url().optional(),
-		}),
+		})
 	),
 });
 
@@ -107,7 +107,7 @@ export const BlogWizardSchema = z.object({
 	content: z
 		.string()
 		.min(100, "El contenido debe tener al menos 100 caracteres")
-		.max(10000, "El contenido no puede exceder 10,000 caracteres"),
+		.max(10_000, "El contenido no puede exceder 10,000 caracteres"),
 	author: z
 		.string()
 		.min(2, "El autor debe tener al menos 2 caracteres")
@@ -138,7 +138,7 @@ export const BlogWizardSchema = z.object({
 			height: z.number().optional(),
 			alt: z.string().optional(),
 			caption: z.string().optional(),
-		}),
+		})
 	),
 	videos: z.array(
 		z.object({
@@ -147,7 +147,7 @@ export const BlogWizardSchema = z.object({
 			title: z.string(),
 			duration: z.number().optional(),
 			thumbnail: z.string().url().optional(),
-		}),
+		})
 	),
 
 	// SEO fields

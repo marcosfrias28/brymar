@@ -1,12 +1,12 @@
 import type { Property } from "@/lib/types/properties";
 
-interface PropertyMapProps {
+type PropertyMapProps = {
 	properties: Property[];
-}
+};
 
 export function PropertyMap({ properties }: PropertyMapProps) {
 	return (
-		<div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
+		<div className="flex h-full w-full items-center justify-center rounded-lg bg-gray-200">
 			<p className="text-muted-foreground">
 				Map would render here ({properties.length} properties)
 			</p>

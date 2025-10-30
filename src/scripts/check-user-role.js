@@ -10,7 +10,7 @@ async function checkUserRole() {
 			process.env.DATABASE_URL || process.env.POSTGRES_URL;
 		if (!connectionString) {
 			console.error(
-				"❌ No se encontró DATABASE_URL o POSTGRES_URL en las variables de entorno",
+				"❌ No se encontró DATABASE_URL o POSTGRES_URL en las variables de entorno"
 			);
 			return;
 		}
@@ -45,7 +45,7 @@ async function checkUserRole() {
 		const marcosUser = allUsers.find(
 			(user) =>
 				user.name?.toLowerCase().includes("marcos") ||
-				user.email?.toLowerCase().includes("marcos"),
+				user.email?.toLowerCase().includes("marcos")
 		);
 
 		if (marcosUser) {

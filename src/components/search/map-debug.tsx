@@ -8,7 +8,7 @@ const realDataSample = [
 	{
 		id: "21",
 		title: "Hermosa Apartamento en República Dominicana",
-		price: { amount: 2500000, currency: "USD" },
+		price: { amount: 2_500_000, currency: "USD" },
 		address: {
 			street: "Calle Principal, Santiago de los Caballeros",
 			city: "Santiago de los Caballeros",
@@ -30,7 +30,7 @@ const realDataSample = [
 	{
 		id: "22",
 		title: "Villa Moderna en Cap Cana",
-		price: { amount: 4500000, currency: "USD" },
+		price: { amount: 4_500_000, currency: "USD" },
 		address: {
 			street: "Cap Cana Resort",
 			city: "Nagua",
@@ -54,7 +54,7 @@ const realDataSample = [
 	{
 		id: "23",
 		title: "Terreno Comercial en Santo Domingo",
-		price: 1800000,
+		price: 1_800_000,
 		location: "Santo Domingo Centro, República Dominicana",
 		coordinates: {
 			lat: 18.4404,
@@ -73,20 +73,18 @@ const realDataSample = [
 export function MapDebug() {
 	const [view, setView] = React.useState<"results" | "map">("map");
 
-	console.log("MapDebug - Datos de prueba:", realDataSample);
-
 	return (
-		<div className="h-screen flex flex-col">
-			<div className="p-4 bg-blue-50 border-b">
-				<h1 className="text-xl font-bold">Debug del Mapa - Datos Reales</h1>
-				<p className="text-sm text-gray-600">
+		<div className="flex h-screen flex-col">
+			<div className="border-b bg-blue-50 p-4">
+				<h1 className="font-bold text-xl">Debug del Mapa - Datos Reales</h1>
+				<p className="text-gray-600 text-sm">
 					Probando con {realDataSample.length} propiedades con coordenadas
 					reales de RD
 				</p>
 				<div className="mt-2 text-xs">
 					<strong>Coordenadas:</strong>
 					{realDataSample.map((item, i) => (
-						<span key={i} className="ml-2">
+						<span className="ml-2" key={i}>
 							{item.coordinates?.lat || item.address?.coordinates?.latitude},
 							{item.coordinates?.lng || item.address?.coordinates?.longitude}
 						</span>
@@ -96,10 +94,10 @@ export function MapDebug() {
 
 			<div className="flex-1">
 				<SearchMapView
-					properties={realDataSample}
-					onViewChange={setView}
-					currentView={view}
 					className="h-full"
+					currentView={view}
+					onViewChange={setView}
+					properties={realDataSample}
 				/>
 			</div>
 		</div>

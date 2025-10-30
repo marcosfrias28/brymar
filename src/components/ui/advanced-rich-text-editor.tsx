@@ -26,14 +26,14 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
-interface AdvancedRichTextEditorProps {
+type AdvancedRichTextEditorProps = {
 	content: string;
 	onChange: (content: string) => void;
 	onSave: () => void;
 	onCancel: () => void;
 	placeholder?: string;
 	className?: string;
-}
+};
 
 export function AdvancedRichTextEditor({
 	content,
@@ -94,153 +94,153 @@ export function AdvancedRichTextEditor({
 
 	return (
 		<div
-			className={`border border-border rounded-lg bg-background ${className}`}
+			className={`rounded-lg border border-border bg-background ${className}`}
 		>
 			{/* Toolbar */}
-			<div className="border-b border-border/20 p-3">
+			<div className="border-border/20 border-b p-3">
 				<div className="flex flex-wrap items-center gap-1">
 					{/* Text formatting */}
 					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => editor.chain().focus().toggleBold().run()}
 						className={
 							editor.isActive("bold")
 								? "bg-primary text-primary-foreground"
 								: ""
 						}
+						onClick={() => editor.chain().focus().toggleBold().run()}
+						size="sm"
+						variant="ghost"
 					>
 						<Bold className="h-4 w-4" />
 					</Button>
 					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => editor.chain().focus().toggleItalic().run()}
 						className={
 							editor.isActive("italic")
 								? "bg-primary text-primary-foreground"
 								: ""
 						}
+						onClick={() => editor.chain().focus().toggleItalic().run()}
+						size="sm"
+						variant="ghost"
 					>
 						<Italic className="h-4 w-4" />
 					</Button>
 					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => editor.chain().focus().toggleStrike().run()}
 						className={
 							editor.isActive("strike")
 								? "bg-primary text-primary-foreground"
 								: ""
 						}
+						onClick={() => editor.chain().focus().toggleStrike().run()}
+						size="sm"
+						variant="ghost"
 					>
 						<Strikethrough className="h-4 w-4" />
 					</Button>
 
-					<Separator orientation="vertical" className="h-6 mx-1" />
+					<Separator className="mx-1 h-6" orientation="vertical" />
 
 					{/* Alignment */}
 					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => editor.chain().focus().setTextAlign("left").run()}
 						className={
 							editor.isActive({ textAlign: "left" })
 								? "bg-arsenic text-white"
 								: ""
 						}
+						onClick={() => editor.chain().focus().setTextAlign("left").run()}
+						size="sm"
+						variant="ghost"
 					>
 						<AlignLeft className="h-4 w-4" />
 					</Button>
 					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => editor.chain().focus().setTextAlign("center").run()}
 						className={
 							editor.isActive({ textAlign: "center" })
 								? "bg-arsenic text-white"
 								: ""
 						}
+						onClick={() => editor.chain().focus().setTextAlign("center").run()}
+						size="sm"
+						variant="ghost"
 					>
 						<AlignCenter className="h-4 w-4" />
 					</Button>
 					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => editor.chain().focus().setTextAlign("right").run()}
 						className={
 							editor.isActive({ textAlign: "right" })
 								? "bg-arsenic text-white"
 								: ""
 						}
+						onClick={() => editor.chain().focus().setTextAlign("right").run()}
+						size="sm"
+						variant="ghost"
 					>
 						<AlignRight className="h-4 w-4" />
 					</Button>
 
-					<Separator orientation="vertical" className="h-6 mx-1" />
+					<Separator className="mx-1 h-6" orientation="vertical" />
 
 					{/* Lists */}
 					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => editor.chain().focus().toggleBulletList().run()}
 						className={
 							editor.isActive("bulletList") ? "bg-arsenic text-white" : ""
 						}
+						onClick={() => editor.chain().focus().toggleBulletList().run()}
+						size="sm"
+						variant="ghost"
 					>
 						<List className="h-4 w-4" />
 					</Button>
 					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => editor.chain().focus().toggleOrderedList().run()}
 						className={
 							editor.isActive("orderedList") ? "bg-arsenic text-white" : ""
 						}
+						onClick={() => editor.chain().focus().toggleOrderedList().run()}
+						size="sm"
+						variant="ghost"
 					>
 						<ListOrdered className="h-4 w-4" />
 					</Button>
 					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => editor.chain().focus().toggleBlockquote().run()}
 						className={
 							editor.isActive("blockquote") ? "bg-arsenic text-white" : ""
 						}
+						onClick={() => editor.chain().focus().toggleBlockquote().run()}
+						size="sm"
+						variant="ghost"
 					>
 						<Quote className="h-4 w-4" />
 					</Button>
 
-					<Separator orientation="vertical" className="h-6 mx-1" />
+					<Separator className="mx-1 h-6" orientation="vertical" />
 
 					{/* Media */}
 					<Button
-						variant="ghost"
-						size="sm"
 						onClick={() => setShowLinkDialog(true)}
+						size="sm"
+						variant="ghost"
 					>
 						<LinkIcon className="h-4 w-4" />
 					</Button>
-					<Button variant="ghost" size="sm" onClick={addImage}>
+					<Button onClick={addImage} size="sm" variant="ghost">
 						<ImageIcon className="h-4 w-4" />
 					</Button>
 
-					<Separator orientation="vertical" className="h-6 mx-1" />
+					<Separator className="mx-1 h-6" orientation="vertical" />
 
 					{/* Undo/Redo */}
 					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => editor.chain().focus().undo().run()}
 						disabled={!editor.can().undo()}
+						onClick={() => editor.chain().focus().undo().run()}
+						size="sm"
+						variant="ghost"
 					>
 						<Undo className="h-4 w-4" />
 					</Button>
 					<Button
-						variant="ghost"
-						size="sm"
-						onClick={() => editor.chain().focus().redo().run()}
 						disabled={!editor.can().redo()}
+						onClick={() => editor.chain().focus().redo().run()}
+						size="sm"
+						variant="ghost"
 					>
 						<Redo className="h-4 w-4" />
 					</Button>
@@ -249,43 +249,43 @@ export function AdvancedRichTextEditor({
 
 					{/* Actions */}
 					<Button
-						variant="outline"
-						size="sm"
+						className="border-blackCoral bg-transparent text-blackCoral hover:bg-blackCoral hover:text-white"
 						onClick={onCancel}
-						className="border-blackCoral text-blackCoral hover:bg-blackCoral hover:text-white bg-transparent"
+						size="sm"
+						variant="outline"
 					>
-						<X className="h-4 w-4 mr-1" />
+						<X className="mr-1 h-4 w-4" />
 						Cancelar
 					</Button>
 					<Button
-						size="sm"
+						className="bg-arsenic text-white hover:bg-blackCoral"
 						onClick={onSave}
-						className="bg-arsenic hover:bg-blackCoral text-white"
+						size="sm"
 					>
-						<Save className="h-4 w-4 mr-1" />
+						<Save className="mr-1 h-4 w-4" />
 						Guardar
 					</Button>
 				</div>
 
 				{/* Link dialog */}
 				{showLinkDialog && (
-					<div className="mt-3 p-3 border border-blackCoral/20 rounded-lg bg-azureishWhite">
+					<div className="mt-3 rounded-lg border border-blackCoral/20 bg-azureishWhite p-3">
 						<div className="flex items-center gap-2">
 							<input
-								type="url"
-								placeholder="https://ejemplo.com"
-								value={linkUrl}
+								className="flex-1 rounded border border-blackCoral/20 px-3 py-1 text-sm"
 								onChange={(e) => setLinkUrl(e.target.value)}
-								className="flex-1 px-3 py-1 border border-blackCoral/20 rounded text-sm"
 								onKeyDown={(e) => e.key === "Enter" && addLink()}
+								placeholder="https://ejemplo.com"
+								type="url"
+								value={linkUrl}
 							/>
-							<Button size="sm" onClick={addLink}>
+							<Button onClick={addLink} size="sm">
 								Agregar
 							</Button>
 							<Button
+								onClick={() => setShowLinkDialog(false)}
 								size="sm"
 								variant="ghost"
-								onClick={() => setShowLinkDialog(false)}
 							>
 								<X className="h-4 w-4" />
 							</Button>
@@ -295,7 +295,7 @@ export function AdvancedRichTextEditor({
 			</div>
 
 			{/* Editor */}
-			<EditorContent editor={editor} className="min-h-[400px]" />
+			<EditorContent className="min-h-[400px]" editor={editor} />
 		</div>
 	);
 }

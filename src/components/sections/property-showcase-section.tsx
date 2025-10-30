@@ -11,23 +11,23 @@ export function PropertyShowcaseSection() {
 			<div className="container mx-auto px-4">
 				{/* Section Header */}
 				<SectionHeader
+					description="Cada propiedad cuenta una historia única. Nuestro enfoque personalizado garantiza que encuentres no solo una casa, sino tu hogar perfecto."
 					subtitle="Experiencia Premium"
 					title="Descubre la Excelencia Inmobiliaria"
-					description="Cada propiedad cuenta una historia única. Nuestro enfoque personalizado garantiza que encuentres no solo una casa, sino tu hogar perfecto."
 				/>
 
 				{/* Right side - Property image */}
-				<div className="flex-1 relative flex justify-center items-center pt-20">
+				<div className="relative flex flex-1 items-center justify-center pt-20">
 					<ImageContainer
-						src="/optimized_villa/1.webp"
 						alt="Propiedad de lujo con jardín y piscina"
-						size="6xl"
-						initialSize="2xl"
-						imageClassName="object-cover"
 						animateOnScroll={true}
+						imageClassName="object-cover"
+						initialSize="2xl"
+						size="6xl"
+						src="/optimized_villa/1.webp"
 					/>
 					{/* Circular action button */}
-					<div className="absolute bottom-0 right-0 z-10">
+					<div className="absolute right-0 bottom-0 z-10">
 						<CircularButton
 							icon={<ArrowUpIcon className="text-black" />}
 							onClick={() => {

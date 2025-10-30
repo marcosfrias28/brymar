@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { DOMINICAN_PROVINCES } from "@/lib/services/map-service";
 
-export interface SimpleLocationData {
+export type SimpleLocationData = {
 	location: string;
 	coordinates?: {
 		lat: number;
@@ -36,15 +36,15 @@ export interface SimpleLocationData {
 		country: string;
 		formattedAddress: string;
 	};
-}
+};
 
-interface SimpleLocationPickerProps {
+type SimpleLocationPickerProps = {
 	data: SimpleLocationData;
 	onUpdate: (data: Partial<SimpleLocationData>) => void;
 	title?: string;
 	description?: string;
 	errors?: Record<string, string>;
-}
+};
 
 export function SimpleLocationPicker({
 	data,
@@ -88,18 +88,18 @@ export function SimpleLocationPicker({
 	};
 
 	const handleCoordinatesChange = (lat: string, lng: string) => {
-		const latNum = parseFloat(lat);
-		const lngNum = parseFloat(lng);
+		const latNum = Number.parseFloat(lat);
+		const lngNum = Number.parseFloat(lng);
 
-		if (!Number.isNaN(latNum) && !Number.isNaN(lngNum)) {
+		if (Number.isNaN(latNum) || Number.isNaN(lngNum)) {
+			onUpdate({ coordinates: undefined });
+		} else {
 			onUpdate({
 				coordinates: {
 					lat: latNum,
 					lng: lngNum,
 				},
 			});
-		} else {
-			onUpdate({ coordinates: undefined });
 		}
 	};
 
@@ -116,13 +116,13 @@ export function SimpleLocationPicker({
 			// Simple geocoding using Nominatim API
 			const response = await fetch(
 				`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-					`${data.location}, Dominican Republic`,
+					`${data.location}, Dominican Republic`
 				)}&limit=1&countrycodes=do&addressdetails=1&accept-language=es`,
 				{
 					headers: {
 						"User-Agent": "Brymar-Inmobiliaria/1.0",
 					},
-				},
+				}
 			);
 
 			if (!response.ok) {
@@ -136,8 +136,8 @@ export function SimpleLocationPicker({
 			}
 
 			const result = results[0];
-			const lat = parseFloat(result.lat);
-			const lng = parseFloat(result.lon);
+			const lat = Number.parseFloat(result.lat);
+			const lng = Number.parseFloat(result.lon);
 
 			// Update coordinates
 			onUpdate({
@@ -183,9 +183,8 @@ export function SimpleLocationPicker({
 
 			setGeocodingError(null);
 		} catch (error) {
-			console.error("Geocoding error:", error);
 			setGeocodingError(
-				error instanceof Error ? error.message : "Error al buscar la ubicación",
+				error instanceof Error ? error.message : "Error al buscar la ubicación"
 			);
 		} finally {
 			setIsGeocoding(false);
@@ -195,7 +194,7 @@ export function SimpleLocationPicker({
 	return (
 		<div className="space-y-6">
 			<div>
-				<h2 className="text-2xl font-bold mb-2">{title}</h2>
+				<h2 className="mb-2 font-bold text-2xl">{title}</h2>
 				<p className="text-muted-foreground">{description}</p>
 			</div>
 
@@ -211,27 +210,27 @@ export function SimpleLocationPicker({
 						<Label htmlFor="location">Ubicación *</Label>
 						<div className="flex gap-2">
 							<Input
+								className={errors.location ? "border-destructive" : ""}
 								id="location"
-								value={data.location || ""}
 								onChange={(e) => handleLocationChange(e.target.value)}
 								placeholder="Ej: Punta Cana, La Altagracia"
-								className={errors.location ? "border-destructive" : ""}
+								value={data.location || ""}
 							/>
 							<Button
+								disabled={!data.location || isGeocoding}
+								onClick={searchLocation}
 								type="button"
 								variant="outline"
-								onClick={searchLocation}
-								disabled={!data.location || isGeocoding}
 							>
 								{isGeocoding ? (
-									<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
+									<div className="h-4 w-4 animate-spin rounded-full border-primary border-b-2" />
 								) : (
 									<Search className="h-4 w-4" />
 								)}
 							</Button>
 						</div>
 						{errors.location && (
-							<p className="text-sm text-destructive">{errors.location}</p>
+							<p className="text-destructive text-sm">{errors.location}</p>
 						)}
 						{geocodingError && (
 							<Alert variant="destructive">
@@ -242,14 +241,14 @@ export function SimpleLocationPicker({
 					</div>
 
 					{data.coordinates && (
-						<div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+						<div className="rounded-lg border border-green-200 bg-green-50 p-3">
 							<div className="flex items-center gap-2 text-green-700">
 								<CheckCircle className="h-4 w-4" />
-								<span className="text-sm font-medium">
+								<span className="font-medium text-sm">
 									Ubicación encontrada
 								</span>
 							</div>
-							<p className="text-sm text-green-600 mt-1">
+							<p className="mt-1 text-green-600 text-sm">
 								Coordenadas: {data.coordinates.lat.toFixed(4)},{" "}
 								{data.coordinates.lng.toFixed(4)}
 							</p>
@@ -266,28 +265,28 @@ export function SimpleLocationPicker({
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div className="space-y-2">
 							<Label htmlFor="street">Calle/Dirección</Label>
 							<Input
 								id="street"
-								value={data.address?.street || ""}
 								onChange={(e) => handleAddressChange("street", e.target.value)}
 								placeholder="Ej: Carretera Verón-Punta Cana"
+								value={data.address?.street || ""}
 							/>
 						</div>
 
 						<div className="space-y-2">
 							<Label htmlFor="city">Ciudad *</Label>
 							<Input
+								className={errors["address.city"] ? "border-destructive" : ""}
 								id="city"
-								value={data.address?.city || ""}
 								onChange={(e) => handleAddressChange("city", e.target.value)}
 								placeholder="Ej: Punta Cana"
-								className={errors["address.city"] ? "border-destructive" : ""}
+								value={data.address?.city || ""}
 							/>
 							{errors["address.city"] && (
-								<p className="text-sm text-destructive">
+								<p className="text-destructive text-sm">
 									{errors["address.city"]}
 								</p>
 							)}
@@ -296,10 +295,10 @@ export function SimpleLocationPicker({
 						<div className="space-y-2">
 							<Label htmlFor="province">Provincia *</Label>
 							<Select
-								value={data.address?.province || ""}
 								onValueChange={(value) =>
 									handleAddressChange("province", value)
 								}
+								value={data.address?.province || ""}
 							>
 								<SelectTrigger
 									className={
@@ -317,7 +316,7 @@ export function SimpleLocationPicker({
 								</SelectContent>
 							</Select>
 							{errors["address.province"] && (
-								<p className="text-sm text-destructive">
+								<p className="text-destructive text-sm">
 									{errors["address.province"]}
 								</p>
 							)}
@@ -327,19 +326,19 @@ export function SimpleLocationPicker({
 							<Label htmlFor="postalCode">Código Postal</Label>
 							<Input
 								id="postalCode"
-								value={data.address?.postalCode || ""}
 								onChange={(e) =>
 									handleAddressChange("postalCode", e.target.value)
 								}
 								placeholder="Ej: 23000"
+								value={data.address?.postalCode || ""}
 							/>
 						</div>
 					</div>
 
 					{data.address?.formattedAddress && (
-						<div className="p-3 bg-muted rounded-lg">
-							<Label className="text-sm font-medium">Dirección Completa:</Label>
-							<p className="text-sm text-muted-foreground mt-1">
+						<div className="rounded-lg bg-muted p-3">
+							<Label className="font-medium text-sm">Dirección Completa:</Label>
+							<p className="mt-1 text-muted-foreground text-sm">
 								{data.address.formattedAddress}
 							</p>
 						</div>
@@ -355,21 +354,21 @@ export function SimpleLocationPicker({
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div className="space-y-2">
 							<Label htmlFor="latitude">Latitud</Label>
 							<Input
 								id="latitude"
-								type="number"
-								step="any"
-								value={data.coordinates?.lat || ""}
 								onChange={(e) =>
 									handleCoordinatesChange(
 										e.target.value,
-										data.coordinates?.lng?.toString() || "",
+										data.coordinates?.lng?.toString() || ""
 									)
 								}
 								placeholder="Ej: 18.5601"
+								step="any"
+								type="number"
+								value={data.coordinates?.lat || ""}
 							/>
 						</div>
 
@@ -377,16 +376,16 @@ export function SimpleLocationPicker({
 							<Label htmlFor="longitude">Longitud</Label>
 							<Input
 								id="longitude"
-								type="number"
-								step="any"
-								value={data.coordinates?.lng || ""}
 								onChange={(e) =>
 									handleCoordinatesChange(
 										data.coordinates?.lat?.toString() || "",
-										e.target.value,
+										e.target.value
 									)
 								}
 								placeholder="Ej: -68.3725"
+								step="any"
+								type="number"
+								value={data.coordinates?.lng || ""}
 							/>
 						</div>
 					</div>

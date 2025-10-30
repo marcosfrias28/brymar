@@ -49,48 +49,48 @@ export function Testimonials() {
 	const subtitle = "Testimonios de clientes satisfechos con nuestros servicios";
 
 	return (
-		<section className="py-24 px-4 bg-muted">
+		<section className="bg-muted px-4 py-24">
 			<div className="container mx-auto">
 				<motion.h2
-					className="text-4xl md:text-5xl font-bold text-center mb-4 text-foreground"
-					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
+					className="mb-4 text-center font-bold text-4xl text-foreground md:text-5xl"
+					initial={{ opacity: 0, y: 20 }}
 					transition={{ duration: 0.8 }}
 				>
 					{title}
 				</motion.h2>
 				<motion.p
-					className="text-xl text-muted-foreground text-center mb-16 max-w-3xl mx-auto"
-					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
+					className="mx-auto mb-16 max-w-3xl text-center text-muted-foreground text-xl"
+					initial={{ opacity: 0, y: 20 }}
 					transition={{ duration: 0.8, delay: 0.2 }}
 				>
 					{subtitle}
 				</motion.p>
 				<div className="relative">
 					<motion.div
-						className="flex "
 						animate={{ x: `-${activeIndex * 100}%` }}
+						className="flex"
 						transition={{ duration: 0.5 }}
 					>
 						{testimonials.map((testimonial, index) => (
-							<div key={index} className="w-full shrink-0">
-								<Card className="bg-background shadow-xl mx-auto max-w-4xl">
+							<div className="w-full shrink-0" key={index}>
+								<Card className="mx-auto max-w-4xl bg-background shadow-xl">
 									<CardContent className="p-12">
-										<Quote className="h-12 w-12 text-muted-foreground mb-8" />
-										<p className="text-2xl text-foreground italic mb-8">
+										<Quote className="mb-8 h-12 w-12 text-muted-foreground" />
+										<p className="mb-8 text-2xl text-foreground italic">
 											{testimonial.quote.es}
 										</p>
 										<div className="flex items-center">
-											<Avatar className="h-16 w-16 mr-4">
+											<Avatar className="mr-4 h-16 w-16">
 												<AvatarImage
-													src={testimonial.image}
 													alt={testimonial.name}
+													src={testimonial.image}
 												/>
 												<AvatarFallback>{testimonial.name[0]}</AvatarFallback>
 											</Avatar>
 											<div>
-												<p className="font-semibold text-xl text-foreground">
+												<p className="font-semibold text-foreground text-xl">
 													{testimonial.name}
 												</p>
 												<p className="text-muted-foreground">
@@ -103,15 +103,15 @@ export function Testimonials() {
 							</div>
 						))}
 					</motion.div>
-					<div className="flex justify-center mt-8">
+					<div className="mt-8 flex justify-center">
 						{testimonials.map((_, index) => (
 							<button
-								key={index}
-								className={`h-3 w-3 rounded-full mx-2 ${
+								className={`mx-2 h-3 w-3 rounded-full ${
 									index === activeIndex
 										? "bg-foreground"
 										: "bg-muted-foreground/30"
 								}`}
+								key={index}
 								onClick={() => setActiveIndex(index)}
 							/>
 						))}

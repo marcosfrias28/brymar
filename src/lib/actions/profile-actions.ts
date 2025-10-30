@@ -4,15 +4,15 @@
 
 "use server";
 
-import { auth } from "@/lib/auth/auth";
-import { headers } from "next/headers";
-import { revalidatePath } from "next/cache";
-import db from "@/lib/db/drizzle";
-import { users, userProfiles } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth/auth";
+import { db } from "@/lib/db";
+import { userProfiles, users } from "@/lib/db/schema";
 import type { ActionState } from "@/lib/validations";
 
-export interface ProfileFormData {
+export type ProfileFormData = {
 	name?: string;
 	email?: string;
 	avatar?: string;
@@ -22,10 +22,10 @@ export interface ProfileFormData {
 	location?: string;
 	website?: string;
 	bio?: string;
-}
+};
 
 export async function updateProfileAction(
-	prevState: ActionState<{ success: boolean; message: string }>,
+	_prevState: ActionState<{ success: boolean; message: string }>,
 	formData: FormData
 ): Promise<ActionState<{ success: boolean; message: string }>> {
 	try {
@@ -35,14 +35,7 @@ export async function updateProfileAction(
 			headers: headersList,
 		});
 
-		console.log("Session retrieved:", {
-			hasSession: !!session,
-			hasUser: !!session?.user,
-			userId: session?.user?.id,
-		});
-
 		if (!session?.user) {
-			console.log("No session found, returning auth error");
 			return {
 				success: false,
 				error: "No estás autenticado",
@@ -60,13 +53,6 @@ export async function updateProfileAction(
 		const website = formData.get("website") as string;
 		const bio = formData.get("bio") as string;
 
-		console.log("Profile update attempt:", {
-			userId: session.user.id,
-			name,
-			email,
-			avatar,
-		});
-
 		// Update user using Better Auth's updateUser method (only fields that Better Auth allows)
 		try {
 			await auth.api.updateUser({
@@ -82,7 +68,7 @@ export async function updateProfileAction(
 				await db
 					.update(users)
 					.set({
-						email: email,
+						email,
 						updatedAt: new Date(),
 						emailVerified: false,
 					})
@@ -94,30 +80,27 @@ export async function updateProfileAction(
 				.insert(userProfiles)
 				.values({
 					userId: session.user.id,
-					firstName: firstName,
-					lastName: lastName,
-					phone: phone,
-					location: location,
-					website: website,
-					bio: bio,
+					firstName,
+					lastName,
+					phone,
+					location,
+					website,
+					bio,
 					updatedAt: new Date(),
 				})
 				.onConflictDoUpdate({
 					target: userProfiles.userId,
 					set: {
-						firstName: firstName,
-						lastName: lastName,
-						phone: phone,
-						location: location,
-						website: website,
-						bio: bio,
+						firstName,
+						lastName,
+						phone,
+						location,
+						website,
+						bio,
 						updatedAt: new Date(),
 					},
 				});
-
-			console.log("Profile updated successfully using Better Auth API");
-		} catch (updateError) {
-			console.error("Better Auth update error:", updateError);
+		} catch (_updateError) {
 			return {
 				success: false,
 				error: "Error al actualizar el perfil",
@@ -134,8 +117,7 @@ export async function updateProfileAction(
 				message: "Perfil actualizado exitosamente",
 			},
 		};
-	} catch (error) {
-		console.error("Error updating profile:", error);
+	} catch (_error) {
 		return {
 			success: false,
 			error: "Error al actualizar el perfil",
@@ -155,8 +137,7 @@ export async function getUserProfile(userId: string) {
 			.limit(1);
 
 		return profile[0] || null;
-	} catch (error) {
-		console.error("Error fetching user profile:", error);
+	} catch (_error) {
 		return null;
 	}
 }

@@ -23,7 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
 
-export interface FormField {
+export type FormField = {
 	name: string;
 	label: string;
 	type: "text" | "number" | "textarea" | "select" | "file" | "rich-text";
@@ -32,9 +32,9 @@ export interface FormField {
 	options?: { value: string; label: string }[];
 	accept?: string;
 	rows?: number;
-}
+};
 
-export interface FormConfig {
+export type FormConfig = {
 	title: string;
 	description?: string;
 	fields: FormField[];
@@ -43,18 +43,18 @@ export interface FormConfig {
 	showDraftOption?: boolean;
 	showImageUpload?: boolean;
 	maxImages?: number;
-}
+};
 
-interface UnifiedFormProps {
+type UnifiedFormProps = {
 	config: FormConfig;
 	initialData?: Record<string, any>;
 	isEditing?: boolean;
 	onSubmit: (
 		data: FormData,
-		action?: "draft" | "publish",
+		action?: "draft" | "publish"
 	) => Promise<{ success: boolean; message?: string; error?: string }>;
 	onCancel?: () => void;
-}
+};
 
 export function UnifiedForm({
 	config,
@@ -68,7 +68,7 @@ export function UnifiedForm({
 	const [images, setImages] = useState<File[]>(initialData.images || []);
 	const [isLoading, setIsLoading] = useState(false);
 	const [coverImagePreview, setCoverImagePreview] = useState<string | null>(
-		null,
+		null
 	);
 
 	const handleInputChange = (field: string, value: any) => {
@@ -95,7 +95,7 @@ export function UnifiedForm({
 
 	const handleSubmit = async (
 		e: React.FormEvent,
-		action?: "draft" | "publish",
+		action?: "draft" | "publish"
 	) => {
 		e.preventDefault();
 		setIsLoading(true);
@@ -147,7 +147,7 @@ export function UnifiedForm({
 							: "";
 				toast.success(
 					result.message ||
-						`${config.title} ${actionText} ${statusText} exitosamente`,
+						`${config.title} ${actionText} ${statusText} exitosamente`
 				);
 
 				if (onCancel) {
@@ -157,7 +157,7 @@ export function UnifiedForm({
 				}
 			} else {
 				toast.error(
-					result.error || `Error al guardar ${config.title.toLowerCase()}`,
+					result.error || `Error al guardar ${config.title.toLowerCase()}`
 				);
 			}
 		} catch (_error) {
@@ -175,34 +175,34 @@ export function UnifiedForm({
 			case "number":
 				return (
 					<Input
+						className={cn("mt-1", secondaryColorClasses.inputFocus)}
 						id={field.name}
-						type={field.type}
-						value={value}
 						onChange={(e) => handleInputChange(field.name, e.target.value)}
 						placeholder={field.placeholder}
-						className={cn("mt-1", secondaryColorClasses.inputFocus)}
 						required={field.required}
+						type={field.type}
+						value={value}
 					/>
 				);
 
 			case "textarea":
 				return (
 					<Textarea
+						className={cn("mt-1", secondaryColorClasses.inputFocus)}
 						id={field.name}
-						value={value}
 						onChange={(e) => handleInputChange(field.name, e.target.value)}
 						placeholder={field.placeholder}
-						rows={field.rows || 3}
-						className={cn("mt-1", secondaryColorClasses.inputFocus)}
 						required={field.required}
+						rows={field.rows || 3}
+						value={value}
 					/>
 				);
 
 			case "select":
 				return (
 					<Select
-						value={value}
 						onValueChange={(val) => handleInputChange(field.name, val)}
+						value={value}
 					>
 						<SelectTrigger
 							className={cn("mt-1", secondaryColorClasses.selectFocus)}
@@ -224,26 +224,26 @@ export function UnifiedForm({
 					<div className="space-y-2">
 						<div className="relative">
 							<Input
-								id={field.name}
-								type="file"
 								accept={field.accept}
-								onChange={handleImageChange}
 								className={secondaryColorClasses.inputFocus}
+								id={field.name}
+								onChange={handleImageChange}
+								type="file"
 							/>
-							<Upload className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+							<Upload className="-translate-y-1/2 pointer-events-none absolute top-1/2 right-3 h-4 w-4 transform text-muted-foreground" />
 						</div>
 						{coverImagePreview && (
 							<div
 								className={cn(
-									"relative w-full h-32 rounded-lg overflow-hidden border",
-									secondaryColorClasses.accent,
+									"relative h-32 w-full overflow-hidden rounded-lg border",
+									secondaryColorClasses.accent
 								)}
 							>
 								<Image
-									src={coverImagePreview}
 									alt="Vista previa"
-									fill
 									className="object-cover"
+									fill
+									src={coverImagePreview}
 								/>
 							</div>
 						)}
@@ -253,10 +253,10 @@ export function UnifiedForm({
 			case "rich-text":
 				return (
 					<RichTextEditor
+						className="min-h-[200px]"
 						content={value}
 						onChange={(content) => handleInputChange(field.name, content)}
 						placeholder={field.placeholder}
-						className="min-h-[200px]"
 					/>
 				);
 
@@ -266,14 +266,14 @@ export function UnifiedForm({
 	};
 
 	return (
-		<div className="max-w-5xl mx-auto">
-			<div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+		<div className="mx-auto max-w-5xl">
+			<div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
 				{/* Main Content */}
-				<div className="lg:col-span-3 space-y-6">
+				<div className="space-y-6 lg:col-span-3">
 					<Card
 						className={cn(
 							"border-border shadow-lg",
-							secondaryColorClasses.cardHover,
+							secondaryColorClasses.cardHover
 						)}
 					>
 						<CardHeader className="pb-4">
@@ -290,8 +290,8 @@ export function UnifiedForm({
 							{config.fields.map((field) => (
 								<div key={field.name}>
 									<Label
+										className="font-medium text-foreground text-sm"
 										htmlFor={field.name}
-										className="text-foreground text-sm font-medium"
 									>
 										{field.label} {field.required && "*"}
 									</Label>
@@ -308,7 +308,7 @@ export function UnifiedForm({
 						<Card
 							className={cn(
 								"border-border shadow-lg",
-								secondaryColorClasses.cardHover,
+								secondaryColorClasses.cardHover
 							)}
 						>
 							<CardHeader className="pb-4">
@@ -319,8 +319,8 @@ export function UnifiedForm({
 							<CardContent>
 								<ImageUpload
 									images={images}
-									onImagesChange={setImages}
 									maxImages={config.maxImages || 10}
+									onImagesChange={setImages}
 								/>
 							</CardContent>
 						</Card>
@@ -329,7 +329,7 @@ export function UnifiedForm({
 					<Card
 						className={cn(
 							"border-border shadow-lg",
-							secondaryColorClasses.cardHover,
+							secondaryColorClasses.cardHover
 						)}
 					>
 						<CardHeader className="pb-4">
@@ -339,44 +339,44 @@ export function UnifiedForm({
 						</CardHeader>
 						<CardContent className="space-y-3">
 							<Button
-								type="button"
-								onClick={(e) => handleSubmit(e, "publish")}
-								disabled={isLoading}
 								className={cn(
-									"w-full bg-primary hover:bg-primary/90 text-primary-foreground",
-									secondaryColorClasses.focusRing,
+									"w-full bg-primary text-primary-foreground hover:bg-primary/90",
+									secondaryColorClasses.focusRing
 								)}
+								disabled={isLoading}
+								onClick={(e) => handleSubmit(e, "publish")}
+								type="button"
 							>
-								<Eye className="h-4 w-4 mr-2" />
+								<Eye className="mr-2 h-4 w-4" />
 								{isLoading ? "Guardando..." : config.submitText}
 							</Button>
 
 							{config.showDraftOption && (
 								<Button
-									type="button"
-									variant="outline"
-									onClick={(e) => handleSubmit(e, "draft")}
-									disabled={isLoading}
 									className={cn(
 										"w-full border-yellow-600 text-yellow-600 hover:bg-yellow-600 hover:text-white",
-										secondaryColorClasses.focusRing,
+										secondaryColorClasses.focusRing
 									)}
+									disabled={isLoading}
+									onClick={(e) => handleSubmit(e, "draft")}
+									type="button"
+									variant="outline"
 								>
-									<FileText className="h-4 w-4 mr-2" />
+									<FileText className="mr-2 h-4 w-4" />
 									{isLoading ? "Guardando..." : "Guardar Borrador"}
 								</Button>
 							)}
 
 							<Button
-								type="button"
-								variant="outline"
-								onClick={onCancel || (() => router.back())}
 								className={cn(
 									"w-full border-border text-foreground hover:bg-muted",
-									secondaryColorClasses.focusRing,
+									secondaryColorClasses.focusRing
 								)}
+								onClick={onCancel || (() => router.back())}
+								type="button"
+								variant="outline"
 							>
-								<X className="h-4 w-4 mr-2" />
+								<X className="mr-2 h-4 w-4" />
 								{config.cancelText || "Cancelar"}
 							</Button>
 						</CardContent>

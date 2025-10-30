@@ -4,7 +4,7 @@ import { Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-interface PropertyPreviewData {
+type PropertyPreviewData = {
 	title?: string;
 	description?: string;
 	price?: number;
@@ -12,13 +12,13 @@ interface PropertyPreviewData {
 	bedrooms?: number;
 	bathrooms?: number;
 	characteristics?: string[];
-}
+};
 
-interface PropertyPreviewStepProps {
+type PropertyPreviewStepProps = {
 	data: PropertyPreviewData;
 	onChange: (data: PropertyPreviewData) => void;
 	errors?: Record<string, string>;
-}
+};
 
 export function PropertyPreviewStep({
 	data,
@@ -37,7 +37,7 @@ export function PropertyPreviewStep({
 				<CardContent className="space-y-4">
 					<div className="space-y-4">
 						<div>
-							<h3 className="text-lg font-semibold">
+							<h3 className="font-semibold text-lg">
 								{data.title || "Sin título"}
 							</h3>
 							<p className="text-muted-foreground">
@@ -60,10 +60,10 @@ export function PropertyPreviewStep({
 
 						{data.characteristics && data.characteristics.length > 0 && (
 							<div>
-								<h4 className="font-medium mb-2">Características:</h4>
+								<h4 className="mb-2 font-medium">Características:</h4>
 								<div className="flex flex-wrap gap-1">
 									{data.characteristics.map((char: string, index: number) => (
-										<Badge key={index} variant="secondary" className="text-xs">
+										<Badge className="text-xs" key={index} variant="secondary">
 											{char}
 										</Badge>
 									))}

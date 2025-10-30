@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
-interface ServiceHealth {
+type ServiceHealth = {
 	name: string;
 	status: "healthy" | "degraded" | "down";
 	responseTime: number;
@@ -34,16 +34,16 @@ interface ServiceHealth {
 	uptime: number;
 	lastCheck: Date;
 	icon: React.ReactNode;
-}
+};
 
-interface SystemMetrics {
+type SystemMetrics = {
 	totalRequests: number;
 	successfulRequests: number;
 	failedRequests: number;
 	averageResponseTime: number;
 	peakResponseTime: number;
 	uptimePercentage: number;
-}
+};
 
 export function SystemHealthMonitor() {
 	const [services, setServices] = useState<ServiceHealth[]>([]);
@@ -62,7 +62,9 @@ export function SystemHealthMonitor() {
 				fetch("/api/analytics/wizard/metrics"),
 			]);
 
-			if (!healthRes.ok) throw new Error("Failed to fetch health data");
+			if (!healthRes.ok) {
+				throw new Error("Failed to fetch health data");
+			}
 
 			const healthData = await healthRes.json();
 
@@ -108,7 +110,7 @@ export function SystemHealthMonitor() {
 			setLastUpdate(new Date());
 		} catch (err) {
 			setError(
-				err instanceof Error ? err.message : "Failed to fetch health data",
+				err instanceof Error ? err.message : "Failed to fetch health data"
 			);
 		} finally {
 			setLoading(false);
@@ -119,14 +121,13 @@ export function SystemHealthMonitor() {
 		fetchHealthData();
 
 		if (autoRefresh) {
-			const interval = setInterval(fetchHealthData, 30000); // Refresh every 30 seconds
+			const interval = setInterval(fetchHealthData, 30_000); // Refresh every 30 seconds
 			return () => clearInterval(interval);
 		}
 	}, [autoRefresh, fetchHealthData]);
 
-	const calculateUptime = (errorRate: number): number => {
-		return Math.max(0, 100 - errorRate);
-	};
+	const calculateUptime = (errorRate: number): number =>
+		Math.max(0, 100 - errorRate);
 
 	const getStatusColor = (status: string) => {
 		switch (status) {
@@ -155,20 +156,30 @@ export function SystemHealthMonitor() {
 	};
 
 	const getResponseTimeStatus = (responseTime: number) => {
-		if (responseTime < 1000) return "excellent";
-		if (responseTime < 3000) return "good";
-		if (responseTime < 5000) return "fair";
+		if (responseTime < 1000) {
+			return "excellent";
+		}
+		if (responseTime < 3000) {
+			return "good";
+		}
+		if (responseTime < 5000) {
+			return "fair";
+		}
 		return "poor";
 	};
 
 	const getOverallHealth = () => {
 		const healthyServices = services.filter(
-			(s) => s.status === "healthy",
+			(s) => s.status === "healthy"
 		).length;
 		const totalServices = services.length;
 
-		if (healthyServices === totalServices) return "healthy";
-		if (healthyServices >= totalServices * 0.7) return "degraded";
+		if (healthyServices === totalServices) {
+			return "healthy";
+		}
+		if (healthyServices >= totalServices * 0.7) {
+			return "degraded";
+		}
 		return "critical";
 	};
 
@@ -183,10 +194,10 @@ export function SystemHealthMonitor() {
 				</CardHeader>
 				<CardContent>
 					<div className="space-y-4">
-						{[...Array(3)].map((_, i) => (
-							<div key={i} className="animate-pulse">
-								<div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-								<div className="h-2 bg-gray-200 rounded w-full"></div>
+						{[...new Array(3)].map((_, i) => (
+							<div className="animate-pulse" key={i}>
+								<div className="mb-2 h-4 w-3/4 rounded bg-gray-200" />
+								<div className="h-2 w-full rounded bg-gray-200" />
 							</div>
 						))}
 					</div>
@@ -200,10 +211,11 @@ export function SystemHealthMonitor() {
 	return (
 		<div className="space-y-6">
 			{/* Header with overall status */}
-			<div className="flex justify-between items-center">
+			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-3">
-					<h2 className="text-2xl font-bold">System Health</h2>
+					<h2 className="font-bold text-2xl">System Health</h2>
 					<Badge
+						className="flex items-center gap-1"
 						variant={
 							overallHealth === "healthy"
 								? "default"
@@ -211,7 +223,6 @@ export function SystemHealthMonitor() {
 									? "secondary"
 									: "destructive"
 						}
-						className="flex items-center gap-1"
 					>
 						{getStatusIcon(overallHealth)}
 						{overallHealth.toUpperCase()}
@@ -219,23 +230,23 @@ export function SystemHealthMonitor() {
 				</div>
 
 				<div className="flex items-center gap-2">
-					<span className="text-sm text-muted-foreground">
+					<span className="text-muted-foreground text-sm">
 						Last updated: {lastUpdate.toLocaleTimeString()}
 					</span>
 					<Button
-						variant="outline"
-						size="sm"
-						onClick={fetchHealthData}
-						disabled={loading}
 						className="flex items-center gap-1"
+						disabled={loading}
+						onClick={fetchHealthData}
+						size="sm"
+						variant="outline"
 					>
 						<RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
 						Refresh
 					</Button>
 					<Button
-						variant={autoRefresh ? "default" : "outline"}
-						size="sm"
 						onClick={() => setAutoRefresh(!autoRefresh)}
+						size="sm"
+						variant={autoRefresh ? "default" : "outline"}
 					>
 						Auto-refresh {autoRefresh ? "ON" : "OFF"}
 					</Button>
@@ -250,11 +261,11 @@ export function SystemHealthMonitor() {
 			)}
 
 			{/* Service Status Cards */}
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+			<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 				{services.map((service) => (
 					<Card
-						key={service.name}
 						className={`border-2 ${getStatusColor(service.status)}`}
+						key={service.name}
 					>
 						<CardHeader className="pb-3">
 							<CardTitle className="flex items-center justify-between text-lg">
@@ -268,7 +279,7 @@ export function SystemHealthMonitor() {
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-3">
-							<div className="flex justify-between items-center">
+							<div className="flex items-center justify-between">
 								<span className="text-sm">Status:</span>
 								<Badge
 									variant={
@@ -283,7 +294,7 @@ export function SystemHealthMonitor() {
 								</Badge>
 							</div>
 
-							<div className="flex justify-between items-center">
+							<div className="flex items-center justify-between">
 								<span className="text-sm">Response Time:</span>
 								<div className="flex items-center gap-1">
 									<span className="font-semibold">
@@ -299,7 +310,7 @@ export function SystemHealthMonitor() {
 								</div>
 							</div>
 
-							<div className="flex justify-between items-center">
+							<div className="flex items-center justify-between">
 								<span className="text-sm">Error Rate:</span>
 								<span className="font-semibold">
 									{service.errorRate.toFixed(1)}%
@@ -307,16 +318,16 @@ export function SystemHealthMonitor() {
 							</div>
 
 							<div className="space-y-1">
-								<div className="flex justify-between items-center">
+								<div className="flex items-center justify-between">
 									<span className="text-sm">Uptime:</span>
 									<span className="font-semibold">
 										{service.uptime.toFixed(1)}%
 									</span>
 								</div>
-								<Progress value={service.uptime} className="h-2" />
+								<Progress className="h-2" value={service.uptime} />
 							</div>
 
-							<div className="flex justify-between items-center text-xs text-muted-foreground">
+							<div className="flex items-center justify-between text-muted-foreground text-xs">
 								<span>Last check:</span>
 								<span>{service.lastCheck.toLocaleTimeString()}</span>
 							</div>
@@ -335,53 +346,53 @@ export function SystemHealthMonitor() {
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+						<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
 							<div className="text-center">
-								<div className="text-2xl font-bold text-blue-600">
+								<div className="font-bold text-2xl text-blue-600">
 									{metrics.totalRequests.toLocaleString()}
 								</div>
-								<div className="text-sm text-muted-foreground">
+								<div className="text-muted-foreground text-sm">
 									Total Requests
 								</div>
 							</div>
 
 							<div className="text-center">
-								<div className="text-2xl font-bold text-green-600">
+								<div className="font-bold text-2xl text-green-600">
 									{metrics.successfulRequests.toLocaleString()}
 								</div>
-								<div className="text-sm text-muted-foreground">Successful</div>
+								<div className="text-muted-foreground text-sm">Successful</div>
 							</div>
 
 							<div className="text-center">
-								<div className="text-2xl font-bold text-red-600">
+								<div className="font-bold text-2xl text-red-600">
 									{metrics.failedRequests.toLocaleString()}
 								</div>
-								<div className="text-sm text-muted-foreground">Failed</div>
+								<div className="text-muted-foreground text-sm">Failed</div>
 							</div>
 
 							<div className="text-center">
-								<div className="text-2xl font-bold text-purple-600">
+								<div className="font-bold text-2xl text-purple-600">
 									{metrics.averageResponseTime}ms
 								</div>
-								<div className="text-sm text-muted-foreground">
+								<div className="text-muted-foreground text-sm">
 									Avg Response
 								</div>
 							</div>
 
 							<div className="text-center">
-								<div className="text-2xl font-bold text-orange-600">
+								<div className="font-bold text-2xl text-orange-600">
 									{metrics.peakResponseTime}ms
 								</div>
-								<div className="text-sm text-muted-foreground">
+								<div className="text-muted-foreground text-sm">
 									Peak Response
 								</div>
 							</div>
 
 							<div className="text-center">
-								<div className="text-2xl font-bold text-teal-600">
+								<div className="font-bold text-2xl text-teal-600">
 									{metrics.uptimePercentage.toFixed(1)}%
 								</div>
-								<div className="text-sm text-muted-foreground">Uptime</div>
+								<div className="text-muted-foreground text-sm">Uptime</div>
 							</div>
 						</div>
 					</CardContent>

@@ -65,7 +65,7 @@ export const propertyWizardConfig: WizardConfig<PropertyWizardData> = {
 	},
 	persistence: {
 		autoSave: true,
-		autoSaveInterval: 30000,
+		autoSaveInterval: 30_000,
 		storageKey: "property-wizard",
 	},
 	navigation: {

@@ -3,10 +3,10 @@
 import { PropertyCard } from "@/components/cards/property-card";
 import type { Property } from "@/lib/types/properties";
 
-interface PropertyCardListProps {
+type PropertyCardListProps = {
 	properties: Property[];
 	loading?: boolean;
-}
+};
 
 export function PropertyCardList({
 	properties,
@@ -14,12 +14,12 @@ export function PropertyCardList({
 }: PropertyCardListProps) {
 	if (loading) {
 		return (
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+			<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 				{Array.from({ length: 6 }).map((_, i) => (
-					<div key={i} className="animate-pulse">
-						<div className="bg-gray-200 h-48 rounded-lg mb-4"></div>
-						<div className="bg-gray-200 h-4 rounded mb-2"></div>
-						<div className="bg-gray-200 h-4 rounded w-3/4"></div>
+					<div className="animate-pulse" key={i}>
+						<div className="mb-4 h-48 rounded-lg bg-gray-200" />
+						<div className="mb-2 h-4 rounded bg-gray-200" />
+						<div className="h-4 w-3/4 rounded bg-gray-200" />
 					</div>
 				))}
 			</div>
@@ -28,14 +28,14 @@ export function PropertyCardList({
 
 	if (properties.length === 0) {
 		return (
-			<div className="text-center py-12">
+			<div className="py-12 text-center">
 				<p className="text-gray-500">No properties found.</p>
 			</div>
 		);
 	}
 
 	return (
-		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+		<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 			{properties.map((property) => (
 				<PropertyCard
 					key={property.id}
@@ -49,7 +49,7 @@ export function PropertyCardList({
 						location: property.address.city,
 						type: property.type,
 						images: property.images?.map((img) =>
-							typeof img === "string" ? img : img.url,
+							typeof img === "string" ? img : img.url
 						),
 						status: property.status,
 					}}

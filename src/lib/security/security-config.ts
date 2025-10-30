@@ -239,28 +239,28 @@ export function validateSecurityConfig(): {
 	const warnings: string[] = [];
 
 	// Check required environment variables
-	if (!process.env.SIGNED_URL_SECRET && !process.env.NEXTAUTH_SECRET) {
+	if (!(process.env.SIGNED_URL_SECRET || process.env.NEXTAUTH_SECRET)) {
 		errors.push(
-			"Missing SIGNED_URL_SECRET or NEXTAUTH_SECRET environment variable",
+			"Missing SIGNED_URL_SECRET or NEXTAUTH_SECRET environment variable"
 		);
 	}
 
 	if (!process.env.HUGGINGFACE_API_KEY) {
 		warnings.push(
-			"Missing HUGGINGFACE_API_KEY environment variable - AI features will use fallbacks",
+			"Missing HUGGINGFACE_API_KEY environment variable - AI features will use fallbacks"
 		);
 	}
 
 	// Check security settings
 	if (SECURITY_CONFIG.RATE_LIMITING.AI_GENERATION.maxRequests > 10) {
 		warnings.push(
-			"AI generation rate limit is quite high - consider reducing for better security",
+			"AI generation rate limit is quite high - consider reducing for better security"
 		);
 	}
 
 	if (SECURITY_CONFIG.FILE_UPLOAD.MAX_FILE_SIZES.image > 20 * 1024 * 1024) {
 		warnings.push(
-			"Image file size limit is quite high - consider reducing for better performance",
+			"Image file size limit is quite high - consider reducing for better performance"
 		);
 	}
 
@@ -269,7 +269,7 @@ export function validateSecurityConfig(): {
 		SECURITY_CONFIG.CSP_DIRECTIVES["script-src"].includes("'unsafe-inline'")
 	) {
 		warnings.push(
-			"CSP allows 'unsafe-inline' scripts - consider using nonces for better security",
+			"CSP allows 'unsafe-inline' scripts - consider using nonces for better security"
 		);
 	}
 
@@ -349,7 +349,7 @@ export const DEPLOYMENT_SECURITY_CONFIGS = {
  * Get deployment-specific security configuration
  */
 export function getDeploymentSecurityConfig(
-	environment: keyof typeof DEPLOYMENT_SECURITY_CONFIGS = "development",
+	environment: keyof typeof DEPLOYMENT_SECURITY_CONFIGS = "development"
 ) {
 	return DEPLOYMENT_SECURITY_CONFIGS[environment];
 }

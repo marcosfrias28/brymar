@@ -32,8 +32,8 @@ const quickActions = [
 export function QuickActions() {
 	return (
 		<div className="space-y-4">
-			<Card className="hover:border-secondary/20 hover:shadow-md transition-all duration-200">
-				<CardHeader className="border-b border-secondary/10">
+			<Card className="transition-all duration-200 hover:border-secondary/20 hover:shadow-md">
+				<CardHeader className="border-secondary/10 border-b">
 					<CardTitle className="flex items-center gap-2">
 						<Zap className="h-5 w-5 text-secondary" />
 						Acciones Rápidas
@@ -42,24 +42,24 @@ export function QuickActions() {
 				<CardContent className="space-y-3 pt-6">
 					{quickActions.map((action, index) => (
 						<Button
-							key={index}
 							asChild
-							variant="outline"
 							className={cn(
-								"w-full justify-start h-auto p-4 text-left",
+								"h-auto w-full justify-start p-4 text-left",
 								secondaryColorClasses.accentHover,
-								"focus-visible:ring-secondary/50",
+								"focus-visible:ring-secondary/50"
 							)}
+							key={index}
+							variant="outline"
 						>
-							<Link href={action.href} className="flex items-center gap-3">
+							<Link className="flex items-center gap-3" href={action.href}>
 								<div
-									className={cn("p-2 rounded-lg", secondaryColorClasses.accent)}
+									className={cn("rounded-lg p-2", secondaryColorClasses.accent)}
 								>
 									<action.icon className="h-4 w-4 text-secondary-foreground" />
 								</div>
 								<div className="flex-1">
 									<div className="font-medium">{action.title}</div>
-									<div className="text-sm text-muted-foreground">
+									<div className="text-muted-foreground text-sm">
 										{action.description}
 									</div>
 								</div>
@@ -72,10 +72,10 @@ export function QuickActions() {
 			{/* Recent Drafts */}
 			<DraftList
 				maxItems={3}
-				showActions={false}
 				onSelectDraft={(draftId) => {
 					window.location.href = `/dashboard/properties/new?draft=${draftId}`;
 				}}
+				showActions={false}
 			/>
 		</div>
 	);

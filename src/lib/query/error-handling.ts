@@ -18,7 +18,7 @@ export class ValidationError extends Error {
 
 	constructor(
 		fieldErrors: Record<string, string[]> = {},
-		message = "Error de validación",
+		message = "Error de validación"
 	) {
 		super(message);
 		this.name = "ValidationError";
@@ -102,17 +102,17 @@ export function classifyError(error: unknown): {
 }
 
 // Retry configuration
-export interface RetryConfig {
+export type RetryConfig = {
 	attempts: number;
 	delay: (attempt: number) => number;
 	shouldRetry: (error: Error) => boolean;
-}
+};
 
 export function createRetryConfig(type: "query" | "mutation"): RetryConfig {
 	const baseConfig = {
 		query: {
 			attempts: 3,
-			delay: (attempt: number) => Math.min(1000 * 2 ** attempt, 30000), // Exponential backoff
+			delay: (attempt: number) => Math.min(1000 * 2 ** attempt, 30_000), // Exponential backoff
 			shouldRetry: (error: Error) => {
 				const { type, canRetry } = classifyError(error);
 				return canRetry && type !== "validation" && type !== "client";
@@ -132,10 +132,8 @@ export function createRetryConfig(type: "query" | "mutation"): RetryConfig {
 }
 
 // Global error handler
-export function handleGlobalError(error: unknown, context?: string) {
+export function handleGlobalError(error: unknown, _context?: string) {
 	const { type, message, canRetry } = classifyError(error);
-
-	console.error(`Global error (${context || "unknown"}):`, error);
 
 	// Show appropriate toast
 	toast.error(message, {
@@ -159,7 +157,7 @@ export function handleGlobalError(error: unknown, context?: string) {
 // Network status detection
 export function useNetworkStatus() {
 	const [isOnline, setIsOnline] = React.useState(
-		typeof navigator !== "undefined" ? navigator.onLine : true,
+		typeof navigator !== "undefined" ? navigator.onLine : true
 	);
 
 	React.useEffect(() => {
@@ -171,7 +169,7 @@ export function useNetworkStatus() {
 		const handleOffline = () => {
 			setIsOnline(false);
 			toast.error("Sin conexión a internet", {
-				duration: Infinity,
+				duration: Number.POSITIVE_INFINITY,
 				action: {
 					label: "Reintentar",
 					onClick: () => (window as any).location.reload(),

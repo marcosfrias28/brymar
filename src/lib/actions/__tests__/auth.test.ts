@@ -145,7 +145,7 @@ describe("Authentication Server Actions", () => {
 
 			expect(result.success).toBe(false);
 			expect(result.errors?.password).toContain(
-				"Password must be at least 8 characters",
+				"Password must be at least 8 characters"
 			);
 		});
 
@@ -189,7 +189,7 @@ describe("Authentication Server Actions", () => {
 
 		it("should handle non-existent user gracefully", async () => {
 			(auth.api.forgetPassword as jest.Mock).mockRejectedValue(
-				new Error("User not found"),
+				new Error("User not found")
 			);
 
 			const result = await forgotPassword({
@@ -230,7 +230,7 @@ describe("Authentication Server Actions", () => {
 
 			expect(result.success).toBe(false);
 			expect(result.errors?.confirmPassword).toContain(
-				"Passwords do not match",
+				"Passwords do not match"
 			);
 		});
 
@@ -243,7 +243,7 @@ describe("Authentication Server Actions", () => {
 
 			expect(result.success).toBe(false);
 			expect(result.errors?.password).toContain(
-				"Password must be at least 8 characters",
+				"Password must be at least 8 characters"
 			);
 		});
 	});
@@ -333,7 +333,7 @@ describe("Authentication Server Actions", () => {
 
 			expect(result.success).toBe(false);
 			expect(result.errors?.confirmPassword).toContain(
-				"New passwords do not match",
+				"New passwords do not match"
 			);
 		});
 
@@ -350,7 +350,7 @@ describe("Authentication Server Actions", () => {
 
 			expect(result.success).toBe(false);
 			expect(result.errors?.newPassword).toContain(
-				"New password must be different from current password",
+				"New password must be different from current password"
 			);
 		});
 	});

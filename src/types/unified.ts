@@ -44,7 +44,6 @@ export {
 } from "../lib/unified-errors";
 // Re-export all unified types from the schema system
 export type {
-	AIGeneration,
 	BlogCategory,
 	BlogFormData,
 	BlogPost,
@@ -62,17 +61,11 @@ export type {
 	PropertyUpdateFormData,
 	// Database types (single source of truth)
 	User,
-	WizardAnalytic,
-	WizardDraft,
-	WizardMedia,
 	WizardProgress,
-	// Wizard types
 	WizardStepData,
 } from "../lib/unified-schema";
 // Re-export validation schemas
 export {
-	AIGenerationInsertSchema,
-	AIGenerationSelectSchema,
 	BlogCategoryInsertSchema,
 	BlogCategorySelectSchema,
 	BlogFormSchema,
@@ -101,12 +94,6 @@ export {
 	UserSelectSchema,
 	// Utility functions
 	validateData,
-	WizardAnalyticInsertSchema,
-	WizardAnalyticSelectSchema,
-	WizardDraftInsertSchema,
-	WizardDraftSelectSchema,
-	WizardMediaInsertSchema,
-	WizardMediaSelectSchema,
 	WizardProgressSchema,
 	// Wizard schemas
 	WizardStepDataSchema,
@@ -134,14 +121,14 @@ export {
 /**
  * Simplified wizard configuration that replaces the complex wizard system
  */
-export interface SimpleWizardConfig {
+export type SimpleWizardConfig = {
 	id: string;
 	title: string;
 	description: string;
 	steps: SimpleWizardStep[];
-}
+};
 
-export interface SimpleWizardStep {
+export type SimpleWizardStep = {
 	id: string;
 	title: string;
 	description?: string;
@@ -151,19 +138,19 @@ export interface SimpleWizardStep {
 		errors?: Record<string, string[]>;
 	};
 	isOptional?: boolean;
-}
+};
 
 /**
  * Simplified wizard data that works with any entity type
  */
-export interface SimpleWizardData {
+export type SimpleWizardData = {
 	wizardType: "property" | "land" | "blog";
 	currentStep: string;
 	completedSteps: string[];
 	formData: Record<string, unknown>;
 	completionPercentage: number;
 	isValid: boolean;
-}
+};
 
 // ============================================================================
 // COMMON UI TYPES
@@ -172,56 +159,56 @@ export interface SimpleWizardData {
 /**
  * Common list view props
  */
-export interface ListViewProps<T> {
+export type ListViewProps<T> = {
 	items: T[];
 	loading?: boolean;
 	error?: string;
 	onEdit?: (item: T) => void;
 	onDelete?: (item: T) => void;
 	onView?: (item: T) => void;
-}
+};
 
 /**
  * Common form props
  */
-export interface FormProps<T> {
+export type FormProps<T> = {
 	initialData?: Partial<T>;
 	onSubmit: (data: T) => Promise<void>;
 	onCancel?: () => void;
 	loading?: boolean;
 	error?: string;
-}
+};
 
 /**
  * Common search/filter props
  */
-export interface SearchFilterProps {
+export type SearchFilterProps = {
 	onSearch: (query: string) => void;
 	onFilter: (filters: Record<string, string | number | boolean>) => void;
 	loading?: boolean;
 	placeholder?: string;
-}
+};
 
 /**
  * Pagination props
  */
-export interface PaginationProps {
+export type PaginationProps = {
 	currentPage: number;
 	totalPages: number;
 	onPageChange: (page: number) => void;
 	loading?: boolean;
-}
+};
 
 /**
  * Common card props for displaying items
  */
-export interface CardProps<T> {
+export type CardProps<T> = {
 	item: T;
 	onEdit?: (item: T) => void;
 	onDelete?: (item: T) => void;
 	onView?: (item: T) => void;
 	featured?: boolean;
-}
+};
 
 // ============================================================================
 // API RESPONSE TYPES
@@ -230,7 +217,7 @@ export interface CardProps<T> {
 /**
  * Standard API response format
  */
-export interface ApiResponse<T = unknown> {
+export type ApiResponse<T = unknown> = {
 	success: boolean;
 	data?: T;
 	error?: string;
@@ -238,7 +225,7 @@ export interface ApiResponse<T = unknown> {
 	code?: string;
 	statusCode?: number;
 	details?: Record<string, unknown>;
-}
+};
 
 /**
  * Paginated response format

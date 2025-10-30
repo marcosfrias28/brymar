@@ -34,7 +34,7 @@ export type PropertyStatus =
 	| "rented"
 	| "archived";
 
-export interface PropertyFeatures {
+export type PropertyFeatures = {
 	bedrooms: number;
 	bathrooms: number;
 	area: number; // in square feet or meters
@@ -46,9 +46,9 @@ export interface PropertyFeatures {
 		spaces: number;
 		type: "garage" | "carport" | "street" | "covered";
 	};
-}
+};
 
-export interface PropertyFeaturesInput {
+export type PropertyFeaturesInput = {
 	bedrooms: number;
 	bathrooms: number;
 	area: number;
@@ -60,7 +60,7 @@ export interface PropertyFeaturesInput {
 		spaces: number;
 		type: "garage" | "carport" | "street" | "covered";
 	};
-}
+};
 
 export interface Property extends BaseEntity {
 	title: string;
@@ -77,7 +77,7 @@ export interface Property extends BaseEntity {
 	publishedAt?: Date;
 }
 
-export interface CreatePropertyInput {
+export type CreatePropertyInput = {
 	title: string;
 	description: string;
 	price: number;
@@ -87,13 +87,13 @@ export interface CreatePropertyInput {
 	features: PropertyFeaturesInput;
 	images?: ImageInput[];
 	featured?: boolean;
-}
+};
 
 export interface UpdatePropertyInput extends Partial<CreatePropertyInput> {
 	id: string;
 }
 
-export interface PropertySearchFilters {
+export type PropertySearchFilters = {
 	minPrice?: number;
 	maxPrice?: number;
 	propertyTypes?: PropertyType[];
@@ -112,7 +112,7 @@ export interface PropertySearchFilters {
 	limit?: number;
 	sortBy?: string;
 	sortOrder?: "asc" | "desc";
-}
+};
 
 export interface PropertySearchResult extends SearchResult<Property> {
 	filters: {
@@ -127,10 +127,10 @@ export interface PropertySearchResult extends SearchResult<Property> {
 	};
 }
 
-export interface PublishPropertyInput {
+export type PublishPropertyInput = {
 	id: string;
 	publishedAt?: Date;
-}
+};
 
 // Property inquiry types
 export interface PropertyInquiry extends BaseEntity {
@@ -143,23 +143,23 @@ export interface PropertyInquiry extends BaseEntity {
 	status: "new" | "contacted" | "closed";
 }
 
-export interface CreatePropertyInquiryInput {
+export type CreatePropertyInquiryInput = {
 	propertyId: string;
 	name: string;
 	email: string;
 	phone?: string;
 	message: string;
-}
+};
 
 // Property view tracking
-export interface PropertyView {
+export type PropertyView = {
 	id: number;
 	propertyId: string;
 	userId?: string;
 	ipAddress?: string;
 	userAgent?: string;
 	createdAt: Date;
-}
+};
 
 // Action result types
 export type CreatePropertyResult = ActionResult<Property>;

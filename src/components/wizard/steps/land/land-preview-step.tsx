@@ -4,20 +4,20 @@ import { Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-interface LandPreviewData {
+type LandPreviewData = {
 	name?: string;
 	description?: string;
 	price?: number;
 	surface?: number;
 	landType?: string;
 	characteristics?: string[];
-}
+};
 
-interface LandPreviewStepProps {
+type LandPreviewStepProps = {
 	data: LandPreviewData;
 	onChange: (data: LandPreviewData) => void;
 	errors?: Record<string, string>;
-}
+};
 
 export function LandPreviewStep({
 	data,
@@ -36,7 +36,7 @@ export function LandPreviewStep({
 				<CardContent className="space-y-4">
 					<div className="space-y-4">
 						<div>
-							<h3 className="text-lg font-semibold">
+							<h3 className="font-semibold text-lg">
 								{data.name || "Sin nombre"}
 							</h3>
 							<p className="text-muted-foreground">
@@ -56,10 +56,10 @@ export function LandPreviewStep({
 
 						{data.characteristics && data.characteristics.length > 0 && (
 							<div>
-								<h4 className="font-medium mb-2">Características:</h4>
+								<h4 className="mb-2 font-medium">Características:</h4>
 								<div className="flex flex-wrap gap-1">
 									{data.characteristics.map((char: string, index: number) => (
-										<Badge key={index} variant="secondary" className="text-xs">
+										<Badge className="text-xs" key={index} variant="secondary">
 											{char}
 										</Badge>
 									))}

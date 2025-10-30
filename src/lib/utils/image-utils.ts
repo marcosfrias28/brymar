@@ -6,7 +6,7 @@
  * Validate image dimensions (client-side helper)
  */
 export function validateImageDimensions(
-	file: File,
+	file: File
 ): Promise<{ width: number; height: number }> {
 	return new Promise((resolve, reject) => {
 		const img = new Image();
@@ -34,8 +34,8 @@ export function validateImageDimensions(
  */
 export function compressImage(
 	file: File,
-	maxWidth: number = 1920,
-	quality: number = 0.8,
+	maxWidth = 1920,
+	quality = 0.8
 ): Promise<File> {
 	return new Promise((resolve, reject) => {
 		const canvas = document.createElement("canvas");
@@ -70,7 +70,7 @@ export function compressImage(
 					}
 				},
 				file.type,
-				quality,
+				quality
 			);
 		};
 
@@ -83,10 +83,7 @@ export function compressImage(
 /**
  * Generate thumbnail for preview
  */
-export function generateThumbnail(
-	file: File,
-	size: number = 200,
-): Promise<string> {
+export function generateThumbnail(file: File, size = 200): Promise<string> {
 	return new Promise((resolve, reject) => {
 		const canvas = document.createElement("canvas");
 		const ctx = canvas.getContext("2d");
@@ -117,13 +114,15 @@ export function generateThumbnail(
  * Format file size for display
  */
 export function formatFileSize(bytes: number): string {
-	if (bytes === 0) return "0 Bytes";
+	if (bytes === 0) {
+		return "0 Bytes";
+	}
 
 	const k = 1024;
 	const sizes = ["Bytes", "KB", "MB", "GB"];
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-	return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
+	return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }
 
 /**
@@ -139,7 +138,7 @@ export function isImageTypeSupported(file: File): boolean {
  */
 export function isFileSizeValid(
 	file: File,
-	maxSize: number = 10 * 1024 * 1024,
+	maxSize: number = 10 * 1024 * 1024
 ): boolean {
 	return file.size <= maxSize;
 }

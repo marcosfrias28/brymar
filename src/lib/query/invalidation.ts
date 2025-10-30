@@ -29,7 +29,7 @@ export type InvalidationAction =
 	| "user.activity";
 
 // Context for invalidation (provides additional data for smart invalidation)
-export interface InvalidationContext {
+export type InvalidationContext = {
 	page?: string;
 	sectionName?: string;
 	contactType?: string;
@@ -38,29 +38,31 @@ export interface InvalidationContext {
 	blogId?: number;
 	userId?: number;
 	[key: string]: any;
-}
+};
 
 /**
  * Get query keys to invalidate based on action and context
  */
 export function getInvalidationKeys(
 	action: InvalidationAction,
-	context: InvalidationContext = {},
+	context: InvalidationContext = {}
 ): Array<readonly unknown[]> {
 	switch (action) {
-		// Section invalidations
+		// Section invalidations - DEPRECATED: sections are no longer used
 		case "section.create":
 		case "section.update":
-			if (context.page) {
-				return [queryKeys.sections.page(context.page), queryKeys.sections.all];
-			}
-			return [queryKeys.sections.all];
+			// if (context.page) {
+			// 	return [queryKeys.sections.page(context.page), queryKeys.sections.all];
+			// }
+			// return [queryKeys.sections.all];
+			return [];
 
 		case "section.delete":
-			if (context.page) {
-				return [queryKeys.sections.page(context.page), queryKeys.sections.all];
-			}
-			return [queryKeys.sections.all];
+			// if (context.page) {
+			// 	return [queryKeys.sections.page(context.page), queryKeys.sections.all];
+			// }
+			// return [queryKeys.sections.all];
+			return [];
 
 		// Note: Contact info is now static content, no cache invalidation needed
 
@@ -161,7 +163,6 @@ export function getInvalidationKeys(
 			return [];
 
 		default:
-			console.warn(`Unknown invalidation action: ${action}`);
 			return [];
 	}
 }
@@ -172,13 +173,13 @@ export function getInvalidationKeys(
 export async function invalidateQueries(
 	queryClient: QueryClient,
 	action: InvalidationAction,
-	context: InvalidationContext = {},
+	context: InvalidationContext = {}
 ): Promise<void> {
 	const keysToInvalidate = getInvalidationKeys(action, context);
 
 	// Invalidate all relevant queries
 	const promises = keysToInvalidate.map((queryKey) =>
-		queryClient.invalidateQueries({ queryKey }),
+		queryClient.invalidateQueries({ queryKey })
 	);
 
 	await Promise.all(promises);
@@ -190,7 +191,7 @@ export async function invalidateQueries(
 export function removeQueries(
 	queryClient: QueryClient,
 	action: InvalidationAction,
-	context: InvalidationContext = {},
+	context: InvalidationContext = {}
 ): void {
 	const keysToRemove = getInvalidationKeys(action, context);
 
@@ -205,7 +206,7 @@ export function removeQueries(
 export function optimisticUpdate<T>(
 	queryClient: QueryClient,
 	queryKey: readonly unknown[],
-	updater: (oldData: T | undefined) => T,
+	updater: (oldData: T | undefined) => T
 ): T | undefined {
 	const previousData = queryClient.getQueryData<T>(queryKey);
 
@@ -220,7 +221,7 @@ export function optimisticUpdate<T>(
 export function rollbackOptimisticUpdate<T>(
 	queryClient: QueryClient,
 	queryKey: readonly unknown[],
-	previousData: T | undefined,
+	previousData: T | undefined
 ): void {
 	queryClient.setQueryData<T>(queryKey, previousData);
 }
@@ -231,7 +232,7 @@ export function rollbackOptimisticUpdate<T>(
 export async function prefetchRelatedQueries(
 	queryClient: QueryClient,
 	action: InvalidationAction,
-	context: InvalidationContext = {},
+	_context: InvalidationContext = {}
 ): Promise<void> {
 	// This can be extended to prefetch specific queries that are likely to be needed
 	// after certain mutations
@@ -246,13 +247,14 @@ export async function prefetchRelatedQueries(
 			break;
 
 		case "section.update":
-			if (context.page) {
-				// Prefetch the updated page sections
-				await queryClient.prefetchQuery({
-					queryKey: queryKeys.sections.page(context.page),
-					staleTime: 0,
-				});
-			}
+			// DEPRECATED: sections are no longer used
+			// if (context.page) {
+			// 	// Prefetch the updated page sections
+			// 	await queryClient.prefetchQuery({
+			// 		queryKey: queryKeys.sections.page(context.page),
+			// 		staleTime: 0,
+			// 	});
+			// }
 			break;
 
 		// Add more prefetch strategies as needed

@@ -52,25 +52,25 @@ export function FavoriteProperties() {
 		switch (status) {
 			case "sale":
 				return (
-					<Badge className="bg-green-100 text-green-800 border-green-200">
+					<Badge className="border-green-200 bg-green-100 text-green-800">
 						En Venta
 					</Badge>
 				);
 			case "rent":
 				return (
-					<Badge className="bg-blue-100 text-blue-800 border-blue-200">
+					<Badge className="border-blue-200 bg-blue-100 text-blue-800">
 						En Alquiler
 					</Badge>
 				);
 			case "sold":
 				return (
-					<Badge className="bg-gray-100 text-gray-800 border-gray-200">
+					<Badge className="border-gray-200 bg-gray-100 text-gray-800">
 						Vendida
 					</Badge>
 				);
 			default:
 				return (
-					<Badge className="bg-gray-100 text-gray-800 border-gray-200">
+					<Badge className="border-gray-200 bg-gray-100 text-gray-800">
 						Disponible
 					</Badge>
 				);
@@ -80,15 +80,15 @@ export function FavoriteProperties() {
 	return (
 		<Card className="border-blackCoral shadow-lg">
 			<CardHeader>
-				<CardTitle className="text-arsenic flex items-center gap-2">
+				<CardTitle className="flex items-center gap-2 text-arsenic">
 					<Heart className="h-5 w-5 text-red-500" />
 					Propiedades Favoritas
 				</CardTitle>
 			</CardHeader>
 			<CardContent>
 				{favoriteProperties.length === 0 ? (
-					<div className="text-center py-8 text-muted-foreground">
-						<Heart className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+					<div className="py-8 text-center text-muted-foreground">
+						<Heart className="mx-auto mb-4 h-12 w-12 text-gray-300" />
 						<p>No tienes propiedades favoritas aún</p>
 						<Button asChild className="mt-4" variant="outline">
 							<Link href="/search">Explorar Propiedades</Link>
@@ -98,24 +98,24 @@ export function FavoriteProperties() {
 					<div className="space-y-4">
 						{favoriteProperties.map((property) => (
 							<div
+								className="flex gap-4 rounded-lg border p-4 transition-colors hover:bg-muted/50"
 								key={property.id}
-								className="flex gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
 							>
-								<div className="relative w-24 h-24 flex-shrink-0">
+								<div className="relative h-24 w-24 flex-shrink-0">
 									<Image
-										src={property.image}
 										alt={property.title}
+										className="rounded-md object-cover"
 										fill
-										className="object-cover rounded-md"
+										src={property.image}
 									/>
 								</div>
-								<div className="flex-1 min-w-0">
-									<div className="flex items-start justify-between mb-2">
+								<div className="min-w-0 flex-1">
+									<div className="mb-2 flex items-start justify-between">
 										<div>
-											<h3 className="font-semibold text-sm truncate">
+											<h3 className="truncate font-semibold text-sm">
 												{property.title}
 											</h3>
-											<p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+											<p className="mt-1 flex items-center gap-1 text-muted-foreground text-xs">
 												<MapPin className="h-3 w-3" />
 												{property.location}
 											</p>
@@ -123,7 +123,7 @@ export function FavoriteProperties() {
 										{getStatusBadge(property.status)}
 									</div>
 
-									<div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
+									<div className="mb-2 flex items-center gap-3 text-muted-foreground text-xs">
 										<span className="flex items-center gap-1">
 											<Bed className="h-3 w-3" />
 											{property.beds}
@@ -143,30 +143,30 @@ export function FavoriteProperties() {
 											{property.price}
 										</span>
 										<div className="flex gap-2">
-											<Button size="sm" variant="outline" asChild>
+											<Button asChild size="sm" variant="outline">
 												<Link href={`/properties/${property.id}`}>
-													<Eye className="h-3 w-3 mr-1" />
+													<Eye className="mr-1 h-3 w-3" />
 													Ver
 												</Link>
 											</Button>
 											<Button
+												className="text-red-500 hover:text-red-700"
 												size="sm"
 												variant="ghost"
-												className="text-red-500 hover:text-red-700"
 											>
 												<Heart className="h-3 w-3" fill="currentColor" />
 											</Button>
 										</div>
 									</div>
 
-									<p className="text-xs text-muted-foreground mt-2">
+									<p className="mt-2 text-muted-foreground text-xs">
 										Agregado a favoritos {property.addedToFavorites}
 									</p>
 								</div>
 							</div>
 						))}
 
-						<div className="pt-4 border-t">
+						<div className="border-t pt-4">
 							<Button asChild className="w-full" variant="outline">
 								<Link href="/search">Ver Todas las Propiedades</Link>
 							</Button>

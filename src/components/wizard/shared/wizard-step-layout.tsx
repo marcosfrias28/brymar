@@ -4,7 +4,7 @@ import type React from "react";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
-interface WizardStepLayoutProps {
+type WizardStepLayoutProps = {
 	title: string;
 	description?: string;
 	icon?: React.ReactNode;
@@ -12,7 +12,7 @@ interface WizardStepLayoutProps {
 	className?: string;
 	headerClassName?: string;
 	contentClassName?: string;
-}
+};
 
 export function WizardStepLayout({
 	title,
@@ -34,9 +34,9 @@ export function WizardStepLayout({
 						</div>
 					)}
 					<div className="space-y-1">
-						<h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
+						<h2 className="font-semibold text-2xl tracking-tight">{title}</h2>
 						{description && (
-							<p className="text-sm text-muted-foreground">{description}</p>
+							<p className="text-muted-foreground text-sm">{description}</p>
 						)}
 					</div>
 				</div>

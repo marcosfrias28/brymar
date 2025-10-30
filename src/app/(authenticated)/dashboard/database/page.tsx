@@ -1,17 +1,15 @@
 "use client";
 
 import {
-	ActivityIcon,
 	AlertTriangleIcon,
 	CheckCircleIcon,
 	ClockIcon,
 	DatabaseIcon,
 	DownloadIcon,
-	HardDriveIcon,
 	RefreshCwIcon,
-	ServerIcon,
 	UploadIcon,
 } from "lucide-react";
+import { FilterTabs } from "@/components/dashboard/filter-tabs";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,7 +20,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { getStatsAdapter } from "@/lib/adapters/stats-adapters";
 
 export default function DatabasePage() {
 	// Mock data for demonstration
@@ -30,10 +28,34 @@ export default function DatabasePage() {
 		totalSize: "2.4 GB",
 		usedSpace: 68,
 		totalTables: 15,
-		totalRecords: 45672,
+		totalRecords: 45_672,
 		lastBackup: "2024-01-15 14:30",
 		status: "healthy",
 	};
+
+	// Handle action button click
+	const handleUpdateData = () => {
+		// You could show a toast notification, trigger a data refresh, etc.
+	};
+
+	// Stats generated via adapter for database management
+	const dbAdapter = getStatsAdapter("database");
+	const statsCards = dbAdapter
+		? dbAdapter.generateStats({
+				totalSize: databaseStats.totalSize,
+				usedSpace: databaseStats.usedSpace,
+				totalTables: databaseStats.totalTables,
+				connections: 42,
+			})
+		: [];
+
+	// Define filter tabs for database sections
+	const filterTabs = [
+		{ label: "Resumen", value: "overview" },
+		{ label: "Tablas", value: "tables" },
+		{ label: "Respaldos", value: "backups" },
+		{ label: "Rendimiento", value: "performance" },
+	];
 
 	const tables = [
 		{ name: "properties", records: 1234, size: "456 MB", status: "healthy" },
@@ -50,7 +72,7 @@ export default function DatabasePage() {
 		{ name: "user_favorites", records: 2345, size: "34 MB", status: "healthy" },
 		{
 			name: "wizard_analytics",
-			records: 12345,
+			records: 12_345,
 			size: "156 MB",
 			status: "healthy",
 		},
@@ -100,13 +122,13 @@ export default function DatabasePage() {
 		switch (status) {
 			case "healthy":
 				return (
-					<Badge variant="default" className="bg-green-100 text-green-800">
+					<Badge className="bg-green-100 text-green-800" variant="default">
 						Saludable
 					</Badge>
 				);
 			case "warning":
 				return (
-					<Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+					<Badge className="bg-yellow-100 text-yellow-800" variant="secondary">
 						Advertencia
 					</Badge>
 				);
@@ -119,77 +141,19 @@ export default function DatabasePage() {
 
 	return (
 		<DashboardPageLayout
-			title="Gestión de Base de Datos"
+			actions={
+				<Button onClick={handleUpdateData} variant="outline">
+					<RefreshCwIcon className="mr-2 h-4 w-4" />
+					Actualizar Datos
+				</Button>
+			}
 			description="Monitorea el estado, rendimiento y respaldos de la base de datos"
+			headerExtras={<FilterTabs className="mb-4" tabs={filterTabs} />}
+			stats={statsCards}
+			statsLoading={false}
+			title="Gestión de Base de Datos"
 		>
 			<div className="space-y-6">
-				{/* Database Overview */}
-				<div className="grid gap-4 md:grid-cols-4">
-					<Card>
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium">
-								Tamaño Total
-							</CardTitle>
-							<DatabaseIcon className="h-4 w-4 text-muted-foreground" />
-						</CardHeader>
-						<CardContent>
-							<div className="text-2xl font-bold">
-								{databaseStats.totalSize}
-							</div>
-							<div className="mt-2">
-								<Progress value={databaseStats.usedSpace} className="h-2" />
-								<p className="text-xs text-muted-foreground mt-1">
-									{databaseStats.usedSpace}% utilizado
-								</p>
-							</div>
-						</CardContent>
-					</Card>
-
-					<Card>
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium">Tablas</CardTitle>
-							<ServerIcon className="h-4 w-4 text-muted-foreground" />
-						</CardHeader>
-						<CardContent>
-							<div className="text-2xl font-bold">
-								{databaseStats.totalTables}
-							</div>
-							<p className="text-xs text-muted-foreground">Tablas activas</p>
-						</CardContent>
-					</Card>
-
-					<Card>
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium">Registros</CardTitle>
-							<HardDriveIcon className="h-4 w-4 text-muted-foreground" />
-						</CardHeader>
-						<CardContent>
-							<div className="text-2xl font-bold">
-								{databaseStats.totalRecords.toLocaleString()}
-							</div>
-							<p className="text-xs text-muted-foreground">
-								Total de registros
-							</p>
-						</CardContent>
-					</Card>
-
-					<Card>
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium">Estado</CardTitle>
-							<ActivityIcon className="h-4 w-4 text-muted-foreground" />
-						</CardHeader>
-						<CardContent>
-							<div className="flex items-center gap-2">
-								{getStatusIcon(databaseStats.status)}
-								<span className="text-sm font-medium">Saludable</span>
-							</div>
-							<p className="text-xs text-muted-foreground">
-								Último respaldo: {databaseStats.lastBackup}
-							</p>
-						</CardContent>
-					</Card>
-				</div>
-
 				{/* Tables Overview */}
 				<Card>
 					<CardHeader>
@@ -200,8 +164,8 @@ export default function DatabasePage() {
 									Información detallada sobre cada tabla de la base de datos
 								</CardDescription>
 							</div>
-							<Button variant="outline" size="sm">
-								<RefreshCwIcon className="h-4 w-4 mr-2" />
+							<Button size="sm" variant="outline">
+								<RefreshCwIcon className="mr-2 h-4 w-4" />
 								Actualizar
 							</Button>
 						</div>
@@ -210,14 +174,14 @@ export default function DatabasePage() {
 						<div className="space-y-4">
 							{tables.map((table) => (
 								<div
+									className="flex items-center justify-between rounded-lg border p-4"
 									key={table.name}
-									className="flex items-center justify-between p-4 border rounded-lg"
 								>
 									<div className="flex items-center gap-4">
 										<DatabaseIcon className="h-5 w-5 text-muted-foreground" />
 										<div>
 											<h3 className="font-medium">{table.name}</h3>
-											<p className="text-sm text-muted-foreground">
+											<p className="text-muted-foreground text-sm">
 												{table.records.toLocaleString()} registros •{" "}
 												{table.size}
 											</p>
@@ -225,7 +189,7 @@ export default function DatabasePage() {
 									</div>
 									<div className="flex items-center gap-2">
 										{getStatusBadge(table.status)}
-										<Button variant="ghost" size="sm">
+										<Button size="sm" variant="ghost">
 											Ver detalles
 										</Button>
 									</div>
@@ -247,20 +211,20 @@ export default function DatabasePage() {
 						<CardContent className="space-y-4">
 							<div className="flex gap-2">
 								<Button className="flex-1">
-									<DownloadIcon className="h-4 w-4 mr-2" />
+									<DownloadIcon className="mr-2 h-4 w-4" />
 									Crear Respaldo
 								</Button>
-								<Button variant="outline" className="flex-1">
-									<UploadIcon className="h-4 w-4 mr-2" />
+								<Button className="flex-1" variant="outline">
+									<UploadIcon className="mr-2 h-4 w-4" />
 									Restaurar
 								</Button>
 							</div>
 
 							<div className="space-y-2">
-								<h4 className="text-sm font-medium">
+								<h4 className="font-medium text-sm">
 									Configuración Automática
 								</h4>
-								<div className="text-sm text-muted-foreground space-y-1">
+								<div className="space-y-1 text-muted-foreground text-sm">
 									<p>• Respaldo diario a las 14:30</p>
 									<p>• Retención: 30 días</p>
 									<p>• Ubicación: AWS S3</p>
@@ -281,18 +245,18 @@ export default function DatabasePage() {
 							<div className="space-y-3">
 								{recentBackups.map((backup) => (
 									<div
+										className="flex items-center justify-between rounded-lg border p-3"
 										key={`${backup.date}-${backup.type}`}
-										className="flex items-center justify-between p-3 border rounded-lg"
 									>
 										<div>
-											<p className="text-sm font-medium">{backup.date}</p>
-											<p className="text-xs text-muted-foreground">
+											<p className="font-medium text-sm">{backup.date}</p>
+											<p className="text-muted-foreground text-xs">
 												{backup.type} • {backup.size}
 											</p>
 										</div>
 										<div className="flex items-center gap-2">
 											{getStatusIcon(backup.status)}
-											<Button variant="ghost" size="sm">
+											<Button size="sm" variant="ghost">
 												Descargar
 											</Button>
 										</div>
@@ -313,21 +277,21 @@ export default function DatabasePage() {
 					</CardHeader>
 					<CardContent>
 						<div className="grid gap-4 md:grid-cols-3">
-							<div className="text-center p-4 border rounded-lg">
-								<h3 className="text-2xl font-bold text-green-600">98.5%</h3>
-								<p className="text-sm text-muted-foreground">
+							<div className="rounded-lg border p-4 text-center">
+								<h3 className="font-bold text-2xl text-green-600">98.5%</h3>
+								<p className="text-muted-foreground text-sm">
 									Tiempo de actividad
 								</p>
 							</div>
-							<div className="text-center p-4 border rounded-lg">
-								<h3 className="text-2xl font-bold text-blue-600">45ms</h3>
-								<p className="text-sm text-muted-foreground">
+							<div className="rounded-lg border p-4 text-center">
+								<h3 className="font-bold text-2xl text-blue-600">45ms</h3>
+								<p className="text-muted-foreground text-sm">
 									Tiempo de respuesta promedio
 								</p>
 							</div>
-							<div className="text-center p-4 border rounded-lg">
-								<h3 className="text-2xl font-bold text-purple-600">1,234</h3>
-								<p className="text-sm text-muted-foreground">
+							<div className="rounded-lg border p-4 text-center">
+								<h3 className="font-bold text-2xl text-purple-600">1,234</h3>
+								<p className="text-muted-foreground text-sm">
 									Consultas por minuto
 								</p>
 							</div>

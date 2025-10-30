@@ -3,12 +3,12 @@ import { cn } from "@/lib/utils";
 
 const inter = Inter({ subsets: ["latin"] });
 
-interface SectionWrapperProps {
+type SectionWrapperProps = {
 	children: React.ReactNode;
 	className?: string;
 	containerClassName?: string;
 	id?: string;
-}
+};
 
 export function SectionWrapper({
 	children,
@@ -17,7 +17,7 @@ export function SectionWrapper({
 	id,
 }: SectionWrapperProps) {
 	return (
-		<section id={id} className={cn("py-32 px-4", inter.className, className)}>
+		<section className={cn("px-4 py-32", inter.className, className)} id={id}>
 			<div className={cn("container mx-auto", containerClassName)}>
 				{children}
 			</div>
@@ -25,7 +25,7 @@ export function SectionWrapper({
 	);
 }
 
-interface SectionHeaderProps {
+type SectionHeaderProps = {
 	title: string;
 	subtitle?: string;
 	description?: string;
@@ -34,7 +34,7 @@ interface SectionHeaderProps {
 	titleClassName?: string;
 	subtitleClassName?: string;
 	descriptionClassName?: string;
-}
+};
 
 export function SectionHeader({
 	title,
@@ -47,12 +47,12 @@ export function SectionHeader({
 	descriptionClassName,
 }: SectionHeaderProps) {
 	return (
-		<div className={cn("text-center mb-12 pt-24", className)}>
+		<div className={cn("mb-12 pt-24 text-center", className)}>
 			{subtitle && (
 				<p
 					className={cn(
-						"text-sm font-medium text-primary uppercase tracking-wide mb-2 flex items-center justify-center gap-2.5",
-						subtitleClassName,
+						"mb-2 flex items-center justify-center gap-2.5 font-medium text-primary text-sm uppercase tracking-wide",
+						subtitleClassName
 					)}
 				>
 					{icon && icon}
@@ -61,8 +61,8 @@ export function SectionHeader({
 			)}
 			<h2
 				className={cn(
-					"text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4",
-					titleClassName,
+					"mb-4 font-bold text-3xl text-foreground md:text-4xl lg:text-5xl",
+					titleClassName
 				)}
 			>
 				{title}
@@ -70,8 +70,8 @@ export function SectionHeader({
 			{description && (
 				<p
 					className={cn(
-						"text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed",
-						descriptionClassName,
+						"mx-auto max-w-3xl text-lg text-muted-foreground leading-relaxed",
+						descriptionClassName
 					)}
 				>
 					{description}

@@ -12,7 +12,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 
-interface CompactToolbarProps {
+type CompactToolbarProps = {
 	searchTerm: string;
 	onSearchChange: (value: string) => void;
 	searchPlaceholder: string;
@@ -31,7 +31,7 @@ interface CompactToolbarProps {
 		active?: boolean;
 		onClick: () => void;
 	}>;
-}
+};
 
 export function CompactToolbar({
 	searchTerm,
@@ -51,43 +51,43 @@ export function CompactToolbar({
 	return (
 		<div className="space-y-3">
 			{/* Main toolbar */}
-			<div className="flex flex-col smartphone:flex-row gap-3">
+			<div className="flex flex-col gap-3 smartphone:flex-row">
 				{/* Search */}
 				<div className="relative flex-1">
-					<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blackCoral h-4 w-4" />
+					<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-blackCoral" />
 					<Input
+						className="border-blackCoral pl-10 focus:ring-arsenic"
+						onChange={(e) => onSearchChange(e.target.value)}
 						placeholder={searchPlaceholder}
 						value={searchTerm}
-						onChange={(e) => onSearchChange(e.target.value)}
-						className="pl-10 border-blackCoral focus:ring-arsenic"
 					/>
 				</div>
 
 				{/* Controls */}
 				<div className="flex items-center gap-2">
 					{/* View Mode */}
-					<div className="flex border border-blackCoral rounded-lg overflow-hidden">
+					<div className="flex overflow-hidden rounded-lg border border-blackCoral">
 						<Button
-							variant={viewMode === "grid" ? "default" : "ghost"}
-							size="sm"
-							onClick={() => onViewModeChange("grid")}
 							className={`rounded-none border-0 ${viewMode === "grid" ? "bg-arsenic text-white" : "text-blackCoral hover:bg-blackCoral/10"}`}
+							onClick={() => onViewModeChange("grid")}
+							size="sm"
+							variant={viewMode === "grid" ? "default" : "ghost"}
 						>
 							<Grid3X3 className="h-4 w-4" />
 						</Button>
 						<Button
-							variant={viewMode === "list" ? "default" : "ghost"}
-							size="sm"
-							onClick={() => onViewModeChange("list")}
 							className={`rounded-none border-0 ${viewMode === "list" ? "bg-arsenic text-white" : "text-blackCoral hover:bg-blackCoral/10"}`}
+							onClick={() => onViewModeChange("list")}
+							size="sm"
+							variant={viewMode === "list" ? "default" : "ghost"}
 						>
 							<List className="h-4 w-4" />
 						</Button>
 						<Button
-							variant={viewMode === "bento" ? "default" : "ghost"}
-							size="sm"
-							onClick={() => onViewModeChange("bento")}
 							className={`rounded-none border-0 ${viewMode === "bento" ? "bg-arsenic text-white" : "text-blackCoral hover:bg-blackCoral/10"}`}
+							onClick={() => onViewModeChange("bento")}
+							size="sm"
+							variant={viewMode === "bento" ? "default" : "ghost"}
 						>
 							<LayoutGrid className="h-4 w-4" />
 						</Button>
@@ -95,8 +95,8 @@ export function CompactToolbar({
 
 					{/* Items per page */}
 					<Select
-						value={itemsPerPage.toString()}
 						onValueChange={(value) => onItemsPerPageChange(Number(value))}
+						value={itemsPerPage.toString()}
 					>
 						<SelectTrigger className="w-20 border-blackCoral">
 							<SelectValue />
@@ -111,23 +111,23 @@ export function CompactToolbar({
 
 					{/* Filters */}
 					<Button
-						variant="outline"
-						size="sm"
-						onClick={onToggleFilters}
 						className={`border-blackCoral ${showFilters ? "bg-blackCoral text-white" : "text-blackCoral hover:bg-blackCoral hover:text-white"}`}
+						onClick={onToggleFilters}
+						size="sm"
+						variant="outline"
 					>
-						<Filter className="h-4 w-4 mr-1" />
+						<Filter className="mr-1 h-4 w-4" />
 						Filtros
 					</Button>
 
 					{/* Add New */}
 					<Button
 						asChild
+						className="bg-arsenic text-white hover:bg-blackCoral"
 						size="sm"
-						className="bg-arsenic hover:bg-blackCoral text-white"
 					>
 						<Link href={addNewHref}>
-							<Plus className="h-4 w-4 mr-1" />
+							<Plus className="mr-1 h-4 w-4" />
 							{addNewLabel}
 						</Link>
 					</Button>
@@ -137,17 +137,17 @@ export function CompactToolbar({
 			{/* Quick filters */}
 			{quickFilters.length > 0 && (
 				<div className="flex flex-wrap items-center gap-2">
-					<span className="text-sm text-blackCoral/70">Filtros rápidos:</span>
+					<span className="text-blackCoral/70 text-sm">Filtros rápidos:</span>
 					{quickFilters.map((filter, index) => (
 						<Badge
-							key={index}
-							variant={filter.active ? "default" : "secondary"}
 							className={`cursor-pointer transition-colors ${
 								filter.active
 									? "bg-arsenic text-white hover:bg-blackCoral"
-									: "bg-white border border-blackCoral/30 text-blackCoral hover:bg-blackCoral hover:text-white"
+									: "border border-blackCoral/30 bg-white text-blackCoral hover:bg-blackCoral hover:text-white"
 							}`}
+							key={index}
 							onClick={filter.onClick}
+							variant={filter.active ? "default" : "secondary"}
 						>
 							{filter.label} ({filter.count})
 						</Badge>
@@ -156,7 +156,7 @@ export function CompactToolbar({
 			)}
 
 			{/* Results count */}
-			<div className="text-sm text-blackCoral/70">
+			<div className="text-blackCoral/70 text-sm">
 				Mostrando {Math.min(itemsPerPage, totalItems)} de {totalItems} elementos
 			</div>
 		</div>

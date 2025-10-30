@@ -6,21 +6,21 @@ export type GridLayout = "single" | "two-column" | "three-column" | "card-grid";
 export type GridSpacing = "compact" | "normal" | "relaxed";
 
 // Grid configuration interfaces
-export interface GridColumns {
+export type GridColumns = {
 	sm?: number;
 	md?: number;
 	lg?: number;
 	xl?: number;
 	"2xl"?: number;
-}
+};
 
-export interface GridConfig {
+export type GridConfig = {
 	layout: GridLayout;
 	spacing: GridSpacing;
 	columns?: GridColumns;
 	minItemWidth?: string;
 	maxColumns?: number;
-}
+};
 
 // Responsive grid utilities
 export const gridUtils = {
@@ -28,11 +28,21 @@ export const gridUtils = {
 	getColumnClasses: (columns: GridColumns): string => {
 		const classes = ["grid", "grid-cols-1"];
 
-		if (columns.sm) classes.push(`sm:grid-cols-${columns.sm}`);
-		if (columns.md) classes.push(`md:grid-cols-${columns.md}`);
-		if (columns.lg) classes.push(`lg:grid-cols-${columns.lg}`);
-		if (columns.xl) classes.push(`xl:grid-cols-${columns.xl}`);
-		if (columns["2xl"]) classes.push(`2xl:grid-cols-${columns["2xl"]}`);
+		if (columns.sm) {
+			classes.push(`sm:grid-cols-${columns.sm}`);
+		}
+		if (columns.md) {
+			classes.push(`md:grid-cols-${columns.md}`);
+		}
+		if (columns.lg) {
+			classes.push(`lg:grid-cols-${columns.lg}`);
+		}
+		if (columns.xl) {
+			classes.push(`xl:grid-cols-${columns.xl}`);
+		}
+		if (columns["2xl"]) {
+			classes.push(`2xl:grid-cols-${columns["2xl"]}`);
+		}
 
 		return classes.join(" ");
 	},
@@ -74,14 +84,11 @@ export const gridUtils = {
 	},
 
 	// Generate auto-fit grid with minimum width
-	getAutoFitClasses: (_minWidth = "280px"): string => {
-		return `grid gap-4 md:gap-6`;
-	},
+	getAutoFitClasses: (_minWidth = "280px"): string => "grid gap-4 md:gap-6",
 
 	// Combine all grid classes
-	combineGridClasses: (...classes: (string | undefined)[]): string => {
-		return twMerge(clsx(classes.filter(Boolean)));
-	},
+	combineGridClasses: (...classes: (string | undefined)[]): string =>
+		twMerge(clsx(classes.filter(Boolean))),
 };
 
 // Predefined grid configurations for common dashboard layouts
@@ -158,7 +165,7 @@ export const responsiveUtils = {
 
 	// Get responsive text size classes
 	getResponsiveTextSize: (
-		level: "xs" | "sm" | "base" | "lg" | "xl" = "base",
+		level: "xs" | "sm" | "base" | "lg" | "xl" = "base"
 	): string => {
 		switch (level) {
 			case "xs":
@@ -179,7 +186,7 @@ export const responsiveUtils = {
 export const secondaryColorUtils = {
 	// Get secondary accent classes
 	getSecondaryAccent: (
-		intensity: "light" | "medium" | "strong" = "medium",
+		intensity: "light" | "medium" | "strong" = "medium"
 	): string => {
 		switch (intensity) {
 			case "light":
@@ -192,18 +199,16 @@ export const secondaryColorUtils = {
 	},
 
 	// Get secondary hover classes
-	getSecondaryHover: (): string => {
-		return "hover:bg-secondary/20 hover:border-secondary/30 transition-colors duration-200";
-	},
+	getSecondaryHover: (): string =>
+		"hover:bg-secondary/20 hover:border-secondary/30 transition-colors duration-200",
 
 	// Get secondary focus classes
-	getSecondaryFocus: (): string => {
-		return "focus-visible:ring-secondary/50 focus-visible:border-secondary";
-	},
+	getSecondaryFocus: (): string =>
+		"focus-visible:ring-secondary/50 focus-visible:border-secondary",
 
 	// Get secondary status classes
 	getSecondaryStatus: (
-		status: "active" | "pending" | "inactive" = "active",
+		status: "active" | "pending" | "inactive" = "active"
 	): string => {
 		switch (status) {
 			case "pending":
@@ -220,7 +225,7 @@ export const secondaryColorUtils = {
 export function createAccentedGrid(
 	layout: GridLayout,
 	spacing: GridSpacing = "normal",
-	showAccents = true,
+	showAccents = true
 ): string {
 	const baseClasses = gridUtils.getLayoutClasses(layout);
 	const spacingClasses = gridUtils.getSpacingClasses(spacing);
@@ -232,6 +237,6 @@ export function createAccentedGrid(
 		baseClasses,
 		spacingClasses,
 		accentClasses,
-		showAccents ? "rounded-lg p-4 md:p-6" : "",
+		showAccents ? "rounded-lg p-4 md:p-6" : ""
 	);
 }

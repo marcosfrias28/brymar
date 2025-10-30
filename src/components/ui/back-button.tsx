@@ -6,13 +6,13 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
 
-interface BackButtonProps {
+type BackButtonProps = {
 	href?: string;
 	label?: string;
 	className?: string;
 	variant?: "link" | "button";
 	onClick?: () => void;
-}
+};
 
 export function BackButton({
 	href,
@@ -35,25 +35,25 @@ export function BackButton({
 	};
 
 	const buttonClasses = cn(
-		"inline-flex items-center gap-2 text-sm font-medium transition-colors",
-		"focus-visible:outline-none rounded-md",
+		"inline-flex items-center gap-2 font-medium text-sm transition-colors",
+		"rounded-md focus-visible:outline-none",
 		secondaryColorClasses.focusRing,
 		variant === "button" && [
-			"px-3 py-2 border border-input bg-background",
+			"border border-input bg-background px-3 py-2",
 			secondaryColorClasses.interactive,
 			"hover:text-foreground",
 		],
 		variant === "link" && [
-			"text-muted-foreground px-1 py-1",
+			"px-1 py-1 text-muted-foreground",
 			secondaryColorClasses.navHover,
 			"hover:text-foreground",
 		],
-		className,
+		className
 	);
 
 	if (href) {
 		return (
-			<Link href={href} className={buttonClasses}>
+			<Link className={buttonClasses} href={href}>
 				<ArrowLeft className="h-4 w-4" />
 				<span>{label}</span>
 			</Link>
@@ -61,7 +61,7 @@ export function BackButton({
 	}
 
 	return (
-		<button onClick={handleClick} className={buttonClasses}>
+		<button className={buttonClasses} onClick={handleClick}>
 			<ArrowLeft className="h-4 w-4" />
 			<span>{label}</span>
 		</button>

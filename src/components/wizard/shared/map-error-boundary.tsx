@@ -12,12 +12,12 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 
-interface MapErrorBoundaryState {
+type MapErrorBoundaryState = {
 	hasError: boolean;
 	error?: Error;
-}
+};
 
-interface MapErrorBoundaryProps {
+type MapErrorBoundaryProps = {
 	children: React.ReactNode;
 	fallback?: React.ComponentType<{
 		error?: Error;
@@ -25,7 +25,7 @@ interface MapErrorBoundaryProps {
 		onUseSimple: () => void;
 	}>;
 	onUseSimple: () => void;
-}
+};
 
 export class MapErrorBoundary extends React.Component<
 	MapErrorBoundaryProps,
@@ -40,9 +40,7 @@ export class MapErrorBoundary extends React.Component<
 		return { hasError: true, error };
 	}
 
-	componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-		console.error("Map component error:", error, errorInfo);
-	}
+	componentDidCatch(_error: Error, _errorInfo: React.ErrorInfo) {}
 
 	handleRetry = () => {
 		this.setState({ hasError: false, error: undefined });
@@ -88,31 +86,31 @@ function DefaultMapErrorFallback({
 			<CardContent className="space-y-4">
 				{process.env.NODE_ENV === "development" && error && (
 					<Alert variant="destructive">
-						<AlertDescription className="text-xs font-mono">
+						<AlertDescription className="font-mono text-xs">
 							{error.message}
 						</AlertDescription>
 					</Alert>
 				)}
 
-				<div className="flex flex-col sm:flex-row gap-3">
+				<div className="flex flex-col gap-3 sm:flex-row">
 					<Button
+						className="flex items-center gap-2"
 						onClick={onRetry}
 						variant="outline"
-						className="flex items-center gap-2"
 					>
 						<RefreshCw className="h-4 w-4" />
 						Intentar de nuevo
 					</Button>
 
-					<Button onClick={onUseSimple} className="flex items-center gap-2">
+					<Button className="flex items-center gap-2" onClick={onUseSimple}>
 						<MapPin className="h-4 w-4" />
 						Usar formulario simple
 					</Button>
 				</div>
 
-				<div className="text-sm text-orange-700 bg-orange-100 p-3 rounded-lg">
-					<p className="font-medium mb-1">¿Por qué puede fallar el mapa?</p>
-					<ul className="text-xs space-y-1 list-disc list-inside">
+				<div className="rounded-lg bg-orange-100 p-3 text-orange-700 text-sm">
+					<p className="mb-1 font-medium">¿Por qué puede fallar el mapa?</p>
+					<ul className="list-inside list-disc space-y-1 text-xs">
 						<li>Conexión a internet lenta o inestable</li>
 						<li>Bloqueador de anuncios activo</li>
 						<li>JavaScript deshabilitado</li>

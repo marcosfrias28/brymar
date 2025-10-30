@@ -9,7 +9,7 @@ import type { WizardNavigationConfig } from "@/types/universal-wizard";
  * Ensures uniform behavior across property, land, and blog wizards
  */
 
-export interface ConsistentNavigationProps {
+export type ConsistentNavigationProps = {
 	currentStep: number;
 	totalSteps: number;
 	canGoNext: boolean;
@@ -22,7 +22,7 @@ export interface ConsistentNavigationProps {
 	onCancel?: () => void;
 	onSaveDraft?: () => void;
 	config?: WizardNavigationConfig;
-}
+};
 
 /**
  * Wizard Step Layout Component
@@ -42,9 +42,9 @@ export function WizardStepLayout({
 	return (
 		<div className={`space-y-6 ${className}`}>
 			<div className="space-y-2">
-				<h2 className="text-2xl font-bold tracking-tight">{title}</h2>
+				<h2 className="font-bold text-2xl tracking-tight">{title}</h2>
 				{description && (
-					<p className="text-muted-foreground text-lg">{description}</p>
+					<p className="text-lg text-muted-foreground">{description}</p>
 				)}
 			</div>
 			{children}
@@ -77,15 +77,15 @@ export function WizardFormSection({
 				{icon && <div className="text-muted-foreground">{icon}</div>}
 				<div className="flex-1">
 					<div className="flex items-center gap-2">
-						<h3 className="text-lg font-semibold">{title}</h3>
+						<h3 className="font-semibold text-lg">{title}</h3>
 						{optional && (
-							<Badge variant="outline" className="text-xs">
+							<Badge className="text-xs" variant="outline">
 								Opcional
 							</Badge>
 						)}
 					</div>
 					{description && (
-						<p className="text-muted-foreground text-sm mt-1">{description}</p>
+						<p className="mt-1 text-muted-foreground text-sm">{description}</p>
 					)}
 				</div>
 			</div>
@@ -116,16 +116,16 @@ export function WizardFormField({
 	return (
 		<fieldset className={`space-y-2 ${className}`}>
 			<div className="space-y-1">
-				<label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+				<label className="font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
 					{label}
-					{required && <span className="text-destructive ml-1">*</span>}
+					{required && <span className="ml-1 text-destructive">*</span>}
 				</label>
 				{description && (
-					<p className="text-xs text-muted-foreground">{description}</p>
+					<p className="text-muted-foreground text-xs">{description}</p>
 				)}
 			</div>
 			{children}
-			<p className="text-xs text-destructive">{error && error}</p>
+			<p className="text-destructive text-xs">{error && error}</p>
 		</fieldset>
 	);
 }
@@ -181,7 +181,7 @@ export const defaultNavigationConfig: Required<WizardNavigationConfig> = {
  * Get navigation configuration with defaults
  */
 export function getNavigationConfig(
-	config?: WizardNavigationConfig,
+	config?: WizardNavigationConfig
 ): Required<WizardNavigationConfig> {
 	return {
 		...defaultNavigationConfig,
@@ -198,13 +198,17 @@ export function useConsistentStepValidation() {
 			targetStep: number,
 			currentStep: number,
 			completedSteps: Set<number>,
-			allowSkipAhead: boolean = false,
+			allowSkipAhead = false
 		): boolean => {
 			// Can always go to current step
-			if (targetStep === currentStep) return true;
+			if (targetStep === currentStep) {
+				return true;
+			}
 
 			// Can always go backwards to completed steps
-			if (targetStep < currentStep) return true;
+			if (targetStep < currentStep) {
+				return true;
+			}
 
 			// Can go to next step if current step is completed
 			if (targetStep === currentStep + 1 && completedSteps.has(currentStep)) {
@@ -214,14 +218,16 @@ export function useConsistentStepValidation() {
 			// Can skip ahead if explicitly allowed and all previous steps are completed
 			if (allowSkipAhead) {
 				for (let i = 0; i < targetStep; i++) {
-					if (!completedSteps.has(i)) return false;
+					if (!completedSteps.has(i)) {
+						return false;
+					}
 				}
 				return true;
 			}
 
 			return false;
 		},
-		[],
+		[]
 	);
 
 	const getNextIncompleteStep = useCallback(
@@ -233,7 +239,7 @@ export function useConsistentStepValidation() {
 			}
 			return null;
 		},
-		[],
+		[]
 	);
 
 	return {
@@ -247,7 +253,7 @@ export function useConsistentStepValidation() {
  */
 export function generateWizardBreadcrumbs(
 	wizardType: "property" | "land" | "blog",
-	isDraft: boolean = false,
+	isDraft = false
 ) {
 	const typeLabels = {
 		property: { singular: "Propiedad", plural: "Propiedades" },
@@ -283,10 +289,10 @@ export function ConsistentLoadingState({
 	breadcrumbs: Array<{ label: string; href?: string }>;
 }) {
 	return (
-		<div className="flex items-center justify-center min-h-[400px]">
+		<div className="flex min-h-[400px] items-center justify-center">
 			<div className="text-center">
-				<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-				<h2 className="text-xl font-semibold mb-2">{title}</h2>
+				<div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-primary border-b-2" />
+				<h2 className="mb-2 font-semibold text-xl">{title}</h2>
 				<p className="text-muted-foreground">{description}</p>
 			</div>
 		</div>
@@ -308,13 +314,13 @@ export function ConsistentErrorState({
 	onAction: () => void;
 }) {
 	return (
-		<div className="flex items-center justify-center min-h-[400px]">
+		<div className="flex min-h-[400px] items-center justify-center">
 			<div className="text-center">
-				<h2 className="text-xl font-semibold mb-2">{title}</h2>
-				<p className="text-muted-foreground mb-4">{description}</p>
+				<h2 className="mb-2 font-semibold text-xl">{title}</h2>
+				<p className="mb-4 text-muted-foreground">{description}</p>
 				<button
+					className="rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
 					onClick={onAction}
-					className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
 				>
 					{actionLabel}
 				</button>
@@ -330,7 +336,7 @@ export function validateStepProgression(
 	currentStep: number,
 	targetStep: number,
 	stepValidation: Record<number, boolean>,
-	allowSkipAhead: boolean = false,
+	allowSkipAhead = false
 ): { canProceed: boolean; reason?: string } {
 	// Moving backwards is always allowed
 	if (targetStep < currentStep) {

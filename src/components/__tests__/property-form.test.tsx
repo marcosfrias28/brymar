@@ -28,35 +28,33 @@ jest.mock("react-hook-form", () => ({
 import { useCreateProperty, useUpdateProperty } from "@/hooks/use-properties";
 
 // Mock component to test
-const MockPropertyForm = ({ property, onSuccess }: any) => {
-	return (
-		<form data-testid="property-form">
-			<input
-				data-testid="title-input"
-				placeholder="Property Title"
-				defaultValue={property?.title || ""}
-			/>
-			<input
-				data-testid="price-input"
-				type="number"
-				placeholder="Price"
-				defaultValue={property?.price || ""}
-			/>
-			<textarea
-				data-testid="description-input"
-				placeholder="Description"
-				defaultValue={property?.description || ""}
-			/>
-			<button
-				type="submit"
-				data-testid="submit-button"
-				onClick={() => onSuccess?.()}
-			>
-				{property ? "Update Property" : "Create Property"}
-			</button>
-		</form>
-	);
-};
+const MockPropertyForm = ({ property, onSuccess }: any) => (
+	<form data-testid="property-form">
+		<input
+			data-testid="title-input"
+			defaultValue={property?.title || ""}
+			placeholder="Property Title"
+		/>
+		<input
+			data-testid="price-input"
+			defaultValue={property?.price || ""}
+			placeholder="Price"
+			type="number"
+		/>
+		<textarea
+			data-testid="description-input"
+			defaultValue={property?.description || ""}
+			placeholder="Description"
+		/>
+		<button
+			data-testid="submit-button"
+			onClick={() => onSuccess?.()}
+			type="submit"
+		>
+			{property ? "Update Property" : "Create Property"}
+		</button>
+	</form>
+);
 
 describe("PropertyForm Component", () => {
 	let queryClient: QueryClient;
@@ -84,13 +82,12 @@ describe("PropertyForm Component", () => {
 		(useUpdateProperty as jest.Mock).mockReturnValue(mockUpdateProperty);
 	});
 
-	const renderWithProviders = (component: React.ReactElement) => {
-		return render(
+	const renderWithProviders = (component: React.ReactElement) =>
+		render(
 			<QueryClientProvider client={queryClient}>
 				{component}
-			</QueryClientProvider>,
+			</QueryClientProvider>
 		);
-	};
 
 	it("should render create form when no property provided", () => {
 		renderWithProviders(<MockPropertyForm />);
@@ -106,7 +103,7 @@ describe("PropertyForm Component", () => {
 		const mockProperty = {
 			id: "1",
 			title: "Test Property",
-			price: 250000,
+			price: 250_000,
 			description: "A beautiful test property",
 		};
 
@@ -115,7 +112,7 @@ describe("PropertyForm Component", () => {
 		expect(screen.getByDisplayValue("Test Property")).toBeInTheDocument();
 		expect(screen.getByDisplayValue("250000")).toBeInTheDocument();
 		expect(
-			screen.getByDisplayValue("A beautiful test property"),
+			screen.getByDisplayValue("A beautiful test property")
 		).toBeInTheDocument();
 		expect(screen.getByText("Update Property")).toBeInTheDocument();
 	});
@@ -200,7 +197,7 @@ describe("PropertyForm Component", () => {
 		const mockProperty = {
 			id: "1",
 			title: "Existing Property",
-			price: 300000,
+			price: 300_000,
 			description: "An existing property",
 		};
 
@@ -211,7 +208,7 @@ describe("PropertyForm Component", () => {
 		});
 
 		renderWithProviders(
-			<MockPropertyForm property={mockProperty} onSuccess={mockOnSuccess} />,
+			<MockPropertyForm onSuccess={mockOnSuccess} property={mockProperty} />
 		);
 
 		const submitButton = screen.getByTestId("submit-button");
@@ -224,7 +221,7 @@ describe("PropertyForm Component", () => {
 
 	it("should handle network errors gracefully", async () => {
 		mockCreateProperty.mutateAsync.mockRejectedValue(
-			new Error("Network error"),
+			new Error("Network error")
 		);
 
 		renderWithProviders(<MockPropertyForm />);

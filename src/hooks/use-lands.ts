@@ -77,8 +77,7 @@ export function useCreateLand() {
 				});
 			}
 		},
-		onError: (error) => {
-			console.error("Create land error:", error);
+		onError: (_error) => {
 			toast({
 				title: "Error",
 				description: "An unexpected error occurred",
@@ -116,8 +115,7 @@ export function useUpdateLand() {
 				});
 			}
 		},
-		onError: (error) => {
-			console.error("Update land error:", error);
+		onError: (_error) => {
 			toast({
 				title: "Error",
 				description: "An unexpected error occurred",
@@ -155,8 +153,7 @@ export function useDeleteLand() {
 				});
 			}
 		},
-		onError: (error) => {
-			console.error("Delete land error:", error);
+		onError: (_error) => {
 			toast({
 				title: "Error",
 				description: "An unexpected error occurred",
@@ -189,10 +186,7 @@ export function useMyLands() {
 /**
  * Hook for land search with debounced filters
  */
-export function useLandSearch(
-	filters: LandSearchFilters,
-	enabled: boolean = true,
-) {
+export function useLandSearch(filters: LandSearchFilters, enabled = true) {
 	return useQuery({
 		queryKey: ["land-search", filters],
 		queryFn: async () => {
@@ -225,7 +219,7 @@ export function useLandStats() {
 			// Calculate basic statistics
 			const stats = {
 				total: lands.length,
-				available: lands.filter((land) => land.status === "available").length,
+				available: lands.filter((land) => land.status === "published").length,
 				sold: lands.filter((land) => land.status === "sold").length,
 				averagePrice:
 					lands.length > 0
@@ -237,7 +231,7 @@ export function useLandStats() {
 						acc[land.type] = (acc[land.type] || 0) + 1;
 						return acc;
 					},
-					{} as Record<string, number>,
+					{} as Record<string, number>
 				),
 			};
 

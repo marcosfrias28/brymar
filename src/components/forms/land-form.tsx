@@ -19,13 +19,13 @@ import { createLandAction, updateLandAction } from "@/lib/actions/land-actions";
 import type { Land } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-interface LandFormProps {
+type LandFormProps = {
 	initialData?: Land;
 	isEditing?: boolean;
 	onCancel?: () => void;
 	onSuccess?: () => void;
 	className?: string;
-}
+};
 
 export function LandForm({
 	initialData,
@@ -64,7 +64,7 @@ export function LandForm({
 	];
 
 	return (
-		<Card className={cn("w-full max-w-2xl mx-auto", className)}>
+		<Card className={cn("mx-auto w-full max-w-2xl", className)}>
 			<CardHeader>
 				<CardTitle>{isEditing ? "Editar Terreno" : "Nuevo Terreno"}</CardTitle>
 			</CardHeader>
@@ -72,54 +72,54 @@ export function LandForm({
 				<form action={formAction} className="space-y-6">
 					{/* Hidden fields */}
 					{isEditing && initialData?.id && (
-						<input type="hidden" name="id" value={initialData.id} />
+						<input name="id" type="hidden" value={initialData.id} />
 					)}
 					<input
-						type="hidden"
 						name="characteristics"
+						type="hidden"
 						value={JSON.stringify([])}
 					/>
-					<input type="hidden" name="utilities" value={JSON.stringify([])} />
-					<input type="hidden" name="accessRoads" value={JSON.stringify([])} />
+					<input name="utilities" type="hidden" value={JSON.stringify([])} />
+					<input name="accessRoads" type="hidden" value={JSON.stringify([])} />
 					<input
-						type="hidden"
 						name="nearbyLandmarks"
-						value={JSON.stringify([])}
-					/>
-					<input type="hidden" name="images" value={JSON.stringify([])} />
-					<input type="hidden" name="aerialImages" value={JSON.stringify([])} />
-					<input
 						type="hidden"
-						name="documentImages"
 						value={JSON.stringify([])}
 					/>
-					<input type="hidden" name="status" value="draft" />
-					<input type="hidden" name="language" value="es" />
-					<input type="hidden" name="tags" value={JSON.stringify([])} />
+					<input name="images" type="hidden" value={JSON.stringify([])} />
+					<input name="aerialImages" type="hidden" value={JSON.stringify([])} />
+					<input
+						name="documentImages"
+						type="hidden"
+						value={JSON.stringify([])}
+					/>
+					<input name="status" type="hidden" value="draft" />
+					<input name="language" type="hidden" value="es" />
+					<input name="tags" type="hidden" value={JSON.stringify([])} />
 
 					{/* Name */}
 					<div className="space-y-2">
 						<Label htmlFor="name">Nombre del Terreno *</Label>
 						<Input
+							defaultValue={initialData?.name || ""}
 							id="name"
 							name="name"
-							defaultValue={initialData?.name || ""}
 							placeholder="Ej: Terreno Comercial Bávaro"
 							required
 						/>
 						{state?.errors?.name && (
-							<p className="text-sm text-red-600">{state.errors.name[0]}</p>
+							<p className="text-red-600 text-sm">{state.errors.name[0]}</p>
 						)}
 					</div>
 
 					{/* Title (same as name for compatibility) */}
-					<input type="hidden" name="title" value={initialData?.name || ""} />
+					<input name="title" type="hidden" value={initialData?.name || ""} />
 
 					{/* Type */}
 					<div className="space-y-2">
 						<Label htmlFor="landType">Tipo de Terreno *</Label>
-						<input type="hidden" name="landType" value={landType} />
-						<Select value={landType} onValueChange={setLandType} required>
+						<input name="landType" type="hidden" value={landType} />
+						<Select onValueChange={setLandType} required value={landType}>
 							<SelectTrigger>
 								<SelectValue placeholder="Seleccionar tipo" />
 							</SelectTrigger>
@@ -132,7 +132,7 @@ export function LandForm({
 							</SelectContent>
 						</Select>
 						{state?.errors?.landType && (
-							<p className="text-sm text-red-600">{state.errors.landType[0]}</p>
+							<p className="text-red-600 text-sm">{state.errors.landType[0]}</p>
 						)}
 					</div>
 
@@ -140,31 +140,31 @@ export function LandForm({
 					<div className="space-y-2">
 						<Label htmlFor="location">Ubicación *</Label>
 						<Input
+							defaultValue={initialData?.location || ""}
 							id="location"
 							name="location"
-							defaultValue={initialData?.location || ""}
 							placeholder="Bávaro, Punta Cana"
 							required
 						/>
 						{state?.errors?.location && (
-							<p className="text-sm text-red-600">{state.errors.location[0]}</p>
+							<p className="text-red-600 text-sm">{state.errors.location[0]}</p>
 						)}
 					</div>
 
 					{/* Area and Price */}
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div className="space-y-2">
 							<Label htmlFor="surface">Superficie (m²) *</Label>
 							<Input
+								defaultValue={initialData?.area || ""}
 								id="surface"
 								name="surface"
-								type="number"
-								defaultValue={initialData?.area || ""}
 								placeholder="2500"
 								required
+								type="number"
 							/>
 							{state?.errors?.surface && (
-								<p className="text-sm text-red-600">
+								<p className="text-red-600 text-sm">
 									{state.errors.surface[0]}
 								</p>
 							)}
@@ -173,15 +173,15 @@ export function LandForm({
 						<div className="space-y-2">
 							<Label htmlFor="price">Precio (USD) *</Label>
 							<Input
+								defaultValue={initialData?.price || ""}
 								id="price"
 								name="price"
-								type="number"
-								defaultValue={initialData?.price || ""}
 								placeholder="180000"
 								required
+								type="number"
 							/>
 							{state?.errors?.price && (
-								<p className="text-sm text-red-600">{state.errors.price[0]}</p>
+								<p className="text-red-600 text-sm">{state.errors.price[0]}</p>
 							)}
 						</div>
 					</div>
@@ -190,15 +190,15 @@ export function LandForm({
 					<div className="space-y-2">
 						<Label htmlFor="description">Descripción *</Label>
 						<Textarea
+							defaultValue={initialData?.description || ""}
 							id="description"
 							name="description"
-							defaultValue={initialData?.description || ""}
 							placeholder="Describe las características principales del terreno..."
-							rows={4}
 							required
+							rows={4}
 						/>
 						{state?.errors?.description && (
-							<p className="text-sm text-red-600">
+							<p className="text-red-600 text-sm">
 								{state.errors.description[0]}
 							</p>
 						)}
@@ -206,10 +206,10 @@ export function LandForm({
 
 					{/* Actions */}
 					<div className="flex gap-4 pt-4">
-						<Button type="submit" disabled={isPending} className="flex-1">
+						<Button className="flex-1" disabled={isPending} type="submit">
 							{isPending ? (
 								<>
-									<Loader2 className="animate-spin mr-2 h-4 w-4" />
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 									Guardando...
 								</>
 							) : isEditing ? (
@@ -220,10 +220,10 @@ export function LandForm({
 						</Button>
 						{onCancel && (
 							<Button
+								disabled={isPending}
+								onClick={onCancel}
 								type="button"
 								variant="outline"
-								onClick={onCancel}
-								disabled={isPending}
 							>
 								Cancelar
 							</Button>

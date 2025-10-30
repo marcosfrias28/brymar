@@ -25,7 +25,7 @@ test.describe("Critical User Flows - Simplified Architecture", () => {
 							"canManageBlog",
 						],
 					},
-				}),
+				})
 			);
 		});
 	});
@@ -47,7 +47,7 @@ test.describe("Critical User Flows - Simplified Architecture", () => {
 			await page.fill('input[name="title"]', "E2E Test Property");
 			await page.fill(
 				'textarea[name="description"]',
-				"This property was created by E2E tests",
+				"This property was created by E2E tests"
 			);
 			await page.fill('input[name="price"]', "350000");
 
@@ -62,8 +62,8 @@ test.describe("Critical User Flows - Simplified Architecture", () => {
 
 			// Verify creation success
 			await expect(
-				page.locator("text=Property created").or(page.locator("text=Success")),
-			).toBeVisible({ timeout: 10000 });
+				page.locator("text=Property created").or(page.locator("text=Success"))
+			).toBeVisible({ timeout: 10_000 });
 		}
 
 		// 3. View properties list
@@ -72,7 +72,7 @@ test.describe("Critical User Flows - Simplified Architecture", () => {
 			page
 				.locator('[data-testid="property-card"]')
 				.or(page.locator(".property-card"))
-				.first(),
+				.first()
 		).toBeVisible({ timeout: 5000 });
 
 		// 4. Search for the created property
@@ -204,7 +204,7 @@ test.describe("Critical User Flows - Simplified Architecture", () => {
 
 			if (await contentEditor.isVisible()) {
 				await contentEditor.fill(
-					"This is a test blog post created by E2E tests. It contains sample content to verify the blog functionality works correctly.",
+					"This is a test blog post created by E2E tests. It contains sample content to verify the blog functionality works correctly."
 				);
 			}
 
@@ -219,8 +219,8 @@ test.describe("Critical User Flows - Simplified Architecture", () => {
 
 			// Verify creation success
 			await expect(
-				page.locator("text=Post created").or(page.locator("text=Success")),
-			).toBeVisible({ timeout: 10000 });
+				page.locator("text=Post created").or(page.locator("text=Success"))
+			).toBeVisible({ timeout: 10_000 });
 		}
 
 		// 3. View blog posts list
@@ -229,7 +229,7 @@ test.describe("Critical User Flows - Simplified Architecture", () => {
 			page
 				.locator('[data-testid="blog-card"]')
 				.or(page.locator(".blog-card"))
-				.first(),
+				.first()
 		).toBeVisible({ timeout: 5000 });
 
 		// 4. Publish the blog post
@@ -241,7 +241,7 @@ test.describe("Critical User Flows - Simplified Architecture", () => {
 
 			// Verify publish success
 			await expect(
-				page.locator("text=Published").or(page.locator("text=Publicado")),
+				page.locator("text=Published").or(page.locator("text=Publicado"))
 			).toBeVisible({ timeout: 5000 });
 		}
 	});
@@ -314,7 +314,7 @@ test.describe("Critical User Flows - Simplified Architecture", () => {
 		if (await locationSelect.isVisible()) {
 			const options = await locationSelect.locator("option").allTextContents();
 			const validOptions = options.filter(
-				(option) => option.trim() && option !== "Select...",
+				(option) => option.trim() && option !== "Select..."
 			);
 
 			if (validOptions.length > 0) {
@@ -365,7 +365,9 @@ test.describe("Critical User Flows - Simplified Architecture", () => {
 					}
 				}
 
-				if (wizardFound) break;
+				if (wizardFound) {
+					break;
+				}
 			} catch (_e) {
 				// Continue to next URL
 			}
@@ -416,7 +418,7 @@ test.describe("Critical User Flows - Simplified Architecture", () => {
 		const descriptionInput = page.locator('textarea[name="description"]');
 		if (await descriptionInput.isVisible()) {
 			await descriptionInput.fill(
-				"This item was created using the wizard in E2E tests",
+				"This item was created using the wizard in E2E tests"
 			);
 		}
 
@@ -663,7 +665,7 @@ test.describe("Critical User Flows - Simplified Architecture", () => {
 		// Wait for main content to load
 		await page.waitForSelector(
 			'main, [data-testid="main-content"], .main-content',
-			{ timeout: 10000 },
+			{ timeout: 10_000 }
 		);
 
 		const loadTime = Date.now() - startTime;
@@ -688,8 +690,8 @@ test.describe("Critical User Flows - Simplified Architecture", () => {
 			page
 				.locator('[data-testid="property-card"]')
 				.or(page.locator(".property-card"))
-				.first(),
-		).toBeVisible({ timeout: 10000 });
+				.first()
+		).toBeVisible({ timeout: 10_000 });
 
 		// 3. Test infinite scroll or pagination
 		const paginationElements = [

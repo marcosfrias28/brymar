@@ -146,7 +146,7 @@ export interface AIService {
 	generateTags(propertyData: PropertyBasicInfo): Promise<string[]>;
 	generateMarketInsights(
 		location: string,
-		propertyType: string,
+		propertyType: string
 	): Promise<string>;
 }
 
@@ -167,7 +167,7 @@ export interface UploadResult {
 export interface ImageUploadService {
 	generateSignedUrl(
 		filename: string,
-		contentType: string,
+		contentType: string
 	): Promise<SignedUrlResponse>;
 	uploadDirect(file: File, signedUrl: string): Promise<UploadResult>;
 	processMetadata(uploadResult: UploadResult): ImageMetadata;
@@ -195,17 +195,17 @@ export interface MapService {
 
 // Error Types
 export class AIServiceError extends Error {
+	code: "RATE_LIMIT" | "API_ERROR" | "INVALID_RESPONSE" | "NETWORK_ERROR";
+	retryable: boolean;
 	constructor(
 		message: string,
-		public code:
-			| "RATE_LIMIT"
-			| "API_ERROR"
-			| "INVALID_RESPONSE"
-			| "NETWORK_ERROR",
-		public retryable: boolean = false,
+		code: "RATE_LIMIT" | "API_ERROR" | "INVALID_RESPONSE" | "NETWORK_ERROR",
+		retryable = false
 	) {
 		super(message);
 		this.name = "AIServiceError";
+		this.code = code;
+		this.retryable = retryable;
 	}
 }
 

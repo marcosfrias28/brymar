@@ -6,19 +6,19 @@ import type { CreateBlogPostInput } from "@/lib/types/blog";
 import { BlogForm } from "../blog/blog-form";
 import { UnifiedWizard, type WizardStep } from "./unified-wizard";
 
-interface BlogWizardData {
+type BlogWizardData = {
 	title?: string;
 	content?: string;
 	author?: string;
 	status?: string;
 	[key: string]: unknown;
-}
+};
 
-interface BlogStepProps {
+type BlogStepProps = {
 	data: BlogWizardData;
 	onChange: (data: BlogWizardData) => void;
 	errors?: Record<string, string>;
-}
+};
 
 // Blog wizard step components
 const BlogBasicInfoStep = ({ data, onChange, errors }: BlogStepProps) => {
@@ -42,19 +42,25 @@ const blogWizardSteps: WizardStep[] = [
 		component: BlogBasicInfoStep,
 		validation: (data: BlogWizardData) => {
 			const errors: Record<string, string> = {};
-			if (!data.title) errors.title = "El título es requerido";
-			if (!data.content) errors.content = "El contenido es requerido";
-			if (!data.author) errors.author = "El autor es requerido";
+			if (!data.title) {
+				errors.title = "El título es requerido";
+			}
+			if (!data.content) {
+				errors.content = "El contenido es requerido";
+			}
+			if (!data.author) {
+				errors.author = "El autor es requerido";
+			}
 			return Object.keys(errors).length > 0 ? errors : null;
 		},
 	},
 ];
 
-interface BlogWizardProps {
+type BlogWizardProps = {
 	draftId?: string;
 	initialData?: BlogWizardData;
 	onComplete?: () => void;
-}
+};
 
 export function BlogWizard({
 	draftId,
@@ -81,12 +87,11 @@ export function BlogWizard({
 			if (result.success) {
 				onComplete?.();
 				return { success: true, message: "Post creado exitosamente" };
-			} else {
-				return {
-					success: false,
-					error: result.error || "Error al crear el post",
-				};
 			}
+			return {
+				success: false,
+				error: result.error || "Error al crear el post",
+			};
 		} catch (_error) {
 			return { success: false, error: "Error inesperado" };
 		}
@@ -97,25 +102,23 @@ export function BlogWizard({
 			if (draftId) {
 				await saveDraft.mutateAsync({
 					id: draftId,
-					data: data,
+					data,
 				});
 			} else {
 				await createDraft.mutateAsync();
 			}
-		} catch (error) {
-			console.warn("Wizard draft functionality is temporarily disabled:", error);
-		}
+		} catch (_error) {}
 	};
 
 	return (
 		<UnifiedWizard
-			title="Crear Nuevo Post"
 			description="Completa la información para agregar un nuevo artículo al blog"
-			steps={blogWizardSteps}
 			initialData={initialData}
 			onComplete={handleComplete}
 			onSaveDraft={handleSaveDraft}
 			showDraftOption={true}
+			steps={blogWizardSteps}
+			title="Crear Nuevo Post"
 		/>
 	);
 }

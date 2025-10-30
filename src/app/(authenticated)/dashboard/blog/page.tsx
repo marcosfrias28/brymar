@@ -1,14 +1,6 @@
 "use client";
 
-import {
-	BookOpen,
-	Calendar,
-	FileText,
-	Home,
-	PenTool,
-	Plus,
-	User,
-} from "lucide-react";
+import { BookOpen, Home, Plus } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { RouteGuard } from "@/components/auth/route-guard";
@@ -16,11 +8,11 @@ import { BlogCard } from "@/components/blog/blog-card";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useBlogPosts } from "@/hooks/use-blog-posts";
+import { getStatsAdapter } from "@/lib/adapters/stats-adapters";
+import type { BlogPost } from "@/lib/types/blog";
 import { cn } from "@/lib/utils";
 import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
-import type { BlogPost } from "@/types/blog";
 
 export default function BlogPage() {
 	const { data: blogPostsData, isLoading: loading, error } = useBlogPosts();
@@ -30,45 +22,17 @@ export default function BlogPage() {
 	>("all");
 
 	const filteredByStatus = useMemo(() => {
-		if (!blogPosts) return [];
+		if (!blogPosts) {
+			return [];
+		}
 		return statusFilter === "all"
 			? blogPosts
-			: blogPosts.filter((p) => p.status === statusFilter);
+			: blogPosts.filter((p: BlogPost) => p.status === statusFilter);
 	}, [blogPosts, statusFilter]);
 
-	const stats = useMemo(() => {
-		if (!blogPosts) return [];
-		return [
-			{
-				id: "total-posts",
-				label: "Total Posts",
-				value: blogPosts.length,
-				icon: <FileText className="h-5 w-5" />,
-				color: "text-foreground",
-			},
-			{
-				id: "published",
-				label: "Publicados",
-				value: blogPosts.filter((p) => p.status === "published")
-					.length,
-				icon: <Calendar className="h-5 w-5" />,
-				color: "text-green-600",
-			},
-			{
-				id: "drafts",
-				label: "Borradores",
-				value: blogPosts.filter((p) => p.status === "draft").length,
-				icon: <PenTool className="h-5 w-5" />,
-				color: "text-orange-600",
-			},
-			{
-				id: "authors",
-				label: "Autores",
-				value: new Set(blogPosts.map((p) => p.authorId)).size,
-				icon: <User className="h-5 w-5" />,
-				color: "text-blue-600",
-			},
-		];
+	const statsCards = useMemo(() => {
+		const adapter = getStatsAdapter("blog");
+		return adapter?.generateStats({ posts: blogPosts }) || [];
 	}, [blogPosts]);
 
 	const breadcrumbs = [
@@ -81,11 +45,11 @@ export default function BlogPage() {
 			asChild
 			className={cn(
 				"bg-primary hover:bg-primary/90",
-				secondaryColorClasses.focusRing,
+				secondaryColorClasses.focusRing
 			)}
 		>
 			<Link href="/dashboard/blog/new">
-				<Plus className="h-4 w-4 mr-2" />
+				<Plus className="mr-2 h-4 w-4" />
 				Nuevo Post
 			</Link>
 		</Button>
@@ -105,13 +69,15 @@ export default function BlogPage() {
 		return (
 			<RouteGuard requiredPermission="blog.manage">
 				<DashboardPageLayout
-					title="Gestión del Blog"
-					description="Error al cargar los posts del blog"
+					actions={actions}
 					breadcrumbs={breadcrumbs}
+					description="Error al cargar los posts del blog"
+					title="Gestión del Blog"
 				>
-					<div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+					<div className="flex min-h-[400px] flex-col items-center justify-center space-y-4">
 						<p className="text-destructive">
-							Error al cargar los posts: {error instanceof Error ? error.message : String(error)}
+							Error al cargar los posts:{" "}
+							{error instanceof Error ? error.message : String(error)}
 						</p>
 						<Button onClick={() => window.location.reload()} variant="outline">
 							Reintentar
@@ -125,62 +91,33 @@ export default function BlogPage() {
 	return (
 		<RouteGuard requiredPermission="blog.manage">
 			<DashboardPageLayout
-				title="Gestión del Blog"
-				description="Administra y publica contenido del blog inmobiliario"
-				breadcrumbs={breadcrumbs}
 				actions={actions}
-				showSearch={true}
+				breadcrumbs={breadcrumbs}
+				description="Administra y publica contenido del blog inmobiliario"
 				searchPlaceholder="Buscar posts..."
+				showSearch={true}
+				stats={statsCards}
+				statsLoading={loading}
+				title="Gestión del Blog"
 			>
-				{/* Stats Cards */}
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-					{stats.map((stat) => (
-						<Card
-							key={stat.id}
-							className={cn("border-border", secondaryColorClasses.cardHover)}
-						>
-							<CardContent className="p-4">
-								<div className="flex items-center justify-between">
-									<div>
-										<p className="text-sm font-medium text-muted-foreground">
-											{stat.label}
-										</p>
-										<p className="text-2xl font-bold text-foreground">
-											{stat.value}
-										</p>
-									</div>
-									<div
-										className={cn(
-											"p-2 rounded-lg",
-											secondaryColorClasses.accent,
-										)}
-									>
-										{stat.icon}
-									</div>
-								</div>
-							</CardContent>
-						</Card>
-					))}
-				</div>
-
 				{/* Status Filters */}
-				<div className="flex flex-wrap gap-2 mb-6">
+				<div className="mb-6 flex flex-wrap gap-2">
 					{statusFilters.map((filter) => (
 						<Badge
-							key={filter.value}
-							variant={filter.active ? "default" : "outline"}
 							className={cn(
 								"cursor-pointer transition-colors",
 								filter.active
 									? secondaryColorClasses.badge
 									: cn(
 											"hover:bg-secondary/10",
-											secondaryColorClasses.interactive,
-										),
+											secondaryColorClasses.interactive
+										)
 							)}
+							key={filter.value}
 							onClick={() =>
 								setStatusFilter(filter.value as "all" | "published" | "draft")
 							}
+							variant={filter.active ? "default" : "outline"}
 						>
 							{filter.label}
 						</Badge>
@@ -191,43 +128,42 @@ export default function BlogPage() {
 				{loading ? (
 					<div className="space-y-4">
 						{["skeleton-1", "skeleton-2", "skeleton-3"].map((skeletonId) => (
-							<Card key={skeletonId} className="animate-pulse">
-								<CardContent className="p-4">
-									<div className="flex space-x-4">
-										<div className="w-32 h-20 bg-muted rounded"></div>
-										<div className="flex-1 space-y-2">
-											<div className="h-4 bg-muted rounded w-3/4"></div>
-											<div className="h-3 bg-muted rounded w-1/2"></div>
-											<div className="h-3 bg-muted rounded w-1/4"></div>
-										</div>
+							<div
+								className="animate-pulse rounded-lg border p-4"
+								key={skeletonId}
+							>
+								<div className="flex space-x-4">
+									<div className="h-20 w-32 rounded bg-muted" />
+									<div className="flex-1 space-y-2">
+										<div className="h-4 w-3/4 rounded bg-muted" />
+										<div className="h-3 w-1/2 rounded bg-muted" />
+										<div className="h-3 w-1/4 rounded bg-muted" />
 									</div>
-								</CardContent>
-							</Card>
+								</div>
+							</div>
 						))}
 					</div>
 				) : filteredByStatus.length === 0 ? (
-					<Card className="border-dashed border-2 border-muted-foreground/25">
-						<CardContent className="flex flex-col items-center justify-center py-12">
-							<BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
-							<h3 className="text-lg font-semibold text-foreground mb-2">
-								No hay posts
-							</h3>
-							<p className="text-muted-foreground text-center mb-4">
-								{statusFilter === "all"
-									? "Aún no has creado ningún post del blog."
-									: `No hay posts con estado "${statusFilter}".`}
-							</p>
-							<Button asChild className={secondaryColorClasses.focusRing}>
-								<Link href="/dashboard/blog/new">
-									<Plus className="h-4 w-4 mr-2" />
-									Crear primer post
-								</Link>
-							</Button>
-						</CardContent>
-					</Card>
+					<div className="rounded-lg border-2 border-muted-foreground/25 border-dashed p-12 text-center">
+						<BookOpen className="mb-4 h-12 w-12 text-muted-foreground" />
+						<h3 className="mb-2 font-semibold text-foreground text-lg">
+							No hay posts
+						</h3>
+						<p className="mb-4 text-center text-muted-foreground">
+							{statusFilter === "all"
+								? "Aún no has creado ningún post del blog."
+								: `No hay posts con estado "${statusFilter}".`}
+						</p>
+						<Button asChild className={secondaryColorClasses.focusRing}>
+							<Link href="/dashboard/blog/new">
+								<Plus className="mr-2 h-4 w-4" />
+								Crear primer post
+							</Link>
+						</Button>
+					</div>
 				) : (
 					<div className="space-y-4">
-						{filteredByStatus.map((post) => (
+						{filteredByStatus.map((post: BlogPost) => (
 							<BlogCard key={post.id} post={post} />
 						))}
 					</div>

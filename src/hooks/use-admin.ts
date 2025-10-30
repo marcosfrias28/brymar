@@ -36,7 +36,9 @@ export function useAdmin() {
 	 * Verifica si el usuario tiene un permiso específico
 	 */
 	const hasPermission = (permission: Permission): boolean => {
-		if (!user || !user.role) return false;
+		if (!user?.role) {
+			return false;
+		}
 
 		// Usar la lógica nativa del plugin admin si está disponible
 		// Por ahora, usar nuestra configuración local
@@ -77,9 +79,7 @@ export function useAdmin() {
 	/**
 	 * Verifica si el usuario tiene un rol específico
 	 */
-	const hasRole = (role: UserRole): boolean => {
-		return user?.role === role;
-	};
+	const hasRole = (role: UserRole): boolean => user?.role === role;
 
 	/**
 	 * Verifica si el usuario puede acceder a una ruta específica

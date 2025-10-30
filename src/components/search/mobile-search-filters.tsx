@@ -24,12 +24,12 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 
-interface MobileSearchFiltersProps {
+type MobileSearchFiltersProps = {
 	filters: Record<string, any>;
 	onFilterChange: (filterName: string, value: any) => void;
 	isLoading?: boolean;
 	className?: string;
-}
+};
 
 export function MobileSearchFilters({
 	filters,
@@ -39,8 +39,8 @@ export function MobileSearchFilters({
 }: MobileSearchFiltersProps) {
 	// Local state for sliders
 	const [localPriceRange, setLocalPriceRange] = useState([
-		filters.minPrice || 50000,
-		filters.maxPrice || 2000000,
+		filters.minPrice || 50_000,
+		filters.maxPrice || 2_000_000,
 	]);
 
 	// Property types (reduced for mobile)
@@ -68,8 +68,8 @@ export function MobileSearchFilters({
 	// Update local ranges when filters change from URL
 	useEffect(() => {
 		setLocalPriceRange([
-			filters.minPrice || 50000,
-			filters.maxPrice || 2000000,
+			filters.minPrice || 50_000,
+			filters.maxPrice || 2_000_000,
 		]);
 	}, [filters.minPrice, filters.maxPrice]);
 
@@ -97,7 +97,7 @@ export function MobileSearchFilters({
 		Object.keys(filters).forEach((key) => {
 			onFilterChange(key, undefined);
 		});
-		setLocalPriceRange([50000, 2000000]);
+		setLocalPriceRange([50_000, 2_000_000]);
 	};
 
 	const activeFiltersCount = Object.keys(filters).length;
@@ -108,21 +108,21 @@ export function MobileSearchFilters({
 			<div className="grid grid-cols-2 gap-2">
 				{/* Location */}
 				<div className="relative">
-					<MapPin className="absolute left-2 top-2 h-3 w-3 text-muted-foreground" />
+					<MapPin className="absolute top-2 left-2 h-3 w-3 text-muted-foreground" />
 					<Input
-						placeholder="Ubicación..."
-						className="pl-7 h-8 text-xs"
-						value={filters.location || ""}
+						className="h-8 pl-7 text-xs"
 						onChange={(e) => onFilterChange("location", e.target.value)}
+						placeholder="Ubicación..."
+						value={filters.location || ""}
 					/>
 				</div>
 
 				{/* Sort By */}
 				<Select
-					value={filters.sortBy || "newest"}
 					onValueChange={(value) =>
 						onFilterChange("sortBy", value === "newest" ? undefined : value)
 					}
+					value={filters.sortBy || "newest"}
 				>
 					<SelectTrigger className="h-8 text-xs">
 						<ArrowUpDown className="mr-1 h-3 w-3" />
@@ -142,10 +142,10 @@ export function MobileSearchFilters({
 			<div className="grid grid-cols-2 gap-2">
 				{/* Property Type */}
 				<Select
-					value={filters.propertyType || ""}
 					onValueChange={(value) =>
 						onFilterChange("propertyType", value === "all" ? undefined : value)
 					}
+					value={filters.propertyType || ""}
 				>
 					<SelectTrigger className="h-8 text-xs">
 						<SelectValue placeholder="Tipo" />
@@ -162,10 +162,10 @@ export function MobileSearchFilters({
 
 				{/* Property Status */}
 				<Select
-					value={filters.status || ""}
 					onValueChange={(value) =>
 						onFilterChange("status", value === "all" ? undefined : value)
 					}
+					value={filters.status || ""}
 				>
 					<SelectTrigger className="h-8 text-xs">
 						<SelectValue placeholder="Estado" />
@@ -180,29 +180,29 @@ export function MobileSearchFilters({
 
 			{/* Price Range - Compact */}
 			<div className="space-y-2">
-				<Label className="text-xs font-medium flex items-center gap-1">
+				<Label className="flex items-center gap-1 font-medium text-xs">
 					<DollarSign className="h-3 w-3" />$
 					{localPriceRange[0].toLocaleString()} - $
 					{localPriceRange[1].toLocaleString()}
 				</Label>
 				<Slider
-					min={10000}
-					max={5000000}
-					step={10000}
-					value={localPriceRange}
-					onValueChange={handlePriceRangeChange}
 					className="py-2"
 					disabled={isLoading}
+					max={5_000_000}
+					min={10_000}
+					onValueChange={handlePriceRangeChange}
+					step={10_000}
+					value={localPriceRange}
 				/>
 			</div>
 
 			{/* Bedrooms and Bathrooms */}
 			<div className="grid grid-cols-2 gap-2">
 				<Select
-					value={filters.bedrooms || ""}
 					onValueChange={(value) =>
 						onFilterChange("bedrooms", value === "any" ? undefined : value)
 					}
+					value={filters.bedrooms || ""}
 				>
 					<SelectTrigger className="h-8 text-xs">
 						<Bed className="mr-1 h-3 w-3" />
@@ -218,10 +218,10 @@ export function MobileSearchFilters({
 				</Select>
 
 				<Select
-					value={filters.bathrooms || ""}
 					onValueChange={(value) =>
 						onFilterChange("bathrooms", value === "any" ? undefined : value)
 					}
+					value={filters.bathrooms || ""}
 				>
 					<SelectTrigger className="h-8 text-xs">
 						<Bath className="mr-1 h-3 w-3" />
@@ -238,22 +238,22 @@ export function MobileSearchFilters({
 
 			{/* Essential Amenities - Compact */}
 			<div className="space-y-2">
-				<Label className="text-xs font-medium">Amenidades</Label>
+				<Label className="font-medium text-xs">Amenidades</Label>
 				<div className="grid grid-cols-2 gap-2">
 					{amenities.map((amenity) => (
-						<div key={amenity.id} className="flex items-center space-x-1">
+						<div className="flex items-center space-x-1" key={amenity.id}>
 							<Checkbox
-								id={amenity.id}
 								checked={(filters.amenities || []).includes(amenity.id)}
+								className="h-3 w-3"
+								disabled={isLoading}
+								id={amenity.id}
 								onCheckedChange={(checked) =>
 									handleAmenityChange(amenity.id, checked as boolean)
 								}
-								disabled={isLoading}
-								className="h-3 w-3"
 							/>
 							<Label
+								className="cursor-pointer font-normal text-xs"
 								htmlFor={amenity.id}
-								className="text-xs font-normal cursor-pointer"
 							>
 								{amenity.label}
 							</Label>
@@ -265,18 +265,18 @@ export function MobileSearchFilters({
 			{/* Action Buttons */}
 			<div className="flex gap-2">
 				<Button
+					className="h-8 flex-1 text-xs"
+					disabled={isLoading || activeFiltersCount === 0}
+					onClick={resetFilters}
+					size="sm"
 					type="button"
 					variant="outline"
-					size="sm"
-					className="flex-1 h-8 text-xs"
-					onClick={resetFilters}
-					disabled={isLoading || activeFiltersCount === 0}
 				>
 					<RotateCcw className="mr-1 h-3 w-3" />
 					Limpiar
 				</Button>
 				{activeFiltersCount > 0 && (
-					<Badge variant="secondary" className="px-2 py-1 text-xs">
+					<Badge className="px-2 py-1 text-xs" variant="secondary">
 						{activeFiltersCount}
 					</Badge>
 				)}

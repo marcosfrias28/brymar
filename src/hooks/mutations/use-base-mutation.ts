@@ -33,7 +33,7 @@ export interface BaseMutationOptions<TData, TError, TVariables, TContext>
 	invalidateOn?: InvalidationAction;
 	invalidationContext?: (
 		variables: TVariables,
-		data?: TData,
+		data?: TData
 	) => InvalidationContext;
 
 	// Optimistic updates
@@ -49,7 +49,7 @@ export interface BaseMutationOptions<TData, TError, TVariables, TContext>
 /**
  * Enhanced Mutation Result
  */
-export interface BaseMutationResult<TData, TError, TVariables, _TContext> {
+export type BaseMutationResult<TData, TError, TVariables, _TContext> = {
 	// All properties from UseMutationResult
 	data: TData | undefined;
 	error: TError | null;
@@ -69,7 +69,7 @@ export interface BaseMutationResult<TData, TError, TVariables, _TContext> {
 	// Additional convenience methods
 	mutateWithToast: (variables: TVariables) => void;
 	mutateAsyncWithToast: (variables: TVariables) => Promise<TData>;
-}
+};
 
 /**
  * Base Mutation Hook with enhanced features
@@ -81,7 +81,7 @@ export function useBaseMutation<
 	TContext = unknown,
 >(
 	mutationFn: (variables: TVariables) => Promise<TData>,
-	options: BaseMutationOptions<TData, TError, TVariables, TContext> = {},
+	options: BaseMutationOptions<TData, TError, TVariables, TContext> = {}
 ): BaseMutationResult<TData, TError, TVariables, TContext> {
 	const queryClient = useQueryClient();
 	const {
@@ -142,7 +142,7 @@ export function useBaseMutation<
 		onSuccess: async (
 			data: TData,
 			variables: TVariables,
-			context: TContext | undefined,
+			context: TContext | undefined
 		) => {
 			const ctx = context as any;
 
@@ -174,7 +174,7 @@ export function useBaseMutation<
 		onError: (
 			error: TError,
 			variables: TVariables,
-			context: TContext | undefined,
+			context: TContext | undefined
 		) => {
 			const ctx = context as any;
 
@@ -205,11 +205,8 @@ export function useBaseMutation<
 		mutation.mutate(variables);
 	};
 
-	const mutateAsyncWithToast = async (
-		variables: TVariables,
-	): Promise<TData> => {
-		return mutation.mutateAsync(variables);
-	};
+	const mutateAsyncWithToast = async (variables: TVariables): Promise<TData> =>
+		mutation.mutateAsync(variables);
 
 	return {
 		...mutation,
@@ -228,7 +225,7 @@ export function useCreateMutation<
 	TContext = unknown,
 >(
 	mutationFn: (variables: TVariables) => Promise<TData>,
-	options: BaseMutationOptions<TData, TError, TVariables, TContext> = {},
+	options: BaseMutationOptions<TData, TError, TVariables, TContext> = {}
 ): BaseMutationResult<TData, TError, TVariables, TContext> {
 	return useBaseMutation(mutationFn, {
 		loadingMessage: "Creando...",
@@ -248,7 +245,7 @@ export function useUpdateMutation<
 	TContext = unknown,
 >(
 	mutationFn: (variables: TVariables) => Promise<TData>,
-	options: BaseMutationOptions<TData, TError, TVariables, TContext> = {},
+	options: BaseMutationOptions<TData, TError, TVariables, TContext> = {}
 ): BaseMutationResult<TData, TError, TVariables, TContext> {
 	return useBaseMutation(mutationFn, {
 		loadingMessage: "Actualizando...",
@@ -268,7 +265,7 @@ export function useDeleteMutation<
 	TContext = unknown,
 >(
 	mutationFn: (variables: TVariables) => Promise<TData>,
-	options: BaseMutationOptions<TData, TError, TVariables, TContext> = {},
+	options: BaseMutationOptions<TData, TError, TVariables, TContext> = {}
 ): BaseMutationResult<TData, TError, TVariables, TContext> {
 	return useBaseMutation(mutationFn, {
 		loadingMessage: "Eliminando...",

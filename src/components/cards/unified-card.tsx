@@ -8,7 +8,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
 
-export interface CardAction {
+export type CardAction = {
 	label: string;
 	icon?: React.ComponentType<{ className?: string }>;
 	onClick?: () => void;
@@ -21,15 +21,15 @@ export interface CardAction {
 		| "ghost"
 		| "link";
 	className?: string;
-}
+};
 
-export interface CardBadge {
+export type CardBadge = {
 	label: string;
 	variant?: "default" | "secondary" | "destructive" | "outline";
 	className?: string;
-}
+};
 
-export interface UnifiedCardProps {
+export type UnifiedCardProps = {
 	title: string;
 	subtitle?: string;
 	description?: string;
@@ -48,7 +48,7 @@ export interface UnifiedCardProps {
 	contentClassName?: string;
 	footerClassName?: string;
 	onClick?: () => void;
-}
+};
 
 export function UnifiedCard({
 	title,
@@ -73,32 +73,32 @@ export function UnifiedCard({
 		<CardWrapper {...(cardProps as any)}>
 			<Card
 				className={cn(
-					"group transition-all duration-200 hover:shadow-lg border-border",
+					"group border-border transition-all duration-200 hover:shadow-lg",
 					secondaryColorClasses.cardHover,
 					onClick && "cursor-pointer",
-					className,
+					className
 				)}
 			>
 				{image && (
 					<div
 						className={cn(
-							"relative w-full h-48 overflow-hidden rounded-t-lg",
-							imageClassName,
+							"relative h-48 w-full overflow-hidden rounded-t-lg",
+							imageClassName
 						)}
 					>
 						<Image
-							src={image}
 							alt={imageAlt || title}
-							fill
 							className="object-cover transition-transform duration-200 group-hover:scale-105"
+							fill
+							src={image}
 						/>
 						{badges.length > 0 && (
 							<div className="absolute top-2 left-2 flex flex-wrap gap-1">
 								{badges.slice(0, 2).map((badge, index) => (
 									<Badge
+										className={cn("text-xs", badge.className)}
 										key={index}
 										variant={badge.variant}
-										className={cn("text-xs", badge.className)}
 									>
 										{badge.label}
 									</Badge>
@@ -111,16 +111,16 @@ export function UnifiedCard({
 				<CardContent className={cn("p-4", contentClassName)}>
 					<div className="space-y-2">
 						<div>
-							<h3 className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+							<h3 className="line-clamp-2 font-semibold text-foreground transition-colors group-hover:text-primary">
 								{title}
 							</h3>
 							{subtitle && (
-								<p className="text-sm text-muted-foreground">{subtitle}</p>
+								<p className="text-muted-foreground text-sm">{subtitle}</p>
 							)}
 						</div>
 
 						{description && (
-							<p className="text-sm text-muted-foreground line-clamp-3">
+							<p className="line-clamp-3 text-muted-foreground text-sm">
 								{description}
 							</p>
 						)}
@@ -129,9 +129,9 @@ export function UnifiedCard({
 							<div className="flex flex-wrap gap-1">
 								{badges.map((badge, index) => (
 									<Badge
+										className={cn("text-xs", badge.className)}
 										key={index}
 										variant={badge.variant}
-										className={cn("text-xs", badge.className)}
 									>
 										{badge.label}
 									</Badge>
@@ -140,9 +140,9 @@ export function UnifiedCard({
 						)}
 
 						{metadata.length > 0 && (
-							<div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+							<div className="flex flex-wrap gap-3 text-muted-foreground text-xs">
 								{metadata.map((item, index) => (
-									<div key={index} className="flex items-center gap-1">
+									<div className="flex items-center gap-1" key={index}>
 										{item.icon && <item.icon className="h-3 w-3" />}
 										<span className="font-medium">{item.label}:</span>
 										<span>{item.value}</span>
@@ -154,7 +154,7 @@ export function UnifiedCard({
 				</CardContent>
 
 				{actions.length > 0 && (
-					<CardFooter className={cn("p-4 pt-0 flex gap-2", footerClassName)}>
+					<CardFooter className={cn("flex gap-2 p-4 pt-0", footerClassName)}>
 						{actions.map((action, index) => {
 							const ActionWrapper = action.href ? Link : "div";
 							const actionProps = action.href ? { href: action.href } : {};
@@ -162,12 +162,12 @@ export function UnifiedCard({
 							return (
 								<ActionWrapper key={index} {...(actionProps as any)}>
 									<Button
-										variant={action.variant || "outline"}
-										size="sm"
-										onClick={action.onClick}
 										className={cn("flex-1", action.className)}
+										onClick={action.onClick}
+										size="sm"
+										variant={action.variant || "outline"}
 									>
-										{action.icon && <action.icon className="h-4 w-4 mr-1" />}
+										{action.icon && <action.icon className="mr-1 h-4 w-4" />}
 										{action.label}
 									</Button>
 								</ActionWrapper>

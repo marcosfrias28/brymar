@@ -3,11 +3,11 @@
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
 
-interface MarkdownRendererProps {
+type MarkdownRendererProps = {
 	content: string;
 	className?: string;
 	variant?: "default" | "compact" | "rich";
-}
+};
 
 export function MarkdownRenderer({
 	content,
@@ -34,15 +34,15 @@ export function MarkdownRenderer({
 				components={{
 					// Personalizar elementos para mantener consistencia visual
 					h1: ({ children }) => (
-						<h1 className="text-2xl font-bold mb-4 text-inherit">{children}</h1>
+						<h1 className="mb-4 font-bold text-2xl text-inherit">{children}</h1>
 					),
 					h2: ({ children }) => (
-						<h2 className="text-xl font-semibold mb-3 text-inherit">
+						<h2 className="mb-3 font-semibold text-inherit text-xl">
 							{children}
 						</h2>
 					),
 					h3: ({ children }) => (
-						<h3 className="text-lg font-medium mb-2 text-inherit">
+						<h3 className="mb-2 font-medium text-inherit text-lg">
 							{children}
 						</h3>
 					),
@@ -53,31 +53,31 @@ export function MarkdownRenderer({
 						<strong className="font-semibold text-inherit">{children}</strong>
 					),
 					em: ({ children }) => (
-						<em className="italic text-inherit">{children}</em>
+						<em className="text-inherit italic">{children}</em>
 					),
 					ul: ({ children }) => (
-						<ul className="list-disc list-inside mb-2 space-y-1 text-inherit">
+						<ul className="mb-2 list-inside list-disc space-y-1 text-inherit">
 							{children}
 						</ul>
 					),
 					ol: ({ children }) => (
-						<ol className="list-decimal list-inside mb-2 space-y-1 text-inherit">
+						<ol className="mb-2 list-inside list-decimal space-y-1 text-inherit">
 							{children}
 						</ol>
 					),
 					li: ({ children }) => <li className="text-inherit">{children}</li>,
 					blockquote: ({ children }) => (
-						<blockquote className="border-l-4 border-primary/30 pl-4 italic text-inherit/80 my-2">
+						<blockquote className="my-2 border-primary/30 border-l-4 pl-4 text-inherit/80 italic">
 							{children}
 						</blockquote>
 					),
 					code: ({ children }) => (
-						<code className="bg-secondary/20 px-1 py-0.5 rounded text-sm font-mono text-inherit">
+						<code className="rounded bg-secondary/20 px-1 py-0.5 font-mono text-inherit text-sm">
 							{children}
 						</code>
 					),
 					pre: ({ children }) => (
-						<pre className="bg-secondary/10 p-3 rounded-lg overflow-x-auto text-sm font-mono text-inherit my-2">
+						<pre className="my-2 overflow-x-auto rounded-lg bg-secondary/10 p-3 font-mono text-inherit text-sm">
 							{children}
 						</pre>
 					),

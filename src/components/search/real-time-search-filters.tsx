@@ -30,12 +30,12 @@ import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 
-interface RealTimeSearchFiltersProps {
+type RealTimeSearchFiltersProps = {
 	filters: Record<string, any>;
 	onFilterChange: (filterName: string, value: any) => void;
 	isLoading?: boolean;
 	className?: string;
-}
+};
 
 export function RealTimeSearchFilters({
 	filters,
@@ -45,8 +45,8 @@ export function RealTimeSearchFilters({
 }: RealTimeSearchFiltersProps) {
 	// Local state for sliders to prevent too many URL updates
 	const [localPriceRange, setLocalPriceRange] = useState([
-		filters.minPrice || 50000,
-		filters.maxPrice || 2000000,
+		filters.minPrice || 50_000,
+		filters.maxPrice || 2_000_000,
 	]);
 	const [localAreaRange, setLocalAreaRange] = useState([
 		filters.minArea || 50,
@@ -94,8 +94,8 @@ export function RealTimeSearchFilters({
 	// Update local ranges when filters change from URL
 	useEffect(() => {
 		setLocalPriceRange([
-			filters.minPrice || 50000,
-			filters.maxPrice || 2000000,
+			filters.minPrice || 50_000,
+			filters.maxPrice || 2_000_000,
 		]);
 		setLocalAreaRange([filters.minArea || 50, filters.maxArea || 1000]);
 	}, [filters.minPrice, filters.maxPrice, filters.minArea, filters.maxArea]);
@@ -133,7 +133,7 @@ export function RealTimeSearchFilters({
 		Object.keys(filters).forEach((key) => {
 			onFilterChange(key, undefined);
 		});
-		setLocalPriceRange([50000, 2000000]);
+		setLocalPriceRange([50_000, 2_000_000]);
 		setLocalAreaRange([50, 1000]);
 	};
 
@@ -146,7 +146,7 @@ export function RealTimeSearchFilters({
 					<Filter className="h-5 w-5" />
 					Filtros de Búsqueda
 					{activeFiltersCount > 0 && (
-						<Badge variant="secondary" className="ml-auto">
+						<Badge className="ml-auto" variant="secondary">
 							{activeFiltersCount} filtros
 						</Badge>
 					)}
@@ -156,32 +156,32 @@ export function RealTimeSearchFilters({
 			<CardContent className="space-y-6">
 				{/* Location Search */}
 				<div className="space-y-2">
-					<Label htmlFor="location" className="text-sm font-medium">
+					<Label className="font-medium text-sm" htmlFor="location">
 						Ubicación
 					</Label>
 					<div className="relative">
-						<MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+						<MapPin className="absolute top-3 left-3 h-4 w-4 text-muted-foreground" />
 						<Input
-							id="location"
-							placeholder="Ciudad, Zona, Dirección..."
 							className="pl-10"
-							value={filters.location || ""}
+							id="location"
 							onChange={(e) => onFilterChange("location", e.target.value)}
+							placeholder="Ciudad, Zona, Dirección..."
+							value={filters.location || ""}
 						/>
 					</div>
 				</div>
 
 				{/* Property Type */}
 				<div className="space-y-2">
-					<Label className="text-sm font-medium">Tipo de Propiedad</Label>
+					<Label className="font-medium text-sm">Tipo de Propiedad</Label>
 					<Select
-						value={filters.propertyType || ""}
 						onValueChange={(value) =>
 							onFilterChange(
 								"propertyType",
-								value === "all" ? undefined : value,
+								value === "all" ? undefined : value
 							)
 						}
+						value={filters.propertyType || ""}
 					>
 						<SelectTrigger>
 							<Building2 className="mr-2 h-4 w-4" />
@@ -200,12 +200,12 @@ export function RealTimeSearchFilters({
 
 				{/* Property Status */}
 				<div className="space-y-2">
-					<Label className="text-sm font-medium">Estado</Label>
+					<Label className="font-medium text-sm">Estado</Label>
 					<Select
-						value={filters.status || ""}
 						onValueChange={(value) =>
 							onFilterChange("status", value === "all" ? undefined : value)
 						}
+						value={filters.status || ""}
 					>
 						<SelectTrigger>
 							<SelectValue placeholder="Seleccionar estado" />
@@ -223,15 +223,15 @@ export function RealTimeSearchFilters({
 
 				{/* Sort By */}
 				<div className="space-y-2">
-					<Label className="text-sm font-medium flex items-center gap-2">
+					<Label className="flex items-center gap-2 font-medium text-sm">
 						<ArrowUpDown className="h-4 w-4" />
 						Ordenar por
 					</Label>
 					<Select
-						value={filters.sortBy || "newest"}
 						onValueChange={(value) =>
 							onFilterChange("sortBy", value === "newest" ? undefined : value)
 						}
+						value={filters.sortBy || "newest"}
 					>
 						<SelectTrigger>
 							<SelectValue placeholder="Seleccionar orden" />
@@ -248,49 +248,49 @@ export function RealTimeSearchFilters({
 
 				{/* Price Range */}
 				<div className="space-y-3">
-					<Label className="text-sm font-medium flex items-center gap-2">
+					<Label className="flex items-center gap-2 font-medium text-sm">
 						<DollarSign className="h-4 w-4" />
 						Rango de Precio
 					</Label>
 					<div className="px-2">
 						<Slider
-							min={10000}
-							max={5000000}
-							step={10000}
-							value={localPriceRange}
-							onValueChange={handlePriceRangeChange}
 							className="py-4"
 							disabled={isLoading}
+							max={5_000_000}
+							min={10_000}
+							onValueChange={handlePriceRangeChange}
+							step={10_000}
+							value={localPriceRange}
 						/>
-						<div className="flex justify-between text-sm text-muted-foreground mt-1">
+						<div className="mt-1 flex justify-between text-muted-foreground text-sm">
 							<span>${localPriceRange[0].toLocaleString()}</span>
 							<span>${localPriceRange[1].toLocaleString()}</span>
 						</div>
 					</div>
 					<div className="grid grid-cols-2 gap-2">
 						<Input
-							type="number"
-							placeholder="Precio mín"
-							value={localPriceRange[0]}
+							disabled={isLoading}
 							onChange={(e) => {
-								const value = parseInt(e.target.value, 10) || 0;
+								const value = Number.parseInt(e.target.value, 10) || 0;
 								const newRange = [value, localPriceRange[1]];
 								setLocalPriceRange(newRange);
 								onFilterChange("minPrice", value);
 							}}
-							disabled={isLoading}
+							placeholder="Precio mín"
+							type="number"
+							value={localPriceRange[0]}
 						/>
 						<Input
-							type="number"
-							placeholder="Precio máx"
-							value={localPriceRange[1]}
+							disabled={isLoading}
 							onChange={(e) => {
-								const value = parseInt(e.target.value, 10) || 0;
+								const value = Number.parseInt(e.target.value, 10) || 0;
 								const newRange = [localPriceRange[0], value];
 								setLocalPriceRange(newRange);
 								onFilterChange("maxPrice", value);
 							}}
-							disabled={isLoading}
+							placeholder="Precio máx"
+							type="number"
+							value={localPriceRange[1]}
 						/>
 					</div>
 				</div>
@@ -298,15 +298,15 @@ export function RealTimeSearchFilters({
 				{/* Bedrooms and Bathrooms */}
 				<div className="grid grid-cols-2 gap-4">
 					<div className="space-y-2">
-						<Label className="text-sm font-medium flex items-center gap-2">
+						<Label className="flex items-center gap-2 font-medium text-sm">
 							<Bed className="h-4 w-4" />
 							Habitaciones
 						</Label>
 						<Select
-							value={filters.bedrooms || ""}
 							onValueChange={(value) =>
 								onFilterChange("bedrooms", value === "any" ? undefined : value)
 							}
+							value={filters.bedrooms || ""}
 						>
 							<SelectTrigger>
 								<SelectValue placeholder="Cualquiera" />
@@ -323,15 +323,15 @@ export function RealTimeSearchFilters({
 					</div>
 
 					<div className="space-y-2">
-						<Label className="text-sm font-medium flex items-center gap-2">
+						<Label className="flex items-center gap-2 font-medium text-sm">
 							<Bath className="h-4 w-4" />
 							Baños
 						</Label>
 						<Select
-							value={filters.bathrooms || ""}
 							onValueChange={(value) =>
 								onFilterChange("bathrooms", value === "any" ? undefined : value)
 							}
+							value={filters.bathrooms || ""}
 						>
 							<SelectTrigger>
 								<SelectValue placeholder="Cualquiera" />
@@ -349,49 +349,49 @@ export function RealTimeSearchFilters({
 
 				{/* Area Range */}
 				<div className="space-y-3">
-					<Label className="text-sm font-medium flex items-center gap-2">
+					<Label className="flex items-center gap-2 font-medium text-sm">
 						<Maximize className="h-4 w-4" />
 						Área (m²)
 					</Label>
 					<div className="px-2">
 						<Slider
-							min={20}
-							max={2000}
-							step={10}
-							value={localAreaRange}
-							onValueChange={handleAreaRangeChange}
 							className="py-4"
 							disabled={isLoading}
+							max={2000}
+							min={20}
+							onValueChange={handleAreaRangeChange}
+							step={10}
+							value={localAreaRange}
 						/>
-						<div className="flex justify-between text-sm text-muted-foreground mt-1">
+						<div className="mt-1 flex justify-between text-muted-foreground text-sm">
 							<span>{localAreaRange[0]} m²</span>
 							<span>{localAreaRange[1]} m²</span>
 						</div>
 					</div>
 					<div className="grid grid-cols-2 gap-2">
 						<Input
-							type="number"
-							placeholder="Área mín"
-							value={localAreaRange[0]}
+							disabled={isLoading}
 							onChange={(e) => {
-								const value = parseInt(e.target.value, 10) || 0;
+								const value = Number.parseInt(e.target.value, 10) || 0;
 								const newRange = [value, localAreaRange[1]];
 								setLocalAreaRange(newRange);
 								onFilterChange("minArea", value);
 							}}
-							disabled={isLoading}
+							placeholder="Área mín"
+							type="number"
+							value={localAreaRange[0]}
 						/>
 						<Input
-							type="number"
-							placeholder="Área máx"
-							value={localAreaRange[1]}
+							disabled={isLoading}
 							onChange={(e) => {
-								const value = parseInt(e.target.value, 10) || 0;
+								const value = Number.parseInt(e.target.value, 10) || 0;
 								const newRange = [localAreaRange[0], value];
 								setLocalAreaRange(newRange);
 								onFilterChange("maxArea", value);
 							}}
-							disabled={isLoading}
+							placeholder="Área máx"
+							type="number"
+							value={localAreaRange[1]}
 						/>
 					</div>
 				</div>
@@ -400,21 +400,21 @@ export function RealTimeSearchFilters({
 
 				{/* Amenities */}
 				<div className="space-y-3">
-					<Label className="text-sm font-medium">Amenidades</Label>
+					<Label className="font-medium text-sm">Amenidades</Label>
 					<div className="grid grid-cols-2 gap-3">
 						{amenities.map((amenity) => (
-							<div key={amenity.id} className="flex items-center space-x-2">
+							<div className="flex items-center space-x-2" key={amenity.id}>
 								<Checkbox
-									id={amenity.id}
 									checked={(filters.amenities || []).includes(amenity.id)}
+									disabled={isLoading}
+									id={amenity.id}
 									onCheckedChange={(checked) =>
 										handleAmenityChange(amenity.id, checked as boolean)
 									}
-									disabled={isLoading}
 								/>
 								<Label
+									className="cursor-pointer font-normal text-sm"
 									htmlFor={amenity.id}
-									className="text-sm font-normal cursor-pointer"
 								>
 									{amenity.label}
 								</Label>
@@ -428,11 +428,11 @@ export function RealTimeSearchFilters({
 				{/* Action Buttons */}
 				<div className="space-y-3">
 					<Button
+						className="w-full"
+						disabled={isLoading || activeFiltersCount === 0}
+						onClick={resetFilters}
 						type="button"
 						variant="outline"
-						className="w-full"
-						onClick={resetFilters}
-						disabled={isLoading || activeFiltersCount === 0}
 					>
 						<RotateCcw className="mr-2 h-4 w-4" />
 						Limpiar Filtros
@@ -443,16 +443,16 @@ export function RealTimeSearchFilters({
 
 				{/* Save Search Alert */}
 				<div className="space-y-3">
-					<Label className="text-sm font-medium">Alertas de Búsqueda</Label>
-					<p className="text-sm text-muted-foreground">
+					<Label className="font-medium text-sm">Alertas de Búsqueda</Label>
+					<p className="text-muted-foreground text-sm">
 						Guarda esta búsqueda y te notificaremos cuando nuevas propiedades
 						coincidan.
 					</p>
 					<Button
-						type="button"
-						variant="secondary"
 						className="w-full"
 						disabled={activeFiltersCount === 0}
+						type="button"
+						variant="secondary"
 					>
 						<Bell className="mr-2 h-4 w-4" />
 						Guardar Búsqueda

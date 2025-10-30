@@ -1,8 +1,8 @@
 "use client";
 
+import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { LucideIcon } from "lucide-react";
 import {
 	SidebarGroup,
 	SidebarGroupLabel,
@@ -10,19 +10,18 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
 
-export interface NavItem {
+export type NavItem = {
 	title: string;
 	url: string;
 	icon?: LucideIcon;
 	isActive?: boolean;
 	items?: NavItem[];
-}
+};
 
-interface NavMainProps {
+type NavMainProps = {
 	items: NavItem[];
-}
+};
 
 export function NavMain({ items }: NavMainProps) {
 	const pathname = usePathname();

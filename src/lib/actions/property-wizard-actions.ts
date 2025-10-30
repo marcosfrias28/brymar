@@ -1,4 +1,4 @@
-// Property Wizard Actions for New Framework
+// Property Wizard Actions - Direct Entity Management
 
 "use server";
 
@@ -8,88 +8,217 @@ import {
 	PropertyCompleteSchema,
 	PropertyDraftSchema,
 } from "@/lib/schemas/property-wizard-schemas";
+import type {
+	CreatePropertyInput,
+	PropertyFeaturesInput,
+	PropertyType as PropertyTypeUnion,
+	UpdatePropertyInput,
+} from "@/lib/types/properties";
+import type { AddressInput, Currency, ImageInput } from "@/lib/types/shared";
 import {
 	type ActionState,
 	createErrorResponse,
 	createSuccessResponse,
 } from "@/lib/validations";
 import type { PropertyWizardData } from "@/types/property-wizard";
-import { createProperty, updateProperty } from "./properties";
-import {
-	deleteUnifiedDraft,
-	loadUnifiedDraft,
-	saveUnifiedDraft,
-} from "./unified-wizard-actions";
+import type { PropertyType } from "@/types/wizard";
+import { createProperty, getPropertyById, updateProperty } from "./properties";
 
-// Schema for completing a property wizard
-const completePropertyWizardSchema = z.object({
+// Schema for creating/updating a property from wizard
+const propertyWizardSchema = z.object({
 	userId: z.string().min(1, "User ID is required"),
-	data: PropertyCompleteSchema,
-	draftId: z.string().optional(),
+	data: PropertyDraftSchema, // Allow partial data for auto-save
+	propertyId: z.string().optional(), // For updates
 });
 
-// Schema for saving a property wizard draft (very lenient for drafts)
-const savePropertyDraftSchema = z.object({
+// Schema for publishing a property
+const publishPropertySchema = z.object({
 	userId: z.string().min(1, "User ID is required"),
-	data: z.record(z.string(), z.any()).optional().default({}), // Accept any data structure for drafts
-	currentStep: z.string().min(1, "Current step is required"),
-	draftId: z.string().optional(),
+	propertyId: z.string().min(1, "Property ID is required"),
+	data: PropertyCompleteSchema, // Require complete data for publishing
 });
 
 /**
- * Complete property wizard and create/update property
+ * Create or update a property from wizard (auto-save functionality)
  */
-export async function completePropertyWizard(
-	data: z.infer<typeof completePropertyWizardSchema>,
+export async function savePropertyFromWizard(
+	data: z.infer<typeof propertyWizardSchema>
 ): Promise<ActionState<{ propertyId: string }>> {
 	try {
 		// Validate input
-		const validatedData = completePropertyWizardSchema.parse(data);
+		const validatedData = propertyWizardSchema.parse(data);
 
-		// Transform wizard data to property data format for the existing schema
-		const propertyFormData = new FormData();
-		propertyFormData.append("title", validatedData.data.title);
-		propertyFormData.append("description", validatedData.data.description);
-		propertyFormData.append("price", validatedData.data.price.toString());
-		propertyFormData.append("type", validatedData.data.propertyType);
-		propertyFormData.append(
-			"bedrooms",
-			(validatedData.data.bedrooms || 0).toString(),
+		// Map wizard data to typed Create/Update inputs
+		const images: ImageInput[] = (validatedData.data.images || []).map(
+			(img) => ({
+				filename: img.filename,
+				mimeType: img.contentType,
+				url: img.url,
+			})
 		);
-		propertyFormData.append(
-			"bathrooms",
-			(validatedData.data.bathrooms || 0).toString(),
-		);
-		propertyFormData.append("area", validatedData.data.surface.toString());
-		propertyFormData.append(
-			"location",
-			validatedData.data.address?.formattedAddress || "",
-		);
-		propertyFormData.append("status", validatedData.data.status);
 
-		// Create or update property
+		const address: AddressInput | undefined = validatedData.data.address
+			? {
+					street: validatedData.data.address.street,
+					city: validatedData.data.address.city,
+					state: validatedData.data.address.province,
+					country: validatedData.data.address.country,
+					postalCode: validatedData.data.address.postalCode,
+					coordinates: validatedData.data.coordinates
+						? {
+								latitude: validatedData.data.coordinates.latitude,
+								longitude: validatedData.data.coordinates.longitude,
+							}
+						: undefined,
+				}
+			: undefined;
+
+		const features: PropertyFeaturesInput = {
+			bedrooms: validatedData.data.bedrooms || 0,
+			bathrooms: validatedData.data.bathrooms || 0,
+			area: validatedData.data.surface || 0,
+			amenities:
+				validatedData.data.characteristics
+					?.filter((char) => char.category === "amenity")
+					.map((char) => char.name) || [],
+			features:
+				validatedData.data.characteristics
+					?.filter((char) => char.category === "feature")
+					.map((char) => char.name) || [],
+		};
+
 		let result;
-		if (validatedData.data.id) {
+
+		if (validatedData.propertyId) {
 			// Update existing property
-			propertyFormData.append("id", validatedData.data.id);
-			result = await updateProperty(propertyFormData);
+			const updateInput: UpdatePropertyInput = {
+				id: validatedData.propertyId,
+				title: validatedData.data.title,
+				description: validatedData.data.description,
+				price: validatedData.data.price,
+				currency: "USD" as Currency,
+				type: validatedData.data.propertyType as PropertyTypeUnion,
+				address,
+				features,
+				images,
+			};
+			result = await updateProperty(updateInput as UpdatePropertyInput);
 		} else {
 			// Create new property
-			result = await createProperty(propertyFormData);
+			const createInput: CreatePropertyInput = {
+				title: validatedData.data.title || "Propiedad sin título",
+				description: validatedData.data.description || "Descripción pendiente",
+				price: validatedData.data.price || 0,
+				currency: "USD" as Currency,
+				type: (validatedData.data.propertyType as PropertyTypeUnion) || "house",
+				address: address || {
+					street: "",
+					city: "",
+					state: "",
+					country: "",
+					postalCode: "",
+				},
+				features,
+				images,
+			};
+			result = await createProperty(createInput as CreatePropertyInput);
 		}
 
 		if (!result.success) {
 			return createErrorResponse(
-				result.error || "Error al crear la propiedad",
+				result.error || "Error al guardar la propiedad"
 			) as ActionState<{ propertyId: string }>;
 		}
 
-		// Delete draft if it exists
-		if (validatedData.draftId) {
-			await deleteUnifiedDraft({
-				draftId: validatedData.draftId,
-				userId: validatedData.userId,
-			});
+		// Revalidate relevant paths
+		revalidatePath("/dashboard");
+		revalidatePath("/dashboard/properties");
+
+		return createSuccessResponse(
+			{ propertyId: result.data!.id.toString() },
+			"Propiedad guardada exitosamente"
+		);
+	} catch (error) {
+		if (error instanceof z.ZodError) {
+			return createErrorResponse(
+				"Datos de propiedad inválidos"
+			) as ActionState<{ propertyId: string }>;
+		}
+
+		return createErrorResponse("Error al guardar la propiedad") as ActionState<{
+			propertyId: string;
+		}>;
+	}
+}
+
+/**
+ * Publish a property (change status from draft to published)
+ */
+export async function publishProperty(
+	data: z.infer<typeof publishPropertySchema>
+): Promise<ActionState<{ propertyId: string }>> {
+	try {
+		// Validate input - requires complete data
+		const validatedData = publishPropertySchema.parse(data);
+
+		// Map wizard data to update input
+		const images: ImageInput[] = (validatedData.data.images || []).map(
+			(img) => ({
+				filename: img.filename,
+				mimeType: img.contentType,
+				url: img.url,
+			})
+		);
+
+		const address: AddressInput | undefined = validatedData.data.address
+			? {
+					street: validatedData.data.address.street,
+					city: validatedData.data.address.city,
+					state: validatedData.data.address.province,
+					country: validatedData.data.address.country,
+					postalCode: validatedData.data.address.postalCode,
+					coordinates: validatedData.data.coordinates
+						? {
+								latitude: validatedData.data.coordinates.latitude,
+								longitude: validatedData.data.coordinates.longitude,
+							}
+						: undefined,
+				}
+			: undefined;
+
+		const features: PropertyFeaturesInput = {
+			bedrooms: validatedData.data.bedrooms || 0,
+			bathrooms: validatedData.data.bathrooms || 0,
+			area: validatedData.data.surface || 0,
+			amenities:
+				validatedData.data.characteristics
+					?.filter((char) => char.category === "amenity")
+					.map((char) => char.name) || [],
+			features:
+				validatedData.data.characteristics
+					?.filter((char) => char.category === "feature")
+					.map((char) => char.name) || [],
+		};
+
+		// Update property with published status
+		const updateInput: UpdatePropertyInput = {
+			id: validatedData.propertyId,
+			title: validatedData.data.title,
+			description: validatedData.data.description,
+			price: validatedData.data.price,
+			currency: "USD" as Currency,
+			type: validatedData.data.propertyType as PropertyTypeUnion,
+			address,
+			features,
+			images,
+		};
+
+		const result = await updateProperty(updateInput);
+
+		if (!result.success) {
+			return createErrorResponse(
+				result.error || "Error al publicar la propiedad"
+			) as ActionState<{ propertyId: string }>;
 		}
 
 		// Revalidate relevant paths
@@ -98,181 +227,152 @@ export async function completePropertyWizard(
 		revalidatePath("/properties");
 
 		return createSuccessResponse(
-			{ propertyId: result.data?.id.toString() },
-			"Propiedad creada exitosamente",
+			{ propertyId: result.data!.id.toString() },
+			"Propiedad publicada exitosamente"
 		);
 	} catch (error) {
-		console.error("Error completing property wizard:", error);
-
 		if (error instanceof z.ZodError) {
 			return createErrorResponse(
-				"Datos de propiedad inválidos",
+				"Datos de propiedad incompletos para publicar"
 			) as ActionState<{ propertyId: string }>;
 		}
 
 		return createErrorResponse(
-			"Error al completar el asistente de propiedades",
+			"Error al publicar la propiedad"
 		) as ActionState<{ propertyId: string }>;
 	}
 }
 
 /**
- * Save property wizard draft
+ * Load property data for editing in wizard
  */
-export async function savePropertyDraft(
-	data: z.infer<typeof savePropertyDraftSchema>,
-): Promise<ActionState<{ draftId: string }>> {
-	try {
-		// Validate input
-		const validatedData = savePropertyDraftSchema.parse(data);
-
-		// Save using unified wizard actions
-		const result = await saveUnifiedDraft({
-			userId: validatedData.userId,
-			wizardType: "property",
-			wizardConfigId: "property-wizard",
-			formData: validatedData.data,
-			currentStep: validatedData.currentStep,
-			draftId: validatedData.draftId,
-		});
-
-		return result;
-	} catch (error) {
-		console.error("Error saving property draft:", error);
-
-		if (error instanceof z.ZodError) {
-			console.error("Validation errors:", error.issues);
-			return createErrorResponse(
-				"Error de validación en el borrador. Los datos se guardarán sin validación estricta.",
-			) as ActionState<{ draftId: string }>;
-		}
-
-		return createErrorResponse(
-			"Error al guardar el borrador de propiedad",
-		) as ActionState<{ draftId: string }>;
-	}
-}
-
-/**
- * Load property wizard draft
- */
-export async function loadPropertyDraft(
-	draftId: string,
-	userId: string,
+export async function loadPropertyForWizard(
+	propertyId: string,
+	_userId: string
 ): Promise<
 	ActionState<{
 		data: Partial<PropertyWizardData>;
-		currentStep: string;
-		stepProgress: Record<string, boolean>;
-		completionPercentage: number;
 	}>
 > {
 	try {
-		// Load using unified wizard actions
-		const result = await loadUnifiedDraft({
-			draftId,
-			userId,
-		});
+		// Load property data
+		const result = await getPropertyById(propertyId);
 
-		if (!result.success) {
-			return result as ActionState<{
+		if (!(result.success && result.data)) {
+			return createErrorResponse("Propiedad no encontrada") as ActionState<{
 				data: Partial<PropertyWizardData>;
-				currentStep: string;
-				stepProgress: Record<string, boolean>;
-				completionPercentage: number;
 			}>;
 		}
 
-		// Transform the data to PropertyWizardData format
-		const transformedData: Partial<PropertyWizardData> = {
-			...result.data?.data,
-			// Ensure characteristics are in the correct format
-			characteristics:
-				result.data?.data.characteristics?.map((char: any) =>
-					typeof char === "string"
-						? {
-								id: char,
-								name: char,
-								category: "feature" as const,
-								selected: true,
-							}
-						: char,
-				) || [],
+		const property = result.data;
+
+		// Transform property data to wizard format
+		const transformedData = {
+			id: property.id.toString(),
+			title: property.title,
+			description: property.description,
+			status: (property.status as "draft" | "published") || "draft",
+			price: property.price,
+			surface: property.features?.area || 0,
+			propertyType: property.type as PropertyType,
+			bedrooms: property.features?.bedrooms,
+			bathrooms: property.features?.bathrooms,
+			characteristics: [
+				...(property.features?.amenities?.map((amenity: string) => ({
+					id: amenity,
+					name: amenity,
+					category: "amenity" as const,
+					selected: true,
+				})) || []),
+				...(property.features?.features?.map((feature: string) => ({
+					id: feature,
+					name: feature,
+					category: "feature" as const,
+					selected: true,
+				})) || []),
+			],
+			address: property.address
+				? {
+						street: property.address.street,
+						city: property.address.city,
+						province: property.address.state,
+						country: property.address.country,
+						postalCode: property.address.postalCode,
+						formattedAddress: `${property.address.street}, ${property.address.city}`,
+					}
+				: undefined,
+			coordinates: property.address?.coordinates
+				? {
+						latitude: property.address.coordinates.latitude,
+						longitude: property.address.coordinates.longitude,
+					}
+				: undefined,
+			images:
+				property.images?.map((img, index) => ({
+					id: img.url,
+					url: img.url,
+					filename: img.filename,
+					size: 0, // Not stored in property
+					contentType: img.mimeType,
+					displayOrder: index,
+				})) || [],
+			language: "es" as const,
+			aiGenerated: {
+				title: false,
+				description: false,
+				tags: false,
+			},
 		};
 
 		return createSuccessResponse(
-			{
-				data: transformedData,
-				currentStep: result.data?.currentStep,
-				stepProgress: result.data?.stepProgress,
-				completionPercentage: result.data?.completionPercentage,
-			},
-			"Borrador de propiedad cargado exitosamente",
+			{ data: transformedData },
+			"Propiedad cargada exitosamente"
 		);
-	} catch (error) {
-		console.error("Error loading property draft:", error);
-		return createErrorResponse(
-			"Error al cargar el borrador de propiedad",
-		) as ActionState<{
+	} catch (_error) {
+		return createErrorResponse("Error al cargar la propiedad") as ActionState<{
 			data: Partial<PropertyWizardData>;
-			currentStep: string;
-			stepProgress: Record<string, boolean>;
-			completionPercentage: number;
 		}>;
 	}
 }
 
 /**
- * Delete property wizard draft
+ * Auto-save property data (simplified version of savePropertyFromWizard)
  */
-export async function deletePropertyDraft(
-	draftId: string,
-	userId: string,
-): Promise<ActionState<void>> {
-	try {
-		// Delete using unified wizard actions
-		const result = await deleteUnifiedDraft({
-			draftId,
-			userId,
-		});
-
-		return result;
-	} catch (error) {
-		console.error("Error deleting property draft:", error);
-		return createErrorResponse("Error al eliminar el borrador de propiedad");
-	}
-}
-
-/**
- * Auto-save property wizard draft
- */
-export async function autoSavePropertyDraft(
+export async function autoSaveProperty(
 	data: Partial<PropertyWizardData>,
-	currentStep: string,
 	userId: string,
-	draftId?: string,
-): Promise<{ success: boolean; draftId?: string; error?: string }> {
+	propertyId?: string
+): Promise<{ success: boolean; propertyId?: string; error?: string }> {
 	try {
-		// Validate data as draft (partial validation)
-		const validatedData = PropertyDraftSchema.parse(data);
+		// Filter out undefined values and ensure required defaults for schema validation
+		const filteredData = Object.fromEntries(
+			Object.entries(data).filter(([_, value]) => value !== undefined)
+		);
 
-		// Save using unified wizard actions
-		const result = await saveUnifiedDraft({
+		const dataWithDefaults = {
+			...filteredData,
+			status: data.status || ("draft" as const),
+			language: data.language || ("es" as const),
+			aiGenerated: data.aiGenerated || {
+				title: false,
+				description: false,
+				tags: false,
+			},
+		};
+
+		const result = await savePropertyFromWizard({
 			userId,
-			wizardType: "property",
-			wizardConfigId: "property-wizard",
-			formData: validatedData,
-			currentStep,
-			draftId,
+			data: dataWithDefaults,
+			propertyId,
 		});
 
+		const success = !!result.success;
 		return {
-			success: result.success || false,
-			draftId: result.success ? result.data?.draftId : undefined,
-			error: result.success ? undefined : result.error,
+			success,
+			propertyId: success ? result.data!.propertyId : undefined,
+			error: success ? undefined : result.error,
 		};
 	} catch (error) {
-		console.error("Error auto-saving property draft:", error);
 		return {
 			success: false,
 			error: error instanceof Error ? error.message : "Auto-save failed",
@@ -281,113 +381,45 @@ export async function autoSavePropertyDraft(
 }
 
 /**
- * Validate property wizard step
+ * Validate property step data
  */
 export async function validatePropertyStep(
-	stepId: string,
-	data: Partial<PropertyWizardData>,
-): Promise<ActionState<{ isValid: boolean; errors: Record<string, string> }>> {
+	stepData: any,
+	stepNumber: number
+): Promise<ActionState<{ isValid: boolean }>> {
 	try {
-		let _schema;
-		const errors: Record<string, string> = {};
-		let isValid = true;
+		// Basic validation based on step
+		let isValid = false;
 
-		switch (stepId) {
-			case "general":
-				try {
-					const { PropertyGeneralSchema } = await import(
-						"@/lib/schemas/property-wizard-schemas"
-					);
-					PropertyGeneralSchema.parse({
-						title: data.title,
-						description: data.description,
-						price: data.price,
-						surface: data.surface,
-						propertyType: data.propertyType,
-						bedrooms: data.bedrooms,
-						bathrooms: data.bathrooms,
-						characteristics: data.characteristics,
-					});
-				} catch (error: any) {
-					isValid = false;
-					if (error.flatten) {
-						const fieldErrors = error.flatten().fieldErrors;
-						Object.entries(fieldErrors).forEach(([field, messages]) => {
-							errors[field] = Array.isArray(messages) ? messages[0] : messages;
-						});
-					}
-				}
+		switch (stepNumber) {
+			case 1: // General info
+				isValid = !!(
+					stepData.title &&
+					stepData.description &&
+					stepData.price &&
+					stepData.surface
+				);
 				break;
-
-			case "location":
-				try {
-					const { PropertyLocationSchema } = await import(
-						"@/lib/schemas/property-wizard-schemas"
-					);
-					PropertyLocationSchema.parse({
-						coordinates: data.coordinates,
-						address: data.address,
-					});
-				} catch (error: any) {
-					isValid = false;
-					if (error.flatten) {
-						const fieldErrors = error.flatten().fieldErrors;
-						Object.entries(fieldErrors).forEach(([field, messages]) => {
-							errors[field] = Array.isArray(messages) ? messages[0] : messages;
-						});
-					}
-				}
+			case 2: // Location
+				isValid = !!(stepData.address || stepData.coordinates);
 				break;
-
-			case "media":
-				try {
-					const { PropertyMediaSchema } = await import(
-						"@/lib/schemas/property-wizard-schemas"
-					);
-					PropertyMediaSchema.parse({
-						images: data.images,
-						videos: data.videos,
-					});
-				} catch (error: any) {
-					isValid = false;
-					if (error.flatten) {
-						const fieldErrors = error.flatten().fieldErrors;
-						Object.entries(fieldErrors).forEach(([field, messages]) => {
-							errors[field] = Array.isArray(messages) ? messages[0] : messages;
-						});
-					}
-				}
+			case 3: // Media
+				isValid = !!(stepData.images && stepData.images.length > 0);
 				break;
-
-			case "preview":
-				try {
-					PropertyCompleteSchema.parse(data);
-				} catch (error: any) {
-					isValid = false;
-					if (error.flatten) {
-						const fieldErrors = error.flatten().fieldErrors;
-						Object.entries(fieldErrors).forEach(([field, messages]) => {
-							errors[field] = Array.isArray(messages) ? messages[0] : messages;
-						});
-					}
-				}
+			case 4: // Preview
+				isValid = true; // Preview step doesn't require validation
 				break;
-
 			default:
-				return createErrorResponse(
-					"Paso de validación desconocido",
-				) as ActionState<{ isValid: boolean; errors: Record<string, string> }>;
+				isValid = false;
 		}
 
 		return createSuccessResponse(
-			{ isValid, errors },
-			isValid ? "Validación exitosa" : "Errores de validación encontrados",
+			{ isValid },
+			isValid ? "Paso válido" : "Paso incompleto"
 		);
-	} catch (error) {
-		console.error("Error validating property step:", error);
+	} catch (_error) {
 		return createErrorResponse("Error al validar el paso") as ActionState<{
 			isValid: boolean;
-			errors: Record<string, string>;
 		}>;
 	}
 }

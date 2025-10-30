@@ -36,7 +36,7 @@ jest.mock("next/cache", () => ({
 // Mock utils
 jest.mock("@/lib/utils", () => ({
 	generateSlug: jest.fn((title: string) =>
-		title.toLowerCase().replace(/\s+/g, "-"),
+		title.toLowerCase().replace(/\s+/g, "-")
 	),
 	calculateReadTime: jest.fn(() => 5),
 }));
@@ -486,7 +486,7 @@ describe("Blog Server Actions", () => {
 
 			expect(result.success).toBe(false);
 			expect(result.error).toBe(
-				"Blog post must have title and content to be published",
+				"Blog post must have title and content to be published"
 			);
 		});
 	});

@@ -9,7 +9,7 @@ import type { BlogPost } from "@/lib/db/schema";
 export type { BlogCategory, BlogPost } from "@/lib/db/schema";
 
 // Blog post input types
-export interface CreateBlogPostInput {
+export type CreateBlogPostInput = {
 	title: string;
 	content: string;
 	excerpt?: string;
@@ -22,9 +22,9 @@ export interface CreateBlogPostInput {
 		caption?: string;
 	};
 	authorId: string;
-}
+};
 
-export interface UpdateBlogPostInput {
+export type UpdateBlogPostInput = {
 	id: string;
 	title?: string;
 	content?: string;
@@ -37,15 +37,15 @@ export interface UpdateBlogPostInput {
 		alt?: string;
 		caption?: string;
 	} | null;
-}
+};
 
-export interface PublishBlogPostInput {
+export type PublishBlogPostInput = {
 	id: string;
 	publishedAt?: Date;
-}
+};
 
 // Blog search and filter types
-export interface BlogSearchFilters {
+export type BlogSearchFilters = {
 	query?: string;
 	category?: string;
 	status?: "draft" | "published" | "archived";
@@ -55,43 +55,37 @@ export interface BlogSearchFilters {
 	limit?: number;
 	sortBy?: "createdAt" | "updatedAt" | "title" | "publishedAt" | "views";
 	sortOrder?: "asc" | "desc";
-}
+};
 
-export interface BlogSearchResult {
+export type BlogSearchResult = {
 	posts: BlogPost[];
 	total: number;
 	page: number;
 	totalPages: number;
 	hasMore: boolean;
-}
+};
 
-// Action result types
-export interface ActionResult<T = any> {
-	success: boolean;
-	data?: T;
-	error?: string;
-	errors?: Record<string, string[]>;
-}
+// Action result types are imported from shared.ts
 
 // Blog category types
-export interface CreateBlogCategoryInput {
+export type CreateBlogCategoryInput = {
 	name: string;
 	slug?: string;
 	description?: string;
 	color?: string;
-}
+};
 
-export interface UpdateBlogCategoryInput {
+export type UpdateBlogCategoryInput = {
 	id: string;
 	name?: string;
 	slug?: string;
 	description?: string;
 	color?: string;
 	isActive?: boolean;
-}
+};
 
 // Blog analytics types
-export interface BlogAnalytics {
+export type BlogAnalytics = {
 	totalPosts: number;
 	publishedPosts: number;
 	draftPosts: number;
@@ -102,7 +96,7 @@ export interface BlogAnalytics {
 		count: number;
 	}>;
 	recentPosts: BlogPost[];
-}
+};
 
 // Utility types
 export type BlogStatus = "draft" | "published" | "archived";
@@ -112,4 +106,4 @@ export type BlogSortField =
 	| "title"
 	| "publishedAt"
 	| "views";
-export type SortOrder = "asc" | "desc";
+// SortOrder is imported from shared.ts

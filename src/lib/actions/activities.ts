@@ -4,19 +4,28 @@ import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth/auth";
-import db from "@/lib/db/drizzle";
+import { db } from "@/lib/db";
 import { userActivities } from "@/lib/db/schema";
 import * as logger from "@/lib/logger";
 import type { ActionResult } from "@/lib/types";
 import { handleActionError } from "@/lib/utils/errors";
 
-export interface ActivityData {
-	type: "view" | "favorite" | "search" | "contact" | "message" | "login" | "profile" | "favorites" | "settings";
+export type ActivityData = {
+	type:
+		| "view"
+		| "favorite"
+		| "search"
+		| "contact"
+		| "message"
+		| "login"
+		| "profile"
+		| "favorites"
+		| "settings";
 	title: string;
 	description: string;
 	details?: string;
 	metadata?: Record<string, any>;
-}
+};
 
 /**
  * Get user activities with pagination and filtering
@@ -30,20 +39,22 @@ export async function getUserActivities(
 		startDate?: Date;
 		endDate?: Date;
 	} = {}
-): Promise<ActionResult<{
-	activities: Array<{
-		id: string;
-		type: string;
-		title: string;
-		description: string;
-		details?: string;
-		metadata?: Record<string, any>;
-		timestamp: Date;
-		ipAddress?: string;
-		userAgent?: string;
-	}>;
-	total: number;
-}>> {
+): Promise<
+	ActionResult<{
+		activities: Array<{
+			id: string;
+			type: string;
+			title: string;
+			description: string;
+			details?: string;
+			metadata?: Record<string, any>;
+			timestamp: Date;
+			ipAddress?: string;
+			userAgent?: string;
+		}>;
+		total: number;
+	}>
+> {
 	try {
 		const { limit = 50, offset = 0, type, startDate, endDate } = options;
 
@@ -96,7 +107,7 @@ export async function getUserActivities(
 		});
 
 		// Transform null values to undefined for type compatibility
-		const transformedActivities = activities.map(activity => ({
+		const transformedActivities = activities.map((activity) => ({
 			...activity,
 			details: activity.details ?? undefined,
 			ipAddress: activity.ipAddress ?? undefined,
@@ -124,8 +135,9 @@ export async function createUserActivity(
 	try {
 		// Get request information
 		const headersList = await headers();
-		const ipAddress = headersList.get("x-forwarded-for") || 
-			headersList.get("x-real-ip") || 
+		const ipAddress =
+			headersList.get("x-forwarded-for") ||
+			headersList.get("x-real-ip") ||
 			"unknown";
 		const userAgent = headersList.get("user-agent") || "unknown";
 
@@ -133,6 +145,7 @@ export async function createUserActivity(
 		const [newActivity] = await db
 			.insert(userActivities)
 			.values({
+				id: crypto.randomUUID(),
 				userId,
 				type: activityData.type,
 				title: activityData.title,
@@ -166,7 +179,9 @@ export async function createUserActivity(
 /**
  * Create activity for authenticated user
  */
-export async function createActivity(activityData: ActivityData): Promise<ActionResult<{ id: string }>> {
+export async function createActivity(
+	activityData: ActivityData
+): Promise<ActionResult<{ id: string }>> {
 	try {
 		// Get current session
 		const session = await auth.api.getSession({
@@ -196,11 +211,13 @@ export async function getActivityStats(
 		startDate?: Date;
 		endDate?: Date;
 	} = {}
-): Promise<ActionResult<{
-	total: number;
-	byType: Record<string, number>;
-	recentActivity: Date;
-}>> {
+): Promise<
+	ActionResult<{
+		total: number;
+		byType: Record<string, number>;
+		recentActivity: Date;
+	}>
+> {
 	try {
 		const { startDate, endDate } = options;
 
@@ -240,10 +257,13 @@ export async function getActivityStats(
 			.limit(1);
 
 		const total = totalResult[0]?.count || 0;
-		const byType = typeStats.reduce((acc, stat) => {
-			acc[stat.type] = stat.count;
-			return acc;
-		}, {} as Record<string, number>);
+		const byType = typeStats.reduce(
+			(acc, stat) => {
+				acc[stat.type] = stat.count;
+				return acc;
+			},
+			{} as Record<string, number>
+		);
 		const recentActivity = recentResult[0]?.createdAt || new Date();
 
 		await logger.info("Activity stats retrieved", {
@@ -266,7 +286,7 @@ export async function getActivityStats(
  * Delete old activities (cleanup function)
  */
 export async function cleanupOldActivities(
-	daysToKeep: number = 90
+	daysToKeep = 90
 ): Promise<ActionResult<{ deletedCount: number }>> {
 	try {
 		const cutoffDate = new Date();

@@ -1,32 +1,31 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import React from "react";
 import { UnifiedSidebar } from "@/components/navigation/unified-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { useAdmin } from "@/hooks/use-admin";
 import { useUser } from "@/hooks/use-user";
 
-interface DashboardLayoutProps {
+type DashboardLayoutProps = {
 	children: React.ReactNode;
-}
+};
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
 	const { user, loading } = useUser();
-	const pathname = usePathname();
+	const _pathname = usePathname();
 
 	// Handle auth reload logic at the top level (always called)
 	React.useEffect(() => {
-		if (!user && !loading) {
-			const lastReload = localStorage.getItem('lastAuthReload');
+		if (!(user || loading)) {
+			const lastReload = localStorage.getItem("lastAuthReload");
 			const now = Date.now();
 
 			// Solo recargar si han pasado más de 5 segundos desde la última recarga
-			if (!lastReload || now - parseInt(lastReload) > 5000) {
+			if (!lastReload || now - Number.parseInt(lastReload, 10) > 5000) {
 				const timer = setTimeout(() => {
-					localStorage.setItem('lastAuthReload', now.toString());
+					localStorage.setItem("lastAuthReload", now.toString());
 					// Forzar refresh de la sesión
 					window.location.reload();
 				}, 2000);
@@ -39,10 +38,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 	// Mostrar loading mientras se verifica la autenticación
 	if (loading) {
 		return (
-			<div className="flex items-center justify-center min-h-screen">
+			<div className="flex min-h-screen items-center justify-center">
 				<div className="text-center">
-					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-					<p className="text-sm text-muted-foreground mt-2">Cargando...</p>
+					<div className="mx-auto h-8 w-8 animate-spin rounded-full border-primary border-b-2" />
+					<p className="mt-2 text-muted-foreground text-sm">Cargando...</p>
 				</div>
 			</div>
 		);
@@ -51,20 +50,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 	// Si no hay usuario, mostrar mensaje de acceso denegado
 	if (!user) {
 		return (
-			<div className="flex items-center justify-center min-h-screen">
+			<div className="flex min-h-screen items-center justify-center">
 				<div className="text-center">
-					<h1 className="text-2xl font-bold text-primary mb-2">
+					<h1 className="mb-2 font-bold text-2xl text-primary">
 						Acceso Denegado
 					</h1>
-					<p className="text-gray-600 mb-4 text-sm">
+					<p className="mb-4 text-gray-600 text-sm">
 						Debes iniciar sesión para acceder a esta página.
 					</p>
-					<p className="text-xs text-gray-500 mb-4">
-						Si acabas de iniciar sesión, la página se recargará automáticamente...
+					<p className="mb-4 text-gray-500 text-xs">
+						Si acabas de iniciar sesión, la página se recargará
+						automáticamente...
 					</p>
 					<Link
+						className="inline-block px-4 py-2 text-blue-500 text-sm underline underline-offset-1"
 						href="/sign-in"
-						className="inline-block px-4 py-2 underline underline-offset-1 text-sm text-blue-500"
 					>
 						Iniciar Sesión
 					</Link>

@@ -61,11 +61,11 @@ export const Step1Schema = z.object({
 	price: z
 		.number()
 		.positive("El precio debe ser mayor a 0")
-		.max(999999999, "El precio es demasiado alto"),
+		.max(999_999_999, "El precio es demasiado alto"),
 	surface: z
 		.number()
 		.positive("La superficie debe ser mayor a 0")
-		.max(999999, "La superficie es demasiado grande"),
+		.max(999_999, "La superficie es demasiado grande"),
 	propertyType: z.nativeEnum(PropertyType, {
 		message: "Selecciona un tipo de propiedad válido",
 	}),
@@ -188,7 +188,7 @@ export const UploadResultSchema = z.object({
 // Validation helper functions
 export function validateStep(
 	stepNumber: number,
-	data: any,
+	data: any
 ): { success: boolean; errors?: any } {
 	try {
 		let dataToValidate = data;
@@ -233,7 +233,7 @@ export function validateStep(
 
 export function validatePartialStep(
 	stepNumber: number,
-	data: any,
+	data: any
 ): { success: boolean; errors?: any } {
 	try {
 		let dataToValidate = data;

@@ -4,7 +4,7 @@ import { Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-interface BlogPreviewData {
+type BlogPreviewData = {
 	title?: string;
 	author?: string;
 	description?: string;
@@ -13,13 +13,13 @@ interface BlogPreviewData {
 	slug?: string;
 	tags?: string[];
 	content?: string;
-}
+};
 
-interface BlogPreviewStepProps {
+type BlogPreviewStepProps = {
 	data: BlogPreviewData;
 	onChange: (data: BlogPreviewData) => void;
 	errors?: Record<string, string>;
-}
+};
 
 export function BlogPreviewStep({
 	data,
@@ -38,20 +38,20 @@ export function BlogPreviewStep({
 				<CardContent className="space-y-4">
 					<div className="space-y-4">
 						<div>
-							<h3 className="text-lg font-semibold">
+							<h3 className="font-semibold text-lg">
 								{data.title || "Sin título"}
 							</h3>
-							<p className="text-sm text-muted-foreground">
+							<p className="text-muted-foreground text-sm">
 								Por: {data.author || "Sin autor"}
 							</p>
-							<p className="text-muted-foreground mt-2">
+							<p className="mt-2 text-muted-foreground">
 								{data.description || "Sin descripción"}
 							</p>
 						</div>
 
 						{data.excerpt && (
-							<div className="bg-muted p-3 rounded-md">
-								<h4 className="font-medium mb-1">Extracto:</h4>
+							<div className="rounded-md bg-muted p-3">
+								<h4 className="mb-1 font-medium">Extracto:</h4>
 								<p className="text-sm">{data.excerpt}</p>
 							</div>
 						)}
@@ -65,10 +65,10 @@ export function BlogPreviewStep({
 
 						{data.tags && data.tags.length > 0 && (
 							<div>
-								<h4 className="font-medium mb-2">Etiquetas:</h4>
+								<h4 className="mb-2 font-medium">Etiquetas:</h4>
 								<div className="flex flex-wrap gap-1">
 									{data.tags.map((tag: string, index: number) => (
-										<Badge key={index} variant="secondary" className="text-xs">
+										<Badge className="text-xs" key={index} variant="secondary">
 											{tag}
 										</Badge>
 									))}
@@ -78,7 +78,7 @@ export function BlogPreviewStep({
 
 						{data.content && (
 							<div className="border-t pt-4">
-								<h4 className="font-medium mb-2">Contenido:</h4>
+								<h4 className="mb-2 font-medium">Contenido:</h4>
 								<div className="prose prose-sm max-w-none">
 									<div
 										dangerouslySetInnerHTML={{

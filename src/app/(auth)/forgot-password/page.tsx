@@ -20,13 +20,13 @@ const ForgotPasswordPage = () => {
 
 	return (
 		<AuthFormWrapper
-			title="Recuperar Contraseña"
-			subtitle="Ingresa tu correo para recibir un enlace de recuperación"
 			action={forgotPasswordAction}
 			fields={[emailField]}
-			submitText="Enviar enlace"
-			loadingText="Enviando..."
 			footerContent={footerContent}
+			loadingText="Enviando..."
+			submitText="Enviar enlace"
+			subtitle="Ingresa tu correo para recibir un enlace de recuperación"
+			title="Recuperar Contraseña"
 		/>
 	);
 };

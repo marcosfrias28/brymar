@@ -14,7 +14,7 @@ if (!connectionString) {
 }
 
 const sql = postgres(connectionString);
-const db = drizzle(sql);
+const _db = drizzle(sql);
 
 async function verifySeededData() {
 	try {
@@ -26,12 +26,12 @@ async function verifySeededData() {
 			FROM users 
 			WHERE email = 'contact@mzn.group'
 		`;
-		
+
 		if (user.length === 0) {
 			console.error("❌ User with email contact@mzn.group not found");
 			return;
 		}
-		
+
 		console.log(`✅ User found: ${user[0].name} (${user[0].email})`);
 		const userId = user[0].id;
 
@@ -41,7 +41,9 @@ async function verifySeededData() {
 				   COUNT(CASE WHEN status = 'available' THEN 1 END) as available
 			FROM properties
 		`;
-		console.log(`🏠 Properties: ${properties[0].count} total, ${properties[0].available} available`);
+		console.log(
+			`🏠 Properties: ${properties[0].count} total, ${properties[0].available} available`
+		);
 
 		// Check lands
 		const lands = await sql`
@@ -49,7 +51,9 @@ async function verifySeededData() {
 				   COUNT(CASE WHEN status = 'available' THEN 1 END) as available
 			FROM lands
 		`;
-		console.log(`🌱 Lands: ${lands[0].count} total, ${lands[0].available} available`);
+		console.log(
+			`🌱 Lands: ${lands[0].count} total, ${lands[0].available} available`
+		);
 
 		// Check activities
 		const activities = await sql`
@@ -67,9 +71,9 @@ async function verifySeededData() {
 			GROUP BY type
 			ORDER BY count DESC
 		`;
-		
+
 		console.log("\n📈 Activities by type:");
-		activitiesByType.forEach(row => {
+		activitiesByType.forEach((row) => {
 			console.log(`   ${row.type}: ${row.count}`);
 		});
 
@@ -81,12 +85,14 @@ async function verifySeededData() {
 			ORDER BY created_at DESC
 			LIMIT 5
 		`;
-		
+
 		console.log("\n🕒 Recent activities:");
 		recentActivities.forEach((activity, index) => {
-			const date = new Date(activity.created_at).toLocaleDateString('it-IT');
-			const time = new Date(activity.created_at).toLocaleTimeString('it-IT');
-			console.log(`   ${index + 1}. [${activity.type}] ${activity.title} (${date} ${time})`);
+			const date = new Date(activity.created_at).toLocaleDateString("it-IT");
+			const time = new Date(activity.created_at).toLocaleTimeString("it-IT");
+			console.log(
+				`   ${index + 1}. [${activity.type}] ${activity.title} (${date} ${time})`
+			);
 		});
 
 		// Check property details
@@ -96,11 +102,15 @@ async function verifySeededData() {
 			ORDER BY price DESC
 			LIMIT 3
 		`;
-		
+
 		console.log("\n🏠 Top properties by price:");
 		propertyDetails.forEach((property, index) => {
-			console.log(`   ${index + 1}. ${property.title} - ${property.price.toLocaleString()} ${property.currency}`);
-			console.log(`      ${property.property_type} | ${property.bedrooms} bed | ${property.bathrooms} bath | ${property.area} sqm`);
+			console.log(
+				`   ${index + 1}. ${property.title} - ${property.price.toLocaleString()} ${property.currency}`
+			);
+			console.log(
+				`      ${property.property_type} | ${property.bedrooms} bed | ${property.bathrooms} bath | ${property.area} sqm`
+			);
 		});
 
 		// Check land details
@@ -109,23 +119,25 @@ async function verifySeededData() {
 			FROM lands
 			ORDER BY price DESC
 		`;
-		
+
 		console.log("\n🌱 Lands by price:");
 		landDetails.forEach((land, index) => {
-			console.log(`   ${index + 1}. ${land.title} - ${land.price.toLocaleString()} ${land.currency}`);
+			console.log(
+				`   ${index + 1}. ${land.title} - ${land.price.toLocaleString()} ${land.currency}`
+			);
 			console.log(`      ${land.land_type} | ${land.area} sqm`);
 		});
 
 		// Check database constraints
 		console.log("\n🔗 Database constraints:");
-		
+
 		// Check foreign key constraint
 		const foreignKeys = await sql`
 			SELECT constraint_name, table_name, column_name
 			FROM information_schema.key_column_usage
 			WHERE constraint_name = 'fk_user_activities_user_id'
 		`;
-		
+
 		if (foreignKeys.length > 0) {
 			console.log("   ✅ Foreign key constraint exists");
 		} else {
@@ -139,9 +151,9 @@ async function verifySeededData() {
 			WHERE tablename IN ('user_activities', 'properties', 'lands')
 			ORDER BY tablename, indexname
 		`;
-		
+
 		console.log("   📊 Indexes:");
-		indexes.forEach(index => {
+		indexes.forEach((index) => {
 			console.log(`      ${index.tablename}.${index.indexname}`);
 		});
 
@@ -151,11 +163,12 @@ async function verifySeededData() {
 		console.log(`   ✅ Properties: ${properties[0].count}`);
 		console.log(`   ✅ Lands: ${lands[0].count}`);
 		console.log(`   ✅ Activities: ${activities[0].count}`);
-		console.log(`   ✅ Database constraints: ${foreignKeys.length > 0 ? 'OK' : 'Missing'}`);
+		console.log(
+			`   ✅ Database constraints: ${foreignKeys.length > 0 ? "OK" : "Missing"}`
+		);
 		console.log(`   ✅ Indexes: ${indexes.length} created`);
 
 		console.log("\n🎉 Verification completed successfully!");
-
 	} catch (error) {
 		console.error("❌ Verification failed:", error);
 		throw error;

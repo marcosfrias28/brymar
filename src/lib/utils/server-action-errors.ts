@@ -15,7 +15,7 @@ import {
 
 // Server action wrapper with error handling
 export function createServerAction<T extends any[], R>(
-	action: (...args: T) => Promise<R>,
+	action: (...args: T) => Promise<R>
 ) {
 	return async (...args: T): Promise<ActionResult<R>> => {
 		try {
@@ -33,7 +33,7 @@ export function createServerAction<T extends any[], R>(
 // Server action wrapper with authentication check
 export function createAuthenticatedAction<T extends any[], R>(
 	action: (userId: string, ...args: T) => Promise<R>,
-	getUserId: () => Promise<string | null>,
+	getUserId: () => Promise<string | null>
 ) {
 	return async (...args: T): Promise<ActionResult<R>> => {
 		try {
@@ -58,7 +58,7 @@ export function createAuthenticatedAction<T extends any[], R>(
 export function createAuthorizedAction<T extends any[], R>(
 	action: (userId: string, userRole: string, ...args: T) => Promise<R>,
 	getUserInfo: () => Promise<{ id: string; role: string } | null>,
-	allowedRoles: string[],
+	allowedRoles: string[]
 ) {
 	return async (...args: T): Promise<ActionResult<R>> => {
 		try {
@@ -97,7 +97,7 @@ export function validateFormData(
 			max?: number;
 			pattern?: RegExp;
 		}
-	>,
+	>
 ): Record<string, any> {
 	const errors: Record<string, string[]> = {};
 	const data: Record<string, any> = {};
@@ -121,7 +121,7 @@ export function validateFormData(
 
 		// Type validation
 		if (rules.type === "number") {
-			const numValue = parseFloat(stringValue);
+			const numValue = Number.parseFloat(stringValue);
 			if (Number.isNaN(numValue)) {
 				errors[field] = [`${field} must be a valid number`];
 				continue;
@@ -200,8 +200,7 @@ export function safeRedirect(path: string): never {
 export function safeRevalidate(path: string): void {
 	try {
 		revalidatePath(path);
-	} catch (error) {
-		console.error("Failed to revalidate path:", path, error);
+	} catch (_error) {
 		// Don't throw, as this is not critical
 	}
 }
@@ -213,7 +212,7 @@ export function validateUploadedFile(
 		maxSize?: number;
 		allowedTypes?: string[];
 		required?: boolean;
-	} = {},
+	} = {}
 ): void {
 	const {
 		maxSize = 10 * 1024 * 1024, // 10MB default
@@ -253,7 +252,7 @@ export function validateUploadedFiles(
 		maxSize?: number;
 		allowedTypes?: string[];
 		required?: boolean;
-	} = {},
+	} = {}
 ): void {
 	const {
 		maxFiles = 10,
@@ -292,7 +291,7 @@ export function validateUploadedFiles(
 export function parseJsonField<T>(
 	value: string | null,
 	fieldName: string,
-	required: boolean = false,
+	required = false
 ): T | null {
 	if (!value || value.trim() === "") {
 		if (required) {

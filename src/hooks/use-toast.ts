@@ -5,7 +5,7 @@ import * as React from "react";
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
 
 const TOAST_LIMIT = 1;
-const TOAST_REMOVE_DELAY = 1000000;
+const TOAST_REMOVE_DELAY = 1_000_000;
 
 type ToasterToast = ToastProps & {
 	id: string;
@@ -48,9 +48,9 @@ type Action =
 			toastId?: ToasterToast["id"];
 	  };
 
-interface State {
+type State = {
 	toasts: ToasterToast[];
-}
+};
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
 
@@ -63,7 +63,7 @@ const addToRemoveQueue = (toastId: string) => {
 		toastTimeouts.delete(toastId);
 		dispatch({
 			type: "REMOVE_TOAST",
-			toastId: toastId,
+			toastId,
 		});
 	}, TOAST_REMOVE_DELAY);
 
@@ -82,7 +82,7 @@ export const reducer = (state: State, action: Action): State => {
 			return {
 				...state,
 				toasts: state.toasts.map((t) =>
-					t.id === action.toast.id ? { ...t, ...action.toast } : t,
+					t.id === action.toast.id ? { ...t, ...action.toast } : t
 				),
 			};
 
@@ -105,7 +105,7 @@ export const reducer = (state: State, action: Action): State => {
 								...t,
 								open: false,
 							}
-						: t,
+						: t
 				),
 			};
 		}
@@ -153,13 +153,15 @@ function toast({ ...props }: Toast) {
 			id,
 			open: true,
 			onOpenChange: (open) => {
-				if (!open) dismiss();
+				if (!open) {
+					dismiss();
+				}
 			},
 		},
 	});
 
 	return {
-		id: id,
+		id,
 		dismiss,
 		update,
 	};

@@ -1,14 +1,12 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import React from "react";
-import { createContext, useCallback, useContext } from "react";
+import React, { createContext, useCallback, useContext } from "react";
 import { useSignOut, useUpdateUserProfile } from "@/hooks/use-auth-actions";
 import { getCurrentUser } from "@/lib/actions/auth";
-import { authClient } from "@/lib/auth/auth-client";
 import type { User } from "@/lib/types";
 
-export interface AuthContextValue {
+export type AuthContextValue = {
 	user: User | null;
 	loading: boolean;
 	isLoading: boolean;
@@ -17,7 +15,7 @@ export interface AuthContextValue {
 	updateProfile: (profileData: any) => Promise<void>;
 	refetch: () => Promise<void>;
 	signOut: () => Promise<void>;
-}
+};
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
@@ -57,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	// Add a small delay to allow session to be established after login
 	const [isInitialLoad, setIsInitialLoad] = React.useState(true);
 	const [lastFetchTime, setLastFetchTime] = React.useState(0);
-	
+
 	React.useEffect(() => {
 		const timer = setTimeout(() => {
 			setIsInitialLoad(false);
@@ -69,7 +67,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	// Debounced refetch to prevent rapid successive calls
 	const debouncedRefetch = React.useCallback(() => {
 		const now = Date.now();
-		if (now - lastFetchTime < 2000) { // Minimum 2 seconds between fetches
+		if (now - lastFetchTime < 2000) {
+			// Minimum 2 seconds between fetches
 			return;
 		}
 		setLastFetchTime(now);
@@ -81,7 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		// Only listen for manual auth changes, not automatic ones
 		const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
 			// Only handle explicit invalidations, not automatic updates
-			if (event.type === 'removed' && event.query.queryKey[0] === 'auth') {
+			if (event.type === "removed" && event.query.queryKey[0] === "auth") {
 				// Only refetch if the query was explicitly removed, using debounced version
 				debouncedRefetch();
 			}
@@ -100,7 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		async (profileData: any) => {
 			await updateProfileMutation.mutateAsync(profileData);
 		},
-		[updateProfileMutation],
+		[updateProfileMutation]
 	);
 
 	const signOut = useCallback(async () => {

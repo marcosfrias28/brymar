@@ -1,6 +1,6 @@
 "use server";
 
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, gte, lte, or } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -14,8 +14,8 @@ import { extractValidationErrors, type FormState } from "@/lib/types/forms";
  * Create a new property using FormState pattern
  */
 export async function createPropertyAction(
-	prevState: FormState<{ id: string }>,
-	formData: FormData,
+	_prevState: FormState<{ id: string }>,
+	formData: FormData
 ): Promise<FormState<{ id: string }>> {
 	try {
 		// Check authentication
@@ -34,14 +34,14 @@ export async function createPropertyAction(
 		const data = {
 			title: formData.get("title") as string,
 			description: formData.get("description") as string,
-			price: parseFloat(formData.get("price") as string),
-			surface: parseFloat(formData.get("surface") as string),
+			price: Number.parseFloat(formData.get("price") as string),
+			surface: Number.parseFloat(formData.get("surface") as string),
 			propertyType: formData.get("propertyType") as string,
 			bedrooms: formData.get("bedrooms")
-				? parseInt(formData.get("bedrooms") as string, 10)
+				? Number.parseInt(formData.get("bedrooms") as string, 10)
 				: undefined,
 			bathrooms: formData.get("bathrooms")
-				? parseInt(formData.get("bathrooms") as string, 10)
+				? Number.parseInt(formData.get("bathrooms") as string, 10)
 				: undefined,
 			characteristics: formData.get("characteristics")
 				? JSON.parse(formData.get("characteristics") as string)
@@ -130,8 +130,85 @@ export async function getFeaturedProperties(limit = 6) {
 			.limit(limit);
 
 		return featuredProperties;
-	} catch (error) {
-		console.error("Error fetching featured properties:", error);
+	} catch (_error) {
+		return [];
+	}
+}
+
+/**
+ * Search properties function for hooks with proper filter handling
+ */
+export async function searchProperties(filters: any = {}) {
+	try {
+		// Build base query
+		let query: any = db.select().from(properties);
+
+		// Apply filters using Drizzle ORM
+		const conditions = [];
+
+		// Always show only published properties for public search
+		conditions.push(eq(properties.status, "published"));
+
+		// Apply price filters
+		if (filters.minPrice !== undefined) {
+			conditions.push(gte(properties.price, filters.minPrice));
+		}
+		if (filters.maxPrice !== undefined) {
+			conditions.push(lte(properties.price, filters.maxPrice));
+		}
+
+		// Apply property type filter
+		if (filters.propertyTypes && filters.propertyTypes.length > 0) {
+			const typeConditions = filters.propertyTypes.map((type: string) =>
+				eq(properties.type, type)
+			);
+			conditions.push(or(...typeConditions));
+		}
+
+		// Apply user filter
+		if (filters.userId) {
+			conditions.push(eq(properties.userId, filters.userId));
+		}
+
+		// Apply featured filter
+		if (filters.featured !== undefined) {
+			conditions.push(eq(properties.featured, filters.featured));
+		}
+
+		// Apply conditions if any
+		if (conditions.length > 0) {
+			const whereCondition =
+				conditions.length === 1 ? conditions[0] : and(...conditions);
+			query = query.where(whereCondition);
+		}
+
+		// Apply sorting
+		const sortBy = filters.sortBy || "createdAt";
+		const sortOrder = filters.sortOrder || "desc";
+
+		if (sortOrder === "desc") {
+			if (sortBy === "createdAt") {
+				query = query.orderBy(desc(properties.createdAt));
+			} else if (sortBy === "price") {
+				query = query.orderBy(desc(properties.price));
+			} else {
+				query = query.orderBy(desc(properties.createdAt));
+			}
+		} else if (sortBy === "createdAt") {
+			query = query.orderBy(properties.createdAt);
+		} else if (sortBy === "price") {
+			query = query.orderBy(properties.price);
+		} else {
+			query = query.orderBy(properties.createdAt);
+		}
+
+		// Apply limit
+		const limit = Math.min(filters.limit || 50, 100);
+		query = query.limit(limit);
+
+		const results = await query;
+		return results;
+	} catch (_error) {
 		return [];
 	}
 }
@@ -140,12 +217,12 @@ export async function getFeaturedProperties(limit = 6) {
  * Search properties action for useActionState
  */
 export async function searchPropertiesAction(
-	prevState: FormState<{ properties: any[] }>,
-	formData: FormData,
+	_prevState: FormState<{ properties: any[] }>,
+	formData: FormData
 ): Promise<FormState<{ properties: any[] }>> {
 	try {
 		// Parse search filters from formData
-		const filters = {
+		const _filters = {
 			location: formData.get("location") as string,
 			minPrice: formData.get("minPrice")
 				? Number.parseFloat(formData.get("minPrice") as string)
@@ -163,7 +240,10 @@ export async function searchPropertiesAction(
 		};
 
 		// Build query
-		const query = db.select().from(properties).where(eq(properties.status, "published"));
+		const query = db
+			.select()
+			.from(properties)
+			.where(eq(properties.status, "published"));
 
 		// Apply filters
 		// Note: This is a simplified version. You'll need to add proper filtering logic
@@ -177,9 +257,7 @@ export async function searchPropertiesAction(
 		return {
 			success: false,
 			message:
-				error instanceof Error
-					? error.message
-					: "Failed to search properties",
+				error instanceof Error ? error.message : "Failed to search properties",
 		};
 	}
 }
@@ -189,7 +267,7 @@ export async function searchPropertiesAction(
  */
 export async function updatePropertyAction(
 	_prevState: FormState<{ id: string }>,
-	formData: FormData,
+	formData: FormData
 ): Promise<FormState<{ id: string }>> {
 	try {
 		// Check authentication
@@ -240,14 +318,14 @@ export async function updatePropertyAction(
 		const data = {
 			title: formData.get("title") as string,
 			description: formData.get("description") as string,
-			price: parseFloat(formData.get("price") as string),
-			surface: parseFloat(formData.get("surface") as string),
+			price: Number.parseFloat(formData.get("price") as string),
+			surface: Number.parseFloat(formData.get("surface") as string),
 			propertyType: formData.get("propertyType") as string,
 			bedrooms: formData.get("bedrooms")
-				? parseInt(formData.get("bedrooms") as string, 10)
+				? Number.parseInt(formData.get("bedrooms") as string, 10)
 				: undefined,
 			bathrooms: formData.get("bathrooms")
-				? parseInt(formData.get("bathrooms") as string, 10)
+				? Number.parseInt(formData.get("bathrooms") as string, 10)
 				: undefined,
 			characteristics: formData.get("characteristics")
 				? JSON.parse(formData.get("characteristics") as string)

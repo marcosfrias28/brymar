@@ -1,9 +1,14 @@
 "use client";
 
-import { Activity, Home, User } from "lucide-react";
+import { Activity, ArrowLeft, Home, User } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FilterTabs } from "@/components/dashboard/filter-tabs";
+import { StatsCards } from "@/components/dashboard/stats-cards";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { ProfileActivity } from "@/components/profile/profile-activity";
 import { ProfileForm } from "@/components/profile/profile-form";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -12,32 +17,78 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getStatsAdapter } from "@/lib/adapters/stats-adapters";
 
 export default function ProfilePage() {
+	const _router = useRouter();
+
 	const breadcrumbs = [
 		{ label: "Dashboard", href: "/dashboard", icon: Home },
 		{ label: "Mi Perfil", icon: User },
 	];
 
+	// Generate profile stats using the adapter system
+	const profileAdapter = getStatsAdapter("profile");
+	const statsCards =
+		profileAdapter?.generateStats({
+			favoriteProperties: 12,
+			totalViews: 245,
+			searchesMade: 38,
+			propertiesContacted: 8,
+		}) || [];
+
+	const filterTabs = [
+		{
+			id: "profile",
+			label: "Información Personal",
+			value: "profile",
+			count: 1,
+			active: true,
+		},
+		{
+			id: "activity",
+			label: "Actividad Reciente",
+			value: "activity",
+			count: 15,
+			active: false,
+		},
+	];
+
+	const actions = (
+		<Button asChild variant="outline">
+			<Link href="/dashboard">
+				<ArrowLeft className="mr-2 h-4 w-4" />
+				Volver al Dashboard
+			</Link>
+		</Button>
+	);
+
 	return (
 		<DashboardPageLayout
-			title="Mi Perfil"
-			description="Gestiona tu información personal y configuración de la cuenta"
+			actions={actions}
 			breadcrumbs={breadcrumbs}
+			description="Gestiona tu información personal y configuración de la cuenta"
+			headerExtras={
+				<div className="space-y-4">
+					<StatsCards className="mb-4" isLoading={false} stats={statsCards} />
+					<FilterTabs className="mb-4" tabs={filterTabs} />
+				</div>
+			}
+			title="Mi Perfil"
 		>
-			<Tabs defaultValue="profile" className="space-y-6">
+			<Tabs className="space-y-6" defaultValue="profile">
 				<TabsList className="grid w-full grid-cols-2">
-					<TabsTrigger value="profile" className="flex items-center gap-2">
+					<TabsTrigger className="flex items-center gap-2" value="profile">
 						<User className="h-4 w-4" />
 						Información Personal
 					</TabsTrigger>
-					<TabsTrigger value="activity" className="flex items-center gap-2">
+					<TabsTrigger className="flex items-center gap-2" value="activity">
 						<Activity className="h-4 w-4" />
 						Actividad Reciente
 					</TabsTrigger>
 				</TabsList>
 
-				<TabsContent value="profile" className="space-y-6">
+				<TabsContent className="space-y-6" value="profile">
 					<Card>
 						<CardHeader>
 							<CardTitle>Perfil del Usuario</CardTitle>
@@ -51,7 +102,7 @@ export default function ProfilePage() {
 					</Card>
 				</TabsContent>
 
-				<TabsContent value="activity" className="space-y-6">
+				<TabsContent className="space-y-6" value="activity">
 					<Card>
 						<CardHeader>
 							<CardTitle>Actividad Reciente</CardTitle>

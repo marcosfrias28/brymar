@@ -37,7 +37,9 @@ export function Wizard<T extends WizardData>({
 
 	// Keyboard navigation
 	useEffect(() => {
-		if (!enableKeyboardNavigation) return;
+		if (!enableKeyboardNavigation) {
+			return;
+		}
 
 		const handleKeyDown = (event: KeyboardEvent) => {
 			// Don't interfere with form inputs
@@ -106,20 +108,16 @@ export function Wizard<T extends WizardData>({
 	const mobileOptimizations = enableMobileOptimizations && isMobile;
 
 	return (
-		<WizardErrorBoundary
-			onError={(error) => {
-				console.error("Wizard error:", error);
-			}}
-		>
+		<WizardErrorBoundary onError={(_error) => {}}>
 			<div
+				aria-label={`Asistente: ${config.title}`}
 				className={cn(
 					"wizard-container",
-					"flex flex-col min-h-screen",
+					"flex min-h-screen flex-col",
 					mobileOptimizations && "mobile-optimized",
-					className,
+					className
 				)}
 				role="application"
-				aria-label={`Asistente: ${config.title}`}
 			>
 				{/* Progress Indicator */}
 				{showProgress && (
@@ -127,15 +125,15 @@ export function Wizard<T extends WizardData>({
 						className={cn(
 							"wizard-progress-container",
 							"sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
-							"border-b border-border",
-							(mobileOptimizations && "px-4 py-2") || "px-6 py-4",
+							"border-border border-b",
+							(mobileOptimizations && "px-4 py-2") || "px-6 py-4"
 						)}
 					>
 						<WizardProgress
-							steps={config.steps}
 							currentStep={wizard.currentStepIndex}
-							showStepNumbers={showStepNumbers}
 							isMobile={isMobile}
+							showStepNumbers={showStepNumbers}
+							steps={config.steps}
 						/>
 					</div>
 				)}
@@ -144,21 +142,21 @@ export function Wizard<T extends WizardData>({
 				<div
 					className={cn(
 						"wizard-content",
-						"flex-1 flex flex-col",
-						(mobileOptimizations && "px-4 py-4") || "px-6 py-8",
+						"flex flex-1 flex-col",
+						(mobileOptimizations && "px-4 py-4") || "px-6 py-8"
 					)}
 				>
 					{/* Step Content */}
 					<div className="flex-1">
 						<WizardStepRenderer
-							step={config.steps[wizard.currentStepIndex]}
 							data={wizard.data}
-							onUpdate={wizard.updateData}
-							onNext={wizard.nextStep}
-							onPrevious={wizard.previousStep}
 							errors={wizard.getStepErrors()}
 							isLoading={wizard.isLoading || wizard.isValidating}
 							isMobile={isMobile}
+							onNext={wizard.nextStep}
+							onPrevious={wizard.previousStep}
+							onUpdate={wizard.updateData}
+							step={config.steps[wizard.currentStepIndex]}
 						/>
 					</div>
 
@@ -166,33 +164,33 @@ export function Wizard<T extends WizardData>({
 					<div
 						className={cn(
 							"wizard-navigation-container",
-							"mt-8 pt-6 border-t border-border",
+							"mt-8 border-border border-t pt-6",
 							mobileOptimizations &&
-								"sticky bottom-0 bg-background/95 backdrop-blur -mx-4 px-4 py-4",
+								"-mx-4 sticky bottom-0 bg-background/95 px-4 py-4 backdrop-blur"
 						)}
 					>
 						<WizardNavigation
+							canComplete={wizard.canComplete}
 							canGoNext={wizard.canGoNext}
 							canGoPrevious={wizard.canGoPrevious}
-							canComplete={wizard.canComplete}
 							isFirstStep={wizard.currentStepIndex === 0}
 							isLastStep={wizard.currentStepIndex === config.steps.length - 1}
+							isLoading={wizard.isLoading}
+							isMobile={isMobile}
+							isSaving={wizard.isSaving}
+							onCancel={onCancel}
+							onComplete={async () => {
+								await wizard.complete();
+							}}
 							onNext={async () => {
 								await wizard.nextStep();
 							}}
 							onPrevious={() => {
 								wizard.previousStep();
 							}}
-							onComplete={async () => {
-								await wizard.complete();
-							}}
 							onSaveDraft={async () => {
 								await wizard.saveDraft();
 							}}
-							onCancel={onCancel}
-							isLoading={wizard.isLoading}
-							isSaving={wizard.isSaving}
-							isMobile={isMobile}
 						/>
 					</div>
 				</div>
@@ -200,26 +198,26 @@ export function Wizard<T extends WizardData>({
 				{/* Error Display */}
 				{wizard.error && (
 					<div
+						aria-live="polite"
 						className={cn(
 							"wizard-error-container",
-							"bg-destructive/10 border-t border-destructive/20 p-4",
-							(mobileOptimizations && "px-4") || "px-6",
+							"border-destructive/20 border-t bg-destructive/10 p-4",
+							(mobileOptimizations && "px-4") || "px-6"
 						)}
 						role="alert"
-						aria-live="polite"
 					>
-						<p className="text-sm text-destructive">{wizard.error}</p>
+						<p className="text-destructive text-sm">{wizard.error}</p>
 					</div>
 				)}
 
 				{/* Keyboard Shortcuts Help (Development) */}
 				{process.env.NODE_ENV === "development" && enableKeyboardNavigation && (
-					<div className="fixed bottom-4 right-4 z-50">
-						<details className="bg-background border border-border rounded-lg shadow-lg">
-							<summary className="p-2 text-xs cursor-pointer">
+					<div className="fixed right-4 bottom-4 z-50">
+						<details className="rounded-lg border border-border bg-background shadow-lg">
+							<summary className="cursor-pointer p-2 text-xs">
 								Atajos de teclado
 							</summary>
-							<div className="p-3 text-xs space-y-1 min-w-48">
+							<div className="min-w-48 space-y-1 p-3 text-xs">
 								<div>
 									<kbd>Ctrl/Cmd + →</kbd> Siguiente paso
 								</div>
@@ -250,7 +248,7 @@ export function WizardWithFeatures<T extends WizardData>(
 		enableAnalytics?: boolean;
 		enableAutoSave?: boolean;
 		enableOfflineSupport?: boolean;
-	},
+	}
 ) {
 	const {
 		enableAnalytics = false,
@@ -262,21 +260,15 @@ export function WizardWithFeatures<T extends WizardData>(
 	// Analytics tracking
 	useEffect(() => {
 		if (enableAnalytics) {
-			// Track wizard start
-			console.log("Wizard started:", props.config.id);
 		}
-	}, [enableAnalytics, props.config.id]);
+	}, [enableAnalytics]);
 
 	// Offline support
 	useEffect(() => {
 		if (enableOfflineSupport) {
-			const handleOnline = () => {
-				console.log("Back online - syncing wizard data");
-			};
+			const handleOnline = () => {};
 
-			const handleOffline = () => {
-				console.log("Gone offline - enabling offline mode");
-			};
+			const handleOffline = () => {};
 
 			window.addEventListener("online", handleOnline);
 			window.addEventListener("offline", handleOffline);

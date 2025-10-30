@@ -17,7 +17,7 @@ test.describe("Land Management Flows", () => {
 						role: "admin",
 						permissions: ["canManageLands", "canCreateLands", "canEditLands"],
 					},
-				}),
+				})
 			);
 		});
 	});
@@ -464,7 +464,7 @@ test.describe("Land Form Validation", () => {
 						role: "admin",
 						permissions: ["canManageLands", "canCreateLands"],
 					},
-				}),
+				})
 			);
 		});
 	});
@@ -636,7 +636,9 @@ test.describe("Land Search and Filters", () => {
 					}
 				}
 
-				if (searchPageFound) break;
+				if (searchPageFound) {
+					break;
+				}
 			} catch (_e) {
 				// Continue to next URL
 			}
@@ -768,7 +770,7 @@ test.describe("Land Search and Filters", () => {
 
 			for (const type of landTypes) {
 				const matchingOption = options.find((option) =>
-					option.toLowerCase().includes(type.toLowerCase()),
+					option.toLowerCase().includes(type.toLowerCase())
 				);
 
 				if (matchingOption) {
@@ -780,7 +782,7 @@ test.describe("Land Search and Filters", () => {
 					const filterResults = [
 						page.locator(`text=${type}`),
 						page.locator(
-							`text=${type.charAt(0).toUpperCase() + type.slice(1)}`,
+							`text=${type.charAt(0).toUpperCase() + type.slice(1)}`
 						),
 						page.locator('[data-testid="land-card"]'),
 						page.locator(".land-card"),

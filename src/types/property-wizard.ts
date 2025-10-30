@@ -1,15 +1,9 @@
 // Property Wizard Types for New Framework
 
 import type { WizardData } from "@/types/wizard-core";
+import { PropertyType } from "@/types/wizard";
 
-// Property type enum
-export enum PropertyType {
-	HOUSE = "house",
-	APARTMENT = "apartment",
-	LAND = "land",
-	COMMERCIAL = "commercial",
-	VILLA = "villa",
-}
+// Usa il PropertyType centralizzato (enum) da src/types/wizard
 
 export interface Coordinates {
 	latitude: number;
@@ -97,7 +91,7 @@ export interface AIService {
 	generateTags(propertyData: PropertyBasicInfo): Promise<string[]>;
 	generateMarketInsights(
 		location: string,
-		propertyType: string,
+		propertyType: string
 	): Promise<string>;
 }
 
@@ -118,7 +112,7 @@ export interface UploadResult {
 export interface ImageUploadService {
 	generateSignedUrl(
 		filename: string,
-		contentType: string,
+		contentType: string
 	): Promise<SignedUrlResponse>;
 	uploadDirect(file: File, signedUrl: string): Promise<UploadResult>;
 	processMetadata(uploadResult: UploadResult): ImageMetadata;
@@ -142,7 +136,7 @@ export class AIServiceError extends Error {
 			| "API_ERROR"
 			| "INVALID_RESPONSE"
 			| "NETWORK_ERROR",
-		public retryable: boolean = false,
+		public retryable = false
 	) {
 		super(message);
 		this.name = "AIServiceError";

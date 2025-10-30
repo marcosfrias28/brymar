@@ -50,13 +50,13 @@ export function UserActivityChart() {
 			</CardHeader>
 			<CardContent>
 				<ChartContainer config={chartConfig}>
-					<ResponsiveContainer width="100%" height={300}>
+					<ResponsiveContainer height={300} width="100%">
 						<AreaChart
 							data={chartData}
 							margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
 						>
 							<defs>
-								<linearGradient id="colorVistas" x1="0" y1="0" x2="0" y2="1">
+								<linearGradient id="colorVistas" x1="0" x2="0" y1="0" y2="1">
 									<stop
 										offset="5%"
 										stopColor="var(--color-vistas)"
@@ -68,7 +68,7 @@ export function UserActivityChart() {
 										stopOpacity={0.1}
 									/>
 								</linearGradient>
-								<linearGradient id="colorFavoritos" x1="0" y1="0" x2="0" y2="1">
+								<linearGradient id="colorFavoritos" x1="0" x2="0" y1="0" y2="1">
 									<stop
 										offset="5%"
 										stopColor="var(--color-favoritos)"
@@ -80,7 +80,7 @@ export function UserActivityChart() {
 										stopOpacity={0.1}
 									/>
 								</linearGradient>
-								<linearGradient id="colorBusquedas" x1="0" y1="0" x2="0" y2="1">
+								<linearGradient id="colorBusquedas" x1="0" x2="0" y1="0" y2="1">
 									<stop
 										offset="5%"
 										stopColor="var(--color-busquedas)"
@@ -94,66 +94,66 @@ export function UserActivityChart() {
 								</linearGradient>
 							</defs>
 							<XAxis
+								axisLine={false}
+								className="text-blackCoral text-xs"
 								dataKey="month"
 								tickLine={false}
-								axisLine={false}
-								className="text-blackCoral text-xs"
 							/>
 							<YAxis
-								tickLine={false}
 								axisLine={false}
 								className="text-blackCoral text-xs"
+								tickLine={false}
 							/>
-							<ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+							<ChartTooltip content={<ChartTooltipContent />} cursor={false} />
 							<Area
-								type="monotone"
 								dataKey="vistas"
-								stroke="var(--color-vistas)"
-								fillOpacity={1}
 								fill="url(#colorVistas)"
+								fillOpacity={1}
+								stroke="var(--color-vistas)"
 								strokeWidth={2}
+								type="monotone"
 							/>
 							<Area
-								type="monotone"
 								dataKey="favoritos"
-								stroke="var(--color-favoritos)"
-								fillOpacity={1}
 								fill="url(#colorFavoritos)"
+								fillOpacity={1}
+								stroke="var(--color-favoritos)"
 								strokeWidth={2}
+								type="monotone"
 							/>
 							<Area
-								type="monotone"
 								dataKey="busquedas"
-								stroke="var(--color-busquedas)"
-								fillOpacity={1}
 								fill="url(#colorBusquedas)"
+								fillOpacity={1}
+								stroke="var(--color-busquedas)"
 								strokeWidth={2}
+								type="monotone"
 							/>
 						</AreaChart>
 					</ResponsiveContainer>
 				</ChartContainer>
 
 				{/* Legend */}
-				<div className="flex justify-center gap-6 mt-4 text-sm">
+				<div className="mt-4 flex justify-center gap-6 text-sm">
 					<div className="flex items-center gap-2">
 						<div
-							className="w-3 h-3 rounded-full"
+							className="h-3 w-3 rounded-full"
 							style={{ backgroundColor: "var(--color-vistas)" }}
-						></div>
+						/>
 						<span className="text-muted-foreground">Propiedades Vistas</span>
 					</div>
 					<div className="flex items-center gap-2">
 						<div
-							className="w-3 h-3 rounded-full"
+							className="h-3 w-3 rounded-full"
 							style={{ backgroundColor: "var(--color-favoritos)" }}
-						></div>
+						/>
 						<span className="text-muted-foreground">Favoritos</span>
 					</div>
 					<div className="flex items-center gap-2">
 						<div
-							className="w-3 h-3 rounded-full"
+							className="h-3 w-3 rounded-full"
 							style={{ backgroundColor: "var(--color-busquedas)" }}
-						></div>
+						/>
 						<span className="text-muted-foreground">Búsquedas</span>
 					</div>
 				</div>

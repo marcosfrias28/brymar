@@ -2,9 +2,9 @@
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-interface SectionsManagerProps {
+type SectionsManagerProps = {
 	page: "home" | "contact";
-}
+};
 
 export function SectionsManager({ page }: SectionsManagerProps) {
 	return (

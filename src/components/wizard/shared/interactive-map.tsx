@@ -41,14 +41,14 @@ const markerIcon = new Icon({
 	shadowSize: [41, 41],
 });
 
-interface InteractiveMapProps {
+type InteractiveMapProps = {
 	coordinates?: Coordinates;
 	onCoordinatesChange: (coordinates: Coordinates) => void;
 	onAddressChange?: (address: any) => void;
 	className?: string;
 	height?: string;
 	isMobile?: boolean;
-}
+};
 
 // Component to handle map clicks with proper event isolation
 function MapClickHandler({
@@ -88,7 +88,6 @@ function MapClickHandler({
 			if (
 				!mapService.isWithinDominicanRepublic({ latitude: lat, longitude: lng })
 			) {
-				console.warn("Click outside Dominican Republic bounds:", { lat, lng });
 				return;
 			}
 
@@ -106,15 +105,14 @@ function MapClickHandler({
 				try {
 					const address = await mapService.reverseGeocode(coordinates);
 					onAddressChangeRef.current(address);
-				} catch (error) {
-					console.error("Error reverse geocoding:", error);
+				} catch (_error) {
 					// Don't show error to user, just log it
 				} finally {
 					onProcessingChange(false);
 				}
 			}
 		},
-		[isProcessing, onProcessingChange],
+		[isProcessing, onProcessingChange]
 	);
 
 	const _map = useMapEvents({
@@ -148,7 +146,7 @@ export function InteractiveMap({
 		(coords: Coordinates) => {
 			onCoordinatesChange(coords);
 		},
-		[onCoordinatesChange],
+		[onCoordinatesChange]
 	);
 
 	const stableOnAddressChange = useCallback(
@@ -157,7 +155,7 @@ export function InteractiveMap({
 				onAddressChange(address);
 			}
 		},
-		[onAddressChange],
+		[onAddressChange]
 	);
 
 	// Ensure component only renders on client side with proper hydration
@@ -178,11 +176,9 @@ export function InteractiveMap({
 			try {
 				mapRef.current.setView(
 					[coordinates.latitude, coordinates.longitude],
-					15,
+					15
 				);
-			} catch (error) {
-				console.warn("Error setting map view:", error);
-			}
+			} catch (_error) {}
 		}
 	}, [coordinates, isClient]);
 
@@ -203,7 +199,7 @@ export function InteractiveMap({
 		const timeoutId = setTimeout(() => {
 			setMapError("Tiempo de espera agotado para obtener la ubicación");
 			setIsLocating(false);
-		}, 15000); // 15 second timeout
+		}, 15_000); // 15 second timeout
 
 		navigator.geolocation.getCurrentPosition(
 			async (position) => {
@@ -228,8 +224,7 @@ export function InteractiveMap({
 					try {
 						const address = await mapService.reverseGeocode(coordinates);
 						stableOnAddressChange(address);
-					} catch (error) {
-						console.error("Error reverse geocoding current location:", error);
+					} catch (_error) {
 						// Don't set error for reverse geocoding failure
 					}
 				}
@@ -238,7 +233,6 @@ export function InteractiveMap({
 			},
 			(error) => {
 				clearTimeout(timeoutId);
-				console.error("Geolocation error:", error);
 
 				let errorMessage = "No se pudo obtener tu ubicación actual";
 				switch (error.code) {
@@ -258,9 +252,9 @@ export function InteractiveMap({
 			},
 			{
 				enableHighAccuracy: true,
-				timeout: 10000,
-				maximumAge: 300000, // 5 minutes
-			},
+				timeout: 10_000,
+				maximumAge: 300_000, // 5 minutes
+			}
 		);
 	}, [
 		isLocating,
@@ -275,12 +269,12 @@ export function InteractiveMap({
 			<Card className={className}>
 				<CardContent className="p-6">
 					<div
-						className="bg-muted rounded-lg flex items-center justify-center animate-pulse"
+						className="flex animate-pulse items-center justify-center rounded-lg bg-muted"
 						style={{ height }}
 					>
 						<div className="text-center">
-							<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-							<p className="text-sm text-muted-foreground">
+							<div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-primary border-b-2" />
+							<p className="text-muted-foreground text-sm">
 								Inicializando mapa...
 							</p>
 						</div>
@@ -319,7 +313,7 @@ export function InteractiveMap({
 		<Card
 			className={cn(
 				className,
-				isMobileDevice && "border-0 shadow-none bg-transparent",
+				isMobileDevice && "border-0 bg-transparent shadow-none"
 			)}
 		>
 			<CardContent className={cn(isMobileDevice ? "p-0" : "p-6")}>
@@ -329,62 +323,62 @@ export function InteractiveMap({
 						className={cn(
 							isMobileDevice
 								? "flex flex-col space-y-2"
-								: "flex items-center justify-between",
+								: "flex items-center justify-between"
 						)}
 					>
 						<div
 							className={cn(
 								"flex items-center",
-								isMobileDevice ? "space-x-1" : "space-x-2",
+								isMobileDevice ? "space-x-1" : "space-x-2"
 							)}
 						>
 							{coordinates ? (
 								<CheckCircle
 									className={cn(
 										"text-green-600",
-										isMobileDevice ? "w-4 h-4" : "w-5 h-5",
+										isMobileDevice ? "h-4 w-4" : "h-5 w-5"
 									)}
 								/>
 							) : (
 								<MapPin
 									className={cn(
 										"text-primary",
-										isMobileDevice ? "w-4 h-4" : "w-5 h-5",
+										isMobileDevice ? "h-4 w-4" : "h-5 w-5"
 									)}
 								/>
 							)}
 							<span
 								className={cn(
 									"font-medium",
-									isMobileDevice ? "text-xs" : "text-sm",
+									isMobileDevice ? "text-xs" : "text-sm"
 								)}
 							>
 								{coordinates
 									? `${coordinates.latitude.toFixed(
-											4,
+											4
 										)}, ${coordinates.longitude.toFixed(4)}`
 									: "Toca el mapa para seleccionar ubicación"}
 							</span>
 							{isProcessingClick && (
-								<div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary"></div>
+								<div className="h-3 w-3 animate-spin rounded-full border-primary border-b-2" />
 							)}
 						</div>
 
 						<Button
-							variant="outline"
-							size={isMobileDevice ? "default" : "sm"}
-							onClick={getCurrentLocation}
-							disabled={isLocating || isProcessingClick}
 							className={cn(
 								"flex items-center space-x-2",
 								isMobileDevice &&
-									`${mobileClasses.touchButton} w-full min-h-[44px]`,
+									`${mobileClasses.touchButton} min-h-[44px] w-full`
 							)}
+							disabled={isLocating || isProcessingClick}
+							onClick={getCurrentLocation}
+							size={isMobileDevice ? "default" : "sm"}
+							variant="outline"
 						>
 							<Crosshair
 								className={cn(
 									isLocating && "animate-spin",
-									isMobileDevice ? "w-5 h-5" : "w-4 h-4",
+									isMobileDevice ? "h-5 w-5" : "h-4 w-4"
 								)}
 							/>
 							<span className={cn(isMobileDevice ? "text-base" : "text-sm")}>
@@ -397,20 +391,20 @@ export function InteractiveMap({
 					{mapError && (
 						<div
 							className={cn(
-								"flex items-center bg-destructive/10 border border-destructive/20 rounded-lg",
-								isMobileDevice ? "space-x-1 p-2" : "space-x-2 p-3",
+								"flex items-center rounded-lg border border-destructive/20 bg-destructive/10",
+								isMobileDevice ? "space-x-1 p-2" : "space-x-2 p-3"
 							)}
 						>
 							<AlertCircle
 								className={cn(
 									"text-destructive",
-									isMobileDevice ? "w-4 h-4" : "w-4 h-4",
+									isMobileDevice ? "h-4 w-4" : "h-4 w-4"
 								)}
 							/>
 							<span
 								className={cn(
 									"text-destructive",
-									isMobileDevice ? "text-xs" : "text-sm",
+									isMobileDevice ? "text-xs" : "text-sm"
 								)}
 							>
 								{mapError}
@@ -420,25 +414,23 @@ export function InteractiveMap({
 
 					{/* Map container */}
 					<div
-						className="relative rounded-lg overflow-hidden border"
+						className="relative overflow-hidden rounded-lg border"
 						style={{ height }}
 					>
 						<MapContainer
-							ref={mapRef}
 							center={mapConfig.center}
-							zoom={mapConfig.zoom}
-							maxBounds={mapConfig.bounds}
-							maxBoundsViscosity={1.0}
-							style={{ height: "100%", width: "100%" }}
 							className={cn(
 								"z-0",
-								isMobileDevice && "touch-pan-y touch-pinch-zoom",
+								isMobileDevice && "touch-pan-y touch-pinch-zoom"
 							)}
-							touchZoom={isTouch}
-							scrollWheelZoom={!isMobileDevice}
 							doubleClickZoom={true}
 							dragging={true}
-							zoomControl={!isMobileDevice}
+							maxBounds={mapConfig.bounds}
+							maxBoundsViscosity={1.0}
+							ref={mapRef}
+							scrollWheelZoom={!isMobileDevice}
+							style={{ height: "100%", width: "100%" }}
+							touchZoom={isTouch}
 							whenReady={() => {
 								// Ensure map is properly initialized
 								if (mapRef.current && isClient) {
@@ -448,54 +440,54 @@ export function InteractiveMap({
 												mapRef.current.invalidateSize();
 											}
 										}, 100);
-									} catch (error) {
-										console.warn("Error initializing map:", error);
-									}
+									} catch (_error) {}
 								}
 							}}
+							zoom={mapConfig.zoom}
+							zoomControl={!isMobileDevice}
 						>
 							<TileLayer
 								attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-								url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 								maxZoom={18}
+								url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 							/>
 
 							{/* Map click handler with improved event isolation */}
 							<MapClickHandler
-								onCoordinatesChange={stableOnCoordinatesChange}
-								onAddressChange={stableOnAddressChange}
 								isProcessing={isProcessingClick}
+								onAddressChange={stableOnAddressChange}
+								onCoordinatesChange={stableOnCoordinatesChange}
 								onProcessingChange={setIsProcessingClick}
 							/>
 
 							{/* Marker for selected coordinates */}
 							{coordinates && (
 								<Marker
-									position={[coordinates.latitude, coordinates.longitude]}
 									icon={markerIcon}
+									position={[coordinates.latitude, coordinates.longitude]}
 								/>
 							)}
 						</MapContainer>
 
 						{/* Improved overlay instructions that don't interfere with clicks */}
-						{!coordinates && !isProcessingClick && (
-							<div className="absolute inset-0 bg-black/10 flex items-center justify-center pointer-events-none z-10">
+						{!(coordinates || isProcessingClick) && (
+							<div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-black/10">
 								<div
 									className={cn(
-										"bg-white/95 backdrop-blur-sm rounded-lg shadow-lg text-center border",
-										isMobileDevice ? "p-3 mx-4" : "p-4",
+										"rounded-lg border bg-white/95 text-center shadow-lg backdrop-blur-sm",
+										isMobileDevice ? "mx-4 p-3" : "p-4"
 									)}
 								>
 									<MapPin
 										className={cn(
 											"mx-auto mb-2 text-primary",
-											isMobileDevice ? "w-6 h-6" : "w-8 h-8",
+											isMobileDevice ? "h-6 w-6" : "h-8 w-8"
 										)}
 									/>
 									<p
 										className={cn(
 											"font-medium",
-											isMobileDevice ? "text-xs" : "text-sm",
+											isMobileDevice ? "text-xs" : "text-sm"
 										)}
 									>
 										{isMobileDevice ? "Toca el mapa" : "Haz clic en el mapa"}
@@ -503,7 +495,7 @@ export function InteractiveMap({
 									<p
 										className={cn(
 											"text-muted-foreground",
-											isMobileDevice ? "text-xs" : "text-xs",
+											isMobileDevice ? "text-xs" : "text-xs"
 										)}
 									>
 										para seleccionar la ubicación
@@ -514,18 +506,18 @@ export function InteractiveMap({
 
 						{/* Processing indicator */}
 						{isProcessingClick && (
-							<div className="absolute inset-0 bg-black/10 flex items-center justify-center pointer-events-none z-10">
+							<div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-black/10">
 								<div
 									className={cn(
-										"bg-white/95 backdrop-blur-sm rounded-lg shadow-lg text-center border",
-										isMobileDevice ? "p-3 mx-4" : "p-4",
+										"rounded-lg border bg-white/95 text-center shadow-lg backdrop-blur-sm",
+										isMobileDevice ? "mx-4 p-3" : "p-4"
 									)}
 								>
-									<div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
+									<div className="mx-auto mb-2 h-6 w-6 animate-spin rounded-full border-primary border-b-2" />
 									<p
 										className={cn(
 											"font-medium text-primary",
-											isMobileDevice ? "text-xs" : "text-sm",
+											isMobileDevice ? "text-xs" : "text-sm"
 										)}
 									>
 										Procesando ubicación...
@@ -538,8 +530,8 @@ export function InteractiveMap({
 					{/* Map instructions with better feedback */}
 					<div
 						className={cn(
-							"text-muted-foreground space-y-1",
-							isMobileDevice ? "text-xs px-2" : "text-xs",
+							"space-y-1 text-muted-foreground",
+							isMobileDevice ? "px-2 text-xs" : "text-xs"
 						)}
 					>
 						<p>
@@ -552,12 +544,12 @@ export function InteractiveMap({
 						)}
 						<p>• El mapa está limitado a República Dominicana</p>
 						{coordinates && (
-							<p className="text-green-600 font-medium">
+							<p className="font-medium text-green-600">
 								✓ Ubicación seleccionada correctamente
 							</p>
 						)}
 						{mapError && (
-							<p className="text-destructive font-medium">⚠ {mapError}</p>
+							<p className="font-medium text-destructive">⚠ {mapError}</p>
 						)}
 					</div>
 				</div>

@@ -2,31 +2,31 @@
 
 import { Home } from "lucide-react";
 
-interface PageHeaderProps {
+type PageHeaderProps = {
 	title: string;
 	subtitle: string;
 	icon?: React.ReactNode;
-}
+};
 
 export function PageHeader({ title, subtitle, icon }: PageHeaderProps) {
 	return (
-		<section className="text-center bg-cover !pt-40 pb-20 relative overflow-x-hidden">
-			<div className="flex gap-2.5 items-center justify-center">
-				<span className="p-2 bg-secondary/20 rounded-full border border-secondary/30">
-					{icon || <Home className="w-5 h-5 text-primary" />}
+		<section className="!pt-40 relative overflow-x-hidden bg-cover pb-20 text-center">
+			<div className="flex items-center justify-center gap-2.5">
+				<span className="rounded-full border border-secondary/30 bg-secondary/20 p-2">
+					{icon || <Home className="h-5 w-5 text-primary" />}
 				</span>
-				<p className="text-base font-semibold text-dark/75 dark:text-white/75">
+				<p className="font-semibold text-base text-dark/75 dark:text-white/75">
 					{title}
 				</p>
 			</div>
-			<h2 className="text-dark text-6xl relative font-bold dark:text-white">
+			<h2 className="relative font-bold text-6xl text-dark dark:text-white">
 				Discover inspiring designed homes.
 			</h2>
-			<p className="text-lg text-dark/50 dark:text-white/50 font-normal w-full mx-auto">
+			<p className="mx-auto w-full font-normal text-dark/50 text-lg dark:text-white/50">
 				{subtitle}
 			</p>
-			<div className="absolute top-10 left-10 w-20 h-20 bg-secondary/10 rounded-full blur-xl"></div>
-			<div className="absolute bottom-10 right-10 w-16 h-16 bg-secondary/15 rounded-full blur-lg"></div>
+			<div className="absolute top-10 left-10 h-20 w-20 rounded-full bg-secondary/10 blur-xl" />
+			<div className="absolute right-10 bottom-10 h-16 w-16 rounded-full bg-secondary/15 blur-lg" />
 		</section>
 	);
 }

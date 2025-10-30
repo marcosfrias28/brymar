@@ -20,16 +20,16 @@ export function ContactForm() {
 	const { data: contactInfo, loading: isLoading } = useContactInfo();
 
 	return (
-		<section className="py-16 px-4 bg-gray-50">
+		<section className="bg-gray-50 px-4 py-16">
 			<div className="container mx-auto">
-				<h2 className="text-4xl font-bold text-center mb-4 text-gray-800">
+				<h2 className="mb-4 text-center font-bold text-4xl text-gray-800">
 					Contáctanos
 				</h2>
-				<p className="text-xl text-gray-600 text-center mb-12">
+				<p className="mb-12 text-center text-gray-600 text-xl">
 					Estamos aquí para ayudarte a encontrar tu propiedad ideal
 				</p>
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-					<Card className="bg-white  border-gray-200 shadow-lg">
+				<div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+					<Card className="border-gray-200 bg-white shadow-lg">
 						<CardHeader>
 							<CardTitle className="text-gray-800">
 								Información de Contacto
@@ -42,47 +42,47 @@ export function ContactForm() {
 							{isLoading ? (
 								<div className="space-y-4">
 									<div className="flex items-center">
-										<div className="h-5 w-5 mr-3 bg-gray-200 rounded animate-pulse" />
-										<div className="h-4 bg-gray-200 rounded w-48 animate-pulse" />
+										<div className="mr-3 h-5 w-5 animate-pulse rounded bg-gray-200" />
+										<div className="h-4 w-48 animate-pulse rounded bg-gray-200" />
 									</div>
 									<div className="flex items-center">
-										<div className="h-5 w-5 mr-3 bg-gray-200 rounded animate-pulse" />
-										<div className="h-4 bg-gray-200 rounded w-32 animate-pulse" />
+										<div className="mr-3 h-5 w-5 animate-pulse rounded bg-gray-200" />
+										<div className="h-4 w-32 animate-pulse rounded bg-gray-200" />
 									</div>
 									<div className="flex items-center">
-										<div className="h-5 w-5 mr-3 bg-gray-200 rounded animate-pulse" />
-										<div className="h-4 bg-gray-200 rounded w-40 animate-pulse" />
+										<div className="mr-3 h-5 w-5 animate-pulse rounded bg-gray-200" />
+										<div className="h-4 w-40 animate-pulse rounded bg-gray-200" />
 									</div>
 								</div>
 							) : (
 								<>
 									<div className="flex items-center text-gray-700">
-										<MapPin className="h-5 w-5 mr-3 text-gray-500" />
+										<MapPin className="mr-3 h-5 w-5 text-gray-500" />
 										<p>
 											{getContactInfoValueHelper(
 												contactInfo,
 												"address",
-												"Av. Principal 123, Ciudad, País",
+												"Av. Principal 123, Ciudad, País"
 											)}
 										</p>
 									</div>
 									<div className="flex items-center text-gray-700">
-										<Phone className="h-5 w-5 mr-3 text-gray-500" />
+										<Phone className="mr-3 h-5 w-5 text-gray-500" />
 										<p>
 											{getContactInfoValueHelper(
 												contactInfo,
 												"phone",
-												"+1 (555) 123-4567",
+												"+1 (555) 123-4567"
 											)}
 										</p>
 									</div>
 									<div className="flex items-center text-gray-700">
-										<Mail className="h-5 w-5 mr-3 text-gray-500" />
+										<Mail className="mr-3 h-5 w-5 text-gray-500" />
 										<p>
 											{getContactInfoValueHelper(
 												contactInfo,
 												"email",
-												"contacto@brymar.com",
+												"contacto@brymar.com"
 											)}
 										</p>
 									</div>
@@ -91,7 +91,7 @@ export function ContactForm() {
 						</CardContent>
 					</Card>
 
-					<Card className="bg-white border-gray-200 shadow-lg">
+					<Card className="border-gray-200 bg-white shadow-lg">
 						<CardHeader>
 							<CardTitle className="text-gray-800">
 								Envíanos un Mensaje
@@ -104,25 +104,25 @@ export function ContactForm() {
 							<form className="space-y-4">
 								<div>
 									<Input
-										placeholder="Nombre completo"
 										className="border-gray-300 focus:border-gray-500"
+										placeholder="Nombre completo"
 									/>
 								</div>
 								<div>
 									<Input
-										type="email"
-										placeholder="Correo electrónico"
 										className="border-gray-300 focus:border-gray-500"
+										placeholder="Correo electrónico"
+										type="email"
 									/>
 								</div>
 								<div>
 									<Textarea
+										className="border-gray-300 focus:border-gray-500"
 										placeholder="Tu mensaje"
 										rows={4}
-										className="border-gray-300 focus:border-gray-500"
 									/>
 								</div>
-								<Button className="w-full bg-gray-800 hover:bg-gray-700 text-white">
+								<Button className="w-full bg-gray-800 text-white hover:bg-gray-700">
 									Enviar Mensaje
 								</Button>
 							</form>

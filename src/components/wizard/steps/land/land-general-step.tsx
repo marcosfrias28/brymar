@@ -48,20 +48,20 @@ const LAND_CHARACTERISTICS = [
 	"Área boscosa",
 ];
 
-interface LandData {
+type LandData = {
 	name?: string;
 	description?: string;
 	price?: number;
 	surface?: number;
 	landType?: "residential" | "commercial" | "agricultural" | "beachfront";
 	characteristics?: string[];
-}
+};
 
-interface LandGeneralStepProps {
+type LandGeneralStepProps = {
 	data: LandData;
 	onChange: (data: LandData) => void;
 	errors?: Record<string, string>;
-}
+};
 
 export function LandGeneralStep({
 	data,
@@ -95,7 +95,9 @@ export function LandGeneralStep({
 	const watchedValues = watch();
 
 	const handleGenerateTitle = useCallback(async () => {
-		if (!watchedValues.landType) return;
+		if (!watchedValues.landType) {
+			return;
+		}
 
 		try {
 			const result = await generateAI.mutateAsync({
@@ -111,13 +113,13 @@ export function LandGeneralStep({
 			if (result.success && result.data?.content?.title) {
 				setValue("name", result.data.content.title);
 			}
-		} catch (error) {
-			console.error("Error generating title:", error);
-		}
+		} catch (_error) {}
 	}, [watchedValues, generateAI, setValue]);
 
 	const handleGenerateDescription = useCallback(async () => {
-		if (!watchedValues.landType) return;
+		if (!watchedValues.landType) {
+			return;
+		}
 
 		try {
 			const result = await generateAI.mutateAsync({
@@ -134,9 +136,7 @@ export function LandGeneralStep({
 			if (result.success && result.data?.content?.description) {
 				setValue("description", result.data.content.description);
 			}
-		} catch (error) {
-			console.error("Error generating description:", error);
-		}
+		} catch (_error) {}
 	}, [watchedValues, selectedCharacteristics, generateAI, setValue]);
 
 	const handleCharacteristicToggle = (characteristic: string) => {
@@ -168,24 +168,24 @@ export function LandGeneralStep({
 						<div className="flex items-center justify-between">
 							<Label htmlFor="name">Nombre del Terreno *</Label>
 							<Button
+								disabled={!watchedValues.landType || generateAI.isPending}
+								onClick={handleGenerateTitle}
+								size="sm"
 								type="button"
 								variant="outline"
-								size="sm"
-								onClick={handleGenerateTitle}
-								disabled={!watchedValues.landType || generateAI.isPending}
 							>
-								<Sparkles className="h-4 w-4 mr-2" />
+								<Sparkles className="mr-2 h-4 w-4" />
 								{generateAI.isPending ? "Generando..." : "Generar con IA"}
 							</Button>
 						</div>
 						<Input
 							id="name"
 							{...register("name")}
-							placeholder="Ej: Terreno en Punta Cana"
 							className={cn(formErrors.name && "border-destructive")}
+							placeholder="Ej: Terreno en Punta Cana"
 						/>
 						{formErrors.name && (
-							<p className="text-sm text-destructive">
+							<p className="text-destructive text-sm">
 								{formErrors.name.message}
 							</p>
 						)}
@@ -195,7 +195,6 @@ export function LandGeneralStep({
 					<div className="space-y-2">
 						<Label>Tipo de Terreno *</Label>
 						<Select
-							value={watchedValues.landType || ""}
 							onValueChange={(value) =>
 								setValue(
 									"landType",
@@ -203,9 +202,10 @@ export function LandGeneralStep({
 										| "residential"
 										| "commercial"
 										| "agricultural"
-										| "beachfront",
+										| "beachfront"
 								)
 							}
+							value={watchedValues.landType || ""}
 						>
 							<SelectTrigger
 								className={cn(formErrors.landType && "border-destructive")}
@@ -221,32 +221,32 @@ export function LandGeneralStep({
 							</SelectContent>
 						</Select>
 						{formErrors.landType && (
-							<p className="text-sm text-destructive">
+							<p className="text-destructive text-sm">
 								{formErrors.landType.message}
 							</p>
 						)}
 					</div>
 
 					{/* Price and Surface */}
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div className="space-y-2">
 							<Label htmlFor="price">Precio (USD) *</Label>
 							<div className="relative">
-								<DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+								<DollarSign className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
 								<Input
 									id="price"
 									type="number"
 									{...register("price", { valueAsNumber: true })}
-									placeholder="0"
-									min="0"
 									className={cn(
 										"pl-10",
-										formErrors.price && "border-destructive",
+										formErrors.price && "border-destructive"
 									)}
+									min="0"
+									placeholder="0"
 								/>
 							</div>
 							{formErrors.price && (
-								<p className="text-sm text-destructive">
+								<p className="text-destructive text-sm">
 									{formErrors.price.message}
 								</p>
 							)}
@@ -255,21 +255,21 @@ export function LandGeneralStep({
 						<div className="space-y-2">
 							<Label htmlFor="surface">Superficie (m²) *</Label>
 							<div className="relative">
-								<Ruler className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+								<Ruler className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
 								<Input
 									id="surface"
 									type="number"
 									{...register("surface", { valueAsNumber: true })}
-									placeholder="0"
-									min="0"
 									className={cn(
 										"pl-10",
-										formErrors.surface && "border-destructive",
+										formErrors.surface && "border-destructive"
 									)}
+									min="0"
+									placeholder="0"
 								/>
 							</div>
 							{formErrors.surface && (
-								<p className="text-sm text-destructive">
+								<p className="text-destructive text-sm">
 									{formErrors.surface.message}
 								</p>
 							)}
@@ -279,17 +279,17 @@ export function LandGeneralStep({
 					{/* Characteristics */}
 					<div className="space-y-2">
 						<Label>Características del Terreno</Label>
-						<div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+						<div className="grid grid-cols-2 gap-2 md:grid-cols-3">
 							{LAND_CHARACTERISTICS.map((characteristic) => {
 								const isSelected =
 									selectedCharacteristics.includes(characteristic);
 								return (
 									<Button
 										key={characteristic}
+										onClick={() => handleCharacteristicToggle(characteristic)}
+										size="sm"
 										type="button"
 										variant={isSelected ? "default" : "outline"}
-										size="sm"
-										onClick={() => handleCharacteristicToggle(characteristic)}
 									>
 										{characteristic}
 									</Button>
@@ -303,25 +303,25 @@ export function LandGeneralStep({
 						<div className="flex items-center justify-between">
 							<Label htmlFor="description">Descripción *</Label>
 							<Button
+								disabled={!watchedValues.landType || generateAI.isPending}
+								onClick={handleGenerateDescription}
+								size="sm"
 								type="button"
 								variant="outline"
-								size="sm"
-								onClick={handleGenerateDescription}
-								disabled={!watchedValues.landType || generateAI.isPending}
 							>
-								<Sparkles className="h-4 w-4 mr-2" />
+								<Sparkles className="mr-2 h-4 w-4" />
 								{generateAI.isPending ? "Generando..." : "Generar con IA"}
 							</Button>
 						</div>
 						<Textarea
 							id="description"
 							{...register("description")}
+							className={cn(formErrors.description && "border-destructive")}
 							placeholder="Describe las características principales del terreno..."
 							rows={4}
-							className={cn(formErrors.description && "border-destructive")}
 						/>
 						{formErrors.description && (
-							<p className="text-sm text-destructive">
+							<p className="text-destructive text-sm">
 								{formErrors.description.message}
 							</p>
 						)}

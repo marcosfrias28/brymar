@@ -2,12 +2,12 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Button } from "../../ui/button";
 
-interface IntroCTAProps {
+type IntroCTAProps = {
 	title: string;
 	cta: string;
 	WordsStyle: string;
 	italianno: any;
-}
+};
 
 export const IntroCTA: React.FC<IntroCTAProps> = ({
 	title,
@@ -19,15 +19,15 @@ export const IntroCTA: React.FC<IntroCTAProps> = ({
 	const lastWord = introPhrase.pop();
 
 	return (
-		<section className="relative text-white flex max-w-4xl flex-col items-center text-center mx-auto">
+		<section className="relative mx-auto flex max-w-4xl flex-col items-center text-center text-white">
 			<div className="pointer-events-none px-10">
 				<p
 					className={cn(
-						"font-sans font-black desktop:text-8xl smartphone:text-7xl smartphonexs:text-4xl",
-						"text-pretty",
+						"font-black font-sans desktop:text-8xl smartphone:text-7xl smartphonexs:text-4xl",
+						"text-pretty"
 					)}
 				>
-					<span className={cn(WordsStyle, "font-thin font-serif bg-aurora")}>
+					<span className={cn(WordsStyle, "bg-aurora font-serif font-thin")}>
 						{firstWord?.concat(" ")}
 					</span>
 					<span>{introPhrase.join(" ").concat(" ")}</span>
@@ -35,8 +35,8 @@ export const IntroCTA: React.FC<IntroCTAProps> = ({
 				<span
 					className={cn(
 						italianno.className,
-						"text-[250px] tablet:text-[350px] smartphonexs:text-[200px] inline-block -mt-56 max-md:-mt-32 -mb-48",
-						WordsStyle,
+						"-mt-56 max-md:-mt-32 -mb-48 inline-block tablet:text-[350px] text-[250px] smartphonexs:text-[200px]",
+						WordsStyle
 					)}
 				>
 					{lastWord}
@@ -44,13 +44,13 @@ export const IntroCTA: React.FC<IntroCTAProps> = ({
 			</div>
 			<Link href="/search">
 				<Button
-					variant="outline"
 					className={cn(
 						"relative",
-						"smartphonexs:mt-4 p-6 text-3xl smartphonexs:text-xl self-center",
-						"border-white rounded-lg text-foreground",
-						"hover:transition-all active:border-green-800 bg-background",
+						"self-center p-6 text-3xl smartphonexs:mt-4 smartphonexs:text-xl",
+						"rounded-lg border-white text-foreground",
+						"bg-background hover:transition-all active:border-green-800"
 					)}
+					variant="outline"
 				>
 					<span>{cta}</span>
 				</Button>

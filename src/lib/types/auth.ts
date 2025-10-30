@@ -6,7 +6,7 @@ import type { ActionResult, BaseEntity, Currency, Language } from "./shared";
 
 export type UserRole = "admin" | "editor" | "super_admin" | "user" | "agent";
 
-export interface UserPreferences {
+export type UserPreferences = {
 	notifications?: {
 		email: boolean;
 		push: boolean;
@@ -22,7 +22,7 @@ export interface UserPreferences {
 		language: Language;
 		currency: Currency;
 	};
-}
+};
 
 export interface User extends BaseEntity {
 	email: string;
@@ -42,7 +42,7 @@ export interface User extends BaseEntity {
 	isActive: boolean;
 }
 
-export interface CreateUserInput {
+export type CreateUserInput = {
 	email: string;
 	name?: string;
 	firstName?: string;
@@ -50,9 +50,9 @@ export interface CreateUserInput {
 	phone?: string;
 	role?: UserRole;
 	preferences?: UserPreferences;
-}
+};
 
-export interface UpdateUserProfileInput {
+export type UpdateUserProfileInput = {
 	id: string;
 	name?: string;
 	firstName?: string;
@@ -64,58 +64,58 @@ export interface UpdateUserProfileInput {
 	location?: string;
 	website?: string;
 	preferences?: UserPreferences;
-}
+};
 
-export interface AuthenticateUserInput {
+export type AuthenticateUserInput = {
 	email: string;
 	password: string;
 	rememberMe?: boolean;
-}
+};
 
-export interface SignUpInput {
+export type SignUpInput = {
 	email: string;
 	password: string;
 	name?: string;
 	firstName?: string;
 	lastName?: string;
 	phone?: string;
-}
+};
 
-export interface ForgotPasswordInput {
+export type ForgotPasswordInput = {
 	email: string;
-}
+};
 
-export interface ResetPasswordInput {
+export type ResetPasswordInput = {
 	token: string;
 	password: string;
 	confirmPassword: string;
-}
+};
 
-export interface VerifyEmailInput {
+export type VerifyEmailInput = {
 	token: string;
-}
+};
 
-export interface SendVerificationOTPInput {
+export type SendVerificationOTPInput = {
 	email: string;
-}
+};
 
-export interface VerifyOTPInput {
+export type VerifyOTPInput = {
 	email: string;
 	otp: string;
-}
+};
 
-export interface ChangePasswordInput {
+export type ChangePasswordInput = {
 	currentPassword: string;
 	newPassword: string;
 	confirmPassword: string;
-}
+};
 
-export interface Session {
+export type Session = {
 	user: User;
 	accessToken: string;
 	refreshToken?: string;
 	expiresAt: Date;
-}
+};
 
 // Notification types
 export interface Notification extends BaseEntity {
@@ -128,13 +128,13 @@ export interface Notification extends BaseEntity {
 	actionUrl?: string;
 }
 
-export interface MarkNotificationAsReadInput {
+export type MarkNotificationAsReadInput = {
 	id: string;
-}
+};
 
-export interface MarkAllNotificationsAsReadInput {
+export type MarkAllNotificationsAsReadInput = {
 	userId: string;
-}
+};
 
 // Favorite types
 export interface Favorite extends BaseEntity {
@@ -143,15 +143,15 @@ export interface Favorite extends BaseEntity {
 	itemType: "property" | "land" | "blog";
 }
 
-export interface AddFavoriteInput {
+export type AddFavoriteInput = {
 	itemId: string;
 	itemType: "property" | "land" | "blog";
-}
+};
 
-export interface RemoveFavoriteInput {
+export type RemoveFavoriteInput = {
 	itemId: string;
 	itemType: "property" | "land" | "blog";
-}
+};
 
 // Action result types
 export type CreateUserResult = ActionResult<User>;

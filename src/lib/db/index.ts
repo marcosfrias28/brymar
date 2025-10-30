@@ -21,6 +21,7 @@ export {
 	lte,
 	notInArray,
 	or,
+	// sql, // Commented out to avoid conflicts with Drizzle ORM sql
 	testConnection,
 	withTransaction,
 } from "./connection";

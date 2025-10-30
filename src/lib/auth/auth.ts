@@ -2,14 +2,17 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { emailOTP } from "better-auth/plugins";
-import db from "../db/drizzle"; // Usar la instancia principal que ya está configurada correctamente
+import { db } from "../db"; // Usar la instancia principal que ya está configurada correctamente
 import { accounts, sessions, users, verificationTokens } from "../db/schema";
 import { sendVerificationOTP } from "../email";
 import { getSafeUserMessage, error as logError } from "../logger";
 
 export const auth = betterAuth({
-	secret: process.env.BETTER_AUTH_SECRET || "P2MTvnMR37nfWXt11MUGS5AT45mTjTlZ",
-	baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+	secret: process.env.BETTER_AUTH_SECRET,
+	baseURL:
+		process.env.BETTER_AUTH_URL ||
+		process.env.NEXT_PUBLIC_APP_URL ||
+		"http://localhost:3000",
 	database: drizzleAdapter(db, {
 		provider: "pg",
 		schema: {
@@ -75,6 +78,9 @@ export const auth = betterAuth({
 				await logError("Password reset email failed to send", result.error, {
 					email: user.email,
 				});
+				// Propagar error para que la acción de forgotPassword no
+				// registre éxito cuando el correo falle.
+				throw new Error(await getSafeUserMessage("EMAIL_SEND_ERROR"));
 			}
 		},
 	},

@@ -147,9 +147,9 @@ export const formAnimations = {
 const animationCache = new Map<string, string>();
 
 export const createHoverAnimation = (
-	bgOpacity: number = 10,
-	borderOpacity: number = 20,
-	duration: keyof typeof animationTimings = "normal",
+	bgOpacity = 10,
+	borderOpacity = 20,
+	duration: keyof typeof animationTimings = "normal"
 ) => {
 	const key = `hover-${bgOpacity}-${borderOpacity}-${duration}`;
 	if (animationCache.has(key)) {
@@ -162,8 +162,8 @@ export const createHoverAnimation = (
 };
 
 export const createFocusAnimation = (
-	ringOpacity: number = 50,
-	duration: keyof typeof animationTimings = "fast",
+	ringOpacity = 50,
+	duration: keyof typeof animationTimings = "fast"
 ) => {
 	const key = `focus-${ringOpacity}-${duration}`;
 	if (animationCache.has(key)) {
@@ -182,7 +182,7 @@ export const createStaggeredAnimation = (delay: number) => {
 	}
 
 	const animation =
-		`animate-in fade-in slide-in-from-bottom-2 duration-300` +
+		"animate-in fade-in slide-in-from-bottom-2 duration-300" +
 		(delay > 0 ? ` delay-${delay * 100}` : "");
 	animationCache.set(key, animation);
 	return animation;
@@ -191,10 +191,8 @@ export const createStaggeredAnimation = (delay: number) => {
 // Performance optimization: Prefers reduced motion
 export const getReducedMotionClasses = (
 	normalClasses: string,
-	reducedClasses: string = "",
-) => {
-	return `motion-safe:${normalClasses} ${reducedClasses}`;
-};
+	reducedClasses = ""
+) => `motion-safe:${normalClasses} ${reducedClasses}`;
 
 // Animation presets for common UI patterns
 export const animationPresets = {

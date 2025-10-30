@@ -28,19 +28,19 @@ interface LazyWizardWrapperProps<T extends WizardData>
 const LazyPropertyWizard = lazy(() =>
 	import("./property/property-wizard").then((module) => ({
 		default: module.PropertyWizard,
-	})),
+	}))
 );
 
 const LazyLandWizard = lazy(() =>
 	import("./land/land-wizard").then((module) => ({
 		default: module.LandWizard,
-	})),
+	}))
 );
 
 const LazyBlogWizard = lazy(() =>
 	import("./blog/blog-wizard").then((module) => ({
 		default: module.BlogWizard,
-	})),
+	}))
 );
 
 export function LazyWizardWrapper<T extends WizardData>({

@@ -7,7 +7,7 @@ import { useCallback, useState } from "react";
 import { toast } from "@/hooks/use-toast";
 
 // Types for different content generation
-export interface PropertyAIData {
+export type PropertyAIData = {
 	type: "property";
 	propertyType?: string;
 	location?: string;
@@ -16,9 +16,9 @@ export interface PropertyAIData {
 	bedrooms?: number;
 	bathrooms?: number;
 	characteristics?: string[];
-}
+};
 
-export interface LandAIData {
+export type LandAIData = {
 	type: "land";
 	landType?: string;
 	location?: string;
@@ -27,26 +27,26 @@ export interface LandAIData {
 	developmentPotential?: string;
 	zoning?: string;
 	characteristics?: string[];
-}
+};
 
-export interface BlogAIData {
+export type BlogAIData = {
 	type: "blog";
 	category?: string;
 	topic?: string;
 	targetAudience?: string;
 	keywords?: string[];
 	tone?: "professional" | "casual" | "informative" | "persuasive";
-}
+};
 
 export type AIContentData = PropertyAIData | LandAIData | BlogAIData;
 
-export interface RichTextContent {
+export type RichTextContent = {
 	html: string;
 	plainText: string;
 	formatted: boolean;
-}
+};
 
-export interface AIGenerationResult {
+export type AIGenerationResult = {
 	title?: string;
 	description?: string | RichTextContent;
 	tags?: string[];
@@ -54,9 +54,9 @@ export interface AIGenerationResult {
 	seoTitle?: string;
 	seoDescription?: string;
 	keywords?: string[];
-}
+};
 
-interface AIGenerationState {
+type AIGenerationState = {
 	isGenerating: boolean;
 	error: string | null;
 	lastGenerated: AIGenerationResult;
@@ -65,18 +65,18 @@ interface AIGenerationState {
 		type: string;
 		content: any;
 	}>;
-}
+};
 
-interface UseEnhancedAIGenerationOptions {
+type UseEnhancedAIGenerationOptions = {
 	language?: "es" | "en";
 	useRichText?: boolean;
 	autoSave?: boolean;
 	onSuccess?: (type: string, content: any) => void;
 	onError?: (error: string) => void;
-}
+};
 
 export function useEnhancedAIGeneration(
-	options: UseEnhancedAIGenerationOptions = {},
+	options: UseEnhancedAIGenerationOptions = {}
 ) {
 	const {
 		language = "es",
@@ -102,7 +102,7 @@ export function useEnhancedAIGeneration(
 			setState((prev) => ({ ...prev, error, isGenerating: false }));
 			onError?.(error);
 		},
-		[onError],
+		[onError]
 	);
 
 	const addToHistory = useCallback((type: string, content: any) => {
@@ -127,7 +127,7 @@ export function useEnhancedAIGeneration(
 			addToHistory(type, content);
 			onSuccess?.(type, content);
 		},
-		[addToHistory, onSuccess],
+		[addToHistory, onSuccess]
 	);
 
 	/**
@@ -175,7 +175,7 @@ export function useEnhancedAIGeneration(
 				return null;
 			}
 		},
-		[setGenerating, setGenerated, setError],
+		[setGenerating, setGenerated, setError]
 	);
 
 	/**
@@ -230,7 +230,7 @@ export function useEnhancedAIGeneration(
 				return null;
 			}
 		},
-		[useRichText, setGenerating, setGenerated, setError],
+		[useRichText, setGenerating, setGenerated, setError]
 	);
 
 	/**
@@ -277,7 +277,7 @@ export function useEnhancedAIGeneration(
 				return null;
 			}
 		},
-		[setGenerating, setGenerated, setError],
+		[setGenerating, setGenerated, setError]
 	);
 
 	/**
@@ -285,7 +285,7 @@ export function useEnhancedAIGeneration(
 	 */
 	const generateSEO = useCallback(
 		async (
-			data: AIContentData,
+			data: AIContentData
 		): Promise<{
 			seoTitle: string;
 			seoDescription: string;
@@ -320,7 +320,7 @@ export function useEnhancedAIGeneration(
 				return null;
 			}
 		},
-		[setGenerating, setGenerated, setError],
+		[setGenerating, setGenerated, setError]
 	);
 
 	/**
@@ -337,7 +337,7 @@ export function useEnhancedAIGeneration(
 						generateDescription(data),
 						generateTags(data),
 						generateSEO(data),
-					],
+					]
 				);
 
 				const result: AIGenerationResult = {
@@ -399,7 +399,7 @@ export function useEnhancedAIGeneration(
 			generateSEO,
 			setError,
 			setGenerating,
-		],
+		]
 	);
 
 	/**
@@ -426,7 +426,7 @@ export function useEnhancedAIGeneration(
 				return [];
 			}
 		},
-		[],
+		[]
 	);
 
 	return {
@@ -479,13 +479,13 @@ async function generateBlogTitle(data: BlogAIData): Promise<string> {
 }
 
 async function generatePropertyDescription(
-	data: PropertyAIData,
+	data: PropertyAIData
 ): Promise<string> {
 	return `Descubre esta increíble ${data.propertyType} ubicada en ${data.location}. Con ${data.bedrooms} habitaciones y ${data.bathrooms} baños, esta propiedad ofrece el espacio perfecto para tu familia.`;
 }
 
 async function generatePropertyRichDescription(
-	data: PropertyAIData,
+	data: PropertyAIData
 ): Promise<RichTextContent> {
 	const html = `<p><strong>Descubre esta increíble ${data.propertyType}</strong> ubicada en <em>${data.location}</em>.</p><ul><li>${data.bedrooms} habitaciones espaciosas</li><li>${data.bathrooms} baños modernos</li><li>Superficie de ${data.surface} m²</li></ul>`;
 	const plainText = `Descubre esta increíble ${data.propertyType} ubicada en ${data.location}. Con ${data.bedrooms} habitaciones y ${data.bathrooms} baños.`;
@@ -498,7 +498,7 @@ async function generateLandDescription(data: LandAIData): Promise<string> {
 }
 
 async function generateLandRichDescription(
-	data: LandAIData,
+	data: LandAIData
 ): Promise<RichTextContent> {
 	const html = `<p><strong>Excelente terreno ${data.landType}</strong> en <em>${data.location}</em>.</p><ul><li>Superficie: ${data.surface} m²</li><li>Potencial: ${data.developmentPotential}</li><li>Zonificación: ${data.zoning}</li></ul>`;
 	const plainText = `Excelente terreno ${data.landType} en ${data.location} con ${data.surface} m² de superficie.`;
@@ -511,7 +511,7 @@ async function generateBlogDescription(data: BlogAIData): Promise<string> {
 }
 
 async function generateBlogRichContent(
-	data: BlogAIData,
+	data: BlogAIData
 ): Promise<RichTextContent> {
 	const html = `<h2>${data.topic}</h2><p>Contenido completo sobre <strong>${data.topic}</strong> dirigido a <em>${data.targetAudience}</em>.</p><p>Este artículo cubre todos los aspectos importantes del tema.</p>`;
 	const plainText = `${data.topic}\n\nContenido completo sobre ${data.topic} dirigido a ${data.targetAudience}.`;
@@ -521,32 +521,48 @@ async function generateBlogRichContent(
 
 async function generatePropertyTags(data: PropertyAIData): Promise<string[]> {
 	const baseTags: (string | undefined)[] = [data.propertyType, data.location];
-	if (data.bedrooms) baseTags.push(`${data.bedrooms} habitaciones`);
-	if (data.bathrooms) baseTags.push(`${data.bathrooms} baños`);
-	if (data.characteristics) baseTags.push(...data.characteristics);
+	if (data.bedrooms) {
+		baseTags.push(`${data.bedrooms} habitaciones`);
+	}
+	if (data.bathrooms) {
+		baseTags.push(`${data.bathrooms} baños`);
+	}
+	if (data.characteristics) {
+		baseTags.push(...data.characteristics);
+	}
 
 	return baseTags.filter((tag): tag is string => Boolean(tag));
 }
 
 async function generateLandTags(data: LandAIData): Promise<string[]> {
 	const baseTags: (string | undefined)[] = [data.landType, data.location];
-	if (data.developmentPotential) baseTags.push(data.developmentPotential);
-	if (data.zoning) baseTags.push(data.zoning);
-	if (data.characteristics) baseTags.push(...data.characteristics);
+	if (data.developmentPotential) {
+		baseTags.push(data.developmentPotential);
+	}
+	if (data.zoning) {
+		baseTags.push(data.zoning);
+	}
+	if (data.characteristics) {
+		baseTags.push(...data.characteristics);
+	}
 
 	return baseTags.filter((tag): tag is string => Boolean(tag));
 }
 
 async function generateBlogTags(data: BlogAIData): Promise<string[]> {
 	const baseTags: (string | undefined)[] = [data.category, data.topic];
-	if (data.keywords) baseTags.push(...data.keywords);
-	if (data.targetAudience) baseTags.push(data.targetAudience);
+	if (data.keywords) {
+		baseTags.push(...data.keywords);
+	}
+	if (data.targetAudience) {
+		baseTags.push(data.targetAudience);
+	}
 
 	return baseTags.filter((tag): tag is string => Boolean(tag));
 }
 
 async function generateSEOContent(
-	data: AIContentData,
+	data: AIContentData
 ): Promise<{ seoTitle: string; seoDescription: string; keywords: string[] }> {
 	switch (data.type) {
 		case "property": {
@@ -630,7 +646,7 @@ async function generateSEOContent(
 
 async function generateSuggestions(
 	_data: Partial<AIContentData>,
-	field: string,
+	field: string
 ): Promise<string[]> {
 	// Mock suggestions - replace with actual AI API
 	const suggestions: Record<string, string[]> = {

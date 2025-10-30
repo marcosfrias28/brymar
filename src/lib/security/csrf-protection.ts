@@ -36,20 +36,20 @@ const CSRF_CONFIG = {
 
 // In-memory token store (in production, use Redis or database)
 class CSRFTokenStore {
-	private tokens = new Map<
+	private readonly tokens = new Map<
 		string,
 		{ token: string; expires: number; userId?: string }
 	>();
 
 	// Cleanup expired tokens periodically
-	private cleanupInterval: NodeJS.Timeout;
+	private readonly cleanupInterval: NodeJS.Timeout;
 
 	constructor() {
 		this.cleanupInterval = setInterval(
 			() => {
 				this.cleanup();
 			},
-			5 * 60 * 1000,
+			5 * 60 * 1000
 		); // Cleanup every 5 minutes
 	}
 
@@ -71,7 +71,7 @@ class CSRFTokenStore {
 	}
 
 	get(
-		sessionId: string,
+		sessionId: string
 	): { token: string; expires: number; userId?: string } | undefined {
 		const data = this.tokens.get(sessionId);
 		if (data && data.expires > Date.now()) {
@@ -83,7 +83,7 @@ class CSRFTokenStore {
 			this.tokens.delete(sessionId);
 		}
 
-		return undefined;
+		return;
 	}
 
 	delete(sessionId: string): void {
@@ -132,7 +132,7 @@ function generateSessionId(request: NextRequest, userId?: string): string {
  */
 export async function createCSRFToken(
 	request: NextRequest,
-	userId?: string,
+	userId?: string
 ): Promise<{
 	token: string;
 	cookie: { name: string; value: string; options: any };
@@ -158,12 +158,12 @@ export async function createCSRFToken(
  */
 export async function validateCSRFToken(
 	request: NextRequest,
-	userId?: string,
+	userId?: string
 ): Promise<boolean> {
 	// Skip validation for exempt methods
 	if (
 		CSRF_CONFIG.EXEMPT_METHODS.includes(
-			request.method as "GET" | "HEAD" | "OPTIONS",
+			request.method as "GET" | "HEAD" | "OPTIONS"
 		)
 	) {
 		return true;
@@ -171,7 +171,7 @@ export async function validateCSRFToken(
 
 	// Check if path requires CSRF protection
 	const requiresProtection = CSRF_CONFIG.PROTECTED_PATHS.some((path) =>
-		request.nextUrl.pathname.startsWith(path),
+		request.nextUrl.pathname.startsWith(path)
 	);
 
 	if (!requiresProtection) {
@@ -214,7 +214,7 @@ export async function validateCSRFToken(
 	// Constant-time comparison to prevent timing attacks
 	return crypto.timingSafeEqual(
 		Buffer.from(storedData.token, "hex"),
-		Buffer.from(requestToken, "hex"),
+		Buffer.from(requestToken, "hex")
 	);
 }
 
@@ -223,7 +223,7 @@ export async function validateCSRFToken(
  */
 export async function csrfProtection(
 	request: NextRequest,
-	userId?: string,
+	userId?: string
 ): Promise<NextResponse | null> {
 	try {
 		const isValid = await validateCSRFToken(request, userId);
@@ -240,14 +240,12 @@ export async function csrfProtection(
 					headers: {
 						"X-CSRF-Protection": "failed",
 					},
-				},
+				}
 			);
 		}
 
 		return null; // Continue processing
-	} catch (error) {
-		console.error("CSRF validation error:", error);
-
+	} catch (_error) {
 		return NextResponse.json(
 			{
 				error: "CSRF validation error",
@@ -258,7 +256,7 @@ export async function csrfProtection(
 				headers: {
 					"X-CSRF-Protection": "error",
 				},
-			},
+			}
 		);
 	}
 }
@@ -268,7 +266,7 @@ export async function csrfProtection(
  */
 export async function getCSRFToken(
 	request: NextRequest,
-	userId?: string,
+	userId?: string
 ): Promise<string> {
 	const sessionId = generateSessionId(request, userId);
 	const storedData = csrfTokenStore.get(sessionId);
@@ -286,7 +284,7 @@ export async function getCSRFToken(
  * Server action wrapper with CSRF protection
  */
 export function withCSRFProtection<T extends any[], R>(
-	action: (...args: T) => Promise<R>,
+	action: (...args: T) => Promise<R>
 ) {
 	return async (...args: T): Promise<R> => {
 		// Note: In server actions, we need to get the request context differently
@@ -352,7 +350,7 @@ export class CSRFTokenManager {
 	 * Add CSRF token to request headers
 	 */
 	async addTokenToHeaders(
-		headers: Record<string, string> = {},
+		headers: Record<string, string> = {}
 	): Promise<Record<string, string>> {
 		const token = await this.getToken();
 		return {
@@ -374,7 +372,7 @@ export class CSRFTokenManager {
 	 * Add CSRF token to JSON payload
 	 */
 	async addTokenToJSON(
-		data: Record<string, any>,
+		data: Record<string, any>
 	): Promise<Record<string, any>> {
 		const token = await this.getToken();
 		return {
@@ -402,10 +400,10 @@ export const csrfTokenManager = new CSRFTokenManager();
  */
 export async function csrfFetch(
 	url: string,
-	options: RequestInit = {},
+	options: RequestInit = {}
 ): Promise<Response> {
 	const headers = await csrfTokenManager.addTokenToHeaders(
-		(options.headers as Record<string, string>) || {},
+		(options.headers as Record<string, string>) || {}
 	);
 
 	return fetch(url, {
@@ -420,7 +418,7 @@ export async function csrfFetch(
  */
 export async function submitFormWithCSRF(
 	form: HTMLFormElement,
-	options: RequestInit = {},
+	options: RequestInit = {}
 ): Promise<Response> {
 	const formData = new FormData(form);
 	await csrfTokenManager.addTokenToFormData(formData);
@@ -438,7 +436,7 @@ export async function submitFormWithCSRF(
  */
 export async function validateCSRFInServerAction(
 	formData: FormData | Record<string, any>,
-	_userId?: string,
+	_userId?: string
 ): Promise<void> {
 	// Extract token from form data or object
 	let token: string | null = null;
@@ -452,7 +450,7 @@ export async function validateCSRFInServerAction(
 	if (!token) {
 		throw new ValidationError(
 			{ csrf: ["Token CSRF requerido"] },
-			"Token de seguridad requerido",
+			"Token de seguridad requerido"
 		);
 	}
 
@@ -464,7 +462,7 @@ export async function validateCSRFInServerAction(
 	) {
 		throw new ValidationError(
 			{ csrf: ["Token CSRF inválido"] },
-			"Token de seguridad inválido",
+			"Token de seguridad inválido"
 		);
 	}
 }

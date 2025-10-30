@@ -3,7 +3,7 @@
 import { Bath, Bed, Edit, Eye, MapPin, Square } from "lucide-react";
 import { type CardAction, type CardBadge, UnifiedCard } from "./unified-card";
 
-interface PropertyCardProps {
+type PropertyCardProps = {
 	property: {
 		id: string;
 		title: string;
@@ -19,7 +19,7 @@ interface PropertyCardProps {
 	showActions?: boolean;
 	onEdit?: (id: string) => void;
 	onView?: (id: string) => void;
-}
+};
 
 export function PropertyCard({
 	property,
@@ -72,14 +72,14 @@ export function PropertyCard({
 
 	return (
 		<UnifiedCard
-			title={property.title}
-			subtitle={`$${property.price.toLocaleString()} USD`}
+			actions={actions}
+			badges={badges}
+			href={showActions ? undefined : `/properties/${property.id}`}
 			image={property.images?.[0]}
 			imageAlt={property.title}
-			badges={badges}
 			metadata={metadata}
-			actions={actions}
-			href={!showActions ? `/properties/${property.id}` : undefined}
+			subtitle={`$${property.price.toLocaleString()} USD`}
+			title={property.title}
 		/>
 	);
 }

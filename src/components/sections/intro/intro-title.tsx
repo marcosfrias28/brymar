@@ -1,37 +1,35 @@
 import { motion } from "framer-motion";
 import type React from "react";
 
-interface IntroTitleProps {
+type IntroTitleProps = {
 	name: string;
 	subtitle: string;
-}
-
-export const IntroTitle: React.FC<IntroTitleProps> = ({ name, subtitle }) => {
-	return (
-		<div className="w-full h-fit text-center text-foreground px-4 z-10 pt-20 pb-10 bg-background">
-			<motion.h1
-				initial={{ opacity: 0, y: 100 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{
-					duration: 0.5,
-					ease: "easeInOut",
-				}}
-				className="font-extrabold font-serif uppercase text-4xl"
-			>
-				{name}
-			</motion.h1>
-			<motion.h2
-				initial={{ opacity: 0, y: 100 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{
-					duration: 0.5,
-					delay: 0.5,
-					ease: "easeInOut",
-				}}
-				className="font-extrabold font-sans opacity-50 uppercase text-sm"
-			>
-				{subtitle}
-			</motion.h2>
-		</div>
-	);
 };
+
+export const IntroTitle: React.FC<IntroTitleProps> = ({ name, subtitle }) => (
+	<div className="z-10 h-fit w-full bg-background px-4 pt-20 pb-10 text-center text-foreground">
+		<motion.h1
+			animate={{ opacity: 1, y: 0 }}
+			className="font-extrabold font-serif text-4xl uppercase"
+			initial={{ opacity: 0, y: 100 }}
+			transition={{
+				duration: 0.5,
+				ease: "easeInOut",
+			}}
+		>
+			{name}
+		</motion.h1>
+		<motion.h2
+			animate={{ opacity: 1, y: 0 }}
+			className="font-extrabold font-sans text-sm uppercase opacity-50"
+			initial={{ opacity: 0, y: 100 }}
+			transition={{
+				duration: 0.5,
+				delay: 0.5,
+				ease: "easeInOut",
+			}}
+		>
+			{subtitle}
+		</motion.h2>
+	</div>
+);

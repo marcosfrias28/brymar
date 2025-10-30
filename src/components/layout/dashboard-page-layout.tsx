@@ -14,6 +14,9 @@ export const DashboardPageLayout = memo(function DashboardPageLayout({
 	description,
 	breadcrumbs,
 	actions,
+	stats,
+	statsLoading,
+	headerExtras,
 	children,
 	sidebar,
 	className,
@@ -27,31 +30,31 @@ export const DashboardPageLayout = memo(function DashboardPageLayout({
 	const containerClasses = useMemo(
 		() =>
 			cn(
-				"flex-1 space-y-4 max-w-full",
+				"max-w-full flex-1 space-y-4",
 				// Mobile-first responsive padding
 				"p-3 sm:p-4 md:p-6 lg:p-8",
 				// Adjust spacing based on screen size
 				isMobile && "space-y-3",
 				isTablet && "space-y-4",
-				!isMobileOrTablet && "space-y-6",
+				!isMobileOrTablet && "space-y-6"
 			),
-		[isMobile, isTablet, isMobileOrTablet],
+		[isMobile, isTablet, isMobileOrTablet]
 	);
 
 	const mainContentClasses = useMemo(
-		() => cn("flex-1 w-full", contentClassName),
-		[contentClassName],
+		() => cn("w-full flex-1", contentClassName),
+		[contentClassName]
 	);
 
 	return (
 		<PageTransition
+			className={cn("flex min-h-screen flex-col bg-background", className)}
 			variant="fade"
-			className={cn("flex flex-col min-h-screen bg-background", className)}
 		>
 			{/* Skip to main content link for screen readers */}
 			<a
+				className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:shadow-lg focus:ring-2 focus:ring-secondary focus:ring-offset-2"
 				href="#main-content"
-				className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:shadow-lg focus:ring-2 focus:ring-secondary focus:ring-offset-2"
 			>
 				{ariaLabels.skipToContent}
 			</a>
@@ -59,25 +62,34 @@ export const DashboardPageLayout = memo(function DashboardPageLayout({
 			{/* Page Container with responsive padding */}
 			<div className={containerClasses}>
 				{/* Page Header */}
-				<PageTransition variant="slideDown" delay={1}>
+				<PageTransition delay={1} variant="slideDown">
 					<header>
 						<PageHeader
-							title={title}
-							description={description}
-							breadcrumbs={breadcrumbs}
 							actions={actions}
-							showSearch={showSearch}
+							breadcrumbs={breadcrumbs}
+							description={description}
 							searchPlaceholder={searchPlaceholder}
+							showSearch={showSearch}
+							stats={stats}
+							statsLoading={statsLoading}
+							title={title}
 						/>
 					</header>
 				</PageTransition>
 
 				{/* Page Content */}
-				<PageTransition variant="slideUp" delay={2}>
+				<PageTransition delay={2} variant="slideUp">
+					{/* Header extras slot */}
+					{headerExtras && (
+						<section aria-label="Elementos de cabecera" className="mb-6">
+							{headerExtras}
+						</section>
+					)}
+
 					<main
-						id="main-content"
 						aria-label={`${title} - Contenido principal`}
 						className={mainContentClasses}
+						id="main-content"
 					>
 						<ContentGrid
 							layout={sidebar ? "two-column" : "single"}

@@ -19,11 +19,10 @@
  */
 
 export {
-	autoSavePropertyDraft,
-	completePropertyWizard,
-	deletePropertyDraft,
-	loadPropertyDraft,
-	savePropertyDraft,
+	autoSaveProperty,
+	loadPropertyForWizard,
+	publishProperty,
+	savePropertyFromWizard,
 	validatePropertyStep,
 } from "@/lib/actions/property-wizard-actions";
 // Configuration and Actions (Re-exported for convenience)
@@ -32,8 +31,3 @@ export { propertyWizardConfig } from "@/lib/wizard/property-wizard-config";
 export type { PropertyWizardData } from "@/types/property-wizard";
 // Main Property Wizard Component
 export { PropertyWizard } from "./property-wizard";
-// Property Wizard Steps
-// export { PropertyGeneralStep } from "./steps/property-general-step"; // TODO: Create step
-// export { PropertyLocationStep } from "./steps/property-location-step"; // TODO: Create step
-// export { PropertyMediaStep } from "./steps/property-media-step"; // TODO: Create step
-// export { PropertyPreviewStep } from "./steps/property-preview-step"; // TODO: Create step

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	ArrowLeft,
 	Bell,
 	Database,
 	Globe,
@@ -11,6 +12,7 @@ import {
 	Shield,
 	User as UserIcon,
 } from "lucide-react";
+import Link from "next/link";
 import { useActionState, useEffect, useId, useState } from "react";
 import { toast } from "sonner";
 import { RouteGuard } from "@/components/auth/route-guard";
@@ -39,7 +41,8 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUser } from "@/hooks/use-user";
 import { updateUserProfileAction } from "@/lib/actions/auth";
-import type { ActionState } from "@/lib/validations";
+import { getStatsAdapter } from "@/lib/adapters/stats-adapters";
+import { cn } from "@/lib/utils";
 
 const rolePermissions = {
 	admin: {
@@ -74,7 +77,7 @@ export default function SettingsPage() {
 		{
 			success: false,
 			error: undefined,
-		},
+		}
 	);
 	const [formData, setFormData] = useState<{
 		name: string;
@@ -92,6 +95,52 @@ export default function SettingsPage() {
 		security: true,
 	});
 	const [theme, setTheme] = useState("light");
+
+	// Mock settings stats data for the adapter
+	const settingsStatsData = {
+		profileCompleteness: 85,
+		securityScore: 92,
+		notificationsEnabled: Object.values(notifications).filter(Boolean).length,
+		totalSettings: 12,
+		lastUpdated: "2024-01-15",
+		activePermissions: user
+			? rolePermissions[user.role as keyof typeof rolePermissions]?.permissions
+					.length || 0
+			: 0,
+	};
+
+	// Generate stats cards using the profile adapter (settings is profile-related)
+	const statsAdapter = getStatsAdapter("profile");
+	const statsCards = statsAdapter
+		? statsAdapter.generateStats(settingsStatsData)
+		: [];
+
+	// Define filter tabs for settings sections
+	const _filterTabs = [
+		{ label: "Perfil", value: "profile" },
+		{ label: "Permisos", value: "permissions" },
+		{ label: "Notificaciones", value: "notifications" },
+		{ label: "Sistema", value: "system" },
+	];
+
+	const actions = (
+		<Link href="/dashboard">
+			<Button
+				className={cn(
+					"text-arsenic",
+					"hover:text-arsenic/80",
+					"focus-visible:outline-none",
+					"focus-visible:ring-2",
+					"focus-visible:ring-arsenic/50"
+				)}
+				size="sm"
+				variant="link"
+			>
+				<ArrowLeft className="h-4 w-4" />
+				Volver al Dashboard
+			</Button>
+		</Link>
+	);
 
 	// Update form data when user loads
 	useEffect(() => {
@@ -117,14 +166,14 @@ export default function SettingsPage() {
 		return (
 			<div className="space-y-6">
 				<div className="animate-pulse">
-					<div className="h-8 bg-gray-200 rounded w-1/4 mb-2"></div>
-					<div className="h-4 bg-gray-200 rounded w-1/2"></div>
+					<div className="mb-2 h-8 w-1/4 rounded bg-gray-200" />
+					<div className="h-4 w-1/2 rounded bg-gray-200" />
 				</div>
 			</div>
 		);
 	}
 
-	if (!user && !userLoading) {
+	if (!(user || userLoading)) {
 		return (
 			<div className="space-y-6">
 				<div className="text-red-600">Error: No se pudo cargar el usuario</div>
@@ -141,42 +190,50 @@ export default function SettingsPage() {
 		{ label: "Configuración", icon: Settings },
 	];
 
+	// Handle save settings
+	const _handleSaveSettings = () => {
+		toast.success("Configuración guardada correctamente");
+	};
+
 	return (
 		<RouteGuard requiredPermission="settings.view">
 			<DashboardPageLayout
-				title="Configuración"
-				description="Gestiona tu perfil y preferencias del sistema"
+				actions={actions}
 				breadcrumbs={breadcrumbs}
+				description="Gestiona tu perfil y preferencias del sistema"
+				stats={statsCards}
+				statsLoading={false}
+				title="Configuración"
 			>
 				<div className="space-y-6">
-					<Tabs defaultValue="profile" className="space-y-6">
+					<Tabs className="space-y-6" defaultValue="profile">
 						<TabsList className="grid w-full grid-cols-2 tablet:grid-cols-4">
-							<TabsTrigger value="profile" className="flex items-center gap-2">
+							<TabsTrigger className="flex items-center gap-2" value="profile">
 								<UserIcon className="h-4 w-4" />
 								Perfil
 							</TabsTrigger>
 							<TabsTrigger
-								value="permissions"
 								className="flex items-center gap-2"
+								value="permissions"
 							>
 								<Shield className="h-4 w-4" />
 								Permisos
 							</TabsTrigger>
 							<TabsTrigger
-								value="notifications"
 								className="flex items-center gap-2"
+								value="notifications"
 							>
 								<Bell className="h-4 w-4" />
 								Notificaciones
 							</TabsTrigger>
-							<TabsTrigger value="system" className="flex items-center gap-2">
+							<TabsTrigger className="flex items-center gap-2" value="system">
 								<Globe className="h-4 w-4" />
 								Sistema
 							</TabsTrigger>
 						</TabsList>
 
 						{/* Profile Tab */}
-						<TabsContent value="profile" className="space-y-6">
+						<TabsContent className="space-y-6" value="profile">
 							<Card>
 								<CardHeader>
 									<CardTitle className="flex items-center gap-2">
@@ -192,8 +249,8 @@ export default function SettingsPage() {
 									<div className="flex items-center gap-4">
 										<Avatar className="h-20 w-20">
 											<AvatarImage
-												src={user?.avatar || "/placeholder.svg"}
 												alt={user?.name || "Usuario"}
+												src={user?.avatar || "/placeholder.svg"}
 											/>
 											<AvatarFallback className="text-lg">
 												{(user?.name || "Usuario")
@@ -203,10 +260,10 @@ export default function SettingsPage() {
 											</AvatarFallback>
 										</Avatar>
 										<div>
-											<Button variant="outline" size="sm">
+											<Button size="sm" variant="outline">
 												Cambiar Foto
 											</Button>
-											<p className="text-sm text-blackCoral/70 mt-1">
+											<p className="mt-1 text-blackCoral/70 text-sm">
 												JPG, PNG o GIF. Máximo 2MB.
 											</p>
 										</div>
@@ -215,17 +272,17 @@ export default function SettingsPage() {
 									<Separator />
 
 									{/* Form Fields */}
-									<form id={formId} action={updateUserFormAction}>
+									<form action={updateUserFormAction} id={formId}>
 										<div className="grid grid-cols-1 tablet:grid-cols-2 gap-4">
 											<div className="space-y-2">
 												<Label htmlFor={nameId}>Nombre Completo</Label>
 												<Input
 													id={nameId}
 													name="name"
-													value={formData.name || ""}
 													onChange={(e) =>
 														setFormData({ ...formData, name: e.target.value })
 													}
+													value={formData.name || ""}
 												/>
 											</div>
 											<div className="space-y-2">
@@ -233,11 +290,11 @@ export default function SettingsPage() {
 												<Input
 													id={emailId}
 													name="email"
-													type="email"
-													value={formData.email}
 													onChange={(e) =>
 														setFormData({ ...formData, email: e.target.value })
 													}
+													type="email"
+													value={formData.email}
 												/>
 											</div>
 										</div>
@@ -245,14 +302,14 @@ export default function SettingsPage() {
 
 									<div className="flex justify-end">
 										<Button
-											type="submit"
-											form="profile-form"
 											className="bg-arsenic hover:bg-blackCoral"
 											disabled={
 												updateState.success === undefined
 													? false
-													: !updateState.success && !updateState.error
+													: !(updateState.success || updateState.error)
 											}
+											form="profile-form"
+											type="submit"
 										>
 											Guardar Cambios
 										</Button>
@@ -262,7 +319,7 @@ export default function SettingsPage() {
 						</TabsContent>
 
 						{/* Permissions Tab */}
-						<TabsContent value="permissions" className="space-y-6">
+						<TabsContent className="space-y-6" value="permissions">
 							<Card>
 								<CardHeader>
 									<CardTitle className="flex items-center gap-2">
@@ -275,10 +332,10 @@ export default function SettingsPage() {
 								</CardHeader>
 								<CardContent className="space-y-6">
 									{/* Current Role */}
-									<div className="flex items-center justify-between p-4 border rounded-lg">
+									<div className="flex items-center justify-between rounded-lg border p-4">
 										<div className="flex items-center gap-3">
 											<div
-												className={`w-3 h-3 rounded-full ${
+												className={`h-3 w-3 rounded-full ${
 													currentRole?.color || "bg-gray-400"
 												}`}
 											/>
@@ -286,7 +343,7 @@ export default function SettingsPage() {
 												<h3 className="font-semibold">
 													{currentRole?.label || "Rol desconocido"}
 												</h3>
-												<p className="text-sm text-blackCoral/70">
+												<p className="text-blackCoral/70 text-sm">
 													{currentRole?.description || "Sin descripción"}
 												</p>
 											</div>
@@ -318,29 +375,29 @@ export default function SettingsPage() {
 											{Object.entries(rolePermissions).map(
 												([roleKey, role]) => (
 													<Card
-														key={roleKey}
 														className={
 															user?.role === roleKey
 																? "ring-2 ring-arsenic"
 																: ""
 														}
+														key={roleKey}
 													>
 														<CardContent className="p-4">
-															<div className="flex items-center gap-2 mb-2">
+															<div className="mb-2 flex items-center gap-2">
 																<div
-																	className={`w-3 h-3 rounded-full ${role.color}`}
+																	className={`h-3 w-3 rounded-full ${role.color}`}
 																/>
 																<h5 className="font-semibold">{role.label}</h5>
 															</div>
-															<p className="text-sm text-blackCoral/70 mb-3">
+															<p className="mb-3 text-blackCoral/70 text-sm">
 																{role.description}
 															</p>
 															<div className="space-y-1">
 																{role.permissions.map((permission) => (
 																	<Badge
+																		className="text-xs"
 																		key={permission}
 																		variant="outline"
-																		className="text-xs"
 																	>
 																		{permission}
 																	</Badge>
@@ -348,7 +405,7 @@ export default function SettingsPage() {
 															</div>
 														</CardContent>
 													</Card>
-												),
+												)
 											)}
 										</div>
 									</div>
@@ -357,7 +414,7 @@ export default function SettingsPage() {
 						</TabsContent>
 
 						{/* Notifications Tab */}
-						<TabsContent value="notifications" className="space-y-6">
+						<TabsContent className="space-y-6" value="notifications">
 							<Card>
 								<CardHeader>
 									<CardTitle className="flex items-center gap-2">
@@ -371,17 +428,17 @@ export default function SettingsPage() {
 								<CardContent className="space-y-6">
 									{Object.entries(notifications).map(([key, value]) => (
 										<div
-											key={key}
 											className="flex items-center justify-between"
+											key={key}
 										>
 											<div>
-												<Label htmlFor={key} className="text-base capitalize">
+												<Label className="text-base capitalize" htmlFor={key}>
 													{key === "email" && "Notificaciones por Email"}
 													{key === "push" && "Notificaciones Push"}
 													{key === "marketing" && "Emails de Marketing"}
 													{key === "security" && "Alertas de Seguridad"}
 												</Label>
-												<p className="text-sm text-blackCoral/70">
+												<p className="text-blackCoral/70 text-sm">
 													{key === "email" &&
 														"Recibe actualizaciones importantes por correo"}
 													{key === "push" &&
@@ -393,8 +450,8 @@ export default function SettingsPage() {
 												</p>
 											</div>
 											<Switch
-												id={key}
 												checked={value}
+												id={key}
 												onCheckedChange={(checked) =>
 													setNotifications({ ...notifications, [key]: checked })
 												}
@@ -406,7 +463,7 @@ export default function SettingsPage() {
 						</TabsContent>
 
 						{/* System Tab */}
-						<TabsContent value="system" className="space-y-6">
+						<TabsContent className="space-y-6" value="system">
 							<div className="grid grid-cols-1 tablet:grid-cols-2 gap-6">
 								{/* Language Settings */}
 								<Card>
@@ -417,7 +474,7 @@ export default function SettingsPage() {
 										</CardTitle>
 									</CardHeader>
 									<CardContent>
-										<Select value={language} onValueChange={setLanguage}>
+										<Select onValueChange={setLanguage} value={language}>
 											<SelectTrigger>
 												<SelectValue />
 											</SelectTrigger>
@@ -438,7 +495,7 @@ export default function SettingsPage() {
 										</CardTitle>
 									</CardHeader>
 									<CardContent>
-										<Select value={theme} onValueChange={setTheme}>
+										<Select onValueChange={setTheme} value={theme}>
 											<SelectTrigger>
 												<SelectValue />
 											</SelectTrigger>
@@ -462,20 +519,20 @@ export default function SettingsPage() {
 								</CardHeader>
 								<CardContent className="space-y-4">
 									<Button
-										variant="outline"
 										className="w-full justify-start bg-transparent"
+										variant="outline"
 									>
 										Cambiar Contraseña
 									</Button>
 									<Button
-										variant="outline"
 										className="w-full justify-start bg-transparent"
+										variant="outline"
 									>
 										Configurar Autenticación de Dos Factores
 									</Button>
 									<Button
-										variant="outline"
 										className="w-full justify-start bg-transparent"
+										variant="outline"
 									>
 										Ver Sesiones Activas
 									</Button>
@@ -492,19 +549,19 @@ export default function SettingsPage() {
 								</CardHeader>
 								<CardContent className="space-y-4">
 									<Button
-										variant="outline"
 										className="w-full justify-start bg-transparent"
+										variant="outline"
 									>
 										Exportar Mis Datos
 									</Button>
 									<Button
-										variant="outline"
 										className="w-full justify-start bg-transparent"
+										variant="outline"
 									>
 										Descargar Historial de Actividad
 									</Button>
 									<Separator />
-									<Button variant="destructive" className="w-full">
+									<Button className="w-full" variant="destructive">
 										Eliminar Cuenta
 									</Button>
 								</CardContent>

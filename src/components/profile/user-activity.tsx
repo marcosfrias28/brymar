@@ -99,19 +99,19 @@ export function UserActivity() {
 		switch (type) {
 			case "favorite":
 				return (
-					<Badge variant="outline" className="text-red-600 border-red-200">
+					<Badge className="border-red-200 text-red-600" variant="outline">
 						Favorito
 					</Badge>
 				);
 			case "view":
 				return (
-					<Badge variant="outline" className="text-blue-600 border-blue-200">
+					<Badge className="border-blue-200 text-blue-600" variant="outline">
 						Vista
 					</Badge>
 				);
 			case "search":
 				return (
-					<Badge variant="outline" className="text-green-600 border-green-200">
+					<Badge className="border-green-200 text-green-600" variant="outline">
 						Búsqueda
 					</Badge>
 				);
@@ -123,15 +123,15 @@ export function UserActivity() {
 	return (
 		<Card className="border-blackCoral shadow-lg">
 			<CardHeader>
-				<CardTitle className="text-arsenic flex items-center gap-2">
+				<CardTitle className="flex items-center gap-2 text-arsenic">
 					<Clock className="h-5 w-5" />
 					Actividad Reciente
 				</CardTitle>
 			</CardHeader>
 			<CardContent>
 				{userActivities.length === 0 ? (
-					<div className="text-center py-8 text-muted-foreground">
-						<Clock className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+					<div className="py-8 text-center text-muted-foreground">
+						<Clock className="mx-auto mb-4 h-12 w-12 text-gray-300" />
 						<p>No hay actividad reciente</p>
 					</div>
 				) : (
@@ -142,8 +142,8 @@ export function UserActivity() {
 
 							return (
 								<div
+									className="flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg-muted/50"
 									key={activity.id}
-									className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
 								>
 									<Avatar className={`h-8 w-8 ${colorClass}`}>
 										<AvatarFallback className={colorClass}>
@@ -151,24 +151,24 @@ export function UserActivity() {
 										</AvatarFallback>
 									</Avatar>
 
-									<div className="flex-1 min-w-0">
-										<div className="flex items-start justify-between mb-1">
+									<div className="min-w-0 flex-1">
+										<div className="mb-1 flex items-start justify-between">
 											<div className="flex-1">
 												<Link
+													className="line-clamp-1 font-medium text-sm transition-colors hover:text-primary"
 													href={activity.href}
-													className="font-medium text-sm hover:text-primary transition-colors line-clamp-1"
 												>
 													{activity.title}
 												</Link>
-												<p className="text-xs text-muted-foreground mt-1">
+												<p className="mt-1 text-muted-foreground text-xs">
 													{activity.action}
 												</p>
 											</div>
 											{getStatusBadge(activity.type)}
 										</div>
 
-										<div className="flex items-center justify-between mt-2">
-											<span className="text-xs text-muted-foreground flex items-center gap-1">
+										<div className="mt-2 flex items-center justify-between">
+											<span className="flex items-center gap-1 text-muted-foreground text-xs">
 												<Clock className="h-3 w-3" />
 												{activity.time}
 											</span>
@@ -178,10 +178,10 @@ export function UserActivity() {
 							);
 						})}
 
-						<div className="pt-4 border-t text-center">
+						<div className="border-t pt-4 text-center">
 							<Link
+								className="text-primary text-sm transition-colors hover:text-primary/80"
 								href="/search"
-								className="text-sm text-primary hover:text-primary/80 transition-colors"
 							>
 								Ver más actividad →
 							</Link>

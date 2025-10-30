@@ -24,7 +24,7 @@ import {
 import { cn } from "@/lib/utils";
 import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
 
-interface ErrorStateProps {
+type ErrorStateProps = {
 	title?: string;
 	description?: string;
 	error?: Error | string;
@@ -34,7 +34,7 @@ interface ErrorStateProps {
 	showDetails?: boolean;
 	className?: string;
 	variant?: "default" | "network" | "server" | "permission" | "notFound";
-}
+};
 
 const errorVariants = {
 	default: {
@@ -114,7 +114,7 @@ export function ErrorState({
 					<div
 						className={cn(
 							"mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full",
-							config.bgColor,
+							config.bgColor
 						)}
 					>
 						<Icon className={cn("h-6 w-6", config.iconColor)} />
@@ -126,17 +126,17 @@ export function ErrorState({
 					{showDetails && error && (
 						<div
 							className={cn(
-								"rounded-md p-3 border",
-								secondaryColorClasses.accent,
+								"rounded-md border p-3",
+								secondaryColorClasses.accent
 							)}
 						>
-							<div className="flex items-center gap-2 mb-2">
+							<div className="mb-2 flex items-center gap-2">
 								<Bug className="h-4 w-4 text-muted-foreground" />
-								<p className="text-sm font-medium text-muted-foreground">
+								<p className="font-medium text-muted-foreground text-sm">
 									Detalles del error:
 								</p>
 							</div>
-							<p className="text-xs text-muted-foreground break-all font-mono">
+							<p className="break-all font-mono text-muted-foreground text-xs">
 								{typeof error === "string" ? error : error.message}
 							</p>
 						</div>
@@ -145,8 +145,8 @@ export function ErrorState({
 					<div className="flex gap-2">
 						{onRetry && (
 							<Button
-								onClick={onRetry}
 								className={cn("flex-1", secondaryColorClasses.focusRing)}
+								onClick={onRetry}
 								variant="outline"
 							>
 								<RefreshCw className="mr-2 h-4 w-4" />
@@ -156,8 +156,8 @@ export function ErrorState({
 
 						{variant !== "notFound" && (
 							<Button
-								onClick={handleGoBack}
 								className="flex-1"
+								onClick={handleGoBack}
 								variant="outline"
 							>
 								<ArrowLeft className="mr-2 h-4 w-4" />
@@ -166,8 +166,8 @@ export function ErrorState({
 						)}
 
 						<Button
-							onClick={handleGoHome}
 							className={cn("flex-1", secondaryColorClasses.buttonSecondary)}
+							onClick={handleGoHome}
 						>
 							<Home className="mr-2 h-4 w-4" />
 							Inicio
@@ -195,25 +195,25 @@ export function InlineErrorState({
 		<div
 			className={cn(
 				"flex items-center justify-center p-4 text-center",
-				className,
+				className
 			)}
 		>
 			<div className="space-y-3">
 				<div
 					className={cn(
 						"mx-auto flex h-8 w-8 items-center justify-center rounded-full",
-						"bg-destructive/10",
+						"bg-destructive/10"
 					)}
 				>
 					<AlertTriangle className="h-4 w-4 text-destructive" />
 				</div>
-				<p className="text-sm text-muted-foreground">{message}</p>
+				<p className="text-muted-foreground text-sm">{message}</p>
 				{onRetry && (
 					<Button
+						className={secondaryColorClasses.focusRing}
 						onClick={onRetry}
 						size="sm"
 						variant="outline"
-						className={secondaryColorClasses.focusRing}
 					>
 						<RefreshCw className="mr-2 h-3 w-3" />
 						Reintentar
@@ -244,19 +244,19 @@ export function EmptyState({
 		<div
 			className={cn(
 				"flex flex-col items-center justify-center p-8 text-center",
-				className,
+				className
 			)}
 		>
 			<div
 				className={cn(
 					"mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full",
-					secondaryColorClasses.accent,
+					secondaryColorClasses.accent
 				)}
 			>
 				<Icon className="h-6 w-6 text-muted-foreground" />
 			</div>
-			<h3 className="text-lg font-semibold mb-2">{title}</h3>
-			<p className="text-muted-foreground mb-4 max-w-sm">{description}</p>
+			<h3 className="mb-2 font-semibold text-lg">{title}</h3>
+			<p className="mb-4 max-w-sm text-muted-foreground">{description}</p>
 			{action}
 		</div>
 	);
@@ -274,13 +274,13 @@ export function LoadingState({
 }) {
 	return (
 		<div className={cn("flex items-center justify-center p-8", className)}>
-			<div className="text-center space-y-3">
+			<div className="space-y-3 text-center">
 				<div
 					className={cn(
-						"mx-auto h-8 w-8 rounded-full border-2 border-secondary/30 border-t-secondary animate-spin",
+						"mx-auto h-8 w-8 animate-spin rounded-full border-2 border-secondary/30 border-t-secondary"
 					)}
 				/>
-				<p className="text-sm text-muted-foreground">{message}</p>
+				<p className="text-muted-foreground text-sm">{message}</p>
 			</div>
 		</div>
 	);
@@ -296,17 +296,19 @@ export function FormLoadingOverlay({
 	message?: string;
 	isVisible?: boolean;
 }) {
-	if (!isVisible) return null;
+	if (!isVisible) {
+		return null;
+	}
 
 	return (
-		<div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 rounded-lg">
-			<div className="text-center space-y-3">
+		<div className="absolute inset-0 z-50 flex items-center justify-center rounded-lg bg-background/80 backdrop-blur-sm">
+			<div className="space-y-3 text-center">
 				<div
 					className={cn(
-						"mx-auto h-6 w-6 rounded-full border-2 border-secondary/30 border-t-secondary animate-spin",
+						"mx-auto h-6 w-6 animate-spin rounded-full border-2 border-secondary/30 border-t-secondary"
 					)}
 				/>
-				<p className="text-sm text-muted-foreground">{message}</p>
+				<p className="text-muted-foreground text-sm">{message}</p>
 			</div>
 		</div>
 	);

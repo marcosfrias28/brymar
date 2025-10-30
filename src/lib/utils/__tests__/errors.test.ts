@@ -121,7 +121,7 @@ describe("Validation Helpers", () => {
 
 		expect(errors).toContain("Password must be at least 8 characters long");
 		expect(errors).toContain(
-			"Password must contain at least one uppercase letter",
+			"Password must contain at least one uppercase letter"
 		);
 		expect(errors).toContain("Password must contain at least one number");
 	});

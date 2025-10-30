@@ -6,13 +6,13 @@ import { useEffect } from "react";
 import { useAdmin } from "@/hooks/use-admin";
 import type { Permission, UserRole } from "@/lib/auth/admin-config";
 
-interface RouteGuardProps {
+type RouteGuardProps = {
 	children: React.ReactNode;
 	requiredPermission?: Permission;
 	requiredRoute?: string;
 	fallback?: React.ReactNode;
 	redirectTo?: string;
-}
+};
 
 /**
  * Componente per proteggere le route basato sui permessi dell'utente
@@ -29,7 +29,9 @@ export function RouteGuard({
 	const router = useRouter();
 
 	useEffect(() => {
-		if (loading) return;
+		if (loading) {
+			return;
+		}
 
 		// Se non c'è un utente autenticato, reindirizza al login
 		if (!user) {
@@ -63,7 +65,7 @@ export function RouteGuard({
 	if (loading) {
 		return (
 			fallback || (
-				<div className="flex items-center justify-center min-h-screen">
+				<div className="flex min-h-screen items-center justify-center">
 					<Loader2 className="h-8 w-8 animate-spin" />
 				</div>
 			)
@@ -90,11 +92,11 @@ export function RouteGuard({
 /**
  * Componente per mostrare contenuto solo se l'utente ha un permesso specifico
  */
-interface PermissionGateProps {
+type PermissionGateProps = {
 	children: React.ReactNode;
 	permission: Permission;
 	fallback?: React.ReactNode;
-}
+};
 
 export function PermissionGate({
 	children,
@@ -117,11 +119,11 @@ export function PermissionGate({
 /**
  * Componente per mostrare contenuto solo per ruoli specifici
  */
-interface RoleGateProps {
+type RoleGateProps = {
 	children: React.ReactNode;
 	allowedRoles: UserRole[];
 	fallback?: React.ReactNode;
-}
+};
 
 export function RoleGate({ children, allowedRoles, fallback }: RoleGateProps) {
 	const { hasRole, loading } = useAdmin();

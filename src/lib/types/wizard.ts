@@ -10,7 +10,7 @@ import type { ActionResult, BaseEntity, ContentType, Language } from "./shared";
 export type WizardType = "property" | "land" | "blog";
 export type WizardStatus = "draft" | "completed" | "published" | "archived";
 
-export interface WizardStep {
+export type WizardStep = {
 	id: string;
 	name: string;
 	title: string;
@@ -18,7 +18,7 @@ export interface WizardStep {
 	completed: boolean;
 	optional?: boolean;
 	data?: Record<string, any>;
-}
+};
 
 export interface WizardDraft extends BaseEntity {
 	type: WizardType;
@@ -33,14 +33,14 @@ export interface WizardDraft extends BaseEntity {
 	publishedAt?: Date;
 }
 
-export interface CreateWizardDraftInput {
+export type CreateWizardDraftInput = {
 	type: WizardType;
 	title: string;
 	description?: string;
 	initialData?: Record<string, any>;
-}
+};
 
-export interface UpdateWizardDraftInput {
+export type UpdateWizardDraftInput = {
 	id: string;
 	title?: string;
 	description?: string;
@@ -51,21 +51,21 @@ export interface UpdateWizardDraftInput {
 		data: Record<string, any>;
 		completed?: boolean;
 	};
-}
+};
 
-export interface SaveWizardStepInput {
+export type SaveWizardStepInput = {
 	draftId: string;
 	stepId: string;
 	data: Record<string, any>;
 	completed?: boolean;
-}
+};
 
-export interface PublishWizardInput {
+export type PublishWizardInput = {
 	id: string;
 	finalData?: Record<string, any>;
-}
+};
 
-export interface GenerateAIContentInput {
+export type GenerateAIContentInput = {
 	wizardType: WizardType;
 	contentType: ContentType;
 	baseData: Record<string, any>;
@@ -74,17 +74,17 @@ export interface GenerateAIContentInput {
 	prompt?: string; // optional custom prompt
 	context?: Record<string, any>;
 	previousData?: Record<string, any>;
-}
+};
 
-export interface AIGeneratedContent {
+export type AIGeneratedContent = {
 	content: Record<string, any>;
 	suggestions?: string[];
 	confidence?: number;
 	model?: string;
-}
+};
 
 // Wizard template types
-export interface WizardTemplate {
+export type WizardTemplate = {
 	id: string;
 	type: WizardType;
 	name: string;
@@ -92,7 +92,7 @@ export interface WizardTemplate {
 	steps: Omit<WizardStep, "completed" | "data">[];
 	defaultData?: Record<string, any>;
 	isActive: boolean;
-}
+};
 
 // Property wizard specific types
 export interface PropertyWizardData extends CreatePropertyInput {

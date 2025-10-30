@@ -36,7 +36,7 @@ export function NavigationPills() {
 					(item.href !== "/" && pathname.startsWith(item.href));
 
 				return (
-					<Link key={item.href} href={item.href}>
+					<Link href={item.href} key={item.href}>
 						<PillLink isActive={isActive}>{item.label}</PillLink>
 					</Link>
 				);
@@ -46,52 +46,52 @@ export function NavigationPills() {
 			<NavigationMenu>
 				<NavigationMenuList>
 					<NavigationMenuItem>
-						<NavigationMenuTrigger className="text-foreground text-center font-sofia-pro font-medium transition-all rounded-full flex items-center gap-1 h-auto whitespace-nowrap px-3 py-2 text-sm">
+						<NavigationMenuTrigger className="flex h-auto items-center gap-1 whitespace-nowrap rounded-full px-3 py-2 text-center font-medium font-sofia-pro text-foreground text-sm transition-all">
 							Más
 						</NavigationMenuTrigger>
-						<NavigationMenuContent className="p-4 backdrop-blur-xl border border-white/20 shadow-xl">
-							<div className="grid grid-cols-2 gap-4 max-w-2xl w-full">
+						<NavigationMenuContent className="border border-white/20 p-4 shadow-xl backdrop-blur-xl">
+							<div className="grid w-full max-w-2xl grid-cols-2 gap-4">
 								{/* Sección Servicios */}
 								<div className="space-y-3">
-									<h4 className="text-sm font-semibold text-card-foreground whitespace-nowrap">
+									<h4 className="whitespace-nowrap font-semibold text-card-foreground text-sm">
 										Servicios
 									</h4>
 									<div className="space-y-2">
 										<NavigationMenuLink asChild>
 											<Link
+												className="block rounded-md p-2 transition-colors hover:bg-secondary/60 hover:text-secondary-foreground"
 												href="/services/valuation"
-												className="block p-2 rounded-md hover:bg-secondary/60 hover:text-secondary-foreground transition-colors"
 											>
-												<div className="text-sm font-medium text-card-foreground whitespace-nowrap">
+												<div className="whitespace-nowrap font-medium text-card-foreground text-sm">
 													Valuación
 												</div>
-												<div className="text-xs text-muted-foreground whitespace-nowrap">
+												<div className="whitespace-nowrap text-muted-foreground text-xs">
 													Evaluación profesional
 												</div>
 											</Link>
 										</NavigationMenuLink>
 										<NavigationMenuLink asChild>
 											<Link
+												className="block rounded-md p-2 transition-colors hover:bg-secondary/60 hover:text-secondary-foreground"
 												href="/services/consulting"
-												className="block p-2 rounded-md hover:bg-secondary/60 hover:text-secondary-foreground transition-colors"
 											>
-												<div className="text-sm font-medium text-card-foreground whitespace-nowrap">
+												<div className="whitespace-nowrap font-medium text-card-foreground text-sm">
 													Consultoría
 												</div>
-												<div className="text-xs text-muted-foreground whitespace-nowrap">
+												<div className="whitespace-nowrap text-muted-foreground text-xs">
 													Asesoría especializada
 												</div>
 											</Link>
 										</NavigationMenuLink>
 										<NavigationMenuLink asChild>
 											<Link
+												className="block rounded-md p-2 transition-colors hover:bg-secondary/60 hover:text-secondary-foreground"
 												href="/services/legal"
-												className="block p-2 rounded-md hover:bg-secondary/60 hover:text-secondary-foreground transition-colors"
 											>
-												<div className="text-sm font-medium text-card-foreground whitespace-nowrap">
+												<div className="whitespace-nowrap font-medium text-card-foreground text-sm">
 													Legal
 												</div>
-												<div className="text-xs text-muted-foreground whitespace-nowrap">
+												<div className="whitespace-nowrap text-muted-foreground text-xs">
 													Trámites legales
 												</div>
 											</Link>
@@ -101,45 +101,45 @@ export function NavigationPills() {
 
 								{/* Sección Recursos */}
 								<div className="space-y-3">
-									<h4 className="text-sm font-semibold text-card-foreground whitespace-nowrap">
+									<h4 className="whitespace-nowrap font-semibold text-card-foreground text-sm">
 										Recursos
 									</h4>
 									<div className="space-y-2">
 										<NavigationMenuLink asChild>
 											<Link
+												className="block rounded-md p-2 transition-colors hover:bg-secondary/60 hover:text-secondary-foreground"
 												href="/blog"
-												className="block p-2 rounded-md hover:bg-secondary/60 hover:text-secondary-foreground transition-colors"
 											>
-												<div className="text-sm font-medium text-card-foreground whitespace-nowrap">
+												<div className="whitespace-nowrap font-medium text-card-foreground text-sm">
 													Blog
 												</div>
-												<div className="text-xs text-muted-foreground whitespace-nowrap">
+												<div className="whitespace-nowrap text-muted-foreground text-xs">
 													Artículos y noticias
 												</div>
 											</Link>
 										</NavigationMenuLink>
 										<NavigationMenuLink asChild>
 											<Link
+												className="block rounded-md p-2 transition-colors hover:bg-secondary/60 hover:text-secondary-foreground"
 												href="/guides"
-												className="block p-2 rounded-md hover:bg-secondary/60 hover:text-secondary-foreground transition-colors"
 											>
-												<div className="text-sm font-medium text-card-foreground whitespace-nowrap">
+												<div className="whitespace-nowrap font-medium text-card-foreground text-sm">
 													Guías
 												</div>
-												<div className="text-xs text-muted-foreground whitespace-nowrap">
+												<div className="whitespace-nowrap text-muted-foreground text-xs">
 													Guías de compra/venta
 												</div>
 											</Link>
 										</NavigationMenuLink>
 										<NavigationMenuLink asChild>
 											<Link
+												className="block rounded-md p-2 transition-colors hover:bg-secondary/60 hover:text-secondary-foreground"
 												href="/calculator"
-												className="block p-2 rounded-md hover:bg-secondary/60 hover:text-secondary-foreground transition-colors"
 											>
-												<div className="text-sm font-medium text-card-foreground whitespace-nowrap">
+												<div className="whitespace-nowrap font-medium text-card-foreground text-sm">
 													Calculadora
 												</div>
-												<div className="text-xs text-muted-foreground whitespace-nowrap">
+												<div className="whitespace-nowrap text-muted-foreground text-xs">
 													Calculadora hipotecaria
 												</div>
 											</Link>
@@ -149,21 +149,21 @@ export function NavigationPills() {
 							</div>
 
 							{/* Sección destacada */}
-							<div className="mt-4 pt-4 border-t border-border">
+							<div className="mt-4 border-border border-t pt-4">
 								<NavigationMenuLink asChild>
 									<Link
+										className="flex items-center rounded-lg border border-accent/20 bg-gradient-to-r from-accent/20 to-primary/20 p-3 transition-all hover:from-accent/30 hover:to-primary/30"
 										href="/premium"
-										className="flex items-center p-3 rounded-lg bg-gradient-to-r from-accent/20 to-primary/20 hover:from-accent/30 hover:to-primary/30 transition-all border border-accent/20"
 									>
 										<div className="flex-1">
-											<div className="text-sm font-semibold text-card-foreground whitespace-nowrap">
+											<div className="whitespace-nowrap font-semibold text-card-foreground text-sm">
 												Servicios Premium
 											</div>
-											<div className="text-xs text-muted-foreground whitespace-nowrap">
+											<div className="whitespace-nowrap text-muted-foreground text-xs">
 												Acceso exclusivo a herramientas avanzadas
 											</div>
 										</div>
-										<div className="ml-2 px-2 py-1 bg-accent text-accent-foreground text-xs font-medium rounded-full whitespace-nowrap">
+										<div className="ml-2 whitespace-nowrap rounded-full bg-accent px-2 py-1 font-medium text-accent-foreground text-xs">
 											Nuevo
 										</div>
 									</Link>

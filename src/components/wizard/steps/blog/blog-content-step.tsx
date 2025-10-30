@@ -41,20 +41,20 @@ const BLOG_CATEGORIES = [
 	{ value: "lifestyle", label: "Estilo de Vida" },
 ];
 
-interface BlogData {
+type BlogData = {
 	title?: string;
 	description?: string;
 	content?: string;
 	author?: string;
 	category?: string;
 	excerpt?: string;
-}
+};
 
-interface BlogContentStepProps {
+type BlogContentStepProps = {
 	data: BlogData;
 	onChange: (data: BlogData) => void;
 	errors?: Record<string, string>;
-}
+};
 
 export function BlogContentStep({
 	data,
@@ -110,13 +110,13 @@ export function BlogContentStep({
 			if (result.success && result.data?.content?.title) {
 				setValue("title", result.data.content.title);
 			}
-		} catch (error) {
-			console.error("Error generating title:", error);
-		}
+		} catch (_error) {}
 	}, [watchedValues, generateAI, setValue]);
 
 	const handleGenerateContent = useCallback(async () => {
-		if (!watchedValues.title) return;
+		if (!watchedValues.title) {
+			return;
+		}
 
 		try {
 			const result = await generateAI.mutateAsync({
@@ -132,13 +132,13 @@ export function BlogContentStep({
 			if (result.success && result.data?.content?.content) {
 				setValue("content", result.data.content.content);
 			}
-		} catch (error) {
-			console.error("Error generating content:", error);
-		}
+		} catch (_error) {}
 	}, [watchedValues, generateAI, setValue]);
 
 	const handleGenerateExcerpt = useCallback(async () => {
-		if (!watchedValues.title) return;
+		if (!watchedValues.title) {
+			return;
+		}
 
 		try {
 			const result = await generateAI.mutateAsync({
@@ -153,9 +153,7 @@ export function BlogContentStep({
 			if (result.success && result.data?.content?.excerpt) {
 				setValue("excerpt", result.data.content.excerpt);
 			}
-		} catch (error) {
-			console.error("Error generating excerpt:", error);
-		}
+		} catch (_error) {}
 	}, [watchedValues, generateAI, setValue]);
 
 	// Update parent when form data changes
@@ -202,24 +200,24 @@ export function BlogContentStep({
 						<div className="flex items-center justify-between">
 							<Label htmlFor="title">Título *</Label>
 							<Button
+								disabled={generateAI.isPending}
+								onClick={handleGenerateTitle}
+								size="sm"
 								type="button"
 								variant="outline"
-								size="sm"
-								onClick={handleGenerateTitle}
-								disabled={generateAI.isPending}
 							>
-								<Sparkles className="h-4 w-4 mr-2" />
+								<Sparkles className="mr-2 h-4 w-4" />
 								{generateAI.isPending ? "Generando..." : "Generar"}
 							</Button>
 						</div>
 						<Input
 							id="title"
 							{...register("title")}
-							placeholder="Ingresa el título del artículo..."
 							className={cn(formErrors.title && "border-destructive")}
+							placeholder="Ingresa el título del artículo..."
 						/>
 						{formErrors.title && (
-							<p className="text-sm text-destructive">
+							<p className="text-destructive text-sm">
 								{formErrors.title.message}
 							</p>
 						)}
@@ -231,29 +229,29 @@ export function BlogContentStep({
 						<Textarea
 							id="description"
 							{...register("description")}
+							className={cn(formErrors.description && "border-destructive")}
 							placeholder="Breve descripción del artículo..."
 							rows={2}
-							className={cn(formErrors.description && "border-destructive")}
 						/>
 						{formErrors.description && (
-							<p className="text-sm text-destructive">
+							<p className="text-destructive text-sm">
 								{formErrors.description.message}
 							</p>
 						)}
 					</div>
 
 					{/* Author and Category */}
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div className="space-y-2">
 							<Label htmlFor="author">Autor *</Label>
 							<Input
 								id="author"
 								{...register("author")}
-								placeholder="Nombre del autor..."
 								className={cn(formErrors.author && "border-destructive")}
+								placeholder="Nombre del autor..."
 							/>
 							{formErrors.author && (
-								<p className="text-sm text-destructive">
+								<p className="text-destructive text-sm">
 									{formErrors.author.message}
 								</p>
 							)}
@@ -262,8 +260,8 @@ export function BlogContentStep({
 						<div className="space-y-2">
 							<Label>Categoría *</Label>
 							<Select
-								value={watchedValues.category || ""}
 								onValueChange={(value) => setValue("category", value)}
+								value={watchedValues.category || ""}
 							>
 								<SelectTrigger
 									className={cn(formErrors.category && "border-destructive")}
@@ -279,7 +277,7 @@ export function BlogContentStep({
 								</SelectContent>
 							</Select>
 							{formErrors.category && (
-								<p className="text-sm text-destructive">
+								<p className="text-destructive text-sm">
 									{formErrors.category.message}
 								</p>
 							)}
@@ -291,13 +289,13 @@ export function BlogContentStep({
 						<div className="flex items-center justify-between">
 							<Label htmlFor="excerpt">Extracto</Label>
 							<Button
+								disabled={!watchedValues.title || generateAI.isPending}
+								onClick={handleGenerateExcerpt}
+								size="sm"
 								type="button"
 								variant="outline"
-								size="sm"
-								onClick={handleGenerateExcerpt}
-								disabled={!watchedValues.title || generateAI.isPending}
 							>
-								<Sparkles className="h-4 w-4 mr-2" />
+								<Sparkles className="mr-2 h-4 w-4" />
 								{generateAI.isPending ? "Generando..." : "Generar"}
 							</Button>
 						</div>
@@ -315,49 +313,49 @@ export function BlogContentStep({
 							<Label htmlFor="content">Contenido *</Label>
 							<div className="flex gap-2">
 								<Button
+									onClick={() => setShowPreview(!showPreview)}
+									size="sm"
 									type="button"
 									variant="outline"
-									size="sm"
-									onClick={() => setShowPreview(!showPreview)}
 								>
 									{showPreview ? (
 										<>
-											<EyeOff className="h-4 w-4 mr-2" />
+											<EyeOff className="mr-2 h-4 w-4" />
 											Editar
 										</>
 									) : (
 										<>
-											<Eye className="h-4 w-4 mr-2" />
+											<Eye className="mr-2 h-4 w-4" />
 											Vista Previa
 										</>
 									)}
 								</Button>
 								<Button
+									disabled={!watchedValues.title || generateAI.isPending}
+									onClick={handleGenerateContent}
+									size="sm"
 									type="button"
 									variant="outline"
-									size="sm"
-									onClick={handleGenerateContent}
-									disabled={!watchedValues.title || generateAI.isPending}
 								>
-									<Sparkles className="h-4 w-4 mr-2" />
+									<Sparkles className="mr-2 h-4 w-4" />
 									{generateAI.isPending ? "Generando..." : "Generar"}
 								</Button>
 							</div>
 						</div>
 
 						{showPreview ? (
-							<Card className="p-4 min-h-[300px]">{renderPreview()}</Card>
+							<Card className="min-h-[300px] p-4">{renderPreview()}</Card>
 						) : (
 							<Textarea
 								id="content"
 								{...register("content")}
+								className={cn(formErrors.content && "border-destructive")}
 								placeholder="Escribe el contenido del artículo..."
 								rows={15}
-								className={cn(formErrors.content && "border-destructive")}
 							/>
 						)}
 						{formErrors.content && (
-							<p className="text-sm text-destructive">
+							<p className="text-destructive text-sm">
 								{formErrors.content.message}
 							</p>
 						)}

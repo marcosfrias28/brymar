@@ -3,12 +3,12 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-interface ActionButtonsProps {
+type ActionButtonsProps = {
 	children: ReactNode;
 	className?: string;
 	align?: "left" | "right" | "center";
 	spacing?: "compact" | "normal" | "relaxed";
-}
+};
 
 export function ActionButtons({
 	children,
@@ -19,7 +19,7 @@ export function ActionButtons({
 	return (
 		<div
 			className={cn(
-				"flex items-center flex-wrap",
+				"flex flex-wrap items-center",
 				// Alignment
 				align === "left" && "justify-start",
 				align === "right" && "justify-end",
@@ -28,7 +28,7 @@ export function ActionButtons({
 				spacing === "compact" && "gap-1",
 				spacing === "normal" && "gap-2",
 				spacing === "relaxed" && "gap-3",
-				className,
+				className
 			)}
 		>
 			{children}

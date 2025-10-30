@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Plus } from "lucide-react";
+import { ArrowLeft, FileText, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { RouteGuard } from "@/components/auth/route-guard";
@@ -23,27 +23,35 @@ export default function DraftsPage() {
 	];
 
 	const actions = (
-		<Button asChild>
-			<Link href="/dashboard/properties/new">
-				<Plus className="h-4 w-4 mr-2" />
-				Nueva Propiedad
-			</Link>
-		</Button>
+		<div className="flex gap-2">
+			<Button asChild>
+				<Link href="/dashboard/properties/new">
+					<Plus className="mr-2 h-4 w-4" />
+					Nueva Propiedad
+				</Link>
+			</Button>
+			<Button asChild variant="outline">
+				<Link href="/dashboard/properties">
+					<ArrowLeft className="mr-2 h-4 w-4" />
+					Volver a Propiedades
+				</Link>
+			</Button>
+		</div>
 	);
 
 	return (
 		<RouteGuard requiredPermission="properties.manage">
 			<DashboardPageLayout
-				title="Borradores de Propiedades"
-				description="Gestiona y continúa editando tus borradores guardados"
-				breadcrumbs={breadcrumbs}
 				actions={actions}
+				breadcrumbs={breadcrumbs}
+				description="Gestiona y continúa editando tus borradores guardados"
+				title="Borradores de Propiedades"
 			>
-				<div className="max-w-4xl mx-auto">
+				<div className="mx-auto max-w-4xl">
 					<div className="mb-6">
-						<div className="flex items-center gap-3 mb-2">
+						<div className="mb-2 flex items-center gap-3">
 							<FileText className="h-6 w-6 text-secondary" />
-							<h2 className="text-2xl font-bold">Todos los Borradores</h2>
+							<h2 className="font-bold text-2xl">Todos los Borradores</h2>
 						</div>
 						<p className="text-muted-foreground">
 							Aquí puedes ver todos tus borradores guardados y continuar

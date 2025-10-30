@@ -4,7 +4,7 @@
  * Types for user session management
  */
 
-export interface UserSession {
+export type UserSession = {
 	user: {
 		id: string;
 		email: string;
@@ -13,4 +13,4 @@ export interface UserSession {
 	accessToken: string;
 	refreshToken?: string;
 	expiresAt: number;
-}
+};

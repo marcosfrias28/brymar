@@ -9,16 +9,16 @@ export function SignUpForm() {
 
 	return (
 		<AuthFormWrapper
-			title="Crear Cuenta"
-			subtitle="Ingresa tus datos para crear una nueva cuenta"
 			action={signUpAction}
 			fields={[nameField, emailField, newPasswordField, confirmPasswordField]}
-			submitText="Crear Cuenta"
-			loadingText="Creando cuenta..."
 			footerContent={FooterContent}
+			loadingText="Creando cuenta..."
 			onSuccess={() => {
 				// La redirección se maneja automáticamente por el wrapper
 			}}
+			submitText="Crear Cuenta"
+			subtitle="Ingresa tus datos para crear una nueva cuenta"
+			title="Crear Cuenta"
 		/>
 	);
 }

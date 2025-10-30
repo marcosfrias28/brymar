@@ -61,17 +61,17 @@ export function AppSidebar() {
 	const pathname = usePathname();
 
 	return (
-		<Sidebar className="bg-arsenic border-r border-blackCoral">
+		<Sidebar className="border-blackCoral border-r bg-arsenic">
 			<SidebarHeader className="p-6">
 				<div className="flex items-center gap-2">
-					<div className="w-8 h-8 bg-aurora rounded-lg flex items-center justify-center">
-						<Building2 className="w-5 h-5 text-white" />
+					<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-aurora">
+						<Building2 className="h-5 w-5 text-white" />
 					</div>
 					<div>
-						<h2 className="text-lg font-bold text-azureishWhite font-italianno">
+						<h2 className="font-bold font-italianno text-azureishWhite text-lg">
 							Marbry
 						</h2>
-						<p className="text-sm text-darkVanilla">Inmobiliaria</p>
+						<p className="text-darkVanilla text-sm">Inmobiliaria</p>
 					</div>
 				</div>
 			</SidebarHeader>
@@ -87,11 +87,11 @@ export function AppSidebar() {
 								<SidebarMenuItem key={item.title}>
 									<SidebarMenuButton
 										asChild
-										isActive={pathname === item.url}
 										className="text-azureishWhite hover:bg-blackCoral hover:text-white data-[active=true]:bg-aurora data-[active=true]:text-white"
+										isActive={pathname === item.url}
 									>
 										<Link href={item.url}>
-											<item.icon className="w-4 h-4" />
+											<item.icon className="h-4 w-4" />
 											<span>{getMenuTitle(item.title)}</span>
 										</Link>
 									</SidebarMenuButton>

@@ -9,29 +9,27 @@ import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
 import type { BreadcrumbItem } from "@/types/layout";
 import { TouchTarget } from "./touch-target";
 
-interface BreadcrumbProps {
+type BreadcrumbProps = {
 	items: BreadcrumbItem[];
 	className?: string;
-}
+};
 
 export function Breadcrumb({ items, className }: BreadcrumbProps) {
 	const { isMobile, isTablet } = useResponsive();
 
-	// Limit items on mobile for better UX
+	// Limit items on mobile for better UX (use slice to avoid undefined)
 	const displayItems =
-		isMobile && items.length > 2
-			? [items[items.length - 2], items[items.length - 1]]
-			: items;
+		isMobile && items.length > 2 ? items.slice(-2) : items;
 
 	return (
 		<nav
+			aria-label={ariaLabels.breadcrumbNavigation}
 			className={cn(
 				"flex items-center",
 				// Responsive spacing and text size
 				isMobile ? "space-x-0.5 text-xs" : "space-x-1 text-sm",
-				className,
+				className
 			)}
-			aria-label={ariaLabels.breadcrumbNavigation}
 		>
 			<ol className="flex items-center space-x-1">
 				{/* Home link - hide on mobile if we have items */}
@@ -39,20 +37,20 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
 					<li>
 						<TouchTarget asChild>
 							<Link
-								href="/dashboard"
 								aria-label="Ir al Dashboard"
 								className={cn(
-									"flex items-center text-muted-foreground transition-colors rounded-md",
+									"flex items-center rounded-md text-muted-foreground transition-colors",
 									secondaryColorClasses.navHover,
 									"hover:text-foreground",
 									focusRingClasses.default,
 									// Enhanced touch targets
-									isMobile ? "px-2 py-2 min-h-[36px]" : "px-2 py-1",
+									isMobile ? "min-h-[36px] px-2 py-2" : "px-2 py-1"
 								)}
+								href="/dashboard"
 							>
 								<Home
-									className={cn(isMobile ? "h-4 w-4" : "h-4 w-4")}
 									aria-hidden="true"
+									className={cn(isMobile ? "h-4 w-4" : "h-4 w-4")}
 								/>
 								<span className="sr-only">Dashboard</span>
 							</Link>
@@ -62,39 +60,39 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
 
 				{displayItems.map((item, index) => (
 					<li
-						key={index}
 						className={cn(
 							"flex items-center",
-							isMobile ? "space-x-0.5" : "space-x-1",
+							isMobile ? "space-x-0.5" : "space-x-1"
 						)}
+						key={index}
 					>
 						<ChevronRight
 							className={cn(
 								"text-muted-foreground",
-								isMobile ? "h-3 w-3" : "h-4 w-4",
+								isMobile ? "h-3 w-3" : "h-4 w-4"
 							)}
 						/>
 						{item.href ? (
 							<TouchTarget asChild>
 								<Link
-									href={item.href}
 									className={cn(
-										"flex items-center text-muted-foreground transition-colors rounded-md",
+										"flex items-center rounded-md text-muted-foreground transition-colors",
 										secondaryColorClasses.navHover,
 										"hover:text-foreground focus-visible:outline-none",
 										secondaryColorClasses.focusRing,
 										// Responsive spacing and touch targets
 										isMobile
-											? "space-x-1 px-2 py-2 min-h-[36px]"
-											: "space-x-1 px-2 py-1",
+											? "min-h-[36px] space-x-1 px-2 py-2"
+											: "space-x-1 px-2 py-1"
 									)}
+									href={item.href}
 								>
 									{item.icon && (
 										<item.icon
 											className={cn(isMobile ? "h-3 w-3" : "h-4 w-4")}
 										/>
 									)}
-									<span className="truncate max-w-[100px] sm:max-w-none">
+									<span className="max-w-[100px] truncate sm:max-w-none">
 										{item.label}
 									</span>
 								</Link>
@@ -102,16 +100,16 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
 						) : (
 							<div
 								className={cn(
-									"flex items-center text-foreground font-medium rounded-md",
+									"flex items-center rounded-md font-medium text-foreground",
 									secondaryColorClasses.accent,
 									// Responsive spacing
-									isMobile ? "space-x-1 px-2 py-2" : "space-x-1 px-2 py-1",
+									isMobile ? "space-x-1 px-2 py-2" : "space-x-1 px-2 py-1"
 								)}
 							>
 								{item.icon && (
 									<item.icon className={cn(isMobile ? "h-3 w-3" : "h-4 w-4")} />
 								)}
-								<span className="truncate max-w-[100px] sm:max-w-none">
+								<span className="max-w-[100px] truncate sm:max-w-none">
 									{item.label}
 								</span>
 							</div>

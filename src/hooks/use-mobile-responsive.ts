@@ -17,13 +17,13 @@ export type Breakpoint = keyof typeof BREAKPOINTS;
 export type Orientation = "portrait" | "landscape";
 
 // Enhanced responsive hook with comprehensive mobile features
-export interface UseResponsiveOptions {
+export type UseResponsiveOptions = {
 	trackKeyboard?: boolean;
 	trackOrientation?: boolean;
 	debounceMs?: number;
-}
+};
 
-export interface ResponsiveState {
+export type ResponsiveState = {
 	isMobile: boolean;
 	isTablet: boolean;
 	isDesktop: boolean;
@@ -34,7 +34,7 @@ export interface ResponsiveState {
 	isKeyboardOpen: boolean;
 	orientation: Orientation;
 	devicePixelRatio: number;
-}
+};
 
 export function useResponsive(options: UseResponsiveOptions = {}) {
 	const {
@@ -60,7 +60,9 @@ export function useResponsive(options: UseResponsiveOptions = {}) {
 	const initialViewportHeight = useRef<number>(0);
 
 	const updateState = useCallback(() => {
-		if (typeof window === "undefined") return;
+		if (typeof window === "undefined") {
+			return;
+		}
 
 		const width = window.innerWidth;
 		const height = window.innerHeight;
@@ -135,20 +137,28 @@ export function useResponsive(options: UseResponsiveOptions = {}) {
 	// Utility functions
 	const getColumns = useCallback(
 		(mobile: number, tablet: number, desktop: number) => {
-			if (state.isMobile) return mobile;
-			if (state.isTablet) return tablet;
+			if (state.isMobile) {
+				return mobile;
+			}
+			if (state.isTablet) {
+				return tablet;
+			}
 			return desktop;
 		},
-		[state.isMobile, state.isTablet],
+		[state.isMobile, state.isTablet]
 	);
 
 	const getSpacing = useCallback(
 		(mobile: string, tablet: string, desktop: string) => {
-			if (state.isMobile) return mobile;
-			if (state.isTablet) return tablet;
+			if (state.isMobile) {
+				return mobile;
+			}
+			if (state.isTablet) {
+				return tablet;
+			}
 			return desktop;
 		},
-		[state.isMobile, state.isTablet],
+		[state.isMobile, state.isTablet]
 	);
 
 	return {
@@ -165,7 +175,9 @@ export function useMobileKeyboard() {
 	const initialViewportHeight = useRef<number>(0);
 
 	useEffect(() => {
-		if (typeof window === "undefined") return;
+		if (typeof window === "undefined") {
+			return;
+		}
 
 		const updateKeyboardState = () => {
 			const currentHeight = window.innerHeight;
@@ -186,7 +198,8 @@ export function useMobileKeyboard() {
 		if (window.visualViewport) {
 			const handleViewportChange = () => {
 				const heightDifference =
-					window.innerHeight - (window.visualViewport?.height || window.innerHeight);
+					window.innerHeight -
+					(window.visualViewport?.height || window.innerHeight);
 				const isOpen = heightDifference > 150;
 
 				setIsKeyboardOpen(isOpen);
@@ -197,18 +210,17 @@ export function useMobileKeyboard() {
 			return () => {
 				window.visualViewport?.removeEventListener(
 					"resize",
-					handleViewportChange,
+					handleViewportChange
 				);
 			};
-		} else {
-			// Fallback to window resize
-			window.addEventListener("resize", updateKeyboardState);
-			updateKeyboardState();
-
-			return () => {
-				window.removeEventListener("resize", updateKeyboardState);
-			};
 		}
+		// Fallback to window resize
+		window.addEventListener("resize", updateKeyboardState);
+		updateKeyboardState();
+
+		return () => {
+			window.removeEventListener("resize", updateKeyboardState);
+		};
 	}, []);
 
 	return {
@@ -218,7 +230,7 @@ export function useMobileKeyboard() {
 }
 
 // Touch gesture detection hook
-export interface TouchState {
+export type TouchState = {
 	isPressed: boolean;
 	startX: number;
 	startY: number;
@@ -228,7 +240,7 @@ export interface TouchState {
 	deltaY: number;
 	direction: "up" | "down" | "left" | "right" | null;
 	distance: number;
-}
+};
 
 export function useTouchGestures() {
 	const [touchState, setTouchState] = useState<TouchState>({
@@ -308,7 +320,9 @@ export function useMobilePerformance() {
 	const [connectionType, setConnectionType] = useState<string>("unknown");
 
 	useEffect(() => {
-		if (typeof window === "undefined") return;
+		if (typeof window === "undefined") {
+			return;
+		}
 
 		// Detect low-end device based on hardware concurrency and memory
 		const hardwareConcurrency = navigator.hardwareConcurrency || 1;
@@ -352,27 +366,29 @@ export function useSafeArea() {
 	});
 
 	useEffect(() => {
-		if (typeof window === "undefined") return;
+		if (typeof window === "undefined") {
+			return;
+		}
 
 		const updateSafeArea = () => {
 			const computedStyle = getComputedStyle(document.documentElement);
 
 			setSafeArea({
-				top: parseInt(
+				top: Number.parseInt(
 					computedStyle.getPropertyValue("env(safe-area-inset-top)") || "0",
-					10,
+					10
 				),
-				right: parseInt(
+				right: Number.parseInt(
 					computedStyle.getPropertyValue("env(safe-area-inset-right)") || "0",
-					10,
+					10
 				),
-				bottom: parseInt(
+				bottom: Number.parseInt(
 					computedStyle.getPropertyValue("env(safe-area-inset-bottom)") || "0",
-					10,
+					10
 				),
-				left: parseInt(
+				left: Number.parseInt(
 					computedStyle.getPropertyValue("env(safe-area-inset-left)") || "0",
-					10,
+					10
 				),
 			});
 		};
@@ -440,7 +456,7 @@ export function useMobileFormOptimization() {
 	}, []);
 
 	const getInputProps = useCallback(
-		(inputType: string = "text") => {
+		(inputType = "text") => {
 			let inputMode: "text" | "numeric" | "email" | "tel" | "url" = "text";
 
 			switch (inputType) {
@@ -471,11 +487,11 @@ export function useMobileFormOptimization() {
 				className: isMobile ? "text-base px-4 py-3" : "text-sm px-3 py-2",
 			};
 		},
-		[isMobile],
+		[isMobile]
 	);
 
-	const getTextareaProps = useCallback(() => {
-		return {
+	const getTextareaProps = useCallback(
+		() => ({
 			autoComplete: "off",
 			autoCapitalize: "sentences",
 			autoCorrect: "on",
@@ -483,8 +499,9 @@ export function useMobileFormOptimization() {
 			className: isMobile
 				? "text-base px-4 py-3 min-h-[120px]"
 				: "text-sm px-3 py-2 min-h-[100px]",
-		};
-	}, [isMobile]);
+		}),
+		[isMobile]
+	);
 
 	return {
 		...formState,

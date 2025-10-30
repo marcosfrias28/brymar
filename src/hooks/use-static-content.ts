@@ -48,10 +48,7 @@ export function useContactInfoByType(type: ContactInfo["type"]) {
 }
 
 // Hook for contact info value by type
-export function useContactInfoValue(
-	type: ContactInfo["type"],
-	fallback: string = "",
-) {
+export function useContactInfoValue(type: ContactInfo["type"], fallback = "") {
 	const { data: contactInfo } = useContactInfoByType(type);
 
 	const info = contactInfo[0]; // Get first item of this type
@@ -68,7 +65,7 @@ export function useContactInfoValues(types: ContactInfo["type"][]) {
 			acc[type] = info?.value || "";
 			return acc;
 		},
-		{} as Record<string, string>,
+		{} as Record<string, string>
 	);
 
 	return {
@@ -131,7 +128,7 @@ export { useSection as usePageSection };
 // Helper functions (maintaining backward compatibility)
 export function getContactInfoByTypeHelper(
 	contactInfo: ContactInfo[],
-	type: ContactInfo["type"],
+	type: ContactInfo["type"]
 ): ContactInfo[] {
 	return contactInfo.filter((info) => info.type === type);
 }
@@ -139,7 +136,7 @@ export function getContactInfoByTypeHelper(
 export function getContactInfoValueHelper(
 	contactInfo: ContactInfo[],
 	type: ContactInfo["type"],
-	fallback: string = "",
+	fallback = ""
 ): string {
 	const info = contactInfo.find((info) => info.type === type);
 	return info?.value || fallback;

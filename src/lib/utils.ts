@@ -43,17 +43,16 @@ export function formatDate(date: Date | string): string {
  * Truncate text to a specified length
  */
 export function truncateText(text: string, maxLength: number): string {
-	if (text.length <= maxLength) return text;
+	if (text.length <= maxLength) {
+		return text;
+	}
 	return `${text.slice(0, maxLength).trim()}...`;
 }
 
 /**
  * Extract excerpt from content
  */
-export function extractExcerpt(
-	content: string,
-	maxLength: number = 160,
-): string {
+export function extractExcerpt(content: string, maxLength = 160): string {
 	// Remove HTML tags and markdown
 	const plainText = content
 		.replace(/<[^>]*>/g, "") // Remove HTML tags

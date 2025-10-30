@@ -9,7 +9,7 @@ import { validateBlobConfig } from "@/lib/config/blob-config";
 import type { ActionState } from "@/lib/validations";
 
 export async function uploadAvatarAction(
-	prevState: ActionState<{ url: string }>,
+	_prevState: ActionState<{ url: string }>,
 	formData: FormData
 ): Promise<ActionState<{ url: string }>> {
 	try {
@@ -46,8 +46,7 @@ export async function uploadAvatarAction(
 				url: blob.url,
 			},
 		};
-	} catch (error) {
-		console.error("Error uploading avatar:", error);
+	} catch (_error) {
 		return {
 			success: false,
 			error: "Error al subir el archivo",

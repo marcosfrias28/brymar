@@ -1,7 +1,8 @@
 "use client";
 
-import { ChevronsUpDown, LogOut, User } from "lucide-react";
+import { ChevronsUpDown, User } from "lucide-react";
 import Link from "next/link";
+import LogOutButton from "@/components/auth/logout-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
 	DropdownMenu,
@@ -16,17 +17,16 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import LogOutButton from "@/components/auth/logout-button";
 
-interface UserData {
+type UserData = {
 	name: string;
 	email: string;
 	avatar?: string;
-}
+};
 
-interface NavUserProps {
+type NavUserProps = {
 	user: UserData;
-}
+};
 
 export function NavUser({ user }: NavUserProps) {
 	const initials = user.name
@@ -42,11 +42,11 @@ export function NavUser({ user }: NavUserProps) {
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<SidebarMenuButton
-							size="lg"
 							className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+							size="lg"
 						>
 							<Avatar className="h-8 w-8 rounded-lg">
-								<AvatarImage src={user.avatar} alt={user.name} />
+								<AvatarImage alt={user.name} src={user.avatar} />
 								<AvatarFallback className="rounded-lg">
 									{initials}
 								</AvatarFallback>
@@ -59,15 +59,15 @@ export function NavUser({ user }: NavUserProps) {
 						</SidebarMenuButton>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent
+						align="end"
 						className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
 						side="bottom"
-						align="end"
 						sideOffset={4}
 					>
 						<DropdownMenuLabel className="p-0 font-normal">
 							<div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
 								<Avatar className="h-8 w-8 rounded-lg">
-									<AvatarImage src={user.avatar} alt={user.name} />
+									<AvatarImage alt={user.name} src={user.avatar} />
 									<AvatarFallback className="rounded-lg">
 										{initials}
 									</AvatarFallback>

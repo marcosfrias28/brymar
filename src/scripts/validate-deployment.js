@@ -155,7 +155,7 @@ async function validateDatabaseConnection() {
 			return;
 		}
 
-		if (!url.hostname || !url.pathname) {
+		if (!(url.hostname && url.pathname)) {
 			logError("Database URL must include hostname and database name");
 			return;
 		}
@@ -166,7 +166,7 @@ async function validateDatabaseConnection() {
 
 		// In a real implementation, you would test the actual connection here
 		logWarning(
-			"Database connectivity test skipped (requires runtime environment)",
+			"Database connectivity test skipped (requires runtime environment)"
 		);
 	} catch (error) {
 		logError(`Invalid database URL: ${error.message}`);
@@ -188,8 +188,8 @@ async function validateExternalServices() {
 					headers: {
 						Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
 					},
-					signal: AbortSignal.timeout(10000),
-				},
+					signal: AbortSignal.timeout(10_000),
+				}
 			);
 
 			if (response.ok) {
@@ -211,7 +211,7 @@ async function validateExternalServices() {
 
 			// This would require the actual Vercel Blob client
 			logWarning(
-				"Vercel Blob Storage test skipped (requires runtime environment)",
+				"Vercel Blob Storage test skipped (requires runtime environment)"
 			);
 		} catch (error) {
 			logError(`Vercel Blob Storage test failed: ${error.message}`);
@@ -355,16 +355,16 @@ function validateBuildAndDependencies() {
 	}
 
 	// Test build process (if not in CI)
-	if (!process.env.CI) {
+	if (process.env.CI) {
+		logInfo("Skipping build test in CI environment");
+	} else {
 		try {
 			logInfo("Testing build process...");
-			execSync("npm run build", { stdio: "pipe", timeout: 120000 });
+			execSync("npm run build", { stdio: "pipe", timeout: 120_000 });
 			logSuccess("Build process completed successfully");
 		} catch (error) {
 			logError(`Build process failed: ${error.message}`);
 		}
-	} else {
-		logInfo("Skipping build test in CI environment");
 	}
 }
 
@@ -490,7 +490,7 @@ async function validateTestSuite() {
 			const testFiles = fs
 				.readdirSync(dir)
 				.filter(
-					(file) => file.endsWith(".test.tsx") || file.endsWith(".test.ts"),
+					(file) => file.endsWith(".test.tsx") || file.endsWith(".test.ts")
 				);
 			if (testFiles.length > 0) {
 				logSuccess(`Test files found in ${dir} (${testFiles.length} files)`);
@@ -517,7 +517,7 @@ async function validateTestSuite() {
 	if (!process.env.CI && fs.existsSync("components/wizard/__tests__")) {
 		try {
 			logInfo("Running wizard test suite...");
-			execSync("npm run test:wizard", { stdio: "pipe", timeout: 60000 });
+			execSync("npm run test:wizard", { stdio: "pipe", timeout: 60_000 });
 			logSuccess("All wizard tests passed");
 		} catch (_error) {
 			logError("Some wizard tests failed");
@@ -555,7 +555,7 @@ async function validateHealthChecks() {
 					`${process.env.NEXT_PUBLIC_APP_URL}${endpoint}`,
 					{
 						signal: AbortSignal.timeout(5000),
-					},
+					}
 				);
 
 				if (response.ok) {
@@ -565,7 +565,7 @@ async function validateHealthChecks() {
 				}
 			} catch (error) {
 				logWarning(
-					`Could not test health endpoint: ${endpoint} (${error.message})`,
+					`Could not test health endpoint: ${endpoint} (${error.message})`
 				);
 			}
 		}
@@ -575,7 +575,7 @@ async function validateHealthChecks() {
 // Main validation function
 async function runValidation() {
 	log(
-		`${colors.bright}${colors.magenta}AI Property Wizard Deployment Validation${colors.reset}`,
+		`${colors.bright}${colors.magenta}AI Property Wizard Deployment Validation${colors.reset}`
 	);
 	log(`Environment: ${process.env.NODE_ENV || "development"}`);
 	log(`Timestamp: ${new Date().toISOString()}\n`);

@@ -9,9 +9,9 @@ import type { ActionResult } from "../types";
 export class AppError extends Error {
 	constructor(
 		message: string,
-		public code: string = "UNKNOWN_ERROR",
-		public statusCode: number = 500,
-		public context?: Record<string, any>,
+		public code = "UNKNOWN_ERROR",
+		public statusCode = 500,
+		public context?: Record<string, any>
 	) {
 		super(message);
 		this.name = "AppError";
@@ -23,7 +23,7 @@ export class ValidationError extends AppError {
 	constructor(
 		message: string,
 		public errors: Record<string, string[]>,
-		context?: Record<string, any>,
+		context?: Record<string, any>
 	) {
 		super(message, "VALIDATION_ERROR", 400, context);
 	}
@@ -38,14 +38,14 @@ export class NotFoundError extends AppError {
 
 // Unauthorized error for authentication issues
 export class UnauthorizedError extends AppError {
-	constructor(message: string = "Unauthorized", context?: Record<string, any>) {
+	constructor(message = "Unauthorized", context?: Record<string, any>) {
 		super(message, "UNAUTHORIZED", 401, context);
 	}
 }
 
 // Forbidden error for authorization issues
 export class ForbiddenError extends AppError {
-	constructor(message: string = "Forbidden", context?: Record<string, any>) {
+	constructor(message = "Forbidden", context?: Record<string, any>) {
 		super(message, "FORBIDDEN", 403, context);
 	}
 }
@@ -59,10 +59,7 @@ export class ConflictError extends AppError {
 
 // Rate limit error
 export class RateLimitError extends AppError {
-	constructor(
-		message: string = "Rate limit exceeded",
-		context?: Record<string, any>,
-	) {
+	constructor(message = "Rate limit exceeded", context?: Record<string, any>) {
 		super(message, "RATE_LIMIT", 429, context);
 	}
 }
@@ -97,8 +94,6 @@ export class AIServiceError extends AppError {
 
 // Error handler for server actions
 export function handleActionError(error: unknown): ActionResult {
-	console.error("Action error:", error);
-
 	if (error instanceof ValidationError) {
 		return {
 			success: false,
@@ -138,7 +133,7 @@ export function successResult<T>(data: T): ActionResult<T> {
 // Error result helper
 export function errorResult(
 	error: string,
-	errors?: Record<string, string[]>,
+	errors?: Record<string, string[]>
 ): ActionResult {
 	return {
 		success: false,
@@ -149,7 +144,7 @@ export function errorResult(
 
 // Async error wrapper for server actions
 export async function withErrorHandling<T>(
-	action: () => Promise<T>,
+	action: () => Promise<T>
 ): Promise<ActionResult<T>> {
 	try {
 		const result = await action();
@@ -162,7 +157,7 @@ export async function withErrorHandling<T>(
 // Validation helper
 export function validateRequired(
 	data: Record<string, any>,
-	requiredFields: string[],
+	requiredFields: string[]
 ): void {
 	const errors: Record<string, string[]> = {};
 
@@ -232,7 +227,7 @@ export function validateImageFile(file: File): void {
 
 	if (!allowedTypes.includes(file.type)) {
 		throw new FileUploadError(
-			"Invalid file type. Only JPEG, PNG, and WebP are allowed.",
+			"Invalid file type. Only JPEG, PNG, and WebP are allowed."
 		);
 	}
 
@@ -247,7 +242,7 @@ export function validateVideoFile(file: File): void {
 
 	if (!allowedTypes.includes(file.type)) {
 		throw new FileUploadError(
-			"Invalid file type. Only MP4, WebM, and MOV are allowed.",
+			"Invalid file type. Only MP4, WebM, and MOV are allowed."
 		);
 	}
 
@@ -258,8 +253,6 @@ export function validateVideoFile(file: File): void {
 
 // Database error handler
 export function handleDatabaseError(error: unknown): never {
-	console.error("Database error:", error);
-
 	if (error instanceof Error) {
 		if (error.message.includes("unique constraint")) {
 			throw new ConflictError("Resource already exists");
@@ -284,8 +277,8 @@ export function handleDatabaseError(error: unknown): never {
 // Retry helper for external services
 export async function withRetry<T>(
 	action: () => Promise<T>,
-	maxRetries: number = 3,
-	delay: number = 1000,
+	maxRetries = 3,
+	delay = 1000
 ): Promise<T> {
 	let lastError: unknown;
 

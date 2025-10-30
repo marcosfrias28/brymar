@@ -3,9 +3,9 @@
 import type { BlogWizardData } from "@/types/blog-wizard";
 import { BlogPreviewStep } from "./steps/blog-preview-step";
 
-interface BlogPreviewWrapperProps {
+type BlogPreviewWrapperProps = {
 	data: BlogWizardData;
-}
+};
 
 export function BlogPreviewWrapper({ data }: BlogPreviewWrapperProps) {
 	const handleUpdate = () => {
@@ -15,12 +15,12 @@ export function BlogPreviewWrapper({ data }: BlogPreviewWrapperProps) {
 	return (
 		<BlogPreviewStep
 			data={data}
-			onUpdate={handleUpdate}
-			onNext={() => {}}
-			onPrevious={() => {}}
 			errors={{}}
 			isLoading={false}
 			isMobile={false}
+			onNext={() => {}}
+			onPrevious={() => {}}
+			onUpdate={handleUpdate}
 		/>
 	);
 }

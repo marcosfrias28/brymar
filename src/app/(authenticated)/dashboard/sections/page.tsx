@@ -1,6 +1,16 @@
 "use client";
 
-import { HelpCircle, Home, Phone, Settings, Star, Users } from "lucide-react";
+import {
+	ArrowLeft,
+	HelpCircle,
+	Home,
+	Link,
+	Phone,
+	Settings,
+	Star,
+	Users,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Suspense, useState } from "react";
 import { SectionsManager } from "@/components/dashboard/sections-manager";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
@@ -12,8 +22,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export default function SectionsPage() {
+	const _router = useRouter();
 	const [currentPage, setCurrentPage] = useState<"home" | "contact">("home");
 
 	const breadcrumbs = [
@@ -21,29 +33,49 @@ export default function SectionsPage() {
 		{ label: "Secciones", icon: Settings },
 	];
 
+	const actions = (
+		<Link href="/dashboard">
+			<Button
+				className={cn(
+					"text-arsenic",
+					"hover:text-arsenic/80",
+					"focus-visible:outline-none",
+					"focus-visible:ring-2",
+					"focus-visible:ring-arsenic/50"
+				)}
+				size="sm"
+				variant="link"
+			>
+				<ArrowLeft className="h-4 w-4" />
+				Volver al Dashboard
+			</Button>
+		</Link>
+	);
+
 	return (
 		<DashboardPageLayout
-			title="Gestión de Secciones"
-			description="Administra el contenido de las secciones de tu sitio web"
+			actions={actions}
 			breadcrumbs={breadcrumbs}
+			description="Administra el contenido de las secciones de tu sitio web"
+			title="Gestión de Secciones"
 		>
 			<div className="space-y-6">
 				{/* Navigation Buttons */}
 				<div className="flex gap-2">
 					<Button
-						variant={currentPage === "home" ? "default" : "outline"}
-						onClick={() => setCurrentPage("home")}
 						className="flex items-center gap-2"
+						onClick={() => setCurrentPage("home")}
+						variant={currentPage === "home" ? "default" : "outline"}
 					>
-						<Home className="w-4 h-4" />
+						<Home className="h-4 w-4" />
 						Página Principal
 					</Button>
 					<Button
-						variant={currentPage === "contact" ? "default" : "outline"}
-						onClick={() => setCurrentPage("contact")}
 						className="flex items-center gap-2"
+						onClick={() => setCurrentPage("contact")}
+						variant={currentPage === "contact" ? "default" : "outline"}
 					>
-						<Phone className="w-4 h-4" />
+						<Phone className="h-4 w-4" />
 						Información de Contacto
 					</Button>
 				</div>
@@ -55,12 +87,12 @@ export default function SectionsPage() {
 							<CardTitle className="flex items-center gap-2">
 								{currentPage === "home" ? (
 									<>
-										<Settings className="w-5 h-5" />
+										<Settings className="h-5 w-5" />
 										Secciones de la Página Principal
 									</>
 								) : (
 									<>
-										<Phone className="w-5 h-5" />
+										<Phone className="h-5 w-5" />
 										Información de Contacto
 									</>
 								)}
@@ -91,13 +123,13 @@ export default function SectionsPage() {
 				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 					<Card>
 						<CardHeader className="pb-3">
-							<CardTitle className="text-sm font-medium flex items-center gap-2">
-								<Star className="w-4 h-4 text-primary" />
+							<CardTitle className="flex items-center gap-2 font-medium text-sm">
+								<Star className="h-4 w-4 text-primary" />
 								Hero Section
 							</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<p className="text-xs text-muted-foreground">
+							<p className="text-muted-foreground text-xs">
 								Título principal, subtítulo y descripción de la página de inicio
 							</p>
 						</CardContent>
@@ -105,13 +137,13 @@ export default function SectionsPage() {
 
 					<Card>
 						<CardHeader className="pb-3">
-							<CardTitle className="text-sm font-medium flex items-center gap-2">
-								<Settings className="w-4 h-4 text-primary" />
+							<CardTitle className="flex items-center gap-2 font-medium text-sm">
+								<Settings className="h-4 w-4 text-primary" />
 								Categorías
 							</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<p className="text-xs text-muted-foreground">
+							<p className="text-muted-foreground text-xs">
 								Título, descripción y configuración de la sección de categorías
 							</p>
 						</CardContent>
@@ -119,13 +151,13 @@ export default function SectionsPage() {
 
 					<Card>
 						<CardHeader className="pb-3">
-							<CardTitle className="text-sm font-medium flex items-center gap-2">
-								<Users className="w-4 h-4 text-primary" />
+							<CardTitle className="flex items-center gap-2 font-medium text-sm">
+								<Users className="h-4 w-4 text-primary" />
 								Equipo
 							</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<p className="text-xs text-muted-foreground">
+							<p className="text-muted-foreground text-xs">
 								Información del equipo, biografías y datos de contacto
 							</p>
 						</CardContent>
@@ -133,13 +165,13 @@ export default function SectionsPage() {
 
 					<Card>
 						<CardHeader className="pb-3">
-							<CardTitle className="text-sm font-medium flex items-center gap-2">
-								<HelpCircle className="w-4 h-4 text-primary" />
+							<CardTitle className="flex items-center gap-2 font-medium text-sm">
+								<HelpCircle className="h-4 w-4 text-primary" />
 								FAQ
 							</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<p className="text-xs text-muted-foreground">
+							<p className="text-muted-foreground text-xs">
 								Preguntas frecuentes y sus respuestas
 							</p>
 						</CardContent>

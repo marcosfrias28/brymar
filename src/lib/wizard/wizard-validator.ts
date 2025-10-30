@@ -14,7 +14,7 @@ export class WizardValidator {
 	static validateStep<T extends WizardData>(
 		stepId: string,
 		data: Partial<T>,
-		schema: ZodSchema,
+		schema: ZodSchema
 	): ValidationResult {
 		try {
 			schema.parse(data);
@@ -60,7 +60,7 @@ export class WizardValidator {
 	 */
 	static validateAllSteps<T extends WizardData>(
 		data: Partial<T>,
-		config: WizardConfig<T>,
+		config: WizardConfig<T>
 	): ValidationResult {
 		const allErrors: Record<string, string> = {};
 		const allWarnings: Record<string, string> = {};
@@ -73,7 +73,7 @@ export class WizardValidator {
 				const stepResult = WizardValidator.validateStep(
 					step.id,
 					data,
-					stepSchema,
+					stepSchema
 				);
 
 				if (!stepResult.isValid) {
@@ -117,10 +117,12 @@ export class WizardValidator {
 	static canProceedToNextStep<T extends WizardData>(
 		currentStepId: string,
 		data: Partial<T>,
-		config: WizardConfig<T>,
+		config: WizardConfig<T>
 	): boolean {
 		const currentStep = config.steps.find((step) => step.id === currentStepId);
-		if (!currentStep) return false;
+		if (!currentStep) {
+			return false;
+		}
 
 		// Optional steps can always be skipped
 		if (currentStep.isOptional || currentStep.canSkip) {
@@ -129,12 +131,14 @@ export class WizardValidator {
 
 		// Validate current step
 		const stepSchema = config.validation.stepSchemas[currentStepId];
-		if (!stepSchema) return true; // No validation schema means step is valid
+		if (!stepSchema) {
+			return true; // No validation schema means step is valid
+		}
 
 		const result = WizardValidator.validateStep(
 			currentStepId,
 			data,
-			stepSchema,
+			stepSchema
 		);
 		return result.isValid;
 	}
@@ -144,17 +148,17 @@ export class WizardValidator {
 	 */
 	static canComplete<T extends WizardData>(
 		data: Partial<T>,
-		config: WizardConfig<T>,
+		config: WizardConfig<T>
 	): boolean {
 		// Check if all required steps are valid
 		for (const step of config.steps) {
-			if (!step.isOptional && !step.canSkip) {
+			if (!(step.isOptional || step.canSkip)) {
 				const stepSchema = config.validation.stepSchemas[step.id];
 				if (stepSchema) {
 					const result = WizardValidator.validateStep(
 						step.id,
 						data,
-						stepSchema,
+						stepSchema
 					);
 					if (!result.isValid) {
 						return false;
@@ -178,10 +182,12 @@ export class WizardValidator {
 	static getStepErrors<T extends WizardData>(
 		stepId: string,
 		data: Partial<T>,
-		config: WizardConfig<T>,
+		config: WizardConfig<T>
 	): Record<string, string> {
 		const stepSchema = config.validation.stepSchemas[stepId];
-		if (!stepSchema) return {};
+		if (!stepSchema) {
+			return {};
+		}
 
 		const result = WizardValidator.validateStep(stepId, data, stepSchema);
 		return result.errors;
@@ -192,7 +198,7 @@ export class WizardValidator {
 	 */
 	static getAllErrors<T extends WizardData>(
 		data: Partial<T>,
-		config: WizardConfig<T>,
+		config: WizardConfig<T>
 	): Record<string, string> {
 		const result = WizardValidator.validateAllSteps(data, config);
 		return result.errors;
@@ -220,7 +226,7 @@ export class WizardValidator {
 		const friendlyMessage = message
 			.replace(
 				/String must contain at least \d+ character\(s\)/,
-				"Este campo es requerido",
+				"Este campo es requerido"
 			)
 			.replace(/Number must be greater than \d+/, "Debe ser un número válido")
 			.replace(/Invalid email/, "Correo electrónico inválido")
@@ -237,7 +243,7 @@ export class WizardValidator {
 		fieldName: string,
 		value: any,
 		data: Partial<T>,
-		config: WizardConfig<T>,
+		config: WizardConfig<T>
 	): { isValid: boolean; error?: string } {
 		const stepSchema = config.validation.stepSchemas[stepId];
 		if (!stepSchema) {
@@ -255,7 +261,7 @@ export class WizardValidator {
 
 			// Find error for this specific field
 			const fieldError = result.error.issues.find((err) =>
-				err.path.includes(fieldName),
+				err.path.includes(fieldName)
 			);
 
 			if (fieldError) {
@@ -263,7 +269,7 @@ export class WizardValidator {
 					isValid: false,
 					error: WizardValidator.formatErrorMessage(
 						fieldName,
-						fieldError.message,
+						fieldError.message
 					),
 				};
 			}

@@ -45,20 +45,20 @@ export function PropertyChart() {
 			</CardHeader>
 			<CardContent>
 				<ChartContainer config={chartConfig}>
-					<ResponsiveContainer width="100%" height={300}>
+					<ResponsiveContainer height={300} width="100%">
 						<BarChart data={chartData}>
 							<XAxis
+								axisLine={false}
+								className="text-blackCoral"
 								dataKey="month"
 								tickLine={false}
-								axisLine={false}
-								className="text-blackCoral"
 							/>
 							<YAxis
-								tickLine={false}
 								axisLine={false}
 								className="text-blackCoral"
+								tickLine={false}
 							/>
-							<ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+							<ChartTooltip content={<ChartTooltipContent />} cursor={false} />
 							<Bar
 								dataKey="propiedades"
 								fill="var(--color-propiedades)"

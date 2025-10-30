@@ -3,22 +3,22 @@
  * This replaces the dynamic CMS with static content
  */
 
-export interface ContactInfo {
+export type ContactInfo = {
 	type: "phone" | "email" | "address" | "social";
 	label: string;
 	value: string;
 	icon?: string;
 	href?: string;
-}
+};
 
-export interface PageSection {
+export type PageSection = {
 	id: string;
 	title?: string;
 	subtitle?: string;
 	description?: string;
 	content?: Record<string, any>;
 	images?: string[];
-}
+};
 
 // Static contact information
 export const CONTACT_INFO: ContactInfo[] = [
@@ -248,7 +248,7 @@ export function getContactInfoByType(type: ContactInfo["type"]): ContactInfo[] {
 
 export function getContactInfoValue(
 	type: ContactInfo["type"],
-	fallback: string = "",
+	fallback = ""
 ): string {
 	const info = CONTACT_INFO.find((item) => item.type === type);
 	return info?.value || fallback;
@@ -256,17 +256,21 @@ export function getContactInfoValue(
 
 export function getPageSection(
 	page: string,
-	section: string,
+	section: string
 ): PageSection | null {
 	const pageData = PAGE_SECTIONS[page as keyof typeof PAGE_SECTIONS];
-	if (!pageData) return null;
+	if (!pageData) {
+		return null;
+	}
 
 	return pageData[section as keyof typeof pageData] || null;
 }
 
 export function getPageSections(page: string): PageSection[] {
 	const pageData = PAGE_SECTIONS[page as keyof typeof PAGE_SECTIONS];
-	if (!pageData) return [];
+	if (!pageData) {
+		return [];
+	}
 
 	return Object.values(pageData);
 }

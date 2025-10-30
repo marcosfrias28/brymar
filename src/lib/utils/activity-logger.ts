@@ -1,5 +1,5 @@
-import { createActivity } from "@/lib/actions/activities";
 import type { ActivityData } from "@/lib/actions/activities";
+import { createActivity } from "@/lib/actions/activities";
 
 /**
  * Utility function to log user activities
@@ -22,10 +22,15 @@ export class ActivityLogger {
 	/**
 	 * Log a property favorite
 	 */
-	static async logPropertyFavorite(propertyId: string, propertyTitle: string, action: "add" | "remove") {
+	static async logPropertyFavorite(
+		propertyId: string,
+		propertyTitle: string,
+		action: "add" | "remove"
+	) {
 		await createActivity({
 			type: "favorite",
-			title: action === "add" ? "Aggiunto ai preferiti" : "Rimosso dai preferiti",
+			title:
+				action === "add" ? "Aggiunto ai preferiti" : "Rimosso dai preferiti",
 			description: `${propertyTitle} ${action === "add" ? "aggiunto a" : "rimosso da"} i preferiti`,
 			details: `Proprietà ID: ${propertyId}`,
 			metadata: { propertyId, action },
@@ -35,7 +40,11 @@ export class ActivityLogger {
 	/**
 	 * Log a search
 	 */
-	static async logSearch(searchTerm: string, filters: Record<string, any>, resultsCount: number) {
+	static async logSearch(
+		searchTerm: string,
+		filters: Record<string, any>,
+		resultsCount: number
+	) {
 		await createActivity({
 			type: "search",
 			title: "Nuova ricerca",
@@ -48,7 +57,11 @@ export class ActivityLogger {
 	/**
 	 * Log a contact/inquiry
 	 */
-	static async logContact(propertyId: string, propertyTitle: string, contactType: "inquiry" | "call" | "email") {
+	static async logContact(
+		propertyId: string,
+		propertyTitle: string,
+		contactType: "inquiry" | "call" | "email"
+	) {
 		await createActivity({
 			type: "contact",
 			title: "Contatto proprietario",
@@ -61,10 +74,15 @@ export class ActivityLogger {
 	/**
 	 * Log a message
 	 */
-	static async logMessage(recipientId: string, recipientName: string, messageType: "sent" | "received") {
+	static async logMessage(
+		recipientId: string,
+		recipientName: string,
+		messageType: "sent" | "received"
+	) {
 		await createActivity({
 			type: "message",
-			title: messageType === "sent" ? "Messaggio inviato" : "Messaggio ricevuto",
+			title:
+				messageType === "sent" ? "Messaggio inviato" : "Messaggio ricevuto",
 			description: `${messageType === "sent" ? "Hai inviato" : "Hai ricevuto"} un messaggio da ${recipientName}`,
 			details: `Destinatario: ${recipientName}`,
 			metadata: { recipientId, messageType },
@@ -100,7 +118,11 @@ export class ActivityLogger {
 	/**
 	 * Log a settings change
 	 */
-	static async logSettingsChange(settingName: string, oldValue: any, newValue: any) {
+	static async logSettingsChange(
+		settingName: string,
+		oldValue: any,
+		newValue: any
+	) {
 		await createActivity({
 			type: "settings",
 			title: "Impostazioni modificate",

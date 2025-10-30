@@ -10,13 +10,13 @@ import {
 } from "@/lib/actions/ai-actions";
 import type { PropertyBasicInfo } from "@/types/wizard";
 
-export interface RichTextContent {
+export type RichTextContent = {
 	html: string;
 	plainText: string;
 	formatted: boolean;
-}
+};
 
-interface AIGenerationState {
+type AIGenerationState = {
 	isGenerating: boolean;
 	error: string | null;
 	lastGenerated: {
@@ -24,14 +24,14 @@ interface AIGenerationState {
 		description?: string | RichTextContent;
 		tags?: string[];
 	};
-}
+};
 
-interface UseAIGenerationOptions {
+type UseAIGenerationOptions = {
 	language?: "es" | "en";
 	useRichText?: boolean;
 	onSuccess?: (type: "title" | "description" | "tags", content: any) => void;
 	onError?: (error: string) => void;
-}
+};
 
 export function useAIGeneration(options: UseAIGenerationOptions = {}) {
 	const { language = "es", useRichText = false, onSuccess, onError } = options;
@@ -59,7 +59,7 @@ export function useAIGeneration(options: UseAIGenerationOptions = {}) {
 				error: null,
 			}));
 		},
-		[],
+		[]
 	);
 
 	/**
@@ -82,9 +82,8 @@ export function useAIGeneration(options: UseAIGenerationOptions = {}) {
 					});
 
 					return result.data;
-				} else {
-					throw new Error(result.error || "Error al generar título");
 				}
+				throw new Error(result.error || "Error al generar título");
 			} catch (error) {
 				const errorMessage =
 					error instanceof Error
@@ -103,7 +102,7 @@ export function useAIGeneration(options: UseAIGenerationOptions = {}) {
 				return null;
 			}
 		},
-		[language, onSuccess, onError, setGenerating, setError, setGenerated],
+		[language, onSuccess, onError, setGenerating, setError, setGenerated]
 	);
 
 	/**
@@ -111,7 +110,7 @@ export function useAIGeneration(options: UseAIGenerationOptions = {}) {
 	 */
 	const generateDescription = useCallback(
 		async (
-			propertyData: PropertyBasicInfo,
+			propertyData: PropertyBasicInfo
 		): Promise<string | RichTextContent | null> => {
 			setGenerating(true);
 
@@ -140,9 +139,8 @@ export function useAIGeneration(options: UseAIGenerationOptions = {}) {
 					});
 
 					return result.data;
-				} else {
-					throw new Error(result.error || "Error al generar descripción");
 				}
+				throw new Error(result.error || "Error al generar descripción");
 			} catch (error) {
 				const errorMessage =
 					error instanceof Error
@@ -169,7 +167,7 @@ export function useAIGeneration(options: UseAIGenerationOptions = {}) {
 			setGenerating,
 			setError,
 			setGenerated,
-		],
+		]
 	);
 
 	/**
@@ -192,9 +190,8 @@ export function useAIGeneration(options: UseAIGenerationOptions = {}) {
 					});
 
 					return result.data;
-				} else {
-					throw new Error(result.error || "Error al generar etiquetas");
 				}
+				throw new Error(result.error || "Error al generar etiquetas");
 			} catch (error) {
 				const errorMessage =
 					error instanceof Error
@@ -213,7 +210,7 @@ export function useAIGeneration(options: UseAIGenerationOptions = {}) {
 				return null;
 			}
 		},
-		[language, onSuccess, onError, setGenerating, setError, setGenerated],
+		[language, onSuccess, onError, setGenerating, setError, setGenerated]
 	);
 
 	/**
@@ -288,7 +285,7 @@ export function useAIGeneration(options: UseAIGenerationOptions = {}) {
 				return null;
 			}
 		},
-		[language, useRichText, onSuccess, setGenerating, setError],
+		[language, useRichText, onSuccess, setGenerating, setError]
 	);
 
 	/**
@@ -329,7 +326,7 @@ export function useAIGeneration(options: UseAIGenerationOptions = {}) {
 							break;
 						default:
 							throw new Error(
-								"Tipo de generación no soportado para propiedades",
+								"Tipo de generación no soportado para propiedades"
 							);
 					}
 				} else if (request.type === "land") {
@@ -376,9 +373,11 @@ export function useAIGeneration(options: UseAIGenerationOptions = {}) {
 
 					if (typeof result.data === "string") {
 						return result.data;
-					} else if (Array.isArray(result.data)) {
+					}
+					if (Array.isArray(result.data)) {
 						return result.data.join(", ");
-					} else if (
+					}
+					if (
 						result.data &&
 						typeof result.data === "object" &&
 						"plainText" in result.data
@@ -386,14 +385,12 @@ export function useAIGeneration(options: UseAIGenerationOptions = {}) {
 						return (
 							(result.data as any).plainText || (result.data as any).html || ""
 						);
-					} else {
-						return String(result.data);
 					}
-				} else {
-					throw new Error(
-						result.error || `Error al generar ${request.generationType}`,
-					);
+					return String(result.data);
 				}
+				throw new Error(
+					result.error || `Error al generar ${request.generationType}`
+				);
 			} catch (error) {
 				const errorMessage =
 					error instanceof Error
@@ -412,7 +409,7 @@ export function useAIGeneration(options: UseAIGenerationOptions = {}) {
 				return null;
 			}
 		},
-		[useRichText, onSuccess, onError, setGenerating, setError, setGenerated],
+		[useRichText, onSuccess, onError, setGenerating, setError, setGenerated]
 	);
 
 	/**

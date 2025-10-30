@@ -4,6 +4,7 @@ import { DollarSign, MapPin, Plus, Ruler, TreePine } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { RouteGuard } from "@/components/auth/route-guard";
+import { FilterTabs } from "@/components/dashboard/filter-tabs";
 import { LandCardList } from "@/components/lands/land-card-list";
 import { LandFilters } from "@/components/lands/land-filters";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
@@ -23,6 +24,9 @@ export default function LandsPage() {
 	const breadcrumbs = useBreadcrumbs();
 
 	const [typeFilter, setTypeFilter] = useState<"all" | LandType>("all");
+	const [statusFilter, setStatusFilter] = useState<
+		"all" | "published" | "sold" | "reserved" | "under-contract"
+	>("all");
 
 	const {
 		data: landsData,
@@ -35,11 +39,21 @@ export default function LandsPage() {
 
 	const lands = landsData?.items || [];
 
-	const filteredByType = useMemo(() => {
-		return typeFilter === "all"
-			? lands
-			: lands.filter((l) => l.type === typeFilter);
-	}, [lands, typeFilter]);
+	const filteredByStatus = useMemo(
+		() =>
+			statusFilter === "all"
+				? lands
+				: lands.filter((l) => l.status === statusFilter),
+		[lands, statusFilter]
+	);
+
+	const filteredByType = useMemo(
+		() =>
+			typeFilter === "all"
+				? filteredByStatus
+				: filteredByStatus.filter((l) => l.type === typeFilter),
+		[filteredByStatus, typeFilter]
+	);
 
 	const stats = useMemo(
 		() => [
@@ -68,8 +82,40 @@ export default function LandsPage() {
 				color: "text-cyan-600",
 			},
 		],
-		[lands],
+		[lands]
 	);
+
+	// Quick status filter tabs aligned with layout
+	const filterTabs = [
+		{
+			label: "Todas",
+			value: "all",
+			count: lands.length,
+			active: statusFilter === "all",
+			onClick: () => setStatusFilter("all"),
+		},
+		{
+			label: "Publicadas",
+			value: "published",
+			count: lands.filter((l) => l.status === "published").length,
+			active: statusFilter === "published",
+			onClick: () => setStatusFilter("published"),
+		},
+		{
+			label: "Vendidas",
+			value: "sold",
+			count: lands.filter((l) => l.status === "sold").length,
+			active: statusFilter === "sold",
+			onClick: () => setStatusFilter("sold"),
+		},
+		{
+			label: "Reservadas",
+			value: "reserved",
+			count: lands.filter((l) => l.status === "reserved").length,
+			active: statusFilter === "reserved",
+			onClick: () => setStatusFilter("reserved"),
+		},
+	];
 
 	const handleFilterChange = (newFilter: typeof typeFilter) => {
 		setTypeFilter(newFilter);
@@ -79,13 +125,27 @@ export default function LandsPage() {
 	if (error) {
 		return (
 			<DashboardPageLayout
-				title="Gestión de Terrenos"
-				description="Administra y gestiona todos los terrenos disponibles"
+				actions={
+					<Button
+						asChild
+						className={cn(
+							"bg-arsenic hover:bg-blackCoral",
+							secondaryColorClasses.focusRing
+						)}
+					>
+						<Link href="/dashboard/lands/new">
+							<Plus className="mr-2 h-4 w-4" />
+							Agregar Terreno
+						</Link>
+					</Button>
+				}
 				breadcrumbs={breadcrumbs}
+				description="Administra y gestiona todos los terrenos disponibles"
+				title="Gestión de Terrenos"
 			>
-				<div className="flex items-center justify-center h-64">
+				<div className="flex h-64 items-center justify-center">
 					<div className="text-center">
-						<p className="text-red-600 mb-2">Error al cargar terrenos</p>
+						<p className="mb-2 text-red-600">Error al cargar terrenos</p>
 						<Button onClick={() => searchLands()} variant="outline">
 							Reintentar
 						</Button>
@@ -100,11 +160,11 @@ export default function LandsPage() {
 			asChild
 			className={cn(
 				"bg-arsenic hover:bg-blackCoral",
-				secondaryColorClasses.focusRing,
+				secondaryColorClasses.focusRing
 			)}
 		>
 			<Link href="/dashboard/lands/new">
-				<Plus className="h-4 w-4 mr-2" />
+				<Plus className="mr-2 h-4 w-4" />
 				Agregar Terreno
 			</Link>
 		</Button>
@@ -113,37 +173,38 @@ export default function LandsPage() {
 	return (
 		<RouteGuard requiredPermission="lands.manage">
 			<DashboardPageLayout
-				title="Gestión de Terrenos"
-				description="Administra y gestiona todos los terrenos disponibles"
-				breadcrumbs={breadcrumbs}
 				actions={actions}
-				showSearch={true}
+				breadcrumbs={breadcrumbs}
+				description="Administra y gestiona todos los terrenos disponibles"
+				headerExtras={<FilterTabs className="mb-4" tabs={filterTabs} />}
 				searchPlaceholder="Buscar terrenos..."
+				showSearch={true}
+				title="Gestión de Terrenos"
 			>
 				<div className="space-y-6">
 					{/* Stats Cards */}
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
 						{stats.map((stat) => (
 							<Card
-								key={stat.label}
 								className={cn(
 									"transition-all duration-200",
-									secondaryColorClasses.cardHover,
+									secondaryColorClasses.cardHover
 								)}
+								key={stat.label}
 							>
 								<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-									<CardTitle className="text-sm font-medium text-muted-foreground">
+									<CardTitle className="font-medium text-muted-foreground text-sm">
 										{stat.label}
 									</CardTitle>
 									<div className={stat.color}>{stat.icon}</div>
 								</CardHeader>
 								<CardContent>
-									<div className="text-2xl font-bold text-arsenic">
+									<div className="font-bold text-2xl text-arsenic">
 										{stat.value}
 									</div>
 									<Badge
-										variant="secondary"
 										className={cn(badgeVariants.secondarySubtle, "mt-2")}
+										variant="secondary"
 									>
 										{stat.value > 0 ? "Disponibles" : "Sin registros"}
 									</Badge>
@@ -157,7 +218,7 @@ export default function LandsPage() {
 						className={cn("border-blackCoral/20", secondaryColorClasses.accent)}
 					>
 						<CardHeader>
-							<CardTitle className="text-lg font-semibold text-arsenic">
+							<CardTitle className="font-semibold text-arsenic text-lg">
 								Filtros
 							</CardTitle>
 						</CardHeader>
@@ -173,19 +234,35 @@ export default function LandsPage() {
 					{/* Lands List */}
 					<div className="space-y-4">
 						<div className="flex items-center justify-between">
-							<h2 className="text-xl font-semibold text-arsenic">
+							<h2 className="font-semibold text-arsenic text-xl">
 								Terrenos ({filteredByType.length})
 							</h2>
-							<Badge
-								variant="outline"
-								className={badgeVariants.secondaryOutline}
-							>
-								{filteredByType.length} de {lands.length} terrenos
-							</Badge>
+							<div className="flex items-center gap-2">
+								<Badge
+									className={badgeVariants.secondaryOutline}
+									variant="outline"
+								>
+									{filteredByType.length} de {lands.length} terrenos
+								</Badge>
+								<Badge
+									className={cn(badgeVariants.secondarySubtle)}
+									variant="secondary"
+								>
+									{statusFilter === "all"
+										? "Todas"
+										: statusFilter === "published"
+											? "Publicadas"
+											: statusFilter === "sold"
+												? "Vendidas"
+												: statusFilter === "reserved"
+													? "Reservadas"
+													: "En Contrato"}
+								</Badge>
+							</div>
 						</div>
 
 						{loading ? (
-							<div className="text-center py-8 text-muted-foreground">
+							<div className="py-8 text-center text-muted-foreground">
 								Cargando terrenos...
 							</div>
 						) : (

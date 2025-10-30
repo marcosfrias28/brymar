@@ -49,13 +49,13 @@ export const secondaryColorClasses = {
 } as const;
 
 // Helper functions for dynamic class generation
-export const getSecondaryAccentClass = (opacity: number = 10) =>
+export const getSecondaryAccentClass = (opacity = 10) =>
 	`bg-secondary/${opacity} border-secondary/${Math.min(opacity * 2, 40)}`;
 
-export const getSecondaryHoverClass = (opacity: number = 20) =>
+export const getSecondaryHoverClass = (opacity = 20) =>
 	`hover:bg-secondary/${opacity} hover:border-secondary/${Math.min(opacity * 1.5, 40)}`;
 
-export const getSecondaryFocusClass = (ringOpacity: number = 50) =>
+export const getSecondaryFocusClass = (ringOpacity = 50) =>
 	`focus-visible:ring-secondary/${ringOpacity} focus-visible:border-secondary`;
 
 // Status indicator variants using secondary colors

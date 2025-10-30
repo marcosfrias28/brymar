@@ -28,14 +28,14 @@ import { cn } from "@/lib/utils";
 import { handleErrorWithRecovery } from "@/lib/utils/error-recovery";
 import { useNetworkStatus } from "@/lib/utils/network-detection";
 
-export interface ErrorRecoveryState {
+export type ErrorRecoveryState = {
 	errors: WizardError[];
 	retryAttempts: Record<string, number>;
 	isRecovering: boolean;
 	lastRecoveryAttempt?: Date;
-}
+};
 
-export interface RecoveryAction {
+export type RecoveryAction = {
 	id: string;
 	label: string;
 	description?: string;
@@ -44,9 +44,9 @@ export interface RecoveryAction {
 	primary?: boolean;
 	destructive?: boolean;
 	requiresNetwork?: boolean;
-}
+};
 
-export interface ComprehensiveErrorRecoveryProps {
+export type ComprehensiveErrorRecoveryProps = {
 	children: React.ReactNode;
 	onError?: (error: WizardError) => void;
 	onRecovery?: (error: WizardError) => void;
@@ -58,7 +58,7 @@ export interface ComprehensiveErrorRecoveryProps {
 		onRetry: () => void;
 	}>;
 	className?: string;
-}
+};
 
 export function ComprehensiveErrorRecovery({
 	children,
@@ -94,7 +94,9 @@ export function ComprehensiveErrorRecovery({
 	const handleRetry = useCallback(
 		async (errorCode: string) => {
 			const error = errorState.errors.find((e) => e.code === errorCode);
-			if (!error) return;
+			if (!error) {
+				return;
+			}
 
 			const currentRetries = errorState.retryAttempts[errorCode] || 0;
 			if (currentRetries >= maxRetries) {
@@ -128,8 +130,7 @@ export function ComprehensiveErrorRecovery({
 					onRecovery?.(error);
 					toast.success("Error recuperado exitosamente");
 				}
-			} catch (recoveryError) {
-				console.error("Recovery failed:", recoveryError);
+			} catch (_recoveryError) {
 				toast.error("No se pudo recuperar del error");
 			} finally {
 				setErrorState((prev) => ({
@@ -144,7 +145,7 @@ export function ComprehensiveErrorRecovery({
 			maxRetries,
 			removeError,
 			onRecovery,
-		],
+		]
 	);
 
 	// Add error to state
@@ -176,7 +177,7 @@ export function ComprehensiveErrorRecovery({
 					() => {
 						handleRetry(wizardError.code);
 					},
-					1000 * 2 ** (errorState.retryAttempts[wizardError.code] || 0),
+					1000 * 2 ** (errorState.retryAttempts[wizardError.code] || 0)
 				);
 			}
 		},
@@ -186,7 +187,7 @@ export function ComprehensiveErrorRecovery({
 			maxRetries,
 			errorState.retryAttempts,
 			handleRetry,
-		],
+		]
 	);
 
 	// Handle graceful degradation
@@ -213,7 +214,7 @@ export function ComprehensiveErrorRecovery({
 				id: "enable-offline-mode",
 				label: "Continuar sin conexión",
 				description: "Los cambios se guardarán localmente",
-				icon: <WifiOff className="w-4 h-4" />,
+				icon: <WifiOff className="h-4 w-4" />,
 				action: handleGracefulDegradation,
 			});
 		}
@@ -223,7 +224,7 @@ export function ComprehensiveErrorRecovery({
 			id: "retry-all",
 			label: "Reintentar todo",
 			description: "Intenta recuperar todos los errores",
-			icon: <RefreshCw className="w-4 h-4" />,
+			icon: <RefreshCw className="h-4 w-4" />,
 			action: () => {
 				errorState.errors.forEach((error) => {
 					if (error.retryable) {
@@ -239,7 +240,7 @@ export function ComprehensiveErrorRecovery({
 			id: "save-and-continue",
 			label: "Guardar y continuar",
 			description: "Guarda el progreso actual",
-			icon: <Save className="w-4 h-4" />,
+			icon: <Save className="h-4 w-4" />,
 			action: handleGracefulDegradation,
 		});
 
@@ -247,7 +248,7 @@ export function ComprehensiveErrorRecovery({
 			id: "go-back",
 			label: "Volver atrás",
 			description: "Regresa a la página anterior",
-			icon: <ArrowLeft className="w-4 h-4" />,
+			icon: <ArrowLeft className="h-4 w-4" />,
 			action: () => window.history.back(),
 		});
 
@@ -255,7 +256,7 @@ export function ComprehensiveErrorRecovery({
 			id: "go-home",
 			label: "Ir al Dashboard",
 			description: "Regresa al panel principal",
-			icon: <Home className="w-4 h-4" />,
+			icon: <Home className="h-4 w-4" />,
 			action: () => {
 				window.location.href = "/dashboard";
 			},
@@ -287,7 +288,7 @@ export function ComprehensiveErrorRecovery({
 			window.removeEventListener("error", handleUnhandledError);
 			window.removeEventListener(
 				"unhandledrejection",
-				handleUnhandledRejection,
+				handleUnhandledRejection
 			);
 		};
 	}, [addError]);
@@ -296,7 +297,7 @@ export function ComprehensiveErrorRecovery({
 	if (errorState.errors.length > 0) {
 		const criticalErrors = errorState.errors.filter(
 			(e) =>
-				!e.retryable || (errorState.retryAttempts[e.code] || 0) >= maxRetries,
+				!e.retryable || (errorState.retryAttempts[e.code] || 0) >= maxRetries
 		);
 
 		if (criticalErrors.length > 0) {
@@ -314,19 +315,19 @@ export function ComprehensiveErrorRecovery({
 			return (
 				<div
 					className={cn(
-						"min-h-screen flex items-center justify-center p-4",
-						className,
+						"flex min-h-screen items-center justify-center p-4",
+						className
 					)}
 				>
 					<ErrorRecoveryUI
 						errors={errorState.errors}
-						retryAttempts={errorState.retryAttempts}
 						isRecovering={errorState.isRecovering}
-						networkStatus={networkStatus}
-						recoveryActions={getRecoveryActions()}
-						onRetry={handleRetry}
-						onDismiss={removeError}
 						maxRetries={maxRetries}
+						networkStatus={networkStatus}
+						onDismiss={removeError}
+						onRetry={handleRetry}
+						recoveryActions={getRecoveryActions()}
+						retryAttempts={errorState.retryAttempts}
 					/>
 				</div>
 			);
@@ -342,15 +343,15 @@ export function ComprehensiveErrorRecovery({
 
 			{/* Non-critical errors overlay */}
 			{errorState.errors.length > 0 && (
-				<div className="fixed bottom-4 right-4 z-50 max-w-sm">
+				<div className="fixed right-4 bottom-4 z-50 max-w-sm">
 					<ErrorNotificationOverlay
 						errors={errorState.errors.filter(
 							(e) =>
 								e.retryable &&
-								(errorState.retryAttempts[e.code] || 0) < maxRetries,
+								(errorState.retryAttempts[e.code] || 0) < maxRetries
 						)}
-						onRetry={handleRetry}
 						onDismiss={removeError}
+						onRetry={handleRetry}
 					/>
 				</div>
 			)}
@@ -359,7 +360,7 @@ export function ComprehensiveErrorRecovery({
 }
 
 // Error Recovery UI Component
-interface ErrorRecoveryUIProps {
+type ErrorRecoveryUIProps = {
 	errors: WizardError[];
 	retryAttempts: Record<string, number>;
 	isRecovering: boolean;
@@ -368,7 +369,7 @@ interface ErrorRecoveryUIProps {
 	onRetry: (errorCode: string) => void;
 	onDismiss: (errorCode: string) => void;
 	maxRetries: number;
-}
+};
 
 function ErrorRecoveryUI({
 	errors,
@@ -385,8 +386,8 @@ function ErrorRecoveryUI({
 	return (
 		<Card className="w-full max-w-md border-destructive">
 			<CardHeader className="text-center">
-				<div className="mx-auto w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center mb-4">
-					<AlertTriangle className="w-6 h-6 text-destructive" />
+				<div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+					<AlertTriangle className="h-6 w-6 text-destructive" />
 				</div>
 				<CardTitle className="text-destructive">
 					Error en el Asistente
@@ -396,11 +397,11 @@ function ErrorRecoveryUI({
 
 			<CardContent className="space-y-4">
 				{/* Network Status */}
-				<div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+				<div className="flex items-center gap-2 rounded-lg bg-muted p-3">
 					{networkStatus.isOnline ? (
-						<Wifi className="w-4 h-4 text-green-500" />
+						<Wifi className="h-4 w-4 text-green-500" />
 					) : (
-						<WifiOff className="w-4 h-4 text-red-500" />
+						<WifiOff className="h-4 w-4 text-red-500" />
 					)}
 					<span className="text-sm">
 						{networkStatus.isOnline ? "Conectado" : "Sin conexión"}
@@ -410,10 +411,10 @@ function ErrorRecoveryUI({
 				{/* Error Details */}
 				<div className="space-y-2">
 					{errors.map((error) => (
-						<div key={error.code} className="p-3 border rounded-lg">
-							<div className="flex items-center justify-between mb-2">
+						<div className="rounded-lg border p-3" key={error.code}>
+							<div className="mb-2 flex items-center justify-between">
 								<Badge variant="outline">{error.code}</Badge>
-								<span className="text-xs text-muted-foreground">
+								<span className="text-muted-foreground text-xs">
 									{retryAttempts[error.code] || 0}/{maxRetries} intentos
 								</span>
 							</div>
@@ -423,8 +424,8 @@ function ErrorRecoveryUI({
 							{/* Retry Progress */}
 							{(retryAttempts[error.code] || 0) > 0 && (
 								<Progress
-									value={((retryAttempts[error.code] || 0) / maxRetries) * 100}
 									className="mt-2 h-1"
+									value={((retryAttempts[error.code] || 0) / maxRetries) * 100}
 								/>
 							)}
 						</div>
@@ -436,7 +437,14 @@ function ErrorRecoveryUI({
 					<h4 className="font-medium text-sm">Opciones de recuperación:</h4>
 					{recoveryActions.map((action) => (
 						<Button
+							className="w-full justify-start"
+							disabled={
+								isRecovering ||
+								(action.requiresNetwork && !networkStatus.isOnline)
+							}
 							key={action.id}
+							onClick={action.action}
+							size="sm"
 							variant={
 								action.primary
 									? "default"
@@ -444,13 +452,6 @@ function ErrorRecoveryUI({
 										? "destructive"
 										: "outline"
 							}
-							size="sm"
-							onClick={action.action}
-							disabled={
-								isRecovering ||
-								(action.requiresNetwork && !networkStatus.isOnline)
-							}
-							className="w-full justify-start"
 						>
 							{action.icon && <span className="mr-2">{action.icon}</span>}
 							<div className="text-left">
@@ -469,7 +470,7 @@ function ErrorRecoveryUI({
 						<summary className="cursor-pointer">
 							Información de desarrollo
 						</summary>
-						<pre className="mt-2 p-2 bg-muted rounded text-xs overflow-auto">
+						<pre className="mt-2 overflow-auto rounded bg-muted p-2 text-xs">
 							{JSON.stringify({ errors, retryAttempts }, null, 2)}
 						</pre>
 					</details>
@@ -480,43 +481,45 @@ function ErrorRecoveryUI({
 }
 
 // Error Notification Overlay for non-critical errors
-interface ErrorNotificationOverlayProps {
+type ErrorNotificationOverlayProps = {
 	errors: WizardError[];
 	onRetry: (errorCode: string) => void;
 	onDismiss: (errorCode: string) => void;
-}
+};
 
 function ErrorNotificationOverlay({
 	errors,
 	onRetry,
 	onDismiss,
 }: ErrorNotificationOverlayProps) {
-	if (errors.length === 0) return null;
+	if (errors.length === 0) {
+		return null;
+	}
 
 	return (
 		<div className="space-y-2">
 			{errors.map((error) => (
-				<Alert key={error.code} variant="destructive" className="shadow-lg">
-					<AlertCircle className="w-4 h-4" />
+				<Alert className="shadow-lg" key={error.code} variant="destructive">
+					<AlertCircle className="h-4 w-4" />
 					<AlertDescription>
 						<div className="flex items-center justify-between">
 							<span className="text-sm">{error.userMessage}</span>
-							<div className="flex gap-1 ml-2">
+							<div className="ml-2 flex gap-1">
 								{error.retryable && (
 									<Button
-										variant="ghost"
-										size="sm"
-										onClick={() => onRetry(error.code)}
 										className="h-6 px-2"
+										onClick={() => onRetry(error.code)}
+										size="sm"
+										variant="ghost"
 									>
-										<RefreshCw className="w-3 h-3" />
+										<RefreshCw className="h-3 w-3" />
 									</Button>
 								)}
 								<Button
-									variant="ghost"
-									size="sm"
-									onClick={() => onDismiss(error.code)}
 									className="h-6 px-2"
+									onClick={() => onDismiss(error.code)}
+									size="sm"
+									variant="ghost"
 								>
 									×
 								</Button>
@@ -541,7 +544,7 @@ export function useErrorRecovery() {
 	const context = React.useContext(ErrorRecoveryContext);
 	if (!context) {
 		throw new Error(
-			"useErrorRecovery must be used within ComprehensiveErrorRecovery",
+			"useErrorRecovery must be used within ComprehensiveErrorRecovery"
 		);
 	}
 	return context;
@@ -550,7 +553,7 @@ export function useErrorRecovery() {
 // HOC for wrapping components with comprehensive error recovery
 export function withComprehensiveErrorRecovery<P extends object>(
 	Component: React.ComponentType<P>,
-	options?: Partial<ComprehensiveErrorRecoveryProps>,
+	options?: Partial<ComprehensiveErrorRecoveryProps>
 ) {
 	const WrappedComponent = (props: P) => (
 		<ComprehensiveErrorRecovery {...options}>

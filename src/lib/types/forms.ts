@@ -17,7 +17,7 @@ export type FormState<T = any> = {
  */
 export type FormAction<T = any> = (
 	prevState: FormState<T>,
-	formData: FormData,
+	formData: FormData
 ) => Promise<FormState<T>>;
 
 /**
@@ -26,7 +26,7 @@ export type FormAction<T = any> = (
  * @returns A record of field names to error messages
  */
 export function extractValidationErrors(
-	error: ZodError,
+	error: ZodError
 ): Record<string, string[]> {
 	const errors: Record<string, string[]> = {};
 

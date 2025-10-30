@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useUser } from "@/hooks/use-user";
 import type { User } from "@/lib/db/schema";
 
-export interface ProfileActivity {
+export type ProfileActivity = {
 	id: string;
 	type:
 		| "view"
@@ -23,9 +23,9 @@ export interface ProfileActivity {
 	details?: string;
 	timestamp: Date;
 	metadata?: Record<string, any>;
-}
+};
 
-export interface ProfileFavorite {
+export type ProfileFavorite = {
 	id: string;
 	type: "property" | "search";
 	title: string;
@@ -33,9 +33,9 @@ export interface ProfileFavorite {
 	url: string;
 	thumbnail?: string;
 	createdAt: Date;
-}
+};
 
-export interface ProfileNotification {
+export type ProfileNotification = {
 	id: string;
 	type: "info" | "success" | "warning" | "error";
 	title: string;
@@ -43,9 +43,9 @@ export interface ProfileNotification {
 	read: boolean;
 	createdAt: Date;
 	actionUrl?: string;
-}
+};
 
-export interface ProfileMessage {
+export type ProfileMessage = {
 	id: string;
 	senderId: string;
 	senderName: string;
@@ -70,7 +70,7 @@ export interface ProfileMessage {
 		size: string;
 		url: string;
 	}[];
-}
+};
 
 /**
  * Hook per la gestione del profilo utente
@@ -107,10 +107,10 @@ export function useProfile() {
 		try {
 			setLoading(true);
 			setProfile((prev) => (prev ? { ...prev, ...data } : null));
-			toast.success("Profilo aggiornato con successo");
+			toast.success("Perfil actualizado con éxito");
 		} catch (_err) {
-			setError("Errore durante l'aggiornamento del profilo");
-			toast.error("Errore durante l'aggiornamento del profilo");
+			setError("Error al actualizar el perfil");
+			toast.error("Error al actualizar el perfil");
 		} finally {
 			setLoading(false);
 		}
@@ -139,8 +139,10 @@ export function useProfileActivity() {
 	} = useQuery({
 		queryKey: ["profile", "activities", user?.id],
 		queryFn: async () => {
-			if (!user?.id) return { activities: [], total: 0 };
-			
+			if (!user?.id) {
+				return { activities: [], total: 0 };
+			}
+
 			const response = await fetch(`/api/profile/activities?userId=${user.id}`);
 			if (!response.ok) {
 				throw new Error("Failed to fetch activities");
@@ -154,18 +156,21 @@ export function useProfileActivity() {
 		enabled: !!user?.id,
 	});
 
-	const activities: ProfileActivity[] = activitiesResult?.activities?.map((activity: any) => ({
-		id: activity.id,
-		type: activity.type,
-		title: activity.title,
-		description: activity.description,
-		details: activity.details,
-		timestamp: new Date(activity.timestamp),
-		metadata: activity.metadata,
-	})) || [];
+	const activities: ProfileActivity[] =
+		activitiesResult?.activities?.map((activity: any) => ({
+			id: activity.id,
+			type: activity.type,
+			title: activity.title,
+			description: activity.description,
+			details: activity.details,
+			timestamp: new Date(activity.timestamp),
+			metadata: activity.metadata,
+		})) || [];
 
 	const refreshActivities = async () => {
-		await queryClient.invalidateQueries({ queryKey: ["profile", "activities", user?.id] });
+		await queryClient.invalidateQueries({
+			queryKey: ["profile", "activities", user?.id],
+		});
 		await refetch();
 	};
 
@@ -235,15 +240,15 @@ export function useProfileNotifications() {
 	const [unreadCount, setUnreadCount] = useState(0);
 
 	useEffect(() => {
-		// Simula il caricamento delle notifiche
+		// Simula la carga de notificaciones
 		setTimeout(() => {
 			const mockNotifications = [
 				{
 					id: "1",
 					type: "info" as const,
-					title: "Nuova proprietà disponibile",
+					title: "Nueva propiedad disponible",
 					message:
-						"Una nuova proprietà corrispondente ai tuoi criteri è disponibile",
+						"Una nueva propiedad que coincide con tus criterios está disponible",
 					read: false,
 					createdAt: new Date(Date.now() - 1000 * 60 * 30),
 					actionUrl: "/properties/new-property",
@@ -251,8 +256,8 @@ export function useProfileNotifications() {
 				{
 					id: "2",
 					type: "success" as const,
-					title: "Profilo aggiornato",
-					message: "Il tuo profilo è stato aggiornato con successo",
+					title: "Perfil actualizado",
+					message: "Tu perfil se ha actualizado con éxito",
 					read: true,
 					createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
 				},
@@ -266,15 +271,15 @@ export function useProfileNotifications() {
 	const markAsRead = async (id: string) => {
 		setNotifications((prev) =>
 			prev.map((notification) =>
-				notification.id === id ? { ...notification, read: true } : notification,
-			),
+				notification.id === id ? { ...notification, read: true } : notification
+			)
 		);
 		setUnreadCount((prev) => Math.max(0, prev - 1));
 	};
 
 	const markAllAsRead = async () => {
 		setNotifications((prev) =>
-			prev.map((notification) => ({ ...notification, read: true })),
+			prev.map((notification) => ({ ...notification, read: true }))
 		);
 		setUnreadCount(0);
 	};
@@ -297,7 +302,7 @@ export function useProfileMessages() {
 	const [unreadCount, setUnreadCount] = useState(0);
 
 	useEffect(() => {
-		// Simula il caricamento dei messaggi
+		// Simula la carga de mensajes
 		setTimeout(() => {
 			const mockMessages = [
 				{
@@ -305,11 +310,11 @@ export function useProfileMessages() {
 					senderId: "agent-1",
 					senderName: "Marco Rossi",
 					senderAvatar: "/avatars/agent-1.jpg",
-					subject: "Informazioni Villa Milano",
+					subject: "Información Villa Milán",
 					message:
-						"Salve, ho visto il suo interesse per la villa a Milano. Posso fornirle maggiori dettagli.",
+						"Hola, he visto tu interés por la villa en Milán. Puedo proporcionarte más detalles.",
 					content:
-						"Salve, ho visto il suo interesse per la villa a Milano. Posso fornirle maggiori dettagli.",
+						"Hola, he visto tu interés por la villa en Milán. Puedo proporcionarte más detalles.",
 					read: false,
 					starred: false,
 					archived: false,
@@ -327,12 +332,12 @@ export function useProfileMessages() {
 				{
 					id: "2",
 					senderId: "admin-1",
-					senderName: "Supporto Brymar",
-					subject: "Benvenuto su Brymar",
+					senderName: "Soporte Brymar",
+					subject: "Bienvenido a Brymar",
 					message:
-						"Benvenuto sulla nostra piattaforma! Siamo qui per aiutarti a trovare la casa dei tuoi sogni.",
+						"¡Bienvenido a nuestra plataforma! Estamos aquí para ayudarte a encontrar la casa de tus sueños.",
 					content:
-						"Benvenuto sulla nostra piattaforma! Siamo qui per aiutarti a trovare la casa dei tuoi sogni.",
+						"¡Bienvenido a nuestra plataforma! Estamos aquí para ayudarte a encontrar la casa de tus sueños.",
 					read: true,
 					starred: false,
 					archived: false,
@@ -340,15 +345,17 @@ export function useProfileMessages() {
 					createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
 					sender: {
 						id: "admin-1",
-						name: "Supporto Brymar",
-						email: "supporto@brymar.com",
+						name: "Soporte Brymar",
+						email: "soporte@brymar.com",
 						avatar: "/avatars/support.jpg",
 					},
 					attachments: [],
 				},
 			];
 			setMessages(mockMessages);
-			setUnreadCount(mockMessages.filter((m) => !m.read && !m.archived).length);
+			setUnreadCount(
+				mockMessages.filter((m) => !(m.read || m.archived)).length
+			);
 			setLoading(false);
 		}, 700);
 	}, []);
@@ -358,8 +365,8 @@ export function useProfileMessages() {
 			prev.map((message) =>
 				message.id === id
 					? { ...message, read: true, status: "read" as const }
-					: message,
-			),
+					: message
+			)
 		);
 		setUnreadCount((prev) => Math.max(0, prev - 1));
 	};
@@ -369,75 +376,58 @@ export function useProfileMessages() {
 		subject: string;
 		content: string;
 	}) => {
-		try {
-			// Simulazione invio messaggio
-			await new Promise((resolve) => setTimeout(resolve, 1000));
+		// Simulazione invio messaggio
+		await new Promise((resolve) => setTimeout(resolve, 1000));
 
-			const newMessage: ProfileMessage = {
-				id: Date.now().toString(),
-				senderId: "current-user",
-				senderName: "Tu",
-				subject: data.subject,
-				message: data.content,
-				content: data.content,
-				read: true,
-				starred: false,
-				archived: false,
-				status: "sent",
-				createdAt: new Date(),
-				sender: {
-					id: "current-user",
-					name: "Tu",
-					email: data.to,
-					avatar: "/avatars/user.png",
-				},
-				attachments: [],
-			};
+		const newMessage: ProfileMessage = {
+			id: Date.now().toString(),
+			senderId: "current-user",
+			senderName: "Tu",
+			subject: data.subject,
+			message: data.content,
+			content: data.content,
+			read: true,
+			starred: false,
+			archived: false,
+			status: "sent",
+			createdAt: new Date(),
+			sender: {
+				id: "current-user",
+				name: "Tu",
+				email: data.to,
+				avatar: "/avatars/user.png",
+			},
+			attachments: [],
+		};
 
-			setMessages((prev) => [newMessage, ...prev]);
-		} catch (error) {
-			console.error("Errore nell'invio del messaggio:", error);
-			throw error;
-		}
+		setMessages((prev) => [newMessage, ...prev]);
 	};
 
 	const toggleStar = async (id: string) => {
-		try {
-			// Simulazione toggle stella
-			await new Promise((resolve) => setTimeout(resolve, 300));
+		// Simulazione toggle stella
+		await new Promise((resolve) => setTimeout(resolve, 300));
 
-			setMessages((prev) =>
-				prev.map((message) =>
-					message.id === id
-						? { ...message, starred: !message.starred }
-						: message,
-				),
-			);
-		} catch (error) {
-			console.error("Errore nell'aggiornamento della stella:", error);
-			throw error;
-		}
+		setMessages((prev) =>
+			prev.map((message) =>
+				message.id === id ? { ...message, starred: !message.starred } : message
+			)
+		);
 	};
 
 	const archiveMessage = async (id: string) => {
-		try {
-			// Simulazione archiviazione
-			await new Promise((resolve) => setTimeout(resolve, 500));
+		// Simulazione archiviazione
+		await new Promise((resolve) => setTimeout(resolve, 500));
 
-			setMessages((prev) =>
-				prev.map((message) =>
-					message.id === id ? { ...message, archived: true } : message,
-				),
-			);
+		setMessages((prev) =>
+			prev.map((message) =>
+				message.id === id ? { ...message, archived: true } : message
+			)
+		);
 
-			// Aggiorna il conteggio non letti se il messaggio era non letto
-			const message = messages.find((m) => m.id === id);
-			if (message && !message.read) {
-				setUnreadCount((prev) => Math.max(0, prev - 1));
-			}
-		} catch (error) {
-			console.error("Errore nell'archiviazione del messaggio:", error);
-			throw error;
+		// Aggiorna il conteggio non letti se il messaggio era non letto
+		const message = messages.find((m) => m.id === id);
+		if (message && !message.read) {
+			setUnreadCount((prev) => Math.max(0, prev - 1));
 		}
 	};
 

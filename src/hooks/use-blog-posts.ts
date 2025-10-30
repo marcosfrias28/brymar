@@ -50,7 +50,9 @@ export function useBlogPost(id: string | null) {
 	return useQuery({
 		queryKey: ["blog-post", id],
 		queryFn: async () => {
-			if (!id) return null;
+			if (!id) {
+				return null;
+			}
 			const result = await getBlogPostById(id);
 			if (!result.success) {
 				throw new Error(result.error);
@@ -69,7 +71,9 @@ export function useBlogPostBySlug(slug: string | null) {
 	return useQuery({
 		queryKey: ["blog-post-slug", slug],
 		queryFn: async () => {
-			if (!slug) return null;
+			if (!slug) {
+				return null;
+			}
 			const result = await getBlogPostBySlug(slug);
 			if (!result.success) {
 				throw new Error(result.error);
@@ -84,11 +88,7 @@ export function useBlogPostBySlug(slug: string | null) {
 /**
  * Hook for getting blog posts by category
  */
-export function useBlogPostsByCategory(
-	category: string,
-	page: number = 1,
-	limit: number = 12,
-) {
+export function useBlogPostsByCategory(category: string, page = 1, limit = 12) {
 	return useQuery({
 		queryKey: ["blog-posts-category", category, page, limit],
 		queryFn: async () => {
@@ -105,7 +105,7 @@ export function useBlogPostsByCategory(
 /**
  * Hook for getting recent blog posts
  */
-export function useRecentBlogPosts(limit: number = 5) {
+export function useRecentBlogPosts(limit = 5) {
 	return useQuery({
 		queryKey: ["recent-blog-posts", limit],
 		queryFn: async () => {
@@ -122,7 +122,7 @@ export function useRecentBlogPosts(limit: number = 5) {
 /**
  * Hook for getting featured blog posts
  */
-export function useFeaturedBlogPosts(limit: number = 3) {
+export function useFeaturedBlogPosts(limit = 3) {
 	return useQuery({
 		queryKey: ["featured-blog-posts", limit],
 		queryFn: async () => {
@@ -271,11 +271,15 @@ export function useOptimisticBlogPost(initialPost: BlogPost | null) {
 	const queryClient = useQueryClient();
 
 	const updateOptimistic = (updates: Partial<BlogPost>) => {
-		if (!initialPost) return;
+		if (!initialPost) {
+			return;
+		}
 
 		const queryKey = ["blog-post", initialPost.id];
 		queryClient.setQueryData(queryKey, (old: BlogPost | undefined) => {
-			if (!old) return old;
+			if (!old) {
+				return old;
+			}
 			return { ...old, ...updates };
 		});
 	};
@@ -291,13 +295,12 @@ export function useBlogPostForm(_initialData?: Partial<CreateBlogPostInput>) {
 	const updateMutation = useUpdateBlogPost();
 
 	const handleSubmit = async (
-		data: CreateBlogPostInput | UpdateBlogPostInput,
+		data: CreateBlogPostInput | UpdateBlogPostInput
 	) => {
 		if ("id" in data) {
 			return updateMutation.mutateAsync(data);
-		} else {
-			return createMutation.mutateAsync(data);
 		}
+		return createMutation.mutateAsync(data);
 	};
 
 	return {

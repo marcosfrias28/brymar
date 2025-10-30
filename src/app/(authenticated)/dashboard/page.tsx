@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Settings, TrendingUp } from "lucide-react";
+import { Plus, Settings } from "lucide-react";
 import Link from "next/link";
 import { RouteGuard } from "@/components/auth/route-guard";
 import { PropertyChart } from "@/components/dashboard/property-chart";
@@ -9,31 +9,63 @@ import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { StatsCards } from "@/components/dashboard/stats-cards";
 import { DashboardPageLayout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
+import { useBlogPosts } from "@/hooks/use-blog-posts";
 import { useBreadcrumbs } from "@/hooks/use-breadcrumbs";
+import { useLands } from "@/hooks/use-lands";
+import { useProperties } from "@/hooks/use-properties";
+import { getStatsAdapter } from "@/lib/adapters/stats-adapters";
 
 export default function DashboardPage() {
 	const breadcrumbs = useBreadcrumbs();
 
+	// Fetch data for stats
+	const { data: propertiesData, isLoading: propertiesLoading } =
+		useProperties();
+	const { data: landsData, isLoading: landsLoading } = useLands();
+	const { data: blogPostsData, isLoading: postsLoading } = useBlogPosts();
+
+	const properties = propertiesData || [];
+	const _lands = landsData?.items || [];
+	const blogPosts = blogPostsData?.posts || [];
+
+	const isLoading = propertiesLoading || landsLoading || postsLoading;
+
+	// Handle dashboard refresh
+	const _handleRefreshDashboard = () => {
+		// Here you would trigger data refetch
+		// refetch functions from the hooks could be called here
+	};
+
+	// Generate stats using the adapter system
+	const adminAdapter = getStatsAdapter("admin");
+	const statsCards =
+		adminAdapter?.generateStats({
+			totalUsers: 150, // This would come from a users hook
+			totalProperties: properties.length,
+			totalPosts: blogPosts.length,
+			systemHealth: "good" as const,
+		}) || [];
+
 	const actions = (
 		<div className="flex items-center gap-3">
 			<Button
-				variant="outline"
-				size="sm"
 				asChild
-				className="hover:bg-secondary/10 hover:border-secondary/30 transition-colors"
+				className="transition-colors hover:border-secondary/30 hover:bg-secondary/10"
+				size="sm"
+				variant="outline"
 			>
 				<Link href="/dashboard/settings">
-					<Settings className="h-4 w-4 mr-2" />
+					<Settings className="mr-2 h-4 w-4" />
 					Configuración
 				</Link>
 			</Button>
 			<Button
-				size="sm"
 				asChild
 				className="bg-secondary text-secondary-foreground hover:bg-secondary/80 focus-visible:ring-secondary/50"
+				size="sm"
 			>
 				<Link href="/dashboard/properties/new">
-					<Plus className="h-4 w-4 mr-2" />
+					<Plus className="mr-2 h-4 w-4" />
 					Agregar Propiedad
 				</Link>
 			</Button>
@@ -43,41 +75,34 @@ export default function DashboardPage() {
 	return (
 		<RouteGuard requiredPermission="dashboard.access">
 			<DashboardPageLayout
-				title="Dashboard"
-				description="Resumen general de tu actividad y estadísticas de la plataforma"
-				breadcrumbs={breadcrumbs}
 				actions={actions}
-				showSearch={true}
-				searchPlaceholder="Buscar en dashboard..."
-				className="bg-background"
-				contentClassName="space-y-8"
+				breadcrumbs={breadcrumbs}
+				description="Panel de control principal"
+				headerExtras={
+					<StatsCards
+						className="mb-4"
+						isLoading={isLoading}
+						stats={statsCards}
+					/>
+				}
+				title="Dashboard"
 			>
-				{/* Overview Cards Section */}
-				<section className="space-y-4">
-					<div className="flex items-center gap-2">
-						<TrendingUp className="h-5 w-5 text-secondary" />
-						<h2 className="text-xl font-semibold text-foreground">
-							Resumen General
-						</h2>
+				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+					{/* Quick Actions */}
+					<div className="md:col-span-2 lg:col-span-1">
+						<QuickActions />
 					</div>
-					<StatsCards />
-				</section>
 
-				{/* Charts and Activity Section */}
-				<section className="space-y-4">
-					<h2 className="text-xl font-semibold text-foreground">
-						Análisis y Actividad
-					</h2>
-					<div className="grid gap-6 lg:grid-cols-7">
-						<div className="lg:col-span-4 space-y-4">
-							<PropertyChart />
-						</div>
-						<div className="lg:col-span-3 space-y-4">
-							<RecentActivity />
-							<QuickActions />
-						</div>
+					{/* Property Chart */}
+					<div className="md:col-span-2 lg:col-span-2">
+						<PropertyChart />
 					</div>
-				</section>
+
+					{/* Recent Activity */}
+					<div className="md:col-span-2 lg:col-span-3">
+						<RecentActivity />
+					</div>
+				</div>
 			</DashboardPageLayout>
 		</RouteGuard>
 	);

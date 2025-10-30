@@ -125,29 +125,29 @@ export class TemplateService {
 
 	static getTemplates(): PropertyTemplate[] {
 		return TemplateService.DEFAULT_TEMPLATES.filter(
-			(template) => template.isActive,
+			(template) => template.isActive
 		);
 	}
 
 	static getTemplateById(id: string): PropertyTemplate | null {
 		return (
 			TemplateService.DEFAULT_TEMPLATES.find(
-				(template) => template.id === id,
+				(template) => template.id === id
 			) || null
 		);
 	}
 
 	static getTemplatesByCategory(
-		category: PropertyTemplate["category"],
+		category: PropertyTemplate["category"]
 	): PropertyTemplate[] {
 		return TemplateService.DEFAULT_TEMPLATES.filter(
-			(template) => template.category === category && template.isActive,
+			(template) => template.category === category && template.isActive
 		);
 	}
 
 	static applyTemplate(
 		template: PropertyTemplate,
-		customData?: Partial<PropertyFormData>,
+		customData?: Partial<PropertyFormData>
 	): PropertyFormData {
 		const baseData = {
 			...template.defaultData,
@@ -172,7 +172,7 @@ export class TemplateService {
 	}
 
 	static validateBulkImportData(
-		data: Array<Partial<PropertyFormData>>,
+		data: Partial<PropertyFormData>[]
 	): BulkImportData["validationResults"] {
 		const errors: Array<{ row: number; field: string; message: string }> = [];
 		let valid = 0;
@@ -242,7 +242,7 @@ export class TemplateService {
 		name: string,
 		description: string,
 		category: PropertyTemplate["category"],
-		baseData: Partial<PropertyFormData>,
+		baseData: Partial<PropertyFormData>
 	): PropertyTemplate {
 		return {
 			id: `custom-${Date.now()}`,

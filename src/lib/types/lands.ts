@@ -23,13 +23,14 @@ export type LandType =
 	| "vacant";
 
 export type LandStatus =
-	| "available"
+	| "draft"
+	| "published"
 	| "sold"
 	| "reserved"
 	| "under-contract"
 	| "archived";
 
-export interface LandFeatures {
+export type LandFeatures = {
 	zoning?: string;
 	utilities: string[]; // water, electricity, gas, sewer, etc.
 	access: string[]; // road access, utilities access, etc.
@@ -39,7 +40,7 @@ export interface LandFeatures {
 	mineralRights?: boolean;
 	restrictions?: string[];
 	developmentPotential?: string;
-}
+};
 
 export interface Land extends BaseEntity {
 	name: string;
@@ -56,7 +57,7 @@ export interface Land extends BaseEntity {
 	userId: string;
 }
 
-export interface CreateLandInput {
+export type CreateLandInput = {
 	name: string;
 	description: string;
 	area: number;
@@ -67,13 +68,13 @@ export interface CreateLandInput {
 	type: LandType;
 	features: LandFeatures;
 	images?: ImageInput[];
-}
+};
 
 export interface UpdateLandInput extends Partial<CreateLandInput> {
 	id: string;
 }
 
-export interface SearchLandsFilters {
+export type SearchLandsFilters = {
 	query?: string;
 	landTypes?: string[];
 	minPrice?: number;
@@ -82,9 +83,9 @@ export interface SearchLandsFilters {
 	maxArea?: number;
 	location?: string;
 	status?: "draft" | "published" | "sold" | "withdrawn" | "archived";
-}
+};
 
-export interface LandSearchFilters {
+export type LandSearchFilters = {
 	minPrice?: number;
 	maxPrice?: number;
 	landTypes?: LandType[];
@@ -95,7 +96,7 @@ export interface LandSearchFilters {
 	zoning?: string[];
 	status?: LandStatus[];
 	userId?: string;
-}
+};
 
 export interface LandSearchResult extends SearchResult<Land> {
 	filters: {

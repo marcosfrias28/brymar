@@ -11,13 +11,13 @@ enum LogLevel {
 	CRITICAL = 4,
 }
 
-interface LoggerConfig {
+type LoggerConfig = {
 	level: LogLevel;
 	enableConsole: boolean;
 	enableFile: boolean;
 	filePath?: string;
 	sanitizeErrors: boolean;
-}
+};
 
 // Función para obtener el nivel de log desde variables de entorno
 function getLogLevel(): LogLevel {
@@ -39,22 +39,22 @@ function getLogLevel(): LogLevel {
 // Función para parsear valores booleanos de variables de entorno
 function parseEnvBoolean(
 	value: string | undefined,
-	defaultValue: boolean,
+	defaultValue: boolean
 ): boolean {
-	if (value === undefined) return defaultValue;
+	if (value === undefined) {
+		return defaultValue;
+	}
 	return value.toLowerCase() === "true";
 }
 
 // Configuración por defecto basada en el entorno
-const getDefaultConfig = (): LoggerConfig => {
-	return {
-		level: getLogLevel(),
-		enableConsole: parseEnvBoolean(process.env.LOG_CONSOLE, isDevelopment),
-		enableFile: parseEnvBoolean(process.env.LOG_FILE, true),
-		filePath: process.env.LOG_FILE_PATH || "./logs/app.log",
-		sanitizeErrors: parseEnvBoolean(process.env.LOG_SANITIZE, isProduction),
-	};
-};
+const getDefaultConfig = (): LoggerConfig => ({
+	level: getLogLevel(),
+	enableConsole: parseEnvBoolean(process.env.LOG_CONSOLE, isDevelopment),
+	enableFile: parseEnvBoolean(process.env.LOG_FILE, true),
+	filePath: process.env.LOG_FILE_PATH || "./logs/app.log",
+	sanitizeErrors: parseEnvBoolean(process.env.LOG_SANITIZE, isProduction),
+});
 
 // Configuración global del logger
 const config = getDefaultConfig();
@@ -67,7 +67,7 @@ function shouldLog(level: LogLevel): boolean {
 function formatMessage(
 	level: LogLevel,
 	message: string,
-	context?: any,
+	context?: any
 ): string {
 	const timestamp = new Date().toISOString();
 	const levelName = LogLevel[level];
@@ -104,13 +104,15 @@ function sanitizeError(error: any): string {
 }
 
 function logMessage(level: LogLevel, message: string, context?: any): void {
-	if (!shouldLog(level)) return;
+	if (!shouldLog(level)) {
+		return;
+	}
 
-	const formattedMessage = formatMessage(level, message, context);
+	const _formattedMessage = formatMessage(level, message, context);
 
 	// Log a consola solo en desarrollo
 	if (config.enableConsole) {
-		const consoleMethod =
+		const _consoleMethod =
 			level >= LogLevel.ERROR
 				? "error"
 				: level >= LogLevel.WARNING
@@ -118,7 +120,6 @@ function logMessage(level: LogLevel, message: string, context?: any): void {
 					: level >= LogLevel.INFO
 						? "info"
 						: "log";
-		console[consoleMethod](formattedMessage);
 	}
 
 	// En producción, aquí se podría implementar logging a archivo o servicio externo
@@ -144,7 +145,7 @@ export async function warning(message: string, context?: any): Promise<void> {
 export async function error(
 	message: string,
 	errorObj?: any,
-	context?: any,
+	context?: any
 ): Promise<void> {
 	const sanitizedError = errorObj ? sanitizeError(errorObj) : "";
 	const fullMessage = sanitizedError
@@ -156,7 +157,7 @@ export async function error(
 export async function critical(
 	message: string,
 	errorObj?: any,
-	context?: any,
+	context?: any
 ): Promise<void> {
 	const sanitizedError = errorObj ? sanitizeError(errorObj) : "";
 	const fullMessage = sanitizedError
@@ -180,7 +181,7 @@ export const UserMessages = {
 
 // Función para obtener mensaje de usuario seguro
 export async function getSafeUserMessage(
-	errorType: keyof typeof UserMessages,
+	errorType: keyof typeof UserMessages
 ): Promise<string> {
 	return UserMessages[errorType];
 }

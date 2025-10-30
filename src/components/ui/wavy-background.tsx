@@ -4,7 +4,7 @@ import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
-interface WavyBackgroundProps {
+type WavyBackgroundProps = {
 	children?: React.ReactNode;
 	className?: string;
 	containerClassName?: string;
@@ -15,7 +15,7 @@ interface WavyBackgroundProps {
 	speed?: "slow" | "fast";
 	waveOpacity?: number;
 	[key: string]: any;
-}
+};
 
 export const WavyBackground = ({
 	children,
@@ -78,7 +78,7 @@ export const WavyBackground = ({
 			ctx.lineWidth = waveWidth || 50;
 			ctx.strokeStyle = waveColors[i % waveColors.length];
 			for (x = 0; x < w; x += 5) {
-				var y = noise(x / 800, 0.3 * i, nt) * 100;
+				const y = noise(x / 800, 0.3 * i, nt) * 100;
 				ctx.lineTo(x, y + h * 0.5); // adjust for height, currently at 50% of the container
 			}
 			ctx.stroke();
@@ -110,25 +110,25 @@ export const WavyBackground = ({
 		setIsSafari(
 			typeof window !== "undefined" &&
 				navigator.userAgent.includes("Safari") &&
-				!navigator.userAgent.includes("Chrome"),
+				!navigator.userAgent.includes("Chrome")
 		);
 	}, []);
 
 	return (
 		<div
 			className={cn(
-				"h-screen flex flex-col items-center justify-center",
-				containerClassName,
+				"flex h-screen flex-col items-center justify-center",
+				containerClassName
 			)}
 		>
 			<canvas
 				className="absolute inset-0 z-0"
-				ref={canvasRef}
 				id="canvas"
+				ref={canvasRef}
 				style={{
 					...(isSafari ? { filter: `blur(${blur}px)` } : {}),
 				}}
-			></canvas>
+			/>
 			<div className={cn("relative z-10", className)} {...props}>
 				{children}
 			</div>
@@ -136,42 +136,40 @@ export const WavyBackground = ({
 	);
 };
 
-const getNoiseFunction = () => {
-	return (x: number, y: number, z: number) => {
-		const X = Math.floor(x) & 255;
-		const Y = Math.floor(y) & 255;
-		const Z = Math.floor(z) & 255;
-		x -= Math.floor(x);
-		y -= Math.floor(y);
-		z -= Math.floor(z);
-		const u = fade(x);
-		const v = fade(y);
-		const w = fade(z);
-		const A = p[X] + Y;
-		const AA = p[A] + Z;
-		const AB = p[A + 1] + Z;
-		const B = p[X + 1] + Y;
-		const BA = p[B] + Z;
-		const BB = p[B + 1] + Z;
+const getNoiseFunction = () => (x: number, y: number, z: number) => {
+	const X = Math.floor(x) & 255;
+	const Y = Math.floor(y) & 255;
+	const Z = Math.floor(z) & 255;
+	x -= Math.floor(x);
+	y -= Math.floor(y);
+	z -= Math.floor(z);
+	const u = fade(x);
+	const v = fade(y);
+	const w = fade(z);
+	const A = p[X] + Y;
+	const AA = p[A] + Z;
+	const AB = p[A + 1] + Z;
+	const B = p[X + 1] + Y;
+	const BA = p[B] + Z;
+	const BB = p[B + 1] + Z;
 
-		return lerp(
-			w,
+	return lerp(
+		w,
+		lerp(
+			v,
+			lerp(u, grad(p[AA], x, y, z), grad(p[BA], x - 1, y, z)),
+			lerp(u, grad(p[AB], x, y - 1, z), grad(p[BB], x - 1, y - 1, z))
+		),
+		lerp(
+			v,
+			lerp(u, grad(p[AA + 1], x, y, z - 1), grad(p[BA + 1], x - 1, y, z - 1)),
 			lerp(
-				v,
-				lerp(u, grad(p[AA], x, y, z), grad(p[BA], x - 1, y, z)),
-				lerp(u, grad(p[AB], x, y - 1, z), grad(p[BB], x - 1, y - 1, z)),
-			),
-			lerp(
-				v,
-				lerp(u, grad(p[AA + 1], x, y, z - 1), grad(p[BA + 1], x - 1, y, z - 1)),
-				lerp(
-					u,
-					grad(p[AB + 1], x, y - 1, z - 1),
-					grad(p[BB + 1], x - 1, y - 1, z - 1),
-				),
-			),
-		);
-	};
+				u,
+				grad(p[AB + 1], x, y - 1, z - 1),
+				grad(p[BB + 1], x - 1, y - 1, z - 1)
+			)
+		)
+	);
 };
 
 const fade = (t: number) => t * t * t * (t * (t * 6 - 15) + 10);

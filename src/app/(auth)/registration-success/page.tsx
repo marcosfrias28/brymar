@@ -32,7 +32,7 @@ const RegistrationSuccessPage = () => {
 		}
 
 		// If no params, try to get from session
-		if (!emailParam || !usernameParam) {
+		if (!(emailParam && usernameParam)) {
 			authClient.getSession().then(({ data }) => {
 				if (data?.user) {
 					if (!emailParam && data.user.email) {
@@ -55,15 +55,15 @@ const RegistrationSuccessPage = () => {
 	};
 
 	return (
-		<div className="flex flex-col items-center justify-center min-h-screen p-4">
+		<div className="flex min-h-screen flex-col items-center justify-center p-4">
 			<Card className="w-full max-w-md">
 				<CardHeader className="text-center">
-					<div className="flex items-center justify-center mb-4">
-						<div className="rounded-full bg-green-100 dark:bg-green-900/20 p-3">
+					<div className="mb-4 flex items-center justify-center">
+						<div className="rounded-full bg-green-100 p-3 dark:bg-green-900/20">
 							<CheckCircle className="h-12 w-12 text-green-600 dark:text-green-400" />
 						</div>
 					</div>
-					<CardTitle className="text-2xl font-bold text-green-600 dark:text-green-400">
+					<CardTitle className="font-bold text-2xl text-green-600 dark:text-green-400">
 						¡Registro Exitoso!
 					</CardTitle>
 					<CardDescription>
@@ -77,17 +77,17 @@ const RegistrationSuccessPage = () => {
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-6">
-					<div className="text-center space-y-4">
-						<p className="text-sm text-muted-foreground">
+					<div className="space-y-4 text-center">
+						<p className="text-muted-foreground text-sm">
 							Tu cuenta ha sido creada exitosamente. Para comenzar a usar todas
 							las funcionalidades de la plataforma, necesitas verificar tu
 							dirección de correo electrónico.
 						</p>
 
 						{email && (
-							<div className="flex items-center justify-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+							<div className="flex items-center justify-center gap-2 rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
 								<Mail className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-								<span className="text-sm text-blue-700 dark:text-blue-300">
+								<span className="text-blue-700 text-sm dark:text-blue-300">
 									Hemos enviado un código de verificación a{" "}
 									<strong>{email}</strong>
 								</span>
@@ -96,22 +96,22 @@ const RegistrationSuccessPage = () => {
 					</div>
 
 					<div className="space-y-3">
-						<Button onClick={handleVerifyEmail} className="w-full">
+						<Button className="w-full" onClick={handleVerifyEmail}>
 							<Mail className="mr-2 h-4 w-4" />
 							Verificar Email Ahora
 						</Button>
 
 						<Button
-							variant="outline"
-							onClick={handleGoToDashboard}
 							className="w-full"
+							onClick={handleGoToDashboard}
+							variant="outline"
 						>
 							Continuar al Panel de Control
 						</Button>
 					</div>
 
 					<div className="text-center">
-						<p className="text-xs text-muted-foreground">
+						<p className="text-muted-foreground text-xs">
 							Puedes verificar tu email más tarde desde la configuración de tu
 							cuenta.
 						</p>

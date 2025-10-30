@@ -1,9 +1,9 @@
 import { cn } from "@/lib/utils";
 
-interface SearchSkeletonProps {
+type SearchSkeletonProps = {
 	count?: number;
 	className?: string;
-}
+};
 
 /**
  * Skeleton component for search results using modern React patterns
@@ -12,7 +12,7 @@ interface SearchSkeletonProps {
 export function SearchSkeleton({ count = 6, className }: SearchSkeletonProps) {
 	return (
 		<div className={cn("p-8", className)}>
-			<div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 pt-20">
+			<div className="grid grid-cols-1 gap-8 pt-20 md:grid-cols-2 lg:grid-cols-3">
 				{Array.from({ length: count }, (_, index) => (
 					<PropertyCardSkeleton key={index} />
 				))}
@@ -27,15 +27,15 @@ export function SearchSkeleton({ count = 6, className }: SearchSkeletonProps) {
  */
 function PropertyCardSkeleton() {
 	return (
-		<div className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm border-border">
+		<div className="flex flex-col gap-6 rounded-xl border border-border bg-card py-6 text-card-foreground shadow-sm">
 			{/* Image skeleton */}
-			<div className="relative w-full h-48 overflow-hidden rounded-t-lg">
-				<div className="absolute inset-0 bg-muted animate-pulse" />
+			<div className="relative h-48 w-full overflow-hidden rounded-t-lg">
+				<div className="absolute inset-0 animate-pulse bg-muted" />
 
 				{/* Badge skeletons */}
 				<div className="absolute top-2 left-2 flex flex-wrap gap-1">
-					<div className="h-6 w-16 bg-muted-foreground/20 rounded-md animate-pulse" />
-					<div className="h-6 w-20 bg-muted-foreground/20 rounded-md animate-pulse" />
+					<div className="h-6 w-16 animate-pulse rounded-md bg-muted-foreground/20" />
+					<div className="h-6 w-20 animate-pulse rounded-md bg-muted-foreground/20" />
 				</div>
 			</div>
 
@@ -44,38 +44,38 @@ function PropertyCardSkeleton() {
 				<div className="space-y-2">
 					{/* Title and price skeleton */}
 					<div>
-						<div className="h-6 w-3/4 bg-muted animate-pulse rounded mb-2" />
-						<div className="h-4 w-24 bg-muted animate-pulse rounded" />
+						<div className="mb-2 h-6 w-3/4 animate-pulse rounded bg-muted" />
+						<div className="h-4 w-24 animate-pulse rounded bg-muted" />
 					</div>
 
 					{/* Property details skeleton */}
-					<div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+					<div className="flex flex-wrap gap-3 text-muted-foreground text-xs">
 						{/* Location skeleton */}
 						<div className="flex items-center gap-1">
-							<div className="h-3 w-3 bg-muted animate-pulse rounded" />
-							<div className="h-3 w-16 bg-muted animate-pulse rounded" />
-							<div className="h-3 w-20 bg-muted animate-pulse rounded" />
+							<div className="h-3 w-3 animate-pulse rounded bg-muted" />
+							<div className="h-3 w-16 animate-pulse rounded bg-muted" />
+							<div className="h-3 w-20 animate-pulse rounded bg-muted" />
 						</div>
 
 						{/* Bedrooms skeleton */}
 						<div className="flex items-center gap-1">
-							<div className="h-3 w-3 bg-muted animate-pulse rounded" />
-							<div className="h-3 w-20 bg-muted animate-pulse rounded" />
-							<div className="h-3 w-4 bg-muted animate-pulse rounded" />
+							<div className="h-3 w-3 animate-pulse rounded bg-muted" />
+							<div className="h-3 w-20 animate-pulse rounded bg-muted" />
+							<div className="h-3 w-4 animate-pulse rounded bg-muted" />
 						</div>
 
 						{/* Bathrooms skeleton */}
 						<div className="flex items-center gap-1">
-							<div className="h-3 w-3 bg-muted animate-pulse rounded" />
-							<div className="h-3 w-12 bg-muted animate-pulse rounded" />
-							<div className="h-3 w-4 bg-muted animate-pulse rounded" />
+							<div className="h-3 w-3 animate-pulse rounded bg-muted" />
+							<div className="h-3 w-12 animate-pulse rounded bg-muted" />
+							<div className="h-3 w-4 animate-pulse rounded bg-muted" />
 						</div>
 
 						{/* Area skeleton */}
 						<div className="flex items-center gap-1">
-							<div className="h-3 w-3 bg-muted animate-pulse rounded" />
-							<div className="h-3 w-8 bg-muted animate-pulse rounded" />
-							<div className="h-3 w-12 bg-muted animate-pulse rounded" />
+							<div className="h-3 w-3 animate-pulse rounded bg-muted" />
+							<div className="h-3 w-8 animate-pulse rounded bg-muted" />
+							<div className="h-3 w-12 animate-pulse rounded bg-muted" />
 						</div>
 					</div>
 				</div>
@@ -89,20 +89,20 @@ function PropertyCardSkeleton() {
  */
 export function MobileSearchSkeleton({ count = 4 }: { count?: number }) {
 	return (
-		<div className="p-4 space-y-4">
+		<div className="space-y-4 p-4">
 			{Array.from({ length: count }, (_, index) => (
-				<div key={index} className="bg-card rounded-lg border p-4">
+				<div className="rounded-lg border bg-card p-4" key={index}>
 					<div className="flex gap-4">
 						{/* Image skeleton */}
-						<div className="w-20 h-20 bg-muted animate-pulse rounded-lg flex-shrink-0" />
+						<div className="h-20 w-20 flex-shrink-0 animate-pulse rounded-lg bg-muted" />
 
 						{/* Content skeleton */}
 						<div className="flex-1 space-y-2">
-							<div className="h-4 w-3/4 bg-muted animate-pulse rounded" />
-							<div className="h-3 w-20 bg-muted animate-pulse rounded" />
+							<div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+							<div className="h-3 w-20 animate-pulse rounded bg-muted" />
 							<div className="flex gap-2">
-								<div className="h-3 w-12 bg-muted animate-pulse rounded" />
-								<div className="h-3 w-12 bg-muted animate-pulse rounded" />
+								<div className="h-3 w-12 animate-pulse rounded bg-muted" />
+								<div className="h-3 w-12 animate-pulse rounded bg-muted" />
 							</div>
 						</div>
 					</div>
@@ -136,7 +136,7 @@ export function GridSkeleton({
 			<div
 				className={cn(
 					"grid gap-8",
-					gridCols[columns as keyof typeof gridCols] || gridCols[3],
+					gridCols[columns as keyof typeof gridCols] || gridCols[3]
 				)}
 			>
 				{Array.from({ length: columns * rows }, (_, index) => (
@@ -152,36 +152,36 @@ export function GridSkeleton({
  */
 export function ListSkeleton({ count = 5 }: { count?: number }) {
 	return (
-		<div className="p-8 space-y-6">
+		<div className="space-y-6 p-8">
 			{Array.from({ length: count }, (_, index) => (
-				<div key={index} className="bg-card rounded-xl border p-6">
+				<div className="rounded-xl border bg-card p-6" key={index}>
 					<div className="flex gap-6">
 						{/* Image skeleton */}
-						<div className="w-48 h-32 bg-muted animate-pulse rounded-lg flex-shrink-0" />
+						<div className="h-32 w-48 flex-shrink-0 animate-pulse rounded-lg bg-muted" />
 
 						{/* Content skeleton */}
 						<div className="flex-1 space-y-3">
 							<div className="space-y-2">
-								<div className="h-6 w-2/3 bg-muted animate-pulse rounded" />
-								<div className="h-4 w-24 bg-muted animate-pulse rounded" />
+								<div className="h-6 w-2/3 animate-pulse rounded bg-muted" />
+								<div className="h-4 w-24 animate-pulse rounded bg-muted" />
 							</div>
 
-							<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+							<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
 								<div className="flex items-center gap-2">
-									<div className="h-3 w-3 bg-muted animate-pulse rounded" />
-									<div className="h-3 w-16 bg-muted animate-pulse rounded" />
+									<div className="h-3 w-3 animate-pulse rounded bg-muted" />
+									<div className="h-3 w-16 animate-pulse rounded bg-muted" />
 								</div>
 								<div className="flex items-center gap-2">
-									<div className="h-3 w-3 bg-muted animate-pulse rounded" />
-									<div className="h-3 w-12 bg-muted animate-pulse rounded" />
+									<div className="h-3 w-3 animate-pulse rounded bg-muted" />
+									<div className="h-3 w-12 animate-pulse rounded bg-muted" />
 								</div>
 								<div className="flex items-center gap-2">
-									<div className="h-3 w-3 bg-muted animate-pulse rounded" />
-									<div className="h-3 w-12 bg-muted animate-pulse rounded" />
+									<div className="h-3 w-3 animate-pulse rounded bg-muted" />
+									<div className="h-3 w-12 animate-pulse rounded bg-muted" />
 								</div>
 								<div className="flex items-center gap-2">
-									<div className="h-3 w-3 bg-muted animate-pulse rounded" />
-									<div className="h-3 w-16 bg-muted animate-pulse rounded" />
+									<div className="h-3 w-3 animate-pulse rounded bg-muted" />
+									<div className="h-3 w-16 animate-pulse rounded bg-muted" />
 								</div>
 							</div>
 						</div>
@@ -198,37 +198,37 @@ export function ListSkeleton({ count = 5 }: { count?: number }) {
 export function ShimmerSkeleton({ count = 6 }: { count?: number }) {
 	return (
 		<div className="p-8">
-			<div className="grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+			<div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
 				{Array.from({ length: count }, (_, index) => (
 					<div
+						className="overflow-hidden rounded-xl border bg-card"
 						key={index}
-						className="bg-card rounded-xl border overflow-hidden"
 					>
 						{/* Shimmer effect */}
 						<div className="relative">
 							<div className="h-48 bg-muted" />
-							<div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+							<div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 						</div>
 
-						<div className="p-4 space-y-3">
+						<div className="space-y-3 p-4">
 							<div className="relative">
-								<div className="h-6 bg-muted rounded" />
-								<div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+								<div className="h-6 rounded bg-muted" />
+								<div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 							</div>
 
 							<div className="relative">
-								<div className="h-4 w-24 bg-muted rounded" />
-								<div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+								<div className="h-4 w-24 rounded bg-muted" />
+								<div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 							</div>
 
 							<div className="space-y-2">
 								{Array.from({ length: 4 }, (_, i) => (
-									<div key={i} className="relative">
+									<div className="relative" key={i}>
 										<div
-											className="h-3 bg-muted rounded"
+											className="h-3 rounded bg-muted"
 											style={{ width: `${60 + Math.random() * 40}%` }}
 										/>
-										<div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+										<div className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 									</div>
 								))}
 							</div>

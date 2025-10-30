@@ -35,7 +35,7 @@ export function WizardStepRenderer<T extends WizardData>({
 			isLoading,
 			isMobile,
 		}),
-		[data, onUpdate, onNext, onPrevious, errors, isLoading, isMobile],
+		[data, onUpdate, onNext, onPrevious, errors, isLoading, isMobile]
 	);
 
 	// Loading skeleton for step content
@@ -73,9 +73,9 @@ export function WizardStepRenderer<T extends WizardData>({
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<div className="text-sm text-orange-700 space-y-2">
+						<div className="space-y-2 text-orange-700 text-sm">
 							<p>Posibles soluciones:</p>
-							<ul className="list-disc list-inside space-y-1 text-xs">
+							<ul className="list-inside list-disc space-y-1 text-xs">
 								<li>Recargar la página</li>
 								<li>Verificar la conexión a internet</li>
 								<li>Desactivar bloqueadores de anuncios temporalmente</li>
@@ -98,7 +98,7 @@ export function WizardStepRenderer<T extends WizardData>({
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<p className="text-sm text-muted-foreground">
+					<p className="text-muted-foreground text-sm">
 						Por favor, intenta recargar la página o contacta al soporte técnico.
 					</p>
 				</CardContent>
@@ -110,24 +110,22 @@ export function WizardStepRenderer<T extends WizardData>({
 		<div className="wizard-step-renderer w-full">
 			{/* Step Header */}
 			<div className="mb-6">
-				<h2 className="text-2xl font-semibold tracking-tight">{step.title}</h2>
+				<h2 className="font-semibold text-2xl tracking-tight">{step.title}</h2>
 				{step.description && (
-					<p className="text-muted-foreground mt-1">{step.description}</p>
+					<p className="mt-1 text-muted-foreground">{step.description}</p>
 				)}
 			</div>
 
 			{/* Step Content */}
 			<WizardErrorBoundary
 				fallback={() => <StepErrorFallback />}
-				onError={(error) => {
-					console.error(`Error in step "${step.id}":`, error);
-				}}
+				onError={(_error) => {}}
 			>
 				<Suspense fallback={<StepSkeleton />}>
 					<StepContent
+						isLoading={isLoading}
 						step={step}
 						stepProps={stepProps}
-						isLoading={isLoading}
 					/>
 				</Suspense>
 			</WizardErrorBoundary>
@@ -137,10 +135,10 @@ export function WizardStepRenderer<T extends WizardData>({
 				<div className="mt-4 space-y-2">
 					{Object.entries(errors).map(([field, message]) => (
 						<div
-							key={field}
-							className="text-sm text-destructive bg-destructive/10 p-2 rounded-md"
-							role="alert"
 							aria-live="polite"
+							className="rounded-md bg-destructive/10 p-2 text-destructive text-sm"
+							key={field}
+							role="alert"
 						>
 							{message}
 						</div>
@@ -167,9 +165,9 @@ function StepContent<T extends WizardData>({
 	return (
 		<div className="relative">
 			{isLoading && (
-				<div className="absolute inset-0 bg-background/50 backdrop-blur-sm z-10 flex items-center justify-center">
-					<div className="flex items-center gap-2 text-sm text-muted-foreground">
-						<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+				<div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50 backdrop-blur-sm">
+					<div className="flex items-center gap-2 text-muted-foreground text-sm">
+						<div className="h-4 w-4 animate-spin rounded-full border-primary border-b-2" />
 						Cargando...
 					</div>
 				</div>
@@ -182,7 +180,7 @@ function StepContent<T extends WizardData>({
 
 // Higher-order component for lazy loading step components
 export function withLazyLoading<P extends object>(
-	importFn: () => Promise<{ default: React.ComponentType<P> }>,
+	importFn: () => Promise<{ default: React.ComponentType<P> }>
 ) {
 	return React.lazy(importFn);
 }
@@ -197,7 +195,7 @@ export function createLazyStep<_T extends WizardData>(
 		validation?: any;
 		isOptional?: boolean;
 		canSkip?: boolean;
-	},
+	}
 ) {
 	return {
 		id,
@@ -205,13 +203,13 @@ export function createLazyStep<_T extends WizardData>(
 		description: options?.description,
 		component: withLazyLoading(importFn),
 		validation: options?.validation,
-		isOptional: options?.isOptional || false,
-		canSkip: options?.canSkip || false,
+		isOptional: options?.isOptional,
+		canSkip: options?.canSkip,
 	};
 }
 
 // Performance monitoring hook for step rendering
-export function useStepPerformance(stepId: string) {
+export function useStepPerformance(_stepId: string) {
 	React.useEffect(() => {
 		const startTime = performance.now();
 
@@ -221,19 +219,12 @@ export function useStepPerformance(stepId: string) {
 
 			// Log performance metrics (in development)
 			if (process.env.NODE_ENV === "development") {
-				console.log(`Step "${stepId}" render time: ${renderTime.toFixed(2)}ms`);
-
 				// Warn about slow renders
 				if (renderTime > 100) {
-					console.warn(
-						`Slow render detected for step "${stepId}": ${renderTime.toFixed(
-							2,
-						)}ms`,
-					);
 				}
 			}
 		};
-	}, [stepId]);
+	}, []);
 }
 
 // Accessibility helper for step navigation

@@ -5,16 +5,16 @@ import type React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-interface SelectionOption {
+type SelectionOption = {
 	id: string;
 	label: string;
 	description?: string;
 	icon?: React.ReactNode;
 	category?: string;
 	disabled?: boolean;
-}
+};
 
-interface WizardSelectionGridProps {
+type WizardSelectionGridProps = {
 	options: SelectionOption[];
 	selectedValues: string[];
 	onSelectionChange: (values: string[]) => void;
@@ -23,7 +23,7 @@ interface WizardSelectionGridProps {
 	variant?: "default" | "compact" | "card";
 	className?: string;
 	showCategories?: boolean;
-}
+};
 
 export function WizardSelectionGrid({
 	options,
@@ -66,24 +66,26 @@ export function WizardSelectionGrid({
 		? options.reduce(
 				(acc, option) => {
 					const category = option.category || "Otros";
-					if (!acc[category]) acc[category] = [];
+					if (!acc[category]) {
+						acc[category] = [];
+					}
 					acc[category].push(option);
 					return acc;
 				},
-				{} as Record<string, SelectionOption[]>,
+				{} as Record<string, SelectionOption[]>
 			)
 		: { "": options };
 
 	return (
 		<div className={cn("space-y-6", className)}>
 			{Object.entries(groupedOptions).map(([category, categoryOptions]) => (
-				<div key={category} className="space-y-3">
+				<div className="space-y-3" key={category}>
 					{showCategories && category && (
 						<div className="flex items-center gap-2">
-							<h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+							<h4 className="font-medium text-muted-foreground text-sm uppercase tracking-wide">
 								{category}
 							</h4>
-							<div className="flex-1 h-px bg-border" />
+							<div className="h-px flex-1 bg-border" />
 						</div>
 					)}
 
@@ -93,25 +95,25 @@ export function WizardSelectionGrid({
 
 							return (
 								<Button
-									key={option.id}
-									variant="ghost"
 									className={cn(
 										"relative h-auto justify-start text-left",
 										variantStyles[variant],
 										isSelected && "border-primary bg-primary/10",
-										option.disabled && "opacity-50 cursor-not-allowed",
+										option.disabled && "cursor-not-allowed opacity-50"
 									)}
-									onClick={() => !option.disabled && handleSelection(option.id)}
 									disabled={option.disabled}
+									key={option.id}
+									onClick={() => !option.disabled && handleSelection(option.id)}
+									variant="ghost"
 								>
-									<div className="flex items-start gap-3 w-full">
+									<div className="flex w-full items-start gap-3">
 										{option.icon && (
 											<div
 												className={cn(
 													"flex h-8 w-8 items-center justify-center rounded-md",
 													isSelected
 														? "bg-primary text-primary-foreground"
-														: "bg-muted",
+														: "bg-muted"
 												)}
 											>
 												{option.icon}
@@ -126,7 +128,7 @@ export function WizardSelectionGrid({
 												)}
 											</div>
 											{option.description && (
-												<p className="text-xs text-muted-foreground">
+												<p className="text-muted-foreground text-xs">
 													{option.description}
 												</p>
 											)}

@@ -14,9 +14,9 @@ export class ColorContrastChecker {
 		const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 		return result
 			? {
-					r: parseInt(result[1], 16),
-					g: parseInt(result[2], 16),
-					b: parseInt(result[3], 16),
+					r: Number.parseInt(result[1], 16),
+					g: Number.parseInt(result[2], 16),
+					b: Number.parseInt(result[3], 16),
 				}
 			: null;
 	}
@@ -26,8 +26,8 @@ export class ColorContrastChecker {
 	 */
 	static getLuminance(r: number, g: number, b: number): number {
 		const [rs, gs, bs] = [r, g, b].map((c) => {
-			c = c / 255;
-			return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+			c /= 255;
+			return c <= 0.039_28 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
 		});
 		return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
 	}
@@ -39,7 +39,9 @@ export class ColorContrastChecker {
 		const rgb1 = ColorContrastChecker.hexToRgb(color1);
 		const rgb2 = ColorContrastChecker.hexToRgb(color2);
 
-		if (!rgb1 || !rgb2) return 0;
+		if (!(rgb1 && rgb2)) {
+			return 0;
+		}
 
 		const lum1 = ColorContrastChecker.getLuminance(rgb1.r, rgb1.g, rgb1.b);
 		const lum2 = ColorContrastChecker.getLuminance(rgb2.r, rgb2.g, rgb2.b);
@@ -57,7 +59,7 @@ export class ColorContrastChecker {
 		foreground: string,
 		background: string,
 		level: "AA" | "AAA" = "AA",
-		size: "normal" | "large" = "normal",
+		size: "normal" | "large" = "normal"
 	): boolean {
 		const ratio = ColorContrastChecker.getContrastRatio(foreground, background);
 
@@ -87,13 +89,13 @@ export const validateSecondaryColorContrast = () => {
 			secondaryColors.light,
 			backgroundColors.light,
 			"AA",
-			"normal",
+			"normal"
 		),
 		darkMode: ColorContrastChecker.meetsWCAG(
 			secondaryColors.dark,
 			backgroundColors.dark,
 			"AA",
-			"normal",
+			"normal"
 		),
 	};
 
@@ -133,7 +135,7 @@ export class AriaValidator {
 		const hasProperRole =
 			interactiveTags.includes(tagName) ||
 			Boolean(
-				role && ["button", "link", "menuitem", "tab", "option"].includes(role),
+				role && ["button", "link", "menuitem", "tab", "option"].includes(role)
 			);
 
 		// Check for required attributes based on role/tag
@@ -200,7 +202,7 @@ export class AriaValidator {
 			const ariaDescribedBy = element.getAttribute("aria-describedby");
 
 			// Check for labels
-			if (!ariaLabel && !ariaLabelledBy) {
+			if (!(ariaLabel || ariaLabelledBy)) {
 				const label = id ? form.querySelector(`label[for="${id}"]`) : null;
 				if (!label) {
 					hasLabels = false;
@@ -307,7 +309,7 @@ export class KeyboardNavigationTester {
 
 		if (focusableElements.length === 1) {
 			issues.push(
-				"Only one focusable element - focus trap may not work properly",
+				"Only one focusable element - focus trap may not work properly"
 			);
 		}
 
@@ -363,10 +365,18 @@ export class AccessibilityAuditor {
 		const totalChecks = 4;
 		let passedChecks = 0;
 
-		if (aria.hasAccessibleName) passedChecks++;
-		if (aria.hasProperRole) passedChecks++;
-		if (keyboard.isAccessible) passedChecks++;
-		if (colorContrast.hasGoodContrast) passedChecks++;
+		if (aria.hasAccessibleName) {
+			passedChecks++;
+		}
+		if (aria.hasProperRole) {
+			passedChecks++;
+		}
+		if (keyboard.isAccessible) {
+			passedChecks++;
+		}
+		if (colorContrast.hasGoodContrast) {
+			passedChecks++;
+		}
 
 		const score = (passedChecks / totalChecks) * 100;
 
@@ -394,7 +404,7 @@ export class AccessibilityAuditor {
 		};
 	} {
 		const interactiveElements = container.querySelectorAll(
-			'button, input, select, textarea, a, [role="button"], [role="link"], [tabindex]',
+			'button, input, select, textarea, a, [role="button"], [role="link"], [tabindex]'
 		);
 
 		const elementAudits = Array.from(interactiveElements).map((el) => {
@@ -408,7 +418,7 @@ export class AccessibilityAuditor {
 
 		const totalElements = elementAudits.length;
 		const passedElements = elementAudits.filter(
-			(audit) => audit.score >= 80,
+			(audit) => audit.score >= 80
 		).length;
 		const failedElements = totalElements - passedElements;
 
@@ -425,7 +435,7 @@ export class AccessibilityAuditor {
 				acc[issue] = (acc[issue] || 0) + 1;
 				return acc;
 			},
-			{} as Record<string, number>,
+			{} as Record<string, number>
 		);
 
 		const commonIssues = Object.entries(issueCount)
@@ -448,36 +458,20 @@ export class AccessibilityAuditor {
 
 // Development-only accessibility checker
 export const runAccessibilityCheck = (element?: HTMLElement) => {
-	if (process.env.NODE_ENV !== "development") return;
+	if (process.env.NODE_ENV !== "development") {
+		return;
+	}
 
 	const target = element || document.body;
 	const audit = AccessibilityAuditor.auditContainer(target);
 
-	console.group("🔍 Accessibility Audit Results");
-	console.log(`Overall Score: ${audit.overallScore.toFixed(1)}%`);
-	console.log(`Elements Audited: ${audit.summary.totalElements}`);
-	console.log(`Passed: ${audit.summary.passedElements}`);
-	console.log(`Failed: ${audit.summary.failedElements}`);
-
 	if (audit.summary.commonIssues.length > 0) {
-		console.group("Common Issues:");
-		audit.summary.commonIssues.forEach((issue) => console.log(`• ${issue}`));
-		console.groupEnd();
+		audit.summary.commonIssues.forEach((_issue) => {});
 	}
 
 	if (audit.elementAudits.some((a) => a.score < 80)) {
-		console.group("Failed Elements:");
-		audit.elementAudits
-			.filter((a) => a.score < 80)
-			.forEach((audit) => {
-				console.log(
-					`${audit.tagName}: ${audit.score.toFixed(1)}% - ${audit.issues.join(", ")}`,
-				);
-			});
-		console.groupEnd();
+		audit.elementAudits.filter((a) => a.score < 80).forEach((_audit) => {});
 	}
-
-	console.groupEnd();
 
 	return audit;
 };

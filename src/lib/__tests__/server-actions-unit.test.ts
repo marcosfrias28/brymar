@@ -16,17 +16,15 @@ const mockValidateEmail = (email: string) => {
 	return emailRegex.test(email);
 };
 
-const mockValidatePassword = (password: string) => {
-	return Boolean(password && password.length >= 8);
-};
+const mockValidatePassword = (password: string) =>
+	Boolean(password && password.length >= 8);
 
-const mockGenerateSlug = (title: string) => {
-	return title
+const mockGenerateSlug = (title: string) =>
+	title
 		.toLowerCase()
 		.replace(/\s+/g, "-")
 		.replace(/[^a-z0-9-]/g, "")
 		.replace(/-+$/, "");
-};
 
 describe("Server Actions Unit Tests", () => {
 	describe("Authentication Logic", () => {
@@ -104,7 +102,7 @@ describe("Server Actions Unit Tests", () => {
 			const validProperty = {
 				title: "Beautiful Villa",
 				description: "A stunning property with ocean views",
-				price: 500000,
+				price: 500_000,
 				currency: "USD",
 				type: "house",
 				address: {
@@ -151,8 +149,8 @@ describe("Server Actions Unit Tests", () => {
 
 		it("should validate property search filters", () => {
 			const validFilters = {
-				minPrice: 100000,
-				maxPrice: 1000000,
+				minPrice: 100_000,
+				maxPrice: 1_000_000,
 				propertyTypes: ["house", "apartment"],
 				location: "Miami",
 				page: 1,
@@ -213,7 +211,7 @@ describe("Server Actions Unit Tests", () => {
 
 			// Admin can modify any property
 			expect(
-				property.userId === adminUser.id || adminUser.role === "admin",
+				property.userId === adminUser.id || adminUser.role === "admin"
 			).toBe(true);
 		});
 	});
@@ -222,7 +220,7 @@ describe("Server Actions Unit Tests", () => {
 		it("should generate valid slug from title", () => {
 			expect(mockGenerateSlug("My Blog Post Title")).toBe("my-blog-post-title");
 			expect(mockGenerateSlug("Special Characters! @#$%")).toBe(
-				"special-characters",
+				"special-characters"
 			);
 			expect(mockGenerateSlug("Multiple   Spaces")).toBe("multiple-spaces");
 			expect(mockGenerateSlug("UPPERCASE TITLE")).toBe("uppercase-title");
@@ -331,7 +329,7 @@ describe("Server Actions Unit Tests", () => {
 			expect(result.error).toBe("Validation failed");
 			expect(result.errors?.email).toContain("Email is required");
 			expect(result.errors?.password).toContain(
-				"Password must be at least 8 characters",
+				"Password must be at least 8 characters"
 			);
 		});
 
@@ -374,12 +372,12 @@ describe("Server Actions Unit Tests", () => {
 			const transformedProperty = {
 				id: rawPropertyData.id,
 				title: rawPropertyData.title,
-				price: parseInt(rawPropertyData.price, 10),
+				price: Number.parseInt(rawPropertyData.price, 10),
 				features: JSON.parse(rawPropertyData.features),
 				createdAt: new Date(rawPropertyData.created_at),
 			};
 
-			expect(transformedProperty.price).toBe(500000);
+			expect(transformedProperty.price).toBe(500_000);
 			expect(transformedProperty.features.bedrooms).toBe(3);
 			expect(transformedProperty.createdAt).toBeInstanceOf(Date);
 		});
@@ -415,8 +413,8 @@ describe("Server Actions Unit Tests", () => {
 					available: {
 						propertyTypes: ["house", "apartment"],
 						priceRanges: [
-							{ min: 0, max: 100000, label: "Under $100K" },
-							{ min: 100000, max: 300000, label: "$100K - $300K" },
+							{ min: 0, max: 100_000, label: "Under $100K" },
+							{ min: 100_000, max: 300_000, label: "$100K - $300K" },
 						],
 					},
 				},
@@ -433,13 +431,13 @@ describe("Server Actions Unit Tests", () => {
 	describe("Business Logic Validation", () => {
 		it("should validate property pricing logic", () => {
 			const property = {
-				price: 500000,
+				price: 500_000,
 				currency: "USD",
 			};
 
 			const priceRange = {
-				min: 400000,
-				max: 600000,
+				min: 400_000,
+				max: 600_000,
 			};
 
 			const isInRange =

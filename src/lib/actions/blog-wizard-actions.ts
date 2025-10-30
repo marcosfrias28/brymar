@@ -3,21 +3,20 @@
 import { put } from "@vercel/blob";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import db from "@/lib/db/drizzle";
+import { db } from "@/lib/db";
 import { blogPosts } from "@/lib/db/schema";
 import type { BlogWizardData } from "@/lib/schemas/blog-wizard-schemas";
-import { BlogDraftManager } from "@/lib/utils/draft-management";
 
 // Simple result type
-interface ActionResult<T = any> {
+type ActionResult<T = any> = {
 	success: boolean;
 	data?: T;
 	message?: string;
-}
+};
 
 // Create blog post from wizard data
 export const createBlogFromWizard = async (
-	data: BlogWizardData,
+	data: BlogWizardData
 ): Promise<ActionResult<{ blogPost: any }>> => {
 	try {
 		// Calculate reading time
@@ -25,8 +24,9 @@ export const createBlogFromWizard = async (
 		const wordCount = data.content.split(" ").length;
 		const readingTime = Math.ceil(wordCount / wordsPerMinute);
 
-		// Generate slug if not provided (for potential future use)
-		data.slug ||
+		// Generate slug if not provided
+		const slug =
+			data.slug ||
 			data.title
 				.toLowerCase()
 				.replace(/[^a-z0-9\s-]/g, "")
@@ -37,14 +37,18 @@ export const createBlogFromWizard = async (
 		const [newBlogPost] = await db
 			.insert(blogPosts)
 			.values({
+				id: crypto.randomUUID(),
 				title: data.title,
 				content: data.content,
-				author: data.author,
-				category: data.category,
+				excerpt: data.excerpt,
+				slug,
 				status: data.status,
-				image: data.coverImage || "",
-				readingTime: readingTime,
-				createdAt: new Date(),
+				category: data.category,
+				// tags: data.tags, // optional if present in data
+				// coverImage: data.coverImage ? { url: data.coverImage } : undefined,
+				authorId: data.author,
+				readTime: readingTime,
+				// publishedAt: data.status === "published" ? new Date() : undefined,
 			})
 			.returning();
 
@@ -54,8 +58,7 @@ export const createBlogFromWizard = async (
 			data: { blogPost: newBlogPost },
 			message: "Post de blog creado exitosamente!",
 		};
-	} catch (error) {
-		console.error("Error creating blog post from wizard:", error);
+	} catch (_error) {
 		return {
 			success: false,
 			message: "Error al crear el post de blog",
@@ -65,7 +68,7 @@ export const createBlogFromWizard = async (
 
 // Update blog post from wizard data
 export const updateBlogFromWizard = async (
-	data: BlogWizardData & { id?: string },
+	data: BlogWizardData & { id?: string }
 ): Promise<ActionResult<{ blogPost: any }>> => {
 	try {
 		if (!data.id) {
@@ -82,14 +85,17 @@ export const updateBlogFromWizard = async (
 			.set({
 				title: data.title,
 				content: data.content,
-				author: data.author,
-				category: data.category,
+				excerpt: data.excerpt,
+				slug: data.slug,
 				status: data.status,
-				image: data.coverImage || "",
-				readingTime: readingTime,
+				category: data.category,
+				// tags: data.tags,
+				// coverImage: data.coverImage ? { url: data.coverImage } : undefined,
+				authorId: data.author,
+				readTime: readingTime,
 				updatedAt: new Date(),
 			})
-			.where(eq(blogPosts.id, parseInt(data.id, 10)))
+			.where(eq(blogPosts.id, data.id))
 			.returning();
 
 		revalidatePath("/dashboard/blog");
@@ -99,8 +105,7 @@ export const updateBlogFromWizard = async (
 			data: { blogPost: updatedBlogPost },
 			message: "Post de blog actualizado exitosamente!",
 		};
-	} catch (error) {
-		console.error("Error updating blog post from wizard:", error);
+	} catch (_error) {
 		return {
 			success: false,
 			message: "Error al actualizar el post de blog",
@@ -110,45 +115,18 @@ export const updateBlogFromWizard = async (
 
 // Save blog draft
 export const saveBlogDraft = async (
-	data: Partial<BlogWizardData> & {
+	_data: Partial<BlogWizardData> & {
 		draftId?: string;
 		userId: string;
 		stepCompleted: number;
 		completionPercentage: number;
-	},
-): Promise<ActionResult<{ draftId: string }>> => {
-	try {
-		const result = await BlogDraftManager.save({
-			draftId: data.draftId,
-			userId: data.userId,
-			formData: data,
-			stepCompleted: data.stepCompleted,
-			completionPercentage: data.completionPercentage,
-			title: data.title,
-			metadata: {
-				category: data.category,
-			},
-		});
-
-		if (result.success && result.data) {
-			return {
-				success: true,
-				data: { draftId: result.data.draftId },
-				message: result.message || "Borrador guardado exitosamente!",
-			};
-		} else {
-			return {
-				success: false,
-				message: result.message || "Error al guardar el borrador",
-			};
-		}
-	} catch (error) {
-		console.error("Error saving blog draft:", error);
-		return {
-			success: false,
-			message: "Error al guardar el borrador",
-		};
 	}
+): Promise<ActionResult<{ draftId: string }>> => {
+	// Draft functionality is temporarily disabled; return a safe fallback
+	return {
+		success: false,
+		message: "La funcionalidad de borradores está deshabilitada temporalmente",
+	};
 };
 
 // Upload blog image
@@ -157,7 +135,7 @@ export const uploadBlogImage = async (data: {
 	image: File;
 }): Promise<ActionResult<{ url: string; filename: string }>> => {
 	try {
-		if (!data.image || !data.image.type.startsWith("image/")) {
+		if (!data.image?.type.startsWith("image/")) {
 			throw new Error("Invalid image file");
 		}
 
@@ -173,8 +151,7 @@ export const uploadBlogImage = async (data: {
 			data: { url, filename: data.image.name },
 			message: "Imagen subida exitosamente!",
 		};
-	} catch (error) {
-		console.error("Error uploading blog image:", error);
+	} catch (_error) {
 		return {
 			success: false,
 			message: "Error al subir la imagen",
@@ -230,8 +207,7 @@ export const generateBlogContent = async (data: {
 			data: { content: generatedContent },
 			message: "Contenido generado exitosamente!",
 		};
-	} catch (error) {
-		console.error("Error generating blog content:", error);
+	} catch (_error) {
 		return {
 			success: false,
 			message: "Error al generar contenido",
@@ -240,88 +216,35 @@ export const generateBlogContent = async (data: {
 };
 
 // Load blog draft
-export const loadBlogDraft = async (data: {
+export const loadBlogDraft = async (_data: {
 	draftId: string;
 	userId: string;
 }): Promise<
 	ActionResult<{ formData: Partial<BlogWizardData>; stepCompleted: number }>
 > => {
-	try {
-		const result = await BlogDraftManager.load({
-			draftId: data.draftId,
-			userId: data.userId,
-		});
-
-		if (result.success && result.data) {
-			return {
-				success: true,
-				data: {
-					formData: result.data.formData,
-					stepCompleted: result.data.stepCompleted,
-				},
-				message: result.message || "Borrador cargado exitosamente!",
-			};
-		} else {
-			return {
-				success: false,
-				message: result.message || "Error al cargar el borrador",
-			};
-		}
-	} catch (error) {
-		console.error("Error loading blog draft:", error);
-		return {
-			success: false,
-			message: "Error al cargar el borrador",
-		};
-	}
+	// Draft functionality is temporarily disabled; return a safe fallback
+	return {
+		success: false,
+		message: "La funcionalidad de borradores está deshabilitada temporalmente",
+	};
 };
 
 // Delete blog draft
-export const deleteBlogDraft = async (data: {
+export const deleteBlogDraft = async (_data: {
 	draftId: string;
 	userId: string;
 }): Promise<ActionResult> => {
-	try {
-		const result = await BlogDraftManager.delete({
-			draftId: data.draftId,
-			userId: data.userId,
-		});
-
-		if (result.success) {
-			return {
-				success: true,
-				message: result.message || "Borrador eliminado exitosamente!",
-			};
-		} else {
-			return {
-				success: false,
-				message: result.message || "Error al eliminar el borrador",
-			};
-		}
-	} catch (error) {
-		console.error("Error deleting blog draft:", error);
-		return {
-			success: false,
-			message: "Error al eliminar el borrador",
-		};
-	}
+	// Draft functionality is temporarily disabled; return a safe fallback
+	return {
+		success: false,
+		message: "La funcionalidad de borradores está deshabilitada temporalmente",
+	};
 };
 
 // Get blog drafts for user
-export const getBlogDrafts = async (userId: string) => {
-	try {
-		const result = await BlogDraftManager.list(userId);
-
-		if (result.success && result.data) {
-			return { drafts: result.data };
-		} else {
-			console.error("Error fetching blog drafts:", result.message);
-			return { drafts: [] };
-		}
-	} catch (error) {
-		console.error("Error fetching blog drafts:", error);
-		return { drafts: [] };
-	}
+export const getBlogDrafts = async (_userId: string) => {
+	// Draft functionality is temporarily disabled; return empty list
+	return { drafts: [] };
 };
 
 // Generate SEO suggestions
@@ -347,7 +270,7 @@ export const generateSEOSuggestions = async (data: {
 				}
 				return acc;
 			},
-			{} as Record<string, number>,
+			{} as Record<string, number>
 		);
 
 		const topWords = Object.entries(wordFreq)
@@ -371,8 +294,7 @@ export const generateSEOSuggestions = async (data: {
 			data: { seoTitle, seoDescription, tags, suggestions },
 			message: "Sugerencias SEO generadas exitosamente!",
 		};
-	} catch (error) {
-		console.error("Error generating SEO suggestions:", error);
+	} catch (_error) {
 		return {
 			success: false,
 			message: "Error al generar sugerencias SEO",

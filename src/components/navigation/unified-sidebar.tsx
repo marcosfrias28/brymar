@@ -47,7 +47,7 @@ import { ariaLabels, focusRingClasses } from "@/lib/utils/accessibility";
 import { hoverAnimations } from "@/lib/utils/animations";
 import Logo from "../ui/logo";
 
-export interface SidebarConfig {
+export type SidebarConfig = {
 	userRole: "admin" | "editor" | "agent" | "user";
 	permissions: {
 		canManageUsers?: boolean;
@@ -55,7 +55,7 @@ export interface SidebarConfig {
 		canViewAnalytics?: boolean;
 		canManageBlog?: boolean;
 	};
-}
+};
 
 const getNavigationData = (config: SidebarConfig) => {
 	const { userRole, permissions } = config;
@@ -229,7 +229,7 @@ const getNavigationData = (config: SidebarConfig) => {
 				name: "Guías",
 				url: "/guides",
 				icon: BookOpenIcon,
-			},
+			}
 		);
 	}
 
@@ -327,27 +327,27 @@ export const UnifiedSidebar = memo(function UnifiedSidebar({
 			email: user?.email || "usuario@brymar.com",
 			avatar: user?.avatar || "/avatars/default.jpg",
 		}),
-		[user?.name, user?.email, user?.avatar],
+		[user?.name, user?.email, user?.avatar]
 	);
 
 	return (
 		<Sidebar
-			collapsible="offcanvas"
 			aria-label={ariaLabels.sidebarNavigation}
+			collapsible="offcanvas"
 			{...props}
 		>
 			<SidebarHeader>
-				<PageTransition variant="slideDown" delay={1}>
+				<PageTransition delay={1} variant="slideDown">
 					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton
-								asChild
 								aria-label="Brymar Inmobiliaria - Ir al inicio"
+								asChild
 								className={cn(
 									"data-[slot=sidebar-menu-button]:!p-1.5",
 									hoverAnimations.gentle,
 									focusRingClasses.default,
-									"transition-all duration-200",
+									"transition-all duration-200"
 								)}
 							>
 								<Logo />
@@ -358,7 +358,7 @@ export const UnifiedSidebar = memo(function UnifiedSidebar({
 			</SidebarHeader>
 
 			<SidebarContent>
-				<PageTransition variant="slideUp" delay={2} stagger="children">
+				<PageTransition delay={2} stagger="children" variant="slideUp">
 					<nav aria-label={ariaLabels.mainNavigation}>
 						<NavMain items={navigationData.navMain} />
 					</nav>
@@ -367,15 +367,15 @@ export const UnifiedSidebar = memo(function UnifiedSidebar({
 					</nav>
 					<nav aria-label="Navegación secundaria">
 						<NavSecondary
-							items={navigationData.navSecondary}
 							className="mt-auto"
+							items={navigationData.navSecondary}
 						/>
 					</nav>
 				</PageTransition>
 			</SidebarContent>
 
 			<SidebarFooter>
-				<PageTransition variant="slideUp" delay={3}>
+				<PageTransition delay={3} variant="slideUp">
 					<nav aria-label={ariaLabels.userNavigation}>
 						<NavUser user={userData} />
 					</nav>

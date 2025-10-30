@@ -4,7 +4,7 @@ import type React from "react";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
-interface WizardFormFieldProps {
+type WizardFormFieldProps = {
 	label?: string;
 	description?: string;
 	error?: string;
@@ -14,7 +14,7 @@ interface WizardFormFieldProps {
 	labelClassName?: string;
 	fieldClassName?: string;
 	layout?: "vertical" | "horizontal";
-}
+};
 
 export function WizardFormField({
 	label,
@@ -34,7 +34,7 @@ export function WizardFormField({
 			className={cn(
 				"space-y-2",
 				isHorizontal && "grid grid-cols-1 gap-4 sm:grid-cols-3 sm:items-start",
-				className,
+				className
 			)}
 		>
 			{(label || description) && (
@@ -44,8 +44,8 @@ export function WizardFormField({
 					{label && (
 						<Label
 							className={cn(
-								"text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
-								error && "text-destructive",
+								"font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
+								error && "text-destructive"
 							)}
 						>
 							{label}
@@ -53,7 +53,7 @@ export function WizardFormField({
 						</Label>
 					)}
 					{description && (
-						<p className="text-xs text-muted-foreground">{description}</p>
+						<p className="text-muted-foreground text-xs">{description}</p>
 					)}
 				</div>
 			)}
@@ -62,11 +62,11 @@ export function WizardFormField({
 				className={cn(
 					"space-y-1",
 					isHorizontal && "sm:col-span-2",
-					fieldClassName,
+					fieldClassName
 				)}
 			>
 				{children}
-				{error && <p className="text-xs text-destructive">{error}</p>}
+				{error && <p className="text-destructive text-xs">{error}</p>}
 			</div>
 		</div>
 	);

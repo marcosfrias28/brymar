@@ -29,7 +29,7 @@ export interface BaseQueryOptions<T>
 /**
  * Enhanced Query Result
  */
-export interface BaseQueryResult<T> {
+export type BaseQueryResult<T> = {
 	// All properties from UseQueryResult
 	data: T | undefined;
 	error: Error | null;
@@ -46,7 +46,7 @@ export interface BaseQueryResult<T> {
 	hasData: boolean;
 	isFirstLoading: boolean;
 	isRefetchError: boolean;
-}
+};
 
 /**
  * Hydration-safe hook to prevent SSR mismatches
@@ -67,7 +67,7 @@ function useHydration() {
 export function useBaseQuery<T>(
 	queryKey: readonly unknown[],
 	queryFn: () => Promise<T>,
-	options: BaseQueryOptions<T> = {},
+	options: BaseQueryOptions<T> = {}
 ): BaseQueryResult<T> {
 	const isHydrated = useHydration();
 	const { notifyError, notifyLoading, notifySuccess, dismiss } =
@@ -160,7 +160,7 @@ export function useBaseQuery<T>(
 export function useBaseQueryWithLoading<T>(
 	queryKey: readonly unknown[],
 	queryFn: () => Promise<T>,
-	options: BaseQueryOptions<T> = {},
+	options: BaseQueryOptions<T> = {}
 ): BaseQueryResult<T> {
 	return useBaseQuery(queryKey, queryFn, {
 		showLoadingToast: true,
@@ -174,7 +174,7 @@ export function useBaseQueryWithLoading<T>(
 export function useCriticalQuery<T>(
 	queryKey: readonly unknown[],
 	queryFn: () => Promise<T>,
-	options: BaseQueryOptions<T> = {},
+	options: BaseQueryOptions<T> = {}
 ): BaseQueryResult<T> {
 	return useBaseQuery(queryKey, queryFn, {
 		queryType: "critical",
@@ -189,7 +189,7 @@ export function useCriticalQuery<T>(
 export function useStaticQuery<T>(
 	queryKey: readonly unknown[],
 	queryFn: () => Promise<T>,
-	options: BaseQueryOptions<T> = {},
+	options: BaseQueryOptions<T> = {}
 ): BaseQueryResult<T> {
 	return useBaseQuery(queryKey, queryFn, {
 		queryType: "static",
@@ -204,7 +204,7 @@ export function useStaticQuery<T>(
 export function useRealtimeQuery<T>(
 	queryKey: readonly unknown[],
 	queryFn: () => Promise<T>,
-	options: BaseQueryOptions<T> = {},
+	options: BaseQueryOptions<T> = {}
 ): BaseQueryResult<T> {
 	return useBaseQuery(queryKey, queryFn, {
 		queryType: "realtime",

@@ -3,12 +3,12 @@
  * Tests core application functionality with real data
  */
 
-interface TestResult {
+type TestResult = {
 	testName: string;
 	passed: boolean;
 	error?: string;
 	details?: any;
-}
+};
 
 export async function runEndToEndTests(): Promise<void> {
 	console.log("🧪 Starting End-to-End Functionality Tests...");

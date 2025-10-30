@@ -5,18 +5,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-interface LandLocationData {
+type LandLocationData = {
 	location?: string;
 	city?: string;
 	state?: string;
 	country?: string;
-}
+};
 
-interface LandLocationStepProps {
+type LandLocationStepProps = {
 	data: LandLocationData;
 	onChange: (data: LandLocationData) => void;
 	errors?: Record<string, string>;
-}
+};
 
 export function LandLocationStep({
 	data,
@@ -37,14 +37,14 @@ export function LandLocationStep({
 					</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-4">
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div className="space-y-2">
 							<Label htmlFor="location">Ubicación</Label>
 							<Input
 								id="location"
-								value={data.location || ""}
 								onChange={(e) => handleChange("location", e.target.value)}
 								placeholder="Ubicación del terreno"
+								value={data.location || ""}
 							/>
 						</div>
 
@@ -52,9 +52,9 @@ export function LandLocationStep({
 							<Label htmlFor="city">Ciudad</Label>
 							<Input
 								id="city"
-								value={data.city || ""}
 								onChange={(e) => handleChange("city", e.target.value)}
 								placeholder="Ciudad"
+								value={data.city || ""}
 							/>
 						</div>
 
@@ -62,9 +62,9 @@ export function LandLocationStep({
 							<Label htmlFor="state">Provincia/Estado</Label>
 							<Input
 								id="state"
-								value={data.state || ""}
 								onChange={(e) => handleChange("state", e.target.value)}
 								placeholder="Provincia o Estado"
+								value={data.state || ""}
 							/>
 						</div>
 
@@ -72,9 +72,9 @@ export function LandLocationStep({
 							<Label htmlFor="country">País</Label>
 							<Input
 								id="country"
-								value={data.country || ""}
 								onChange={(e) => handleChange("country", e.target.value)}
 								placeholder="País"
+								value={data.country || ""}
 							/>
 						</div>
 					</div>

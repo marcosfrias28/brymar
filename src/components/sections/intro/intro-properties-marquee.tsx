@@ -2,7 +2,7 @@ import type { FC } from "react";
 import { PropertyCard } from "../../cards/property-card";
 import Marquee from "../../ui/marquee";
 
-interface MarqueePropertyData {
+type MarqueePropertyData = {
 	id: string;
 	sqm: number;
 	imageUrl: string;
@@ -11,7 +11,7 @@ interface MarqueePropertyData {
 	bedrooms: number;
 	bathrooms: number;
 	price: number;
-}
+};
 
 const SELLING_PROPERTIES = [
 	{
@@ -136,15 +136,38 @@ const SELLING_PROPERTIES = [
 	},
 ];
 
-export const IntroPropertiesMarquee: FC = () => {
-	return (
-		<div className="flex flex-col items-center justify-center w-screen mt-20">
-			<div className="h-1/3">
-				<Marquee reverse>
-					{SELLING_PROPERTIES.slice(
-						0,
-						Math.ceil(SELLING_PROPERTIES.length / 2),
-					).map(({ id, imgSrc, name, location, beds, baths, price, area }) => (
+export const IntroPropertiesMarquee: FC = () => (
+	<div className="mt-20 flex w-screen flex-col items-center justify-center">
+		<div className="h-1/3">
+			<Marquee reverse>
+				{SELLING_PROPERTIES.slice(
+					0,
+					Math.ceil(SELLING_PROPERTIES.length / 2)
+				).map(({ id, imgSrc, name, location, beds, baths, price, area }) => (
+					<PropertyCard
+						key={id}
+						property={{
+							id,
+							title: name,
+							location,
+							bedrooms: beds,
+							bathrooms: baths,
+							price,
+							area,
+							images: [imgSrc],
+							type: "residential",
+						}}
+					/>
+				))}
+			</Marquee>
+		</div>
+		<div className="h-1/3">
+			<Marquee>
+				{SELLING_PROPERTIES.slice(SELLING_PROPERTIES.length / 2).map(
+					(
+						{ id, imgSrc, name, location, beds, baths, price, area },
+						_index
+					) => (
 						<PropertyCard
 							key={id}
 							property={{
@@ -154,39 +177,14 @@ export const IntroPropertiesMarquee: FC = () => {
 								bedrooms: beds,
 								bathrooms: baths,
 								price,
-								area: area,
+								area,
 								images: [imgSrc],
 								type: "residential",
 							}}
 						/>
-					))}
-				</Marquee>
-			</div>
-			<div className="h-1/3">
-				<Marquee>
-					{SELLING_PROPERTIES.slice(SELLING_PROPERTIES.length / 2).map(
-						(
-							{ id, imgSrc, name, location, beds, baths, price, area },
-							_index,
-						) => (
-							<PropertyCard
-								key={id}
-								property={{
-									id,
-									title: name,
-									location,
-									bedrooms: beds,
-									bathrooms: baths,
-									price,
-									area: area,
-									images: [imgSrc],
-									type: "residential",
-								}}
-							/>
-						),
-					)}
-				</Marquee>
-			</div>
+					)
+				)}
+			</Marquee>
 		</div>
-	);
-};
+	</div>
+);

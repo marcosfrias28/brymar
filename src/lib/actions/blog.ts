@@ -7,7 +7,6 @@ import { auth } from "@/lib/auth/auth";
 import { db } from "@/lib/db";
 import { blogPosts } from "@/lib/db/schema";
 import type {
-	ActionResult,
 	BlogPost,
 	BlogSearchFilters,
 	BlogSearchResult,
@@ -15,13 +14,14 @@ import type {
 	PublishBlogPostInput,
 	UpdateBlogPostInput,
 } from "@/lib/types/blog";
+import type { ActionResult } from "@/lib/types/shared";
 import { calculateReadTime, generateSlug } from "@/lib/utils";
 
 /**
  * Create a new blog post
  */
 export async function createBlogPost(
-	input: CreateBlogPostInput,
+	input: CreateBlogPostInput
 ): Promise<ActionResult<BlogPost>> {
 	try {
 		const session = await auth.api.getSession({
@@ -76,7 +76,6 @@ export async function createBlogPost(
 
 		return { success: true, data: blogPost };
 	} catch (error) {
-		console.error("Error creating blog post:", error);
 		return {
 			success: false,
 			error:
@@ -89,7 +88,7 @@ export async function createBlogPost(
  * Update an existing blog post
  */
 export async function updateBlogPost(
-	input: UpdateBlogPostInput,
+	input: UpdateBlogPostInput
 ): Promise<ActionResult<BlogPost>> {
 	try {
 		const session = await auth.api.getSession({
@@ -122,8 +121,8 @@ export async function updateBlogPost(
 				.where(
 					and(
 						eq(blogPosts.slug, input.slug),
-						sql`${blogPosts.id} != ${input.id}`,
-					),
+						sql`${blogPosts.id} != ${input.id}`
+					)
 				)
 				.limit(1);
 
@@ -176,7 +175,6 @@ export async function updateBlogPost(
 
 		return { success: true, data: updatedPost };
 	} catch (error) {
-		console.error("Error updating blog post:", error);
 		return {
 			success: false,
 			error:
@@ -189,7 +187,7 @@ export async function updateBlogPost(
  * Delete a blog post
  */
 export async function deleteBlogPost(
-	id: string,
+	id: string
 ): Promise<ActionResult<{ id: string }>> {
 	try {
 		const session = await auth.api.getSession({
@@ -222,7 +220,6 @@ export async function deleteBlogPost(
 
 		return { success: true, data: { id } };
 	} catch (error) {
-		console.error("Error deleting blog post:", error);
 		return {
 			success: false,
 			error:
@@ -235,7 +232,7 @@ export async function deleteBlogPost(
  * Get a blog post by ID
  */
 export async function getBlogPostById(
-	id: string,
+	id: string
 ): Promise<ActionResult<BlogPost>> {
 	try {
 		const [blogPost] = await db
@@ -250,7 +247,6 @@ export async function getBlogPostById(
 
 		return { success: true, data: blogPost };
 	} catch (error) {
-		console.error("Error getting blog post:", error);
 		return {
 			success: false,
 			error: error instanceof Error ? error.message : "Failed to get blog post",
@@ -262,7 +258,7 @@ export async function getBlogPostById(
  * Get a blog post by slug
  */
 export async function getBlogPostBySlug(
-	slug: string,
+	slug: string
 ): Promise<ActionResult<BlogPost>> {
 	try {
 		const [blogPost] = await db
@@ -277,7 +273,6 @@ export async function getBlogPostBySlug(
 
 		return { success: true, data: blogPost };
 	} catch (error) {
-		console.error("Error getting blog post by slug:", error);
 		return {
 			success: false,
 			error: error instanceof Error ? error.message : "Failed to get blog post",
@@ -289,7 +284,7 @@ export async function getBlogPostBySlug(
  * Search blog posts with filters and pagination
  */
 export async function searchBlogPosts(
-	filters: BlogSearchFilters = {},
+	filters: BlogSearchFilters = {}
 ): Promise<ActionResult<BlogSearchResult>> {
 	try {
 		const {
@@ -312,8 +307,8 @@ export async function searchBlogPosts(
 				or(
 					like(blogPosts.title, `%${query}%`),
 					like(blogPosts.content, `%${query}%`),
-					like(blogPosts.excerpt, `%${query}%`),
-				),
+					like(blogPosts.excerpt, `%${query}%`)
+				)
 			);
 		}
 
@@ -388,7 +383,6 @@ export async function searchBlogPosts(
 			},
 		};
 	} catch (error) {
-		console.error("Error searching blog posts:", error);
 		return {
 			success: false,
 			error:
@@ -401,7 +395,7 @@ export async function searchBlogPosts(
  * Publish a blog post
  */
 export async function publishBlogPost(
-	input: PublishBlogPostInput,
+	input: PublishBlogPostInput
 ): Promise<ActionResult<BlogPost>> {
 	try {
 		const session = await auth.api.getSession({
@@ -434,7 +428,7 @@ export async function publishBlogPost(
 		}
 
 		// Validate required fields for publishing
-		if (!existingPost[0].title || !existingPost[0].content) {
+		if (!(existingPost[0].title && existingPost[0].content)) {
 			return {
 				success: false,
 				error: "Blog post must have title and content to be published",
@@ -459,7 +453,6 @@ export async function publishBlogPost(
 
 		return { success: true, data: publishedPost };
 	} catch (error) {
-		console.error("Error publishing blog post:", error);
 		return {
 			success: false,
 			error:
@@ -472,7 +465,7 @@ export async function publishBlogPost(
  * Unpublish a blog post (set back to draft)
  */
 export async function unpublishBlogPost(
-	id: string,
+	id: string
 ): Promise<ActionResult<BlogPost>> {
 	try {
 		const session = await auth.api.getSession({
@@ -516,7 +509,6 @@ export async function unpublishBlogPost(
 
 		return { success: true, data: unpublishedPost };
 	} catch (error) {
-		console.error("Error unpublishing blog post:", error);
 		return {
 			success: false,
 			error:
@@ -532,8 +524,8 @@ export async function unpublishBlogPost(
  */
 export async function getBlogPostsByCategory(
 	category: string,
-	page: number = 1,
-	limit: number = 12,
+	page = 1,
+	limit = 12
 ): Promise<ActionResult<BlogSearchResult>> {
 	return searchBlogPosts({
 		category,
@@ -549,7 +541,7 @@ export async function getBlogPostsByCategory(
  * Get recent blog posts
  */
 export async function getRecentBlogPosts(
-	limit: number = 5,
+	limit = 5
 ): Promise<ActionResult<BlogPost[]>> {
 	try {
 		const posts = await db
@@ -561,7 +553,6 @@ export async function getRecentBlogPosts(
 
 		return { success: true, data: posts };
 	} catch (error) {
-		console.error("Error getting recent blog posts:", error);
 		return {
 			success: false,
 			error:
@@ -576,7 +567,7 @@ export async function getRecentBlogPosts(
  * Get featured blog posts
  */
 export async function getFeaturedBlogPosts(
-	limit: number = 3,
+	limit = 3
 ): Promise<ActionResult<BlogPost[]>> {
 	try {
 		const posts = await db
@@ -585,15 +576,14 @@ export async function getFeaturedBlogPosts(
 			.where(
 				and(
 					eq(blogPosts.status, "published"),
-					sql`${blogPosts.tags} ? 'featured'`,
-				),
+					sql`${blogPosts.tags} ? 'featured'`
+				)
 			)
 			.orderBy(desc(blogPosts.publishedAt))
 			.limit(limit);
 
 		return { success: true, data: posts };
 	} catch (error) {
-		console.error("Error getting featured blog posts:", error);
 		return {
 			success: false,
 			error:

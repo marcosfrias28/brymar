@@ -24,7 +24,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-interface UniversalCardProps {
+type UniversalCardProps = {
 	id: string;
 	title: string;
 	description?: string;
@@ -44,7 +44,7 @@ interface UniversalCardProps {
 	onEdit?: () => void;
 	onDelete?: () => void;
 	onView?: () => void;
-}
+};
 
 export function UniversalCard({
 	id,
@@ -99,7 +99,9 @@ export function UniversalCard({
 	};
 
 	const formatPrice = (price?: number) => {
-		if (!price) return "";
+		if (!price) {
+			return "";
+		}
 		return new Intl.NumberFormat("es-DO", {
 			style: "currency",
 			currency: "DOP",
@@ -108,28 +110,30 @@ export function UniversalCard({
 	};
 
 	const formatArea = (area?: number) => {
-		if (!area) return "";
+		if (!area) {
+			return "";
+		}
 		return `${area.toLocaleString()} m²`;
 	};
 
 	if (viewMode === "list") {
 		return (
-			<div className="bg-background border border-border rounded-lg p-4 hover:shadow-md transition-shadow">
+			<div className="rounded-lg border border-border bg-background p-4 transition-shadow hover:shadow-md">
 				<div className="flex gap-4">
 					{/* Image */}
-					<Link href={getDetailUrl()} className="w-24 h-24 flex-shrink-0">
+					<Link className="h-24 w-24 flex-shrink-0" href={getDetailUrl()}>
 						{image && !imageError ? (
 							<Image
-								src={image || "/placeholder.svg"}
 								alt={title}
-								width={96}
+								className="h-full w-full rounded-lg object-cover transition-opacity hover:opacity-90"
 								height={96}
-								className="w-full h-full object-cover rounded-lg hover:opacity-90 transition-opacity"
 								onError={() => setImageError(true)}
+								src={image || "/placeholder.svg"}
+								width={96}
 							/>
 						) : (
-							<div className="w-full h-full bg-muted rounded-lg flex items-center justify-center hover:bg-muted/80 transition-colors">
-								<span className="text-muted-foreground text-xs font-medium">
+							<div className="flex h-full w-full items-center justify-center rounded-lg bg-muted transition-colors hover:bg-muted/80">
+								<span className="font-medium text-muted-foreground text-xs">
 									Sin imagen
 								</span>
 							</div>
@@ -137,16 +141,16 @@ export function UniversalCard({
 					</Link>
 
 					{/* Content */}
-					<div className="flex-1 min-w-0">
+					<div className="min-w-0 flex-1">
 						<div className="flex items-start justify-between gap-2">
 							<div className="min-w-0 flex-1">
 								<Link href={getDetailUrl()}>
-									<h3 className="font-semibold text-foreground truncate hover:text-primary transition-colors cursor-pointer">
+									<h3 className="cursor-pointer truncate font-semibold text-foreground transition-colors hover:text-primary">
 										{title}
 									</h3>
 								</Link>
 								{description && (
-									<p className="text-sm text-blackCoral/70 line-clamp-2 mt-1">
+									<p className="mt-1 line-clamp-2 text-blackCoral/70 text-sm">
 										{description}
 									</p>
 								)}
@@ -155,29 +159,29 @@ export function UniversalCard({
 							{/* Actions */}
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
-									<Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+									<Button className="h-8 w-8 p-0" size="sm" variant="ghost">
 										<MoreVertical className="h-4 w-4" />
 									</Button>
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end">
 									<DropdownMenuItem asChild>
 										<Link href={getDetailUrl()}>
-											<Eye className="h-4 w-4 mr-2" />
+											<Eye className="mr-2 h-4 w-4" />
 											Ver Detalles
 										</Link>
 									</DropdownMenuItem>
 									<DropdownMenuItem asChild>
 										<Link href={`${getDetailUrl()}?edit=true`}>
-											<Edit className="h-4 w-4 mr-2" />
+											<Edit className="mr-2 h-4 w-4" />
 											Editar
 										</Link>
 									</DropdownMenuItem>
 									{onDelete && (
 										<DropdownMenuItem
-											onClick={onDelete}
 											className="text-red-600"
+											onClick={onDelete}
 										>
-											<Trash2 className="h-4 w-4 mr-2" />
+											<Trash2 className="mr-2 h-4 w-4" />
 											Eliminar
 										</DropdownMenuItem>
 									)}
@@ -186,7 +190,7 @@ export function UniversalCard({
 						</div>
 
 						{/* Metadata */}
-						<div className="flex flex-wrap items-center gap-3 mt-2">
+						<div className="mt-2 flex flex-wrap items-center gap-3">
 							{status && (
 								<Badge className={getStatusColor(status)} variant="secondary">
 									{status}
@@ -194,59 +198,59 @@ export function UniversalCard({
 							)}
 
 							{price && (
-								<div className="flex items-center gap-1 text-sm text-blackCoral">
+								<div className="flex items-center gap-1 text-blackCoral text-sm">
 									<DollarSign className="h-3 w-3" />
 									{formatPrice(price)}
 								</div>
 							)}
 
 							{area && (
-								<div className="flex items-center gap-1 text-sm text-blackCoral">
+								<div className="flex items-center gap-1 text-blackCoral text-sm">
 									<Ruler className="h-3 w-3" />
 									{formatArea(area)}
 								</div>
 							)}
 
 							{location && (
-								<div className="flex items-center gap-1 text-sm text-blackCoral">
+								<div className="flex items-center gap-1 text-blackCoral text-sm">
 									<MapPin className="h-3 w-3" />
 									{location}
 								</div>
 							)}
 
 							{author && (
-								<div className="flex items-center gap-1 text-sm text-blackCoral">
+								<div className="flex items-center gap-1 text-blackCoral text-sm">
 									<User className="h-3 w-3" />
 									{author}
 								</div>
 							)}
 
 							{date && (
-								<div className="flex items-center gap-1 text-sm text-blackCoral">
+								<div className="flex items-center gap-1 text-blackCoral text-sm">
 									<Calendar className="h-3 w-3" />
 									{date}
 								</div>
 							)}
 
 							{category && (
-								<div className="flex items-center gap-1 text-sm text-blackCoral">
+								<div className="flex items-center gap-1 text-blackCoral text-sm">
 									<Tag className="h-3 w-3" />
 									{category}
 								</div>
 							)}
 
 							{readTime && (
-								<span className="text-sm text-blackCoral">
+								<span className="text-blackCoral text-sm">
 									{readTime} min lectura
 								</span>
 							)}
 
 							{bedrooms && (
-								<span className="text-sm text-blackCoral">{bedrooms} hab</span>
+								<span className="text-blackCoral text-sm">{bedrooms} hab</span>
 							)}
 
 							{bathrooms && (
-								<span className="text-sm text-blackCoral">
+								<span className="text-blackCoral text-sm">
 									{bathrooms} baños
 								</span>
 							)}
@@ -262,21 +266,21 @@ export function UniversalCard({
 
 	return (
 		<div
-			className={`bg-white border border-blackCoral rounded-lg overflow-hidden hover:shadow-md transition-shadow ${cardHeight}`}
+			className={`overflow-hidden rounded-lg border border-blackCoral bg-white transition-shadow hover:shadow-md ${cardHeight}`}
 		>
 			{/* Image */}
-			<Link href={getDetailUrl()} className="relative h-48 block">
+			<Link className="relative block h-48" href={getDetailUrl()}>
 				{image && !imageError ? (
 					<Image
-						src={image || "/placeholder.svg"}
 						alt={title}
+						className="object-cover transition-opacity hover:opacity-90"
 						fill
-						className="object-cover hover:opacity-90 transition-opacity"
 						onError={() => setImageError(true)}
+						src={image || "/placeholder.svg"}
 					/>
 				) : (
-					<div className="w-full h-full bg-blackCoral flex items-center justify-center hover:bg-arsenic transition-colors">
-						<span className="text-white font-medium">Sin imagen</span>
+					<div className="flex h-full w-full items-center justify-center bg-blackCoral transition-colors hover:bg-arsenic">
+						<span className="font-medium text-white">Sin imagen</span>
 					</div>
 				)}
 
@@ -298,9 +302,9 @@ export function UniversalCard({
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button
-								variant="secondary"
+								className="h-8 w-8 bg-white/90 p-0 hover:bg-white"
 								size="sm"
-								className="h-8 w-8 p-0 bg-white/90 hover:bg-white"
+								variant="secondary"
 							>
 								<MoreVertical className="h-4 w-4" />
 							</Button>
@@ -308,19 +312,19 @@ export function UniversalCard({
 						<DropdownMenuContent align="end">
 							<DropdownMenuItem asChild>
 								<Link href={getDetailUrl()}>
-									<Eye className="h-4 w-4 mr-2" />
+									<Eye className="mr-2 h-4 w-4" />
 									Ver Detalles
 								</Link>
 							</DropdownMenuItem>
 							<DropdownMenuItem asChild>
 								<Link href={`${getDetailUrl()}?edit=true`}>
-									<Edit className="h-4 w-4 mr-2" />
+									<Edit className="mr-2 h-4 w-4" />
 									Editar
 								</Link>
 							</DropdownMenuItem>
 							{onDelete && (
-								<DropdownMenuItem onClick={onDelete} className="text-red-600">
-									<Trash2 className="h-4 w-4 mr-2" />
+								<DropdownMenuItem className="text-red-600" onClick={onDelete}>
+									<Trash2 className="mr-2 h-4 w-4" />
 									Eliminar
 								</DropdownMenuItem>
 							)}
@@ -332,13 +336,13 @@ export function UniversalCard({
 			{/* Content */}
 			<div className="p-4">
 				<Link href={getDetailUrl()}>
-					<h3 className="font-semibold text-arsenic line-clamp-2 mb-2 hover:text-blackCoral transition-colors cursor-pointer">
+					<h3 className="mb-2 line-clamp-2 cursor-pointer font-semibold text-arsenic transition-colors hover:text-blackCoral">
 						{title}
 					</h3>
 				</Link>
 
 				{description && (
-					<p className="text-sm text-blackCoral/70 line-clamp-2 mb-3">
+					<p className="mb-3 line-clamp-2 text-blackCoral/70 text-sm">
 						{description}
 					</p>
 				)}
@@ -346,13 +350,13 @@ export function UniversalCard({
 				{/* Metadata */}
 				<div className="space-y-2">
 					{price && (
-						<div className="flex items-center gap-1 text-sm font-medium text-arsenic">
+						<div className="flex items-center gap-1 font-medium text-arsenic text-sm">
 							<DollarSign className="h-3 w-3" />
 							{formatPrice(price)}
 						</div>
 					)}
 
-					<div className="flex flex-wrap items-center gap-2 text-xs text-blackCoral">
+					<div className="flex flex-wrap items-center gap-2 text-blackCoral text-xs">
 						{area && (
 							<div className="flex items-center gap-1">
 								<Ruler className="h-3 w-3" />

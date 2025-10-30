@@ -3,14 +3,14 @@
 import Link from "next/link";
 
 const Logo = () => (
-	<Link href="/" className="flex items-center px-7 py-2 text-white">
+	<Link className="flex items-center px-7 py-2 text-white" href="/">
 		<svg
-			width="62"
+			className="h-16 w-16"
+			fill="none"
 			height="63"
 			viewBox="0 0 63 63"
-			fill="none"
+			width="62"
 			xmlns="http://www.w3.org/2000/svg"
-			className="w-16 h-16"
 		>
 			<path
 				className="stroke-primary"
@@ -23,7 +23,7 @@ const Logo = () => (
 				strokeWidth="11.1111"
 			/>
 		</svg>
-		<span className="font-encode-sans text-3xl font-bold -ml-4 mt-4">
+		<span className="-ml-4 mt-4 font-bold font-encode-sans text-3xl">
 			ARBRY
 		</span>
 	</Link>

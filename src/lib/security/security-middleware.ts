@@ -53,7 +53,7 @@ function requiresProtection(pathname: string): "full" | "basic" | "none" {
 	// Check basic protection paths
 	if (
 		SECURITY_CONFIG.BASIC_PROTECTION_PATHS.some((path) =>
-			pathname.startsWith(path),
+			pathname.startsWith(path)
 		)
 	) {
 		return "basic";
@@ -84,7 +84,7 @@ function applySecurityHeaders(response: NextResponse): void {
  */
 export async function securityMiddleware(
 	request: NextRequest,
-	userId?: string,
+	userId?: string
 ): Promise<NextResponse | null> {
 	const { pathname } = request.nextUrl;
 	const protectionLevel = requiresProtection(pathname);
@@ -110,16 +110,14 @@ export async function securityMiddleware(
 		}
 
 		return null; // Continue processing
-	} catch (error) {
-		console.error("Security middleware error:", error);
-
+	} catch (_error) {
 		// Create error response with security headers
 		const errorResponse = NextResponse.json(
 			{
 				error: "Security validation failed",
 				message: "La solicitud no pudo ser validada por razones de seguridad.",
 			},
-			{ status: 403 },
+			{ status: 403 }
 		);
 
 		applySecurityHeaders(errorResponse);
@@ -142,13 +140,13 @@ export async function createSecureResponse(
 	data: any,
 	request: NextRequest,
 	userId?: string,
-	status: number = 200,
+	status = 200
 ): Promise<NextResponse> {
 	const clientId = getClientIdentifier(request, userId);
 
 	// Get rate limit status for headers
 	const rateLimitStatus = await import("./rate-limiting").then((m) =>
-		m.getRateLimitStatus(clientId),
+		m.getRateLimitStatus(clientId)
 	);
 
 	// Create response
@@ -161,7 +159,7 @@ export async function createSecureResponse(
 	const rateLimitHeaders = getRateLimitHeaders(
 		rateLimitStatus.formSubmission.remaining,
 		rateLimitStatus.formSubmission.resetTime,
-		rateLimitStatus.formSubmission.totalHits,
+		rateLimitStatus.formSubmission.totalHits
 	);
 
 	Object.entries(rateLimitHeaders).forEach(([key, value]) => {
@@ -174,7 +172,7 @@ export async function createSecureResponse(
 /**
  * Security audit logging
  */
-export interface SecurityEvent {
+export type SecurityEvent = {
 	type:
 		| "csrf_failure"
 		| "rate_limit_exceeded"
@@ -186,11 +184,11 @@ export interface SecurityEvent {
 	path: string;
 	timestamp: Date;
 	details?: Record<string, any>;
-}
+};
 
 class SecurityAuditLogger {
 	private events: SecurityEvent[] = [];
-	private maxEvents = 1000;
+	private readonly maxEvents = 1000;
 
 	log(event: Omit<SecurityEvent, "timestamp">): void {
 		const fullEvent: SecurityEvent = {
@@ -207,7 +205,6 @@ class SecurityAuditLogger {
 
 		// Log to console in development
 		if (process.env.NODE_ENV === "development") {
-			console.warn("Security Event:", fullEvent);
 		}
 
 		// In production, send to monitoring service
@@ -216,17 +213,9 @@ class SecurityAuditLogger {
 		}
 	}
 
-	private sendToMonitoring(event: SecurityEvent): void {
-		// Placeholder for monitoring service integration
-		// In production, integrate with services like:
-		// - Sentry
-		// - DataDog
-		// - New Relic
-		// - Custom logging service
-		console.log("Security event logged:", event.type);
-	}
+	private sendToMonitoring(_event: SecurityEvent): void {}
 
-	getRecentEvents(limit: number = 100): SecurityEvent[] {
+	getRecentEvents(limit = 100): SecurityEvent[] {
 		return this.events.slice(-limit);
 	}
 
@@ -253,7 +242,7 @@ export function logSecurityEvent(
 	type: SecurityEvent["type"],
 	request: NextRequest,
 	userId?: string,
-	details?: Record<string, any>,
+	details?: Record<string, any>
 ): void {
 	const ip =
 		request.headers.get("x-forwarded-for") ||
@@ -283,8 +272,8 @@ export function getSecurityHealthStatus(): {
 	const recentEvents = securityAuditLogger.getRecentEvents(50);
 	const recentFailures = recentEvents.filter((event) =>
 		["csrf_failure", "rate_limit_exceeded", "suspicious_activity"].includes(
-			event.type,
-		),
+			event.type
+		)
 	);
 
 	const checks = {
@@ -310,7 +299,7 @@ export function getSecurityHealthStatus(): {
 	}
 
 	// Check for missing environment variables
-	if (!process.env.SIGNED_URL_SECRET && !process.env.NEXTAUTH_SECRET) {
+	if (!(process.env.SIGNED_URL_SECRET || process.env.NEXTAUTH_SECRET)) {
 		status = "critical";
 		recommendations.push("Critical: No signing secret configured");
 		checks.csrfProtectionEnabled = false;

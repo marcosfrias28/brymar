@@ -5,15 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-interface PropertyMediaData {
+type PropertyMediaData = {
 	images?: File[];
-}
+};
 
-interface PropertyMediaStepProps {
+type PropertyMediaStepProps = {
 	data: PropertyMediaData;
 	onChange: (data: PropertyMediaData) => void;
 	errors?: Record<string, string>;
-}
+};
 
 export function PropertyMediaStep({
 	data,
@@ -37,16 +37,16 @@ export function PropertyMediaStep({
 					<div className="space-y-2">
 						<Label htmlFor="images">Imágenes</Label>
 						<Input
-							id="images"
-							type="file"
-							multiple
 							accept="image/*"
+							id="images"
+							multiple
 							onChange={(e) => {
 								const files = Array.from(e.target.files || []);
 								handleChange("images", files);
 							}}
+							type="file"
 						/>
-						<p className="text-sm text-muted-foreground">
+						<p className="text-muted-foreground text-sm">
 							Selecciona múltiples imágenes de la propiedad
 						</p>
 					</div>

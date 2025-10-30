@@ -1,4 +1,4 @@
-export interface PropertyTemplate {
+export type PropertyTemplate = {
 	id: string;
 	name: string;
 	description: string;
@@ -9,9 +9,9 @@ export interface PropertyTemplate {
 	isActive: boolean;
 	createdAt: Date;
 	updatedAt: Date;
-}
+};
 
-export interface PropertyFormData {
+export type PropertyFormData = {
 	title: string;
 	description: string;
 	price: number;
@@ -37,10 +37,10 @@ export interface PropertyFormData {
 	}>;
 	status: "draft" | "published";
 	language: "es" | "en";
-}
+};
 
-export interface BulkImportData {
-	properties: Array<Partial<PropertyFormData>>;
+export type BulkImportData = {
+	properties: Partial<PropertyFormData>[];
 	template?: PropertyTemplate;
 	validationResults: {
 		valid: number;
@@ -51,9 +51,9 @@ export interface BulkImportData {
 			message: string;
 		}>;
 	};
-}
+};
 
-export interface PropertyComparison {
+export type PropertyComparison = {
 	id: string;
 	properties: Array<{
 		id: string;
@@ -67,18 +67,18 @@ export interface PropertyComparison {
 	similarities: string[];
 	differences: string[];
 	marketPosition: "below" | "average" | "above";
-}
+};
 
-export interface SocialMediaPreview {
+export type SocialMediaPreview = {
 	platform: "facebook" | "instagram" | "twitter" | "whatsapp";
 	title: string;
 	description: string;
 	image: string;
 	url: string;
 	hashtags: string[];
-}
+};
 
-export interface SEOSuggestions {
+export type SEOSuggestions = {
 	title: {
 		current: string;
 		suggested: string;
@@ -105,4 +105,4 @@ export interface SEOSuggestions {
 		issues: string[];
 		recommendations: string[];
 	};
-}
+};

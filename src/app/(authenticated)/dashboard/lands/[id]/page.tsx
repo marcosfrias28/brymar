@@ -30,13 +30,12 @@ export default function LandDetailPage() {
 	const { data: land, isLoading: loading, error, refetch } = useLand(landId);
 
 	// Helper functions defined after hooks
-	const formatPrice = (price: number, currency: string = "USD") => {
-		return new Intl.NumberFormat("es-DO", {
+	const formatPrice = (price: number, currency = "USD") =>
+		new Intl.NumberFormat("es-DO", {
 			style: "currency",
-			currency: currency,
+			currency,
 			minimumFractionDigits: 0,
 		}).format(price);
-	};
 
 	const getTypeLabel = (type: string) => {
 		const labels = {
@@ -67,14 +66,23 @@ export default function LandDetailPage() {
 	};
 
 	// Conditional rendering after all hooks and helper functions
-	if (!params || !params.id) {
+	if (!params?.id) {
 		return (
 			<DashboardPageLayout
-				title="Error"
-				description="Terreno no encontrado"
+				actions={
+					<Button
+						onClick={() => router.push("/dashboard/lands")}
+						variant="outline"
+					>
+						<ArrowLeft className="mr-2 h-4 w-4" />
+						Volver a Terrenos
+					</Button>
+				}
 				breadcrumbs={breadcrumbs}
+				description="Terreno no encontrado"
+				title="Error"
 			>
-				<div className="flex items-center justify-center h-64">
+				<div className="flex h-64 items-center justify-center">
 					<InlineErrorState message="ID de terreno no válido" />
 				</div>
 			</DashboardPageLayout>
@@ -84,11 +92,20 @@ export default function LandDetailPage() {
 	if (loading) {
 		return (
 			<DashboardPageLayout
-				title="Cargando terreno..."
-				description="Obteniendo información del terreno"
+				actions={
+					<Button
+						onClick={() => router.push("/dashboard/lands")}
+						variant="outline"
+					>
+						<ArrowLeft className="mr-2 h-4 w-4" />
+						Volver a Terrenos
+					</Button>
+				}
 				breadcrumbs={breadcrumbs}
+				description="Obteniendo información del terreno"
+				title="Cargando terreno..."
 			>
-				<div className="flex items-center justify-center h-64">
+				<div className="flex h-64 items-center justify-center">
 					<LoadingSpinner />
 				</div>
 			</DashboardPageLayout>
@@ -98,11 +115,20 @@ export default function LandDetailPage() {
 	if (error || !land) {
 		return (
 			<DashboardPageLayout
-				title="Error"
-				description="No se pudo cargar el terreno"
+				actions={
+					<Button
+						onClick={() => router.push("/dashboard/lands")}
+						variant="outline"
+					>
+						<ArrowLeft className="mr-2 h-4 w-4" />
+						Volver a Terrenos
+					</Button>
+				}
 				breadcrumbs={breadcrumbs}
+				description="No se pudo cargar el terreno"
+				title="Error"
 			>
-				<div className="flex items-center justify-center h-64">
+				<div className="flex h-64 items-center justify-center">
 					<InlineErrorState
 						message={error?.message || "Terreno no encontrado"}
 						onRetry={refetch}
@@ -113,37 +139,31 @@ export default function LandDetailPage() {
 	}
 
 	const pricePerM2 = land.price / land.area;
-	const hectares = (land.area / 10000).toFixed(4);
+	const hectares = (land.area / 10_000).toFixed(4);
 	const tareas = (land.area / 629).toFixed(2);
 
 	const actions = (
 		<div className="flex gap-2">
 			<Button
-				variant="outline"
-				onClick={() => router.back()}
 				className={cn(interactiveClasses.button)}
+				onClick={() => router.back()}
+				variant="outline"
 			>
-				<ArrowLeft className="h-4 w-4 mr-2" />
+				<ArrowLeft className="mr-2 h-4 w-4" />
 				Volver
 			</Button>
 			<Button
-				onClick={() => router.push(`/dashboard/lands/${landId}/edit`)}
 				className={cn(
 					"bg-arsenic hover:bg-blackCoral",
-					secondaryColorClasses.focusRing,
+					secondaryColorClasses.focusRing
 				)}
+				onClick={() => router.push(`/dashboard/lands/${landId}/edit`)}
 			>
-				<Edit className="h-4 w-4 mr-2" />
+				<Edit className="mr-2 h-4 w-4" />
 				Editar
 			</Button>
-			<Button
-				variant="destructive"
-				onClick={() => {
-					// TODO: Implement delete functionality
-					console.log("Delete land:", landId);
-				}}
-			>
-				<Trash2 className="h-4 w-4 mr-2" />
+			<Button onClick={() => {}} variant="destructive">
+				<Trash2 className="mr-2 h-4 w-4" />
 				Eliminar
 			</Button>
 		</div>
@@ -152,30 +172,33 @@ export default function LandDetailPage() {
 	return (
 		<RouteGuard requiredPermission="lands.manage">
 			<DashboardPageLayout
-				title={land.name}
-				description={`Detalles del terreno ${getTypeLabel(
-					land.type,
-				).toLowerCase()}`}
-				breadcrumbs={breadcrumbs}
 				actions={actions}
+				breadcrumbs={breadcrumbs}
+				description={`Detalles del terreno ${getTypeLabel(
+					land.type
+				).toLowerCase()}`}
+				title={land.name}
 			>
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+				<div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 					{/* Main Content */}
-					<div className="lg:col-span-2 space-y-6">
+					<div className="space-y-6 lg:col-span-2">
 						{/* Images */}
 						<Card
 							className={cn(
 								"border-blackCoral/20 shadow-lg transition-all duration-200",
-								secondaryColorClasses.cardHover,
+								secondaryColorClasses.cardHover
 							)}
 						>
 							<CardContent className="p-0">
 								<div className="relative h-96 overflow-hidden rounded-lg">
 									<Image
-										src={(Array.isArray(land.images) && land.images[0]?.url) || "/placeholder.svg"}
 										alt={land.name}
-										fill
 										className="object-cover"
+										fill
+										src={
+											(Array.isArray(land.images) && land.images[0]?.url) ||
+											"/placeholder.svg"
+										}
 									/>
 									<div className="absolute top-4 left-4">
 										<Badge className={getTypeBadgeColor(land.type)}>
@@ -188,14 +211,14 @@ export default function LandDetailPage() {
 										<div className="grid grid-cols-4 gap-2">
 											{land.images.slice(1, 5).map((image, index) => (
 												<div
-													key={image.url || index}
 													className="relative h-20 overflow-hidden rounded"
+													key={image.url || index}
 												>
 													<Image
-														src={image.url || "/placeholder.svg"}
 														alt={`${land.name} - imagen adicional`}
-														fill
 														className="object-cover"
+														fill
+														src={image.url || "/placeholder.svg"}
 													/>
 												</div>
 											))}
@@ -209,7 +232,7 @@ export default function LandDetailPage() {
 						<Card
 							className={cn(
 								"border-blackCoral/20 shadow-lg transition-all duration-200",
-								secondaryColorClasses.cardHover,
+								secondaryColorClasses.cardHover
 							)}
 						>
 							<CardHeader>
@@ -231,7 +254,7 @@ export default function LandDetailPage() {
 							<Card
 								className={cn(
 									"border-blackCoral/20 shadow-lg transition-all duration-200",
-									secondaryColorClasses.cardHover,
+									secondaryColorClasses.cardHover
 								)}
 							>
 								<CardHeader>
@@ -243,11 +266,11 @@ export default function LandDetailPage() {
 									<div className="flex flex-wrap gap-2">
 										{Object.entries(land.features).map(([key, value]) => (
 											<Badge
+												className={badgeVariants.secondarySubtle}
 												key={key}
 												variant="secondary"
-												className={badgeVariants.secondarySubtle}
 											>
-												{typeof value === 'string' ? value : key}
+												{typeof value === "string" ? value : key}
 											</Badge>
 										))}
 									</div>
@@ -262,7 +285,7 @@ export default function LandDetailPage() {
 						<Card
 							className={cn(
 								"border-blackCoral/20 shadow-lg transition-all duration-200",
-								secondaryColorClasses.cardHover,
+								secondaryColorClasses.cardHover
 							)}
 						>
 							<CardHeader>
@@ -272,13 +295,10 @@ export default function LandDetailPage() {
 							</CardHeader>
 							<CardContent className="space-y-4">
 								<div className="text-center">
-									<div className="text-3xl font-bold text-arsenic">
-										{formatPrice(
-											land.price,
-											land.currency || "USD",
-										)}
+									<div className="font-bold text-3xl text-arsenic">
+										{formatPrice(land.price, land.currency || "USD")}
 									</div>
-									<div className="text-sm text-blackCoral/70">
+									<div className="text-blackCoral/70 text-sm">
 										${Math.round(pricePerM2).toLocaleString()}/m²
 									</div>
 								</div>
@@ -297,14 +317,14 @@ export default function LandDetailPage() {
 									</div>
 
 									<div className="flex items-center justify-between">
-										<span className="text-sm text-blackCoral">Hectáreas</span>
+										<span className="text-blackCoral text-sm">Hectáreas</span>
 										<span className="font-medium text-arsenic">
 											{hectares} ha
 										</span>
 									</div>
 
 									<div className="flex items-center justify-between">
-										<span className="text-sm text-blackCoral">Tareas</span>
+										<span className="text-blackCoral text-sm">Tareas</span>
 										<span className="font-medium text-arsenic">
 											{tareas} tareas
 										</span>
@@ -317,7 +337,7 @@ export default function LandDetailPage() {
 						<Card
 							className={cn(
 								"border-blackCoral/20 shadow-lg transition-all duration-200",
-								secondaryColorClasses.cardHover,
+								secondaryColorClasses.cardHover
 							)}
 						>
 							<CardHeader>
@@ -325,8 +345,8 @@ export default function LandDetailPage() {
 							</CardHeader>
 							<CardContent>
 								<div className="flex items-start gap-2">
-									<MapPin className="h-4 w-4 text-blackCoral mt-1" />
-									<span className="text-sm text-blackCoral">
+									<MapPin className="mt-1 h-4 w-4 text-blackCoral" />
+									<span className="text-blackCoral text-sm">
 										{land.location || "Ubicación no especificada"}
 									</span>
 								</div>
@@ -337,7 +357,7 @@ export default function LandDetailPage() {
 						<Card
 							className={cn(
 								"border-blackCoral/20 shadow-lg transition-all duration-200",
-								secondaryColorClasses.cardHover,
+								secondaryColorClasses.cardHover
 							)}
 						>
 							<CardHeader>
@@ -345,14 +365,16 @@ export default function LandDetailPage() {
 							</CardHeader>
 							<CardContent>
 								<Badge
-									variant={land.status === "available" ? "default" : "secondary"}
 									className={
-										land.status === "available"
+										land.status === "published"
 											? "bg-green-100 text-green-800"
 											: badgeVariants.secondary
 									}
+									variant={
+										land.status === "published" ? "default" : "secondary"
+									}
 								>
-									{land.status === "available" ? "Disponible" : "No Disponible"}
+									{land.status === "published" ? "Disponible" : "No Disponible"}
 								</Badge>
 							</CardContent>
 						</Card>
@@ -361,7 +383,7 @@ export default function LandDetailPage() {
 						<Card
 							className={cn(
 								"border-blackCoral/20 shadow-lg transition-all duration-200",
-								secondaryColorClasses.cardHover,
+								secondaryColorClasses.cardHover
 							)}
 						>
 							<CardHeader>

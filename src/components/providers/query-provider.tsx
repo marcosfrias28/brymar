@@ -6,9 +6,9 @@ import { useState } from "react";
 import { getQueryClient } from "@/lib/query/client";
 import { NotificationProvider } from "./notification-provider";
 
-interface QueryProviderProps {
+type QueryProviderProps = {
 	children: React.ReactNode;
-}
+};
 
 export function QueryProvider({ children }: QueryProviderProps) {
 	// Create a stable QueryClient instance
@@ -21,8 +21,8 @@ export function QueryProvider({ children }: QueryProviderProps) {
 				{/* Only show devtools in development */}
 				{process.env.NODE_ENV === "development" && (
 					<ReactQueryDevtools
-						initialIsOpen={false}
 						buttonPosition="bottom-left"
+						initialIsOpen={false}
 					/>
 				)}
 			</NotificationProvider>

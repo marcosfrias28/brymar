@@ -41,7 +41,7 @@ export type ValidatedOptions = {
  */
 export type ActionFunction<TInput, TOutput> = (
 	data: TInput,
-	user?: User,
+	user?: User
 ) => Promise<TOutput>;
 
 // ============================================================================
@@ -54,7 +54,7 @@ export type ActionFunction<TInput, TOutput> = (
  */
 export function handleActionError(
 	error: unknown,
-	_fallbackMessage = "Error desconocido",
+	_fallbackMessage = "Error desconocido"
 ): ActionState {
 	const appError = handleError(error);
 	const response = formatErrorResponse(appError);
@@ -138,7 +138,7 @@ export function createSuccessResponse<T = void>(
 	data?: T,
 	message?: string,
 	redirect?: boolean,
-	url?: string,
+	url?: string
 ): ActionState<T> {
 	return {
 		success: true,
@@ -157,7 +157,7 @@ export function createErrorResponse(
 	error: string,
 	code?: string,
 	statusCode?: number,
-	details?: any,
+	details?: any
 ): ActionState {
 	return {
 		success: false,
@@ -182,7 +182,7 @@ export function createErrorResponse(
 export function createValidatedAction<TInput, TOutput>(
 	schema: z.ZodType<TInput>,
 	action: ActionFunction<TInput, TOutput>,
-	options: ValidatedOptions = {},
+	options: ValidatedOptions = {}
 ): (formData: FormData) => Promise<TOutput> {
 	return async (formData: FormData): Promise<TOutput> => {
 		try {
@@ -213,7 +213,7 @@ export function createValidatedAction<TInput, TOutput>(
 					return createErrorResponse(
 						"User is not authenticated",
 						"AUTH_REQUIRED",
-						401,
+						401
 					) as TOutput;
 				}
 				user = currentUser;
@@ -225,7 +225,7 @@ export function createValidatedAction<TInput, TOutput>(
 			// Handle unexpected errors using unified error system
 			return handleActionError(
 				error,
-				"An unexpected error occurred",
+				"An unexpected error occurred"
 			) as TOutput;
 		}
 	};

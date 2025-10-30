@@ -86,7 +86,7 @@ function convertBetterAuthUser(betterAuthUser: any): User {
  * Verify OTP code - Updated to use Zod validation
  */
 export async function verifyOTP(
-	input: VerifyOTPInput,
+	input: VerifyOTPInput
 ): Promise<ActionResult<void>> {
 	try {
 		// Validate input using Zod schema
@@ -94,14 +94,14 @@ export async function verifyOTP(
 
 		await logger.info("Verifying OTP", {
 			email: validatedInput.email,
-			otp: validatedInput.otp
+			otp: validatedInput.otp,
 		});
 
 		// Use Better Auth to verify OTP
 		const result = await auth.api.verifyEmailOTP({
 			body: {
 				email: validatedInput.email,
-				otp: validatedInput.otp
+				otp: validatedInput.otp,
 			},
 			headers: await headers(),
 		});
@@ -151,10 +151,10 @@ export async function verifyOTP(
  * Sign in with email and password
  */
 export async function signIn(
-	input: AuthenticateUserInput,
+	input: AuthenticateUserInput
 ): Promise<ActionResult<{ user: any; redirectUrl: string }>> {
 	try {
-		if (!input.email || !input.password) {
+		if (!(input.email && input.password)) {
 			throw new ValidationError("Email and password are required", {
 				email: input.email ? [] : ["Email is required"],
 				password: input.password ? [] : ["Password is required"],
@@ -210,10 +210,10 @@ export async function signIn(
  * Sign up a new user
  */
 export async function signUp(
-	input: SignUpInput,
+	input: SignUpInput
 ): Promise<ActionResult<{ user: any; redirectUrl: string }>> {
 	try {
-		if (!input.email || !input.password || !input.name) {
+		if (!(input.email && input.password && input.name)) {
 			throw new ValidationError("All fields are required", {
 				email: input.email ? [] : ["Email is required"],
 				password: input.password ? [] : ["Password is required"],
@@ -308,7 +308,7 @@ export async function signOut(): Promise<ActionResult<void>> {
  * Request password reset
  */
 export async function forgotPassword(
-	input: ForgotPasswordInput,
+	input: ForgotPasswordInput
 ): Promise<ActionResult<void>> {
 	try {
 		if (!input.email) {
@@ -336,7 +336,7 @@ export async function forgotPassword(
 
 		// Use Better Auth to send password reset email
 		await auth.api.forgetPassword({
-			body: { 
+			body: {
 				email: input.email,
 				redirectTo: callbackURL,
 			},
@@ -368,10 +368,10 @@ export async function forgotPassword(
  * Reset password with token
  */
 export async function resetPassword(
-	input: ResetPasswordInput,
+	input: ResetPasswordInput
 ): Promise<ActionResult<void>> {
 	try {
-		if (!input.token || !input.password || !input.confirmPassword) {
+		if (!(input.token && input.password && input.confirmPassword)) {
 			throw new ValidationError("All fields are required", {
 				token: input.token ? [] : ["Token is required"],
 				password: input.password ? [] : ["Password is required"],
@@ -421,7 +421,7 @@ export async function resetPassword(
  * Update user profile
  */
 export async function updateUserProfile(
-	input: UpdateUserProfileInput,
+	input: UpdateUserProfileInput
 ): Promise<ActionResult<User>> {
 	try {
 		// Get current session
@@ -434,15 +434,17 @@ export async function updateUserProfile(
 		}
 
 		if (
-			!input.name &&
-			!input.email &&
-			!input.firstName &&
-			!input.lastName &&
-			!input.phone &&
-			!input.avatar &&
-			!input.bio &&
-			!input.location &&
-			!input.website
+			!(
+				input.name ||
+				input.email ||
+				input.firstName ||
+				input.lastName ||
+				input.phone ||
+				input.avatar ||
+				input.bio ||
+				input.location ||
+				input.website
+			)
 		) {
 			throw new ValidationError("At least one field must be provided", {});
 		}
@@ -465,8 +467,12 @@ export async function updateUserProfile(
 
 		// Use Better Auth to update profile
 		const updateData: any = {};
-		if (input.name) updateData.name = input.name;
-		if (input.email) updateData.email = input.email;
+		if (input.name) {
+			updateData.name = input.name;
+		}
+		if (input.email) {
+			updateData.email = input.email;
+		}
 		// Note: Better Auth might not support all fields, we may need to extend this
 
 		await auth.api.updateUser({
@@ -506,7 +512,7 @@ export async function updateUserProfile(
  * Change password for authenticated user
  */
 export async function changePassword(
-	input: ChangePasswordInput,
+	input: ChangePasswordInput
 ): Promise<ActionResult<void>> {
 	try {
 		// Get current session
@@ -519,9 +525,7 @@ export async function changePassword(
 		}
 
 		if (
-			!input.currentPassword ||
-			!input.newPassword ||
-			!input.confirmPassword
+			!(input.currentPassword && input.newPassword && input.confirmPassword)
 		) {
 			throw new ValidationError("All fields are required", {
 				currentPassword: input.currentPassword
@@ -552,7 +556,7 @@ export async function changePassword(
 				"New password must be different from current password",
 				{
 					newPassword: ["New password must be different from current password"],
-				},
+				}
 			);
 		}
 
@@ -585,7 +589,7 @@ export async function changePassword(
  * Send verification OTP
  */
 export async function sendVerificationOTP(
-	input: SendVerificationOTPInput,
+	input: SendVerificationOTPInput
 ): Promise<ActionResult<void>> {
 	try {
 		if (!input.email) {
@@ -658,7 +662,7 @@ export async function getCurrentUser(): Promise<ActionResult<User | null>> {
 // Server action wrappers using FormState pattern
 export async function signInAction(
 	_prevState: FormState<{ user: any; redirectUrl: string }>,
-	formData: FormData,
+	formData: FormData
 ): Promise<FormState<{ user: any; redirectUrl: string }>> {
 	try {
 		const email = formData.get("email") as string;
@@ -668,13 +672,13 @@ export async function signInAction(
 		// Validation
 		const errors: Record<string, string[]> = {};
 
-		if (!email) {
-			errors.email = ["Email is required"];
-		} else {
+		if (email) {
 			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 			if (!emailRegex.test(email)) {
 				errors.email = ["Invalid email format"];
 			}
+		} else {
+			errors.email = ["Email is required"];
 		}
 
 		if (!password) {
@@ -739,7 +743,7 @@ export async function signInAction(
 
 export async function signUpAction(
 	_prevState: FormState<{ user: any; redirectUrl: string }>,
-	formData: FormData,
+	formData: FormData
 ): Promise<FormState<{ user: any; redirectUrl: string }>> {
 	try {
 		const email = formData.get("email") as string;
@@ -753,13 +757,13 @@ export async function signUpAction(
 		// Validation
 		const errors: Record<string, string[]> = {};
 
-		if (!email) {
-			errors.email = ["Email is required"];
-		} else {
+		if (email) {
 			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 			if (!emailRegex.test(email)) {
 				errors.email = ["Invalid email format"];
 			}
+		} else {
+			errors.email = ["Email is required"];
 		}
 
 		if (!password) {
@@ -841,16 +845,16 @@ export async function signOutAction() {
 }
 
 export async function forgotPasswordAction(
-	prevState: ActionResult<void>,
-	formData: FormData,
+	_prevState: ActionResult<void>,
+	formData: FormData
 ): Promise<ActionResult<void>> {
 	const email = formData.get("email") as string;
 	return forgotPassword({ email });
 }
 
 export async function resetPasswordAction(
-	prevState: ActionResult<void>,
-	formData: FormData,
+	_prevState: ActionResult<void>,
+	formData: FormData
 ): Promise<ActionResult<void>> {
 	const token = formData.get("token") as string;
 	const password = formData.get("password") as string;
@@ -867,8 +871,8 @@ export async function resetPasswordAction(
 }
 
 export async function updateUserProfileAction(
-	prevState: ActionResult<User>,
-	formData: FormData,
+	_prevState: ActionResult<User>,
+	formData: FormData
 ): Promise<ActionResult<User>> {
 	const id = formData.get("id") as string;
 	const name = formData.get("name") as string;

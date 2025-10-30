@@ -36,7 +36,7 @@ import {
 import type { ImageMetadata } from "@/types/wizard";
 import { ImagePreview } from "./image-preview-handler";
 
-interface EnhancedImageUploadProps {
+type EnhancedImageUploadProps = {
 	images: ImageMetadata[];
 	onImagesChange: (images: ImageMetadata[]) => void;
 	maxImages?: number;
@@ -44,15 +44,15 @@ interface EnhancedImageUploadProps {
 	allowedTypes?: string[];
 	disabled?: boolean;
 	isMobile?: boolean;
-}
+};
 
-interface UploadProgress {
+type UploadProgress = {
 	file: File;
 	progress: number;
 	status: "uploading" | "success" | "error";
 	error?: string;
 	result?: ImageMetadata;
-}
+};
 
 interface ImageWithFile extends ImageMetadata {
 	originalFile?: File;
@@ -81,7 +81,7 @@ export function EnhancedImageUpload({
 	// Handle file validation
 	const validateFiles = useCallback(
 		(
-			files: FileList | File[],
+			files: FileList | File[]
 		): { valid: File[]; invalid: { file: File; reason: string }[] } => {
 			const fileArray = Array.from(files);
 			const valid: File[] = [];
@@ -117,13 +117,15 @@ export function EnhancedImageUpload({
 
 			return { valid, invalid };
 		},
-		[maxFileSize, maxImages, images.length],
+		[maxFileSize, maxImages, images.length]
 	);
 
 	// Handle file upload with progress tracking
 	const handleFileUpload = useCallback(
 		async (files: File[]) => {
-			if (files.length === 0) return;
+			if (files.length === 0) {
+				return;
+			}
 
 			setIsUploading(true);
 
@@ -145,14 +147,14 @@ export function EnhancedImageUpload({
 										...item,
 										progress: Math.min(item.progress + Math.random() * 20, 90),
 									}
-								: item,
-						),
+								: item
+						)
 					);
 				}, 500);
 
 				// Upload files
 				// TODO: Implement uploadPropertyImages service
-				const result = { 
+				const result = {
 					successful: files.map(() => ({
 						id: "placeholder-id",
 						url: "/placeholder-image.jpg",
@@ -160,10 +162,10 @@ export function EnhancedImageUpload({
 						size: 1024,
 						type: "image/jpeg",
 						contentType: "image/jpeg",
-						displayOrder: 0
+						displayOrder: 0,
 					})),
 					failed: [] as any[],
-					urls: files.map(() => "/placeholder-image.jpg")
+					urls: files.map(() => "/placeholder-image.jpg"),
 				};
 
 				clearInterval(progressInterval);
@@ -208,7 +210,7 @@ export function EnhancedImageUpload({
 					});
 					onImagesChange(newImages);
 					toast.success(
-						`${result.successful.length} imagen(es) subida(s) exitosamente`,
+						`${result.successful.length} imagen(es) subida(s) exitosamente`
 					);
 				}
 
@@ -223,8 +225,7 @@ export function EnhancedImageUpload({
 				setTimeout(() => {
 					setUploadProgress([]);
 				}, 3000);
-			} catch (error) {
-				console.error("Upload error:", error);
+			} catch (_error) {
 				toast.error("Error al subir imágenes");
 				setUploadProgress((prev) =>
 					prev.map((item) => ({
@@ -232,19 +233,21 @@ export function EnhancedImageUpload({
 						status: "error" as const,
 						error: "Error de conexión",
 						progress: 0,
-					})),
+					}))
 				);
 			} finally {
 				setIsUploading(false);
 			}
 		},
-		[images, onImagesChange],
+		[images, onImagesChange]
 	);
 
 	// Handle files from input or drop
 	const handleFiles = useCallback(
 		async (files: FileList | File[]) => {
-			if (disabled) return;
+			if (disabled) {
+				return;
+			}
 
 			const { valid, invalid } = validateFiles(files);
 
@@ -258,7 +261,7 @@ export function EnhancedImageUpload({
 				await handleFileUpload(valid);
 			}
 		},
-		[validateFiles, handleFileUpload, disabled],
+		[validateFiles, handleFileUpload, disabled]
 	);
 
 	// Drag and drop handlers
@@ -296,7 +299,7 @@ export function EnhancedImageUpload({
 				handleFiles(e.dataTransfer.files);
 			}
 		},
-		[handleFiles],
+		[handleFiles]
 	);
 
 	// File input handler
@@ -308,7 +311,7 @@ export function EnhancedImageUpload({
 				e.target.value = "";
 			}
 		},
-		[handleFiles],
+		[handleFiles]
 	);
 
 	// Remove image
@@ -318,7 +321,7 @@ export function EnhancedImageUpload({
 			onImagesChange(newImages);
 			toast.success("Imagen eliminada");
 		},
-		[images, onImagesChange],
+		[images, onImagesChange]
 	);
 
 	// Reorder images
@@ -336,7 +339,7 @@ export function EnhancedImageUpload({
 
 			onImagesChange(updatedImages);
 		},
-		[images, onImagesChange],
+		[images, onImagesChange]
 	);
 
 	// Retry failed upload
@@ -344,7 +347,7 @@ export function EnhancedImageUpload({
 		(file: File) => {
 			handleFileUpload([file]);
 		},
-		[handleFileUpload],
+		[handleFileUpload]
 	);
 
 	return (
@@ -367,25 +370,25 @@ export function EnhancedImageUpload({
 			{/* Upload Area */}
 			<div
 				className={cn(
-					"border-2 border-dashed rounded-lg text-center transition-all duration-200",
+					"rounded-lg border-2 border-dashed text-center transition-all duration-200",
 					isMobileDevice ? "p-4" : "p-8",
 					dragActive
-						? "border-primary bg-primary/5 scale-[1.02]"
+						? "scale-[1.02] border-primary bg-primary/5"
 						: "border-border hover:border-primary/50",
-					disabled && "opacity-50 cursor-not-allowed",
+					disabled && "cursor-not-allowed opacity-50",
 					isUploading && "pointer-events-none",
 					// Disable drag on mobile since it interferes with scrolling
-					isMobileDevice && "pointer-events-none",
+					isMobileDevice && "pointer-events-none"
 				)}
-				onDragEnter={!isMobileDevice ? handleDragIn : undefined}
-				onDragLeave={!isMobileDevice ? handleDragOut : undefined}
-				onDragOver={!isMobileDevice ? handleDrag : undefined}
-				onDrop={!isMobileDevice ? handleDrop : undefined}
+				onDragEnter={isMobileDevice ? undefined : handleDragIn}
+				onDragLeave={isMobileDevice ? undefined : handleDragOut}
+				onDragOver={isMobileDevice ? undefined : handleDrag}
+				onDrop={isMobileDevice ? undefined : handleDrop}
 			>
 				<div
 					className={cn(
 						"flex flex-col items-center",
-						isMobileDevice ? "gap-3" : "gap-4",
+						isMobileDevice ? "gap-3" : "gap-4"
 					)}
 				>
 					<div
@@ -394,14 +397,14 @@ export function EnhancedImageUpload({
 							isMobileDevice ? "p-3" : "p-4",
 							dragActive
 								? "bg-primary text-primary-foreground"
-								: "bg-primary/10 text-primary",
+								: "bg-primary/10 text-primary"
 						)}
 					>
 						{isUploading ? (
 							<Loader2
 								className={cn(
 									"animate-spin",
-									isMobileDevice ? "h-6 w-6" : "h-8 w-8",
+									isMobileDevice ? "h-6 w-6" : "h-8 w-8"
 								)}
 							/>
 						) : (
@@ -413,7 +416,7 @@ export function EnhancedImageUpload({
 						<p
 							className={cn(
 								"font-medium",
-								isMobileDevice ? "text-base" : "text-lg",
+								isMobileDevice ? "text-base" : "text-lg"
 							)}
 						>
 							{isUploading
@@ -424,8 +427,8 @@ export function EnhancedImageUpload({
 						</p>
 						<p
 							className={cn(
-								"text-muted-foreground mt-1",
-								isMobileDevice ? "text-xs" : "text-sm",
+								"mt-1 text-muted-foreground",
+								isMobileDevice ? "text-xs" : "text-sm"
 							)}
 						>
 							Máximo {maxImages} imágenes, hasta{" "}
@@ -434,7 +437,7 @@ export function EnhancedImageUpload({
 						<p
 							className={cn(
 								"text-muted-foreground",
-								isMobileDevice ? "text-xs" : "text-xs",
+								isMobileDevice ? "text-xs" : "text-xs"
 							)}
 						>
 							Formatos soportados: JPEG, PNG, WebP
@@ -442,14 +445,14 @@ export function EnhancedImageUpload({
 					</div>
 
 					<Button
-						type="button"
-						variant="outline"
-						disabled={disabled || isUploading}
-						onClick={() => fileInputRef.current?.click()}
 						className={cn(
 							isMobileDevice &&
-								`${mobileClasses.touchButton} min-h-[48px] text-base`,
+								`${mobileClasses.touchButton} min-h-[48px] text-base`
 						)}
+						disabled={disabled || isUploading}
+						onClick={() => fileInputRef.current?.click()}
+						type="button"
+						variant="outline"
 					>
 						<ImageIcon
 							className={cn("mr-2", isMobileDevice ? "h-5 w-5" : "h-4 w-4")}
@@ -458,12 +461,12 @@ export function EnhancedImageUpload({
 					</Button>
 
 					<input
+						accept={allowedTypes.join(",")}
+						className="hidden"
+						multiple
+						onChange={handleFileInputChange}
 						ref={fileInputRef}
 						type="file"
-						multiple
-						accept={allowedTypes.join(",")}
-						onChange={handleFileInputChange}
-						className="hidden"
 					/>
 				</div>
 			</div>
@@ -474,30 +477,30 @@ export function EnhancedImageUpload({
 					<h4
 						className={cn(
 							"font-medium",
-							isMobileDevice ? "text-xs" : "text-sm",
+							isMobileDevice ? "text-xs" : "text-sm"
 						)}
 					>
 						Progreso de subida
 					</h4>
 					{uploadProgress.map((item, index) => (
-						<Card key={index} className={cn(isMobileDevice ? "p-2" : "p-3")}>
+						<Card className={cn(isMobileDevice ? "p-2" : "p-3")} key={index}>
 							<div
 								className={cn(
 									"flex items-center",
-									isMobileDevice ? "gap-2" : "gap-3",
+									isMobileDevice ? "gap-2" : "gap-3"
 								)}
 							>
 								<div className="flex-1">
 									<div
 										className={cn(
 											"flex items-center justify-between",
-											isMobileDevice ? "mb-0.5" : "mb-1",
+											isMobileDevice ? "mb-0.5" : "mb-1"
 										)}
 									>
 										<span
 											className={cn(
-												"font-medium truncate",
-												isMobileDevice ? "text-xs" : "text-sm",
+												"truncate font-medium",
+												isMobileDevice ? "text-xs" : "text-sm"
 											)}
 										>
 											{item.file.name}
@@ -505,14 +508,14 @@ export function EnhancedImageUpload({
 										<div
 											className={cn(
 												"flex items-center",
-												isMobileDevice ? "gap-1" : "gap-2",
+												isMobileDevice ? "gap-1" : "gap-2"
 											)}
 										>
 											{item.status === "uploading" && (
 												<Loader2
 													className={cn(
 														"animate-spin text-blue-500",
-														isMobileDevice ? "h-3 w-3" : "h-4 w-4",
+														isMobileDevice ? "h-3 w-3" : "h-4 w-4"
 													)}
 												/>
 											)}
@@ -520,7 +523,7 @@ export function EnhancedImageUpload({
 												<CheckCircle2
 													className={cn(
 														"text-green-500",
-														isMobileDevice ? "h-3 w-3" : "h-4 w-4",
+														isMobileDevice ? "h-3 w-3" : "h-4 w-4"
 													)}
 												/>
 											)}
@@ -529,20 +532,20 @@ export function EnhancedImageUpload({
 													<AlertCircle
 														className={cn(
 															"text-red-500",
-															isMobileDevice ? "h-3 w-3" : "h-4 w-4",
+															isMobileDevice ? "h-3 w-3" : "h-4 w-4"
 														)}
 													/>
 													<Button
+														className={cn(
+															isMobileDevice && mobileClasses.touchButton
+														)}
+														onClick={() => retryUpload(item.file)}
 														size={isMobileDevice ? "sm" : "sm"}
 														variant="ghost"
-														onClick={() => retryUpload(item.file)}
-														className={cn(
-															isMobileDevice && mobileClasses.touchButton,
-														)}
 													>
 														<RotateCcw
 															className={cn(
-																isMobileDevice ? "h-3 w-3" : "h-3 w-3",
+																isMobileDevice ? "h-3 w-3" : "h-3 w-3"
 															)}
 														/>
 													</Button>
@@ -553,8 +556,8 @@ export function EnhancedImageUpload({
 
 									{item.status === "uploading" && (
 										<Progress
-											value={item.progress}
 											className={cn(isMobileDevice ? "h-1" : "h-2")}
+											value={item.progress}
 										/>
 									)}
 
@@ -562,7 +565,7 @@ export function EnhancedImageUpload({
 										<p
 											className={cn(
 												"text-red-500",
-												isMobileDevice ? "text-xs" : "text-xs",
+												isMobileDevice ? "text-xs" : "text-xs"
 											)}
 										>
 											{item.error}
@@ -579,7 +582,7 @@ export function EnhancedImageUpload({
 			{images.length > 0 && (
 				<div className="space-y-4">
 					<div className="flex items-center justify-between">
-						<h4 className="text-sm font-medium">
+						<h4 className="font-medium text-sm">
 							Imágenes subidas ({images.length}/{maxImages})
 						</h4>
 						<Badge variant="outline">
@@ -592,40 +595,40 @@ export function EnhancedImageUpload({
 							"gap-4",
 							isMobileDevice
 								? "grid grid-cols-2 gap-2"
-								: "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
+								: "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
 						)}
 					>
 						{images.map((image, index) => (
-							<Card key={image.id} className="group relative overflow-hidden">
+							<Card className="group relative overflow-hidden" key={image.id}>
 								<CardContent className="p-0">
-									<div className="aspect-square relative">
+									<div className="relative aspect-square">
 										<ImagePreview
-											image={image}
 											className="aspect-square w-full"
+											image={image}
 											onRemove={() => removeImage(index)}
 										/>
 
 										{/* Overlay with controls */}
 										<div
 											className={cn(
-												"absolute inset-0 bg-black/50 transition-opacity flex items-center justify-center",
+												"absolute inset-0 flex items-center justify-center bg-black/50 transition-opacity",
 												isMobileDevice
-													? "opacity-100 gap-1" // Always visible on mobile
-													: "opacity-0 group-hover:opacity-100 gap-2",
+													? "gap-1 opacity-100" // Always visible on mobile
+													: "gap-2 opacity-0 group-hover:opacity-100"
 											)}
 										>
 											<Dialog>
 												<DialogTrigger asChild>
 													<Button
+														className={cn(
+															isMobileDevice && mobileClasses.touchButton
+														)}
 														size={isMobileDevice ? "sm" : "sm"}
 														variant="secondary"
-														className={cn(
-															isMobileDevice && mobileClasses.touchButton,
-														)}
 													>
 														<Eye
 															className={cn(
-																isMobileDevice ? "h-3 w-3" : "h-4 w-4",
+																isMobileDevice ? "h-3 w-3" : "h-4 w-4"
 															)}
 														/>
 													</Button>
@@ -633,14 +636,14 @@ export function EnhancedImageUpload({
 												<DialogContent
 													className={cn(
 														isMobileDevice
-															? "max-w-[95vw] max-h-[95vh]"
-															: "max-w-3xl",
+															? "max-h-[95vh] max-w-[95vw]"
+															: "max-w-3xl"
 													)}
 												>
 													<div className="relative aspect-video">
 														<ImagePreview
+															className="h-full w-full"
 															image={image}
-															className="w-full h-full"
 															showControls={false}
 														/>
 													</div>
@@ -648,12 +651,12 @@ export function EnhancedImageUpload({
 											</Dialog>
 
 											<Button
+												className={cn(
+													isMobileDevice && mobileClasses.touchButton
+												)}
+												onClick={() => removeImage(index)}
 												size={isMobileDevice ? "sm" : "sm"}
 												variant="destructive"
-												onClick={() => removeImage(index)}
-												className={cn(
-													isMobileDevice && mobileClasses.touchButton,
-												)}
 											>
 												<X
 													className={cn(isMobileDevice ? "h-3 w-3" : "h-4 w-4")}
@@ -662,15 +665,15 @@ export function EnhancedImageUpload({
 										</div>
 
 										{/* Drag handle */}
-										<div className="absolute top-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity">
-											<div className="bg-black/50 rounded p-1 cursor-move">
+										<div className="absolute top-2 left-2 opacity-0 transition-opacity group-hover:opacity-100">
+											<div className="cursor-move rounded bg-black/50 p-1">
 												<GripVertical className="h-4 w-4 text-white" />
 											</div>
 										</div>
 
 										{/* Image order badge */}
 										<div className="absolute top-2 right-2">
-											<Badge variant="secondary" className="text-xs">
+											<Badge className="text-xs" variant="secondary">
 												{index + 1}
 											</Badge>
 										</div>
@@ -680,8 +683,8 @@ export function EnhancedImageUpload({
 									<div className={cn(isMobileDevice ? "p-1" : "p-2")}>
 										<p
 											className={cn(
-												"text-muted-foreground truncate",
-												isMobileDevice ? "text-xs" : "text-xs",
+												"truncate text-muted-foreground",
+												isMobileDevice ? "text-xs" : "text-xs"
 											)}
 										>
 											{image.filename}
@@ -689,7 +692,7 @@ export function EnhancedImageUpload({
 										<p
 											className={cn(
 												"text-muted-foreground",
-												isMobileDevice ? "text-xs" : "text-xs",
+												isMobileDevice ? "text-xs" : "text-xs"
 											)}
 										>
 											{formatFileSize(image.size)}
@@ -715,8 +718,8 @@ export function EnhancedImageUpload({
 
 			{/* Empty state */}
 			{images.length === 0 && !isUploading && (
-				<div className="text-center py-8">
-					<ImageIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+				<div className="py-8 text-center">
+					<ImageIcon className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
 					<p className="text-muted-foreground">No hay imágenes subidas aún</p>
 				</div>
 			)}

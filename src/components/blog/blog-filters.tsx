@@ -13,10 +13,10 @@ import {
 } from "@/components/ui/select";
 import type { BlogSearchFilters } from "@/lib/types/blog";
 
-interface BlogFiltersProps {
+type BlogFiltersProps = {
 	filters: BlogSearchFilters;
 	onFiltersChange: (filters: BlogSearchFilters) => void;
-}
+};
 
 export function BlogFilters({ filters, onFiltersChange }: BlogFiltersProps) {
 	const handleFilterChange = (key: keyof BlogSearchFilters, value: any) => {
@@ -33,20 +33,20 @@ export function BlogFilters({ filters, onFiltersChange }: BlogFiltersProps) {
 	return (
 		<Card className="border-border">
 			<CardContent className="p-4">
-				<div className="grid grid-cols-1 smartphone:grid-cols-2 tablet:grid-cols-3 laptop:grid-cols-5 gap-4">
+				<div className="grid grid-cols-1 laptop:grid-cols-5 tablet:grid-cols-3 gap-4 smartphone:grid-cols-2">
 					{/* Status */}
 					<div className="space-y-2">
 						<Label className="text-foreground">Estado</Label>
 						<Select
-							value={filters.status || ""}
 							onValueChange={(value) =>
 								handleFilterChange(
 									"status",
 									value === ""
 										? undefined
-										: (value as "draft" | "published" | "archived"),
+										: (value as "draft" | "published" | "archived")
 								)
 							}
+							value={filters.status || ""}
 						>
 							<SelectTrigger className="border-border">
 								<SelectValue placeholder="Todos los estados" />
@@ -64,10 +64,10 @@ export function BlogFilters({ filters, onFiltersChange }: BlogFiltersProps) {
 					<div className="space-y-2">
 						<Label className="text-foreground">Categoría</Label>
 						<Select
-							value={filters.category || ""}
 							onValueChange={(value) =>
 								handleFilterChange("category", value === "" ? undefined : value)
 							}
+							value={filters.category || ""}
 						>
 							<SelectTrigger className="border-border">
 								<SelectValue placeholder="Todas las categorías" />
@@ -96,12 +96,12 @@ export function BlogFilters({ filters, onFiltersChange }: BlogFiltersProps) {
 					<div className="space-y-2">
 						<Label className="text-foreground">Buscar</Label>
 						<Input
-							placeholder="Buscar en posts..."
-							value={filters.query || ""}
+							className="border-border"
 							onChange={(e) =>
 								handleFilterChange("query", e.target.value || undefined)
 							}
-							className="border-border"
+							placeholder="Buscar en posts..."
+							value={filters.query || ""}
 						/>
 					</div>
 				</div>
@@ -109,9 +109,9 @@ export function BlogFilters({ filters, onFiltersChange }: BlogFiltersProps) {
 				{/* Clear Filters Button */}
 				<div className="mt-4 flex justify-end">
 					<Button
-						variant="outline"
-						onClick={clearFilters}
 						className="border-border text-foreground hover:bg-secondary"
+						onClick={clearFilters}
+						variant="outline"
 					>
 						Limpiar Filtros
 					</Button>

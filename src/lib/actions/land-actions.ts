@@ -14,8 +14,8 @@ import { extractValidationErrors, type FormState } from "@/lib/types/forms";
  * Create a new land using FormState pattern
  */
 export async function createLandAction(
-	prevState: FormState<{ id: string }>,
-	formData: FormData,
+	_prevState: FormState<{ id: string }>,
+	formData: FormData
 ): Promise<FormState<{ id: string }>> {
 	try {
 		// Check authentication
@@ -36,8 +36,8 @@ export async function createLandAction(
 			title:
 				(formData.get("title") as string) || (formData.get("name") as string),
 			description: formData.get("description") as string,
-			price: parseFloat(formData.get("price") as string),
-			surface: parseFloat(formData.get("surface") as string),
+			price: Number.parseFloat(formData.get("price") as string),
+			surface: Number.parseFloat(formData.get("surface") as string),
 			landType: formData.get("landType") as string,
 			zoning: formData.get("zoning") as string,
 			utilities: formData.get("utilities")
@@ -154,8 +154,8 @@ export async function createLandAction(
  * Update an existing land using FormState pattern
  */
 export async function updateLandAction(
-	prevState: FormState<{ id: string }>,
-	formData: FormData,
+	_prevState: FormState<{ id: string }>,
+	formData: FormData
 ): Promise<FormState<{ id: string }>> {
 	try {
 		// Check authentication
@@ -208,8 +208,8 @@ export async function updateLandAction(
 			title:
 				(formData.get("title") as string) || (formData.get("name") as string),
 			description: formData.get("description") as string,
-			price: parseFloat(formData.get("price") as string),
-			surface: parseFloat(formData.get("surface") as string),
+			price: Number.parseFloat(formData.get("price") as string),
+			surface: Number.parseFloat(formData.get("surface") as string),
 			landType: formData.get("landType") as string,
 			zoning: formData.get("zoning") as string,
 			utilities: formData.get("utilities")
@@ -323,12 +323,12 @@ export async function updateLandAction(
  * Search lands action for useActionState
  */
 export async function searchLandsAction(
-	prevState: FormState<{ lands: any[] }>,
-	formData: FormData,
+	_prevState: FormState<{ lands: any[] }>,
+	formData: FormData
 ): Promise<FormState<{ lands: any[] }>> {
 	try {
 		// Parse search filters from formData
-		const filters = {
+		const _filters = {
 			location: formData.get("location") as string,
 			minPrice: formData.get("minPrice")
 				? Number.parseFloat(formData.get("minPrice") as string)

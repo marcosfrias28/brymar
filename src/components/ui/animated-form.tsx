@@ -1,7 +1,7 @@
 "use client";
 
 import { cva, type VariantProps } from "class-variance-authority";
-import * as React from "react";
+import type * as React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,9 +13,9 @@ const animatedFormVariants = cva("space-y-6", {
 		animation: {
 			none: "",
 			stagger:
-				"[&>*]:animate-fade-in [&>*:nth-child(1)]:animation-delay-100 [&>*:nth-child(2)]:animation-delay-200 [&>*:nth-child(3)]:animation-delay-300 [&>*:nth-child(4)]:animation-delay-400 [&>*:nth-child(5)]:animation-delay-500",
+				"[&>*:nth-child(1)]:animation-delay-100 [&>*:nth-child(2)]:animation-delay-200 [&>*:nth-child(3)]:animation-delay-300 [&>*:nth-child(4)]:animation-delay-400 [&>*:nth-child(5)]:animation-delay-500 [&>*]:animate-fade-in",
 			slideUp:
-				"[&>*]:animate-slide-in-bottom [&>*:nth-child(1)]:animation-delay-100 [&>*:nth-child(2)]:animation-delay-200 [&>*:nth-child(3)]:animation-delay-300",
+				"[&>*:nth-child(1)]:animation-delay-100 [&>*:nth-child(2)]:animation-delay-200 [&>*:nth-child(3)]:animation-delay-300 [&>*]:animate-slide-in-bottom",
 		},
 	},
 	defaultVariants: {
@@ -27,18 +27,20 @@ export interface AnimatedFormProps
 	extends React.FormHTMLAttributes<HTMLFormElement>,
 		VariantProps<typeof animatedFormVariants> {}
 
-const AnimatedForm = React.forwardRef<HTMLFormElement, AnimatedFormProps>(
-	({ className, animation, children, ...props }, ref) => {
-		return (
-			<form
-				ref={ref}
-				className={cn(animatedFormVariants({ animation }), className)}
-				{...props}
-			>
-				{children}
-			</form>
-		);
-	},
+const AnimatedForm = ({
+	className,
+	animation,
+	children,
+	ref,
+	...props
+}: AnimatedFormProps & { ref?: React.RefObject<HTMLFormElement | null> }) => (
+	<form
+		className={cn(animatedFormVariants({ animation }), className)}
+		ref={ref}
+		{...props}
+	>
+		{children}
+	</form>
 );
 AnimatedForm.displayName = "AnimatedForm";
 
@@ -49,19 +51,21 @@ export interface AnimatedInputProps
 	success?: boolean;
 }
 
-const AnimatedInput = React.forwardRef<HTMLInputElement, AnimatedInputProps>(
-	({ className, error, success, ...props }, ref) => {
-		const stateClasses = error
-			? formAnimations.inputError
-			: success
-				? formAnimations.valid
-				: formAnimations.input;
+const AnimatedInput = ({
+	className,
+	error,
+	success,
+	ref,
+	...props
+}: AnimatedInputProps & { ref?: React.RefObject<HTMLInputElement | null> }) => {
+	const stateClasses = error
+		? formAnimations.inputError
+		: success
+			? formAnimations.valid
+			: formAnimations.input;
 
-		return (
-			<Input ref={ref} className={cn(stateClasses, className)} {...props} />
-		);
-	},
-);
+	return <Input className={cn(stateClasses, className)} ref={ref} {...props} />;
+};
 AnimatedInput.displayName = "AnimatedInput";
 
 // Enhanced Textarea with animations
@@ -71,10 +75,15 @@ export interface AnimatedTextareaProps
 	success?: boolean;
 }
 
-const AnimatedTextarea = React.forwardRef<
-	HTMLTextAreaElement,
-	AnimatedTextareaProps
->(({ className, error, success, ...props }, ref) => {
+const AnimatedTextarea = ({
+	className,
+	error,
+	success,
+	ref,
+	...props
+}: AnimatedTextareaProps & {
+	ref?: React.RefObject<HTMLTextAreaElement | null>;
+}) => {
 	const stateClasses = error
 		? formAnimations.inputError
 		: success
@@ -82,9 +91,9 @@ const AnimatedTextarea = React.forwardRef<
 			: formAnimations.input;
 
 	return (
-		<Textarea ref={ref} className={cn(stateClasses, className)} {...props} />
+		<Textarea className={cn(stateClasses, className)} ref={ref} {...props} />
 	);
-});
+};
 AnimatedTextarea.displayName = "AnimatedTextarea";
 
 // Form Field wrapper with animations
@@ -97,59 +106,54 @@ export interface AnimatedFormFieldProps
 	delay?: number;
 }
 
-const AnimatedFormField = React.forwardRef<
-	HTMLDivElement,
-	AnimatedFormFieldProps
->(
-	(
-		{
-			className,
-			label,
-			error,
-			success,
-			required,
-			delay = 0,
-			children,
-			...props
-		},
-		ref,
-	) => {
-		const delayClass =
-			delay > 0 ? `animation-delay-${Math.min(delay * 100, 500)}` : "";
+const AnimatedFormField = ({
+	className,
+	label,
+	error,
+	success,
+	required,
+	delay = 0,
+	children,
+	ref,
+	...props
+}: AnimatedFormFieldProps & {
+	ref?: React.RefObject<HTMLDivElement | null>;
+}) => {
+	const delayClass =
+		delay > 0 ? `animation-delay-${Math.min(delay * 100, 500)}` : "";
 
-		return (
-			<div
-				ref={ref}
-				className={cn("space-y-2 animate-fade-in", delayClass, className)}
-				{...props}
-			>
-				{label && (
-					<Label
-						className={cn(
-							"text-sm font-medium transition-colors duration-200",
-							error && "text-red-500",
-							success && "text-green-500",
-						)}
-					>
-						{label}
-						{required && <span className="text-red-500 ml-1">*</span>}
-					</Label>
-				)}
-				{children}
-				{error && (
-					<p className="text-sm text-red-500 animate-fade-in animation-delay-100">
-						{error}
-					</p>
-				)}
-				{success && (
-					<p className="text-sm text-green-500 animate-fade-in animation-delay-100">
-						{success}
-					</p>
-				)}
-			</div>
-		);
-	},
-);
+	return (
+		<div
+			className={cn("animate-fade-in space-y-2", delayClass, className)}
+			ref={ref}
+			{...props}
+		>
+			{label && (
+				<Label
+					className={cn(
+						"font-medium text-sm transition-colors duration-200",
+						error && "text-red-500",
+						success && "text-green-500"
+					)}
+				>
+					{label}
+					{required && <span className="ml-1 text-red-500">*</span>}
+				</Label>
+			)}
+			{children}
+			{error && (
+				<p className="animation-delay-100 animate-fade-in text-red-500 text-sm">
+					{error}
+				</p>
+			)}
+			{success && (
+				<p className="animation-delay-100 animate-fade-in text-green-500 text-sm">
+					{success}
+				</p>
+			)}
+		</div>
+	);
+};
 AnimatedFormField.displayName = "AnimatedFormField";
 
 // Form Grid for responsive layouts
@@ -158,10 +162,15 @@ export interface AnimatedFormGridProps
 	columns?: 1 | 2 | 3;
 }
 
-const AnimatedFormGrid = React.forwardRef<
-	HTMLDivElement,
-	AnimatedFormGridProps
->(({ className, columns = 2, children, ...props }, ref) => {
+const AnimatedFormGrid = ({
+	className,
+	columns = 2,
+	children,
+	ref,
+	...props
+}: AnimatedFormGridProps & {
+	ref?: React.RefObject<HTMLDivElement | null>;
+}) => {
 	const gridClass = {
 		1: "grid-cols-1",
 		2: "grid-cols-1 md:grid-cols-2",
@@ -170,14 +179,14 @@ const AnimatedFormGrid = React.forwardRef<
 
 	return (
 		<div
-			ref={ref}
 			className={cn("grid gap-4", gridClass, className)}
+			ref={ref}
 			{...props}
 		>
 			{children}
 		</div>
 	);
-});
+};
 AnimatedFormGrid.displayName = "AnimatedFormGrid";
 
 export {

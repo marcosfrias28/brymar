@@ -1,67 +1,69 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/lib/utils";
-import { useAvoidRoutes } from "@/hooks/use-avoid-routes";
 import { useAdmin } from "@/hooks/use-admin";
+import { useAvoidRoutes } from "@/hooks/use-avoid-routes";
 import { useUser } from "@/hooks/use-user";
-import Logo from "./ui/logo";
 import getProfileItems from "@/lib/navbar/getProfileItems";
-import { ModeToggle } from "./mode-toggle";
+import { cn } from "@/lib/utils";
 import { AuthButtons } from "./auth/auth-buttons";
-import { NavigationPills } from "./navigation/navigation-pills";
+import { ModeToggle } from "./mode-toggle";
 import { MobileNavbar } from "./navigation/mobile-navbar";
+import { NavigationPills } from "./navigation/navigation-pills";
+import Logo from "./ui/logo";
 
-interface NavbarProps {
-  className?: string;
-}
+type NavbarProps = {
+	className?: string;
+};
 
 export function Navbar({ className }: NavbarProps) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
-  const shouldAvoid = useAvoidRoutes();
-  const { role, permissions } = useAdmin();
-  const { user } = useUser();
+	const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
+	const shouldAvoid = useAvoidRoutes();
+	const { role, permissions } = useAdmin();
+	const { user } = useUser();
 
-  if (shouldAvoid) return null;
+	if (shouldAvoid) {
+		return null;
+	}
 
-  const profileItems = user && role ? getProfileItems(role, permissions) : [];
+	const profileItems = user && role ? getProfileItems(role, permissions) : [];
 
-  return (
-    <nav
-      className={cn(
-        "fixed left-1/2 transform -translate-x-1/2 z-50 w-full max-w-7xl px-4 top-4",
-        className
-      )}
-    >
-      {/* Desktop Navigation */}
-      <div className="hidden md:flex justify-between items-center w-full bg-black/20 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-4">
-        <div>
-          <Logo />
-        </div>
-        <NavigationPills />
-        <div>
-          <AuthButtons />
-        </div>
-      </div>
+	return (
+		<nav
+			className={cn(
+				"-translate-x-1/2 fixed top-4 left-1/2 z-50 w-full max-w-7xl transform px-4",
+				className
+			)}
+		>
+			{/* Desktop Navigation */}
+			<div className="hidden w-full items-center justify-between rounded-2xl border border-white/20 bg-black/20 p-4 shadow-2xl backdrop-blur-xl md:flex">
+				<div>
+					<Logo />
+				</div>
+				<NavigationPills />
+				<div>
+					<AuthButtons />
+				</div>
+			</div>
 
-      {/* Mobile Navigation */}
-      <div className="md:hidden flex justify-between items-center w-full bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-4">
-        <div>
-          <Logo />
-        </div>
-        <div className="flex items-center gap-2">
-          <div>
-            <ModeToggle />
-          </div>
-          <MobileNavbar
-            isOpen={mobileMenuOpen}
-            onOpenChange={setMobileMenuOpen}
-            user={user}
-            role={role || null}
-            profileItems={profileItems}
-          />
-        </div>
-      </div>
-    </nav>
-  );
+			{/* Mobile Navigation */}
+			<div className="flex w-full items-center justify-between rounded-2xl border border-white/20 bg-white/10 p-4 shadow-2xl backdrop-blur-xl md:hidden">
+				<div>
+					<Logo />
+				</div>
+				<div className="flex items-center gap-2">
+					<div>
+						<ModeToggle />
+					</div>
+					<MobileNavbar
+						isOpen={mobileMenuOpen}
+						onOpenChange={setMobileMenuOpen}
+						profileItems={profileItems}
+						role={role || null}
+						user={user}
+					/>
+				</div>
+			</div>
+		</nav>
+	);
 }

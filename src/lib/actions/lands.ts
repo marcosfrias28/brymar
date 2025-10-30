@@ -6,6 +6,7 @@
 
 import { and, eq, gte, ilike, inArray, lte } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { v4 as uuidv4 } from "uuid";
 import { auth } from "@/lib/auth/auth";
 import { db } from "@/lib/db";
@@ -27,10 +28,12 @@ import type {
  * Create a new land listing
  */
 export async function createLand(
-	input: CreateLandInput,
+	input: CreateLandInput
 ): Promise<CreateLandResult> {
 	try {
-		const session = await auth();
+		const session = await auth.api.getSession({
+			headers: await headers(),
+		});
 		if (!session?.user?.id) {
 			return {
 				success: false,
@@ -99,8 +102,7 @@ export async function createLand(
 			success: true,
 			data: land as Land,
 		};
-	} catch (error) {
-		console.error("Error creating land:", error);
+	} catch (_error) {
 		return {
 			success: false,
 			error: "Failed to create land listing",
@@ -112,10 +114,12 @@ export async function createLand(
  * Update an existing land listing
  */
 export async function updateLand(
-	input: UpdateLandInput,
+	input: UpdateLandInput
 ): Promise<UpdateLandResult> {
 	try {
-		const session = await auth();
+		const session = await auth.api.getSession({
+			headers: await headers(),
+		});
 		if (!session?.user?.id) {
 			return {
 				success: false,
@@ -229,8 +233,7 @@ export async function updateLand(
 			success: true,
 			data: updatedLand as Land,
 		};
-	} catch (error) {
-		console.error("Error updating land:", error);
+	} catch (_error) {
 		return {
 			success: false,
 			error: "Failed to update land listing",
@@ -267,8 +270,7 @@ export async function getLandById(id: string): Promise<GetLandResult> {
 			success: true,
 			data: land as Land,
 		};
-	} catch (error) {
-		console.error("Error fetching land:", error);
+	} catch (_error) {
 		return {
 			success: false,
 			error: "Failed to fetch land",
@@ -280,10 +282,10 @@ export async function getLandById(id: string): Promise<GetLandResult> {
  * Search lands with filters
  */
 export async function searchLands(
-	filters: LandSearchFilters = {},
+	filters: LandSearchFilters = {}
 ): Promise<SearchLandsResult> {
 	try {
-		let query = db.select().from(lands);
+		const baseQuery = db.select().from(lands);
 		const conditions = [];
 
 		// Apply filters
@@ -319,13 +321,11 @@ export async function searchLands(
 			conditions.push(eq(lands.userId, filters.userId));
 		}
 
-		// Apply conditions
-		if (conditions.length > 0) {
-			query = query.where(and(...conditions));
-		}
-
-		// Execute query
-		const results = await query;
+		// Execute query (apply conditions if present)
+		const results =
+			conditions.length > 0
+				? await baseQuery.where(and(...conditions))
+				: await baseQuery;
 
 		// Get available filter options (simplified for now)
 		const availableFilters = {
@@ -339,12 +339,12 @@ export async function searchLands(
 				"vacant",
 			] as LandType[],
 			priceRanges: [
-				{ min: 0, max: 50000, label: "Under $50K" },
-				{ min: 50000, max: 100000, label: "$50K - $100K" },
-				{ min: 100000, max: 250000, label: "$100K - $250K" },
-				{ min: 250000, max: 500000, label: "$250K - $500K" },
-				{ min: 500000, max: 1000000, label: "$500K - $1M" },
-				{ min: 1000000, max: Number.MAX_SAFE_INTEGER, label: "Over $1M" },
+				{ min: 0, max: 50_000, label: "Under $50K" },
+				{ min: 50_000, max: 100_000, label: "$50K - $100K" },
+				{ min: 100_000, max: 250_000, label: "$100K - $250K" },
+				{ min: 250_000, max: 500_000, label: "$250K - $500K" },
+				{ min: 500_000, max: 1_000_000, label: "$500K - $1M" },
+				{ min: 1_000_000, max: Number.MAX_SAFE_INTEGER, label: "Over $1M" },
 			],
 			locations: [], // Could be populated from database
 			utilities: ["water", "electricity", "gas", "sewer", "internet", "phone"],
@@ -385,8 +385,7 @@ export async function searchLands(
 				},
 			},
 		};
-	} catch (error) {
-		console.error("Error searching lands:", error);
+	} catch (_error) {
 		return {
 			success: false,
 			error: "Failed to search lands",
@@ -399,7 +398,9 @@ export async function searchLands(
  */
 export async function deleteLand(id: string): Promise<DeleteLandResult> {
 	try {
-		const session = await auth();
+		const session = await auth.api.getSession({
+			headers: await headers(),
+		});
 		if (!session?.user?.id) {
 			return {
 				success: false,
@@ -438,8 +439,7 @@ export async function deleteLand(id: string): Promise<DeleteLandResult> {
 		return {
 			success: true,
 		};
-	} catch (error) {
-		console.error("Error deleting land:", error);
+	} catch (_error) {
 		return {
 			success: false,
 			error: "Failed to delete land listing",

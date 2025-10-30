@@ -58,7 +58,9 @@ export function ProfileFavorites() {
 	});
 
 	const handleRemoveFavorite = async (favoriteId: string) => {
-		if (!user?.id) return;
+		if (!user?.id) {
+			return;
+		}
 
 		setRemovingId(favoriteId);
 
@@ -68,11 +70,11 @@ export function ProfileFavorites() {
 			formData.append("favoriteId", favoriteId);
 			// Remove favorite functionality needs to be implemented in DDD structure
 			toast.error(
-				"Remove favorite functionality needs to be implemented in DDD structure",
+				"La funcionalidad de eliminar favoritos debe implementarse en la estructura DDD"
 			);
 			return;
 		} catch (_error) {
-			toast.error("Errore durante la rimozione del preferito");
+			toast.error("Error al eliminar el favorito");
 		} finally {
 			setRemovingId(null);
 		}
@@ -92,9 +94,9 @@ export function ProfileFavorites() {
 	const getTypeLabel = (type: string) => {
 		switch (type) {
 			case "property":
-				return "Proprietà";
+				return "Propiedad";
 			case "search":
-				return "Ricerca";
+				return "Búsqueda";
 			default:
 				return type;
 		}
@@ -104,9 +106,9 @@ export function ProfileFavorites() {
 		return (
 			<Card>
 				<CardContent className="flex items-center justify-center py-8">
-					<div className="animate-pulse space-y-4 w-full">
-						{[...Array(3)].map((_, i) => (
-							<div key={i} className="h-24 bg-muted rounded-lg" />
+					<div className="w-full animate-pulse space-y-4">
+						{[...new Array(3)].map((_, i) => (
+							<div className="h-24 rounded-lg bg-muted" key={i} />
 						))}
 					</div>
 				</CardContent>
@@ -116,59 +118,59 @@ export function ProfileFavorites() {
 
 	return (
 		<div className="space-y-6">
-			{/* Header con ricerca e filtri */}
+			{/* Encabezado con búsqueda y filtros */}
 			<Card>
 				<CardHeader>
 					<CardTitle className="flex items-center space-x-2">
 						<Heart className="h-5 w-5" />
-						<span>I Miei Preferiti</span>
+						<span>Mis Favoritos</span>
 						<Badge variant="secondary">{favorites.length}</Badge>
 					</CardTitle>
-					<CardDescription>Gestisci i tuoi elementi preferiti</CardDescription>
+					<CardDescription>Gestiona tus elementos favoritos</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<div className="flex flex-col sm:flex-row gap-4">
+					<div className="flex flex-col gap-4 sm:flex-row">
 						<div className="relative flex-1">
-							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+							<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-muted-foreground" />
 							<Input
-								placeholder="Cerca nei preferiti..."
-								value={searchTerm}
-								onChange={(e) => setSearchTerm(e.target.value)}
 								className="pl-10"
+								onChange={(e) => setSearchTerm(e.target.value)}
+								placeholder="Buscar en favoritos..."
+								value={searchTerm}
 							/>
 						</div>
 						<Select
-							value={filterType}
 							onValueChange={(value: FilterType) => setFilterType(value)}
+							value={filterType}
 						>
 							<SelectTrigger className="w-full sm:w-[180px]">
-								<Filter className="h-4 w-4 mr-2" />
-								<SelectValue placeholder="Filtra per tipo" />
+								<Filter className="mr-2 h-4 w-4" />
+								<SelectValue placeholder="Filtrar por tipo" />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="all">Tutti i tipi</SelectItem>
-								<SelectItem value="property">Proprietà</SelectItem>
-								<SelectItem value="search">Ricerche</SelectItem>
+								<SelectItem value="all">Todos los tipos</SelectItem>
+								<SelectItem value="property">Propiedades</SelectItem>
+								<SelectItem value="search">Búsquedas</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
 				</CardContent>
 			</Card>
 
-			{/* Lista dei preferiti */}
+			{/* Lista de favoritos */}
 			{filteredFavorites.length === 0 ? (
 				<Card>
 					<CardContent className="flex flex-col items-center justify-center py-12">
-						<Heart className="h-12 w-12 text-muted-foreground mb-4" />
-						<h3 className="text-lg font-semibold mb-2">
+						<Heart className="mb-4 h-12 w-12 text-muted-foreground" />
+						<h3 className="mb-2 font-semibold text-lg">
 							{searchTerm || filterType !== "all"
-								? "Nessun risultato trovato"
-								: "Nessun preferito ancora"}
+								? "No se encontraron resultados"
+								: "Aún no tienes favoritos"}
 						</h3>
-						<p className="text-muted-foreground text-center max-w-md">
+						<p className="max-w-md text-center text-muted-foreground">
 							{searchTerm || filterType !== "all"
-								? "Prova a modificare i filtri di ricerca per trovare quello che stai cercando."
-								: "Inizia ad aggiungere elementi ai tuoi preferiti per vederli qui."}
+								? "Prueba a ajustar los filtros de búsqueda para encontrar lo que buscas."
+								: "Empieza a añadir elementos a tus favoritos para verlos aquí."}
 						</p>
 					</CardContent>
 				</Card>
@@ -176,8 +178,8 @@ export function ProfileFavorites() {
 				<div className="grid gap-4">
 					{filteredFavorites.map((favorite) => (
 						<Card
+							className="transition-shadow hover:shadow-md"
 							key={favorite.id}
-							className="hover:shadow-md transition-shadow"
 						>
 							<CardContent className="p-6">
 								<div className="flex items-start justify-between">
@@ -196,22 +198,22 @@ export function ProfileFavorites() {
 										</p>
 
 										{favorite.url && (
-											<div className="flex items-center space-x-2 text-sm text-muted-foreground">
+											<div className="flex items-center space-x-2 text-muted-foreground text-sm">
 												<ExternalLink className="h-4 w-4" />
 												<a
+													className="underline hover:text-primary"
 													href={favorite.url}
-													target="_blank"
 													rel="noopener noreferrer"
-													className="hover:text-primary underline"
+													target="_blank"
 												>
-													Visualizza elemento
+													Ver elemento
 												</a>
 											</div>
 										)}
 
-										<div className="text-xs text-muted-foreground">
-											Aggiunto il{" "}
-											{new Date().toLocaleDateString("it-IT", {
+										<div className="text-muted-foreground text-xs">
+											Añadido el{" "}
+											{new Date().toLocaleDateString("es-ES", {
 												year: "numeric",
 												month: "long",
 												day: "numeric",
@@ -219,13 +221,13 @@ export function ProfileFavorites() {
 										</div>
 									</div>
 
-									<div className="flex items-center space-x-2 ml-4">
+									<div className="ml-4 flex items-center space-x-2">
 										{favorite.url && (
-											<Button variant="outline" size="sm" asChild>
+											<Button asChild size="sm" variant="outline">
 												<a
 													href={favorite.url}
-													target="_blank"
 													rel="noopener noreferrer"
+													target="_blank"
 												>
 													<ExternalLink className="h-4 w-4" />
 												</a>
@@ -235,9 +237,9 @@ export function ProfileFavorites() {
 										<AlertDialog>
 											<AlertDialogTrigger asChild>
 												<Button
-													variant="outline"
-													size="sm"
 													disabled={removingId === favorite.id}
+													size="sm"
+													variant="outline"
 												>
 													<Trash2 className="h-4 w-4" />
 												</Button>
@@ -245,21 +247,21 @@ export function ProfileFavorites() {
 											<AlertDialogContent>
 												<AlertDialogHeader>
 													<AlertDialogTitle>
-														Rimuovi dai preferiti
+														Eliminar de favoritos
 													</AlertDialogTitle>
 													<AlertDialogDescription>
-														Sei sicuro di voler rimuovere &quot;{favorite.title}
-														&quot; dai tuoi preferiti? Questa azione non può
-														essere annullata.
+														¿Estás seguro de eliminar &quot;{favorite.title}
+														&quot; de tus favoritos? Esta acción no se puede
+														deshacer.
 													</AlertDialogDescription>
 												</AlertDialogHeader>
 												<AlertDialogFooter>
-													<AlertDialogCancel>Annulla</AlertDialogCancel>
+													<AlertDialogCancel>Cancelar</AlertDialogCancel>
 													<AlertDialogAction
-														onClick={() => handleRemoveFavorite(favorite.id)}
 														className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+														onClick={() => handleRemoveFavorite(favorite.id)}
 													>
-														Rimuovi
+														Eliminar
 													</AlertDialogAction>
 												</AlertDialogFooter>
 											</AlertDialogContent>
@@ -272,41 +274,41 @@ export function ProfileFavorites() {
 				</div>
 			)}
 
-			{/* Statistiche */}
+			{/* Estadísticas */}
 			{favorites.length > 0 && (
 				<Card>
 					<CardHeader>
-						<CardTitle className="text-lg">Statistiche Preferiti</CardTitle>
+						<CardTitle className="text-lg">Estadísticas de Favoritos</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+						<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
 							<div className="text-center">
-								<div className="text-2xl font-bold text-primary">
+								<div className="font-bold text-2xl text-primary">
 									{favorites.length}
 								</div>
-								<div className="text-sm text-muted-foreground">Totale</div>
+								<div className="text-muted-foreground text-sm">Total</div>
 							</div>
 							<div className="text-center">
-								<div className="text-2xl font-bold text-blue-600">
+								<div className="font-bold text-2xl text-blue-600">
 									{favorites.filter((f) => f.type === "property").length}
 								</div>
-								<div className="text-sm text-muted-foreground">Proprietà</div>
+								<div className="text-muted-foreground text-sm">Propiedades</div>
 							</div>
 							<div className="text-center">
-								<div className="text-2xl font-bold text-green-600">
+								<div className="font-bold text-2xl text-green-600">
 									{favorites.filter((f) => f.type === "search").length}
 								</div>
-								<div className="text-sm text-muted-foreground">Ricerche</div>
+								<div className="text-muted-foreground text-sm">Búsquedas</div>
 							</div>
 							<div className="text-center">
-								<div className="text-2xl font-bold text-purple-600">
+								<div className="font-bold text-2xl text-purple-600">
 									{
 										favorites.filter(
-											(f) => f.type !== "property" && f.type !== "search",
+											(f) => f.type !== "property" && f.type !== "search"
 										).length
 									}
 								</div>
-								<div className="text-sm text-muted-foreground">Altri</div>
+								<div className="text-muted-foreground text-sm">Otros</div>
 							</div>
 						</div>
 					</CardContent>

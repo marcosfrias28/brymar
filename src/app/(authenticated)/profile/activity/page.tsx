@@ -1,8 +1,11 @@
 "use client";
 
-import { Activity, Home, User } from "lucide-react";
+import { Activity, ArrowLeft, Home, User } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { ProfileActivity } from "@/components/profile/profile-activity";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -12,23 +15,33 @@ import {
 } from "@/components/ui/card";
 
 export default function ProfileActivityPage() {
+	const _router = useRouter();
+
 	const breadcrumbs = [
 		{ label: "Dashboard", href: "/dashboard", icon: Home },
-		{ label: "Profilo", href: "/profile", icon: User },
-		{ label: "Cronologia Attività", icon: Activity },
+		{ label: "Perfil", href: "/profile", icon: User },
+		{ label: "Historial de Actividad", icon: Activity },
 	];
 
 	return (
 		<DashboardPageLayout
-			title="Cronologia Attività"
-			description="Visualizza la cronologia completa delle tue attività e azioni"
+			actions={
+				<Button asChild variant="outline">
+					<Link href="/profile">
+						<ArrowLeft className="mr-2 h-4 w-4" />
+						Volver al Perfil
+					</Link>
+				</Button>
+			}
 			breadcrumbs={breadcrumbs}
+			description="Visualiza el historial completo de tus actividades y acciones"
+			title="Historial de Actividad"
 		>
 			<Card>
 				<CardHeader>
-					<CardTitle>Attività Utente</CardTitle>
+					<CardTitle>Actividad de Usuario</CardTitle>
 					<CardDescription>
-						Cronologia dettagliata di tutte le azioni eseguite nel sistema
+						Historial detallado de todas las acciones realizadas en el sistema
 					</CardDescription>
 				</CardHeader>
 				<CardContent>

@@ -9,11 +9,11 @@ import { verifyDeployment } from "@/scripts/verify-deployment";
 import { runEndToEndTests } from "@/tests/e2e-functionality.test";
 import { runMockEndToEndTests } from "@/tests/e2e-functionality-mock.test";
 
-interface TestSuite {
+type TestSuite = {
 	name: string;
 	description: string;
 	runner: () => Promise<void>;
-}
+};
 
 const testSuites: TestSuite[] = [
 	{
@@ -51,7 +51,7 @@ function printUsage(): void {
 	console.log("  npm run test:e2e              # Run all test suites");
 	console.log("  npm run test:e2e deployment   # Run only deployment tests");
 	console.log(
-		"  npm run test:e2e e2e           # Run only E2E functionality tests",
+		"  npm run test:e2e e2e           # Run only E2E functionality tests"
 	);
 }
 
@@ -110,7 +110,7 @@ async function runAllTestSuites(): Promise<void> {
 	});
 
 	console.log(
-		`\n📈 Overall Results: ${passedSuites}/${totalSuites} test suites passed`,
+		`\n📈 Overall Results: ${passedSuites}/${totalSuites} test suites passed`
 	);
 
 	if (passedSuites === totalSuites) {
@@ -137,15 +137,15 @@ async function main(): Promise<void> {
 
 	const suiteName = args[0];
 
-	if (!suiteName) {
-		// Run all test suites
-		await runAllTestSuites();
-	} else {
+	if (suiteName) {
 		// Run specific test suite
 		const success = await runTestSuite(suiteName);
 		if (!success) {
 			process.exit(1);
 		}
+	} else {
+		// Run all test suites
+		await runAllTestSuites();
 	}
 }
 

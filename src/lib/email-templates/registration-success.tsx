@@ -1,12 +1,12 @@
 import type React from "react";
 
-interface RegistrationSuccessProps {
+type RegistrationSuccessProps = {
 	userName?: string;
 	userEmail: string;
 	loginUrl: string;
 	companyName?: string;
 	dashboardUrl?: string;
-}
+};
 
 export const RegistrationSuccessTemplate: React.FC<
 	RegistrationSuccessProps
@@ -16,14 +16,13 @@ export const RegistrationSuccessTemplate: React.FC<
 	loginUrl,
 	companyName = "Brymar",
 	dashboardUrl,
-}) => {
-	return (
-		<html>
-			<head>
-				<meta charSet="utf-8" />
-				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-				<title>¡Bienvenido a {companyName}!</title>
-				<style>{`
+}) => (
+	<html>
+		<head>
+			<meta charSet="utf-8" />
+			<meta content="width=device-width, initial-scale=1.0" name="viewport" />
+			<title>¡Bienvenido a {companyName}!</title>
+			<style>{`
           * {
             margin: 0;
             padding: 0;
@@ -350,130 +349,128 @@ export const RegistrationSuccessTemplate: React.FC<
             }
           }
         `}</style>
-			</head>
-			<body>
-				<div className="container">
-					<div className="header">
-						<div className="header-content">
-							<div className="success-icon"></div>
-							<h1>¡Bienvenido!</h1>
-							<p>Tu cuenta ha sido creada exitosamente</p>
-						</div>
-					</div>
-
-					<div className="content">
-						<div className="greeting">¡Hola {userName}! 🎉</div>
-
-						<div className="message">
-							¡Felicitaciones! Tu cuenta en {companyName} ha sido verificada y
-							activada exitosamente. Ya puedes comenzar a disfrutar de todos
-							nuestros servicios.
-						</div>
-
-						<div className="account-details">
-							<h3>
-								<span className="icon">👤</span>
-								Detalles de tu cuenta
-							</h3>
-							<div className="detail-item">
-								<span className="detail-label">Nombre de usuario:</span>
-								<span className="detail-value">{userName}</span>
-							</div>
-							<div className="detail-item">
-								<span className="detail-label">Email:</span>
-								<span className="detail-value">{userEmail}</span>
-							</div>
-							<div className="detail-item">
-								<span className="detail-label">Estado:</span>
-								<span className="detail-value" style={{ color: "#48bb78" }}>
-									✓ Verificado
-								</span>
-							</div>
-							<div className="detail-item">
-								<span className="detail-label">Fecha de registro:</span>
-								<span className="detail-value">
-									{new Date().toLocaleDateString("es-ES")}
-								</span>
-							</div>
-						</div>
-
-						<div className="cta-section">
-							<a href={loginUrl} className="cta-button">
-								Iniciar Sesión
-							</a>
-							{dashboardUrl && (
-								<a href={dashboardUrl} className="cta-button secondary">
-									Ir al Dashboard
-								</a>
-							)}
-						</div>
-
-						<div className="features">
-							<h3>¿Qué puedes hacer ahora?</h3>
-							<div className="feature-grid">
-								<div className="feature-item">
-									<div className="feature-icon">🚀</div>
-									<div className="feature-title">Comenzar a usar</div>
-									<div className="feature-description">
-										Explora todas las funcionalidades disponibles en tu cuenta
-									</div>
-								</div>
-								<div className="feature-item">
-									<div className="feature-icon">⚙️</div>
-									<div className="feature-title">Personalizar perfil</div>
-									<div className="feature-description">
-										Configura tu perfil y preferencias según tus necesidades
-									</div>
-								</div>
-								<div className="feature-item">
-									<div className="feature-icon">🔐</div>
-									<div className="feature-title">Configurar seguridad</div>
-									<div className="feature-description">
-										Activa la autenticación de dos factores para mayor seguridad
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<div className="divider"></div>
-
-						<div className="support-section">
-							<h3>¿Necesitas ayuda?</h3>
-							<p>
-								Nuestro equipo de soporte está aquí para ayudarte en todo
-								momento.
-							</p>
-							<div className="support-links">
-								<a href="mailto:support@brymar.com" className="support-link">
-									📧 Contactar Soporte
-								</a>
-								<a href="#" className="support-link">
-									📚 Centro de Ayuda
-								</a>
-								<a href="#" className="support-link">
-									💬 Chat en Vivo
-								</a>
-							</div>
-						</div>
-
-						<div className="message">
-							Gracias por unirte a {companyName}. Estamos emocionados de tenerte
-							como parte de nuestra comunidad.
-						</div>
-					</div>
-
-					<div className="footer">
-						<p>
-							Este correo fue enviado por {companyName}. Si tienes alguna
-							pregunta, no dudes en{" "}
-							<a href="mailto:support@brymar.com">contactarnos</a>.
-						</p>
-						<p>© 2024 {companyName}. Todos los derechos reservados.</p>
+		</head>
+		<body>
+			<div className="container">
+				<div className="header">
+					<div className="header-content">
+						<div className="success-icon" />
+						<h1>¡Bienvenido!</h1>
+						<p>Tu cuenta ha sido creada exitosamente</p>
 					</div>
 				</div>
-			</body>
-		</html>
-	);
-};
+
+				<div className="content">
+					<div className="greeting">¡Hola {userName}! 🎉</div>
+
+					<div className="message">
+						¡Felicitaciones! Tu cuenta en {companyName} ha sido verificada y
+						activada exitosamente. Ya puedes comenzar a disfrutar de todos
+						nuestros servicios.
+					</div>
+
+					<div className="account-details">
+						<h3>
+							<span className="icon">👤</span>
+							Detalles de tu cuenta
+						</h3>
+						<div className="detail-item">
+							<span className="detail-label">Nombre de usuario:</span>
+							<span className="detail-value">{userName}</span>
+						</div>
+						<div className="detail-item">
+							<span className="detail-label">Email:</span>
+							<span className="detail-value">{userEmail}</span>
+						</div>
+						<div className="detail-item">
+							<span className="detail-label">Estado:</span>
+							<span className="detail-value" style={{ color: "#48bb78" }}>
+								✓ Verificado
+							</span>
+						</div>
+						<div className="detail-item">
+							<span className="detail-label">Fecha de registro:</span>
+							<span className="detail-value">
+								{new Date().toLocaleDateString("es-ES")}
+							</span>
+						</div>
+					</div>
+
+					<div className="cta-section">
+						<a className="cta-button" href={loginUrl}>
+							Iniciar Sesión
+						</a>
+						{dashboardUrl && (
+							<a className="cta-button secondary" href={dashboardUrl}>
+								Ir al Dashboard
+							</a>
+						)}
+					</div>
+
+					<div className="features">
+						<h3>¿Qué puedes hacer ahora?</h3>
+						<div className="feature-grid">
+							<div className="feature-item">
+								<div className="feature-icon">🚀</div>
+								<div className="feature-title">Comenzar a usar</div>
+								<div className="feature-description">
+									Explora todas las funcionalidades disponibles en tu cuenta
+								</div>
+							</div>
+							<div className="feature-item">
+								<div className="feature-icon">⚙️</div>
+								<div className="feature-title">Personalizar perfil</div>
+								<div className="feature-description">
+									Configura tu perfil y preferencias según tus necesidades
+								</div>
+							</div>
+							<div className="feature-item">
+								<div className="feature-icon">🔐</div>
+								<div className="feature-title">Configurar seguridad</div>
+								<div className="feature-description">
+									Activa la autenticación de dos factores para mayor seguridad
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div className="divider" />
+
+					<div className="support-section">
+						<h3>¿Necesitas ayuda?</h3>
+						<p>
+							Nuestro equipo de soporte está aquí para ayudarte en todo momento.
+						</p>
+						<div className="support-links">
+							<a className="support-link" href="mailto:support@brymar.com">
+								📧 Contactar Soporte
+							</a>
+							<a className="support-link" href="#">
+								📚 Centro de Ayuda
+							</a>
+							<a className="support-link" href="#">
+								💬 Chat en Vivo
+							</a>
+						</div>
+					</div>
+
+					<div className="message">
+						Gracias por unirte a {companyName}. Estamos emocionados de tenerte
+						como parte de nuestra comunidad.
+					</div>
+				</div>
+
+				<div className="footer">
+					<p>
+						Este correo fue enviado por {companyName}. Si tienes alguna
+						pregunta, no dudes en{" "}
+						<a href="mailto:support@brymar.com">contactarnos</a>.
+					</p>
+					<p>© 2024 {companyName}. Todos los derechos reservados.</p>
+				</div>
+			</div>
+		</body>
+	</html>
+);
 
 export default RegistrationSuccessTemplate;

@@ -31,25 +31,25 @@ export function NewsSection() {
 	];
 
 	return (
-		<section className="py-16 px-4 bg-muted/50">
+		<section className="bg-muted/50 px-4 py-16">
 			<div className="container mx-auto">
-				<h2 className="text-4xl font-bold text-center mb-4">
+				<h2 className="mb-4 text-center font-bold text-4xl">
 					Últimas Noticias
 				</h2>
-				<p className="text-xl text-muted-foreground text-center mb-12">
+				<p className="mb-12 text-center text-muted-foreground text-xl">
 					Mantente actualizado con las tendencias del mercado inmobiliario
 				</p>
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+				<div className="grid grid-cols-1 gap-8 md:grid-cols-2">
 					{news.map((item, index) => (
-						<Card key={index} className="">
+						<Card className="" key={index}>
 							<img
-								src={item.image}
 								alt={item.title}
-								className="w-full h-48 object-cover"
+								className="h-48 w-full object-cover"
+								src={item.image}
 							/>
 							<CardHeader>
-								<div className="flex items-center text-sm text-muted-foreground mb-2">
-									<Calendar className="h-4 w-4 mr-2" />
+								<div className="mb-2 flex items-center text-muted-foreground text-sm">
+									<Calendar className="mr-2 h-4 w-4" />
 									{new Date(item.date).toLocaleDateString("es")}
 								</div>
 								<CardTitle>{item.title}</CardTitle>

@@ -83,7 +83,7 @@ export function validateFileBasics(file: File): void {
 	if (!validation.success) {
 		throw new ValidationError(
 			validation.error.flatten().fieldErrors,
-			"Propiedades básicas del archivo no válidas",
+			"Propiedades básicas del archivo no válidas"
 		);
 	}
 }
@@ -93,7 +93,7 @@ export function validateFileBasics(file: File): void {
  */
 export function validateFileExtension(
 	filename: string,
-	fileType: "image" | "video",
+	fileType: "image" | "video"
 ): void {
 	const extension = getFileExtension(filename);
 	const allowedExtensions = UPLOAD_SECURITY_CONFIG.ALLOWED_EXTENSIONS[fileType];
@@ -101,7 +101,7 @@ export function validateFileExtension(
 	if (!allowedExtensions.includes(extension)) {
 		throw new ValidationError(
 			{ extension: [`Extensión de archivo no permitida: ${extension}`] },
-			`Solo se permiten archivos: ${allowedExtensions.join(", ")}`,
+			`Solo se permiten archivos: ${allowedExtensions.join(", ")}`
 		);
 	}
 }
@@ -111,14 +111,14 @@ export function validateFileExtension(
  */
 export function validateMimeType(
 	mimeType: string,
-	fileType: "image" | "video",
+	fileType: "image" | "video"
 ): void {
 	const allowedTypes = UPLOAD_SECURITY_CONFIG.ALLOWED_MIME_TYPES[fileType];
 
 	if (!allowedTypes.includes(mimeType)) {
 		throw new ValidationError(
 			{ mimeType: [`Tipo MIME no permitido: ${mimeType}`] },
-			`Solo se permiten tipos: ${allowedTypes.join(", ")}`,
+			`Solo se permiten tipos: ${allowedTypes.join(", ")}`
 		);
 	}
 }
@@ -128,7 +128,7 @@ export function validateMimeType(
  */
 export function validateFileSize(
 	size: number,
-	fileType: "image" | "video",
+	fileType: "image" | "video"
 ): void {
 	const maxSize = UPLOAD_SECURITY_CONFIG.MAX_FILE_SIZES[fileType];
 
@@ -136,14 +136,14 @@ export function validateFileSize(
 		const maxSizeMB = Math.round(maxSize / (1024 * 1024));
 		throw new ValidationError(
 			{ size: [`Archivo demasiado grande: ${formatFileSize(size)}`] },
-			`El archivo excede el tamaño máximo de ${maxSizeMB}MB`,
+			`El archivo excede el tamaño máximo de ${maxSizeMB}MB`
 		);
 	}
 
 	if (size === 0) {
 		throw new ValidationError(
 			{ size: ["El archivo está vacío"] },
-			"No se pueden subir archivos vacíos",
+			"No se pueden subir archivos vacíos"
 		);
 	}
 }
@@ -153,14 +153,14 @@ export function validateFileSize(
  */
 export function validateFileCount(
 	count: number,
-	fileType: "images" | "videos",
+	fileType: "images" | "videos"
 ): void {
 	const maxCount = UPLOAD_SECURITY_CONFIG.MAX_FILES[fileType];
 
 	if (count > maxCount) {
 		throw new ValidationError(
 			{ count: [`Demasiados archivos: ${count}`] },
-			`Solo se permiten máximo ${maxCount} ${fileType}`,
+			`Solo se permiten máximo ${maxCount} ${fileType}`
 		);
 	}
 }
@@ -179,8 +179,8 @@ export async function validateFileSignature(file: File): Promise<void> {
 					reject(
 						new ValidationError(
 							{ signature: ["No se pudo leer el archivo"] },
-							"Error al validar la firma del archivo",
-						),
+							"Error al validar la firma del archivo"
+						)
 					);
 					return;
 				}
@@ -193,28 +193,29 @@ export async function validateFileSignature(file: File): Promise<void> {
 						reject(
 							new ValidationError(
 								{ signature: ["Tipo de archivo peligroso detectado"] },
-								"El archivo contiene una firma de archivo no permitida",
-							),
+								"El archivo contiene una firma de archivo no permitida"
+							)
 						);
 						return;
 					}
 				}
 
 				// Validate expected image signatures
-				if (file.type.startsWith("image/")) {
-					if (!isValidImageSignature(bytes, file.type)) {
-						reject(
-							new ValidationError(
-								{
-									signature: [
-										"La firma del archivo no coincide con el tipo declarado",
-									],
-								},
-								"El archivo no es una imagen válida",
-							),
-						);
-						return;
-					}
+				if (
+					file.type.startsWith("image/") &&
+					!isValidImageSignature(bytes, file.type)
+				) {
+					reject(
+						new ValidationError(
+							{
+								signature: [
+									"La firma del archivo no coincide con el tipo declarado",
+								],
+							},
+							"El archivo no es una imagen válida"
+						)
+					);
+					return;
 				}
 
 				resolve();
@@ -222,8 +223,8 @@ export async function validateFileSignature(file: File): Promise<void> {
 				reject(
 					new ValidationError(
 						{ signature: ["Error al validar la firma del archivo"] },
-						"No se pudo verificar la seguridad del archivo",
-					),
+						"No se pudo verificar la seguridad del archivo"
+					)
 				);
 			}
 		};
@@ -232,8 +233,8 @@ export async function validateFileSignature(file: File): Promise<void> {
 			reject(
 				new ValidationError(
 					{ signature: ["Error al leer el archivo"] },
-					"No se pudo leer el archivo para validación",
-				),
+					"No se pudo leer el archivo para validación"
+				)
 			);
 		};
 
@@ -283,7 +284,7 @@ function isValidImageSignature(bytes: Uint8Array, mimeType: string): boolean {
 			const hasRiffHeader = matchesSignature(bytes, [0x52, 0x49, 0x46, 0x46]);
 			const hasWebpIdentifier = matchesSignature(
 				bytes.slice(8),
-				[0x57, 0x45, 0x42, 0x50],
+				[0x57, 0x45, 0x42, 0x50]
 			);
 			return hasRiffHeader && hasWebpIdentifier;
 		}
@@ -292,7 +293,7 @@ function isValidImageSignature(bytes: Uint8Array, mimeType: string): boolean {
 	}
 
 	return expectedSignatures.some((signature) =>
-		matchesSignature(bytes, signature),
+		matchesSignature(bytes, signature)
 	);
 }
 
@@ -307,19 +308,19 @@ export function validateImageUrl(url: string): void {
 		if (!["https:", "http:"].includes(parsedUrl.protocol)) {
 			throw new ValidationError(
 				{ url: ["Protocolo de URL no permitido"] },
-				"Solo se permiten URLs HTTP/HTTPS",
+				"Solo se permiten URLs HTTP/HTTPS"
 			);
 		}
 
 		// Check trusted domains
 		const isTrustedDomain = UPLOAD_SECURITY_CONFIG.TRUSTED_DOMAINS.some(
-			(domain) => parsedUrl.hostname.endsWith(domain),
+			(domain) => parsedUrl.hostname.endsWith(domain)
 		);
 
 		if (!isTrustedDomain) {
 			throw new ValidationError(
 				{ url: ["Dominio no confiable"] },
-				"La URL de imagen debe ser de un dominio confiable",
+				"La URL de imagen debe ser de un dominio confiable"
 			);
 		}
 
@@ -335,7 +336,7 @@ export function validateImageUrl(url: string): void {
 		if (suspiciousPatterns.some((pattern) => pattern.test(url))) {
 			throw new ValidationError(
 				{ url: ["URL contiene patrones sospechosos"] },
-				"La URL de imagen contiene contenido no permitido",
+				"La URL de imagen contiene contenido no permitido"
 			);
 		}
 	} catch (error) {
@@ -345,7 +346,7 @@ export function validateImageUrl(url: string): void {
 
 		throw new ValidationError(
 			{ url: ["URL malformada"] },
-			"La URL de imagen no es válida",
+			"La URL de imagen no es válida"
 		);
 	}
 }
@@ -355,7 +356,7 @@ export function validateImageUrl(url: string): void {
  */
 export async function validateUploadedFile(
 	file: File,
-	fileType: "image" | "video",
+	fileType: "image" | "video"
 ): Promise<void> {
 	// Basic validation
 	validateFileBasics(file);
@@ -378,7 +379,7 @@ export async function validateUploadedFile(
  */
 export async function validateMultipleFiles(
 	files: File[],
-	fileType: "image" | "video",
+	fileType: "image" | "video"
 ): Promise<{
 	valid: File[];
 	invalid: Array<{ file: File; error: string }>;
@@ -392,7 +393,7 @@ export async function validateMultipleFiles(
 		files.map(async (file) => {
 			await validateUploadedFile(file, fileType);
 			return file;
-		}),
+		})
 	);
 
 	const valid: File[] = [];
@@ -420,7 +421,7 @@ export async function validateMultipleFiles(
  */
 export function generateSecureFilename(
 	originalFilename: string,
-	fileType: "image" | "video",
+	fileType: "image" | "video"
 ): string {
 	const extension = getFileExtension(originalFilename);
 	const timestamp = Date.now();
@@ -442,13 +443,15 @@ function getFileExtension(filename: string): string {
  * Format file size for display
  */
 function formatFileSize(bytes: number): string {
-	if (bytes === 0) return "0 Bytes";
+	if (bytes === 0) {
+		return "0 Bytes";
+	}
 
 	const k = 1024;
 	const sizes = ["Bytes", "KB", "MB", "GB"];
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-	return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
+	return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }
 
 /**
@@ -467,16 +470,7 @@ export function getUploadSecurityHeaders(): Record<string, string> {
 /**
  * Virus scanning placeholder (integrate with actual service)
  */
-export async function scanFileForViruses(file: File): Promise<boolean> {
-	// Placeholder for virus scanning integration
-	// In production, integrate with services like:
-	// - ClamAV
-	// - VirusTotal API
-	// - AWS GuardDuty
-	// - Azure Defender
-
-	console.log(`Virus scan placeholder for file: ${file.name}`);
-
+export async function scanFileForViruses(_file: File): Promise<boolean> {
 	// For now, return true (clean)
 	// In production, implement actual scanning
 	return true;
@@ -485,20 +479,11 @@ export async function scanFileForViruses(file: File): Promise<boolean> {
 /**
  * Content analysis for inappropriate content
  */
-export async function analyzeImageContent(file: File): Promise<{
+export async function analyzeImageContent(_file: File): Promise<{
 	safe: boolean;
 	confidence: number;
 	categories: string[];
 }> {
-	// Placeholder for content analysis
-	// In production, integrate with services like:
-	// - Google Cloud Vision API
-	// - AWS Rekognition
-	// - Azure Computer Vision
-	// - Clarifai
-
-	console.log(`Content analysis placeholder for file: ${file.name}`);
-
 	// For now, return safe
 	return {
 		safe: true,
@@ -512,7 +497,7 @@ export async function analyzeImageContent(file: File): Promise<{
  */
 export async function performCompleteSecurityValidation(
 	file: File,
-	fileType: "image" | "video",
+	fileType: "image" | "video"
 ): Promise<{
 	valid: boolean;
 	errors: string[];
@@ -543,10 +528,6 @@ export async function performCompleteSecurityValidation(
 				}
 			}
 		} else {
-			// In development, just log that we're skipping these validations
-			console.log(
-				`[DEV] Skipping virus scan and content analysis for file: ${file.name}`,
-			);
 		}
 	} catch (error) {
 		if (error instanceof ValidationError) {

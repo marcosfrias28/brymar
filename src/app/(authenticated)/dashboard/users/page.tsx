@@ -10,6 +10,8 @@ import {
 	UserCheckIcon,
 	UserIcon,
 } from "lucide-react";
+import { FilterTabs } from "@/components/dashboard/filter-tabs";
+import { StatsCards } from "@/components/dashboard/stats-cards";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +24,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { getStatsAdapter } from "@/lib/adapters/stats-adapters";
 
 export default function UsersPage() {
 	// Mock data for demonstration
@@ -68,6 +71,32 @@ export default function UsersPage() {
 		},
 	];
 
+	// Mock users stats data for the adapter
+	const usersStatsData = {
+		totalUsers: users.length,
+		activeUsers: users.filter((u) => u.status === "active").length,
+		adminUsers: users.filter((u) => u.role === "admin").length,
+		agentUsers: users.filter((u) => u.role === "agent").length,
+		newUsersThisMonth: 2,
+		totalProperties: users.reduce((sum, user) => sum + user.properties, 0),
+	};
+
+	// Generate stats cards using the users adapter
+	const statsAdapter = getStatsAdapter("users");
+	const statsCards = statsAdapter
+		? statsAdapter.generateStats(usersStatsData)
+		: [];
+
+	// Define filter tabs for users sections
+	const filterTabs = [
+		{ label: "Todos", value: "all" },
+		{ label: "Administradores", value: "admin" },
+		{ label: "Agentes", value: "agent" },
+		{ label: "Usuarios", value: "user" },
+		{ label: "Activos", value: "active" },
+		{ label: "Inactivos", value: "inactive" },
+	];
+
 	const getRoleBadgeVariant = (role: string) => {
 		switch (role) {
 			case "admin":
@@ -81,9 +110,8 @@ export default function UsersPage() {
 		}
 	};
 
-	const getStatusBadgeVariant = (status: string) => {
-		return status === "active" ? "default" : "secondary";
-	};
+	const getStatusBadgeVariant = (status: string) =>
+		status === "active" ? "default" : "secondary";
 
 	const getRoleIcon = (role: string) => {
 		switch (role) {
@@ -96,90 +124,46 @@ export default function UsersPage() {
 		}
 	};
 
+	// Handle new user creation
+	const handleNewUser = () => {
+		// Here you would navigate to user creation page or open modal
+	};
+
+	const actions = (
+		<Button onClick={handleNewUser} size="sm">
+			<PlusIcon className="mr-2 h-4 w-4" />
+			Nuevo Usuario
+		</Button>
+	);
+
 	return (
 		<DashboardPageLayout
-			title="Gestión de Usuarios"
+			actions={actions}
 			description="Administra usuarios, roles y permisos de la plataforma"
+			headerExtras={
+				<div className="space-y-4">
+					<StatsCards className="mb-4" isLoading={false} stats={statsCards} />
+					<FilterTabs className="mb-4" tabs={filterTabs} />
+				</div>
+			}
+			title="Gestión de Usuarios"
 		>
 			<div className="space-y-6">
 				{/* Header Actions */}
-				<div className="flex flex-col sm:flex-row gap-4 justify-between">
+				<div className="flex flex-col justify-between gap-4 sm:flex-row">
 					<div className="flex gap-2">
 						<div className="relative flex-1 sm:max-w-sm">
-							<SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-							<Input placeholder="Buscar usuarios..." className="pl-10" />
+							<SearchIcon className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-muted-foreground" />
+							<Input className="pl-10" placeholder="Buscar usuarios..." />
 						</div>
-						<Button variant="outline" size="icon">
+						<Button size="icon" variant="outline">
 							<FilterIcon className="h-4 w-4" />
 						</Button>
 					</div>
 					<Button>
-						<PlusIcon className="h-4 w-4 mr-2" />
+						<PlusIcon className="mr-2 h-4 w-4" />
 						Invitar Usuario
 					</Button>
-				</div>
-
-				{/* Stats Cards */}
-				<div className="grid gap-4 md:grid-cols-4">
-					<Card>
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium">
-								Total Usuarios
-							</CardTitle>
-							<UserIcon className="h-4 w-4 text-muted-foreground" />
-						</CardHeader>
-						<CardContent>
-							<div className="text-2xl font-bold">{users.length}</div>
-							<p className="text-xs text-muted-foreground">
-								+2 desde el mes pasado
-							</p>
-						</CardContent>
-					</Card>
-
-					<Card>
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium">
-								Administradores
-							</CardTitle>
-							<ShieldIcon className="h-4 w-4 text-muted-foreground" />
-						</CardHeader>
-						<CardContent>
-							<div className="text-2xl font-bold">
-								{users.filter((u) => u.role === "admin").length}
-							</div>
-							<p className="text-xs text-muted-foreground">Acceso completo</p>
-						</CardContent>
-					</Card>
-
-					<Card>
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium">Agentes</CardTitle>
-							<UserCheckIcon className="h-4 w-4 text-muted-foreground" />
-						</CardHeader>
-						<CardContent>
-							<div className="text-2xl font-bold">
-								{users.filter((u) => u.role === "agent").length}
-							</div>
-							<p className="text-xs text-muted-foreground">
-								Gestión de propiedades
-							</p>
-						</CardContent>
-					</Card>
-
-					<Card>
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium">
-								Usuarios Activos
-							</CardTitle>
-							<UserIcon className="h-4 w-4 text-muted-foreground" />
-						</CardHeader>
-						<CardContent>
-							<div className="text-2xl font-bold">
-								{users.filter((u) => u.status === "active").length}
-							</div>
-							<p className="text-xs text-muted-foreground">Últimos 30 días</p>
-						</CardContent>
-					</Card>
 				</div>
 
 				{/* Users Table */}
@@ -196,8 +180,8 @@ export default function UsersPage() {
 								const RoleIcon = getRoleIcon(user.role);
 								return (
 									<div
+										className="flex items-center justify-between rounded-lg border p-4"
 										key={user.id}
-										className="flex items-center justify-between p-4 border rounded-lg"
 									>
 										<div className="flex items-center gap-4">
 											<Avatar className="h-10 w-10">
@@ -215,20 +199,20 @@ export default function UsersPage() {
 												<div className="flex items-center gap-2">
 													<h3 className="font-medium">{user.name}</h3>
 													<Badge
-														variant={getRoleBadgeVariant(user.role)}
 														className="text-xs"
+														variant={getRoleBadgeVariant(user.role)}
 													>
-														<RoleIcon className="h-3 w-3 mr-1" />
+														<RoleIcon className="mr-1 h-3 w-3" />
 														{user.role}
 													</Badge>
 													<Badge
-														variant={getStatusBadgeVariant(user.status)}
 														className="text-xs"
+														variant={getStatusBadgeVariant(user.status)}
 													>
 														{user.status === "active" ? "Activo" : "Inactivo"}
 													</Badge>
 												</div>
-												<div className="flex items-center gap-4 text-sm text-muted-foreground">
+												<div className="flex items-center gap-4 text-muted-foreground text-sm">
 													<div className="flex items-center gap-1">
 														<MailIcon className="h-3 w-3" />
 														{user.email}
@@ -242,10 +226,10 @@ export default function UsersPage() {
 										</div>
 
 										<div className="flex items-center gap-2">
-											<Button variant="outline" size="sm">
+											<Button size="sm" variant="outline">
 												Editar
 											</Button>
-											<Button variant="ghost" size="icon">
+											<Button size="icon" variant="ghost">
 												<MoreVerticalIcon className="h-4 w-4" />
 											</Button>
 										</div>
@@ -266,15 +250,15 @@ export default function UsersPage() {
 					</CardHeader>
 					<CardContent>
 						<div className="grid gap-4 md:grid-cols-3">
-							<div className="p-4 border rounded-lg">
-								<div className="flex items-center gap-2 mb-2">
+							<div className="rounded-lg border p-4">
+								<div className="mb-2 flex items-center gap-2">
 									<ShieldIcon className="h-5 w-5 text-red-500" />
 									<h3 className="font-medium">Administrador</h3>
 								</div>
-								<p className="text-sm text-muted-foreground mb-3">
+								<p className="mb-3 text-muted-foreground text-sm">
 									Acceso completo a todas las funciones
 								</p>
-								<ul className="text-xs space-y-1 text-muted-foreground">
+								<ul className="space-y-1 text-muted-foreground text-xs">
 									<li>• Gestión de usuarios</li>
 									<li>• Analytics completos</li>
 									<li>• Configuración del sistema</li>
@@ -282,15 +266,15 @@ export default function UsersPage() {
 								</ul>
 							</div>
 
-							<div className="p-4 border rounded-lg">
-								<div className="flex items-center gap-2 mb-2">
+							<div className="rounded-lg border p-4">
+								<div className="mb-2 flex items-center gap-2">
 									<UserCheckIcon className="h-5 w-5 text-blue-500" />
 									<h3 className="font-medium">Agente</h3>
 								</div>
-								<p className="text-sm text-muted-foreground mb-3">
+								<p className="mb-3 text-muted-foreground text-sm">
 									Gestión de propiedades y terrenos
 								</p>
-								<ul className="text-xs space-y-1 text-muted-foreground">
+								<ul className="space-y-1 text-muted-foreground text-xs">
 									<li>• Crear propiedades</li>
 									<li>• Gestionar terrenos</li>
 									<li>• Ver analytics básicos</li>
@@ -298,15 +282,15 @@ export default function UsersPage() {
 								</ul>
 							</div>
 
-							<div className="p-4 border rounded-lg">
-								<div className="flex items-center gap-2 mb-2">
+							<div className="rounded-lg border p-4">
+								<div className="mb-2 flex items-center gap-2">
 									<UserIcon className="h-5 w-5 text-gray-500" />
 									<h3 className="font-medium">Usuario</h3>
 								</div>
-								<p className="text-sm text-muted-foreground mb-3">
+								<p className="mb-3 text-muted-foreground text-sm">
 									Acceso básico a funciones públicas
 								</p>
-								<ul className="text-xs space-y-1 text-muted-foreground">
+								<ul className="space-y-1 text-muted-foreground text-xs">
 									<li>• Ver propiedades</li>
 									<li>• Gestionar perfil</li>
 									<li>• Favoritos</li>

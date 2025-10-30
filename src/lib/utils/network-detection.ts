@@ -5,7 +5,7 @@
 
 import { toast } from "sonner";
 
-export interface QueuedOperation {
+export type QueuedOperation = {
 	id: string;
 	operation: () => Promise<any>;
 	data: any;
@@ -14,21 +14,21 @@ export interface QueuedOperation {
 	maxRetries: number;
 	type: "draft" | "upload" | "ai" | "general";
 	description: string;
-}
+};
 
-export interface NetworkStatus {
+export type NetworkStatus = {
 	isOnline: boolean;
 	connectionType?: string;
 	effectiveType?: string;
 	downlink?: number;
 	rtt?: number;
-}
+};
 
 class NetworkDetectionService {
-	private isOnline: boolean = true;
-	private listeners: Set<(status: NetworkStatus) => void> = new Set();
-	private operationQueue: Map<string, QueuedOperation> = new Map();
-	private isProcessingQueue: boolean = false;
+	private isOnline = true;
+	private readonly listeners: Set<(status: NetworkStatus) => void> = new Set();
+	private readonly operationQueue: Map<string, QueuedOperation> = new Map();
+	private isProcessingQueue = false;
 	private connectionCheckInterval?: NodeJS.Timeout;
 	private lastOnlineCheck: number = Date.now();
 
@@ -52,14 +52,14 @@ class NetworkDetectionService {
 			const connection = (navigator as any).connection;
 			connection?.addEventListener(
 				"change",
-				this.handleConnectionChange.bind(this),
+				this.handleConnectionChange.bind(this)
 			);
 		}
 
 		// Visibility change detection (tab becomes active)
 		document.addEventListener(
 			"visibilitychange",
-			this.handleVisibilityChange.bind(this),
+			this.handleVisibilityChange.bind(this)
 		);
 	}
 
@@ -67,7 +67,7 @@ class NetworkDetectionService {
 		// Periodic connectivity check
 		this.connectionCheckInterval = setInterval(() => {
 			this.performConnectivityCheck();
-		}, 30000); // Check every 30 seconds
+		}, 30_000); // Check every 30 seconds
 	}
 
 	private async performConnectivityCheck(): Promise<void> {
@@ -122,7 +122,7 @@ class NetworkDetectionService {
 		toast.error("Sin conexión a internet", {
 			description:
 				"Las operaciones se guardarán para cuando se restaure la conexión.",
-			duration: Infinity,
+			duration: Number.POSITIVE_INFINITY,
 			action: {
 				label: "Reintentar",
 				onClick: () => this.performConnectivityCheck(),
@@ -138,7 +138,7 @@ class NetworkDetectionService {
 	}
 
 	private handleVisibilityChange(): void {
-		if (!document.hidden && Date.now() - this.lastOnlineCheck > 10000) {
+		if (!document.hidden && Date.now() - this.lastOnlineCheck > 10_000) {
 			// Tab became visible and it's been more than 10 seconds since last check
 			this.performConnectivityCheck();
 		}
@@ -149,9 +149,7 @@ class NetworkDetectionService {
 		this.listeners.forEach((listener) => {
 			try {
 				listener(status);
-			} catch (error) {
-				console.error("Error in network status listener:", error);
-			}
+			} catch (_error) {}
 		});
 	}
 
@@ -174,7 +172,7 @@ class NetworkDetectionService {
 	}
 
 	public addNetworkListener(
-		listener: (status: NetworkStatus) => void,
+		listener: (status: NetworkStatus) => void
 	): () => void {
 		this.listeners.add(listener);
 
@@ -185,7 +183,7 @@ class NetworkDetectionService {
 	}
 
 	public async queueOperation(
-		operation: Omit<QueuedOperation, "id" | "timestamp" | "retries">,
+		operation: Omit<QueuedOperation, "id" | "timestamp" | "retries">
 	): Promise<string> {
 		const id = `op_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
@@ -234,7 +232,7 @@ class NetworkDetectionService {
 		this.isProcessingQueue = true;
 
 		const operations = Array.from(this.operationQueue.values()).sort(
-			(a, b) => a.timestamp - b.timestamp,
+			(a, b) => a.timestamp - b.timestamp
 		); // Process oldest first
 
 		let processedCount = 0;
@@ -256,10 +254,6 @@ class NetworkDetectionService {
 						description: `${operation.description} no pudo completarse después de ${operation.maxRetries} intentos.`,
 					});
 				} else {
-					// Keep in queue for next attempt
-					console.warn(
-						`Operation ${operation.id} failed, will retry (${operation.retries}/${operation.maxRetries})`,
-					);
 				}
 			}
 
@@ -284,7 +278,7 @@ class NetworkDetectionService {
 			window.removeEventListener("offline", this.handleOffline.bind(this));
 			document.removeEventListener(
 				"visibilitychange",
-				this.handleVisibilityChange.bind(this),
+				this.handleVisibilityChange.bind(this)
 			);
 		}
 
@@ -303,7 +297,7 @@ export const networkDetection = new NetworkDetectionService();
 // React hook for network status
 export function useNetworkStatus() {
 	const [networkStatus, setNetworkStatus] = React.useState<NetworkStatus>(() =>
-		networkDetection.getNetworkStatus(),
+		networkDetection.getNetworkStatus()
 	);
 
 	React.useEffect(() => {
@@ -348,22 +342,22 @@ export function useOfflineQueue() {
 				description: string;
 				data?: any;
 				maxRetries?: number;
-			},
-		) => {
-			return await networkDetection.queueOperation({
+			}
+		) =>
+			await networkDetection.queueOperation({
 				operation,
 				data: options.data,
 				type: options.type,
 				description: options.description,
 				maxRetries: options.maxRetries || 3,
-			});
-		},
-		[],
+			}),
+		[]
 	);
 
-	const removeOperation = React.useCallback((id: string) => {
-		return networkDetection.removeQueuedOperation(id);
-	}, []);
+	const removeOperation = React.useCallback(
+		(id: string) => networkDetection.removeQueuedOperation(id),
+		[]
+	);
 
 	const clearQueue = React.useCallback(() => {
 		networkDetection.clearQueue();
@@ -387,7 +381,7 @@ export async function executeWithOfflineSupport<T>(
 		data?: any;
 		maxRetries?: number;
 		fallback?: () => T;
-	},
+	}
 ): Promise<T> {
 	const networkStatus = networkDetection.getNetworkStatus();
 

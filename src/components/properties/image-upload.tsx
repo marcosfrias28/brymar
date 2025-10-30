@@ -8,11 +8,11 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-interface ImageUploadProps {
+type ImageUploadProps = {
 	images: File[];
 	onImagesChange: (images: File[]) => void;
 	maxImages?: number;
-}
+};
 
 export function ImageUpload({
 	images,
@@ -23,7 +23,9 @@ export function ImageUpload({
 
 	const handleFiles = useCallback(
 		(files: FileList | null) => {
-			if (!files) return;
+			if (!files) {
+				return;
+			}
 
 			const newFiles = Array.from(files).filter((file) => {
 				if (!file.type.startsWith("image/")) {
@@ -46,7 +48,7 @@ export function ImageUpload({
 
 			onImagesChange([...images, ...newFiles]);
 		},
-		[images, onImagesChange, maxImages],
+		[images, onImagesChange, maxImages]
 	);
 
 	const handleDrag = useCallback((e: React.DragEvent) => {
@@ -66,7 +68,7 @@ export function ImageUpload({
 			setDragActive(false);
 			handleFiles(e.dataTransfer.files);
 		},
-		[handleFiles],
+		[handleFiles]
 	);
 
 	const removeImage = (index: number) => {
@@ -78,7 +80,7 @@ export function ImageUpload({
 		<div className="space-y-4">
 			{/* Upload Area */}
 			<div
-				className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+				className={`rounded-lg border-2 border-dashed p-8 text-center transition-colors ${
 					dragActive
 						? "border-primary bg-primary/5"
 						: "border-border hover:border-primary"
@@ -89,21 +91,19 @@ export function ImageUpload({
 				onDrop={handleDrop}
 			>
 				<div className="flex flex-col items-center gap-4">
-					<div className="p-4 rounded-full bg-primary/10">
+					<div className="rounded-full bg-primary/10 p-4">
 						<Upload className="h-8 w-8 text-primary" />
 					</div>
 					<div>
-						<p className="text-lg font-medium text-foreground">
+						<p className="font-medium text-foreground text-lg">
 							Arrastra las imágenes aquí o haz clic para seleccionar
 						</p>
-						<p className="text-sm text-muted-foreground mt-1">
+						<p className="mt-1 text-muted-foreground text-sm">
 							Máximo {maxImages} imágenes, hasta 5MB cada una
 						</p>
 					</div>
 					<Button
-						type="button"
-						variant="outline"
-						className="border-border text-foreground hover:bg-primary hover:text-primary-foreground bg-transparent"
+						className="border-border bg-transparent text-foreground hover:bg-primary hover:text-primary-foreground"
 						onClick={() => {
 							const input = document.createElement("input");
 							input.type = "file";
@@ -115,8 +115,10 @@ export function ImageUpload({
 							};
 							input.click();
 						}}
+						type="button"
+						variant="outline"
 					>
-						<ImageIcon className="h-4 w-4 mr-2" />
+						<ImageIcon className="mr-2 h-4 w-4" />
 						Seleccionar Imágenes
 					</Button>
 				</div>
@@ -124,30 +126,30 @@ export function ImageUpload({
 
 			{/* Image Preview Grid */}
 			{images.length > 0 && (
-				<div className="grid grid-cols-2 smartphone:grid-cols-3 tablet:grid-cols-4 laptop:grid-cols-5 gap-4">
+				<div className="grid grid-cols-2 laptop:grid-cols-5 tablet:grid-cols-4 gap-4 smartphone:grid-cols-3">
 					{images.map((file, index) => (
-						<Card key={index} className="relative group border-blackCoral">
-							<div className="aspect-square relative overflow-hidden rounded-lg">
+						<Card className="group relative border-blackCoral" key={index}>
+							<div className="relative aspect-square overflow-hidden rounded-lg">
 								<Image
-									src={URL.createObjectURL(file) || "/placeholder.svg"}
 									alt={`Preview ${index + 1}`}
-									fill
 									className="object-cover"
+									fill
+									src={URL.createObjectURL(file) || "/placeholder.svg"}
 								/>
-								<div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+								<div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
 									<Button
-										type="button"
-										size="sm"
-										variant="destructive"
-										onClick={() => removeImage(index)}
 										className="bg-red-600 hover:bg-red-700"
+										onClick={() => removeImage(index)}
+										size="sm"
+										type="button"
+										variant="destructive"
 									>
 										<X className="h-4 w-4" />
 									</Button>
 								</div>
 							</div>
 							<div className="p-2">
-								<p className="text-xs text-blackCoral truncate">{file.name}</p>
+								<p className="truncate text-blackCoral text-xs">{file.name}</p>
 							</div>
 						</Card>
 					))}
@@ -155,7 +157,7 @@ export function ImageUpload({
 			)}
 
 			{/* Images Counter */}
-			<div className="text-sm text-blackCoral">
+			<div className="text-blackCoral text-sm">
 				{images.length} de {maxImages} imágenes seleccionadas
 			</div>
 		</div>

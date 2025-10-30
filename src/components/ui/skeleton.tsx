@@ -16,8 +16,8 @@ function Skeleton({
 
 	return (
 		<div
-			data-slot="skeleton"
 			className={cn("rounded-md", variants[variant], className)}
+			data-slot="skeleton"
 			{...props}
 		/>
 	);

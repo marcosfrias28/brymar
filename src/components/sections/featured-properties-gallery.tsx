@@ -15,13 +15,13 @@ const placeholderImages = [
 
 function FeaturedPropertiesSkeleton() {
 	return (
-		<div className="flex items-center gap-2 h-[400px] w-full max-w-4xl mt-10 mx-auto">
+		<div className="mx-auto mt-10 flex h-[400px] w-full max-w-4xl items-center gap-2">
 			{Array.from({ length: 6 }).map((_, index) => (
 				<div
+					className="relative h-[400px] w-56 flex-grow animate-pulse overflow-hidden rounded-lg bg-gray-200"
 					key={index}
-					className="relative flex-grow w-56 rounded-lg overflow-hidden h-[400px] bg-gray-200 animate-pulse"
 				>
-					<div className="h-full w-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse" />
+					<div className="h-full w-full animate-pulse bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200" />
 				</div>
 			))}
 		</div>
@@ -40,7 +40,6 @@ export function FeaturedPropertiesGallery() {
 	}
 
 	if (error) {
-		console.error("Featured properties error:", error);
 	}
 
 	// If no featured properties, use placeholder data
@@ -65,29 +64,29 @@ export function FeaturedPropertiesGallery() {
 				}));
 
 	return (
-		<div className="flex items-center gap-2 h-[400px] w-full max-w-4xl mt-10 mx-auto">
+		<div className="mx-auto mt-10 flex h-[400px] w-full max-w-4xl items-center gap-2">
 			{displayItems.slice(0, 6).map((item, index) => (
 				<div
+					className="group relative h-[400px] w-56 flex-grow overflow-hidden rounded-lg transition-all duration-500 hover:w-full"
 					key={item.id}
-					className="relative group flex-grow transition-all w-56 rounded-lg overflow-hidden h-[400px] duration-500 hover:w-full"
 				>
 					<Image
-						className="h-full w-full object-cover object-center"
-						src={item.image}
 						alt={item.title}
-						width={800}
+						className="h-full w-full object-cover object-center"
 						height={800}
 						priority={index < 3}
+						src={item.image}
+						width={800}
 					/>
 
 					{/* Overlay with property info on hover */}
-					<div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-						<h3 className="text-white font-semibold text-lg mb-1 truncate">
+					<div className="absolute inset-0 flex flex-col justify-end bg-black/50 p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+						<h3 className="mb-1 truncate font-semibold text-lg text-white">
 							{item.title}
 						</h3>
-						<p className="text-white/80 text-sm mb-1">{item.location}</p>
+						<p className="mb-1 text-sm text-white/80">{item.location}</p>
 						{item.price > 0 && (
-							<p className="text-white font-bold text-lg">
+							<p className="font-bold text-lg text-white">
 								${item.price.toLocaleString()}
 							</p>
 						)}

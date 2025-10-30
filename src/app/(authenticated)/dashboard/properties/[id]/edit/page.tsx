@@ -26,7 +26,7 @@ export default function EditPropertyPage() {
 	// useActionState for handling property updates
 	const [updateState, updateAction, isPending] = useActionState(
 		updatePropertyAction,
-		{ success: false },
+		{ success: false }
 	);
 
 	useEffect(() => {
@@ -40,15 +40,14 @@ export default function EditPropertyPage() {
 			try {
 				const result = await getPropertyById(propertyId);
 
-				if (!result.success || !result.data) {
+				if (!(result.success && result.data)) {
 					setError("Propiedad no encontrada");
 					setLoading(false);
 					return;
 				}
 
 				setProperty(result.data);
-			} catch (err) {
-				console.error("Error loading property:", err);
+			} catch (_err) {
 				setError("Error al cargar la propiedad");
 			} finally {
 				setLoading(false);
@@ -70,25 +69,33 @@ export default function EditPropertyPage() {
 	];
 
 	// Conditional rendering after all hooks are called
-	if (!params || !params.id) {
+	if (!params?.id) {
 		return (
 			<RouteGuard requiredPermission="properties.manage">
 				<DashboardPageLayout
-					title="Error"
-					description="Propiedad no encontrada"
+					actions={
+						<Button asChild variant="outline">
+							<Link href="/dashboard/properties">
+								<ArrowLeft className="mr-2 h-4 w-4" />
+								Volver a Propiedades
+							</Link>
+						</Button>
+					}
 					breadcrumbs={breadcrumbs}
+					description="Propiedad no encontrada"
+					title="Error"
 				>
-					<div className="flex items-center justify-center min-h-[400px]">
+					<div className="flex min-h-[400px] items-center justify-center">
 						<div className="text-center">
-							<h2 className="text-xl font-semibold mb-2">
+							<h2 className="mb-2 font-semibold text-xl">
 								ID de propiedad no válido
 							</h2>
-							<p className="text-muted-foreground mb-4">
+							<p className="mb-4 text-muted-foreground">
 								No se pudo encontrar la propiedad solicitada
 							</p>
-							<Button variant="outline" asChild>
+							<Button asChild variant="outline">
 								<Link href="/dashboard/properties">
-									<ArrowLeft className="h-4 w-4 mr-2" />
+									<ArrowLeft className="mr-2 h-4 w-4" />
 									Volver a Propiedades
 								</Link>
 							</Button>
@@ -119,14 +126,22 @@ export default function EditPropertyPage() {
 		return (
 			<RouteGuard requiredPermission="properties.manage">
 				<DashboardPageLayout
-					title="Cargando..."
-					description="Cargando datos de la propiedad"
+					actions={
+						<Button asChild variant="outline">
+							<Link href="/dashboard/properties">
+								<ArrowLeft className="mr-2 h-4 w-4" />
+								Volver a Propiedades
+							</Link>
+						</Button>
+					}
 					breadcrumbs={breadcrumbs}
+					description="Cargando datos de la propiedad"
+					title="Cargando..."
 				>
-					<div className="flex items-center justify-center min-h-[400px]">
+					<div className="flex min-h-[400px] items-center justify-center">
 						<div className="text-center">
-							<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-							<h2 className="text-xl font-semibold mb-2">
+							<div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-primary border-b-2" />
+							<h2 className="mb-2 font-semibold text-xl">
 								Cargando propiedad...
 							</h2>
 							<p className="text-muted-foreground">
@@ -143,22 +158,30 @@ export default function EditPropertyPage() {
 		return (
 			<RouteGuard requiredPermission="properties.manage">
 				<DashboardPageLayout
-					title="Error"
-					description="No se pudo cargar la propiedad"
+					actions={
+						<Button asChild variant="outline">
+							<Link href="/dashboard/properties">
+								<ArrowLeft className="mr-2 h-4 w-4" />
+								Volver a Propiedades
+							</Link>
+						</Button>
+					}
 					breadcrumbs={breadcrumbs}
+					description="No se pudo cargar la propiedad"
+					title="Error"
 				>
-					<div className="flex items-center justify-center min-h-[400px]">
+					<div className="flex min-h-[400px] items-center justify-center">
 						<div className="text-center">
-							<h2 className="text-xl font-semibold mb-2">
+							<h2 className="mb-2 font-semibold text-xl">
 								Error al cargar la propiedad
 							</h2>
-							<p className="text-muted-foreground mb-4">
+							<p className="mb-4 text-muted-foreground">
 								{error || "La propiedad no se pudo cargar para edición"}
 							</p>
-							<div className="flex gap-2 justify-center">
-								<Button variant="outline" asChild>
+							<div className="flex justify-center gap-2">
+								<Button asChild variant="outline">
 									<Link href="/dashboard/properties">
-										<ArrowLeft className="h-4 w-4 mr-2" />
+										<ArrowLeft className="mr-2 h-4 w-4" />
 										Volver a Propiedades
 									</Link>
 								</Button>
@@ -178,66 +201,86 @@ export default function EditPropertyPage() {
 	return (
 		<RouteGuard requiredPermission="properties.manage">
 			<DashboardPageLayout
-				title="Editar Propiedad"
-				description="Edita la información de la propiedad"
+				actions={
+					<Button asChild variant="outline">
+						<Link href="/dashboard/properties">
+							<ArrowLeft className="mr-2 h-4 w-4" />
+							Volver a Propiedades
+						</Link>
+					</Button>
+				}
 				breadcrumbs={breadcrumbs}
+				description="Edita la información de la propiedad"
+				title="Editar Propiedad"
 			>
-				<div className="max-w-4xl mx-auto">
-					<form onSubmit={handleSubmit} className="space-y-6">
-						<input type="hidden" name="id" value={propertyId} />
-						
-						<div className="bg-white rounded-lg shadow p-6 space-y-6">
+				<div className="mx-auto max-w-4xl">
+					<form className="space-y-6" onSubmit={handleSubmit}>
+						<input name="id" type="hidden" value={propertyId} />
+
+						<div className="space-y-6 rounded-lg bg-white p-6 shadow">
 							<div>
-								<label htmlFor="title" className="block text-sm font-medium mb-2">
+								<label
+									className="mb-2 block font-medium text-sm"
+									htmlFor="title"
+								>
 									Título
 								</label>
 								<input
-									type="text"
+									className="w-full rounded-md border px-3 py-2"
+									defaultValue={property.title}
 									id="title"
 									name="title"
-									defaultValue={property.title}
-									className="w-full px-3 py-2 border rounded-md"
 									required
+									type="text"
 								/>
 							</div>
 
 							<div>
-								<label htmlFor="description" className="block text-sm font-medium mb-2">
+								<label
+									className="mb-2 block font-medium text-sm"
+									htmlFor="description"
+								>
 									Descripción
 								</label>
 								<textarea
+									className="w-full rounded-md border px-3 py-2"
+									defaultValue={property.description || ""}
 									id="description"
 									name="description"
-									defaultValue={property.description || ""}
 									rows={4}
-									className="w-full px-3 py-2 border rounded-md"
 								/>
 							</div>
 
 							<div className="grid grid-cols-2 gap-4">
 								<div>
-									<label htmlFor="price" className="block text-sm font-medium mb-2">
+									<label
+										className="mb-2 block font-medium text-sm"
+										htmlFor="price"
+									>
 										Precio
 									</label>
 									<input
-										type="number"
+										className="w-full rounded-md border px-3 py-2"
+										defaultValue={property.price}
 										id="price"
 										name="price"
-										defaultValue={property.price}
-										className="w-full px-3 py-2 border rounded-md"
 										required
+										type="number"
 									/>
 								</div>
 
 								<div>
-									<label htmlFor="type" className="block text-sm font-medium mb-2">
+									<label
+										className="mb-2 block font-medium text-sm"
+										htmlFor="type"
+									>
 										Tipo
 									</label>
 									<select
+										className="w-full rounded-md border px-3 py-2"
+										defaultValue={property.type}
 										id="type"
 										name="type"
-										defaultValue={property.type}
-										className="w-full px-3 py-2 border rounded-md"
 										required
 									>
 										<option value="house">Casa</option>
@@ -253,54 +296,66 @@ export default function EditPropertyPage() {
 
 							<div className="grid grid-cols-3 gap-4">
 								<div>
-									<label htmlFor="bedrooms" className="block text-sm font-medium mb-2">
+									<label
+										className="mb-2 block font-medium text-sm"
+										htmlFor="bedrooms"
+									>
 										Habitaciones
 									</label>
 									<input
-										type="number"
+										className="w-full rounded-md border px-3 py-2"
+										defaultValue={property.features?.bedrooms || 0}
 										id="bedrooms"
 										name="bedrooms"
-										defaultValue={property.features?.bedrooms || 0}
-										className="w-full px-3 py-2 border rounded-md"
+										type="number"
 									/>
 								</div>
 
 								<div>
-									<label htmlFor="bathrooms" className="block text-sm font-medium mb-2">
+									<label
+										className="mb-2 block font-medium text-sm"
+										htmlFor="bathrooms"
+									>
 										Baños
 									</label>
 									<input
-										type="number"
+										className="w-full rounded-md border px-3 py-2"
+										defaultValue={property.features?.bathrooms || 0}
 										id="bathrooms"
 										name="bathrooms"
-										defaultValue={property.features?.bathrooms || 0}
-										className="w-full px-3 py-2 border rounded-md"
+										type="number"
 									/>
 								</div>
 
 								<div>
-									<label htmlFor="area" className="block text-sm font-medium mb-2">
+									<label
+										className="mb-2 block font-medium text-sm"
+										htmlFor="area"
+									>
 										Área (m²)
 									</label>
 									<input
-										type="number"
+										className="w-full rounded-md border px-3 py-2"
+										defaultValue={property.features?.area || 0}
 										id="area"
 										name="area"
-										defaultValue={property.features?.area || 0}
-										className="w-full px-3 py-2 border rounded-md"
+										type="number"
 									/>
 								</div>
 							</div>
 
 							<div>
-								<label htmlFor="status" className="block text-sm font-medium mb-2">
+								<label
+									className="mb-2 block font-medium text-sm"
+									htmlFor="status"
+								>
 									Estado
 								</label>
 								<select
+									className="w-full rounded-md border px-3 py-2"
+									defaultValue={property.status}
 									id="status"
 									name="status"
-									defaultValue={property.status}
-									className="w-full px-3 py-2 border rounded-md"
 								>
 									<option value="draft">Borrador</option>
 									<option value="published">Publicado</option>
@@ -310,23 +365,25 @@ export default function EditPropertyPage() {
 
 						<div className="flex justify-end gap-3">
 							<Button
+								disabled={isPending}
+								onClick={() =>
+									router.push(`/dashboard/properties/${propertyId}`)
+								}
 								type="button"
 								variant="outline"
-								onClick={() => router.push(`/dashboard/properties/${propertyId}`)}
-								disabled={isPending}
 							>
 								Cancelar
 							</Button>
-							<Button type="submit" disabled={isPending}>
+							<Button disabled={isPending} type="submit">
 								{isPending ? "Guardando..." : "Guardar Cambios"}
 							</Button>
 						</div>
 					</form>
 
 					{isPending && (
-						<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-							<div className="bg-white rounded-lg p-6 flex items-center gap-3">
-								<div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+						<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+							<div className="flex items-center gap-3 rounded-lg bg-white p-6">
+								<div className="h-6 w-6 animate-spin rounded-full border-primary border-b-2" />
 								<span>Guardando cambios...</span>
 							</div>
 						</div>

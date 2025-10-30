@@ -6,18 +6,18 @@ import type { CreateLandInput } from "@/lib/types/lands";
 import { LandForm } from "../forms/land-form";
 import { UnifiedWizard, type WizardStep } from "./unified-wizard";
 
-interface LandWizardData {
+type LandWizardData = {
 	name?: string;
 	price?: number;
 	area?: number;
 	[key: string]: unknown;
-}
+};
 
-interface LandStepProps {
+type LandStepProps = {
 	data: LandWizardData;
 	onChange: (data: LandWizardData) => void;
 	errors?: Record<string, string>;
-}
+};
 
 // Land wizard step components
 const LandBasicInfoStep = ({ data, onChange, errors }: LandStepProps) => {
@@ -41,19 +41,25 @@ const landWizardSteps: WizardStep[] = [
 		component: LandBasicInfoStep,
 		validation: (data: LandWizardData) => {
 			const errors: Record<string, string> = {};
-			if (!data.name) errors.name = "El nombre es requerido";
-			if (!data.price) errors.price = "El precio es requerido";
-			if (!data.area) errors.area = "El área es requerida";
+			if (!data.name) {
+				errors.name = "El nombre es requerido";
+			}
+			if (!data.price) {
+				errors.price = "El precio es requerido";
+			}
+			if (!data.area) {
+				errors.area = "El área es requerida";
+			}
 			return Object.keys(errors).length > 0 ? errors : null;
 		},
 	},
 ];
 
-interface LandWizardProps {
+type LandWizardProps = {
 	draftId?: string;
 	initialData?: LandWizardData;
 	onComplete?: () => void;
-}
+};
 
 export function LandWizard({
 	draftId,
@@ -81,12 +87,11 @@ export function LandWizard({
 			if (result.success) {
 				onComplete?.();
 				return { success: true, message: "Terreno creado exitosamente" };
-			} else {
-				return {
-					success: false,
-					error: result.error || "Error al crear el terreno",
-				};
 			}
+			return {
+				success: false,
+				error: result.error || "Error al crear el terreno",
+			};
 		} catch (_error) {
 			return { success: false, error: "Error inesperado" };
 		}
@@ -97,25 +102,23 @@ export function LandWizard({
 			if (draftId) {
 				await saveDraft.mutateAsync({
 					id: draftId,
-					data: data,
+					data,
 				});
 			} else {
 				await createDraft.mutateAsync();
 			}
-		} catch (error) {
-			console.warn("Wizard draft functionality is temporarily disabled:", error);
-		}
+		} catch (_error) {}
 	};
 
 	return (
 		<UnifiedWizard
-			title="Crear Nuevo Terreno"
 			description="Completa la información para agregar un nuevo terreno"
-			steps={landWizardSteps}
 			initialData={initialData}
 			onComplete={handleComplete}
 			onSaveDraft={handleSaveDraft}
 			showDraftOption={true}
+			steps={landWizardSteps}
+			title="Crear Nuevo Terreno"
 		/>
 	);
 }

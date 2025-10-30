@@ -1,10 +1,13 @@
 "use client";
 
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { RouteGuard } from "@/components/auth/route-guard";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
+import { Button } from "@/components/ui/button";
 import { ComprehensiveErrorRecovery } from "@/components/wizard/comprehensive-error-recovery";
 import { WizardFallbackUI } from "@/components/wizard/fallback-ui-states";
 import { LazyWizardWrapper } from "@/components/wizard/lazy-wizard-wrapper";
@@ -28,7 +31,9 @@ export default function NewBlogPage() {
 
 	useEffect(() => {
 		const loadDraftData = async () => {
-			if (!draftId || !user?.id) return;
+			if (!(draftId && user?.id)) {
+				return;
+			}
 
 			setLoading(true);
 			try {
@@ -50,8 +55,7 @@ export default function NewBlogPage() {
 					// Redirect to new blog without draft
 					router.replace("/dashboard/blog/new");
 				}
-			} catch (error) {
-				console.error("Error loading draft:", error);
+			} catch (_error) {
 				toast.error("Error inesperado al cargar el borrador");
 				router.replace("/dashboard/blog/new");
 			} finally {
@@ -66,16 +70,12 @@ export default function NewBlogPage() {
 		try {
 			toast.success("¡Artículo creado exitosamente!");
 			router.push("/dashboard/blog");
-		} catch (error) {
-			console.error("Error completing blog wizard:", error);
+		} catch (_error) {
 			toast.error("Error inesperado al completar el artículo");
 		}
 	};
 
-	const handleUpdate = async (data: Partial<BlogWizardData>) => {
-		// Handle draft updates if needed
-		console.log("Blog data updated:", data);
-	};
+	const handleUpdate = async (_data: Partial<BlogWizardData>) => {};
 
 	const handleCancel = () => {
 		// Consistent navigation pattern - go back to the list page
@@ -88,14 +88,22 @@ export default function NewBlogPage() {
 		return (
 			<RouteGuard requiredPermission="blog.manage">
 				<DashboardPageLayout
-					title="Cargando..."
-					description="Cargando borrador"
+					actions={
+						<Button asChild variant="outline">
+							<Link href="/dashboard/blog">
+								<ArrowLeft className="mr-2 h-4 w-4" />
+								Volver al Blog
+							</Link>
+						</Button>
+					}
 					breadcrumbs={breadcrumbs}
+					description="Cargando borrador"
+					title="Cargando..."
 				>
 					<ConsistentLoadingState
-						title="Cargando borrador..."
-						description="Preparando el asistente con tus datos guardados"
 						breadcrumbs={breadcrumbs}
+						description="Preparando el asistente con tus datos guardados"
+						title="Cargando borrador..."
 					/>
 				</DashboardPageLayout>
 			</RouteGuard>
@@ -106,15 +114,23 @@ export default function NewBlogPage() {
 		return (
 			<RouteGuard requiredPermission="blog.manage">
 				<DashboardPageLayout
-					title="Error"
-					description="Usuario no autenticado"
+					actions={
+						<Button asChild variant="outline">
+							<Link href="/dashboard/blog">
+								<ArrowLeft className="mr-2 h-4 w-4" />
+								Volver al Blog
+							</Link>
+						</Button>
+					}
 					breadcrumbs={breadcrumbs}
+					description="Usuario no autenticado"
+					title="Error"
 				>
 					<ConsistentErrorState
-						title="Error de autenticación"
-						description="No se pudo verificar tu identidad"
 						actionLabel="Volver al Blog"
+						description="No se pudo verificar tu identidad"
 						onAction={() => router.push("/dashboard/blog")}
+						title="Error de autenticación"
 					/>
 				</DashboardPageLayout>
 			</RouteGuard>
@@ -124,34 +140,40 @@ export default function NewBlogPage() {
 	return (
 		<RouteGuard requiredPermission="blog.manage">
 			<DashboardPageLayout
-				title={draftId ? "Continuar Borrador" : "Nuevo Artículo"}
+				actions={
+					<Button asChild variant="outline">
+						<Link href="/dashboard/blog">
+							<ArrowLeft className="mr-2 h-4 w-4" />
+							Volver al Blog
+						</Link>
+					</Button>
+				}
+				breadcrumbs={breadcrumbs}
 				description={
 					draftId
 						? "Continúa editando tu borrador guardado"
 						: "Crea un nuevo artículo usando el asistente inteligente"
 				}
-				breadcrumbs={breadcrumbs}
+				title={draftId ? "Continuar Borrador" : "Nuevo Artículo"}
 			>
-				<div className="max-w-6xl mx-auto">
+				<div className="mx-auto max-w-6xl">
 					<ComprehensiveErrorRecovery
 						enableAutoRetry={true}
 						enableOfflineMode={true}
-						maxRetries={3}
 						fallbackComponent={({ error, onRetry }) => (
 							<WizardFallbackUI
 								error={error}
-								onRetry={onRetry}
 								onGoBack={handleCancel}
 								onGoHome={() => router.push("/dashboard")}
+								onRetry={onRetry}
 								showDetails={process.env.NODE_ENV === "development"}
 							/>
 						)}
-						onError={(error) => {
-							console.error("Blog wizard error:", error);
+						maxRetries={3}
+						onError={(_error) => {
 							// Could integrate with error reporting service here
 						}}
-						onRecovery={(error) => {
-							console.log("Blog wizard recovered from error:", error);
+						onRecovery={(_error) => {
 							toast.success("Error recuperado exitosamente");
 						}}
 					>
@@ -169,15 +191,15 @@ export default function NewBlogPage() {
 							}}
 						>
 							<LazyWizardWrapper
-								type="blog"
-								wizardId={`blog-${user.id}-${draftId || "new"}`}
-								initialData={initialData}
 								draftId={draftId || undefined}
-								userId={user.id}
+								enablePerformanceOptimizations={true}
+								initialData={initialData}
+								onCancel={handleCancel}
 								onComplete={handleComplete}
 								onUpdate={handleUpdate}
-								onCancel={handleCancel}
-								enablePerformanceOptimizations={true}
+								type="blog"
+								userId={user.id}
+								wizardId={`blog-${user.id}-${draftId || "new"}`}
 							/>
 						</NetworkAwareWizard>
 					</ComprehensiveErrorRecovery>

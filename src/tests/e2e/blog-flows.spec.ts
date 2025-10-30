@@ -22,7 +22,7 @@ test.describe("Blog Management Flows", () => {
 							"canPublishBlogs",
 						],
 					},
-				}),
+				})
 			);
 		});
 	});
@@ -297,7 +297,7 @@ test.describe("Blog Management Flows", () => {
 		const contentInput = page.locator('textarea[name="content"]');
 		if (await contentInput.isVisible()) {
 			await contentInput.fill(
-				"This is a test blog post created by E2E tests. It contains sample content for testing purposes.",
+				"This is a test blog post created by E2E tests. It contains sample content for testing purposes."
 			);
 		}
 
@@ -541,7 +541,7 @@ test.describe("Blog Form Validation", () => {
 						role: "admin",
 						permissions: ["canManageBlogs", "canCreateBlogs"],
 					},
-				}),
+				})
 			);
 		});
 	});
@@ -750,7 +750,7 @@ test.describe("Blog Content Management", () => {
 							"canPublishBlogs",
 						],
 					},
-				}),
+				})
 			);
 		});
 	});
@@ -798,7 +798,7 @@ test.describe("Blog Content Management", () => {
 		if (editor) {
 			// Test typing in the editor
 			await editor.fill(
-				"This is test content with **bold text** and *italic text*.",
+				"This is test content with **bold text** and *italic text*."
 			);
 
 			// Should show formatted content or accept the input
@@ -940,7 +940,7 @@ test.describe("Blog Content Management", () => {
 				// Get available options
 				const options = await select.locator("option").allTextContents();
 				const validOptions = options.filter(
-					(option) => option.trim() && option !== "Select...",
+					(option) => option.trim() && option !== "Select..."
 				);
 
 				if (validOptions.length > 0) {

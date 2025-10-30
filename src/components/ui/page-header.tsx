@@ -24,14 +24,14 @@ export function PageHeader({
 	return (
 		<div
 			className={cn(
-				"border-b border-border/40",
+				"border-border/40 border-b",
 				// Responsive spacing and padding
 				isMobile
 					? "space-y-3 pb-4"
 					: isTablet
 						? "space-y-3 pb-5"
 						: "space-y-4 pb-6",
-				className,
+				className
 			)}
 		>
 			{/* Breadcrumbs */}
@@ -46,19 +46,19 @@ export function PageHeader({
 					// Better responsive layout
 					isMobileOrTablet
 						? "space-y-3"
-						: "sm:flex-row sm:items-start sm:justify-between",
+						: "sm:flex-row sm:items-start sm:justify-between"
 				)}
 			>
 				<div className={cn("flex-1", isMobile ? "space-y-1" : "space-y-2")}>
 					<h1
 						className={cn(
-							"font-bold font-serif tracking-tight text-foreground",
+							"font-bold font-serif text-foreground tracking-tight",
 							// Responsive title sizing
 							isMobile
 								? "text-2xl"
 								: isTablet
 									? "text-2xl sm:text-3xl"
-									: "text-3xl",
+									: "text-3xl"
 						)}
 					>
 						{title}
@@ -66,9 +66,9 @@ export function PageHeader({
 					{description && (
 						<p
 							className={cn(
-								"text-muted-foreground max-w-2xl leading-relaxed",
+								"max-w-2xl text-muted-foreground leading-relaxed",
 								// Responsive description sizing
-								isMobile ? "text-sm" : "text-base",
+								isMobile ? "text-sm" : "text-base"
 							)}
 						>
 							{description}
@@ -80,11 +80,11 @@ export function PageHeader({
 				{actions && (
 					<div
 						className={cn(
-							"flex items-center flex-shrink-0",
+							"flex flex-shrink-0 items-center",
 							// Better mobile layout for actions
-							isMobileOrTablet ? "gap-2 flex-wrap" : "gap-2",
+							isMobileOrTablet ? "flex-wrap gap-2" : "gap-2",
 							// Full width on mobile for better touch targets
-							isMobile && "w-full justify-start",
+							isMobile && "w-full justify-start"
 						)}
 					>
 						<TouchTarget asChild>{actions}</TouchTarget>
@@ -95,24 +95,24 @@ export function PageHeader({
 			{/* Search Bar (if enabled) */}
 			{showSearch && (
 				<div className={cn(isMobile ? "w-full" : "max-w-md")}>
-					<label htmlFor="page-search" className="sr-only">
+					<label className="sr-only" htmlFor="page-search">
 						{ariaLabels.search}
 					</label>
 					<TouchTarget asChild>
 						<input
-							id="page-search"
-							type="search"
-							placeholder={searchPlaceholder}
 							aria-label={ariaLabels.search}
 							className={cn(
-								"w-full border border-input rounded-md bg-background placeholder:text-muted-foreground",
+								"w-full rounded-md border border-input bg-background placeholder:text-muted-foreground",
 								focusRingClasses.input,
 								"transition-colors duration-200",
 								// Enhanced touch targets
 								isMobile ? "px-4 py-3 text-base" : "px-3 py-2 text-sm",
 								// Prevent zoom on iOS
-								"text-[16px] sm:text-sm",
+								"text-[16px] sm:text-sm"
 							)}
+							id="page-search"
+							placeholder={searchPlaceholder}
+							type="search"
 						/>
 					</TouchTarget>
 				</div>

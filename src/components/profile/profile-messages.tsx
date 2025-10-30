@@ -81,7 +81,7 @@ export function ProfileMessages() {
 	});
 
 	const handleSendMessage = async () => {
-		if (!newMessage.to || !newMessage.subject || !newMessage.content) {
+		if (!(newMessage.to && newMessage.subject && newMessage.content)) {
 			toast.error("Compila tutti i campi richiesti");
 			return;
 		}
@@ -121,7 +121,7 @@ export function ProfileMessages() {
 			await toggleStar(messageId);
 			const message = messages.find((m) => m.id === messageId);
 			toast.success(
-				message?.starred ? "Stella rimossa" : "Messaggio aggiunto ai preferiti",
+				message?.starred ? "Stella rimossa" : "Messaggio aggiunto ai preferiti"
 			);
 		} catch (_error) {
 			toast.error("Errore durante l'aggiornamento del messaggio");
@@ -172,14 +172,26 @@ export function ProfileMessages() {
 		}
 	};
 
-	const formatDate = (date: Date) => {
-		return new Intl.DateTimeFormat("it-IT", {
+	const formatDate = (date: Date) =>
+		new Intl.DateTimeFormat("es-ES", {
 			day: "2-digit",
 			month: "2-digit",
 			year: "numeric",
 			hour: "2-digit",
 			minute: "2-digit",
 		}).format(date);
+
+	const getMessageStatusLabel = (status: MessageStatus) => {
+		switch (status) {
+			case "sent":
+				return "enviado";
+			case "delivered":
+				return "entregado";
+			case "read":
+				return "leído";
+			default:
+				return status;
+		}
 	};
 
 	const selectedMessageData = selectedMessage
@@ -188,95 +200,95 @@ export function ProfileMessages() {
 
 	if (loading) {
 		return (
-			<div className="flex items-center justify-center h-64">
+			<div className="flex h-64 items-center justify-center">
 				<Loader2 className="h-8 w-8 animate-spin" />
-				<span className="ml-2">Caricamento messaggi...</span>
+				<span className="ml-2">Cargando mensajes...</span>
 			</div>
 		);
 	}
 
 	return (
 		<div className="space-y-6">
-			{/* Header con statistiche */}
+			{/* Encabezado con estadísticas */}
 			<Card>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Send className="h-5 w-5" />
-						Messaggi
+						Mensajes
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+					<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
 						<div className="text-center">
-							<div className="text-2xl font-bold text-blue-600">
+							<div className="font-bold text-2xl text-blue-600">
 								{messages.length}
 							</div>
-							<div className="text-sm text-muted-foreground">Totali</div>
+							<div className="text-muted-foreground text-sm">Totales</div>
 						</div>
 						<div className="text-center">
-							<div className="text-2xl font-bold text-orange-600">
-								{messages.filter((m) => !m.read && !m.archived).length}
+							<div className="font-bold text-2xl text-orange-600">
+								{messages.filter((m) => !(m.read || m.archived)).length}
 							</div>
-							<div className="text-sm text-muted-foreground">Non letti</div>
+							<div className="text-muted-foreground text-sm">No leídos</div>
 						</div>
 						<div className="text-center">
-							<div className="text-2xl font-bold text-yellow-600">
+							<div className="font-bold text-2xl text-yellow-600">
 								{messages.filter((m) => m.starred && !m.archived).length}
 							</div>
-							<div className="text-sm text-muted-foreground">Preferiti</div>
+							<div className="text-muted-foreground text-sm">Favoritos</div>
 						</div>
 						<div className="text-center">
-							<div className="text-2xl font-bold text-gray-600">
+							<div className="font-bold text-2xl text-gray-600">
 								{messages.filter((m) => m.archived).length}
 							</div>
-							<div className="text-sm text-muted-foreground">Archiviati</div>
+							<div className="text-muted-foreground text-sm">Archivados</div>
 						</div>
 					</div>
 				</CardContent>
 			</Card>
 
-			{/* Controlli */}
+			{/* Controles */}
 			<Card>
 				<CardContent className="pt-6">
-					<div className="flex flex-col md:flex-row gap-4">
+					<div className="flex flex-col gap-4 md:flex-row">
 						<div className="flex-1">
 							<div className="relative">
-								<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+								<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-muted-foreground" />
 								<Input
-									placeholder="Cerca messaggi..."
-									value={searchTerm}
-									onChange={(e) => setSearchTerm(e.target.value)}
 									className="pl-10"
+									onChange={(e) => setSearchTerm(e.target.value)}
+									placeholder="Buscar mensajes..."
+									value={searchTerm}
 								/>
 							</div>
 						</div>
 						<Select
-							value={filterType}
 							onValueChange={(value: FilterType) => setFilterType(value)}
+							value={filterType}
 						>
 							<SelectTrigger className="w-full md:w-48">
-								<SelectValue placeholder="Filtra per stato" />
+								<SelectValue placeholder="Filtrar por estado" />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="all">Tutti i messaggi</SelectItem>
-								<SelectItem value="unread">Non letti</SelectItem>
-								<SelectItem value="read">Letti</SelectItem>
-								<SelectItem value="starred">Preferiti</SelectItem>
-								<SelectItem value="archived">Archiviati</SelectItem>
+								<SelectItem value="all">Todos los mensajes</SelectItem>
+								<SelectItem value="unread">No leídos</SelectItem>
+								<SelectItem value="read">Leídos</SelectItem>
+								<SelectItem value="starred">Favoritos</SelectItem>
+								<SelectItem value="archived">Archivados</SelectItem>
 							</SelectContent>
 						</Select>
-						<Dialog open={isComposing} onOpenChange={setIsComposing}>
+						<Dialog onOpenChange={setIsComposing} open={isComposing}>
 							<DialogTrigger asChild>
 								<Button>
-									<Plus className="h-4 w-4 mr-2" />
-									Nuovo Messaggio
+									<Plus className="mr-2 h-4 w-4" />
+									Nuevo Mensaje
 								</Button>
 							</DialogTrigger>
 							<DialogContent className="sm:max-w-md">
 								<DialogHeader>
-									<DialogTitle>Nuovo Messaggio</DialogTitle>
+									<DialogTitle>Nuevo Mensaje</DialogTitle>
 									<DialogDescription>
-										Componi un nuovo messaggio
+										Redacta un nuevo mensaje
 									</DialogDescription>
 								</DialogHeader>
 								<div className="space-y-4">
@@ -284,56 +296,56 @@ export function ProfileMessages() {
 										<Label htmlFor="to">Destinatario</Label>
 										<Input
 											id="to"
-											placeholder="Email del destinatario"
-											value={newMessage.to}
 											onChange={(e) =>
 												setNewMessage((prev) => ({
 													...prev,
 													to: e.target.value,
 												}))
 											}
+											placeholder="Correo del destinatario"
+											value={newMessage.to}
 										/>
 									</div>
 									<div>
-										<Label htmlFor="subject">Oggetto</Label>
+										<Label htmlFor="subject">Asunto</Label>
 										<Input
 											id="subject"
-											placeholder="Oggetto del messaggio"
-											value={newMessage.subject}
 											onChange={(e) =>
 												setNewMessage((prev) => ({
 													...prev,
 													subject: e.target.value,
 												}))
 											}
+											placeholder="Asunto del mensaje"
+											value={newMessage.subject}
 										/>
 									</div>
 									<div>
-										<Label htmlFor="content">Messaggio</Label>
+										<Label htmlFor="content">Mensaje</Label>
 										<Textarea
 											id="content"
-											placeholder="Scrivi il tuo messaggio..."
-											rows={4}
-											value={newMessage.content}
 											onChange={(e) =>
 												setNewMessage((prev) => ({
 													...prev,
 													content: e.target.value,
 												}))
 											}
+											placeholder="Escribe tu mensaje..."
+											rows={4}
+											value={newMessage.content}
 										/>
 									</div>
 								</div>
 								<DialogFooter>
 									<Button
-										variant="outline"
 										onClick={() => setIsComposing(false)}
+										variant="outline"
 									>
-										Annulla
+										Cancelar
 									</Button>
 									<Button onClick={handleSendMessage}>
-										<Send className="h-4 w-4 mr-2" />
-										Invia
+										<Send className="mr-2 h-4 w-4" />
+										Enviar
 									</Button>
 								</DialogFooter>
 							</DialogContent>
@@ -342,9 +354,9 @@ export function ProfileMessages() {
 				</CardContent>
 			</Card>
 
-			{/* Layout messaggi */}
-			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-				{/* Lista messaggi */}
+			{/* Layout de mensajes */}
+			<div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+				{/* Lista de mensajes */}
 				<div className="lg:col-span-1">
 					<Card>
 						<CardHeader>
@@ -362,14 +374,14 @@ export function ProfileMessages() {
 									<div className="space-y-1">
 										{filteredMessages.map((message) => (
 											<div
-												key={message.id}
-												className={`p-4 cursor-pointer hover:bg-muted/50 transition-colors border-l-4 ${
+												className={`cursor-pointer border-l-4 p-4 transition-colors hover:bg-muted/50 ${
 													selectedMessage === message.id
-														? "bg-muted border-l-primary"
+														? "border-l-primary bg-muted"
 														: message.read
 															? "border-l-transparent"
 															: "border-l-blue-500 bg-blue-50/50 dark:bg-blue-950/20"
 												}`}
+												key={message.id}
 												onClick={() => {
 													setSelectedMessage(message.id);
 													if (!message.read) {
@@ -378,7 +390,7 @@ export function ProfileMessages() {
 												}}
 											>
 												<div className="flex items-start justify-between">
-													<div className="flex items-center gap-3 flex-1 min-w-0">
+													<div className="flex min-w-0 flex-1 items-center gap-3">
 														<Avatar className="h-8 w-8">
 															<AvatarImage src={message.sender.avatar} />
 															<AvatarFallback>
@@ -388,33 +400,33 @@ export function ProfileMessages() {
 																	.join("")}
 															</AvatarFallback>
 														</Avatar>
-														<div className="flex-1 min-w-0">
+														<div className="min-w-0 flex-1">
 															<div className="flex items-center gap-2">
-																<p className="font-medium text-sm truncate">
+																<p className="truncate font-medium text-sm">
 																	{message.sender.name}
 																</p>
 																{message.starred && (
-																	<Star className="h-3 w-3 text-yellow-500 fill-current" />
+																	<Star className="h-3 w-3 fill-current text-yellow-500" />
 																)}
 															</div>
-															<p className="text-sm font-medium truncate">
+															<p className="truncate font-medium text-sm">
 																{message.subject}
 															</p>
-															<p className="text-xs text-muted-foreground truncate">
+															<p className="truncate text-muted-foreground text-xs">
 																{message.content}
 															</p>
 														</div>
 													</div>
 													<div className="flex flex-col items-end gap-1">
 														<Badge
-															variant="secondary"
 															className={`text-xs ${getMessageStatusColor(
-																message.status,
+																message.status
 															)}`}
+															variant="secondary"
 														>
 															{getMessageStatusIcon(message.status)}
 														</Badge>
-														<span className="text-xs text-muted-foreground">
+														<span className="text-muted-foreground text-xs">
 															{formatDate(message.createdAt)}
 														</span>
 													</div>
@@ -428,14 +440,14 @@ export function ProfileMessages() {
 					</Card>
 				</div>
 
-				{/* Dettaglio messaggio */}
+				{/* Detalle del mensaje */}
 				<div className="lg:col-span-2">
 					<Card>
 						<CardHeader>
 							<CardTitle className="text-lg">
 								{selectedMessageData
-									? "Dettaglio Messaggio"
-									: "Seleziona un messaggio"}
+									? "Detalle del Mensaje"
+									: "Selecciona un mensaje"}
 							</CardTitle>
 						</CardHeader>
 						<CardContent>
@@ -457,19 +469,19 @@ export function ProfileMessages() {
 												<p className="font-medium">
 													{selectedMessageData.sender.name}
 												</p>
-												<p className="text-sm text-muted-foreground">
+												<p className="text-muted-foreground text-sm">
 													{selectedMessageData.sender.email}
 												</p>
 											</div>
 										</div>
 										<div className="flex items-center gap-2">
 											<Button
-												variant="outline"
-												size="sm"
-												onClick={() => handleToggleStar(selectedMessageData.id)}
 												disabled={processingIds.includes(
-													selectedMessageData.id,
+													selectedMessageData.id
 												)}
+												onClick={() => handleToggleStar(selectedMessageData.id)}
+												size="sm"
+												variant="outline"
 											>
 												{processingIds.includes(selectedMessageData.id) ? (
 													<Loader2 className="h-4 w-4 animate-spin" />
@@ -477,19 +489,19 @@ export function ProfileMessages() {
 													<Star
 														className={`h-4 w-4 ${
 															selectedMessageData.starred
-																? "text-yellow-500 fill-current"
+																? "fill-current text-yellow-500"
 																: ""
 														}`}
 													/>
 												)}
 											</Button>
 											<Button
-												variant="outline"
-												size="sm"
-												onClick={() => handleArchive(selectedMessageData.id)}
 												disabled={processingIds.includes(
-													selectedMessageData.id,
+													selectedMessageData.id
 												)}
+												onClick={() => handleArchive(selectedMessageData.id)}
+												size="sm"
+												variant="outline"
 											>
 												{processingIds.includes(selectedMessageData.id) ? (
 													<Loader2 className="h-4 w-4 animate-spin" />
@@ -502,30 +514,30 @@ export function ProfileMessages() {
 
 									<Separator />
 
-									{/* Oggetto e metadati */}
+									{/* Asunto y metadatos */}
 									<div className="space-y-2">
-										<h3 className="text-lg font-semibold">
+										<h3 className="font-semibold text-lg">
 											{selectedMessageData.subject}
 										</h3>
-										<div className="flex items-center gap-4 text-sm text-muted-foreground">
+										<div className="flex items-center gap-4 text-muted-foreground text-sm">
 											<span>
 												📅 {formatDate(selectedMessageData.createdAt)}
 											</span>
 											<Badge
-												variant="secondary"
 												className={getMessageStatusColor(
-													selectedMessageData.status,
+													selectedMessageData.status
 												)}
+												variant="secondary"
 											>
 												{getMessageStatusIcon(selectedMessageData.status)}{" "}
-												{selectedMessageData.status}
+												{getMessageStatusLabel(selectedMessageData.status)}
 											</Badge>
 											{selectedMessageData.starred && (
 												<Badge
-													variant="secondary"
 													className="bg-yellow-100 text-yellow-800"
+													variant="secondary"
 												>
-													⭐ Preferito
+													⭐ Favorito
 												</Badge>
 											)}
 										</div>
@@ -533,38 +545,38 @@ export function ProfileMessages() {
 
 									<Separator />
 
-									{/* Contenuto messaggio */}
-									<div className="prose prose-sm max-w-none dark:prose-invert">
+									{/* Contenido del mensaje */}
+									<div className="prose prose-sm dark:prose-invert max-w-none">
 										<div className="whitespace-pre-wrap">
 											{selectedMessageData.content}
 										</div>
 									</div>
 
-									{/* Allegati (se presenti) */}
+									{/* Adjuntos (si aplica) */}
 									{selectedMessageData.attachments &&
 										selectedMessageData.attachments.length > 0 && (
 											<>
 												<Separator />
 												<div>
-													<h4 className="font-medium mb-2">
-														Allegati ({selectedMessageData.attachments.length})
+													<h4 className="mb-2 font-medium">
+														Adjuntos ({selectedMessageData.attachments.length})
 													</h4>
 													<div className="space-y-2">
 														{selectedMessageData.attachments.map(
 															(attachment, index) => (
 																<div
+																	className="flex items-center gap-2 rounded border p-2"
 																	key={index}
-																	className="flex items-center gap-2 p-2 border rounded"
 																>
 																	<span>📎</span>
 																	<span className="text-sm">
 																		{attachment.name}
 																	</span>
-																	<span className="text-xs text-muted-foreground">
+																	<span className="text-muted-foreground text-xs">
 																		({attachment.size})
 																	</span>
 																</div>
-															),
+															)
 														)}
 													</div>
 												</div>
@@ -572,12 +584,9 @@ export function ProfileMessages() {
 										)}
 								</div>
 							) : (
-								<div className="text-center text-muted-foreground py-12">
-									<Send className="h-12 w-12 mx-auto mb-4 opacity-50" />
-									<p>
-										Seleziona un messaggio dalla lista per visualizzarne i
-										dettagli
-									</p>
+								<div className="py-12 text-center text-muted-foreground">
+									<Send className="mx-auto mb-4 h-12 w-12 opacity-50" />
+									<p>Selecciona un mensaje de la lista para ver sus detalles</p>
 								</div>
 							)}
 						</CardContent>

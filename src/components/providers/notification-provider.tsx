@@ -9,7 +9,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 
-interface NotificationContextType {
+type NotificationContextType = {
 	notifySuccess: (message: string, description?: string) => void;
 	notifyError: (message: string, description?: string) => void;
 	notifyLoading: (message: string) => string;
@@ -22,19 +22,19 @@ interface NotificationContextType {
 	notifyMutationError: (
 		operation: string,
 		error?: string,
-		loadingId?: string,
+		loadingId?: string
 	) => void;
 	notifyOffline: () => void;
 	notifyOnline: () => void;
-}
+};
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
-	undefined,
+	undefined
 );
 
-interface NotificationProviderProps {
+type NotificationProviderProps = {
 	children: ReactNode;
-}
+};
 
 export function NotificationProvider({ children }: NotificationProviderProps) {
 	const activeLoadingToasts = useRef<Map<string, string>>(new Map());
@@ -58,13 +58,15 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
 		});
 	}, []);
 
-	const notifyLoading = useCallback((message: string): string => {
-		return String(
-			toast.loading(message, {
-				duration: Infinity,
-			}),
-		);
-	}, []);
+	const notifyLoading = useCallback(
+		(message: string): string =>
+			String(
+				toast.loading(message, {
+					duration: Number.POSITIVE_INFINITY,
+				})
+			),
+		[]
+	);
 
 	const notifyInfo = useCallback((message: string, description?: string) => {
 		toast.info(message, {
@@ -98,7 +100,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
 			activeLoadingToasts.current.set(operation, id);
 			return id;
 		},
-		[notifyLoading],
+		[notifyLoading]
 	);
 
 	const notifyMutationSuccess = useCallback(
@@ -121,7 +123,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
 				messages[operation as keyof typeof messages] || "Operación completada";
 			notifySuccess(message);
 		},
-		[dismiss, notifySuccess],
+		[dismiss, notifySuccess]
 	);
 
 	const notifyMutationError = useCallback(
@@ -144,24 +146,26 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
 				messages[operation as keyof typeof messages] || "Error en la operación";
 			notifyError(message, error || "Por favor, inténtalo de nuevo");
 		},
-		[dismiss, notifyError],
+		[dismiss, notifyError]
 	);
 
 	// Network status notifications
 	const notifyOffline = useCallback(() => {
-		if (offlineToastId.current) return; // Don't show multiple offline toasts
+		if (offlineToastId.current) {
+			return; // Don't show multiple offline toasts
+		}
 
 		offlineToastId.current = String(
 			toast.error("Sin conexión a internet", {
 				description: "Algunos datos pueden no estar actualizados",
-				duration: Infinity,
+				duration: Number.POSITIVE_INFINITY,
 				action: {
 					label: "Reintentar",
 					onClick: () => {
 						window.location.reload();
 					},
 				},
-			}),
+			})
 		);
 	}, []);
 
@@ -199,7 +203,7 @@ export function useNotificationContext(): NotificationContextType {
 	const context = useContext(NotificationContext);
 	if (context === undefined) {
 		throw new Error(
-			"useNotificationContext must be used within a NotificationProvider",
+			"useNotificationContext must be used within a NotificationProvider"
 		);
 	}
 	return context;

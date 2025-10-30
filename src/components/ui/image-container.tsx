@@ -16,7 +16,7 @@ const sizes = {
 };
 
 type Size = keyof typeof sizes;
-interface ImageContainerProps {
+type ImageContainerProps = {
 	src: string;
 	alt: string;
 	title?: string;
@@ -28,7 +28,7 @@ interface ImageContainerProps {
 	children?: React.ReactNode;
 	animateOnScroll?: boolean;
 	initialSize?: Size;
-}
+};
 
 export function ImageContainer({
 	src,
@@ -77,26 +77,26 @@ export function ImageContainer({
 	if (animateOnScroll) {
 		return (
 			<motion.div
-				ref={ref}
+				animate={isInView ? "animate" : "initial"}
 				className={cn(
 					"relative overflow-hidden border-4 border-white",
 					"rounded-[297px]",
-					className,
+					className
 				)}
-				style={containerStyle}
 				initial="initial"
-				animate={isInView ? "animate" : "initial"}
+				ref={ref}
+				style={containerStyle}
 				variants={animationVariants}
 			>
 				<motion.div
-					className="absolute inset-0 w-full h-full"
+					className="absolute inset-0 h-full w-full"
 					style={{ y, scale }}
 				>
 					<Image
-						src={src}
 						alt={alt}
-						fill
 						className={cn("object-cover", imageClassName)}
+						fill
+						src={src}
 					/>
 				</motion.div>
 
@@ -105,14 +105,14 @@ export function ImageContainer({
 						className={cn(
 							"absolute inset-x-0 bottom-0 h-3/5",
 							"rounded-[216px]",
-							"bg-gradient-to-t from-black/80 to-transparent",
+							"bg-gradient-to-t from-black/80 to-transparent"
 						)}
 					/>
 				)}
 
 				{title && (
-					<div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-						<h3 className="font-satoshi text-white text-7xl md:text-8xl lg:text-9xl font-normal leading-tight text-center uppercase tracking-tight">
+					<div className="-translate-x-1/2 absolute bottom-8 left-1/2 transform">
+						<h3 className="text-center font-normal font-satoshi text-7xl text-white uppercase leading-tight tracking-tight md:text-8xl lg:text-9xl">
 							{title}
 						</h3>
 					</div>
@@ -125,20 +125,20 @@ export function ImageContainer({
 
 	return (
 		<div
-			ref={ref}
 			className={cn(
 				"relative overflow-hidden border-4 border-white",
 				"rounded-[297px]",
 				sizes[size],
-				className,
+				className
 			)}
+			ref={ref}
 			style={containerStyle}
 		>
 			<Image
-				src={src}
 				alt={alt}
-				fill
 				className={cn("object-cover", imageClassName)}
+				fill
+				src={src}
 			/>
 
 			{overlay && (
@@ -146,14 +146,14 @@ export function ImageContainer({
 					className={cn(
 						"absolute inset-x-0 bottom-0 h-3/5",
 						"rounded-[216px]", // Smaller radius for overlay
-						"bg-gradient-to-t from-black/80 to-transparent",
+						"bg-gradient-to-t from-black/80 to-transparent"
 					)}
 				/>
 			)}
 
 			{title && (
-				<div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-					<h3 className="font-satoshi text-white text-7xl md:text-8xl lg:text-9xl font-normal leading-tight text-center uppercase tracking-tight">
+				<div className="-translate-x-1/2 absolute bottom-8 left-1/2 transform">
+					<h3 className="text-center font-normal font-satoshi text-7xl text-white uppercase leading-tight tracking-tight md:text-8xl lg:text-9xl">
 						{title}
 					</h3>
 				</div>

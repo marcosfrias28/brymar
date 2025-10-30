@@ -3,9 +3,9 @@
 import Image from "next/image";
 import Logo from "@/components/ui/logo";
 
-interface AuthWrapperLayoutProps {
+type AuthWrapperLayoutProps = {
 	children: React.ReactNode;
-}
+};
 
 export function AuthWrapperLayout({ children }: AuthWrapperLayoutProps) {
 	return (
@@ -19,13 +19,13 @@ export function AuthWrapperLayout({ children }: AuthWrapperLayoutProps) {
 				</div>
 			</div>
 			<div className="relative hidden bg-muted lg:block">
-				<div className="bg-gradient-to-l from-black/40 from-70% to-transparent absolute w-full h-full z-10 " />
+				<div className="absolute z-10 h-full w-full bg-gradient-to-l from-70% from-black/40 to-transparent" />
 				<Image
-					src="/optimized_villa/1.webp"
 					alt="Real Estate Properties"
-					fill
 					className="object-cover"
+					fill
 					priority
+					src="/optimized_villa/1.webp"
 				/>
 			</div>
 		</div>

@@ -1,7 +1,7 @@
 // Property Wizard Validation Schemas for New Framework
 
 import { z } from "zod";
-import { PropertyType } from "@/types/property-wizard";
+import { PropertyType } from "@/types/wizard";
 
 // Base schemas for reusable types
 export const CoordinatesSchema = z.object({
@@ -63,11 +63,11 @@ export const PropertyGeneralSchema = z.object({
 	price: z
 		.number()
 		.positive("El precio debe ser mayor a 0")
-		.max(999999999, "El precio es demasiado alto"),
+		.max(999_999_999, "El precio es demasiado alto"),
 	surface: z
 		.number()
 		.positive("La superficie debe ser mayor a 0")
-		.max(999999, "La superficie es demasiado grande"),
+		.max(999_999, "La superficie es demasiado grande"),
 	propertyType: z.nativeEnum(PropertyType, {
 		message: "Selecciona un tipo de propiedad válido",
 	}),

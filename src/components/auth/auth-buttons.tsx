@@ -17,10 +17,10 @@ import { useAdmin } from "@/hooks/use-admin";
 import { useUser } from "@/hooks/use-user";
 import getProfileItems from "@/lib/navbar/getProfileItems";
 
-interface AuthButtonsProps {
+type AuthButtonsProps = {
 	className?: string;
 	showModeToggle?: boolean;
-}
+};
 
 export function AuthButtons({
 	className = "",
@@ -37,7 +37,7 @@ export function AuthButtons({
 					<NavigationMenu viewport={false}>
 						<NavigationMenuList>
 							<NavigationMenuItem>
-								<NavigationMenuTrigger className="text-foreground text-center font-sofia-pro font-medium transition-all hover:bg-white/20 hover:text-white rounded-full flex items-center gap-2 h-auto whitespace-nowrap px-3 py-2 text-sm">
+								<NavigationMenuTrigger className="flex h-auto items-center gap-2 whitespace-nowrap rounded-full px-3 py-2 text-center font-medium font-sofia-pro text-foreground text-sm transition-all hover:bg-white/20 hover:text-white">
 									{role === "user" ? (
 										<>
 											<UserIcon className="h-4 w-4" />
@@ -50,18 +50,18 @@ export function AuthButtons({
 										</>
 									)}
 								</NavigationMenuTrigger>
-								<NavigationMenuContent className="backdrop-blur-sm border border-border/50 shadow-xl w-80 sm:w-96">
+								<NavigationMenuContent className="w-80 border border-border/50 shadow-xl backdrop-blur-sm sm:w-96">
 									{/* Información del usuario */}
-									<div className="px-3 py-2 text-sm text-muted-foreground border-b border-border/50">
+									<div className="border-border/50 border-b px-3 py-2 text-muted-foreground text-sm">
 										<Link href={role === "admin" ? "/dashboard" : "/profile"}>
-											<div className="font-medium text-card-foreground whitespace-nowrap truncate">
+											<div className="truncate whitespace-nowrap font-medium text-card-foreground">
 												{user.name ||
 													`${user.firstName || ""} ${
 														user.lastName || ""
 													}`.trim() ||
 													user.email}
 											</div>
-											<div className="text-xs capitalize whitespace-nowrap">
+											<div className="whitespace-nowrap text-xs capitalize">
 												{role === "admin"
 													? "Administrador"
 													: role === "agent"
@@ -73,9 +73,9 @@ export function AuthButtons({
 
 									{/* Elementos del menú basados en rol */}
 									{profileItems.map(({ icon: Icon, href, label }) => (
-										<NavigationMenuLink key={href} asChild>
+										<NavigationMenuLink asChild key={href}>
 											<Link href={href}>
-												<div className="flex items-center flex-nowrap gap-2 px-3 py-2 hover:bg-secondary/60 hover:text-secondary-foreground transition-colors rounded-sm whitespace-nowrap">
+												<div className="flex flex-nowrap items-center gap-2 whitespace-nowrap rounded-sm px-3 py-2 transition-colors hover:bg-secondary/60 hover:text-secondary-foreground">
 													<Icon className="h-4 w-4" />
 													<span className="truncate">{label}</span>
 												</div>
@@ -84,7 +84,7 @@ export function AuthButtons({
 									))}
 
 									{profileItems.length > 0 && (
-										<div className="border-t border-border/50 my-1" />
+										<div className="my-1 border-border/50 border-t" />
 									)}
 
 									{/* Cerrar sesión */}

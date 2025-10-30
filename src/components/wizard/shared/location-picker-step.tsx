@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
-export interface LocationData {
+export type LocationData = {
 	location: string;
 	coordinates?: {
 		lat: number;
@@ -31,9 +31,9 @@ export interface LocationData {
 	};
 	accessRoads?: string[];
 	nearbyLandmarks?: string[];
-}
+};
 
-interface LocationPickerStepProps {
+type LocationPickerStepProps = {
 	data: LocationData;
 	onUpdate: (data: Partial<LocationData>) => void;
 	title?: string;
@@ -42,7 +42,7 @@ interface LocationPickerStepProps {
 	showLandmarks?: boolean;
 	showCoordinates?: boolean;
 	errors?: Record<string, string>;
-}
+};
 
 export function LocationPickerStep({
 	data,
@@ -89,18 +89,18 @@ export function LocationPickerStep({
 	};
 
 	const handleCoordinatesChange = (lat: string, lng: string) => {
-		const latNum = parseFloat(lat);
-		const lngNum = parseFloat(lng);
+		const latNum = Number.parseFloat(lat);
+		const lngNum = Number.parseFloat(lng);
 
-		if (!Number.isNaN(latNum) && !Number.isNaN(lngNum)) {
+		if (Number.isNaN(latNum) || Number.isNaN(lngNum)) {
+			onUpdate({ coordinates: undefined });
+		} else {
 			onUpdate({
 				coordinates: {
 					lat: latNum,
 					lng: lngNum,
 				},
 			});
-		} else {
-			onUpdate({ coordinates: undefined });
 		}
 	};
 
@@ -132,16 +132,12 @@ export function LocationPickerStep({
 		});
 	};
 
-	const searchLocation = () => {
-		// Placeholder for location search functionality
-		// In a real implementation, this would integrate with a geocoding service
-		console.log("Searching for location:", data.location);
-	};
+	const searchLocation = () => {};
 
 	return (
 		<div className="space-y-6">
 			<div>
-				<h2 className="text-2xl font-bold mb-2">{title}</h2>
+				<h2 className="mb-2 font-bold text-2xl">{title}</h2>
 				<p className="text-muted-foreground">{description}</p>
 			</div>
 
@@ -157,50 +153,50 @@ export function LocationPickerStep({
 						<Label htmlFor="location">Ubicación General *</Label>
 						<div className="flex gap-2">
 							<Input
+								className={errors.location ? "border-destructive" : ""}
 								id="location"
-								value={data.location || ""}
 								onChange={(e) => handleLocationChange(e.target.value)}
 								placeholder="Ej: Punta Cana, La Altagracia"
-								className={errors.location ? "border-destructive" : ""}
+								value={data.location || ""}
 							/>
 							<Button
+								disabled={!data.location}
+								onClick={searchLocation}
 								type="button"
 								variant="outline"
-								onClick={searchLocation}
-								disabled={!data.location}
 							>
 								<Search className="h-4 w-4" />
 							</Button>
 						</div>
 						{errors.location && (
-							<p className="text-sm text-destructive">{errors.location}</p>
+							<p className="text-destructive text-sm">{errors.location}</p>
 						)}
 					</div>
 
 					<Separator />
 
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div className="space-y-2">
 							<Label htmlFor="street">Calle/Dirección</Label>
 							<Input
 								id="street"
-								value={data.address?.street || ""}
 								onChange={(e) => handleAddressChange("street", e.target.value)}
 								placeholder="Ej: Carretera Verón-Punta Cana"
+								value={data.address?.street || ""}
 							/>
 						</div>
 
 						<div className="space-y-2">
 							<Label htmlFor="city">Ciudad *</Label>
 							<Input
+								className={errors["address.city"] ? "border-destructive" : ""}
 								id="city"
-								value={data.address?.city || ""}
 								onChange={(e) => handleAddressChange("city", e.target.value)}
 								placeholder="Ej: Punta Cana"
-								className={errors["address.city"] ? "border-destructive" : ""}
+								value={data.address?.city || ""}
 							/>
 							{errors["address.city"] && (
-								<p className="text-sm text-destructive">
+								<p className="text-destructive text-sm">
 									{errors["address.city"]}
 								</p>
 							)}
@@ -209,18 +205,18 @@ export function LocationPickerStep({
 						<div className="space-y-2">
 							<Label htmlFor="province">Provincia *</Label>
 							<Input
+								className={
+									errors["address.province"] ? "border-destructive" : ""
+								}
 								id="province"
-								value={data.address?.province || ""}
 								onChange={(e) =>
 									handleAddressChange("province", e.target.value)
 								}
 								placeholder="Ej: La Altagracia"
-								className={
-									errors["address.province"] ? "border-destructive" : ""
-								}
+								value={data.address?.province || ""}
 							/>
 							{errors["address.province"] && (
-								<p className="text-sm text-destructive">
+								<p className="text-destructive text-sm">
 									{errors["address.province"]}
 								</p>
 							)}
@@ -230,19 +226,19 @@ export function LocationPickerStep({
 							<Label htmlFor="postalCode">Código Postal</Label>
 							<Input
 								id="postalCode"
-								value={data.address?.postalCode || ""}
 								onChange={(e) =>
 									handleAddressChange("postalCode", e.target.value)
 								}
 								placeholder="Ej: 23000"
+								value={data.address?.postalCode || ""}
 							/>
 						</div>
 					</div>
 
 					{data.address?.formattedAddress && (
-						<div className="p-3 bg-muted rounded-lg">
-							<Label className="text-sm font-medium">Dirección Completa:</Label>
-							<p className="text-sm text-muted-foreground mt-1">
+						<div className="rounded-lg bg-muted p-3">
+							<Label className="font-medium text-sm">Dirección Completa:</Label>
+							<p className="mt-1 text-muted-foreground text-sm">
 								{data.address.formattedAddress}
 							</p>
 						</div>
@@ -262,21 +258,21 @@ export function LocationPickerStep({
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 							<div className="space-y-2">
 								<Label htmlFor="latitude">Latitud</Label>
 								<Input
 									id="latitude"
-									type="number"
-									step="any"
-									value={data.coordinates?.lat || ""}
 									onChange={(e) =>
 										handleCoordinatesChange(
 											e.target.value,
-											data.coordinates?.lng?.toString() || "",
+											data.coordinates?.lng?.toString() || ""
 										)
 									}
 									placeholder="Ej: 18.5601"
+									step="any"
+									type="number"
+									value={data.coordinates?.lat || ""}
 								/>
 							</div>
 
@@ -284,24 +280,24 @@ export function LocationPickerStep({
 								<Label htmlFor="longitude">Longitud</Label>
 								<Input
 									id="longitude"
-									type="number"
-									step="any"
-									value={data.coordinates?.lng || ""}
 									onChange={(e) =>
 										handleCoordinatesChange(
 											data.coordinates?.lat?.toString() || "",
-											e.target.value,
+											e.target.value
 										)
 									}
 									placeholder="Ej: -68.3725"
+									step="any"
+									type="number"
+									value={data.coordinates?.lng || ""}
 								/>
 							</div>
 						</div>
 
 						{data.coordinates && (
-							<div className="mt-4 p-3 bg-muted rounded-lg">
-								<Label className="text-sm font-medium">Coordenadas:</Label>
-								<p className="text-sm text-muted-foreground mt-1">
+							<div className="mt-4 rounded-lg bg-muted p-3">
+								<Label className="font-medium text-sm">Coordenadas:</Label>
+								<p className="mt-1 text-muted-foreground text-sm">
 									{data.coordinates.lat}, {data.coordinates.lng}
 								</p>
 							</div>
@@ -321,15 +317,15 @@ export function LocationPickerStep({
 					<CardContent className="space-y-4">
 						<div className="flex gap-2">
 							<Input
-								value={newAccessRoad}
 								onChange={(e) => setNewAccessRoad(e.target.value)}
-								placeholder="Ej: Autopista del Este, Km 28"
 								onKeyPress={(e) => e.key === "Enter" && addAccessRoad()}
+								placeholder="Ej: Autopista del Este, Km 28"
+								value={newAccessRoad}
 							/>
 							<Button
-								type="button"
-								onClick={addAccessRoad}
 								disabled={!newAccessRoad.trim()}
+								onClick={addAccessRoad}
+								type="button"
 							>
 								<Plus className="h-4 w-4" />
 							</Button>
@@ -341,13 +337,13 @@ export function LocationPickerStep({
 								<div className="flex flex-wrap gap-2">
 									{data.accessRoads.map((road, index) => (
 										<Badge
-											key={index}
-											variant="secondary"
 											className="cursor-pointer"
+											key={index}
 											onClick={() => removeAccessRoad(index)}
+											variant="secondary"
 										>
 											{road}
-											<X className="h-3 w-3 ml-1" />
+											<X className="ml-1 h-3 w-3" />
 										</Badge>
 									))}
 								</div>
@@ -368,15 +364,15 @@ export function LocationPickerStep({
 					<CardContent className="space-y-4">
 						<div className="flex gap-2">
 							<Input
-								value={newLandmark}
 								onChange={(e) => setNewLandmark(e.target.value)}
-								placeholder="Ej: Hard Rock Hotel, Aeropuerto de Punta Cana"
 								onKeyPress={(e) => e.key === "Enter" && addLandmark()}
+								placeholder="Ej: Hard Rock Hotel, Aeropuerto de Punta Cana"
+								value={newLandmark}
 							/>
 							<Button
-								type="button"
-								onClick={addLandmark}
 								disabled={!newLandmark.trim()}
+								onClick={addLandmark}
+								type="button"
 							>
 								<Plus className="h-4 w-4" />
 							</Button>
@@ -388,13 +384,13 @@ export function LocationPickerStep({
 								<div className="flex flex-wrap gap-2">
 									{data.nearbyLandmarks.map((landmark, index) => (
 										<Badge
-											key={index}
-											variant="secondary"
 											className="cursor-pointer"
+											key={index}
 											onClick={() => removeLandmark(index)}
+											variant="secondary"
 										>
 											{landmark}
-											<X className="h-3 w-3 ml-1" />
+											<X className="ml-1 h-3 w-3" />
 										</Badge>
 									))}
 								</div>

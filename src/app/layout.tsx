@@ -8,7 +8,6 @@ import { QueryProvider } from "@/components/providers/query-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { GlobalLiveRegion } from "@/components/ui/accessibility-announcer";
 import { Toaster } from "@/components/ui/sonner";
-import { PropertiesSlider } from "@/components/sections/properties-slider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -18,24 +17,22 @@ export const metadata: Metadata = {
 		"Our international brand specializes in property appraisal, sales, purchases, and investments. Trust us to deliver exceptional service and help you find your perfect real estate opportunity.",
 };
 
-export default async function LocaleLayout({
+export default function LocaleLayout({
 	children,
-}: // params,
-{
+}: {
 	children: React.ReactNode;
-	params: Promise<{ locale: string }>;
 }) {
 	return (
 		<html lang="es" suppressHydrationWarning>
-			<body className={`${inter.className} flex flex-col min-h-screen`}>
+			<body className={`${inter.className} flex min-h-screen flex-col`}>
 				<QueryProvider>
 					<AuthProvider>
 						<LoadingErrorProvider>
 							<ThemeProvider
 								attribute="class"
 								defaultTheme="dark"
-								enableSystem={false}
 								disableTransitionOnChange
+								enableSystem={false}
 							>
 								{/* Global accessibility live regions */}
 								<GlobalLiveRegion />
@@ -44,7 +41,7 @@ export default async function LocaleLayout({
 								<main className="flex-1 overflow-y-auto overflow-x-hidden bg-background">
 									{children}
 								</main>
-								<Toaster richColors={true} position="bottom-center" />
+								<Toaster position="bottom-center" richColors={true} />
 
 								{/* Global accessibility live regions */}
 							</ThemeProvider>

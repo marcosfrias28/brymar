@@ -1,5 +1,5 @@
-import { pgTable, text, timestamp, jsonb, varchar } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import { jsonb, pgTable, text, timestamp, varchar } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
 export const userActivities = pgTable("user_activities", {
@@ -15,7 +15,7 @@ export const userActivities = pgTable("user_activities", {
 	ipAddress: varchar("ip_address", { length: 45 }), // IPv4 or IPv6
 	userAgent: text("user_agent"), // Browser/device info
 	createdAt: timestamp("created_at").notNull().defaultNow(),
-	updatedAt: timestamp("updated_at").notNull().defaultNow()
+	updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // Performance indexes for userActivities table

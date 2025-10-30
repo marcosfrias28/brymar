@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 export type GridLayout = "single" | "two-column" | "three-column" | "card-grid";
 export type GridSpacing = "compact" | "normal" | "relaxed";
 
-interface ContentGridProps {
+type ContentGridProps = {
 	children: React.ReactNode;
 	layout?: GridLayout;
 	spacing?: GridSpacing;
@@ -14,7 +14,7 @@ interface ContentGridProps {
 	contentClassName?: string;
 	sidebarContent?: React.ReactNode;
 	sidebarPosition?: "left" | "right";
-}
+};
 
 export function ContentGrid({
 	children,
@@ -86,7 +86,7 @@ export function ContentGrid({
 					<aside className="space-y-6">
 						{/* Left sidebar - could be navigation or filters */}
 						<div className="secondary-accent rounded-lg p-4">
-							<h3 className="font-medium text-foreground mb-3">Navegación</h3>
+							<h3 className="mb-3 font-medium text-foreground">Navegación</h3>
 							{/* Navigation content would go here */}
 						</div>
 					</aside>
@@ -105,7 +105,7 @@ export function ContentGrid({
 				"w-full",
 				getLayoutClasses(),
 				getSpacingClasses(),
-				className,
+				className
 			)}
 		>
 			{renderContent()}
@@ -114,7 +114,7 @@ export function ContentGrid({
 }
 
 // Specialized grid components for specific use cases
-interface CardGridProps {
+type CardGridProps = {
 	children: React.ReactNode;
 	columns?: {
 		sm?: number;
@@ -125,7 +125,7 @@ interface CardGridProps {
 	};
 	spacing?: GridSpacing;
 	className?: string;
-}
+};
 
 export function CardGrid({
 	children,
@@ -136,11 +136,21 @@ export function CardGrid({
 	const getColumnClasses = () => {
 		const classes = ["grid", "grid-cols-1"];
 
-		if (columns.sm) classes.push(`sm:grid-cols-${columns.sm}`);
-		if (columns.md) classes.push(`md:grid-cols-${columns.md}`);
-		if (columns.lg) classes.push(`lg:grid-cols-${columns.lg}`);
-		if (columns.xl) classes.push(`xl:grid-cols-${columns.xl}`);
-		if (columns["2xl"]) classes.push(`2xl:grid-cols-${columns["2xl"]}`);
+		if (columns.sm) {
+			classes.push(`sm:grid-cols-${columns.sm}`);
+		}
+		if (columns.md) {
+			classes.push(`md:grid-cols-${columns.md}`);
+		}
+		if (columns.lg) {
+			classes.push(`lg:grid-cols-${columns.lg}`);
+		}
+		if (columns.xl) {
+			classes.push(`xl:grid-cols-${columns.xl}`);
+		}
+		if (columns["2xl"]) {
+			classes.push(`2xl:grid-cols-${columns["2xl"]}`);
+		}
 
 		return classes.join(" ");
 	};
@@ -164,12 +174,12 @@ export function CardGrid({
 }
 
 // Responsive grid utilities
-interface ResponsiveGridProps {
+type ResponsiveGridProps = {
 	children: React.ReactNode;
 	minItemWidth?: string;
 	spacing?: GridSpacing;
 	className?: string;
-}
+};
 
 export function ResponsiveGrid({
 	children,
@@ -201,13 +211,13 @@ export function ResponsiveGrid({
 }
 
 // Grid container with secondary color accents
-interface AccentGridProps {
+type AccentGridProps = {
 	children: React.ReactNode;
 	layout?: GridLayout;
 	spacing?: GridSpacing;
 	showAccents?: boolean;
 	className?: string;
-}
+};
 
 export function AccentGrid({
 	children,
@@ -220,7 +230,7 @@ export function AccentGrid({
 		<div
 			className={cn(
 				showAccents && "secondary-accent rounded-lg p-4 md:p-6",
-				className,
+				className
 			)}
 		>
 			<ContentGrid layout={layout} spacing={spacing}>

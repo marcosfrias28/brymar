@@ -10,11 +10,11 @@ import {
 	secondaryColorClasses,
 } from "@/lib/utils/secondary-colors";
 
-interface LandFiltersProps {
+type LandFiltersProps = {
 	currentFilter: "all" | LandType;
 	onFilterChange: (filter: "all" | LandType) => void;
 	totalCount?: number;
-}
+};
 
 export function LandFilters({
 	currentFilter,
@@ -65,34 +65,34 @@ export function LandFilters({
 				const isActive = currentFilter === filter.value;
 				return (
 					<Button
-						key={filter.value}
-						variant={isActive ? "default" : "outline"}
-						size="sm"
-						onClick={() => onFilterChange(filter.value)}
 						className={cn(
 							"transition-all duration-200",
 							isActive
 								? cn(
-										"bg-arsenic hover:bg-blackCoral text-white",
-										secondaryColorClasses.focusRing,
+										"bg-arsenic text-white hover:bg-blackCoral",
+										secondaryColorClasses.focusRing
 									)
 								: cn(
 										"border-blackCoral/30 text-blackCoral hover:bg-blackCoral hover:text-white",
 										secondaryColorClasses.accentHover,
-										interactiveClasses.button,
-									),
+										interactiveClasses.button
+									)
 						)}
+						key={filter.value}
+						onClick={() => onFilterChange(filter.value)}
+						size="sm"
+						variant={isActive ? "default" : "outline"}
 					>
 						{filter.label}
 						{filter.count > 0 && (
 							<Badge
-								variant="secondary"
 								className={cn(
 									"ml-2 text-xs",
 									isActive
 										? "bg-white/20 text-white"
-										: badgeVariants.secondarySubtle,
+										: badgeVariants.secondarySubtle
 								)}
+								variant="secondary"
 							>
 								{filter.count}
 							</Badge>

@@ -61,26 +61,26 @@ export function UserQuickActions() {
 	return (
 		<Card className="border-blackCoral shadow-lg">
 			<CardHeader>
-				<CardTitle className="text-arsenic flex items-center gap-2">
+				<CardTitle className="flex items-center gap-2 text-arsenic">
 					<Settings className="h-5 w-5" />
 					Acciones Rápidas
 				</CardTitle>
 			</CardHeader>
 			<CardContent>
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+				<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
 					{userQuickActions.map((action, index) => (
 						<Button
-							key={index}
 							asChild
-							className={`${action.color} text-white h-auto p-4 flex flex-col items-start gap-2 hover:scale-105 transition-all duration-200`}
+							className={`${action.color} flex h-auto flex-col items-start gap-2 p-4 text-white transition-all duration-200 hover:scale-105`}
+							key={index}
 							variant="default"
 						>
 							<Link href={action.href}>
-								<div className="flex items-center gap-2 w-full">
+								<div className="flex w-full items-center gap-2">
 									<action.icon className="h-5 w-5 flex-shrink-0" />
 									<span className="font-medium text-sm">{action.title}</span>
 								</div>
-								<span className="text-xs opacity-90 text-left w-full">
+								<span className="w-full text-left text-xs opacity-90">
 									{action.description}
 								</span>
 							</Link>

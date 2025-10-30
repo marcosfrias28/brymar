@@ -4,10 +4,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AuthFormWrapper } from "@/components/auth/auth-form-wrapper";
-import { sendVerificationOTPAction } from "@/lib/actions/auth";
 import { useVerifyOTP } from "@/hooks/use-auth-actions";
+import { sendVerificationOTPAction } from "@/lib/actions/auth";
 import { authClient } from "@/lib/auth/auth-client";
-import type { UserSession } from "@/types/session";
 
 const VerifyEmailPage = () => {
 	const searchParams = useSearchParams();
@@ -50,8 +49,7 @@ const VerifyEmailPage = () => {
 					router.push("/sign-in");
 					return;
 				}
-			} catch (error) {
-				console.error("Error checking session:", error);
+			} catch (_error) {
 				router.push("/sign-in");
 			} finally {
 				setIsLoading(false);
@@ -63,7 +61,9 @@ const VerifyEmailPage = () => {
 
 	// Función para reenviar código OTP
 	const handleResendCode = async () => {
-		if (!email || isResending) return;
+		if (!email || isResending) {
+			return;
+		}
 
 		setIsResending(true);
 		try {
@@ -85,7 +85,7 @@ const VerifyEmailPage = () => {
 	};
 
 	// Función personalizada para manejar la verificación usando el hook
-	const handleVerifyOTP = async (prevState: unknown, formData: FormData) => {
+	const handleVerifyOTP = async (_prevState: unknown, formData: FormData) => {
 		if (!email) {
 			return { error: "Email no disponible", success: false };
 		}
@@ -99,7 +99,7 @@ const VerifyEmailPage = () => {
 
 			if (result.success) {
 				// Wait a bit for the query to refetch before redirecting
-				await new Promise(resolve => setTimeout(resolve, 500));
+				await new Promise((resolve) => setTimeout(resolve, 500));
 				// Redirect to profile after successful verification
 				router.push("/profile");
 			}
@@ -115,16 +115,16 @@ const VerifyEmailPage = () => {
 
 	if (isLoading) {
 		return (
-			<div className="flex items-center justify-center min-h-screen">
+			<div className="flex min-h-screen items-center justify-center">
 				<div className="text-center">
-					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+					<div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-primary border-b-2" />
 					<p>Verificando sesión...</p>
 				</div>
 			</div>
 		);
 	}
 
-	if (!email || !session) {
+	if (!(email && session)) {
 		return null; // El useEffect manejará la redirección
 	}
 
@@ -143,32 +143,32 @@ const VerifyEmailPage = () => {
 
 	return (
 		<AuthFormWrapper
-			title="Verificar Email"
-			subtitle={`Ingresa el código de 6 dígitos que enviamos a ${email}`}
 			action={handleVerifyOTP}
-			isLoading={verifyOTPMutation.isPending}
-			onSuccess={() => {
-				// This won't be called since we're handling success in the mutation
-			}}
-			onError={(error) => {
-				toast.error(error);
-			}}
 			fields={[otpField]}
-			submitText="Verificar Código"
-			loadingText="Verificando código..."
 			footerContent={
-				<p className="text-sm text-muted-foreground text-center">
+				<p className="text-center text-muted-foreground text-sm">
 					¿No recibiste el código?{" "}
 					<button
-						type="button"
-						className="text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
-						onClick={handleResendCode}
+						className="text-primary hover:underline disabled:cursor-not-allowed disabled:opacity-50"
 						disabled={isResending}
+						onClick={handleResendCode}
+						type="button"
 					>
 						{isResending ? "Reenviando..." : "Reenviar código"}
 					</button>
 				</p>
 			}
+			isLoading={verifyOTPMutation.isPending}
+			loadingText="Verificando código..."
+			onError={(error) => {
+				toast.error(error);
+			}}
+			onSuccess={() => {
+				// This won't be called since we're handling success in the mutation
+			}}
+			submitText="Verificar Código"
+			subtitle={`Ingresa el código de 6 dígitos que enviamos a ${email}`}
+			title="Verificar Email"
 		/>
 	);
 };

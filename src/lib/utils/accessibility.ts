@@ -78,17 +78,19 @@ export const useFocusManagement = () => {
 		'[contenteditable="true"]',
 	].join(", ");
 
-	const getFocusableElements = useCallback((container: HTMLElement) => {
-		return Array.from(
-			container.querySelectorAll(focusableElementsSelector),
-		) as HTMLElement[];
-	}, []);
+	const getFocusableElements = useCallback(
+		(container: HTMLElement) =>
+			Array.from(
+				container.querySelectorAll(focusableElementsSelector)
+			) as HTMLElement[],
+		[]
+	);
 
 	const trapFocus = useCallback(
 		(container: HTMLElement) => {
 			const focusableElements = getFocusableElements(container);
 			const firstElement = focusableElements[0];
-			const lastElement = focusableElements[focusableElements.length - 1];
+			const lastElement = focusableElements.at(-1);
 
 			const handleKeyDown = (e: KeyboardEvent) => {
 				if (e.key === keyboardKeys.TAB) {
@@ -97,11 +99,9 @@ export const useFocusManagement = () => {
 							e.preventDefault();
 							lastElement?.focus();
 						}
-					} else {
-						if (document.activeElement === lastElement) {
-							e.preventDefault();
-							firstElement?.focus();
-						}
+					} else if (document.activeElement === lastElement) {
+						e.preventDefault();
+						firstElement?.focus();
 					}
 				}
 			};
@@ -109,7 +109,7 @@ export const useFocusManagement = () => {
 			container.addEventListener("keydown", handleKeyDown);
 			return () => container.removeEventListener("keydown", handleKeyDown);
 		},
-		[getFocusableElements],
+		[getFocusableElements]
 	);
 
 	const restoreFocus = useCallback((element: HTMLElement | null) => {
@@ -169,7 +169,7 @@ export const useKeyboardNavigation = (
 		loop?: boolean;
 		orientation?: "horizontal" | "vertical" | "both";
 		onActivate?: (index: number) => void;
-	} = {},
+	} = {}
 ) => {
 	const { loop = true, orientation = "vertical", onActivate } = options;
 	const currentIndexRef = useRef(0);
@@ -242,7 +242,7 @@ export const useKeyboardNavigation = (
 				items[newIndex].focus();
 			}
 		},
-		[items, loop, orientation, onActivate],
+		[items, loop, orientation, onActivate]
 	);
 
 	return { handleKeyDown, currentIndex: currentIndexRef.current };
@@ -251,7 +251,7 @@ export const useKeyboardNavigation = (
 // Announcement utilities for screen readers
 export const announceToScreenReader = (
 	message: string,
-	priority: "polite" | "assertive" = "polite",
+	priority: "polite" | "assertive" = "polite"
 ) => {
 	const announcement = document.createElement("div");
 	announcement.setAttribute("aria-live", priority);
@@ -290,15 +290,14 @@ export const useHighContrast = () => {
 // Accessibility validation utilities
 export const validateAccessibility = {
 	// Check if element has accessible name
-	hasAccessibleName: (element: HTMLElement): boolean => {
-		return !!(
+	hasAccessibleName: (element: HTMLElement): boolean =>
+		!!(
 			element.getAttribute("aria-label") ||
 			element.getAttribute("aria-labelledby") ||
 			element.textContent?.trim() ||
 			element.getAttribute("title") ||
 			element.getAttribute("alt")
-		);
-	},
+		),
 
 	// Check if interactive element has proper role
 	hasProperRole: (element: HTMLElement): boolean => {
@@ -332,7 +331,7 @@ export const validateAccessibility = {
 
 	// Check if form element has proper labeling
 	hasProperLabeling: (
-		element: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement,
+		element: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
 	): boolean => {
 		const id = element.id;
 		const ariaLabel = element.getAttribute("aria-label");
@@ -357,28 +356,27 @@ export const validateAccessibility = {
 		// Check for accessible name on interactive elements
 		if (
 			element.matches(
-				'button, a, input, select, textarea, [role="button"], [role="link"]',
-			)
+				'button, a, input, select, textarea, [role="button"], [role="link"]'
+			) &&
+			!validateAccessibility.hasAccessibleName(element)
 		) {
-			if (!validateAccessibility.hasAccessibleName(element)) {
-				issues.push("Missing accessible name");
-			}
+			issues.push("Missing accessible name");
 		}
 
 		// Check for proper focus indicator
-		if (element.matches("button, a, input, select, textarea, [tabindex]")) {
-			if (!validateAccessibility.hasFocusIndicator(element)) {
-				issues.push("Missing focus indicator");
-			}
+		if (
+			element.matches("button, a, input, select, textarea, [tabindex]") &&
+			!validateAccessibility.hasFocusIndicator(element)
+		) {
+			issues.push("Missing focus indicator");
 		}
 
 		// Check for form labeling
-		if (element.matches("input, select, textarea")) {
-			if (
-				!validateAccessibility.hasProperLabeling(element as HTMLInputElement)
-			) {
-				issues.push("Missing proper form labeling");
-			}
+		if (
+			element.matches("input, select, textarea") &&
+			!validateAccessibility.hasProperLabeling(element as HTMLInputElement)
+		) {
+			issues.push("Missing proper form labeling");
 		}
 
 		// Check for images without alt text

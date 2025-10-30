@@ -9,17 +9,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-interface BlogSeoData {
+type BlogSeoData = {
 	slug?: string;
 	metaDescription?: string;
 	tags?: string[];
-}
+};
 
-interface BlogSeoStepProps {
+type BlogSeoStepProps = {
 	data: BlogSeoData;
 	onChange: (data: BlogSeoData) => void;
 	errors?: Record<string, string>;
-}
+};
 
 export function BlogSeoStep({ data, onChange, errors }: BlogSeoStepProps) {
 	const [newTag, setNewTag] = useState("");
@@ -39,7 +39,7 @@ export function BlogSeoStep({ data, onChange, errors }: BlogSeoStepProps) {
 	const removeTag = (tagToRemove: string) => {
 		handleChange(
 			"tags",
-			tags.filter((tag: string) => tag !== tagToRemove),
+			tags.filter((tag: string) => tag !== tagToRemove)
 		);
 	};
 
@@ -57,11 +57,11 @@ export function BlogSeoStep({ data, onChange, errors }: BlogSeoStepProps) {
 						<Label htmlFor="slug">URL Slug</Label>
 						<Input
 							id="slug"
-							value={data.slug || ""}
 							onChange={(e) => handleChange("slug", e.target.value)}
 							placeholder="mi-articulo-de-blog"
+							value={data.slug || ""}
 						/>
-						<p className="text-sm text-muted-foreground">
+						<p className="text-muted-foreground text-sm">
 							URL amigable para el artículo (sin espacios, solo letras, números
 							y guiones)
 						</p>
@@ -71,13 +71,13 @@ export function BlogSeoStep({ data, onChange, errors }: BlogSeoStepProps) {
 						<Label htmlFor="metaDescription">Meta Descripción</Label>
 						<Textarea
 							id="metaDescription"
-							value={data.metaDescription || ""}
+							maxLength={160}
 							onChange={(e) => handleChange("metaDescription", e.target.value)}
 							placeholder="Descripción breve para motores de búsqueda..."
 							rows={3}
-							maxLength={160}
+							value={data.metaDescription || ""}
 						/>
-						<p className="text-sm text-muted-foreground">
+						<p className="text-muted-foreground text-sm">
 							Máximo 160 caracteres. Aparecerá en los resultados de búsqueda.
 						</p>
 					</div>
@@ -86,31 +86,31 @@ export function BlogSeoStep({ data, onChange, errors }: BlogSeoStepProps) {
 						<Label>Etiquetas</Label>
 						<div className="flex gap-2">
 							<Input
-								value={newTag}
 								onChange={(e) => setNewTag(e.target.value)}
-								placeholder="Agregar etiqueta..."
 								onKeyPress={(e) => e.key === "Enter" && addTag()}
+								placeholder="Agregar etiqueta..."
+								value={newTag}
 							/>
-							<Button type="button" onClick={addTag} size="sm">
+							<Button onClick={addTag} size="sm" type="button">
 								<Plus className="h-4 w-4" />
 							</Button>
 						</div>
 
 						{tags.length > 0 && (
-							<div className="flex flex-wrap gap-2 mt-2">
+							<div className="mt-2 flex flex-wrap gap-2">
 								{tags.map((tag: string, index: number) => (
 									<Badge
+										className="flex items-center gap-1"
 										key={index}
 										variant="secondary"
-										className="flex items-center gap-1"
 									>
 										{tag}
 										<Button
-											type="button"
-											variant="ghost"
-											size="sm"
 											className="h-auto p-0 hover:bg-transparent"
 											onClick={() => removeTag(tag)}
+											size="sm"
+											type="button"
+											variant="ghost"
 										>
 											<X className="h-3 w-3" />
 										</Button>

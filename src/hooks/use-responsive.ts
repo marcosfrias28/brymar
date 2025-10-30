@@ -59,12 +59,16 @@ export function useResponsive() {
 		isMobileOrTablet,
 		// Utility functions
 		isAtLeast: (bp: Breakpoint) => {
-			if (!breakpoint) return false;
+			if (!breakpoint) {
+				return false;
+			}
 			const currentWidth = dimensions.width;
 			return currentWidth >= BREAKPOINTS[bp];
 		},
 		isBelow: (bp: Breakpoint) => {
-			if (!breakpoint) return false;
+			if (!breakpoint) {
+				return false;
+			}
 			const currentWidth = dimensions.width;
 			return currentWidth < BREAKPOINTS[bp];
 		},
@@ -81,7 +85,7 @@ export function useTouchDevice() {
 				"ontouchstart" in window ||
 					navigator.maxTouchPoints > 0 ||
 					// @ts-expect-error
-					navigator.msMaxTouchPoints > 0,
+					navigator.msMaxTouchPoints > 0
 			);
 		};
 
@@ -105,7 +109,7 @@ export function useOrientation() {
 	React.useEffect(() => {
 		const updateOrientation = () => {
 			setOrientation(
-				window.innerHeight > window.innerWidth ? "portrait" : "landscape",
+				window.innerHeight > window.innerWidth ? "portrait" : "landscape"
 			);
 		};
 

@@ -45,7 +45,7 @@ export function LoadingButton({
 			className={cn(
 				loading && "cursor-not-allowed",
 				secondaryColorClasses.focusRing,
-				className,
+				className
 			)}
 			disabled={disabled || loading}
 			{...props}
@@ -76,9 +76,9 @@ export function SaveButton({
 }: LoadingButtonProps) {
 	return (
 		<LoadingButton
+			icon={Save}
 			loading={loading}
 			loadingText={loadingText}
-			icon={Save}
 			{...props}
 		>
 			{children}
@@ -94,9 +94,9 @@ export function SearchButton({
 }: LoadingButtonProps) {
 	return (
 		<LoadingButton
+			icon={Search}
 			loading={loading}
 			loadingText={loadingText}
-			icon={Search}
 			variant="outline"
 			{...props}
 		>
@@ -113,9 +113,9 @@ export function RefreshButton({
 }: LoadingButtonProps) {
 	return (
 		<LoadingButton
+			icon={RefreshCw}
 			loading={loading}
 			loadingText={loadingText}
-			icon={RefreshCw}
 			variant="outline"
 			{...props}
 		>
@@ -132,9 +132,9 @@ export function UploadButton({
 }: LoadingButtonProps) {
 	return (
 		<LoadingButton
+			icon={Upload}
 			loading={loading}
 			loadingText={loadingText}
-			icon={Upload}
 			variant="outline"
 			{...props}
 		>
@@ -151,9 +151,9 @@ export function DownloadButton({
 }: LoadingButtonProps) {
 	return (
 		<LoadingButton
+			icon={Download}
 			loading={loading}
 			loadingText={loadingText}
-			icon={Download}
 			variant="outline"
 			{...props}
 		>
@@ -182,8 +182,8 @@ export function LoadingSpinner({
 		<div className={cn("flex items-center justify-center", className)}>
 			<div
 				className={cn(
-					"rounded-full border-2 border-secondary/30 border-t-secondary animate-spin",
-					sizeClasses[size],
+					"animate-spin rounded-full border-2 border-secondary/30 border-t-secondary",
+					sizeClasses[size]
 				)}
 			/>
 		</div>
@@ -198,11 +198,11 @@ export function LoadingDots({ className }: { className?: string }) {
 		<div className={cn("flex space-x-1", className)}>
 			{[0, 1, 2].map((i) => (
 				<div
-					key={i}
 					className={cn(
-						"h-2 w-2 rounded-full bg-secondary animate-pulse",
-						`animation-delay-${i * 200}ms`,
+						"h-2 w-2 animate-pulse rounded-full bg-secondary",
+						`animation-delay-${i * 200}ms`
 					)}
+					key={i}
 					style={{ animationDelay: `${i * 200}ms` }}
 				/>
 			))}
@@ -225,16 +225,16 @@ export function LoadingProgress({
 	return (
 		<div className={cn("space-y-2", className)}>
 			{showPercentage && (
-				<div className="flex justify-between text-sm text-muted-foreground">
+				<div className="flex justify-between text-muted-foreground text-sm">
 					<span>Progreso</span>
 					<span>{Math.round(progress)}%</span>
 				</div>
 			)}
-			<div className="w-full bg-muted rounded-full h-2">
+			<div className="h-2 w-full rounded-full bg-muted">
 				<div
 					className={cn(
 						"h-2 rounded-full transition-all duration-300 ease-out",
-						"bg-gradient-to-r from-secondary to-secondary/80",
+						"bg-gradient-to-r from-secondary to-secondary/80"
 					)}
 					style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
 				/>
@@ -256,8 +256,8 @@ export function InlineLoading({
 	return (
 		<div
 			className={cn(
-				"flex items-center gap-2 text-sm text-muted-foreground",
-				className,
+				"flex items-center gap-2 text-muted-foreground text-sm",
+				className
 			)}
 		>
 			<LoadingSpinner size="sm" />
@@ -279,19 +279,21 @@ export function CardLoadingOverlay({
 	message?: string;
 	className?: string;
 }) {
-	if (!isVisible) return null;
+	if (!isVisible) {
+		return null;
+	}
 
 	return (
 		<div
 			className={cn(
-				"absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg",
+				"absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-background/80 backdrop-blur-sm",
 				secondaryColorClasses.accent,
-				className,
+				className
 			)}
 		>
-			<div className="text-center space-y-3">
+			<div className="space-y-3 text-center">
 				<LoadingSpinner />
-				<p className="text-sm text-muted-foreground">{message}</p>
+				<p className="text-muted-foreground text-sm">{message}</p>
 			</div>
 		</div>
 	);
@@ -310,15 +312,15 @@ export function DataLoadingState({
 	return (
 		<div
 			className={cn(
-				"flex flex-col items-center justify-center p-8 space-y-4",
-				className,
+				"flex flex-col items-center justify-center space-y-4 p-8",
+				className
 			)}
 		>
-			<div className={cn("p-4 rounded-full", secondaryColorClasses.accent)}>
+			<div className={cn("rounded-full p-4", secondaryColorClasses.accent)}>
 				<LoadingSpinner size="lg" />
 			</div>
-			<div className="text-center space-y-2">
-				<p className="text-sm font-medium">{message}</p>
+			<div className="space-y-2 text-center">
+				<p className="font-medium text-sm">{message}</p>
 				<LoadingDots />
 			</div>
 		</div>
@@ -340,14 +342,14 @@ export function TableLoadingState({
 	return (
 		<div className={cn("space-y-3", className)}>
 			{Array.from({ length: rows }).map((_, i) => (
-				<div key={i} className="flex gap-4">
+				<div className="flex gap-4" key={i}>
 					{Array.from({ length: columns }).map((_, j) => (
 						<div
-							key={j}
 							className={cn(
-								"h-4 rounded animate-pulse",
-								j === 0 ? "w-24 bg-secondary/20" : "flex-1 bg-muted",
+								"h-4 animate-pulse rounded",
+								j === 0 ? "w-24 bg-secondary/20" : "flex-1 bg-muted"
 							)}
+							key={j}
 						/>
 					))}
 				</div>
@@ -362,11 +364,11 @@ export function TableLoadingState({
 export function FieldLoadingState({ className }: { className?: string }) {
 	return (
 		<div className={cn("space-y-2", className)}>
-			<div className="h-4 w-20 bg-muted animate-pulse rounded" />
+			<div className="h-4 w-20 animate-pulse rounded bg-muted" />
 			<div
 				className={cn(
-					"h-10 w-full rounded-md border animate-pulse",
-					secondaryColorClasses.accent,
+					"h-10 w-full animate-pulse rounded-md border",
+					secondaryColorClasses.accent
 				)}
 			/>
 		</div>
@@ -379,27 +381,27 @@ export function FieldLoadingState({ className }: { className?: string }) {
 export const LoadingStates = {
 	StepLoading: () => (
 		<div className="space-y-4 p-6">
-			<div className="h-6 w-48 bg-muted animate-pulse rounded" />
+			<div className="h-6 w-48 animate-pulse rounded bg-muted" />
 			<div className="space-y-3">
 				<FieldLoadingState />
 				<FieldLoadingState />
 				<FieldLoadingState />
 			</div>
 			<div className="flex justify-between pt-4">
-				<div className="h-10 w-24 bg-muted animate-pulse rounded" />
-				<div className="h-10 w-24 bg-muted animate-pulse rounded" />
+				<div className="h-10 w-24 animate-pulse rounded bg-muted" />
+				<div className="h-10 w-24 animate-pulse rounded bg-muted" />
 			</div>
 		</div>
 	),
 
 	NavigationLoading: () => (
 		<div className="space-y-4">
-			<div className="h-2 w-full bg-muted animate-pulse rounded" />
+			<div className="h-2 w-full animate-pulse rounded bg-muted" />
 			<div className="flex justify-between">
 				{[1, 2, 3, 4].map((i) => (
-					<div key={i} className="flex flex-col items-center space-y-2">
-						<div className="w-10 h-10 bg-muted animate-pulse rounded-full" />
-						<div className="h-3 w-16 bg-muted animate-pulse rounded" />
+					<div className="flex flex-col items-center space-y-2" key={i}>
+						<div className="h-10 w-10 animate-pulse rounded-full bg-muted" />
+						<div className="h-3 w-16 animate-pulse rounded bg-muted" />
 					</div>
 				))}
 			</div>
@@ -407,20 +409,20 @@ export const LoadingStates = {
 	),
 
 	MapLoading: () => (
-		<div className="w-full h-64 bg-muted animate-pulse rounded-lg flex items-center justify-center">
-			<div className="text-center space-y-2">
+		<div className="flex h-64 w-full animate-pulse items-center justify-center rounded-lg bg-muted">
+			<div className="space-y-2 text-center">
 				<LoadingSpinner />
-				<p className="text-sm text-muted-foreground">Cargando mapa...</p>
+				<p className="text-muted-foreground text-sm">Cargando mapa...</p>
 			</div>
 		</div>
 	),
 
 	ImageUploadLoading: () => (
-		<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+		<div className="grid grid-cols-2 gap-4 md:grid-cols-3">
 			{[1, 2, 3, 4, 5, 6].map((i) => (
 				<div
+					className="aspect-video animate-pulse rounded-lg bg-muted"
 					key={i}
-					className="aspect-video bg-muted animate-pulse rounded-lg"
 				/>
 			))}
 		</div>

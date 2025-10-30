@@ -2,12 +2,12 @@
  * Vercel Blob configuration and validation
  */
 
-export interface BlobConfig {
+export type BlobConfig = {
 	isConfigured: boolean;
 	token?: string;
 	storeUrl?: string;
 	error?: string;
-}
+};
 
 /**
  * Validate Vercel Blob configuration
@@ -63,12 +63,12 @@ export function getBlobConfigInfo(): BlobConfig & {
 			"1. Go to your Vercel dashboard",
 			"2. Navigate to Storage tab",
 			"3. Create a new Blob store",
-			"4. Copy the BLOB_READ_WRITE_TOKEN to your .env file",
+			"4. Copy the BLOB_READ_WRITE_TOKEN to your .env file"
 		);
 
 		if (isDevelopment) {
 			recommendations.push(
-				"5. For development, you can use mock storage by setting MOCK_BLOB_STORAGE=true",
+				"5. For development, you can use mock storage by setting MOCK_BLOB_STORAGE=true"
 			);
 		}
 	}

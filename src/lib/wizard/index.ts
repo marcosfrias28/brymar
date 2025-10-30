@@ -22,16 +22,16 @@
  */
 
 // Types (Re-exported for convenience)
-export type { WizardDraft } from "@/lib/db/schema";
 export type {
 	ValidationResult,
 	WizardConfig,
 	WizardData,
 } from "@/types/wizard-core";
+
+// Wizard Configurations
 export { blogWizardConfig } from "./blog-wizard-config";
 export { landWizardConfig } from "./land-wizard-config";
-// Wizard Configurations
 export { propertyWizardConfig } from "./property-wizard-config";
-export { WizardPersistence } from "./wizard-persistence";
+
 // Core Utilities
 export { WizardValidator } from "./wizard-validator";

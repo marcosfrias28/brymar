@@ -1,39 +1,40 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+
 // import { createDraftManager } from "@/lib/utils/draft-management";
 
 // Placeholder ClientDraftManager since draft functionality is disabled
 const ClientDraftManager = {
-	hasDraft: (type: any, userId: any, draftId: any) => false,
-	loadDraft: (type: any, userId: any, draftId: any) => null,
-	saveDraft: (type: any, userId: any, data: any, draftId?: any) => {},
-	deleteDraft: (type: any, userId: any, draftId: any) => {},
+	hasDraft: (_type: any, _userId: any, _draftId: any) => false,
+	loadDraft: (_type: any, _userId: any, _draftId: any) => null,
+	saveDraft: (_type: any, _userId: any, _data: any, _draftId?: any) => {},
+	deleteDraft: (_type: any, _userId: any, _draftId: any) => {},
 	clearExpiredDrafts: () => {},
 };
 
-interface UseDraftPersistenceOptions {
+type UseDraftPersistenceOptions = {
 	type: "property" | "land" | "blog";
 	userId: string;
 	draftId?: string;
 	autoSaveInterval?: number;
 	enableLocalStorage?: boolean;
-}
+};
 
-interface DraftPersistenceState {
+type DraftPersistenceState = {
 	hasLocalDraft: boolean;
 	localDraftTimestamp: Date | null;
 	isAutoSaving: boolean;
 	lastAutoSave: Date | null;
 	autoSaveError: string | null;
-}
+};
 
 export function useDraftPersistence(options: UseDraftPersistenceOptions) {
 	const {
 		type,
 		userId,
 		draftId,
-		autoSaveInterval = 30000, // 30 seconds
+		autoSaveInterval = 30_000, // 30 seconds
 		enableLocalStorage = true,
 	} = options;
 
@@ -47,23 +48,29 @@ export function useDraftPersistence(options: UseDraftPersistenceOptions) {
 
 	// Check for existing local draft on mount
 	useEffect(() => {
-		if (!enableLocalStorage) return;
+		if (!enableLocalStorage) {
+			return;
+		}
 
 		try {
 			const hasLocal = ClientDraftManager.hasDraft(type, userId, draftId);
 			if (hasLocal) {
 				const localData = ClientDraftManager.loadDraft(type, userId, draftId);
-				if (localData && typeof localData === 'object' && 'timestamp' in localData) {
+				if (
+					localData &&
+					typeof localData === "object" &&
+					"timestamp" in localData
+				) {
 					setState((prev) => ({
 						...prev,
 						hasLocalDraft: true,
-						localDraftTimestamp: new Date((localData as any).timestamp || Date.now()),
+						localDraftTimestamp: new Date(
+							(localData as any).timestamp || Date.now()
+						),
 					}));
 				}
 			}
-		} catch (error) {
-			console.error("Error checking for local draft:", error);
-		}
+		} catch (_error) {}
 	}, [type, userId, draftId, enableLocalStorage]);
 
 	// Clean up expired drafts on mount
@@ -76,7 +83,9 @@ export function useDraftPersistence(options: UseDraftPersistenceOptions) {
 	// Save draft to localStorage
 	const saveLocalDraft = useCallback(
 		(data: any) => {
-			if (!enableLocalStorage) return;
+			if (!enableLocalStorage) {
+				return;
+			}
 
 			try {
 				ClientDraftManager.saveDraft(type, userId, data, draftId);
@@ -85,32 +94,34 @@ export function useDraftPersistence(options: UseDraftPersistenceOptions) {
 					lastAutoSave: new Date(),
 					autoSaveError: null,
 				}));
-			} catch (error) {
-				console.error("Error saving local draft:", error);
+			} catch (_error) {
 				setState((prev) => ({
 					...prev,
 					autoSaveError: "Error al guardar borrador local",
 				}));
 			}
 		},
-		[type, userId, draftId, enableLocalStorage],
+		[type, userId, draftId, enableLocalStorage]
 	);
 
 	// Load draft from localStorage
 	const loadLocalDraft = useCallback(() => {
-		if (!enableLocalStorage) return null;
+		if (!enableLocalStorage) {
+			return null;
+		}
 
 		try {
 			return ClientDraftManager.loadDraft(type, userId, draftId);
-		} catch (error) {
-			console.error("Error loading local draft:", error);
+		} catch (_error) {
 			return null;
 		}
 	}, [type, userId, draftId, enableLocalStorage]);
 
 	// Delete local draft
 	const deleteLocalDraft = useCallback(() => {
-		if (!enableLocalStorage) return;
+		if (!enableLocalStorage) {
+			return;
+		}
 
 		try {
 			ClientDraftManager.deleteDraft(type, userId, draftId);
@@ -119,15 +130,15 @@ export function useDraftPersistence(options: UseDraftPersistenceOptions) {
 				hasLocalDraft: false,
 				localDraftTimestamp: null,
 			}));
-		} catch (error) {
-			console.error("Error deleting local draft:", error);
-		}
+		} catch (_error) {}
 	}, [type, userId, draftId, enableLocalStorage]);
 
 	// Auto-save functionality
 	const startAutoSave = useCallback(
 		(getData: () => any) => {
-			if (!enableLocalStorage || autoSaveInterval <= 0) return;
+			if (!enableLocalStorage || autoSaveInterval <= 0) {
+				return;
+			}
 
 			const interval = setInterval(() => {
 				try {
@@ -136,8 +147,7 @@ export function useDraftPersistence(options: UseDraftPersistenceOptions) {
 					if (data) {
 						saveLocalDraft(data);
 					}
-				} catch (error) {
-					console.error("Auto-save error:", error);
+				} catch (_error) {
 					setState((prev) => ({
 						...prev,
 						autoSaveError: "Error en guardado automático",
@@ -149,7 +159,7 @@ export function useDraftPersistence(options: UseDraftPersistenceOptions) {
 
 			return () => clearInterval(interval);
 		},
-		[autoSaveInterval, enableLocalStorage, saveLocalDraft],
+		[autoSaveInterval, enableLocalStorage, saveLocalDraft]
 	);
 
 	// Manual save
@@ -162,7 +172,7 @@ export function useDraftPersistence(options: UseDraftPersistenceOptions) {
 				setState((prev) => ({ ...prev, isAutoSaving: false }));
 			}
 		},
-		[saveLocalDraft],
+		[saveLocalDraft]
 	);
 
 	// Restore from local draft
@@ -202,7 +212,7 @@ export function useDraftPersistence(options: UseDraftPersistenceOptions) {
 // Hook for cross-session draft recovery
 export function useDraftRecovery(
 	type: "property" | "land" | "blog",
-	userId: string,
+	userId: string
 ) {
 	const [availableDrafts, setAvailableDrafts] = useState<
 		Array<{
@@ -237,18 +247,14 @@ export function useDraftRecovery(
 								data: draftData.data,
 							});
 						}
-					} catch (error) {
-						console.error("Error parsing draft:", error);
-					}
+					} catch (_error) {}
 				}
 			}
 
 			// Sort by timestamp (newest first)
 			drafts.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 			setAvailableDrafts(drafts);
-		} catch (error) {
-			console.error("Error checking for available drafts:", error);
-		}
+		} catch (_error) {}
 	}, [type, userId]);
 
 	const restoreDraft = useCallback((key: string) => {
@@ -258,9 +264,7 @@ export function useDraftRecovery(
 				const draftData = JSON.parse(stored);
 				return draftData.data;
 			}
-		} catch (error) {
-			console.error("Error restoring draft:", error);
-		}
+		} catch (_error) {}
 		return null;
 	}, []);
 
@@ -268,9 +272,7 @@ export function useDraftRecovery(
 		try {
 			localStorage.removeItem(key);
 			setAvailableDrafts((prev) => prev.filter((draft) => draft.key !== key));
-		} catch (error) {
-			console.error("Error deleting draft:", error);
-		}
+		} catch (_error) {}
 	}, []);
 
 	return {
@@ -284,7 +286,7 @@ export function useDraftRecovery(
 export function useDraftSync(
 	type: "property" | "land" | "blog",
 	userId: string,
-	draftId?: string,
+	draftId?: string
 ) {
 	const [syncState, setSyncState] = useState<{
 		isSyncing: boolean;
@@ -302,8 +304,8 @@ export function useDraftSync(
 	const syncWithServer = useCallback(
 		async (
 			serverSaveFunction: (
-				data: any,
-			) => Promise<{ success: boolean; data?: any; message?: string }>,
+				data: any
+			) => Promise<{ success: boolean; data?: any; message?: string }>
 		) => {
 			setSyncState((prev) => ({ ...prev, isSyncing: true, syncError: null }));
 
@@ -320,12 +322,10 @@ export function useDraftSync(
 							hasUnsyncedChanges: false,
 						}));
 						return result.data;
-					} else {
-						throw new Error(result.message || "Sync failed");
 					}
+					throw new Error(result.message || "Sync failed");
 				}
 			} catch (error) {
-				console.error("Draft sync error:", error);
 				setSyncState((prev) => ({
 					...prev,
 					syncError:
@@ -336,7 +336,7 @@ export function useDraftSync(
 				setSyncState((prev) => ({ ...prev, isSyncing: false }));
 			}
 		},
-		[type, userId, draftId],
+		[type, userId, draftId]
 	);
 
 	// Mark as having unsynced changes

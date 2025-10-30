@@ -3,7 +3,7 @@
 import { ArrowLeft, Edit3, Eye, Save, Trash2, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 import { toast } from "sonner";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
@@ -29,6 +29,7 @@ import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
 
 export default function PropertyDetailPage() {
 	const params = useParams();
+	const _router = useRouter();
 
 	// Always call hooks before any early return
 	const titleId = useId();
@@ -47,7 +48,7 @@ export default function PropertyDetailPage() {
 
 	const [isUpdating, setIsUpdating] = useState(false);
 	const [updateState, setUpdateState] = useState<{ success?: boolean } | null>(
-		null,
+		null
 	);
 
 	useEffect(() => {
@@ -63,28 +64,36 @@ export default function PropertyDetailPage() {
 	}, [updateState]);
 
 	// Check if params and params.id exist after hooks
-	if (!params || !params.id) {
+	if (!params?.id) {
 		return (
 			<DashboardPageLayout
-				title="Error"
-				description="Propiedad no encontrada"
+				actions={
+					<Button asChild variant="outline">
+						<Link href="/dashboard/properties">
+							<ArrowLeft className="mr-2 h-4 w-4" />
+							Volver a Propiedades
+						</Link>
+					</Button>
+				}
 				breadcrumbs={[
 					{ label: "Dashboard", href: "/dashboard" },
 					{ label: "Propiedades", href: "/dashboard/properties" },
 					{ label: "Error" },
 				]}
+				description="Propiedad no encontrada"
+				title="Error"
 			>
-				<div className="flex items-center justify-center min-h-[400px]">
+				<div className="flex min-h-[400px] items-center justify-center">
 					<div className="text-center">
-						<h2 className="text-xl font-semibold mb-2">
+						<h2 className="mb-2 font-semibold text-xl">
 							ID de propiedad no válido
 						</h2>
-						<p className="text-muted-foreground mb-4">
+						<p className="mb-4 text-muted-foreground">
 							No se pudo encontrar la propiedad solicitada
 						</p>
 						<Button asChild>
 							<Link href="/dashboard/properties">
-								<ArrowLeft className="h-4 w-4 mr-2" />
+								<ArrowLeft className="mr-2 h-4 w-4" />
 								Volver a Propiedades
 							</Link>
 						</Button>
@@ -97,13 +106,21 @@ export default function PropertyDetailPage() {
 	if (loading) {
 		return (
 			<DashboardPageLayout
-				title="Cargando Propiedad"
-				description="Cargando información de la propiedad"
+				actions={
+					<Button asChild variant="outline">
+						<Link href="/dashboard/properties">
+							<ArrowLeft className="mr-2 h-4 w-4" />
+							Volver a Propiedades
+						</Link>
+					</Button>
+				}
+				description="Obteniendo información de la propiedad"
+				title="Cargando..."
 			>
-				<div className="flex items-center justify-center min-h-[400px]">
+				<div className="flex min-h-[400px] items-center justify-center">
 					<div className="text-center">
-						<h2 className="text-xl font-semibold mb-2">Cargando...</h2>
-						<p className="text-muted-foreground mb-4">
+						<h2 className="mb-2 font-semibold text-xl">Cargando...</h2>
+						<p className="mb-4 text-muted-foreground">
 							Cargando información de la propiedad.
 						</p>
 					</div>
@@ -115,15 +132,23 @@ export default function PropertyDetailPage() {
 	if (error || !property) {
 		return (
 			<DashboardPageLayout
-				title="Propiedad no encontrada"
-				description="La propiedad solicitada no existe"
+				actions={
+					<Button asChild variant="outline">
+						<Link href="/dashboard/properties">
+							<ArrowLeft className="mr-2 h-4 w-4" />
+							Volver a Propiedades
+						</Link>
+					</Button>
+				}
+				description="No se pudo cargar la propiedad"
+				title="Error"
 			>
-				<div className="flex items-center justify-center min-h-[400px]">
+				<div className="flex min-h-[400px] items-center justify-center">
 					<div className="text-center">
-						<h2 className="text-xl font-semibold mb-2">
+						<h2 className="mb-2 font-semibold text-xl">
 							Propiedad no encontrada
 						</h2>
-						<p className="text-muted-foreground mb-4">
+						<p className="mb-4 text-muted-foreground">
 							La propiedad que buscas no existe o ha sido eliminada.
 						</p>
 						<Button asChild>
@@ -157,8 +182,7 @@ export default function PropertyDetailPage() {
 				} else {
 					toast.error(result.error || "Error al actualizar la propiedad");
 				}
-			} catch (error) {
-				console.error("Error updating property:", error);
+			} catch (_error) {
 				toast.error("Error inesperado al actualizar la propiedad");
 			} finally {
 				setIsUpdating(false);
@@ -181,7 +205,9 @@ export default function PropertyDetailPage() {
 	};
 
 	const currentData = isEditing ? editedProperty : property;
-	if (!currentData) return null;
+	if (!currentData) {
+		return null;
+	}
 
 	const breadcrumbs = [
 		{ label: "Dashboard", href: "/dashboard" },
@@ -193,31 +219,37 @@ export default function PropertyDetailPage() {
 
 	return (
 		<DashboardPageLayout
-			title={currentData.title || "Propiedad"}
-			description="Detalles de la propiedad"
+			actions={
+				<Button asChild variant="outline">
+					<Link href="/dashboard/properties">
+						<ArrowLeft className="mr-2 h-4 w-4" />
+						Volver a Propiedades
+					</Link>
+				</Button>
+			}
 			breadcrumbs={breadcrumbs}
+			description="Detalles de la propiedad"
+			title={currentData.title || "Propiedad"}
 		>
 			<div className="space-y-6">
 				{/* Header */}
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-4">
-						<Button variant="ghost" size="sm" asChild>
+						<Button asChild size="sm" variant="ghost">
 							<Link href="/dashboard/properties">
-								<ArrowLeft className="h-4 w-4 mr-2" />
+								<ArrowLeft className="mr-2 h-4 w-4" />
 								Volver a Propiedades
 							</Link>
 						</Button>
 						<div>
-							<h1 className="text-3xl font-bold font-serif">
-								{isEditing
-									? "Editando Propiedad"
-									: currentData?.title}
+							<h1 className="font-bold font-serif text-3xl">
+								{isEditing ? "Editando Propiedad" : currentData?.title}
 							</h1>
-							<div className="flex items-center gap-2 mt-1">
+							<div className="mt-1 flex items-center gap-2">
 								<Badge
 									className={cn(
 										"bg-blue-500 text-white",
-										secondaryColorClasses.badge,
+										secondaryColorClasses.badge
 									)}
 								>
 									{currentData?.type || "Propiedad"}
@@ -227,88 +259,88 @@ export default function PropertyDetailPage() {
 					</div>
 
 					<div className="flex gap-2">
-						{!isEditing ? (
+						{isEditing ? (
 							<>
 								<Button
-									variant="outline"
-									size="sm"
-									asChild
 									className={cn(secondaryColorClasses.interactive)}
+									onClick={handleCancel}
+									size="sm"
+									variant="outline"
 								>
-									<Link href={`/dashboard/properties/${params.id}/edit`}>
-										<Edit3 className="h-4 w-4 mr-2" />
-										Editar con Asistente
-									</Link>
+									<X className="mr-2 h-4 w-4" />
+									Cancelar
 								</Button>
 								<Button
-									variant="outline"
+									className={cn(
+										"bg-primary hover:bg-primary/90",
+										secondaryColorClasses.focusRing
+									)}
+									disabled={isUpdating}
+									onClick={handleSave}
 									size="sm"
-									onClick={() => setIsEditing(true)}
-									className={cn(secondaryColorClasses.interactive)}
 								>
-									<Edit3 className="h-4 w-4 mr-2" />
-									Edición Rápida
-								</Button>
-								<Button
-									variant="outline"
-									size="sm"
-									className={cn(secondaryColorClasses.interactive)}
-								>
-									<Eye className="h-4 w-4 mr-2" />
-									Vista Previa
-								</Button>
-								<Button variant="destructive" size="sm" onClick={handleDelete}>
-									<Trash2 className="h-4 w-4 mr-2" />
-									Eliminar
+									<Save className="mr-2 h-4 w-4" />
+									{isUpdating ? "Guardando..." : "Guardar"}
 								</Button>
 							</>
 						) : (
 							<>
 								<Button
-									variant="outline"
-									size="sm"
-									onClick={handleCancel}
+									asChild
 									className={cn(secondaryColorClasses.interactive)}
+									size="sm"
+									variant="outline"
 								>
-									<X className="h-4 w-4 mr-2" />
-									Cancelar
+									<Link href={`/dashboard/properties/${params.id}/edit`}>
+										<Edit3 className="mr-2 h-4 w-4" />
+										Editar con Asistente
+									</Link>
 								</Button>
 								<Button
+									className={cn(secondaryColorClasses.interactive)}
+									onClick={() => setIsEditing(true)}
 									size="sm"
-									onClick={handleSave}
-									disabled={isUpdating}
-									className={cn(
-										"bg-primary hover:bg-primary/90",
-										secondaryColorClasses.focusRing,
-									)}
+									variant="outline"
 								>
-									<Save className="h-4 w-4 mr-2" />
-									{isUpdating ? "Guardando..." : "Guardar"}
+									<Edit3 className="mr-2 h-4 w-4" />
+									Edición Rápida
+								</Button>
+								<Button
+									className={cn(secondaryColorClasses.interactive)}
+									size="sm"
+									variant="outline"
+								>
+									<Eye className="mr-2 h-4 w-4" />
+									Vista Previa
+								</Button>
+								<Button onClick={handleDelete} size="sm" variant="destructive">
+									<Trash2 className="mr-2 h-4 w-4" />
+									Eliminar
 								</Button>
 							</>
 						)}
 					</div>
 				</div>
 
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+				<div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 					{/* Main Content */}
-					<div className="lg:col-span-2 space-y-6">
+					<div className="space-y-6 lg:col-span-2">
 						{/* Images */}
 						<Card
 							className={cn(
 								"border shadow-sm transition-all duration-200",
-								secondaryColorClasses.cardHover,
+								secondaryColorClasses.cardHover
 							)}
 						>
 							<CardHeader>
-								<CardTitle className="text-lg font-semibold">
+								<CardTitle className="font-semibold text-lg">
 									Imágenes
 								</CardTitle>
 							</CardHeader>
 							<CardContent>
 								{isEditing ? (
 									<div className="space-y-4">
-										<p className="text-sm text-gray-600">
+										<p className="text-gray-600 text-sm">
 											Gestión de imágenes disponible en modo de edición
 										</p>
 										<div className="grid grid-cols-2 gap-4">
@@ -323,14 +355,14 @@ export default function PropertyDetailPage() {
 															: "/placeholder.svg";
 												return (
 													<div
+														className="relative aspect-video overflow-hidden rounded-lg"
 														key={imageUrl}
-														className="aspect-video rounded-lg overflow-hidden relative"
 													>
 														<Image
-															src={imageUrl}
 															alt="Property"
-															fill
 															className="object-cover"
+															fill
+															src={imageUrl}
 														/>
 													</div>
 												);
@@ -348,14 +380,14 @@ export default function PropertyDetailPage() {
 														: "/placeholder.svg";
 											return (
 												<div
+													className="relative aspect-video overflow-hidden rounded-lg"
 													key={imageUrl}
-													className="aspect-video rounded-lg overflow-hidden relative"
 												>
 													<Image
-														src={imageUrl}
 														alt="Property"
-														fill
 														className="object-cover"
+														fill
+														src={imageUrl}
 													/>
 												</div>
 											);
@@ -369,11 +401,11 @@ export default function PropertyDetailPage() {
 						<Card
 							className={cn(
 								"border shadow-sm transition-all duration-200",
-								secondaryColorClasses.cardHover,
+								secondaryColorClasses.cardHover
 							)}
 						>
 							<CardHeader>
-								<CardTitle className="text-lg font-semibold">
+								<CardTitle className="font-semibold text-lg">
 									Descripción
 								</CardTitle>
 							</CardHeader>
@@ -407,11 +439,11 @@ export default function PropertyDetailPage() {
 						<Card
 							className={cn(
 								"border shadow-sm transition-all duration-200",
-								secondaryColorClasses.cardHover,
+								secondaryColorClasses.cardHover
 							)}
 						>
 							<CardHeader>
-								<CardTitle className="text-lg font-semibold">
+								<CardTitle className="font-semibold text-lg">
 									Información Básica
 								</CardTitle>
 							</CardHeader>
@@ -421,8 +453,8 @@ export default function PropertyDetailPage() {
 										<div>
 											<Label htmlFor={titleId}>Título</Label>
 											<Input
+												className={cn(secondaryColorClasses.inputFocus)}
 												id={titleId}
-												value={editedProperty?.title || ""}
 												onChange={(e) =>
 													editedProperty &&
 													setEditedProperty({
@@ -430,13 +462,12 @@ export default function PropertyDetailPage() {
 														title: e.target.value,
 													})
 												}
-												className={cn(secondaryColorClasses.inputFocus)}
+												value={editedProperty?.title || ""}
 											/>
 										</div>
 										<div>
 											<Label htmlFor="type">Tipo</Label>
 											<Select
-												value={editedProperty?.type || "house"}
 												onValueChange={(value: PropertyType) =>
 													editedProperty &&
 													setEditedProperty({
@@ -444,6 +475,7 @@ export default function PropertyDetailPage() {
 														type: value,
 													})
 												}
+												value={editedProperty?.type || "house"}
 											>
 												<SelectTrigger
 													className={cn(secondaryColorClasses.selectFocus)}
@@ -459,9 +491,8 @@ export default function PropertyDetailPage() {
 										<div>
 											<Label htmlFor={priceId}>Precio (USD)</Label>
 											<Input
+												className={cn(secondaryColorClasses.inputFocus)}
 												id={priceId}
-												type="number"
-												value={editedProperty?.price || 0}
 												onChange={(e) =>
 													editedProperty &&
 													setEditedProperty({
@@ -469,7 +500,8 @@ export default function PropertyDetailPage() {
 														price: Number(e.target.value),
 													})
 												}
-												className={cn(secondaryColorClasses.inputFocus)}
+												type="number"
+												value={editedProperty?.price || 0}
 											/>
 										</div>
 										{/* Location field not available in current DTO */}
@@ -477,13 +509,11 @@ export default function PropertyDetailPage() {
 								) : (
 									<>
 										<div>
-											<Label className="text-sm font-medium text-muted-foreground">
+											<Label className="font-medium text-muted-foreground text-sm">
 												Precio
 											</Label>
-											<p className="text-2xl font-bold text-foreground">
-												$
-												{currentData?.price?.toLocaleString() || 0}{" "}
-												USD
+											<p className="font-bold text-2xl text-foreground">
+												${currentData?.price?.toLocaleString() || 0} USD
 											</p>
 										</div>
 										{/* Location not available in current DTO */}
@@ -496,11 +526,11 @@ export default function PropertyDetailPage() {
 						<Card
 							className={cn(
 								"border shadow-sm transition-all duration-200",
-								secondaryColorClasses.cardHover,
+								secondaryColorClasses.cardHover
 							)}
 						>
 							<CardHeader>
-								<CardTitle className="text-lg font-semibold">
+								<CardTitle className="font-semibold text-lg">
 									Detalles
 								</CardTitle>
 							</CardHeader>
@@ -525,18 +555,18 @@ export default function PropertyDetailPage() {
 						<Card
 							className={cn(
 								"border shadow-sm transition-all duration-200",
-								secondaryColorClasses.cardHover,
+								secondaryColorClasses.cardHover
 							)}
 						>
 							<CardHeader>
-								<CardTitle className="text-lg font-semibold">
+								<CardTitle className="font-semibold text-lg">
 									Información Adicional
 								</CardTitle>
 							</CardHeader>
 							<CardContent>
 								<div className="space-y-2">
 									<div>
-										<Label className="text-sm font-medium text-muted-foreground">
+										<Label className="font-medium text-muted-foreground text-sm">
 											Fecha de Creación
 										</Label>
 										<p className="text-foreground">
@@ -546,10 +576,10 @@ export default function PropertyDetailPage() {
 										</p>
 									</div>
 									<div>
-										<Label className="text-sm font-medium text-muted-foreground">
+										<Label className="font-medium text-muted-foreground text-sm">
 											ID de Propiedad
 										</Label>
-										<p className="text-foreground font-mono">
+										<p className="font-mono text-foreground">
 											{currentData?.id}
 										</p>
 									</div>

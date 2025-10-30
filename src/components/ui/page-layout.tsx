@@ -7,7 +7,7 @@ import { ActionButtons } from "./action-buttons";
 import { BackButton } from "./back-button";
 import { PageHeader } from "./page-header";
 
-interface PageLayoutProps {
+type PageLayoutProps = {
 	title: string;
 	description?: string;
 	breadcrumbs?: BreadcrumbItem[];
@@ -21,7 +21,7 @@ interface PageLayoutProps {
 	className?: string;
 	contentClassName?: string;
 	headerClassName?: string;
-}
+};
 
 export function PageLayout({
 	title,
@@ -55,13 +55,13 @@ export function PageLayout({
 	return (
 		<div className={cn("space-y-6", className)}>
 			<PageHeader
-				title={title}
-				description={description}
-				breadcrumbs={breadcrumbs}
 				actions={combinedActions}
-				showSearch={showSearch}
-				searchPlaceholder={searchPlaceholder}
+				breadcrumbs={breadcrumbs}
 				className={headerClassName}
+				description={description}
+				searchPlaceholder={searchPlaceholder}
+				showSearch={showSearch}
+				title={title}
 			/>
 
 			<div className={cn("space-y-6", contentClassName)}>{children}</div>

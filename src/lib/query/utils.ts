@@ -44,7 +44,7 @@ export const defaultQueryOptions = {
  */
 export function createQueryOptions<_T>(
 	type: keyof typeof defaultQueryOptions,
-	overrides?: any,
+	overrides?: any
 ): any {
 	return {
 		...defaultQueryOptions[type],
@@ -56,15 +56,19 @@ export function createQueryOptions<_T>(
  * Create mutation options with common patterns
  */
 export function createMutationOptions<_TData, _TError, _TVariables, _TContext>(
-	overrides?: any,
+	overrides?: any
 ): any {
 	return {
 		retry: (failureCount: any, error: any) => {
 			// Don't retry on client errors (4xx)
-			if (error && "status" in error && typeof error.status === "number") {
-				if (error.status >= 400 && error.status < 500) {
-					return false;
-				}
+			if (
+				error &&
+				"status" in error &&
+				typeof error.status === "number" &&
+				error.status >= 400 &&
+				error.status < 500
+			) {
+				return false;
 			}
 
 			// Retry up to 2 times for server errors
@@ -79,7 +83,7 @@ export function createMutationOptions<_TData, _TError, _TVariables, _TContext>(
  */
 export function hasQueryData(
 	queryClient: QueryClient,
-	queryKey: readonly unknown[],
+	queryKey: readonly unknown[]
 ): boolean {
 	return queryClient.getQueryData(queryKey) !== undefined;
 }
@@ -89,7 +93,7 @@ export function hasQueryData(
  */
 export function getCachedData<T>(
 	queryClient: QueryClient,
-	queryKey: readonly unknown[],
+	queryKey: readonly unknown[]
 ): T | undefined {
 	return queryClient.getQueryData<T>(queryKey);
 }
@@ -100,7 +104,7 @@ export function getCachedData<T>(
 export function setCachedData<T>(
 	queryClient: QueryClient,
 	queryKey: readonly unknown[],
-	data: T | ((oldData: T | undefined) => T),
+	data: T | ((oldData: T | undefined) => T)
 ): void {
 	queryClient.setQueryData<T>(queryKey, data);
 }
@@ -112,7 +116,7 @@ export async function ensureQueryData<T>(
 	queryClient: QueryClient,
 	queryKey: readonly unknown[],
 	queryFn: () => Promise<T>,
-	options?: { staleTime?: number },
+	options?: { staleTime?: number }
 ): Promise<T> {
 	return queryClient.ensureQueryData({
 		queryKey,
@@ -126,10 +130,10 @@ export async function ensureQueryData<T>(
  */
 export async function batchInvalidate(
 	queryClient: QueryClient,
-	patterns: Array<readonly unknown[]>,
+	patterns: Array<readonly unknown[]>
 ): Promise<void> {
 	const promises = patterns.map((pattern) =>
-		queryClient.invalidateQueries({ queryKey: pattern }),
+		queryClient.invalidateQueries({ queryKey: pattern })
 	);
 
 	await Promise.all(promises);
@@ -147,7 +151,7 @@ export function clearAllCache(queryClient: QueryClient): void {
  */
 export function getQueryState(
 	queryClient: QueryClient,
-	queryKey: readonly unknown[],
+	queryKey: readonly unknown[]
 ) {
 	const query = queryClient.getQueryCache().find({ queryKey });
 
@@ -169,7 +173,7 @@ export async function safePrefetch<T>(
 	queryClient: QueryClient,
 	queryKey: readonly unknown[],
 	queryFn: () => Promise<T>,
-	options?: { staleTime?: number },
+	options?: { staleTime?: number }
 ): Promise<boolean> {
 	try {
 		await queryClient.prefetchQuery({
@@ -178,8 +182,7 @@ export async function safePrefetch<T>(
 			staleTime: options?.staleTime || 5 * 60 * 1000,
 		});
 		return true;
-	} catch (error) {
-		console.warn("Prefetch failed:", error);
+	} catch (_error) {
 		return false;
 	}
 }
@@ -189,7 +192,7 @@ export async function safePrefetch<T>(
  */
 export async function cancelQueries(
 	queryClient: QueryClient,
-	queryKey: readonly unknown[],
+	queryKey: readonly unknown[]
 ): Promise<void> {
 	await queryClient.cancelQueries({ queryKey });
 }
@@ -199,7 +202,7 @@ export async function cancelQueries(
  */
 export async function resetQuery(
 	queryClient: QueryClient,
-	queryKey: readonly unknown[],
+	queryKey: readonly unknown[]
 ): Promise<void> {
 	await queryClient.resetQueries({ queryKey });
 }
@@ -209,10 +212,14 @@ export async function resetQuery(
  */
 export function createQueryMatcher(pattern: readonly unknown[]) {
 	return (queryKey: readonly unknown[]) => {
-		if (queryKey.length < pattern.length) return false;
+		if (queryKey.length < pattern.length) {
+			return false;
+		}
 
 		return pattern.every((part, index) => {
-			if (part === undefined) return true; // Wildcard
+			if (part === undefined) {
+				return true; // Wildcard
+			}
 			return queryKey[index] === part;
 		});
 	};

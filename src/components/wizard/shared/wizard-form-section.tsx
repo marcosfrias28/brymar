@@ -3,7 +3,7 @@
 import type React from "react";
 import { cn } from "@/lib/utils";
 
-interface WizardFormSectionProps {
+type WizardFormSectionProps = {
 	title?: string;
 	description?: string;
 	children: React.ReactNode;
@@ -11,7 +11,7 @@ interface WizardFormSectionProps {
 	headerClassName?: string;
 	contentClassName?: string;
 	variant?: "default" | "compact" | "highlighted";
-}
+};
 
 export function WizardFormSection({
 	title,
@@ -34,12 +34,12 @@ export function WizardFormSection({
 			{(title || description) && (
 				<div className={cn("space-y-1", headerClassName)}>
 					{title && (
-						<h3 className="text-lg font-medium leading-none tracking-tight">
+						<h3 className="font-medium text-lg leading-none tracking-tight">
 							{title}
 						</h3>
 					)}
 					{description && (
-						<p className="text-sm text-muted-foreground">{description}</p>
+						<p className="text-muted-foreground text-sm">{description}</p>
 					)}
 				</div>
 			)}

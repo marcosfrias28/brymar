@@ -48,8 +48,7 @@ export function WizardNavigation({
 				triggerHapticFeedback("light");
 			}
 			await onNext();
-		} catch (error) {
-			console.error("Navigation error:", error);
+		} catch (_error) {
 			if (isTouchDevice) {
 				triggerHapticFeedback("heavy");
 			}
@@ -62,8 +61,7 @@ export function WizardNavigation({
 				triggerHapticFeedback("medium");
 			}
 			await onComplete();
-		} catch (error) {
-			console.error("Completion error:", error);
+		} catch (_error) {
 			if (isTouchDevice) {
 				triggerHapticFeedback("heavy");
 			}
@@ -76,8 +74,7 @@ export function WizardNavigation({
 				triggerHapticFeedback("light");
 			}
 			await onSaveDraft();
-		} catch (error) {
-			console.error("Save draft error:", error);
+		} catch (_error) {
 			if (isTouchDevice) {
 				triggerHapticFeedback("heavy");
 			}
@@ -86,7 +83,9 @@ export function WizardNavigation({
 
 	// Handle swipe gestures
 	React.useEffect(() => {
-		if (!enableTouchGestures || !isTouchDevice || touchState.isPressed) return;
+		if (!(enableTouchGestures && isTouchDevice) || touchState.isPressed) {
+			return;
+		}
 
 		const { deltaX, distance } = touchState;
 		const swipeThreshold = 50;
@@ -125,53 +124,53 @@ export function WizardNavigation({
 	if (isMobile) {
 		return (
 			<nav
-				className="wizard-navigation-mobile"
 				aria-label="Navegación del asistente"
+				className="wizard-navigation-mobile"
 				{...(enableTouchGestures && isTouchDevice ? handlers : {})}
 			>
 				{/* Primary Actions Row */}
-				<div className="flex gap-2 mb-3">
-					{!isLastStep ? (
+				<div className="mb-3 flex gap-2">
+					{isLastStep ? (
 						<Button
-							onClick={handleNext}
-							disabled={!canGoNext || isLoading}
-							className={cn("flex-1", mobileClasses.touchButton)}
-							size="lg"
-							aria-label={`Ir al siguiente paso${
-								canGoNext ? "" : " (deshabilitado)"
-							}`}
-							aria-describedby="next-step-help"
-						>
-							{isLoading ? (
-								<div
-									className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"
-									aria-hidden="true"
-								/>
-							) : (
-								<ChevronRight className="h-4 w-4 mr-2" aria-hidden="true" />
-							)}
-							Siguiente
-						</Button>
-					) : (
-						<Button
-							onClick={handleComplete}
-							disabled={!canComplete || isLoading}
-							className={cn("flex-1", mobileClasses.touchButton)}
-							size="lg"
+							aria-describedby="complete-help"
 							aria-label={`Completar asistente${
 								canComplete ? "" : " (deshabilitado)"
 							}`}
-							aria-describedby="complete-help"
+							className={cn("flex-1", mobileClasses.touchButton)}
+							disabled={!canComplete || isLoading}
+							onClick={handleComplete}
+							size="lg"
 						>
 							{isLoading ? (
 								<div
-									className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"
 									aria-hidden="true"
+									className="mr-2 h-4 w-4 animate-spin rounded-full border-white border-b-2"
 								/>
 							) : (
-								<Check className="h-4 w-4 mr-2" aria-hidden="true" />
+								<Check aria-hidden="true" className="mr-2 h-4 w-4" />
 							)}
 							Completar
+						</Button>
+					) : (
+						<Button
+							aria-describedby="next-step-help"
+							aria-label={`Ir al siguiente paso${
+								canGoNext ? "" : " (deshabilitado)"
+							}`}
+							className={cn("flex-1", mobileClasses.touchButton)}
+							disabled={!canGoNext || isLoading}
+							onClick={handleNext}
+							size="lg"
+						>
+							{isLoading ? (
+								<div
+									aria-hidden="true"
+									className="mr-2 h-4 w-4 animate-spin rounded-full border-white border-b-2"
+								/>
+							) : (
+								<ChevronRight aria-hidden="true" className="mr-2 h-4 w-4" />
+							)}
+							Siguiente
 						</Button>
 					)}
 				</div>
@@ -179,55 +178,55 @@ export function WizardNavigation({
 				{/* Secondary Actions Row */}
 				<div className="flex gap-2">
 					<Button
-						onClick={onPrevious}
-						disabled={!canGoPrevious || isLoading}
-						variant="outline"
-						size="sm"
-						className={cn("flex-1", mobileClasses.touchButton)}
 						aria-label={`Ir al paso anterior${
 							canGoPrevious ? "" : " (deshabilitado)"
 						}`}
+						className={cn("flex-1", mobileClasses.touchButton)}
+						disabled={!canGoPrevious || isLoading}
+						onClick={onPrevious}
+						size="sm"
+						variant="outline"
 					>
-						<ChevronLeft className="h-4 w-4 mr-1" aria-hidden="true" />
+						<ChevronLeft aria-hidden="true" className="mr-1 h-4 w-4" />
 						Anterior
 					</Button>
 
 					<Button
-						onClick={handleSaveDraft}
-						disabled={isSaving}
-						variant="outline"
-						size="sm"
-						className={cn("flex-1", mobileClasses.touchButton)}
 						aria-label={isSaving ? "Guardando borrador..." : "Guardar borrador"}
+						className={cn("flex-1", mobileClasses.touchButton)}
+						disabled={isSaving}
+						onClick={handleSaveDraft}
+						size="sm"
+						variant="outline"
 					>
 						{isSaving ? (
 							<div
-								className="animate-spin rounded-full h-3 w-3 border-b-2 border-current mr-1"
 								aria-hidden="true"
+								className="mr-1 h-3 w-3 animate-spin rounded-full border-current border-b-2"
 							/>
 						) : (
-							<Save className="h-4 w-4 mr-1" aria-hidden="true" />
+							<Save aria-hidden="true" className="mr-1 h-4 w-4" />
 						)}
 						Guardar
 					</Button>
 
 					{onCancel && (
 						<Button
-							onClick={onCancel}
-							disabled={isLoading}
-							variant="ghost"
-							size="sm"
-							className={mobileClasses.touchButton}
 							aria-label="Cancelar asistente"
+							className={mobileClasses.touchButton}
+							disabled={isLoading}
+							onClick={onCancel}
+							size="sm"
+							variant="ghost"
 						>
-							<X className="h-4 w-4" aria-hidden="true" />
+							<X aria-hidden="true" className="h-4 w-4" />
 						</Button>
 					)}
 				</div>
 
 				{/* Touch gesture hint */}
 				{enableTouchGestures && isTouchDevice && (
-					<div className="text-center text-xs text-muted-foreground mt-2 py-1">
+					<div className="mt-2 py-1 text-center text-muted-foreground text-xs">
 						<span aria-live="polite" className="sr-only">
 							Puedes deslizar hacia la izquierda o derecha para navegar entre
 							pasos
@@ -253,26 +252,26 @@ export function WizardNavigation({
 	// Desktop layout with enhanced accessibility
 	return (
 		<nav
-			className="wizard-navigation-desktop"
 			aria-label="Navegación del asistente"
+			className="wizard-navigation-desktop"
 		>
 			<div className="flex items-center justify-between">
 				{/* Left side - Previous button */}
 				<div className="flex items-center gap-2">
 					<Button
-						onClick={onPrevious}
-						disabled={!canGoPrevious || isLoading}
-						variant="outline"
-						className={cn(
-							"transition-opacity",
-							!canGoPrevious && "opacity-0 pointer-events-none",
-						)}
 						aria-label={`Ir al paso anterior${
 							canGoPrevious ? "" : " (deshabilitado)"
 						}`}
+						className={cn(
+							"transition-opacity",
+							!canGoPrevious && "pointer-events-none opacity-0"
+						)}
+						disabled={!canGoPrevious || isLoading}
+						onClick={onPrevious}
 						title="Ctrl+← para navegar al paso anterior"
+						variant="outline"
 					>
-						<ChevronLeft className="h-4 w-4 mr-2" aria-hidden="true" />
+						<ChevronLeft aria-hidden="true" className="mr-2 h-4 w-4" />
 						Anterior
 					</Button>
 				</div>
@@ -280,25 +279,25 @@ export function WizardNavigation({
 				{/* Center - Save draft and help buttons */}
 				<div className="flex items-center gap-2">
 					<Button
-						onClick={handleSaveDraft}
-						disabled={isSaving}
-						variant="ghost"
-						size="sm"
-						className="text-muted-foreground hover:text-foreground"
 						aria-label={isSaving ? "Guardando borrador..." : "Guardar borrador"}
+						className="text-muted-foreground hover:text-foreground"
+						disabled={isSaving}
+						onClick={handleSaveDraft}
+						size="sm"
 						title="Ctrl+S para guardar borrador"
+						variant="ghost"
 					>
 						{isSaving ? (
 							<>
 								<div
-									className="animate-spin rounded-full h-3 w-3 border-b-2 border-current mr-2"
 									aria-hidden="true"
+									className="mr-2 h-3 w-3 animate-spin rounded-full border-current border-b-2"
 								/>
 								Guardando...
 							</>
 						) : (
 							<>
-								<Save className="h-4 w-4 mr-2" aria-hidden="true" />
+								<Save aria-hidden="true" className="mr-2 h-4 w-4" />
 								Guardar borrador
 							</>
 						)}
@@ -306,11 +305,8 @@ export function WizardNavigation({
 
 					{enableKeyboardNavigation && (
 						<Button
-							variant="ghost"
-							size="sm"
-							className="text-muted-foreground hover:text-foreground"
 							aria-label="Mostrar atajos de teclado"
-							title="Alt+? para ver atajos de teclado"
+							className="text-muted-foreground hover:text-foreground"
 							onClick={() => {
 								const announcement = document.createElement("div");
 								announcement.setAttribute("aria-live", "polite");
@@ -320,22 +316,25 @@ export function WizardNavigation({
 								document.body.appendChild(announcement);
 								setTimeout(() => document.body.removeChild(announcement), 3000);
 							}}
+							size="sm"
+							title="Alt+? para ver atajos de teclado"
+							variant="ghost"
 						>
-							<HelpCircle className="h-4 w-4" aria-hidden="true" />
+							<HelpCircle aria-hidden="true" className="h-4 w-4" />
 						</Button>
 					)}
 
 					{onCancel && (
 						<Button
-							onClick={onCancel}
-							disabled={isLoading}
-							variant="ghost"
-							size="sm"
-							className="text-muted-foreground hover:text-foreground"
 							aria-label="Cancelar asistente"
+							className="text-muted-foreground hover:text-foreground"
+							disabled={isLoading}
+							onClick={onCancel}
+							size="sm"
 							title="Escape para cancelar"
+							variant="ghost"
 						>
-							<X className="h-4 w-4 mr-2" aria-hidden="true" />
+							<X aria-hidden="true" className="mr-2 h-4 w-4" />
 							Cancelar
 						</Button>
 					)}
@@ -343,53 +342,53 @@ export function WizardNavigation({
 
 				{/* Right side - Next/Complete button */}
 				<div className="flex items-center gap-2">
-					{!isLastStep ? (
+					{isLastStep ? (
 						<Button
-							onClick={handleNext}
-							disabled={!canGoNext || isLoading}
+							aria-label={`Completar asistente${
+								canComplete ? "" : " (deshabilitado)"
+							}`}
 							className="min-w-[120px]"
+							disabled={!canComplete || isLoading}
+							onClick={handleComplete}
+							title="Ctrl+Enter para completar el asistente"
+						>
+							{isLoading ? (
+								<>
+									<div
+										aria-hidden="true"
+										className="mr-2 h-4 w-4 animate-spin rounded-full border-white border-b-2"
+									/>
+									Completando...
+								</>
+							) : (
+								<>
+									<Check aria-hidden="true" className="mr-2 h-4 w-4" />
+									Completar
+								</>
+							)}
+						</Button>
+					) : (
+						<Button
 							aria-label={`Ir al siguiente paso${
 								canGoNext ? "" : " (deshabilitado)"
 							}`}
+							className="min-w-[120px]"
+							disabled={!canGoNext || isLoading}
+							onClick={handleNext}
 							title="Ctrl+→ para ir al siguiente paso"
 						>
 							{isLoading ? (
 								<>
 									<div
-										className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"
 										aria-hidden="true"
+										className="mr-2 h-4 w-4 animate-spin rounded-full border-white border-b-2"
 									/>
 									Validando...
 								</>
 							) : (
 								<>
 									Siguiente
-									<ChevronRight className="h-4 w-4 ml-2" aria-hidden="true" />
-								</>
-							)}
-						</Button>
-					) : (
-						<Button
-							onClick={handleComplete}
-							disabled={!canComplete || isLoading}
-							className="min-w-[120px]"
-							aria-label={`Completar asistente${
-								canComplete ? "" : " (deshabilitado)"
-							}`}
-							title="Ctrl+Enter para completar el asistente"
-						>
-							{isLoading ? (
-								<>
-									<div
-										className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"
-										aria-hidden="true"
-									/>
-									Completando...
-								</>
-							) : (
-								<>
-									<Check className="h-4 w-4 mr-2" aria-hidden="true" />
-									Completar
+									<ChevronRight aria-hidden="true" className="ml-2 h-4 w-4" />
 								</>
 							)}
 						</Button>
@@ -399,8 +398,8 @@ export function WizardNavigation({
 
 			{/* Progress indicator for current action */}
 			{(isLoading || isSaving) && (
-				<div className="mt-3 text-center" role="status" aria-live="polite">
-					<div className="text-xs text-muted-foreground">
+				<div aria-live="polite" className="mt-3 text-center" role="status">
+					<div className="text-muted-foreground text-xs">
 						{isLoading && "Procesando..."}
 						{isSaving && "Guardando borrador..."}
 					</div>
@@ -431,7 +430,9 @@ export function useWizardKeyboardNavigation({
 	isEnabled?: boolean;
 }) {
 	React.useEffect(() => {
-		if (!isEnabled) return;
+		if (!isEnabled) {
+			return;
+		}
 
 		const handleKeyDown = (event: KeyboardEvent) => {
 			// Only handle keyboard shortcuts when not in form inputs
@@ -503,7 +504,7 @@ export function useWizardKeyboardNavigation({
 					if (isAltKey) {
 						event.preventDefault();
 						announceAction(
-							"Atajos de teclado: Ctrl+Flecha derecha para siguiente, Ctrl+Flecha izquierda para anterior, Ctrl+S para guardar, Escape para cancelar",
+							"Atajos de teclado: Ctrl+Flecha derecha para siguiente, Ctrl+Flecha izquierda para anterior, Ctrl+S para guardar, Escape para cancelar"
 						);
 					}
 					break;
@@ -529,7 +530,7 @@ export function useWizardNavigationState(
 	currentStep: number,
 	totalSteps: number,
 	canGoNext: boolean,
-	canComplete: boolean,
+	canComplete: boolean
 ) {
 	const isFirstStep = currentStep === 0;
 	const isLastStep = currentStep === totalSteps - 1;

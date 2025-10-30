@@ -5,7 +5,14 @@
 
 const { drizzle } = require("drizzle-orm/postgres-js");
 const postgres = require("postgres");
-const { pgTable, text, timestamp, jsonb, uuid, varchar } = require("drizzle-orm/pg-core");
+const {
+	pgTable,
+	text,
+	timestamp,
+	jsonb,
+	uuid,
+	varchar,
+} = require("drizzle-orm/pg-core");
 
 // Database connection
 const connectionString = process.env.DATABASE_URL;
@@ -15,10 +22,10 @@ if (!connectionString) {
 }
 
 const sql = postgres(connectionString);
-const db = drizzle(sql);
+const _db = drizzle(sql);
 
 // Define the activities table schema
-const userActivities = pgTable("user_activities", {
+const _userActivities = pgTable("user_activities", {
 	id: uuid("id").primaryKey().defaultRandom(),
 	userId: uuid("user_id").notNull(),
 	type: varchar("type", { length: 50 }).notNull(),
@@ -35,7 +42,7 @@ const userActivities = pgTable("user_activities", {
 async function createActivitiesTable() {
 	try {
 		console.log("Creating user_activities table...");
-		
+
 		// Create the table
 		await sql`
 			CREATE TABLE IF NOT EXISTS user_activities (
@@ -80,7 +87,6 @@ async function createActivitiesTable() {
 		console.log("✅ user_activities table created successfully!");
 		console.log("✅ Foreign key constraint added to users table");
 		console.log("✅ Indexes created for better performance");
-		
 	} catch (error) {
 		console.error("❌ Error creating user_activities table:", error);
 		throw error;

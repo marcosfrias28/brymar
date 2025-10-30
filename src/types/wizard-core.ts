@@ -4,17 +4,17 @@ import type { ComponentType } from "react";
 import type { ZodSchema } from "zod";
 
 // Base wizard data interface
-export interface WizardData {
+export type WizardData = {
 	id?: string;
 	title: string;
 	description: string;
 	status: "draft" | "published";
 	createdAt?: Date;
 	updatedAt?: Date;
-}
+};
 
 // Wizard step definition
-export interface WizardStep<T extends WizardData> {
+export type WizardStep<T extends WizardData> = {
 	id: string;
 	title: string;
 	description?: string;
@@ -22,10 +22,10 @@ export interface WizardStep<T extends WizardData> {
 	validation?: ZodSchema;
 	isOptional?: boolean;
 	canSkip?: boolean;
-}
+};
 
 // Wizard configuration
-export interface WizardConfig<T extends WizardData> {
+export type WizardConfig<T extends WizardData> = {
 	id: string;
 	type: string;
 	title: string;
@@ -45,10 +45,10 @@ export interface WizardConfig<T extends WizardData> {
 		showProgress?: boolean;
 		showStepNumbers?: boolean;
 	};
-}
+};
 
 // Wizard step props
-export interface WizardStepProps<T extends WizardData> {
+export type WizardStepProps<T extends WizardData> = {
 	data: Partial<T>;
 	onUpdate: (updates: Partial<T>) => void;
 	onNext: () => void;
@@ -56,20 +56,20 @@ export interface WizardStepProps<T extends WizardData> {
 	errors: Record<string, string>;
 	isLoading: boolean;
 	isMobile: boolean;
-}
+};
 
 // Wizard hook options
-export interface UseWizardOptions<T extends WizardData> {
+export type UseWizardOptions<T extends WizardData> = {
 	config: WizardConfig<T>;
 	initialData?: Partial<T>;
 	draftId?: string;
 	onComplete?: (data: T) => Promise<void>;
 	onSaveDraft?: (data: Partial<T>, step: string) => Promise<string>;
 	onUpdate?: (data: Partial<T>) => void;
-}
+};
 
 // Wizard hook return type
-export interface UseWizardReturn<T extends WizardData> {
+export type UseWizardReturn<T extends WizardData> = {
 	// Data
 	data: Partial<T>;
 	updateData: (updates: Partial<T>) => void;
@@ -107,10 +107,10 @@ export interface UseWizardReturn<T extends WizardData> {
 	isSaving: boolean;
 	isValidating: boolean;
 	error: string | null;
-}
+};
 
 // Wizard component props
-export interface WizardProps<T extends WizardData> {
+export type WizardProps<T extends WizardData> = {
 	config: WizardConfig<T>;
 	initialData?: Partial<T>;
 	draftId?: string;
@@ -124,35 +124,35 @@ export interface WizardProps<T extends WizardData> {
 	showStepNumbers?: boolean;
 	enableKeyboardNavigation?: boolean;
 	enableMobileOptimizations?: boolean;
-}
+};
 
 // Error types
-export interface WizardError {
+export type WizardError = {
 	type: "validation" | "network" | "storage" | "permission";
 	message: string;
 	field?: string;
 	step?: string;
 	recoverable: boolean;
 	timestamp: Date;
-}
+};
 
-export interface ErrorRecoveryStrategy {
+export type ErrorRecoveryStrategy = {
 	retry: () => void;
 	skip: () => void;
 	goToStep: (stepId: string) => void;
 	saveDraft: () => void;
 	reset: () => void;
-}
+};
 
 // Validation result
-export interface ValidationResult {
+export type ValidationResult = {
 	isValid: boolean;
 	errors: Record<string, string>;
 	warnings: Record<string, string>;
-}
+};
 
 // Navigation props
-export interface WizardNavigationProps {
+export type WizardNavigationProps = {
 	canGoNext: boolean;
 	canGoPrevious: boolean;
 	canComplete: boolean;
@@ -168,18 +168,18 @@ export interface WizardNavigationProps {
 	isMobile: boolean;
 	enableTouchGestures?: boolean;
 	enableKeyboardNavigation?: boolean;
-}
+};
 
 // Progress props
-export interface WizardProgressProps<T extends WizardData> {
+export type WizardProgressProps<T extends WizardData> = {
 	steps: WizardStep<T>[];
 	currentStep: number;
 	showStepNumbers?: boolean;
 	isMobile: boolean;
-}
+};
 
 // Step renderer props
-export interface WizardStepRendererProps<T extends WizardData> {
+export type WizardStepRendererProps<T extends WizardData> = {
 	step: WizardStep<T>;
 	data: Partial<T>;
 	onUpdate: (updates: Partial<T>) => void;
@@ -188,4 +188,4 @@ export interface WizardStepRendererProps<T extends WizardData> {
 	errors: Record<string, string>;
 	isLoading: boolean;
 	isMobile: boolean;
-}
+};

@@ -16,12 +16,11 @@ export const Intro = () => {
 
 	const WordsStyle = "bg-clip-text text-transparent bg-primary bg-clip-text";
 	return (
-		<section className="relative w-screen min-h-fit h-[150dvh] xl:mt-36 text-center bg-black">
+		<section className="relative h-[150dvh] min-h-fit w-screen bg-black text-center xl:mt-36">
 			<IntroTitle name={name} subtitle={subtitle} />
 			<WavyBackground
-				waveWidth={100}
 				blur={0}
-				waveOpacity={0.8}
+				className="z-20 w-[110dvw]"
 				colors={[
 					"hsl(213, 12%, 25%)",
 					"hsl(220, 10%, 40%)",
@@ -29,14 +28,15 @@ export const Intro = () => {
 					"hsl(162, 27%, 90%)",
 				]}
 				containerClassName="h-1/3 row-start-2 z-0 max-lg:my-20"
-				className="w-[110dvw] z-20"
 				speed="slow"
+				waveOpacity={0.8}
+				waveWidth={100}
 			>
 				<IntroCTA
-					title={title}
 					cta={cta}
-					WordsStyle={WordsStyle}
 					italianno={italianno}
+					title={title}
+					WordsStyle={WordsStyle}
 				/>
 			</WavyBackground>
 			<IntroPropertiesMarquee />

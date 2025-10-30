@@ -14,7 +14,7 @@ export function preprocessFormData(formData: FormData): Record<string, any> {
 		if (typeof value === "string") {
 			// Handle numeric fields
 			if (isNumericField(key) && value.trim() !== "") {
-				const numValue = parseFloat(value);
+				const numValue = Number.parseFloat(value);
 				if (!Number.isNaN(numValue)) {
 					processed[key] = numValue;
 					continue;
@@ -52,7 +52,7 @@ export function preprocessFormData(formData: FormData): Record<string, any> {
  * Preprocesses regular object data to ensure consistent types
  */
 export function preprocessObjectData(
-	data: Record<string, any>,
+	data: Record<string, any>
 ): Record<string, any> {
 	const processed: Record<string, any> = {};
 
@@ -60,7 +60,7 @@ export function preprocessObjectData(
 		if (typeof value === "string") {
 			// Handle numeric fields that might be strings
 			if (isNumericField(key) && value.trim() !== "") {
-				const numValue = parseFloat(value);
+				const numValue = Number.parseFloat(value);
 				if (!Number.isNaN(numValue)) {
 					processed[key] = numValue;
 					continue;
@@ -111,7 +111,7 @@ function isNumericField(fieldName: string): boolean {
 		(field) =>
 			fieldName === field ||
 			fieldName.endsWith(`_${field}`) ||
-			fieldName.includes(field),
+			fieldName.includes(field)
 	);
 }
 
@@ -135,7 +135,7 @@ function isBooleanField(fieldName: string): boolean {
 			fieldName === field ||
 			fieldName.endsWith(`_${field}`) ||
 			fieldName.startsWith(`${field}_`) ||
-			fieldName.includes(field),
+			fieldName.includes(field)
 	);
 }
 
@@ -157,7 +157,7 @@ function isJsonField(fieldName: string): boolean {
 		(field) =>
 			fieldName === field ||
 			fieldName.endsWith(`_${field}`) ||
-			fieldName.includes(field),
+			fieldName.includes(field)
 	);
 }
 
@@ -166,7 +166,7 @@ function isJsonField(fieldName: string): boolean {
  */
 export function validateRequiredNumericFields(
 	data: Record<string, any>,
-	requiredFields: string[],
+	requiredFields: string[]
 ): { isValid: boolean; errors: string[] } {
 	const errors: string[] = [];
 
@@ -179,7 +179,7 @@ export function validateRequiredNumericFields(
 		}
 
 		if (typeof value === "string") {
-			const numValue = parseFloat(value);
+			const numValue = Number.parseFloat(value);
 			if (Number.isNaN(numValue)) {
 				errors.push(`${field} must be a valid number`);
 			}
@@ -198,7 +198,7 @@ export function validateRequiredNumericFields(
  * Converts string coordinates to proper coordinate object
  */
 export function parseCoordinates(
-	coordinatesStr: string,
+	coordinatesStr: string
 ): { latitude: number; longitude: number } | null {
 	try {
 		if (typeof coordinatesStr === "object") {
@@ -224,13 +224,13 @@ export function parseCoordinates(
 /**
  * Safely converts a value to number with fallback
  */
-export function safeNumberConversion(value: any, fallback: number = 0): number {
+export function safeNumberConversion(value: any, fallback = 0): number {
 	if (typeof value === "number" && !Number.isNaN(value)) {
 		return value;
 	}
 
 	if (typeof value === "string" && value.trim() !== "") {
-		const parsed = parseFloat(value);
+		const parsed = Number.parseFloat(value);
 		if (!Number.isNaN(parsed)) {
 			return parsed;
 		}
@@ -242,10 +242,7 @@ export function safeNumberConversion(value: any, fallback: number = 0): number {
 /**
  * Safely converts a value to boolean with fallback
  */
-export function safeBooleanConversion(
-	value: any,
-	fallback: boolean = false,
-): boolean {
+export function safeBooleanConversion(value: any, fallback = false): boolean {
 	if (typeof value === "boolean") {
 		return value;
 	}

@@ -1,15 +1,9 @@
 "use client";
 
-import {
-	Loader2,
-	Mail,
-	Save,
-	Settings,
-	Shield,
-	User,
-} from "lucide-react";
-import { useActionState, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { Loader2, Mail, Save, Settings, Shield, User } from "lucide-react";
+import Link from "next/link";
+import { useActionState, useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,12 +25,14 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { useUser } from "@/hooks/use-user";
 import { useFormChanges } from "@/hooks/use-form-changes";
+import { useUser } from "@/hooks/use-user";
+import {
+	getUserProfile,
+	updateProfileAction,
+} from "@/lib/actions/profile-actions";
 import { getUserPreferences } from "@/lib/utils/user-helpers";
-import { getUserProfile, updateProfileAction } from "@/lib/actions/profile-actions";
 import { AvatarUpload } from "./avatar-upload";
-import Link from "next/link";
 
 // TODO: Move UserPreferences type to lib/types
 // import { UserPreferences } from "@/lib/types/user";
@@ -47,12 +43,12 @@ const initialState = {
 	error: undefined,
 };
 
-interface ProfileSectionProps {
+type ProfileSectionProps = {
 	title: string;
 	description: string;
 	icon: React.ReactNode;
 	children: React.ReactNode;
-}
+};
 
 function ProfileSection({
 	title,
@@ -74,14 +70,16 @@ function ProfileSection({
 	);
 }
 
-
 export function ProfileForm() {
 	const { user } = useUser();
 	const queryClient = useQueryClient();
 	const [userProfile, setUserProfile] = useState<any>(null);
 
 	// Use useActionState for form handling
-	const [state, formAction, isPending] = useActionState(updateProfileAction, initialState);
+	const [state, formAction, isPending] = useActionState(
+		updateProfileAction,
+		initialState
+	);
 
 	// Use form changes detection hook
 	const { formRef, hasChanges, resetChanges, notifyChange } = useFormChanges({
@@ -114,7 +112,9 @@ export function ProfileForm() {
 	}, [state, queryClient, resetChanges]);
 
 	const formatDate = (date: string | Date | null | undefined) => {
-		if (!date) return "No especificado";
+		if (!date) {
+			return "No especificado";
+		}
 		const dateObj = date instanceof Date ? date : new Date(date);
 		return dateObj.toLocaleDateString("es-ES", {
 			year: "numeric",
@@ -148,50 +148,45 @@ export function ProfileForm() {
 	}
 
 	return (
-		<div className="space-y-6 relative">
-
+		<div className="relative space-y-6">
 			<Card>
-
 				<CardContent className="pt-6">
-
 					<div className="flex items-center justify-between">
 						<div className="flex items-center space-x-4">
 							<div className="relative">
 								<Avatar className="h-20 w-20">
-									<AvatarImage src={user.avatar || ""} alt={user.name || ""} />
+									<AvatarImage alt={user.name || ""} src={user.avatar || ""} />
 									<AvatarFallback className="text-lg">
 										{user.name ? user.name.slice(0, 2).toUpperCase() : "U"}
 									</AvatarFallback>
 								</Avatar>
-								<div className="absolute -bottom-2 -right-2">
+								<div className="-bottom-2 -right-2 absolute">
 									<AvatarUpload
-										label=""
-										name="avatar"
+										compact={true}
 										defaultValue={user?.avatar || ""}
 										error={state.error}
-										compact={true}
+										label=""
+										name="avatar"
 										onFileChange={() => notifyChange()}
 									/>
 								</div>
 							</div>
 							<div>
-								<h1 className="text-2xl font-bold text-foreground">
+								<h1 className="font-bold text-2xl text-foreground">
 									{user.name}
 								</h1>
 								<p className="text-gray-600">{user.email}</p>
-								<div className="flex items-center gap-2 mt-2">
+								<div className="mt-2 flex items-center gap-2">
 									<Badge className={getRoleColor(user.role)}>
 										{user.role || "user"}
 									</Badge>
 									{user.emailVerified ? (
-										<Badge
-											className="text-green-600 border-green-600 bg-green-50"
-										>
+										<Badge className="border-green-600 bg-green-50 text-green-600">
 											✓ Verificado
 										</Badge>
 									) : (
 										<Link href={`/verify-email?email=${user.email}`}>
-											<Badge className="text-red-600 border-red-600 bg-red-50">
+											<Badge className="border-red-600 bg-red-50 text-red-600">
 												✗ No verificado
 											</Badge>
 										</Link>
@@ -201,16 +196,20 @@ export function ProfileForm() {
 						</div>
 						<div className="flex justify-end pt-6">
 							<Button
-								type="submit"
-								disabled={isPending || !hasChanges}
 								className="flex items-center gap-2"
+								disabled={isPending || !hasChanges}
+								type="submit"
 							>
 								{isPending ? (
 									<Loader2 className="h-4 w-4 animate-spin" />
 								) : (
 									<Save className="h-4 w-4" />
 								)}
-								{isPending ? "Guardando..." : hasChanges ? "Guardar Cambios" : "Sin Cambios"}
+								{isPending
+									? "Guardando..."
+									: hasChanges
+										? "Guardar Cambios"
+										: "Sin Cambios"}
 							</Button>
 						</div>
 					</div>
@@ -233,172 +232,175 @@ export function ProfileForm() {
 				</Card>
 			)}
 
-			<form ref={formRef} id="profile-form" action={formAction} className="space-y-6">
+			<form
+				action={formAction}
+				className="space-y-6"
+				id="profile-form"
+				ref={formRef}
+			>
 				<ProfileSection
-					title="Información Personal"
 					description="Datos básicos de tu perfil"
 					icon={<User className="h-5 w-5" />}
+					title="Información Personal"
 				>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 						<div className="space-y-2">
 							<Label htmlFor="name">Nombre Completo</Label>
 							<Input
+								defaultValue={user?.name || ""}
 								id="name"
 								name="name"
-								type="text"
-								defaultValue={user?.name || ""}
 								placeholder="Tu nombre completo"
 								required
+								type="text"
 							/>
 						</div>
 
 						<div className="space-y-2">
 							<Label htmlFor="email">Correo Electrónico</Label>
 							<Input
+								defaultValue={user?.email || ""}
 								id="email"
 								name="email"
-								type="email"
-								defaultValue={user?.email || ""}
 								placeholder="tu@email.com"
 								required
+								type="email"
 							/>
 						</div>
-
-
 					</div>
 				</ProfileSection>
 
 				<ProfileSection
-					title="Información de Cuenta"
 					description="Detalles de tu cuenta y configuración"
 					icon={<Shield className="h-5 w-5" />}
+					title="Información de Cuenta"
 				>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 						<div className="space-y-2">
 							<Label htmlFor="userId">ID de Usuario</Label>
 							<Input
+								className="bg-muted"
+								disabled
 								id="userId"
 								name="userId"
 								type="text"
 								value={user.id}
-								disabled
-								className="bg-muted"
 							/>
 						</div>
 						<div className="space-y-2">
 							<Label htmlFor="role">Rol</Label>
 							<Input
+								className="bg-muted"
+								disabled
 								id="role"
 								name="role"
 								type="text"
 								value={user.role || "user"}
-								disabled
-								className="bg-muted"
 							/>
 						</div>
 						<div className="space-y-2">
 							<Label htmlFor="emailStatus">Estado de Email</Label>
 							<Input
+								className="bg-muted"
+								disabled
 								id="emailStatus"
 								name="emailStatus"
 								type="text"
 								value={user.emailVerified ? "Verificado" : "No verificado"}
-								disabled
-								className="bg-muted"
 							/>
 						</div>
 						<div className="space-y-2">
 							<Label htmlFor="createdAt">Fecha de Creación</Label>
 							<Input
+								className="bg-muted"
+								disabled
 								id="createdAt"
 								name="createdAt"
 								type="text"
 								value={formatDate(user.createdAt)}
-								disabled
-								className="bg-muted"
 							/>
 						</div>
 						<div className="space-y-2 md:col-span-2">
 							<Label htmlFor="updatedAt">Última Actualización</Label>
 							<Input
+								className="bg-muted"
+								disabled
 								id="updatedAt"
 								name="updatedAt"
 								type="text"
 								value={formatDate(user.updatedAt)}
-								disabled
-								className="bg-muted"
 							/>
 						</div>
 					</div>
 				</ProfileSection>
 
 				<ProfileSection
-					title="Información Adicional"
 					description="Datos complementarios de tu perfil"
 					icon={<Mail className="h-5 w-5" />}
+					title="Información Adicional"
 				>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 						<div className="space-y-2">
 							<Label htmlFor="firstName">Primer Nombre</Label>
 							<Input
+								defaultValue={userProfile?.firstName || user?.firstName || ""}
 								id="firstName"
 								name="firstName"
-								type="text"
-								defaultValue={userProfile?.firstName || user?.firstName || ""}
 								placeholder="Tu primer nombre"
+								type="text"
 							/>
 						</div>
 
 						<div className="space-y-2">
 							<Label htmlFor="lastName">Apellido</Label>
 							<Input
+								defaultValue={userProfile?.lastName || user?.lastName || ""}
 								id="lastName"
 								name="lastName"
-								type="text"
-								defaultValue={userProfile?.lastName || user?.lastName || ""}
 								placeholder="Tu apellido"
+								type="text"
 							/>
 						</div>
 
 						<div className="space-y-2">
 							<Label htmlFor="phone">Teléfono</Label>
 							<Input
+								defaultValue={userProfile?.phone || user?.phone || ""}
 								id="phone"
 								name="phone"
-								type="tel"
-								defaultValue={userProfile?.phone || user?.phone || ""}
 								placeholder="Tu número de teléfono"
+								type="tel"
 							/>
 						</div>
 
 						<div className="space-y-2">
 							<Label htmlFor="location">Ubicación</Label>
 							<Input
+								defaultValue={userProfile?.location || user?.location || ""}
 								id="location"
 								name="location"
-								type="text"
-								defaultValue={userProfile?.location || user?.location || ""}
 								placeholder="Tu ubicación"
+								type="text"
 							/>
 						</div>
 
 						<div className="space-y-2 md:col-span-2">
 							<Label htmlFor="website">Sitio Web</Label>
 							<Input
+								defaultValue={userProfile?.website || ""}
 								id="website"
 								name="website"
-								type="url"
-								defaultValue={userProfile?.website || ""}
 								placeholder="https://tu-sitio-web.com"
+								type="url"
 							/>
 						</div>
 
 						<div className="space-y-2 md:col-span-2">
 							<Label htmlFor="bio">Biografía</Label>
 							<Textarea
+								defaultValue={userProfile?.bio || user?.bio || ""}
 								id="bio"
 								name="bio"
-								defaultValue={userProfile?.bio || user?.bio || ""}
 								placeholder="Cuéntanos sobre ti"
 								rows={4}
 							/>
@@ -407,26 +409,28 @@ export function ProfileForm() {
 				</ProfileSection>
 
 				<ProfileSection
-					title="Preferencias"
 					description="Configuración de notificaciones y privacidad"
 					icon={<Settings className="h-5 w-5" />}
+					title="Preferencias"
 				>
 					<div className="space-y-6">
 						<div>
-							<h4 className="text-sm font-medium text-gray-900 mb-3">
+							<h4 className="mb-3 font-medium text-gray-900 text-sm">
 								Notificaciones
 							</h4>
-							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+							<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 								<div className="space-y-2">
 									<Label htmlFor="emailNotifications">Email</Label>
 									<div className="flex items-center space-x-2">
 										<Switch
+											defaultChecked={preferences?.notifications?.email}
 											id="emailNotifications"
 											name="emailNotifications"
-											defaultChecked={preferences?.notifications?.email || false}
 										/>
-										<span className="text-sm text-muted-foreground">
-											{preferences?.notifications?.email ? "Activado" : "Desactivado"}
+										<span className="text-muted-foreground text-sm">
+											{preferences?.notifications?.email
+												? "Activado"
+												: "Desactivado"}
 										</span>
 									</div>
 								</div>
@@ -434,12 +438,14 @@ export function ProfileForm() {
 									<Label htmlFor="pushNotifications">Push</Label>
 									<div className="flex items-center space-x-2">
 										<Switch
+											defaultChecked={preferences?.notifications?.push}
 											id="pushNotifications"
 											name="pushNotifications"
-											defaultChecked={preferences?.notifications?.push || false}
 										/>
-										<span className="text-sm text-muted-foreground">
-											{preferences?.notifications?.push ? "Activado" : "Desactivado"}
+										<span className="text-muted-foreground text-sm">
+											{preferences?.notifications?.push
+												? "Activado"
+												: "Desactivado"}
 										</span>
 									</div>
 								</div>
@@ -447,12 +453,14 @@ export function ProfileForm() {
 									<Label htmlFor="marketingNotifications">Marketing</Label>
 									<div className="flex items-center space-x-2">
 										<Switch
+											defaultChecked={preferences?.notifications?.marketing}
 											id="marketingNotifications"
 											name="marketingNotifications"
-											defaultChecked={preferences?.notifications?.marketing || false}
 										/>
-										<span className="text-sm text-muted-foreground">
-											{preferences?.notifications?.marketing ? "Activado" : "Desactivado"}
+										<span className="text-muted-foreground text-sm">
+											{preferences?.notifications?.marketing
+												? "Activado"
+												: "Desactivado"}
 										</span>
 									</div>
 								</div>
@@ -460,15 +468,19 @@ export function ProfileForm() {
 						</div>
 
 						<div>
-							<h4 className="text-sm font-medium text-gray-900 mb-3">
+							<h4 className="mb-3 font-medium text-gray-900 text-sm">
 								Privacidad
 							</h4>
-							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+							<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 								<div className="space-y-2">
 									<Label htmlFor="profileVisible">Perfil Visible</Label>
 									<Select
+										defaultValue={
+											preferences?.privacy?.profileVisible
+												? "public"
+												: "private"
+										}
 										name="profileVisible"
-										defaultValue={preferences?.privacy?.profileVisible ? "public" : "private"}
 									>
 										<SelectTrigger>
 											<SelectValue />
@@ -482,8 +494,10 @@ export function ProfileForm() {
 								<div className="space-y-2">
 									<Label htmlFor="showEmail">Mostrar Email</Label>
 									<Select
+										defaultValue={
+											preferences?.privacy?.showEmail ? "visible" : "hidden"
+										}
 										name="showEmail"
-										defaultValue={preferences?.privacy?.showEmail ? "visible" : "hidden"}
 									>
 										<SelectTrigger>
 											<SelectValue />
@@ -497,8 +511,10 @@ export function ProfileForm() {
 								<div className="space-y-2">
 									<Label htmlFor="showPhone">Mostrar Teléfono</Label>
 									<Select
+										defaultValue={
+											preferences?.privacy?.showPhone ? "visible" : "hidden"
+										}
 										name="showPhone"
-										defaultValue={preferences?.privacy?.showPhone ? "visible" : "hidden"}
 									>
 										<SelectTrigger>
 											<SelectValue />
@@ -513,15 +529,15 @@ export function ProfileForm() {
 						</div>
 
 						<div>
-							<h4 className="text-sm font-medium text-gray-900 mb-3">
+							<h4 className="mb-3 font-medium text-gray-900 text-sm">
 								Configuración de Pantalla
 							</h4>
-							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+							<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 								<div className="space-y-2">
 									<Label htmlFor="theme">Tema</Label>
 									<Select
-										name="theme"
 										defaultValue={preferences?.display?.theme || "system"}
+										name="theme"
 									>
 										<SelectTrigger>
 											<SelectValue />
@@ -536,8 +552,8 @@ export function ProfileForm() {
 								<div className="space-y-2">
 									<Label htmlFor="language">Idioma</Label>
 									<Select
-										name="language"
 										defaultValue={preferences?.display?.language || "es"}
+										name="language"
 									>
 										<SelectTrigger>
 											<SelectValue />
@@ -553,8 +569,8 @@ export function ProfileForm() {
 								<div className="space-y-2">
 									<Label htmlFor="currency">Moneda</Label>
 									<Select
-										name="currency"
 										defaultValue={preferences?.display?.currency || "USD"}
+										name="currency"
 									>
 										<SelectTrigger>
 											<SelectValue />
@@ -575,16 +591,20 @@ export function ProfileForm() {
 
 				<div className="flex justify-end pt-6">
 					<Button
-						type="submit"
-						disabled={isPending || !hasChanges}
 						className="flex items-center gap-2"
+						disabled={isPending || !hasChanges}
+						type="submit"
 					>
 						{isPending ? (
 							<Loader2 className="h-4 w-4 animate-spin" />
 						) : (
 							<Save className="h-4 w-4" />
 						)}
-						{isPending ? "Guardando..." : hasChanges ? "Guardar Cambios" : "Sin Cambios"}
+						{isPending
+							? "Guardando..."
+							: hasChanges
+								? "Guardar Cambios"
+								: "Sin Cambios"}
 					</Button>
 				</div>
 			</form>

@@ -56,7 +56,7 @@ const mockUser = {
 const mockProperty = {
 	title: "Test Property",
 	description: "A beautiful test property",
-	price: 250000,
+	price: 250_000,
 	currency: "USD",
 	type: "house" as const,
 	address: {
@@ -80,7 +80,7 @@ const mockLand = {
 	name: "Test Land",
 	description: "A prime piece of test land",
 	area: 5000,
-	price: 150000,
+	price: 150_000,
 	currency: "USD",
 	location: "Test Location",
 	type: "residential" as const,
@@ -108,7 +108,7 @@ const mockWizardDraft = {
 	description: "Testing property wizard functionality",
 	initialData: {
 		step1: { title: "Test Property" },
-		step2: { price: 200000 },
+		step2: { price: 200_000 },
 	},
 };
 
@@ -204,7 +204,7 @@ describe("Architecture Validation Tests", () => {
 			const result = await updateProperty({
 				id: testPropertyId,
 				title: "Updated Test Property",
-				price: 275000,
+				price: 275_000,
 			});
 
 			expect(typeof result).toBe("object");
@@ -224,8 +224,8 @@ describe("Architecture Validation Tests", () => {
 
 		it("should search properties", async () => {
 			const result = await searchProperties({
-				minPrice: 200000,
-				maxPrice: 300000,
+				minPrice: 200_000,
+				maxPrice: 300_000,
 				propertyTypes: ["house"],
 				location: "Test City",
 			});
@@ -287,7 +287,7 @@ describe("Architecture Validation Tests", () => {
 			const result = await updateLand({
 				id: testLandId,
 				name: "Updated Test Land",
-				price: 175000,
+				price: 175_000,
 			});
 
 			expect(typeof result).toBe("object");
@@ -307,8 +307,8 @@ describe("Architecture Validation Tests", () => {
 
 		it("should search lands", async () => {
 			const result = await searchLands({
-				minPrice: 100000,
-				maxPrice: 200000,
+				minPrice: 100_000,
+				maxPrice: 200_000,
 				landTypes: ["residential"],
 				location: "Test Location",
 			});
@@ -441,7 +441,7 @@ describe("Architecture Validation Tests", () => {
 				id: testWizardDraftId,
 				title: "Updated Wizard Draft",
 				currentStep: 2,
-				data: { step1: { title: "Updated" }, step2: { price: 300000 } },
+				data: { step1: { title: "Updated" }, step2: { price: 300_000 } },
 			});
 
 			expect(typeof result).toBe("object");

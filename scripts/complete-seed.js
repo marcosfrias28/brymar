@@ -14,14 +14,15 @@ if (!connectionString) {
 }
 
 const sql = postgres(connectionString);
-const db = drizzle(sql);
+const _db = drizzle(sql);
 
 // Sample data
 const sampleProperties = [
 	{
 		title: "Villa Moderna Milano",
-		description: "Elegante villa moderna nel cuore di Milano, perfetta per famiglie che cercano comfort e lusso.",
-		price: 850000,
+		description:
+			"Elegante villa moderna nel cuore di Milano, perfetta per famiglie che cercano comfort e lusso.",
+		price: 850_000,
 		currency: "EUR",
 		propertyType: "villa",
 		status: "available",
@@ -33,19 +34,29 @@ const sampleProperties = [
 		location: "Milano, Lombardia, Italia",
 		address: "Via Montenapoleone 15, 20121 Milano",
 		latitude: 45.4642,
-		longitude: 9.1900,
-		features: ["giardino", "garage", "terrazza", "ascensore", "climatizzazione"],
-		images: ["/images/properties/villa-milano-1.jpg", "/images/properties/villa-milano-2.jpg"],
+		longitude: 9.19,
+		features: [
+			"giardino",
+			"garage",
+			"terrazza",
+			"ascensore",
+			"climatizzazione",
+		],
+		images: [
+			"/images/properties/villa-milano-1.jpg",
+			"/images/properties/villa-milano-2.jpg",
+		],
 		contactInfo: {
 			agentName: "Marco Rossi",
 			agentPhone: "+39 02 1234 5678",
-			agentEmail: "marco.rossi@brymar.com"
-		}
+			agentEmail: "marco.rossi@brymar.com",
+		},
 	},
 	{
 		title: "Appartamento Centro Storico Roma",
-		description: "Affascinante appartamento nel centro storico di Roma, a pochi passi dal Colosseo.",
-		price: 650000,
+		description:
+			"Affascinante appartamento nel centro storico di Roma, a pochi passi dal Colosseo.",
+		price: 650_000,
 		currency: "EUR",
 		propertyType: "apartment",
 		status: "available",
@@ -63,13 +74,14 @@ const sampleProperties = [
 		contactInfo: {
 			agentName: "Giulia Bianchi",
 			agentPhone: "+39 06 9876 5432",
-			agentEmail: "giulia.bianchi@brymar.com"
-		}
+			agentEmail: "giulia.bianchi@brymar.com",
+		},
 	},
 	{
 		title: "Casa di Campagna Toscana",
-		description: "Incantevole casa di campagna in Toscana, immersa nella natura.",
-		price: 450000,
+		description:
+			"Incantevole casa di campagna in Toscana, immersa nella natura.",
+		price: 450_000,
 		currency: "EUR",
 		propertyType: "house",
 		status: "available",
@@ -87,13 +99,13 @@ const sampleProperties = [
 		contactInfo: {
 			agentName: "Francesco Neri",
 			agentPhone: "+39 0577 123456",
-			agentEmail: "francesco.neri@brymar.com"
-		}
+			agentEmail: "francesco.neri@brymar.com",
+		},
 	},
 	{
 		title: "Loft Industriale Milano",
 		description: "Stiloso loft industriale nel quartiere Isola di Milano.",
-		price: 420000,
+		price: 420_000,
 		currency: "EUR",
 		propertyType: "loft",
 		status: "available",
@@ -105,19 +117,19 @@ const sampleProperties = [
 		location: "Milano, Lombardia, Italia",
 		address: "Via Borsieri 8, 20159 Milano",
 		latitude: 45.4856,
-		longitude: 9.1900,
+		longitude: 9.19,
 		features: ["open space", "travi a vista", "terrazza", "ascensore"],
 		images: ["/images/properties/loft-milano-1.jpg"],
 		contactInfo: {
 			agentName: "Alessandra Verde",
 			agentPhone: "+39 02 8765 4321",
-			agentEmail: "alessandra.verde@brymar.com"
-		}
+			agentEmail: "alessandra.verde@brymar.com",
+		},
 	},
 	{
 		title: "Villa sul Lago di Como",
 		description: "Lussuosa villa sul Lago di Como con vista mozzafiato.",
-		price: 1200000,
+		price: 1_200_000,
 		currency: "EUR",
 		propertyType: "villa",
 		status: "available",
@@ -135,16 +147,17 @@ const sampleProperties = [
 		contactInfo: {
 			agentName: "Roberto Blu",
 			agentPhone: "+39 031 234567",
-			agentEmail: "roberto.blu@brymar.com"
-		}
-	}
+			agentEmail: "roberto.blu@brymar.com",
+		},
+	},
 ];
 
 const sampleLands = [
 	{
 		title: "Terreno Agricolo Puglia",
-		description: "Vasto terreno agricolo in Puglia, ideale per coltivazioni biologiche.",
-		price: 150000,
+		description:
+			"Vasto terreno agricolo in Puglia, ideale per coltivazioni biologiche.",
+		price: 150_000,
 		currency: "EUR",
 		landType: "agricultural",
 		status: "available",
@@ -153,19 +166,19 @@ const sampleLands = [
 		location: "Lecce, Puglia, Italia",
 		address: "Contrada Masseria Vecchia, 73010 Lecce",
 		latitude: 40.3522,
-		longitude: 18.1720,
+		longitude: 18.172,
 		features: ["terreno fertile", "accesso acqua", "possibilità costruzione"],
 		images: ["/images/lands/puglia-terreno-1.jpg"],
 		contactInfo: {
 			agentName: "Antonio Pugliese",
 			agentPhone: "+39 0832 123456",
-			agentEmail: "antonio.pugliese@brymar.com"
-		}
+			agentEmail: "antonio.pugliese@brymar.com",
+		},
 	},
 	{
 		title: "Lotto Edificabile Sicilia",
 		description: "Lotto edificabile in Sicilia con vista mare.",
-		price: 280000,
+		price: 280_000,
 		currency: "EUR",
 		landType: "residential",
 		status: "available",
@@ -174,19 +187,19 @@ const sampleLands = [
 		location: "Taormina, Sicilia, Italia",
 		address: "Via del Mare 12, 98039 Taormina",
 		latitude: 37.8534,
-		longitude: 15.2880,
+		longitude: 15.288,
 		features: ["vista mare", "terreno pianeggiante", "accesso strada"],
 		images: ["/images/lands/sicilia-lotto-1.jpg"],
 		contactInfo: {
 			agentName: "Carmela Siciliana",
 			agentPhone: "+39 0942 234567",
-			agentEmail: "carmela.siciliana@brymar.com"
-		}
+			agentEmail: "carmela.siciliana@brymar.com",
+		},
 	},
 	{
 		title: "Bosco Trentino",
 		description: "Bosco secolare in Trentino, perfetto per chi ama la natura.",
-		price: 180000,
+		price: 180_000,
 		currency: "EUR",
 		landType: "forest",
 		status: "available",
@@ -201,9 +214,9 @@ const sampleLands = [
 		contactInfo: {
 			agentName: "Hans Trentino",
 			agentPhone: "+39 0461 345678",
-			agentEmail: "hans.trentino@brymar.com"
-		}
-	}
+			agentEmail: "hans.trentino@brymar.com",
+		},
+	},
 ];
 
 const sampleActivities = [
@@ -212,123 +225,135 @@ const sampleActivities = [
 		title: "Visualizzazione proprietà",
 		description: "Hai visualizzato Villa Moderna a Milano",
 		details: "Proprietà visualizzata per 8 minuti",
-		metadata: { propertyId: "property-1", duration: 480, source: "search" }
+		metadata: { propertyId: "property-1", duration: 480, source: "search" },
 	},
 	{
 		type: "favorite",
 		title: "Aggiunto ai preferiti",
 		description: "Villa Moderna a Milano aggiunta ai preferiti",
 		details: "Aggiunto alla lista dei preferiti",
-		metadata: { propertyId: "property-1", action: "add" }
+		metadata: { propertyId: "property-1", action: "add" },
 	},
 	{
 		type: "view",
 		title: "Visualizzazione proprietà",
 		description: "Hai visualizzato Appartamento Centro Storico a Roma",
 		details: "Proprietà visualizzata per 12 minuti",
-		metadata: { propertyId: "property-2", duration: 720, source: "direct" }
+		metadata: { propertyId: "property-2", duration: 720, source: "direct" },
 	},
 	{
 		type: "search",
 		title: "Nuova ricerca",
 		description: "Ricerca: Appartamenti a Milano, 2-3 camere, €400-800/mese",
 		details: "Trovati 15 risultati",
-		metadata: { 
-			query: "appartamenti milano", 
+		metadata: {
+			query: "appartamenti milano",
 			filters: { bedrooms: "2-3", priceRange: "400-800" },
-			resultsCount: 15 
-		}
+			resultsCount: 15,
+		},
 	},
 	{
 		type: "contact",
 		title: "Contatto proprietario",
 		description: "Hai contattato il proprietario di Villa sul Lago di Como",
 		details: "Tipo: inquiry, Proprietà ID: property-5",
-		metadata: { propertyId: "property-5", contactType: "inquiry" }
+		metadata: { propertyId: "property-5", contactType: "inquiry" },
 	},
 	{
 		type: "view",
 		title: "Visualizzazione terreno",
 		description: "Hai visualizzato Terreno Agricolo Puglia",
 		details: "Terreno visualizzato per 5 minuti",
-		metadata: { landId: "land-1", duration: 300, source: "search" }
+		metadata: { landId: "land-1", duration: 300, source: "search" },
 	},
 	{
 		type: "favorite",
 		title: "Aggiunto ai preferiti",
 		description: "Lotto Edificabile Sicilia aggiunto ai preferiti",
 		details: "Aggiunto alla lista dei preferiti",
-		metadata: { landId: "land-2", action: "add" }
+		metadata: { landId: "land-2", action: "add" },
 	},
 	{
 		type: "search",
 		title: "Nuova ricerca",
 		description: "Ricerca: Terreni edificabili Sicilia, vista mare",
 		details: "Trovati 8 risultati",
-		metadata: { 
-			query: "terreni edificabili sicilia", 
+		metadata: {
+			query: "terreni edificabili sicilia",
 			filters: { landType: "residential", features: "vista mare" },
-			resultsCount: 8 
-		}
+			resultsCount: 8,
+		},
 	},
 	{
 		type: "login",
 		title: "Accesso effettuato",
 		description: "Login da dispositivo mobile",
 		details: "IP: 192.168.1.100, User Agent: Mobile Safari",
-		metadata: { deviceInfo: "Mobile Safari", ipAddress: "192.168.1.100" }
+		metadata: { deviceInfo: "Mobile Safari", ipAddress: "192.168.1.100" },
 	},
 	{
 		type: "profile",
 		title: "Profilo aggiornato",
 		description: "Modificate informazioni personali",
 		details: "Aggiornato numero di telefono e indirizzo",
-		metadata: { updatedFields: ["phone", "address"] }
+		metadata: { updatedFields: ["phone", "address"] },
 	},
 	{
 		type: "settings",
 		title: "Impostazioni modificate",
 		description: "Modificata impostazione: notifiche email",
 		details: "Da: false → A: true",
-		metadata: { settingName: "emailNotifications", oldValue: false, newValue: true }
+		metadata: {
+			settingName: "emailNotifications",
+			oldValue: false,
+			newValue: true,
+		},
 	},
 	{
 		type: "message",
 		title: "Messaggio inviato",
 		description: "Hai inviato un messaggio a Marco Rossi",
 		details: "Destinatario: Marco Rossi",
-		metadata: { recipientId: "agent-1", recipientName: "Marco Rossi", messageType: "sent" }
+		metadata: {
+			recipientId: "agent-1",
+			recipientName: "Marco Rossi",
+			messageType: "sent",
+		},
 	},
 	{
 		type: "view",
 		title: "Visualizzazione proprietà",
 		description: "Hai visualizzato Casa di Campagna Toscana",
 		details: "Proprietà visualizzata per 15 minuti",
-		metadata: { propertyId: "property-3", duration: 900, source: "favorites" }
+		metadata: { propertyId: "property-3", duration: 900, source: "favorites" },
 	},
 	{
 		type: "search",
 		title: "Nuova ricerca",
 		description: "Ricerca: Ville con piscina Lombardia",
 		details: "Trovati 6 risultati",
-		metadata: { 
-			query: "ville piscina lombardia", 
-			filters: { propertyType: "villa", features: "piscina", region: "lombardia" },
-			resultsCount: 6 
-		}
+		metadata: {
+			query: "ville piscina lombardia",
+			filters: {
+				propertyType: "villa",
+				features: "piscina",
+				region: "lombardia",
+			},
+			resultsCount: 6,
+		},
 	},
 	{
 		type: "view",
 		title: "Visualizzazione terreno",
 		description: "Hai visualizzato Bosco Trentino",
 		details: "Terreno visualizzato per 7 minuti",
-		metadata: { landId: "land-3", duration: 420, source: "search" }
-	}
+		metadata: { landId: "land-3", duration: 420, source: "search" },
+	},
 ];
 
 async function createTablesIfNotExist() {
 	console.log("🔧 Creating tables if they don't exist...");
-	
+
 	try {
 		// Create properties table
 		await sql`
@@ -426,7 +451,6 @@ async function createTablesIfNotExist() {
 			CREATE INDEX IF NOT EXISTS idx_lands_status ON lands(status);
 		`;
 		console.log("✅ Indexes created/verified");
-
 	} catch (error) {
 		console.error("❌ Error creating tables:", error);
 		throw error;
@@ -449,7 +473,7 @@ async function findUserByEmail(email) {
 
 async function clearExistingData() {
 	console.log("🧹 Clearing existing data...");
-	
+
 	try {
 		await sql`DELETE FROM user_activities WHERE user_id IN (SELECT id FROM users WHERE email = 'contact@mzn.group')`;
 		await sql`DELETE FROM properties`;
@@ -463,7 +487,7 @@ async function clearExistingData() {
 
 async function insertProperties(properties) {
 	console.log("🏠 Inserting properties...");
-	
+
 	for (const property of properties) {
 		try {
 			await sql`
@@ -490,7 +514,7 @@ async function insertProperties(properties) {
 
 async function insertLands(lands) {
 	console.log("🌱 Inserting lands...");
-	
+
 	for (const land of lands) {
 		try {
 			await sql`
@@ -516,7 +540,7 @@ async function insertLands(lands) {
 
 async function insertActivities(userId, activities) {
 	console.log("📊 Inserting user activities...");
-	
+
 	for (const activity of activities) {
 		try {
 			// Generate random timestamp within the last 30 days
@@ -551,10 +575,10 @@ async function insertActivities(userId, activities) {
 async function seedDatabase() {
 	try {
 		console.log("🌱 Starting complete database seeding...");
-		
+
 		// Create tables if they don't exist
 		await createTablesIfNotExist();
-		
+
 		// Find the user
 		const user = await findUserByEmail("contact@mzn.group");
 		if (!user) {
@@ -562,26 +586,27 @@ async function seedDatabase() {
 			console.log("Please make sure the user exists in the database");
 			process.exit(1);
 		}
-		
+
 		console.log(`✅ Found user: ${user.name} (${user.email})`);
-		
+
 		// Clear existing data
 		await clearExistingData();
-		
+
 		// Insert properties
 		await insertProperties(sampleProperties);
-		
+
 		// Insert lands
 		await insertLands(sampleLands);
-		
+
 		// Insert activities
 		await insertActivities(user.id, sampleActivities);
-		
+
 		console.log("🎉 Database seeding completed successfully!");
 		console.log(`📊 Inserted ${sampleProperties.length} properties`);
 		console.log(`🌱 Inserted ${sampleLands.length} lands`);
-		console.log(`📈 Inserted ${sampleActivities.length} activities for user ${user.email}`);
-		
+		console.log(
+			`📈 Inserted ${sampleActivities.length} activities for user ${user.email}`
+		);
 	} catch (error) {
 		console.error("💥 Database seeding failed:", error);
 		throw error;

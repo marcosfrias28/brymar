@@ -22,7 +22,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { PropertyBasicInfo } from "@/types/wizard";
 
-interface EnhancedAIDescriptionProps {
+type EnhancedAIDescriptionProps = {
 	value: string;
 	onChange: (value: string) => void;
 	propertyData: PropertyBasicInfo | null;
@@ -30,7 +30,7 @@ interface EnhancedAIDescriptionProps {
 	className?: string;
 	isMobile?: boolean;
 	disabled?: boolean;
-}
+};
 
 export function EnhancedAIDescription({
 	value,
@@ -73,8 +73,7 @@ export function EnhancedAIDescription({
 				}
 			}
 		},
-		onError: (error) => {
-			console.error("AI generation error:", error);
+		onError: (_error) => {
 			setShowFallbackWarning(true);
 		},
 	});
@@ -89,12 +88,12 @@ export function EnhancedAIDescription({
 		}
 	}, [value, isRichTextMode]);
 
-	const canGenerateAI = useCallback(() => {
-		return !!propertyData?.type;
-	}, [propertyData]);
+	const canGenerateAI = useCallback(() => !!propertyData?.type, [propertyData]);
 
 	const handleGenerateDescription = useCallback(async () => {
-		if (!propertyData || !canGenerateAI()) return;
+		if (!(propertyData && canGenerateAI())) {
+			return;
+		}
 
 		setShowFallbackWarning(false);
 		clearAIState();
@@ -117,7 +116,7 @@ export function EnhancedAIDescription({
 
 			onChange(plainText);
 		},
-		[onChange],
+		[onChange]
 	);
 
 	const handleSaveRichText = useCallback(() => {
@@ -140,7 +139,7 @@ export function EnhancedAIDescription({
 		const html = value
 			.split("\n\n")
 			.map((paragraph) =>
-				paragraph.trim() ? `<p>${paragraph.trim()}</p>` : "",
+				paragraph.trim() ? `<p>${paragraph.trim()}</p>` : ""
 			)
 			.filter(Boolean)
 			.join("\n");
@@ -158,47 +157,47 @@ export function EnhancedAIDescription({
 			{/* AI Generation Section */}
 			<Card
 				className={cn(
-					"border-dashed border-primary/20 bg-primary/5",
-					isMobile && "border-0 shadow-none",
+					"border-primary/20 border-dashed bg-primary/5",
+					isMobile && "border-0 shadow-none"
 				)}
 			>
 				<CardHeader className={cn(isMobile ? "px-0 pb-3" : "")}>
 					<CardTitle
 						className={cn(
 							"flex items-center gap-2",
-							isMobile ? "text-base" : "text-lg",
+							isMobile ? "text-base" : "text-lg"
 						)}
 					>
 						<Wand2
-							className={cn("text-primary", isMobile ? "w-4 h-4" : "w-5 h-5")}
+							className={cn("text-primary", isMobile ? "h-4 w-4" : "h-5 w-5")}
 						/>
 						Generación Inteligente de Descripción
 					</CardTitle>
 					<p
 						className={cn(
 							"text-muted-foreground",
-							isMobile ? "text-xs" : "text-sm",
+							isMobile ? "text-xs" : "text-sm"
 						)}
 					>
 						Genera descripciones detalladas y profesionales con formato rico
 						usando IA
 					</p>
 				</CardHeader>
-				<CardContent className={cn(isMobile ? "px-0 space-y-3" : "space-y-4")}>
+				<CardContent className={cn(isMobile ? "space-y-3 px-0" : "space-y-4")}>
 					{aiError && (
-						<div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+						<div className="rounded-md border border-destructive/20 bg-destructive/10 p-3">
 							<div className="flex items-center gap-2">
-								<AlertTriangle className="w-4 h-4 text-destructive" />
-								<p className="text-sm text-destructive">{aiError}</p>
+								<AlertTriangle className="h-4 w-4 text-destructive" />
+								<p className="text-destructive text-sm">{aiError}</p>
 							</div>
 						</div>
 					)}
 
 					{showFallbackWarning && (
-						<div className="p-3 bg-amber-50 border border-amber-200 rounded-md">
+						<div className="rounded-md border border-amber-200 bg-amber-50 p-3">
 							<div className="flex items-center gap-2">
-								<AlertTriangle className="w-4 h-4 text-amber-600" />
-								<p className="text-sm text-amber-800">
+								<AlertTriangle className="h-4 w-4 text-amber-600" />
+								<p className="text-amber-800 text-sm">
 									Se usó contenido de respaldo. La IA podría no estar disponible
 									temporalmente.
 								</p>
@@ -206,23 +205,23 @@ export function EnhancedAIDescription({
 						</div>
 					)}
 
-					<div className="flex flex-col sm:flex-row gap-3">
+					<div className="flex flex-col gap-3 sm:flex-row">
 						<Button
-							type="button"
-							onClick={handleGenerateDescription}
-							disabled={!canGenerateAI() || isGenerating || disabled}
 							className={cn("flex-1", isMobile && "min-h-[48px] text-base")}
+							disabled={!canGenerateAI() || isGenerating || disabled}
+							onClick={handleGenerateDescription}
+							type="button"
 						>
 							{isGenerating ? (
 								<Loader2
 									className={cn(
-										"animate-spin mr-2",
-										isMobile ? "w-5 h-5" : "w-4 h-4",
+										"mr-2 animate-spin",
+										isMobile ? "h-5 w-5" : "h-4 w-4"
 									)}
 								/>
 							) : (
 								<Sparkles
-									className={cn("mr-2", isMobile ? "w-5 h-5" : "w-4 h-4")}
+									className={cn("mr-2", isMobile ? "h-5 w-5" : "h-4 w-4")}
 								/>
 							)}
 							{isGenerating ? "Generando..." : "Generar Descripción Rica"}
@@ -230,14 +229,14 @@ export function EnhancedAIDescription({
 
 						{!isRichTextMode && value && (
 							<Button
+								className={cn(isMobile && "min-h-[48px]")}
+								disabled={disabled}
+								onClick={handleSwitchToRichText}
 								type="button"
 								variant="outline"
-								onClick={handleSwitchToRichText}
-								disabled={disabled}
-								className={cn(isMobile && "min-h-[48px]")}
 							>
 								<Edit3
-									className={cn("mr-2", isMobile ? "w-5 h-5" : "w-4 h-4")}
+									className={cn("mr-2", isMobile ? "h-5 w-5" : "h-4 w-4")}
 								/>
 								Editar con Formato
 							</Button>
@@ -247,8 +246,8 @@ export function EnhancedAIDescription({
 					{!canGenerateAI() && (
 						<p
 							className={cn(
-								"text-muted-foreground text-center",
-								isMobile ? "text-xs px-2" : "text-xs",
+								"text-center text-muted-foreground",
+								isMobile ? "px-2 text-xs" : "text-xs"
 							)}
 						>
 							Completa el tipo de propiedad, precio y superficie para usar la IA
@@ -260,8 +259,8 @@ export function EnhancedAIDescription({
 			{/* Description Input */}
 			<div>
 				<Label
+					className={cn(isMobile ? "font-medium text-sm" : "")}
 					htmlFor="description"
-					className={cn(isMobile ? "text-sm font-medium" : "")}
 				>
 					Descripción de la Propiedad *
 				</Label>
@@ -269,15 +268,15 @@ export function EnhancedAIDescription({
 				{isRichTextMode ? (
 					<div className="mt-2">
 						<AdvancedRichTextEditor
+							className="min-h-[300px]"
 							content={richContent.html}
+							onCancel={handleCancelRichText}
 							onChange={handleRichTextChange}
 							onSave={handleSaveRichText}
-							onCancel={handleCancelRichText}
 							placeholder={placeholder}
-							className="min-h-[300px]"
 						/>
-						<div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-							<CheckCircle className="w-4 h-4 text-green-600" />
+						<div className="mt-2 flex items-center gap-2 text-muted-foreground text-sm">
+							<CheckCircle className="h-4 w-4 text-green-600" />
 							Modo de edición rica activado. Los cambios se guardan
 							automáticamente.
 						</div>
@@ -285,26 +284,26 @@ export function EnhancedAIDescription({
 				) : (
 					<div className="space-y-2">
 						<Textarea
+							className={cn("mt-2", isMobile && "text-base")}
+							disabled={disabled}
 							id="description"
-							value={value}
 							onChange={(e) => onChange(e.target.value)}
 							placeholder={placeholder}
 							rows={isMobile ? 4 : 6}
-							disabled={disabled}
-							className={cn("mt-2", isMobile && "text-base")}
+							value={value}
 						/>
 						{value?.trim() && (
-							<div className="mt-3 p-3 bg-muted/50 rounded-md border">
-								<div className="flex items-center gap-2 mb-2">
-									<CheckCircle className="w-4 h-4 text-green-600" />
-									<span className="text-sm font-medium text-muted-foreground">
+							<div className="mt-3 rounded-md border bg-muted/50 p-3">
+								<div className="mb-2 flex items-center gap-2">
+									<CheckCircle className="h-4 w-4 text-green-600" />
+									<span className="font-medium text-muted-foreground text-sm">
 										Vista previa con formato:
 									</span>
 								</div>
 								<MarkdownRenderer
+									className="text-sm"
 									content={value}
 									variant="compact"
-									className="text-sm"
 								/>
 							</div>
 						)}

@@ -4,14 +4,12 @@ import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 // Error handler for queries
-function handleQueryError(error: Error) {
-	console.error("Query Error:", error);
+function handleQueryError(_error: Error) {
 	// Don't show toast for every query error, let components handle it
 }
 
 // Error handler for mutations
-function handleMutationError(error: Error) {
-	console.error("Mutation Error:", error);
+function handleMutationError(_error: Error) {
 	toast.error("Ocurrió un error. Por favor, inténtalo de nuevo.");
 }
 
@@ -60,7 +58,9 @@ export function createQueryClient() {
 			mutations: {
 				// Retry mutations once on network errors
 				retry: (failureCount, error) => {
-					if (error.message.includes("4")) return false;
+					if (error.message.includes("4")) {
+						return false;
+					}
 					return failureCount < 1;
 				},
 				// Network timeout for mutations
@@ -77,11 +77,10 @@ export function getQueryClient() {
 	if (typeof window === "undefined") {
 		// Server: always make a new query client
 		return createQueryClient();
-	} else {
-		// Browser: make a new query client if we don't already have one
-		if (!clientQueryClient) {
-			clientQueryClient = createQueryClient();
-		}
-		return clientQueryClient;
 	}
+	// Browser: make a new query client if we don't already have one
+	if (!clientQueryClient) {
+		clientQueryClient = createQueryClient();
+	}
+	return clientQueryClient;
 }

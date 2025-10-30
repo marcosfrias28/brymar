@@ -3,13 +3,13 @@
  * Simplified mock tests for demonstration purposes
  */
 
-interface MockTestResult {
+type MockTestResult = {
 	testName: string;
 	passed: boolean;
 	error?: string;
 	details?: any;
 	duration?: number;
-}
+};
 
 export async function runMockEndToEndTests(): Promise<MockTestResult[]> {
 	console.log("🧪 Starting Mock End-to-End Functionality Tests...");

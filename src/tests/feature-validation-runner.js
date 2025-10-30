@@ -13,9 +13,7 @@
 
 const { execSync } = require("node:child_process");
 const fs = require("node:fs");
-const path = require("node:path");
-
-console.log("🧪 Starting Feature Validation Testing...\n");
+const _path = require("node:path");
 
 // Test results tracking
 const testResults = {
@@ -30,19 +28,15 @@ const testResults = {
 /**
  * Run a command and capture results
  */
-function runCommand(command, description) {
-	console.log(`🔄 ${description}...`);
+function runCommand(command, _description) {
 	try {
 		const output = execSync(command, {
 			encoding: "utf8",
 			stdio: "pipe",
-			timeout: 30000, // 30 second timeout
+			timeout: 30_000, // 30 second timeout
 		});
-		console.log(`✅ ${description} - PASSED`);
 		return { success: true, output };
 	} catch (error) {
-		console.log(`❌ ${description} - FAILED`);
-		console.log(`Error: ${error.message}`);
 		return { success: false, error: error.message };
 	}
 }
@@ -51,22 +45,15 @@ function runCommand(command, description) {
  * Test 1: Architecture Validation (Unit Tests)
  */
 function testArchitectureValidation() {
-	console.log("\n📋 Testing Architecture Validation...");
-
 	const result = runCommand(
 		"npm test -- src/lib/__tests__/architecture-validation.test.ts --silent",
-		"Architecture validation tests",
+		"Architecture validation tests"
 	);
 
 	testResults.architecture.passed = result.success;
 	testResults.architecture.error = result.error;
 
 	if (result.success) {
-		console.log("   ✓ Authentication functions available");
-		console.log("   ✓ Property CRUD operations available");
-		console.log("   ✓ Land CRUD operations available");
-		console.log("   ✓ Blog CRUD operations available");
-		console.log("   ✓ Wizard functionality available");
 	}
 }
 
@@ -74,8 +61,6 @@ function testArchitectureValidation() {
  * Test 2: Authentication Flow Validation
  */
 function testAuthenticationFlows() {
-	console.log("\n🔐 Testing Authentication Flows...");
-
 	// Check if auth action files exist and are properly structured
 	const authFiles = [
 		"src/lib/actions/auth.ts",
@@ -86,15 +71,11 @@ function testAuthenticationFlows() {
 	let authFilesExist = true;
 	for (const file of authFiles) {
 		if (!fs.existsSync(file)) {
-			console.log(`❌ Missing auth file: ${file}`);
 			authFilesExist = false;
 		}
 	}
 
 	if (authFilesExist) {
-		console.log("   ✓ Authentication action files exist");
-		console.log("   ✓ Sign-in form component exists");
-		console.log("   ✓ Sign-up form component exists");
 		testResults.auth.passed = true;
 	} else {
 		testResults.auth.passed = false;
@@ -106,8 +87,6 @@ function testAuthenticationFlows() {
  * Test 3: Property CRUD Operations
  */
 function testPropertyOperations() {
-	console.log("\n🏠 Testing Property CRUD Operations...");
-
 	// Check if property action files exist
 	const propertyFiles = [
 		"src/lib/actions/properties.ts",
@@ -118,15 +97,11 @@ function testPropertyOperations() {
 	let propertyFilesExist = true;
 	for (const file of propertyFiles) {
 		if (!fs.existsSync(file)) {
-			console.log(`❌ Missing property file: ${file}`);
 			propertyFilesExist = false;
 		}
 	}
 
 	if (propertyFilesExist) {
-		console.log("   ✓ Property action files exist");
-		console.log("   ✓ Property form component exists");
-		console.log("   ✓ Property card component exists");
 		testResults.properties.passed = true;
 	} else {
 		testResults.properties.passed = false;
@@ -138,8 +113,6 @@ function testPropertyOperations() {
  * Test 4: Land CRUD Operations
  */
 function testLandOperations() {
-	console.log("\n🌍 Testing Land CRUD Operations...");
-
 	// Check if land action files exist
 	const landFiles = [
 		"src/lib/actions/lands.ts",
@@ -150,15 +123,11 @@ function testLandOperations() {
 	let landFilesExist = true;
 	for (const file of landFiles) {
 		if (!fs.existsSync(file)) {
-			console.log(`❌ Missing land file: ${file}`);
 			landFilesExist = false;
 		}
 	}
 
 	if (landFilesExist) {
-		console.log("   ✓ Land action files exist");
-		console.log("   ✓ Land form component exists");
-		console.log("   ✓ Land card component exists");
 		testResults.lands.passed = true;
 	} else {
 		testResults.lands.passed = false;
@@ -170,8 +139,6 @@ function testLandOperations() {
  * Test 5: Blog CRUD Operations and Publishing
  */
 function testBlogOperations() {
-	console.log("\n📝 Testing Blog CRUD Operations and Publishing...");
-
 	// Check if blog action files exist
 	const blogFiles = [
 		"src/lib/actions/blog.ts",
@@ -182,15 +149,11 @@ function testBlogOperations() {
 	let blogFilesExist = true;
 	for (const file of blogFiles) {
 		if (!fs.existsSync(file)) {
-			console.log(`❌ Missing blog file: ${file}`);
 			blogFilesExist = false;
 		}
 	}
 
 	if (blogFilesExist) {
-		console.log("   ✓ Blog action files exist");
-		console.log("   ✓ Blog form component exists");
-		console.log("   ✓ Blog card component exists");
 		testResults.blog.passed = true;
 	} else {
 		testResults.blog.passed = false;
@@ -202,8 +165,6 @@ function testBlogOperations() {
  * Test 6: Wizard Functionality and AI Content Generation
  */
 function testWizardFunctionality() {
-	console.log("\n🧙 Testing Wizard Functionality and AI Content Generation...");
-
 	// Check if wizard files exist
 	const wizardFiles = [
 		"src/lib/actions/wizard.ts",
@@ -214,15 +175,11 @@ function testWizardFunctionality() {
 	let wizardFilesExist = true;
 	for (const file of wizardFiles) {
 		if (!fs.existsSync(file)) {
-			console.log(`❌ Missing wizard file: ${file}`);
 			wizardFilesExist = false;
 		}
 	}
 
 	if (wizardFilesExist) {
-		console.log("   ✓ Wizard action files exist");
-		console.log("   ✓ Unified wizard component exists");
-		console.log("   ✓ AI action files exist");
 		testResults.wizard.passed = true;
 	} else {
 		testResults.wizard.passed = false;
@@ -234,8 +191,6 @@ function testWizardFunctionality() {
  * Test 7: E2E Test Files Validation
  */
 function testE2EFiles() {
-	console.log("\n🎭 Validating E2E Test Files...");
-
 	const e2eFiles = [
 		"src/tests/e2e/auth-flows.spec.ts",
 		"src/tests/e2e/property-flows.spec.ts",
@@ -246,11 +201,9 @@ function testE2EFiles() {
 
 	let allE2EFilesExist = true;
 	for (const file of e2eFiles) {
-		if (!fs.existsSync(file)) {
-			console.log(`❌ Missing E2E test file: ${file}`);
-			allE2EFilesExist = false;
+		if (fs.existsSync(file)) {
 		} else {
-			console.log(`   ✓ ${path.basename(file)} exists`);
+			allE2EFilesExist = false;
 		}
 	}
 
@@ -261,39 +214,17 @@ function testE2EFiles() {
  * Generate Test Report
  */
 function generateTestReport() {
-	console.log("\n📊 Feature Validation Test Report");
-	console.log("=====================================");
-
 	const totalTests = Object.keys(testResults).length;
 	const passedTests = Object.values(testResults).filter(
-		(result) => result.passed,
+		(result) => result.passed
 	).length;
 	const failedTests = totalTests - passedTests;
 
-	console.log(`\n📈 Summary:`);
-	console.log(`   Total Tests: ${totalTests}`);
-	console.log(`   Passed: ${passedTests}`);
-	console.log(`   Failed: ${failedTests}`);
-	console.log(
-		`   Success Rate: ${Math.round((passedTests / totalTests) * 100)}%`,
-	);
-
-	console.log(`\n📋 Detailed Results:`);
-
-	Object.entries(testResults).forEach(([testName, result]) => {
-		const status = result.passed ? "✅ PASSED" : "❌ FAILED";
-		console.log(`   ${testName.padEnd(15)}: ${status}`);
+	Object.entries(testResults).forEach(([_testName, result]) => {
+		const _status = result.passed ? "✅ PASSED" : "❌ FAILED";
 		if (!result.passed && result.error) {
-			console.log(`      Error: ${result.error}`);
 		}
 	});
-
-	console.log(`\n🎯 Feature Coverage Validation:`);
-	console.log(`   ✓ Authentication flows (sign in, sign up, password reset)`);
-	console.log(`   ✓ Property CRUD operations and search functionality`);
-	console.log(`   ✓ Land CRUD operations and search functionality`);
-	console.log(`   ✓ Blog CRUD operations and publishing`);
-	console.log(`   ✓ Wizard functionality and AI content generation`);
 
 	// Generate report file
 	const reportData = {
@@ -315,11 +246,7 @@ function generateTestReport() {
 
 	fs.writeFileSync(
 		"src/tests/feature-validation-report.json",
-		JSON.stringify(reportData, null, 2),
-	);
-
-	console.log(
-		`\n📄 Detailed report saved to: src/tests/feature-validation-report.json`,
+		JSON.stringify(reportData, null, 2)
 	);
 
 	return passedTests === totalTests;
@@ -344,24 +271,12 @@ async function main() {
 		// Generate report
 		const allTestsPassed = generateTestReport();
 
-		console.log("\n🎉 Feature Validation Testing Complete!");
-
 		if (allTestsPassed && e2eFilesValid) {
-			console.log("\n✅ All feature validation tests PASSED!");
-			console.log(
-				"   The simplified architecture maintains full feature parity.",
-			);
-			console.log("   All CRUD operations are functional.");
-			console.log("   E2E test coverage is complete.");
 			process.exit(0);
 		} else {
-			console.log("\n⚠️  Some feature validation tests FAILED.");
-			console.log("   Please review the detailed report above.");
 			process.exit(1);
 		}
-	} catch (error) {
-		console.error("\n💥 Feature validation testing failed with error:");
-		console.error(error.message);
+	} catch (_error) {
 		process.exit(1);
 	}
 }

@@ -14,20 +14,20 @@ const PILL_ACTIVE_STYLES =
 const PILL_INACTIVE_STYLES =
 	"text-white hover:bg-white/20 hover:text-white hover:shadow-sm";
 
-interface PillContainerProps {
+type PillContainerProps = {
 	children: ReactNode;
 	className?: string;
-}
+};
 
 export function PillContainer({ children, className }: PillContainerProps) {
 	return <div className={cn(PILL_CONTAINER_STYLES, className)}>{children}</div>;
 }
 
-interface PillLinkProps {
+type PillLinkProps = {
 	children: ReactNode;
 	isActive?: boolean;
 	className?: string;
-}
+};
 
 export function PillLink({
 	children,
@@ -39,7 +39,7 @@ export function PillLink({
 			className={cn(
 				PILL_BASE_STYLES,
 				isActive ? PILL_ACTIVE_STYLES : PILL_INACTIVE_STYLES,
-				className,
+				className
 			)}
 		>
 			{children}

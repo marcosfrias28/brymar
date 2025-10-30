@@ -10,7 +10,7 @@ import {
 	WizardError,
 } from "../errors/wizard-errors";
 
-export interface RetryOptions {
+export type RetryOptions = {
 	maxAttempts: number;
 	baseDelay: number;
 	maxDelay: number;
@@ -18,22 +18,22 @@ export interface RetryOptions {
 	jitter: boolean;
 	shouldRetry?: (error: Error, attempt: number) => boolean;
 	onRetry?: (error: Error, attempt: number) => void;
-}
+};
 
-export interface RetryResult<T> {
+export type RetryResult<T> = {
 	success: boolean;
 	data?: T;
 	error?: Error;
 	attempts: number;
 	totalTime: number;
-}
+};
 
 // Default retry configurations for different operation types
 export const RETRY_CONFIGS = {
 	AI_GENERATION: {
 		maxAttempts: 3,
 		baseDelay: 1000,
-		maxDelay: 10000,
+		maxDelay: 10_000,
 		backoffFactor: 2,
 		jitter: true,
 		shouldRetry: (error: Error, attempt: number) => {
@@ -62,9 +62,8 @@ export const RETRY_CONFIGS = {
 		maxDelay: 5000,
 		backoffFactor: 2,
 		jitter: true,
-		shouldRetry: (error: Error, attempt: number) => {
-			return error instanceof NetworkError && attempt < 3;
-		},
+		shouldRetry: (error: Error, attempt: number) =>
+			error instanceof NetworkError && attempt < 3,
 	},
 	DRAFT_OPERATIONS: {
 		maxAttempts: 2,
@@ -89,11 +88,11 @@ function calculateDelay(
 	baseDelay: number,
 	maxDelay: number,
 	backoffFactor: number,
-	jitter: boolean,
+	jitter: boolean
 ): number {
 	const exponentialDelay = Math.min(
 		baseDelay * backoffFactor ** (attempt - 1),
-		maxDelay,
+		maxDelay
 	);
 
 	if (!jitter) {
@@ -119,7 +118,7 @@ function sleep(ms: number): Promise<void> {
  */
 export async function retryWithBackoff<T>(
 	operation: () => Promise<T>,
-	options: RetryOptions,
+	options: RetryOptions
 ): Promise<RetryResult<T>> {
 	const startTime = Date.now();
 	let lastError: Error | undefined;
@@ -158,7 +157,7 @@ export async function retryWithBackoff<T>(
 				options.baseDelay,
 				options.maxDelay,
 				options.backoffFactor,
-				options.jitter,
+				options.jitter
 			);
 
 			await sleep(delay);
@@ -178,7 +177,7 @@ export async function retryWithBackoff<T>(
  */
 export async function retryAIOperation<T>(
 	operation: () => Promise<T>,
-	onRetry?: (error: Error, attempt: number) => void,
+	onRetry?: (error: Error, attempt: number) => void
 ): Promise<T> {
 	const result = await retryWithBackoff(operation, {
 		...RETRY_CONFIGS.AI_GENERATION,
@@ -194,7 +193,7 @@ export async function retryAIOperation<T>(
 		new AIServiceError(
 			"AI operation failed after all retry attempts",
 			"API_ERROR",
-			false,
+			false
 		)
 	);
 }
@@ -204,7 +203,7 @@ export async function retryAIOperation<T>(
  */
 export async function retryUploadOperation<T>(
 	operation: () => Promise<T>,
-	onRetry?: (error: Error, attempt: number) => void,
+	onRetry?: (error: Error, attempt: number) => void
 ): Promise<T> {
 	const result = await retryWithBackoff(operation, {
 		...RETRY_CONFIGS.IMAGE_UPLOAD,
@@ -220,7 +219,7 @@ export async function retryUploadOperation<T>(
 		new UploadError(
 			"Upload operation failed after all retry attempts",
 			"UPLOAD_FAILED",
-			false,
+			false
 		)
 	);
 }
@@ -230,7 +229,7 @@ export async function retryUploadOperation<T>(
  */
 export async function retryNetworkRequest<T>(
 	operation: () => Promise<T>,
-	onRetry?: (error: Error, attempt: number) => void,
+	onRetry?: (error: Error, attempt: number) => void
 ): Promise<T> {
 	const result = await retryWithBackoff(operation, {
 		...RETRY_CONFIGS.NETWORK_REQUEST,
@@ -252,7 +251,7 @@ export async function retryNetworkRequest<T>(
  */
 export async function retryDraftOperation<T>(
 	operation: () => Promise<T>,
-	onRetry?: (error: Error, attempt: number) => void,
+	onRetry?: (error: Error, attempt: number) => void
 ): Promise<T> {
 	const result = await retryWithBackoff(operation, {
 		...RETRY_CONFIGS.DRAFT_OPERATIONS,
@@ -268,7 +267,7 @@ export async function retryDraftOperation<T>(
 		new WizardError(
 			"Draft operation failed after all retry attempts",
 			"OPERATION_FAILED",
-			false,
+			false
 		)
 	);
 }
@@ -283,7 +282,7 @@ export class CircuitBreaker {
 
 	constructor(
 		private readonly failureThreshold: number = 5,
-		private readonly recoveryTimeout: number = 60000, // 1 minute
+		private readonly recoveryTimeout: number = 60_000 // 1 minute
 	) {}
 
 	async execute<T>(operation: () => Promise<T>): Promise<T> {
@@ -295,7 +294,7 @@ export class CircuitBreaker {
 					"Circuit breaker is open",
 					"CIRCUIT_BREAKER_OPEN",
 					true,
-					"El servicio está temporalmente deshabilitado. Inténtalo más tarde.",
+					"El servicio está temporalmente deshabilitado. Inténtalo más tarde."
 				);
 			}
 		}
@@ -337,7 +336,7 @@ export class CircuitBreaker {
 
 // Global circuit breakers for different services
 export const circuitBreakers = {
-	aiService: new CircuitBreaker(3, 30000), // 3 failures, 30s recovery
-	uploadService: new CircuitBreaker(5, 60000), // 5 failures, 1min recovery
-	mapService: new CircuitBreaker(3, 30000), // 3 failures, 30s recovery
+	aiService: new CircuitBreaker(3, 30_000), // 3 failures, 30s recovery
+	uploadService: new CircuitBreaker(5, 60_000), // 5 failures, 1min recovery
+	mapService: new CircuitBreaker(3, 30_000), // 3 failures, 30s recovery
 } as const;

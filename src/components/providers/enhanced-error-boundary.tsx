@@ -3,7 +3,7 @@
 import React, { Component, type ErrorInfo, type ReactNode } from "react";
 import { ErrorState } from "@/components/ui/error-states";
 
-interface Props {
+type Props = {
 	children: ReactNode;
 	fallback?: ReactNode;
 	onError?: (error: Error, errorInfo: ErrorInfo) => void;
@@ -11,13 +11,13 @@ interface Props {
 	variant?: "default" | "network" | "server" | "permission" | "notFound";
 	title?: string;
 	description?: string;
-}
+};
 
-interface State {
+type State = {
 	hasError: boolean;
 	error: Error | null;
 	errorInfo: ErrorInfo | null;
-}
+};
 
 export class EnhancedErrorBoundary extends Component<Props, State> {
 	public state: State = {
@@ -47,11 +47,6 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
 
 		// Log error in development
 		if (process.env.NODE_ENV === "development") {
-			console.error(
-				"Enhanced Error Boundary caught an error:",
-				error,
-				errorInfo,
-			);
 		}
 
 		// Report to error tracking service in production
@@ -60,7 +55,7 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
 		}
 	}
 
-	private handleRetry = () => {
+	private readonly handleRetry = () => {
 		this.setState({
 			hasError: false,
 			error: null,
@@ -68,8 +63,8 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
 		});
 	};
 
-	private determineErrorVariant = (
-		error: Error,
+	private readonly determineErrorVariant = (
+		error: Error
 	): "default" | "network" | "server" | "permission" | "notFound" => {
 		const message = error.message.toLowerCase();
 
@@ -103,15 +98,15 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
 				this.props.variant || this.determineErrorVariant(this.state.error!);
 
 			return (
-				<div className="min-h-[400px] flex items-center justify-center">
+				<div className="flex min-h-[400px] items-center justify-center">
 					<ErrorState
-						title={this.props.title}
 						description={this.props.description}
 						error={this.state.error || undefined}
 						onRetry={this.handleRetry}
 						showDetails={
 							this.props.showDetails || process.env.NODE_ENV === "development"
 						}
+						title={this.props.title}
 						variant={variant}
 					/>
 				</div>
@@ -126,9 +121,7 @@ export class EnhancedErrorBoundary extends Component<Props, State> {
  * Hook-based error handler for functional components
  */
 export function useErrorHandler() {
-	return React.useCallback((error: Error, errorInfo?: ErrorInfo) => {
-		console.error("Error caught by error handler:", error, errorInfo);
-
+	return React.useCallback((_error: Error, _errorInfo?: ErrorInfo) => {
 		// Report to error tracking service
 		if (process.env.NODE_ENV === "production") {
 			// Example: Sentry.captureException(error, { extra: errorInfo });
@@ -141,7 +134,7 @@ export function useErrorHandler() {
  */
 export function withErrorBoundary<P extends object>(
 	Component: React.ComponentType<P>,
-	errorBoundaryProps?: Omit<Props, "children">,
+	errorBoundaryProps?: Omit<Props, "children">
 ) {
 	const WrappedComponent = (props: P) => (
 		<EnhancedErrorBoundary {...errorBoundaryProps}>
@@ -169,9 +162,8 @@ export function AsyncErrorBoundary({
 	React.useEffect(() => {
 		const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
 			const error = new Error(
-				event.reason?.message || "Unhandled promise rejection",
+				event.reason?.message || "Unhandled promise rejection"
 			);
-			console.error("Unhandled promise rejection:", error);
 
 			if (onError) {
 				onError(error);
@@ -183,7 +175,7 @@ export function AsyncErrorBoundary({
 		return () => {
 			window.removeEventListener(
 				"unhandledrejection",
-				handleUnhandledRejection,
+				handleUnhandledRejection
 			);
 		};
 	}, [onError]);

@@ -22,23 +22,23 @@ import {
 } from "@/components/ui/card";
 import type { ErrorRecoveryStrategy, WizardError } from "@/types/wizard-core";
 
-interface WizardErrorBoundaryProps {
+type WizardErrorBoundaryProps = {
 	children: ReactNode;
 	onError?: (error: WizardError) => void;
 	fallback?: (error: WizardError, recovery: ErrorRecoveryStrategy) => ReactNode;
-}
+};
 
-interface WizardErrorBoundaryState {
+type WizardErrorBoundaryState = {
 	error: WizardError | null;
 	errorInfo: React.ErrorInfo | null;
 	retryCount: number;
-}
+};
 
 export class WizardErrorBoundary extends Component<
 	WizardErrorBoundaryProps,
 	WizardErrorBoundaryState
 > {
-	private maxRetries = 3;
+	private readonly maxRetries = 3;
 
 	constructor(props: WizardErrorBoundaryProps) {
 		super(props);
@@ -50,7 +50,7 @@ export class WizardErrorBoundary extends Component<
 	}
 
 	static getDerivedStateFromError(
-		error: Error,
+		error: Error
 	): Partial<WizardErrorBoundaryState> {
 		// Convert generic error to WizardError
 		const wizardError: WizardError = {
@@ -67,9 +67,6 @@ export class WizardErrorBoundary extends Component<
 
 	componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
 		this.setState({ errorInfo });
-
-		// Log error for monitoring
-		console.error("Wizard Error Boundary caught an error:", error, errorInfo);
 
 		// Call onError callback if provided
 		if (this.props.onError && this.state.error) {
@@ -126,7 +123,7 @@ export class WizardErrorBoundary extends Component<
 	private reportError(error: Error, errorInfo: React.ErrorInfo) {
 		// In a real implementation, this would send to an error tracking service
 		// like Sentry, LogRocket, etc.
-		const errorReport = {
+		const _errorReport = {
 			error: {
 				name: error.name,
 				message: error.message,
@@ -139,9 +136,6 @@ export class WizardErrorBoundary extends Component<
 			userAgent: navigator.userAgent,
 			url: window.location.href,
 		};
-
-		// For now, just log to console
-		console.error("Error Report:", errorReport);
 	}
 
 	private createRecoveryStrategy(): ErrorRecoveryStrategy {
@@ -156,19 +150,12 @@ export class WizardErrorBoundary extends Component<
 				}
 			},
 			skip: () => {
-				// This would need to be connected to the wizard's navigation
-				console.log("Skip recovery strategy triggered");
 				this.setState({ error: null, errorInfo: null });
 			},
-			goToStep: (stepId: string) => {
-				// This would need to be connected to the wizard's navigation
-				console.log("Go to step recovery strategy triggered:", stepId);
+			goToStep: (_stepId: string) => {
 				this.setState({ error: null, errorInfo: null });
 			},
-			saveDraft: () => {
-				// This would need to be connected to the wizard's save functionality
-				console.log("Save draft recovery strategy triggered");
-			},
+			saveDraft: () => {},
 			reset: () => {
 				this.setState({
 					error: null,
@@ -185,7 +172,7 @@ export class WizardErrorBoundary extends Component<
 			error.recoverable && this.state.retryCount < this.maxRetries;
 
 		return (
-			<div className="min-h-[400px] flex items-center justify-center p-4">
+			<div className="flex min-h-[400px] items-center justify-center p-4">
 				<Card className="w-full max-w-md">
 					<CardHeader>
 						<div className="flex items-center gap-2">
@@ -204,11 +191,11 @@ export class WizardErrorBoundary extends Component<
 						<div className="flex flex-col gap-2">
 							{canRetry && (
 								<Button
+									className="w-full"
 									onClick={recovery.retry}
 									variant="default"
-									className="w-full"
 								>
-									<RefreshCw className="h-4 w-4 mr-2" />
+									<RefreshCw className="mr-2 h-4 w-4" />
 									Reintentar ({this.maxRetries - this.state.retryCount} intentos
 									restantes)
 								</Button>
@@ -216,40 +203,40 @@ export class WizardErrorBoundary extends Component<
 
 							{error.type === "validation" && (
 								<Button
+									className="w-full"
 									onClick={recovery.skip}
 									variant="outline"
-									className="w-full"
 								>
-									<SkipForward className="h-4 w-4 mr-2" />
+									<SkipForward className="mr-2 h-4 w-4" />
 									Continuar sin validar
 								</Button>
 							)}
 
 							<Button
+								className="w-full"
 								onClick={recovery.saveDraft}
 								variant="outline"
-								className="w-full"
 							>
-								<Save className="h-4 w-4 mr-2" />
+								<Save className="mr-2 h-4 w-4" />
 								Guardar progreso
 							</Button>
 
 							<Button
+								className="w-full"
 								onClick={recovery.reset}
 								variant="outline"
-								className="w-full"
 							>
-								<RotateCcw className="h-4 w-4 mr-2" />
+								<RotateCcw className="mr-2 h-4 w-4" />
 								Reiniciar asistente
 							</Button>
 						</div>
 
 						{process.env.NODE_ENV === "development" && this.state.errorInfo && (
 							<details className="mt-4">
-								<summary className="cursor-pointer text-sm text-muted-foreground">
+								<summary className="cursor-pointer text-muted-foreground text-sm">
 									Detalles técnicos (desarrollo)
 								</summary>
-								<pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto max-h-32">
+								<pre className="mt-2 max-h-32 overflow-auto rounded bg-muted p-2 text-xs">
 									{this.state.errorInfo.componentStack}
 								</pre>
 							</details>
@@ -313,7 +300,7 @@ export function useWizardErrorHandler() {
 
 // Higher-order component for wrapping wizard steps with error boundaries
 export function withWizardErrorBoundary<P extends object>(
-	Component: React.ComponentType<P>,
+	Component: React.ComponentType<P>
 ) {
 	return function WrappedComponent(props: P) {
 		return (

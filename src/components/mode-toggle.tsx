@@ -2,7 +2,6 @@
 
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import * as React from "react";
 import { Button } from "@/components/ui/button";
 
 export const ModeToggle = () => {
@@ -14,12 +13,12 @@ export const ModeToggle = () => {
 
 	return (
 		<Button
-			variant="ghost"
-			size="icon"
+			className="h-10 w-10"
 			onClick={handleToggleTheme}
-			className="w-10 h-10"
+			size="icon"
+			variant="ghost"
 		>
-			<Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+			<Sun className="dark:-rotate-90 h-5 w-5 rotate-0 scale-100 transition-all dark:scale-0" />
 			<Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
 			<span className="sr-only">Toggle theme</span>
 		</Button>

@@ -6,18 +6,18 @@ import type { CreatePropertyInput } from "@/lib/types/properties";
 import { PropertyForm } from "../forms/property-form";
 import { UnifiedWizard, type WizardStep } from "./unified-wizard";
 
-interface PropertyWizardData {
+type PropertyWizardData = {
 	title?: string;
 	price?: number;
 	location?: string;
 	[key: string]: unknown;
-}
+};
 
-interface StepProps {
+type StepProps = {
 	data: PropertyWizardData;
 	onChange: (data: PropertyWizardData) => void;
 	errors?: Record<string, string>;
-}
+};
 
 // Property wizard step components
 const PropertyBasicInfoStep = ({ data, onChange, errors }: StepProps) => {
@@ -41,19 +41,25 @@ const propertyWizardSteps: WizardStep[] = [
 		component: PropertyBasicInfoStep,
 		validation: (data: PropertyWizardData) => {
 			const errors: Record<string, string> = {};
-			if (!data.title) errors.title = "El título es requerido";
-			if (!data.price) errors.price = "El precio es requerido";
-			if (!data.location) errors.location = "La ubicación es requerida";
+			if (!data.title) {
+				errors.title = "El título es requerido";
+			}
+			if (!data.price) {
+				errors.price = "El precio es requerido";
+			}
+			if (!data.location) {
+				errors.location = "La ubicación es requerida";
+			}
 			return Object.keys(errors).length > 0 ? errors : null;
 		},
 	},
 ];
 
-interface PropertyWizardProps {
+type PropertyWizardProps = {
 	draftId?: string;
 	initialData?: PropertyWizardData;
 	onComplete?: () => void;
-}
+};
 
 export function PropertyWizard({
 	draftId,
@@ -94,12 +100,11 @@ export function PropertyWizard({
 			if (result.success) {
 				onComplete?.();
 				return { success: true, message: "Propiedad creada exitosamente" };
-			} else {
-				return {
-					success: false,
-					error: result.error || "Error al crear la propiedad",
-				};
 			}
+			return {
+				success: false,
+				error: result.error || "Error al crear la propiedad",
+			};
 		} catch (_error) {
 			return { success: false, error: "Error inesperado" };
 		}
@@ -110,25 +115,23 @@ export function PropertyWizard({
 			if (draftId) {
 				await saveDraft.mutateAsync({
 					id: draftId,
-					data: data,
+					data,
 				});
 			} else {
 				await createDraft.mutateAsync();
 			}
-		} catch (error) {
-			console.warn("Wizard draft functionality is temporarily disabled:", error);
-		}
+		} catch (_error) {}
 	};
 
 	return (
 		<UnifiedWizard
-			title="Crear Nueva Propiedad"
 			description="Completa la información para agregar una nueva propiedad"
-			steps={propertyWizardSteps}
 			initialData={initialData}
 			onComplete={handleComplete}
 			onSaveDraft={handleSaveDraft}
 			showDraftOption={true}
+			steps={propertyWizardSteps}
+			title="Crear Nueva Propiedad"
 		/>
 	);
 }

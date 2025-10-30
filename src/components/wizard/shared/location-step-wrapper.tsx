@@ -5,14 +5,14 @@ import { useEffect, useState } from "react";
 import { MapErrorBoundary } from "./map-error-boundary";
 import { SimpleLocationPicker } from "./simple-location-picker";
 
-interface LocationStepWrapperProps {
+type LocationStepWrapperProps = {
 	children: React.ReactNode;
 	fallbackData: any;
 	onFallbackUpdate: (data: any) => void;
 	title?: string;
 	description?: string;
 	errors?: Record<string, string>;
-}
+};
 
 export function LocationStepWrapper({
 	children,
@@ -40,10 +40,10 @@ export function LocationStepWrapper({
 		return (
 			<SimpleLocationPicker
 				data={fallbackData}
-				onUpdate={onFallbackUpdate}
-				title={title}
 				description={description}
 				errors={errors}
+				onUpdate={onFallbackUpdate}
+				title={title}
 			/>
 		);
 	}

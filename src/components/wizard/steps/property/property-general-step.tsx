@@ -80,7 +80,7 @@ const CHARACTERISTICS = [
 	"Chimenea",
 ];
 
-interface PropertyData {
+type PropertyData = {
 	title?: string;
 	description?: string;
 	price?: number;
@@ -89,13 +89,13 @@ interface PropertyData {
 	bedrooms?: number;
 	bathrooms?: number;
 	characteristics?: string[];
-}
+};
 
-interface PropertyGeneralStepProps {
+type PropertyGeneralStepProps = {
 	data: PropertyData;
 	onChange: (data: PropertyData) => void;
 	errors?: Record<string, string>;
-}
+};
 
 export function PropertyGeneralStep({
 	data,
@@ -131,7 +131,9 @@ export function PropertyGeneralStep({
 	const watchedValues = watch();
 
 	const handleGenerateTitle = useCallback(async () => {
-		if (!watchedValues.propertyType) return;
+		if (!watchedValues.propertyType) {
+			return;
+		}
 
 		try {
 			const result = await generateAI.mutateAsync({
@@ -147,13 +149,13 @@ export function PropertyGeneralStep({
 			if (result.success && result.data?.content?.title) {
 				setValue("title", result.data.content.title);
 			}
-		} catch (error) {
-			console.error("Error generating title:", error);
-		}
+		} catch (_error) {}
 	}, [watchedValues, generateAI, setValue]);
 
 	const handleGenerateDescription = useCallback(async () => {
-		if (!watchedValues.propertyType) return;
+		if (!watchedValues.propertyType) {
+			return;
+		}
 
 		try {
 			const result = await generateAI.mutateAsync({
@@ -172,9 +174,7 @@ export function PropertyGeneralStep({
 			if (result.success && result.data?.content?.description) {
 				setValue("description", result.data.content.description);
 			}
-		} catch (error) {
-			console.error("Error generating description:", error);
-		}
+		} catch (_error) {}
 	}, [watchedValues, selectedCharacteristics, generateAI, setValue]);
 
 	const handleCharacteristicToggle = (characteristic: string) => {
@@ -204,17 +204,15 @@ export function PropertyGeneralStep({
 					{/* Property Type Selection */}
 					<div className="space-y-2">
 						<Label>Tipo de Propiedad *</Label>
-						<div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+						<div className="grid grid-cols-2 gap-2 md:grid-cols-3">
 							{PROPERTY_TYPES.map((type) => {
 								const Icon = type.icon;
 								const isSelected = watchedValues.propertyType === type.value;
 
 								return (
 									<Button
+										className="flex h-auto flex-col items-center gap-2 p-4"
 										key={type.value}
-										type="button"
-										variant={isSelected ? "default" : "outline"}
-										className="h-auto p-4 flex flex-col items-center gap-2"
 										onClick={() =>
 											setValue(
 												"propertyType",
@@ -223,9 +221,11 @@ export function PropertyGeneralStep({
 													| "apartment"
 													| "villa"
 													| "land"
-													| "commercial",
+													| "commercial"
 											)
 										}
+										type="button"
+										variant={isSelected ? "default" : "outline"}
 									>
 										<Icon className="h-6 w-6" />
 										<div className="text-center">
@@ -239,7 +239,7 @@ export function PropertyGeneralStep({
 							})}
 						</div>
 						{formErrors.propertyType && (
-							<p className="text-sm text-destructive">
+							<p className="text-destructive text-sm">
 								{formErrors.propertyType.message}
 							</p>
 						)}
@@ -250,42 +250,42 @@ export function PropertyGeneralStep({
 						<div className="flex items-center justify-between">
 							<Label htmlFor="title">Título *</Label>
 							<Button
+								disabled={!watchedValues.propertyType || generateAI.isPending}
+								onClick={handleGenerateTitle}
+								size="sm"
 								type="button"
 								variant="outline"
-								size="sm"
-								onClick={handleGenerateTitle}
-								disabled={!watchedValues.propertyType || generateAI.isPending}
 							>
-								<Sparkles className="h-4 w-4 mr-2" />
+								<Sparkles className="mr-2 h-4 w-4" />
 								{generateAI.isPending ? "Generando..." : "Generar con IA"}
 							</Button>
 						</div>
 						<Input
 							id="title"
 							{...register("title")}
-							placeholder="Ej: Hermosa casa con jardín en zona residencial"
 							className={cn(formErrors.title && "border-destructive")}
+							placeholder="Ej: Hermosa casa con jardín en zona residencial"
 						/>
 						{formErrors.title && (
-							<p className="text-sm text-destructive">
+							<p className="text-destructive text-sm">
 								{formErrors.title.message}
 							</p>
 						)}
 					</div>
 
 					{/* Price and Surface */}
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div className="space-y-2">
 							<Label htmlFor="price">Precio (USD) *</Label>
 							<Input
 								id="price"
 								type="number"
 								{...register("price", { valueAsNumber: true })}
-								placeholder="150000"
 								className={cn(formErrors.price && "border-destructive")}
+								placeholder="150000"
 							/>
 							{formErrors.price && (
-								<p className="text-sm text-destructive">
+								<p className="text-destructive text-sm">
 									{formErrors.price.message}
 								</p>
 							)}
@@ -297,11 +297,11 @@ export function PropertyGeneralStep({
 								id="surface"
 								type="number"
 								{...register("surface", { valueAsNumber: true })}
-								placeholder="200"
 								className={cn(formErrors.surface && "border-destructive")}
+								placeholder="200"
 							/>
 							{formErrors.surface && (
-								<p className="text-sm text-destructive">
+								<p className="text-destructive text-sm">
 									{formErrors.surface.message}
 								</p>
 							)}
@@ -309,15 +309,15 @@ export function PropertyGeneralStep({
 					</div>
 
 					{/* Bedrooms and Bathrooms */}
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div className="space-y-2">
 							<Label htmlFor="bedrooms">Habitaciones</Label>
 							<Input
 								id="bedrooms"
 								type="number"
 								{...register("bedrooms", { valueAsNumber: true })}
-								placeholder="3"
 								min="0"
+								placeholder="3"
 							/>
 						</div>
 
@@ -327,8 +327,8 @@ export function PropertyGeneralStep({
 								id="bathrooms"
 								type="number"
 								{...register("bathrooms", { valueAsNumber: true })}
-								placeholder="2"
 								min="0"
+								placeholder="2"
 							/>
 						</div>
 					</div>
@@ -336,17 +336,17 @@ export function PropertyGeneralStep({
 					{/* Characteristics */}
 					<div className="space-y-2">
 						<Label>Características</Label>
-						<div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+						<div className="grid grid-cols-2 gap-2 md:grid-cols-3">
 							{CHARACTERISTICS.map((characteristic) => {
 								const isSelected =
 									selectedCharacteristics.includes(characteristic);
 								return (
 									<Button
 										key={characteristic}
+										onClick={() => handleCharacteristicToggle(characteristic)}
+										size="sm"
 										type="button"
 										variant={isSelected ? "default" : "outline"}
-										size="sm"
-										onClick={() => handleCharacteristicToggle(characteristic)}
 									>
 										{characteristic}
 									</Button>
@@ -360,13 +360,13 @@ export function PropertyGeneralStep({
 						<div className="flex items-center justify-between">
 							<Label htmlFor="description">Descripción</Label>
 							<Button
+								disabled={!watchedValues.propertyType || generateAI.isPending}
+								onClick={handleGenerateDescription}
+								size="sm"
 								type="button"
 								variant="outline"
-								size="sm"
-								onClick={handleGenerateDescription}
-								disabled={!watchedValues.propertyType || generateAI.isPending}
 							>
-								<Sparkles className="h-4 w-4 mr-2" />
+								<Sparkles className="mr-2 h-4 w-4" />
 								{generateAI.isPending ? "Generando..." : "Generar con IA"}
 							</Button>
 						</div>

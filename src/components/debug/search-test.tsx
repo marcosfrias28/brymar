@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { searchPropertiesAction } from "@/lib/actions/property-actions";
 import { searchLandsAction } from "@/lib/actions/land-actions";
+import { searchPropertiesAction } from "@/lib/actions/property-actions";
 
 export function SearchTest() {
 	const [propertyResult, setPropertyResult] = useState<any>(null);
@@ -22,13 +22,12 @@ export function SearchTest() {
 			formData.append("sortBy", "newest");
 			formData.append("limit", "5");
 			formData.append("offset", "0");
-
-			console.log("🏠 Testing property search...");
-			const result = await searchPropertiesAction({ success: false, data: { properties: [] } }, formData);
-			console.log("🏠 Property search result:", result);
+			const result = await searchPropertiesAction(
+				{ success: false, data: { properties: [] } },
+				formData
+			);
 			setPropertyResult(result);
 		} catch (error) {
-			console.error("❌ Property search error:", error);
 			setPropertyResult({
 				success: false,
 				error: error instanceof Error ? error.message : "Unknown error",
@@ -49,13 +48,12 @@ export function SearchTest() {
 			formData.append("sortBy", "newest");
 			formData.append("limit", "5");
 			formData.append("offset", "0");
-
-			console.log("🏞️ Testing land search...");
-			const result = await searchLandsAction({ success: false, data: { lands: [] } }, formData);
-			console.log("🏞️ Land search result:", result);
+			const result = await searchLandsAction(
+				{ success: false, data: { lands: [] } },
+				formData
+			);
 			setLandResult(result);
 		} catch (error) {
-			console.error("❌ Land search error:", error);
 			setLandResult({
 				success: false,
 				error: error instanceof Error ? error.message : "Unknown error",
@@ -66,10 +64,10 @@ export function SearchTest() {
 	};
 
 	return (
-		<div className="p-6 space-y-6">
-			<h1 className="text-2xl font-bold">Search Actions Test</h1>
+		<div className="space-y-6 p-6">
+			<h1 className="font-bold text-2xl">Search Actions Test</h1>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+			<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 				{/* Property Search Test */}
 				<Card>
 					<CardHeader>
@@ -77,17 +75,17 @@ export function SearchTest() {
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<Button
-							onClick={testPropertySearch}
-							disabled={loading}
 							className="w-full"
+							disabled={loading}
+							onClick={testPropertySearch}
 						>
 							{loading ? "Testing..." : "Test Property Search"}
 						</Button>
 
 						{propertyResult && (
 							<div className="mt-4">
-								<h4 className="font-semibold mb-2">Result:</h4>
-								<pre className="bg-gray-100 p-3 rounded text-xs overflow-auto max-h-64">
+								<h4 className="mb-2 font-semibold">Result:</h4>
+								<pre className="max-h-64 overflow-auto rounded bg-gray-100 p-3 text-xs">
 									{JSON.stringify(propertyResult, null, 2)}
 								</pre>
 							</div>
@@ -102,17 +100,17 @@ export function SearchTest() {
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<Button
-							onClick={testLandSearch}
-							disabled={loading}
 							className="w-full"
+							disabled={loading}
+							onClick={testLandSearch}
 						>
 							{loading ? "Testing..." : "Test Land Search"}
 						</Button>
 
 						{landResult && (
 							<div className="mt-4">
-								<h4 className="font-semibold mb-2">Result:</h4>
-								<pre className="bg-gray-100 p-3 rounded text-xs overflow-auto max-h-64">
+								<h4 className="mb-2 font-semibold">Result:</h4>
+								<pre className="max-h-64 overflow-auto rounded bg-gray-100 p-3 text-xs">
 									{JSON.stringify(landResult, null, 2)}
 								</pre>
 							</div>
@@ -137,7 +135,7 @@ export function SearchTest() {
 						<p>
 							<strong>Instructions:</strong>
 						</p>
-						<ul className="list-disc list-inside space-y-1 ml-4">
+						<ul className="ml-4 list-inside list-disc space-y-1">
 							<li>Click the buttons to test search actions</li>
 							<li>Check browser console for detailed logs</li>
 							<li>Check server logs for backend errors</li>

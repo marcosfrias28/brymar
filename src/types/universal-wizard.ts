@@ -2,14 +2,14 @@ import type { ComponentType } from "react";
 import type { z } from "zod";
 
 // Base wizard data interface
-export interface WizardData {
+export type WizardData = {
 	id?: string;
 	title: string;
 	description: string;
 	status: "draft" | "published";
 	createdAt?: Date;
 	updatedAt?: Date;
-}
+};
 
 // Property-specific data
 export interface PropertyWizardData extends WizardData {
@@ -70,7 +70,7 @@ export interface BlogWizardData extends WizardData {
 }
 
 // Wizard step interface
-export interface WizardStep<T extends WizardData> {
+export type WizardStep<T extends WizardData> = {
 	id: string;
 	title: string;
 	description?: string;
@@ -78,27 +78,27 @@ export interface WizardStep<T extends WizardData> {
 	validationSchema?: string;
 	isOptional?: boolean;
 	canSkip?: boolean;
-}
+};
 
 // Wizard step component props
-export interface WizardStepProps<T extends WizardData> {
+export type WizardStepProps<T extends WizardData> = {
 	data: Partial<T>;
 	onUpdate: (updates: Partial<T>) => void;
 	onNext: () => void;
 	onPrevious: () => void;
 	errors?: Record<string, string>;
 	isLoading?: boolean;
-}
+};
 
 // Validation result interface
-export interface ValidationResult {
+export type ValidationResult = {
 	isValid: boolean;
 	errors: Record<string, string>;
 	warnings?: Record<string, string>;
-}
+};
 
 // Navigation configuration for consistent UI
-export interface WizardNavigationConfig {
+export type WizardNavigationConfig = {
 	showProgress?: boolean;
 	showStepList?: boolean;
 	enableKeyboardNavigation?: boolean;
@@ -109,10 +109,10 @@ export interface WizardNavigationConfig {
 	saveDraftLabel?: string;
 	showCancel?: boolean;
 	showSaveDraft?: boolean;
-}
+};
 
 // Universal wizard configuration
-export interface WizardConfig<T extends WizardData> {
+export type WizardConfig<T extends WizardData> = {
 	type: "property" | "land" | "blog";
 	steps: WizardStep<T>[];
 	validationSchemas: Record<
@@ -127,41 +127,41 @@ export interface WizardConfig<T extends WizardData> {
 	onComplete: (data: T) => Promise<void>;
 	onSaveDraft: (data: Partial<T>, stepCompleted: number) => Promise<string>;
 	onLoadDraft?: (
-		draftId: string,
+		draftId: string
 	) => Promise<{ formData: Partial<T>; stepCompleted: number } | null>;
 	onDeleteDraft?: (draftId: string) => Promise<void>;
 	formSchema: z.ZodSchema<T>;
 	defaultValues: Partial<T>;
 	navigation?: WizardNavigationConfig;
-}
+};
 
 // Universal wizard props
-export interface UniversalWizardProps<T extends WizardData> {
+export type UniversalWizardProps<T extends WizardData> = {
 	config: WizardConfig<T>;
 	initialData?: Partial<T>;
 	draftId?: string;
 	onUpdate?: (data: Partial<T>) => void;
 	onComplete?: (data: T) => void;
 	onCancel?: () => void;
-}
+};
 
 // Wizard navigation state
-export interface WizardNavigationState {
+export type WizardNavigationState = {
 	currentStep: number;
 	completedSteps: Set<number>;
 	canNavigateToStep: (step: number) => boolean;
 	totalSteps: number;
 	progress: number;
-}
+};
 
 // Error recovery strategies
-export interface ErrorRecoveryStrategy {
+export type ErrorRecoveryStrategy = {
 	retryValidation: () => void;
 	skipValidation: () => void;
 	resetStep: () => void;
 	saveDraftAndContinue: () => void;
 	goToStep: (step: number) => void;
-}
+};
 
 // Wizard error types
 export type WizardErrorType =
@@ -171,11 +171,11 @@ export type WizardErrorType =
 	| "permission"
 	| "unknown";
 
-export interface WizardError {
+export type WizardError = {
 	type: WizardErrorType;
 	message: string;
 	step?: number;
 	field?: string;
 	recoverable: boolean;
 	timestamp: Date;
-}
+};

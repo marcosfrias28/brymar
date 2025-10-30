@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 
 // Static blog categories
-export interface StaticCategory {
+export type StaticCategory = {
 	id: string;
 	name: string;
 	slug: string;
 	description: string;
 	isActive: boolean;
-}
+};
 
 const STATIC_CATEGORIES: StaticCategory[] = [
 	{
@@ -56,12 +56,12 @@ const STATIC_CATEGORIES: StaticCategory[] = [
 	},
 ];
 
-interface UseCategoriesReturn {
+type UseCategoriesReturn = {
 	categories: StaticCategory[];
 	loading: boolean;
 	error: string | null;
 	refetch: () => Promise<void>;
-}
+};
 
 export function useCategories(): UseCategoriesReturn {
 	const [categories, setCategories] = useState<StaticCategory[]>([]);
@@ -79,7 +79,6 @@ export function useCategories(): UseCategoriesReturn {
 			setCategories(STATIC_CATEGORIES.filter((cat) => cat.isActive));
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Error desconocido");
-			console.error("Error al cargar las categorías:", err);
 		} finally {
 			setLoading(false);
 		}

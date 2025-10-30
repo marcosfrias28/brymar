@@ -58,51 +58,51 @@ const services = [
 
 export function Services() {
 	return (
-		<section className="py-24 px-4 bg-white">
+		<section className="bg-white px-4 py-24">
 			<div className="container mx-auto">
 				<motion.h2
-					className="text-4xl md:text-5xl font-bold text-center mb-4 text-gray-800"
-					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
+					className="mb-4 text-center font-bold text-4xl text-gray-800 md:text-5xl"
+					initial={{ opacity: 0, y: 20 }}
 					transition={{ duration: 0.8 }}
 				>
 					Nuestros Servicios
 				</motion.h2>
 				<motion.p
-					className="text-xl text-gray-600 text-center mb-16 max-w-3xl mx-auto"
-					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
+					className="mx-auto mb-16 max-w-3xl text-center text-gray-600 text-xl"
+					initial={{ opacity: 0, y: 20 }}
 					transition={{ duration: 0.8, delay: 0.2 }}
 				>
 					Servicios exclusivos diseñados para satisfacer todas tus necesidades
 					inmobiliarias de lujo
 				</motion.p>
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+				<div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-3">
 					{services.map(({ title, description, icon: Icon, color }, index) => (
 						<motion.div
-							key={index}
-							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
+							initial={{ opacity: 0, y: 20 }}
+							key={index}
 							transition={{ duration: 0.8, delay: 0.2 * (index + 1) }}
 						>
-							<Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
+							<Card className="bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl">
 								<CardHeader>
 									<div
-										className={`${color} w-16 h-16 rounded-full flex items-center justify-center mb-4`}
+										className={`${color} mb-4 flex h-16 w-16 items-center justify-center rounded-full`}
 									>
 										<Icon />
 									</div>
-									<CardTitle className="text-2xl font-bold text-foreground">
+									<CardTitle className="font-bold text-2xl text-foreground">
 										{title}
 									</CardTitle>
 								</CardHeader>
 								<CardContent>
-									<CardDescription className="text-muted-foreground mb-6">
+									<CardDescription className="mb-6 text-muted-foreground">
 										{description}
 									</CardDescription>
 									<Button
+										className="border-gray-300 text-gray-800 hover:bg-gray-100"
 										variant="outline"
-										className="text-gray-800 border-gray-300 hover:bg-gray-100"
 									>
 										Saber Más
 									</Button>

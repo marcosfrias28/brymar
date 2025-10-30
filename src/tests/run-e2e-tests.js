@@ -15,11 +15,6 @@ const { execSync } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
 
-console.log(
-	"🚀 Starting Comprehensive E2E Test Suite for Action System Refactor",
-);
-console.log("=".repeat(80));
-
 // Test categories and their descriptions
 const testCategories = {
 	"Authentication Flows": {
@@ -95,24 +90,10 @@ const testCategories = {
 // Function to run tests and capture results
 function runTests() {
 	try {
-		console.log("📋 Test Categories Overview:");
-		console.log("-".repeat(50));
-
-		Object.entries(testCategories).forEach(([category, info]) => {
-			console.log(`\n${category}:`);
-			console.log(`  ${info.description}`);
-			console.log(`  Tests: ${info.tests.length}`);
-		});
-
-		console.log(`\n${"=".repeat(80)}`);
-		console.log("🧪 Running E2E Tests...");
-		console.log("=".repeat(80));
+		Object.entries(testCategories).forEach(([_category, _info]) => {});
 
 		// Run Playwright tests with detailed output
 		const testCommand = "npx playwright test --reporter=list --max-failures=5";
-
-		console.log(`Executing: ${testCommand}`);
-		console.log("-".repeat(50));
 
 		const _result = execSync(testCommand, {
 			encoding: "utf8",
@@ -120,22 +101,11 @@ function runTests() {
 			maxBuffer: 1024 * 1024 * 10, // 10MB buffer
 		});
 
-		console.log(`\n${"=".repeat(80)}`);
-		console.log("✅ E2E Test Suite Completed Successfully!");
-		console.log("=".repeat(80));
-
 		return true;
 	} catch (error) {
-		console.error(`\n${"=".repeat(80)}`);
-		console.error("❌ E2E Test Suite Failed");
-		console.error("=".repeat(80));
-		console.error("Error:", error.message);
-
 		if (error.stdout) {
-			console.error("STDOUT:", error.stdout);
 		}
 		if (error.stderr) {
-			console.error("STDERR:", error.stderr);
 		}
 
 		return false;
@@ -169,7 +139,7 @@ ${Object.entries(testCategories)
 - **Test Count**: ${info.tests.length}
 - **Tests**:
 ${info.tests.map((test) => `  - ${test}`).join("\n")}
-`,
+`
 	)
 	.join("\n")}
 
@@ -207,24 +177,15 @@ node tests/run-e2e-tests.js
 `;
 
 	fs.writeFileSync(reportPath, report);
-	console.log(`📊 Test report generated: ${reportPath}`);
 }
 
 // Main execution
 function main() {
-	console.log("Task 8.3: Write end-to-end tests for critical flows");
-	console.log("Requirements: 4.1, 4.2, 4.3, 4.4");
-	console.log("");
-
 	const success = runTests();
 	generateReport();
 
 	if (success) {
-		console.log("\n🎉 All critical flows have been thoroughly tested!");
-		console.log("✅ Task 8.3 completed successfully");
 	} else {
-		console.log("\n⚠️  Some tests may have failed - check output above");
-		console.log("ℹ️  This is expected for E2E tests without a running server");
 	}
 
 	process.exit(success ? 0 : 1);

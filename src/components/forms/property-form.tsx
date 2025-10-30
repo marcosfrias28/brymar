@@ -28,12 +28,12 @@ const propertyTypeOptions = [
 	{ value: "penthouse", label: "Penthouse" },
 ];
 
-interface PropertyFormProps {
+type PropertyFormProps = {
 	initialData?: any;
 	isEditing?: boolean;
 	onCancel?: () => void;
 	onSuccess?: () => void;
-}
+};
 
 export function PropertyForm({
 	initialData,
@@ -42,7 +42,7 @@ export function PropertyForm({
 	onSuccess,
 }: PropertyFormProps) {
 	const [propertyType, setPropertyType] = useState(
-		initialData?.propertyType || "",
+		initialData?.propertyType || ""
 	);
 
 	const action = isEditing ? updatePropertyAction : createPropertyAction;
@@ -76,30 +76,30 @@ export function PropertyForm({
 				<form action={formAction} className="space-y-6">
 					{/* Hidden fields */}
 					{isEditing && initialData?.id && (
-						<input type="hidden" name="id" value={initialData.id} />
+						<input name="id" type="hidden" value={initialData.id} />
 					)}
 					<input
-						type="hidden"
 						name="characteristics"
+						type="hidden"
 						value={JSON.stringify([])}
 					/>
-					<input type="hidden" name="images" value={JSON.stringify([])} />
-					<input type="hidden" name="videos" value={JSON.stringify([])} />
-					<input type="hidden" name="status" value="draft" />
-					<input type="hidden" name="language" value="es" />
+					<input name="images" type="hidden" value={JSON.stringify([])} />
+					<input name="videos" type="hidden" value={JSON.stringify([])} />
+					<input name="status" type="hidden" value="draft" />
+					<input name="language" type="hidden" value="es" />
 
 					{/* Title */}
 					<div className="space-y-2">
 						<Label htmlFor="title">Título de la Propiedad *</Label>
 						<Input
+							defaultValue={initialData?.title || ""}
 							id="title"
 							name="title"
-							defaultValue={initialData?.title || ""}
 							placeholder="Ej: Villa de Lujo en Punta Cana"
 							required
 						/>
 						{state?.errors?.title && (
-							<p className="text-sm text-red-600">{state.errors.title[0]}</p>
+							<p className="text-red-600 text-sm">{state.errors.title[0]}</p>
 						)}
 					</div>
 
@@ -107,15 +107,15 @@ export function PropertyForm({
 					<div className="space-y-2">
 						<Label htmlFor="description">Descripción *</Label>
 						<Textarea
+							defaultValue={initialData?.description || ""}
 							id="description"
 							name="description"
-							defaultValue={initialData?.description || ""}
 							placeholder="Describe las características principales de la propiedad..."
-							rows={5}
 							required
+							rows={5}
 						/>
 						{state?.errors?.description && (
-							<p className="text-sm text-red-600">
+							<p className="text-red-600 text-sm">
 								{state.errors.description[0]}
 							</p>
 						)}
@@ -125,15 +125,15 @@ export function PropertyForm({
 					<div className="space-y-2">
 						<Label htmlFor="price">Precio (USD) *</Label>
 						<Input
+							defaultValue={initialData?.price || ""}
 							id="price"
 							name="price"
-							type="number"
-							defaultValue={initialData?.price || ""}
 							placeholder="450000"
 							required
+							type="number"
 						/>
 						{state?.errors?.price && (
-							<p className="text-sm text-red-600">{state.errors.price[0]}</p>
+							<p className="text-red-600 text-sm">{state.errors.price[0]}</p>
 						)}
 					</div>
 
@@ -141,26 +141,26 @@ export function PropertyForm({
 					<div className="space-y-2">
 						<Label htmlFor="surface">Área (m²) *</Label>
 						<Input
+							defaultValue={initialData?.surface || ""}
 							id="surface"
 							name="surface"
-							type="number"
-							defaultValue={initialData?.surface || ""}
 							placeholder="150"
 							required
+							type="number"
 						/>
 						{state?.errors?.surface && (
-							<p className="text-sm text-red-600">{state.errors.surface[0]}</p>
+							<p className="text-red-600 text-sm">{state.errors.surface[0]}</p>
 						)}
 					</div>
 
 					{/* Property Type */}
 					<div className="space-y-2">
 						<Label htmlFor="propertyType">Tipo de Propiedad *</Label>
-						<input type="hidden" name="propertyType" value={propertyType} />
+						<input name="propertyType" type="hidden" value={propertyType} />
 						<Select
-							value={propertyType}
 							onValueChange={setPropertyType}
 							required
+							value={propertyType}
 						>
 							<SelectTrigger>
 								<SelectValue placeholder="Seleccionar tipo" />
@@ -174,7 +174,7 @@ export function PropertyForm({
 							</SelectContent>
 						</Select>
 						{state?.errors?.propertyType && (
-							<p className="text-sm text-red-600">
+							<p className="text-red-600 text-sm">
 								{state.errors.propertyType[0]}
 							</p>
 						)}
@@ -184,14 +184,14 @@ export function PropertyForm({
 					<div className="space-y-2">
 						<Label htmlFor="bedrooms">Habitaciones</Label>
 						<Input
+							defaultValue={initialData?.bedrooms || ""}
 							id="bedrooms"
 							name="bedrooms"
-							type="number"
-							defaultValue={initialData?.bedrooms || ""}
 							placeholder="3"
+							type="number"
 						/>
 						{state?.errors?.bedrooms && (
-							<p className="text-sm text-red-600">{state.errors.bedrooms[0]}</p>
+							<p className="text-red-600 text-sm">{state.errors.bedrooms[0]}</p>
 						)}
 					</div>
 
@@ -199,14 +199,14 @@ export function PropertyForm({
 					<div className="space-y-2">
 						<Label htmlFor="bathrooms">Baños</Label>
 						<Input
+							defaultValue={initialData?.bathrooms || ""}
 							id="bathrooms"
 							name="bathrooms"
-							type="number"
-							defaultValue={initialData?.bathrooms || ""}
 							placeholder="2"
+							type="number"
 						/>
 						{state?.errors?.bathrooms && (
-							<p className="text-sm text-red-600">
+							<p className="text-red-600 text-sm">
 								{state.errors.bathrooms[0]}
 							</p>
 						)}
@@ -214,10 +214,10 @@ export function PropertyForm({
 
 					{/* Actions */}
 					<div className="flex gap-4">
-						<Button type="submit" disabled={isPending}>
+						<Button disabled={isPending} type="submit">
 							{isPending ? (
 								<>
-									<Loader2 className="animate-spin mr-2 h-4 w-4" />
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 									Guardando...
 								</>
 							) : isEditing ? (
@@ -227,7 +227,7 @@ export function PropertyForm({
 							)}
 						</Button>
 						{onCancel && (
-							<Button type="button" variant="outline" onClick={onCancel}>
+							<Button onClick={onCancel} type="button" variant="outline">
 								Cancelar
 							</Button>
 						)}

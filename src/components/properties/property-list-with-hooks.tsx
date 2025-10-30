@@ -41,10 +41,10 @@ const propertyFilters: FilterOption[] = [
 	},
 ];
 
-interface PropertyListWithHooksProps {
+type PropertyListWithHooksProps = {
 	showActions?: boolean;
 	initialFilters?: PropertySearchFilters;
-}
+};
 
 export function PropertyListWithHooks({
 	showActions = true,
@@ -64,7 +64,7 @@ export function PropertyListWithHooks({
 		location: searchQuery || filters.location,
 	});
 
-	const properties = result?.success && result.data ? result.data.items : [];
+	const properties = result || [];
 
 	const handleEdit = (id: string) => {
 		router.push(`/dashboard/properties/${id}/edit`);
@@ -94,11 +94,21 @@ export function PropertyListWithHooks({
 
 	return (
 		<UnifiedList
-			title="Propiedades"
+			addButtonText="Nueva Propiedad"
+			emptyDescription="Intenta ajustar los filtros o agrega una nueva propiedad"
+			emptyMessage="No se encontraron propiedades"
+			error={error ? "Failed to load properties" : undefined}
+			filters={propertyFilters}
+			isLoading={isLoading}
 			items={properties}
+			onAdd={handleAdd}
+			onFilter={handleFilter}
+			onSearch={handleSearch}
 			renderItem={(property) => (
 				<PropertyCard
 					key={property.id}
+					onEdit={handleEdit}
+					onView={handleView}
 					property={{
 						id: property.id,
 						title: property.title,
@@ -110,26 +120,16 @@ export function PropertyListWithHooks({
 						type: property.type,
 						images:
 							property.images?.map((img) =>
-								typeof img === "string" ? img : img.url,
+								typeof img === "string" ? img : img.url
 							) || [],
 						status: property.status,
 					}}
 					showActions={showActions}
-					onEdit={handleEdit}
-					onView={handleView}
 				/>
 			)}
-			isLoading={isLoading}
-			error={error ? "Failed to load properties" : undefined}
-			filters={propertyFilters}
 			searchPlaceholder="Buscar propiedades..."
 			showAddButton={showActions}
-			addButtonText="Nueva Propiedad"
-			onAdd={handleAdd}
-			onSearch={handleSearch}
-			onFilter={handleFilter}
-			emptyMessage="No se encontraron propiedades"
-			emptyDescription="Intenta ajustar los filtros o agrega una nueva propiedad"
+			title="Propiedades"
 		/>
 	);
 }

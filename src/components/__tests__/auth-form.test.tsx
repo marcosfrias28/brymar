@@ -26,73 +26,69 @@ jest.mock("react-hook-form", () => ({
 import { useAuth } from "@/hooks/use-auth";
 
 // Mock SignIn component to test
-const MockSignInForm = ({ onSuccess }: any) => {
-	return (
-		<form data-testid="signin-form">
-			<input
-				data-testid="email-input"
-				type="email"
-				placeholder="Email"
-				required
-			/>
-			<input
-				data-testid="password-input"
-				type="password"
-				placeholder="Password"
-				required
-			/>
-			<button
-				type="submit"
-				data-testid="signin-button"
-				onClick={() => onSuccess?.()}
-			>
-				Sign In
-			</button>
-			<div data-testid="error-message" style={{ display: "none" }}>
-				Invalid credentials
-			</div>
-		</form>
-	);
-};
+const MockSignInForm = ({ onSuccess }: any) => (
+	<form data-testid="signin-form">
+		<input
+			data-testid="email-input"
+			placeholder="Email"
+			required
+			type="email"
+		/>
+		<input
+			data-testid="password-input"
+			placeholder="Password"
+			required
+			type="password"
+		/>
+		<button
+			data-testid="signin-button"
+			onClick={() => onSuccess?.()}
+			type="submit"
+		>
+			Sign In
+		</button>
+		<div data-testid="error-message" style={{ display: "none" }}>
+			Invalid credentials
+		</div>
+	</form>
+);
 
 // Mock SignUp component to test
-const MockSignUpForm = ({ onSuccess }: any) => {
-	return (
-		<form data-testid="signup-form">
-			<input
-				data-testid="name-input"
-				type="text"
-				placeholder="Full Name"
-				required
-			/>
-			<input
-				data-testid="email-input"
-				type="email"
-				placeholder="Email"
-				required
-			/>
-			<input
-				data-testid="password-input"
-				type="password"
-				placeholder="Password"
-				required
-			/>
-			<input
-				data-testid="confirm-password-input"
-				type="password"
-				placeholder="Confirm Password"
-				required
-			/>
-			<button
-				type="submit"
-				data-testid="signup-button"
-				onClick={() => onSuccess?.()}
-			>
-				Sign Up
-			</button>
-		</form>
-	);
-};
+const MockSignUpForm = ({ onSuccess }: any) => (
+	<form data-testid="signup-form">
+		<input
+			data-testid="name-input"
+			placeholder="Full Name"
+			required
+			type="text"
+		/>
+		<input
+			data-testid="email-input"
+			placeholder="Email"
+			required
+			type="email"
+		/>
+		<input
+			data-testid="password-input"
+			placeholder="Password"
+			required
+			type="password"
+		/>
+		<input
+			data-testid="confirm-password-input"
+			placeholder="Confirm Password"
+			required
+			type="password"
+		/>
+		<button
+			data-testid="signup-button"
+			onClick={() => onSuccess?.()}
+			type="submit"
+		>
+			Sign Up
+		</button>
+	</form>
+);
 
 describe("Authentication Forms", () => {
 	const mockAuth = {

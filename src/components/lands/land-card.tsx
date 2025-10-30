@@ -14,14 +14,14 @@ import {
 	secondaryColorClasses,
 } from "@/lib/utils/secondary-colors";
 
-interface LandCardProps {
+type LandCardProps = {
 	land: Land;
 	showActions?: boolean;
 	variant?: "horizontal" | "vertical";
 	onEdit?: (id: string) => void;
 	onView?: (id: string) => void;
 	className?: string;
-}
+};
 
 export function LandCard({
 	land,
@@ -35,7 +35,7 @@ export function LandCard({
 
 	const surface = land.area;
 	const pricePerM2 = surface > 0 ? Math.round(land.price / surface) : 0;
-	const hectares = (surface / 10000).toFixed(4);
+	const hectares = (surface / 10_000).toFixed(4);
 	const tareas = (surface / 629).toFixed(2);
 	const isVertical = variant === "vertical";
 
@@ -81,43 +81,43 @@ export function LandCard({
 	return (
 		<Card
 			className={cn(
-				"border-blackCoral/20 shadow-sm transition-all duration-200 overflow-hidden hover:shadow-lg",
+				"overflow-hidden border-blackCoral/20 shadow-sm transition-all duration-200 hover:shadow-lg",
 				secondaryColorClasses.cardHover,
-				className,
+				className
 			)}
 		>
 			<CardContent className="p-0">
 				<div
 					className={cn(
 						"flex",
-						isVertical ? "flex-col" : "flex-col sm:flex-row",
+						isVertical ? "flex-col" : "flex-col sm:flex-row"
 					)}
 				>
 					{/* Image */}
 					<div
 						className={cn(
-							"relative bg-muted flex-shrink-0",
-							isVertical ? "w-full h-48" : "w-full sm:w-48 h-32 sm:h-auto",
+							"relative flex-shrink-0 bg-muted",
+							isVertical ? "h-48 w-full" : "h-32 w-full sm:h-auto sm:w-48"
 						)}
 					>
 						{land.images?.[0]?.url ? (
 							<Image
-								src={land.images[0].url}
 								alt={land.name}
-								fill
 								className="object-cover"
+								fill
+								src={land.images[0].url}
 							/>
 						) : (
-							<div className="w-full h-full flex items-center justify-center bg-muted">
+							<div className="flex h-full w-full items-center justify-center bg-muted">
 								<Square className="h-8 w-8 text-muted-foreground" />
 							</div>
 						)}
 						<Badge
-							variant="secondary"
 							className={cn(
 								"absolute top-2 right-2 text-xs capitalize",
-								badgeVariants.secondarySubtle,
+								badgeVariants.secondarySubtle
 							)}
+							variant="secondary"
 						>
 							{getTypeLabel(land.type)}
 						</Badge>
@@ -127,40 +127,40 @@ export function LandCard({
 					<div
 						className={cn(
 							"flex-1 p-4",
-							isVertical ? "space-y-2" : "flex flex-col justify-between",
+							isVertical ? "space-y-2" : "flex flex-col justify-between"
 						)}
 					>
 						<div
 							className={cn(
 								isVertical
 									? "space-y-2"
-									: "flex justify-between items-start gap-4",
+									: "flex items-start justify-between gap-4"
 							)}
 						>
-							<div className="flex-1 min-w-0">
+							<div className="min-w-0 flex-1">
 								<h3
 									className={cn(
-										"font-semibold text-arsenic line-clamp-2 mb-1",
-										isVertical ? "text-lg" : "text-sm",
+										"mb-1 line-clamp-2 font-semibold text-arsenic",
+										isVertical ? "text-lg" : "text-sm"
 									)}
 								>
 									{land.name}
 								</h3>
 
 								{land.description && (
-									<p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+									<p className="mb-2 line-clamp-2 text-muted-foreground text-sm">
 										{land.description}
 									</p>
 								)}
 
-								<div className="flex items-center gap-2 text-xs text-blackCoral mb-2">
+								<div className="mb-2 flex items-center gap-2 text-blackCoral text-xs">
 									<MapPin className="h-3 w-3" />
 									<span className="line-clamp-1">
 										{land.location || "Ubicación no especificada"}
 									</span>
 								</div>
 
-								<div className="flex items-center gap-4 text-xs text-blackCoral">
+								<div className="flex items-center gap-4 text-blackCoral text-xs">
 									<div className="flex items-center gap-1">
 										<Square className="h-3 w-3" />
 										<span>{surface.toLocaleString()}m²</span>
@@ -171,7 +171,7 @@ export function LandCard({
 									</div>
 								</div>
 
-								<div className="text-xs text-blackCoral/70 mt-1">
+								<div className="mt-1 text-blackCoral/70 text-xs">
 									{hectares} ha • {tareas} tareas
 								</div>
 							</div>
@@ -180,20 +180,20 @@ export function LandCard({
 								className={cn(
 									"flex-shrink-0",
 									isVertical
-										? "flex items-center justify-between w-full"
-										: "text-right",
+										? "flex w-full items-center justify-between"
+										: "text-right"
 								)}
 							>
 								<div
 									className={cn(
 										"font-bold text-arsenic",
-										isVertical ? "text-2xl text-primary" : "text-lg",
+										isVertical ? "text-2xl text-primary" : "text-lg"
 									)}
 								>
 									${land.price.toLocaleString()}
 								</div>
 								{isVertical && showActions && (
-									<Button size="sm" onClick={handleView}>
+									<Button onClick={handleView} size="sm">
 										Ver Detalles
 									</Button>
 								)}
@@ -202,40 +202,40 @@ export function LandCard({
 
 						{/* Actions */}
 						{showActions && !isVertical && (
-							<div className="flex gap-2 mt-3">
+							<div className="mt-3 flex gap-2">
 								<Button
+									className={cn(
+										"h-7 bg-transparent px-2 text-xs",
+										interactiveClasses.button
+									)}
+									onClick={handleView}
 									size="sm"
 									variant="outline"
-									onClick={handleView}
-									className={cn(
-										"h-7 px-2 text-xs bg-transparent",
-										interactiveClasses.button,
-									)}
 								>
-									<Eye className="h-3 w-3 mr-1" />
+									<Eye className="mr-1 h-3 w-3" />
 									Ver
 								</Button>
 								<Button
+									className={cn(
+										"h-7 bg-transparent px-2 text-xs",
+										interactiveClasses.button
+									)}
+									onClick={handleEdit}
 									size="sm"
 									variant="outline"
-									onClick={handleEdit}
-									className={cn(
-										"h-7 px-2 text-xs bg-transparent",
-										interactiveClasses.button,
-									)}
 								>
-									<Edit className="h-3 w-3 mr-1" />
+									<Edit className="mr-1 h-3 w-3" />
 									Editar
 								</Button>
 								<Button
+									className={cn(
+										"h-7 bg-transparent px-2 text-red-600 text-xs hover:text-red-700",
+										secondaryColorClasses.focusRing
+									)}
+									disabled={deleteLandMutation.isPending}
+									onClick={handleDelete}
 									size="sm"
 									variant="outline"
-									onClick={handleDelete}
-									disabled={deleteLandMutation.isPending}
-									className={cn(
-										"h-7 px-2 text-xs text-red-600 hover:text-red-700 bg-transparent",
-										secondaryColorClasses.focusRing,
-									)}
 								>
 									<Trash2 className="h-3 w-3" />
 								</Button>

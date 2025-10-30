@@ -15,8 +15,8 @@ import { calculateReadTime, generateSlug } from "@/lib/utils";
  * Create a new blog post using FormState pattern
  */
 export async function createBlogPostAction(
-	prevState: FormState<{ id: string }>,
-	formData: FormData,
+	_prevState: FormState<{ id: string }>,
+	formData: FormData
 ): Promise<FormState<{ id: string }>> {
 	try {
 		// Check authentication
@@ -130,8 +130,8 @@ export async function createBlogPostAction(
  * Update an existing blog post using FormState pattern
  */
 export async function updateBlogPostAction(
-	prevState: FormState<{ id: string }>,
-	formData: FormData,
+	_prevState: FormState<{ id: string }>,
+	formData: FormData
 ): Promise<FormState<{ id: string }>> {
 	try {
 		// Check authentication
@@ -219,7 +219,7 @@ export async function updateBlogPostAction(
 				.select({ id: blogPosts.id })
 				.from(blogPosts)
 				.where(
-					sql`${blogPosts.slug} = ${validation.data.slug} AND ${blogPosts.id} != ${id}`,
+					sql`${blogPosts.slug} = ${validation.data.slug} AND ${blogPosts.id} != ${id}`
 				)
 				.limit(1);
 

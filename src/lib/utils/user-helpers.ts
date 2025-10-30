@@ -4,14 +4,13 @@
  */
 
 import type { User } from "@/lib/db/schema";
-import type { AuthContextValue } from "@/components/providers/auth-provider";
 
 /**
  * User preferences interface
  * Since the database User type doesn't include preferences,
  * this interface defines the structure for user preferences
  */
-export interface UserPreferences {
+export type UserPreferences = {
 	notifications?: {
 		email: boolean;
 		push: boolean;
@@ -27,7 +26,7 @@ export interface UserPreferences {
 		language: string;
 		currency: string;
 	};
-}
+};
 
 /**
  * Default user preferences

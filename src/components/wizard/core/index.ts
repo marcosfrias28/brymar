@@ -14,9 +14,9 @@
 
 // Core Hooks (Re-exported for convenience)
 export { useWizard } from "@/hooks/wizard/use-wizard";
-export { WizardPersistence } from "@/lib/wizard/wizard-persistence";
+// export { WizardPersistence } from "@/lib/wizard/wizard-persistence"; // Temporarily disabled
 // Core Utilities (Re-exported for convenience)
-export { WizardValidator } from "@/lib/wizard/wizard-validator";
+// export { WizardValidator } from "@/lib/wizard/wizard-validator"; // Temporarily disabled
 // Core Types (Re-exported for convenience)
 export type {
 	ErrorRecoveryStrategy,

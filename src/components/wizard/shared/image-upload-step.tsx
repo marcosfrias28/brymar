@@ -24,7 +24,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
-export interface ImageMetadata {
+export type ImageMetadata = {
 	id: string;
 	url: string;
 	filename: string;
@@ -33,9 +33,9 @@ export interface ImageMetadata {
 	displayOrder: number;
 	alt?: string;
 	caption?: string;
-}
+};
 
-interface ImageUploadStepProps {
+type ImageUploadStepProps = {
 	images: ImageMetadata[];
 	onImagesChange: (images: ImageMetadata[]) => void;
 	maxImages?: number;
@@ -46,7 +46,7 @@ interface ImageUploadStepProps {
 	showCaptions?: boolean;
 	showAltText?: boolean;
 	errors?: Record<string, string>;
-}
+};
 
 export function ImageUploadStep({
 	images = [],
@@ -61,7 +61,7 @@ export function ImageUploadStep({
 	errors = {},
 }: ImageUploadStepProps) {
 	const [uploadProgress, setUploadProgress] = useState<Record<string, number>>(
-		{},
+		{}
 	);
 	const [editingImage, setEditingImage] = useState<string | null>(null);
 
@@ -72,13 +72,11 @@ export function ImageUploadStep({
 			for (const file of acceptedFiles) {
 				// Validate file size
 				if (file.size > maxFileSize * 1024 * 1024) {
-					console.error(`File ${file.name} is too large`);
 					continue;
 				}
 
 				// Validate file type
 				if (!acceptedTypes.includes(file.type)) {
-					console.error(`File ${file.name} has invalid type`);
 					continue;
 				}
 
@@ -128,8 +126,7 @@ export function ImageUploadStep({
 							});
 						}, 500);
 					}, 1000);
-				} catch (error) {
-					console.error("Error uploading image:", error);
+				} catch (_error) {
 					setUploadProgress((prev) => {
 						const { [imageId]: _, ...rest } = prev;
 						return rest;
@@ -141,7 +138,7 @@ export function ImageUploadStep({
 				onImagesChange([...images, ...newImages]);
 			}
 		},
-		[images, onImagesChange, maxFileSize, acceptedTypes],
+		[images, onImagesChange, maxFileSize, acceptedTypes]
 	);
 
 	const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -163,20 +160,24 @@ export function ImageUploadStep({
 
 	const updateImageMetadata = (
 		imageId: string,
-		updates: Partial<ImageMetadata>,
+		updates: Partial<ImageMetadata>
 	) => {
 		const updatedImages = images.map((img) =>
-			img.id === imageId ? { ...img, ...updates } : img,
+			img.id === imageId ? { ...img, ...updates } : img
 		);
 		onImagesChange(updatedImages);
 	};
 
 	const moveImage = (imageId: string, direction: "up" | "down") => {
 		const currentIndex = images.findIndex((img) => img.id === imageId);
-		if (currentIndex === -1) return;
+		if (currentIndex === -1) {
+			return;
+		}
 
 		const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
-		if (newIndex < 0 || newIndex >= images.length) return;
+		if (newIndex < 0 || newIndex >= images.length) {
+			return;
+		}
 
 		const updatedImages = [...images];
 		[updatedImages[currentIndex], updatedImages[newIndex]] = [
@@ -196,7 +197,7 @@ export function ImageUploadStep({
 	return (
 		<div className="space-y-6">
 			<div>
-				<h2 className="text-2xl font-bold mb-2">{title}</h2>
+				<h2 className="mb-2 font-bold text-2xl">{title}</h2>
 				<p className="text-muted-foreground">{description}</p>
 			</div>
 
@@ -216,25 +217,25 @@ export function ImageUploadStep({
 					<div
 						{...getRootProps()}
 						className={cn(
-							"border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
+							"cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-colors",
 							isDragActive
 								? "border-primary bg-primary/5"
 								: "border-muted-foreground/25",
-							images.length >= maxImages && "opacity-50 cursor-not-allowed",
+							images.length >= maxImages && "cursor-not-allowed opacity-50"
 						)}
 					>
 						<input {...getInputProps()} />
-						<Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+						<Upload className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
 						{isDragActive ? (
 							<p>Suelta las imágenes aquí...</p>
 						) : (
 							<div>
-								<p className="text-lg font-medium mb-2">
+								<p className="mb-2 font-medium text-lg">
 									{images.length >= maxImages
 										? "Límite de imágenes alcanzado"
 										: "Arrastra imágenes aquí o haz clic para seleccionar"}
 								</p>
-								<p className="text-sm text-muted-foreground">
+								<p className="text-muted-foreground text-sm">
 									Formatos soportados: JPEG, PNG, WebP
 								</p>
 							</div>
@@ -242,7 +243,7 @@ export function ImageUploadStep({
 					</div>
 
 					{errors.images && (
-						<div className="flex items-center gap-2 mt-2 text-sm text-destructive">
+						<div className="mt-2 flex items-center gap-2 text-destructive text-sm">
 							<AlertCircle className="h-4 w-4" />
 							{errors.images}
 						</div>
@@ -258,7 +259,7 @@ export function ImageUploadStep({
 					</CardHeader>
 					<CardContent className="space-y-2">
 						{Object.entries(uploadProgress).map(([imageId, progress]) => (
-							<div key={imageId} className="space-y-1">
+							<div className="space-y-1" key={imageId}>
 								<div className="flex justify-between text-sm">
 									<span>Subiendo imagen...</span>
 									<span>{progress}%</span>
@@ -287,52 +288,52 @@ export function ImageUploadStep({
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+						<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 							{images
 								.sort((a, b) => a.displayOrder - b.displayOrder)
 								.map((image, index) => (
-									<div key={image.id} className="relative group">
-										<div className="aspect-video bg-muted rounded-lg overflow-hidden">
+									<div className="group relative" key={image.id}>
+										<div className="aspect-video overflow-hidden rounded-lg bg-muted">
 											<img
-												src={image.url}
 												alt={image.alt || image.filename}
-												className="w-full h-full object-cover"
+												className="h-full w-full object-cover"
+												src={image.url}
 											/>
 										</div>
 
 										{/* Image Controls */}
-										<div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+										<div className="absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
 											<Button
+												onClick={() => setEditingImage(image.id)}
 												size="sm"
 												variant="secondary"
-												onClick={() => setEditingImage(image.id)}
 											>
 												<Edit className="h-3 w-3" />
 											</Button>
 											<Button
+												onClick={() => removeImage(image.id)}
 												size="sm"
 												variant="destructive"
-												onClick={() => removeImage(image.id)}
 											>
 												<X className="h-3 w-3" />
 											</Button>
 										</div>
 
 										{/* Order Controls */}
-										<div className="absolute top-2 left-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+										<div className="absolute top-2 left-2 flex flex-col gap-1 opacity-0 transition-opacity group-hover:opacity-100">
 											<Button
+												disabled={index === 0}
+												onClick={() => moveImage(image.id, "up")}
 												size="sm"
 												variant="secondary"
-												onClick={() => moveImage(image.id, "up")}
-												disabled={index === 0}
 											>
 												<Move className="h-3 w-3" />
 											</Button>
 											<Button
+												disabled={index === images.length - 1}
+												onClick={() => moveImage(image.id, "down")}
 												size="sm"
 												variant="secondary"
-												onClick={() => moveImage(image.id, "down")}
-												disabled={index === images.length - 1}
 											>
 												<Move className="h-3 w-3 rotate-180" />
 											</Button>
@@ -340,7 +341,7 @@ export function ImageUploadStep({
 
 										{/* Image Info */}
 										<div className="mt-2 space-y-2">
-											<p className="text-sm font-medium truncate">
+											<p className="truncate font-medium text-sm">
 												{image.filename}
 											</p>
 
@@ -349,21 +350,21 @@ export function ImageUploadStep({
 													{showAltText && (
 														<div>
 															<Label
-																htmlFor={`alt-${image.id}`}
 																className="text-xs"
+																htmlFor={`alt-${image.id}`}
 															>
 																Texto alternativo
 															</Label>
 															<Input
+																className="text-xs"
 																id={`alt-${image.id}`}
-																value={image.alt || ""}
 																onChange={(e) =>
 																	updateImageMetadata(image.id, {
 																		alt: e.target.value,
 																	})
 																}
 																placeholder="Describe la imagen"
-																className="text-xs"
+																value={image.alt || ""}
 															/>
 														</div>
 													)}
@@ -371,29 +372,29 @@ export function ImageUploadStep({
 													{showCaptions && (
 														<div>
 															<Label
-																htmlFor={`caption-${image.id}`}
 																className="text-xs"
+																htmlFor={`caption-${image.id}`}
 															>
 																Descripción
 															</Label>
 															<Input
+																className="text-xs"
 																id={`caption-${image.id}`}
-																value={image.caption || ""}
 																onChange={(e) =>
 																	updateImageMetadata(image.id, {
 																		caption: e.target.value,
 																	})
 																}
 																placeholder="Descripción opcional"
-																className="text-xs"
+																value={image.caption || ""}
 															/>
 														</div>
 													)}
 
 													<Button
-														size="sm"
-														onClick={() => setEditingImage(null)}
 														className="w-full"
+														onClick={() => setEditingImage(null)}
+														size="sm"
 													>
 														Guardar
 													</Button>

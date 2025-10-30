@@ -41,7 +41,7 @@ export function ContentGrid({
 				className={cn(
 					"w-full max-w-full",
 					isMobile ? "space-y-3" : isTablet ? "space-y-4" : "space-y-6",
-					className,
+					className
 				)}
 			>
 				{children}
@@ -61,7 +61,7 @@ export function ContentGrid({
 								? "space-y-4"
 								: "space-y-6"
 						: "",
-					"min-w-0 w-full",
+					"w-full min-w-0"
 				)}
 			>
 				{children}
@@ -70,15 +70,15 @@ export function ContentGrid({
 			{sidebar && (
 				<div
 					className={cn(
-						"lg:col-span-1 min-w-0",
+						"min-w-0 lg:col-span-1",
 						// On mobile/tablet, sidebar goes below content
-						isMobileOrTablet && "order-last mt-4 lg:mt-0 lg:order-none",
+						isMobileOrTablet && "order-last mt-4 lg:order-none lg:mt-0"
 					)}
 				>
 					<div
 						className={cn(
 							// Sticky behavior only on desktop
-							!isMobileOrTablet && "sticky top-6",
+							!isMobileOrTablet && "sticky top-6"
 						)}
 					>
 						{sidebar}

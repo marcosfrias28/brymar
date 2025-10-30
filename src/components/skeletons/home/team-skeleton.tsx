@@ -7,23 +7,23 @@ export function TeamSkeleton() {
 		<SectionWrapper className="relative overflow-hidden">
 			{/* Background Elements */}
 			<div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-			<div className="absolute top-20 right-20 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
-			<div className="absolute bottom-20 left-20 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+			<div className="absolute top-20 right-20 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+			<div className="absolute bottom-20 left-20 h-96 w-96 rounded-full bg-accent/10 blur-3xl" />
 
 			<div className="relative z-10">
 				<SectionHeader
+					description="Un equipo poderoso de expertos inmobiliarios, cada uno aportando experiencia única y pasión para transformar tus sueños de propiedad en realidad."
+					icon={<Users className="h-5 w-5" />}
 					subtitle="Nuestro Equipo"
 					title="Conoce a los Visionarios Detrás de Tu Éxito"
-					description="Un equipo poderoso de expertos inmobiliarios, cada uno aportando experiencia única y pasión para transformar tus sueños de propiedad en realidad."
-					icon={<Users className="w-5 h-5" />}
 				/>
 
 				{/* Team Grid Skeleton */}
-				<div className="grid grid-cols-12 gap-6 mt-16">
+				<div className="mt-16 grid grid-cols-12 gap-6">
 					{/* Owner Card - Large */}
 					<div className="col-span-12 lg:col-span-7">
-						<div className="relative h-[600px] rounded-3xl overflow-hidden">
-							<Skeleton className="w-full h-full" />
+						<div className="relative h-[600px] overflow-hidden rounded-3xl">
+							<Skeleton className="h-full w-full" />
 
 							{/* Floating Elements */}
 							<div className="absolute top-6 right-6 flex gap-3">
@@ -63,13 +63,13 @@ export function TeamSkeleton() {
 					</div>
 
 					{/* Team Members - Stacked Cards */}
-					<div className="col-span-12 lg:col-span-5 space-y-6">
+					<div className="col-span-12 space-y-6 lg:col-span-5">
 						{Array.from({ length: 2 }).map((_, index) => (
 							<div
+								className="relative h-[285px] overflow-hidden rounded-2xl"
 								key={index}
-								className="relative h-[285px] rounded-2xl overflow-hidden"
 							>
-								<Skeleton className="w-full h-full" />
+								<Skeleton className="h-full w-full" />
 
 								{/* Achievement Badge */}
 								<div className="absolute top-4 right-4">

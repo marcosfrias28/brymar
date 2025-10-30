@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import type { FormState } from "@/lib/types/forms";
 import { cn } from "@/lib/utils";
 
-interface AuthFormField {
+type AuthFormField = {
 	id: string;
 	name: string;
 	type: string;
@@ -22,14 +22,14 @@ interface AuthFormField {
 	minLength?: number;
 	maxLength?: number;
 	pattern?: string;
-}
+};
 
-interface AuthFormWrapperProps<T = any> {
+type AuthFormWrapperProps<T = any> = {
 	title: string;
 	subtitle: string;
 	action: (
 		prevState: FormState<T>,
-		formData: FormData,
+		formData: FormData
 	) => Promise<FormState<T>>;
 	fields: AuthFormField[];
 	submitText: string;
@@ -40,7 +40,7 @@ interface AuthFormWrapperProps<T = any> {
 	className?: string;
 	hiddenFields?: { name: string; value: string }[];
 	isLoading?: boolean; // New prop for external loading state
-}
+};
 
 export function AuthFormWrapper<T = any>({
 	title,
@@ -86,52 +86,56 @@ export function AuthFormWrapper<T = any>({
 	return (
 		<div className={cn("flex flex-col gap-6", className)}>
 			<div className="space-y-2 text-center">
-				<h1 className="text-2xl font-bold">{title}</h1>
-				<p className="text-balance text-sm text-muted-foreground">{subtitle}</p>
+				<h1 className="font-bold text-2xl">{title}</h1>
+				<p className="text-balance text-muted-foreground text-sm">{subtitle}</p>
 			</div>
 
 			<form action={formAction} className="grid gap-6">
 				{hiddenFields.map((field) => (
 					<input
 						key={field.name}
-						type="hidden"
 						name={field.name}
+						type="hidden"
 						value={field.value}
 					/>
 				))}
 				{fields.map((field) => (
-					<div key={field.id} className="grid gap-2">
+					<div className="grid gap-2" key={field.id}>
 						{typeof field.label === "string" ? (
 							<Label htmlFor={field.id}>{field.label}</Label>
 						) : (
 							field.label
 						)}
 						<Input
-							id={field.id}
-							name={field.name}
-							type={field.type}
-							placeholder={field.placeholder}
-							required={field.required}
-							autoComplete={field.autoComplete}
-							minLength={field.minLength}
-							maxLength={field.maxLength}
-							pattern={field.pattern}
-							aria-invalid={state?.errors?.[field.name] ? "true" : "false"}
 							aria-describedby={
 								state?.errors?.[field.name] ? `${field.id}-error` : undefined
 							}
+							aria-invalid={state?.errors?.[field.name] ? "true" : "false"}
+							autoComplete={field.autoComplete}
+							id={field.id}
+							maxLength={field.maxLength}
+							minLength={field.minLength}
+							name={field.name}
+							pattern={field.pattern}
+							placeholder={field.placeholder}
+							required={field.required}
+							type={field.type}
 						/>
 						{state?.errors?.[field.name] && (
-							<p id={`${field.id}-error`} className="text-sm text-red-500">
+							<p className="text-red-500 text-sm" id={`${field.id}-error`}>
 								{state.errors[field.name][0]}
 							</p>
 						)}
 					</div>
 				))}
-				<Button type="submit" className="w-full" disabled={isPending || isLoading}>
-					{(isPending || isLoading) ? (
+				<Button
+					className="w-full"
+					disabled={isPending || isLoading}
+					type="submit"
+				>
+					{isPending || isLoading ? (
 						<>
-							<Loader2 className="animate-spin mr-2 h-4 w-4" />
+							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 							{loadingText}
 						</>
 					) : (
@@ -220,20 +224,20 @@ export const useAuthFields = () => {
 };
 
 // Componente para enlaces de navegación
-interface AuthLinkProps {
+type AuthLinkProps = {
 	href: string;
 	children: ReactNode;
 	className?: string;
-}
+};
 
 export function AuthLink({ href, children, className }: AuthLinkProps) {
 	return (
 		<Link
-			href={href}
 			className={cn(
 				"underline underline-offset-4 hover:text-primary",
-				className,
+				className
 			)}
+			href={href}
 		>
 			{children}
 		</Link>

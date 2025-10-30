@@ -8,7 +8,7 @@ import { FeaturedPropertiesGallery } from "./featured-gallery";
 export function FeaturedPropertiesSection() {
 	const { data: section, loading: isLoading } = useSection(
 		"home",
-		"featured-properties",
+		"featured-properties"
 	);
 
 	if (isLoading) {
@@ -25,9 +25,9 @@ export function FeaturedPropertiesSection() {
 	return (
 		<SectionWrapper>
 			<SectionHeader
+				description={description}
 				subtitle={subtitle}
 				title={title}
-				description={description}
 			/>
 			<FeaturedPropertiesGallery />
 		</SectionWrapper>

@@ -14,7 +14,7 @@ const sampleProperties = [
 		title: "Villa Moderna en Cap Cana",
 		description:
 			"Espectacular villa de lujo con vista al mar, diseño contemporáneo y acabados de primera calidad. Cuenta con piscina infinita, jardín tropical y acceso directo a la playa. Perfecta para vacaciones o inversión.",
-		price: 2500000,
+		price: 2_500_000,
 		type: "villa",
 		bedrooms: 5,
 		bathrooms: 6,
@@ -32,7 +32,7 @@ const sampleProperties = [
 		title: "Apartamento Penthouse Santo Domingo",
 		description:
 			"Exclusivo penthouse en el corazón de la Zona Colonial con vistas panorámicas de la ciudad. Completamente renovado con cocina gourmet, terraza privada y acabados de lujo. Ubicación privilegiada cerca de restaurantes y sitios históricos.",
-		price: 850000,
+		price: 850_000,
 		type: "penthouse",
 		bedrooms: 3,
 		bathrooms: 3,
@@ -50,7 +50,7 @@ const sampleProperties = [
 		title: "Casa Familiar en Santiago",
 		description:
 			"Hermosa casa familiar en exclusivo residencial de Santiago. Amplia sala de estar, cocina moderna, jardín con piscina y garaje para 2 vehículos. Ideal para familias que buscan tranquilidad y comodidad.",
-		price: 320000,
+		price: 320_000,
 		type: "casa",
 		bedrooms: 4,
 		bathrooms: 3,
@@ -68,7 +68,7 @@ const sampleProperties = [
 		title: "Apartamento Moderno en Bella Vista",
 		description:
 			"Moderno apartamento en torre residencial con amenidades completas. Gimnasio, piscina, área social y seguridad 24/7. Excelente ubicación con fácil acceso a centros comerciales y transporte público.",
-		price: 185000,
+		price: 185_000,
 		type: "apartamento",
 		bedrooms: 2,
 		bathrooms: 2,
@@ -86,7 +86,7 @@ const sampleProperties = [
 		title: "Villa Frente al Mar en Casa de Campo",
 		description:
 			"Exclusiva villa frente al mar en el prestigioso resort Casa de Campo. Diseño arquitectónico único, piscina privada, muelle propio y acceso a campo de golf. Una joya inmobiliaria para los más exigentes.",
-		price: 4200000,
+		price: 4_200_000,
 		type: "villa",
 		bedrooms: 6,
 		bathrooms: 7,
@@ -104,7 +104,7 @@ const sampleProperties = [
 		title: "Dúplex en Piantini",
 		description:
 			"Elegante dúplex en la exclusiva zona de Piantini. Dos niveles con diseño moderno, terraza privada, cocina italiana y acabados de primera. Cerca de los mejores restaurantes y centros comerciales de la ciudad.",
-		price: 650000,
+		price: 650_000,
 		type: "duplex",
 		bedrooms: 3,
 		bathrooms: 4,
@@ -122,7 +122,7 @@ const sampleProperties = [
 		title: "Casa de Playa en Bávaro",
 		description:
 			"Encantadora casa de playa a solo 200 metros del mar. Perfecta para alquiler vacacional o residencia de descanso. Jardín tropical, terraza con vista al mar y decoración caribeña auténtica.",
-		price: 420000,
+		price: 420_000,
 		type: "casa",
 		bedrooms: 3,
 		bathrooms: 2,
@@ -140,7 +140,7 @@ const sampleProperties = [
 		title: "Estudio Ejecutivo en Naco",
 		description:
 			"Moderno estudio completamente amueblado en el sector Naco. Ideal para profesionales o inversión. Edificio con amenidades, ubicación céntrica y excelente conectividad. Listo para habitar o alquilar.",
-		price: 95000,
+		price: 95_000,
 		type: "estudio",
 		bedrooms: 1,
 		bathrooms: 1,
@@ -158,7 +158,7 @@ const sampleProperties = [
 		title: "Local Comercial en Zona Colonial",
 		description:
 			"Excelente local comercial en la histórica Zona Colonial. Ideal para restaurante, boutique o galería de arte. Alto tráfico peatonal, arquitectura colonial restaurada y ubicación turística privilegiada.",
-		price: 280000,
+		price: 280_000,
 		type: "comercial",
 		bedrooms: 0,
 		bathrooms: 2,
@@ -176,7 +176,7 @@ const sampleProperties = [
 		title: "Apartamento de Lujo en Malecón",
 		description:
 			"Espectacular apartamento con vista panorámica al Mar Caribe desde el Malecón. Completamente renovado con acabados de lujo, cocina gourmet y terraza privada. Una oportunidad única en primera línea de mar.",
-		price: 750000,
+		price: 750_000,
 		type: "apartamento",
 		bedrooms: 3,
 		bathrooms: 3,
@@ -203,12 +203,12 @@ async function seedProperties() {
 			.returning();
 
 		console.log(
-			`✅ Se insertaron ${insertedProperties.length} propiedades exitosamente:`,
+			`✅ Se insertaron ${insertedProperties.length} propiedades exitosamente:`
 		);
 
 		insertedProperties.forEach((property, index) => {
 			console.log(
-				`${index + 1}. ${property.title} - $${property.price.toLocaleString()}`,
+				`${index + 1}. ${property.title} - $${property.price.toLocaleString()}`
 			);
 		});
 

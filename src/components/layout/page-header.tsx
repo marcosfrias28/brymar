@@ -1,18 +1,9 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { StatsCards } from "@/components/dashboard/stats-cards";
 import { cn } from "@/lib/utils";
-
-interface PageHeaderProps {
-	title: string;
-	description?: string;
-	children?: ReactNode;
-	className?: string;
-	breadcrumbs?: any;
-	actions?: ReactNode;
-	showSearch?: boolean;
-	searchPlaceholder?: string;
-}
+import type { PageHeaderProps } from "@/types/layout";
+import type { ReactNode } from "react";
 
 export function PageHeader({
 	title,
@@ -23,20 +14,29 @@ export function PageHeader({
 	actions,
 	showSearch,
 	searchPlaceholder,
-}: PageHeaderProps) {
+	stats,
+	statsLoading,
+}: PageHeaderProps & { children?: ReactNode }) {
 	return (
 		<div className={cn("flex flex-col space-y-4 pb-6", className)}>
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+					<h1 className="font-bold text-3xl tracking-tight">{title}</h1>
 					{description && (
-						<p className="text-muted-foreground mt-2">{description}</p>
+						<p className="mt-2 text-muted-foreground">{description}</p>
 					)}
 				</div>
-				{children && (
-					<div className="flex items-center space-x-2">{children}</div>
-				)}
+				<div className="flex items-center space-x-2">
+					{actions}
+					{children}
+				</div>
 			</div>
+			{/* Stats rendered within the header when provided */}
+			{stats && stats.length > 0 && (
+				<div className="mt-4">
+					<StatsCards isLoading={!!statsLoading} stats={stats} />
+				</div>
+			)}
 		</div>
 	);
 }

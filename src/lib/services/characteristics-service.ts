@@ -1,13 +1,13 @@
 import { type PropertyCharacteristic, PropertyType } from "@/types/wizard";
 
-export interface CharacteristicDefinition {
+export type CharacteristicDefinition = {
 	id: string;
 	name: string;
 	category: "amenity" | "feature" | "location";
 	propertyTypes?: PropertyType[]; // If undefined, applies to all types
 	isDefault: boolean;
 	order: number;
-}
+};
 
 // Default characteristics with property type specificity
 export const DEFAULT_CHARACTERISTICS: CharacteristicDefinition[] = [
@@ -280,23 +280,26 @@ export const DEFAULT_CHARACTERISTICS: CharacteristicDefinition[] = [
 	},
 ];
 
-export interface CharacteristicsFilter {
+export type CharacteristicsFilter = {
 	category?: "amenity" | "feature" | "location";
 	propertyType?: PropertyType;
 	search?: string;
 	selected?: boolean;
-}
+};
 
 export class CharacteristicsService {
-	private characteristics: Map<string, PropertyCharacteristic> = new Map();
-	private customCharacteristics: PropertyCharacteristic[] = [];
+    private readonly characteristics: Map<string, PropertyCharacteristic> =
+        new Map();
+    private customCharacteristics: PropertyCharacteristic[] = [];
+    private locale: string = "en";
 
-	constructor(
-		private translations: Record<string, string> = {},
-		_locale: string = "en",
-	) {
-		this.initializeDefaultCharacteristics();
-	}
+    constructor(
+        private translations: Record<string, string> = {},
+        locale = "en"
+    ) {
+        this.locale = locale;
+        this.initializeDefaultCharacteristics();
+    }
 
 	/**
 	 * Initialize default characteristics with translations
@@ -317,7 +320,7 @@ export class CharacteristicsService {
 	 * Get characteristics filtered by property type and other criteria
 	 */
 	getCharacteristics(
-		filter: CharacteristicsFilter = {},
+		filter: CharacteristicsFilter = {}
 	): PropertyCharacteristic[] {
 		const allCharacteristics = [
 			...Array.from(this.characteristics.values()),
@@ -334,7 +337,7 @@ export class CharacteristicsService {
 				// Filter by property type
 				if (filter.propertyType) {
 					const definition = DEFAULT_CHARACTERISTICS.find(
-						(def) => def.id === char.id,
+						(def) => def.id === char.id
 					);
 					if (
 						definition?.propertyTypes &&
@@ -381,7 +384,7 @@ export class CharacteristicsService {
 	 * Get characteristics grouped by category
 	 */
 	getCharacteristicsByCategory(
-		filter: CharacteristicsFilter = {},
+		filter: CharacteristicsFilter = {}
 	): Record<string, PropertyCharacteristic[]> {
 		const characteristics = this.getCharacteristics(filter);
 
@@ -393,7 +396,7 @@ export class CharacteristicsService {
 				acc[char.category].push(char);
 				return acc;
 			},
-			{} as Record<string, PropertyCharacteristic[]>,
+			{} as Record<string, PropertyCharacteristic[]>
 		);
 	}
 
@@ -414,7 +417,7 @@ export class CharacteristicsService {
 		} else {
 			// Check custom characteristics
 			const customChar = this.customCharacteristics.find(
-				(char) => char.id === characteristicId,
+				(char) => char.id === characteristicId
 			);
 			if (customChar) {
 				customChar.selected = !customChar.selected;
@@ -432,7 +435,7 @@ export class CharacteristicsService {
 		} else {
 			// Check custom characteristics
 			const customChar = this.customCharacteristics.find(
-				(char) => char.id === characteristicId,
+				(char) => char.id === characteristicId
 			);
 			if (customChar) {
 				customChar.selected = selected;
@@ -445,7 +448,7 @@ export class CharacteristicsService {
 	 */
 	addCustomCharacteristic(
 		name: string,
-		category: "amenity" | "feature" | "location" = "feature",
+		category: "amenity" | "feature" | "location" = "feature"
 	): PropertyCharacteristic {
 		const customCharacteristic: PropertyCharacteristic = {
 			id: `custom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -467,7 +470,7 @@ export class CharacteristicsService {
 		}
 
 		const index = this.customCharacteristics.findIndex(
-			(char) => char.id === characteristicId,
+			(char) => char.id === characteristicId
 		);
 		if (index !== -1) {
 			this.customCharacteristics.splice(index, 1);
@@ -482,7 +485,7 @@ export class CharacteristicsService {
 	 */
 	updateTranslations(
 		translations: Record<string, string>,
-		locale: string,
+		locale: string
 	): void {
 		this.translations = translations;
 		this.locale = locale;
@@ -531,7 +534,7 @@ export class CharacteristicsService {
 	 * Get characteristics count by category
 	 */
 	getCharacteristicsCount(
-		filter: CharacteristicsFilter = {},
+		filter: CharacteristicsFilter = {}
 	): Record<string, number> {
 		const characteristics = this.getCharacteristics(filter);
 
@@ -540,7 +543,7 @@ export class CharacteristicsService {
 				acc[char.category] = (acc[char.category] || 0) + 1;
 				return acc;
 			},
-			{} as Record<string, number>,
+			{} as Record<string, number>
 		);
 	}
 
@@ -579,7 +582,7 @@ export class CharacteristicsService {
 				valid.push(char);
 			} else {
 				const definition = DEFAULT_CHARACTERISTICS.find(
-					(def) => def.id === char.id,
+					(def) => def.id === char.id
 				);
 				if (
 					!definition?.propertyTypes ||

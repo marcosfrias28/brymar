@@ -8,7 +8,7 @@ const testLands = [
 	{
 		id: "1",
 		title: "Terreno en Santo Domingo",
-		price: 2500000,
+		price: 2_500_000,
 		location: "Santo Domingo, República Dominicana",
 		coordinates: {
 			lat: 18.4861,
@@ -25,7 +25,7 @@ const testLands = [
 	{
 		id: "2",
 		title: "Terreno en Santiago",
-		price: 1800000,
+		price: 1_800_000,
 		location: "Santiago, República Dominicana",
 		coordinates: {
 			lat: 19.4515,
@@ -42,7 +42,7 @@ const testLands = [
 	{
 		id: "3",
 		title: "Terreno en La Romana",
-		price: 3200000,
+		price: 3_200_000,
 		location: "La Romana, República Dominicana",
 		coordinates: {
 			lat: 18.6151,
@@ -64,10 +64,10 @@ export function MapTest() {
 	return (
 		<div className="h-screen">
 			<SearchMapView
-				properties={testLands}
-				onViewChange={setView}
-				currentView={view}
 				className="h-full"
+				currentView={view}
+				onViewChange={setView}
+				properties={testLands}
 			/>
 		</div>
 	);

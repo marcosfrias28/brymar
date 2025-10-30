@@ -33,28 +33,36 @@ export function AccessibilityTestPanel() {
 	};
 
 	const getScoreColor = (score: number) => {
-		if (score >= 90) return "text-green-600";
-		if (score >= 70) return "text-yellow-600";
+		if (score >= 90) {
+			return "text-green-600";
+		}
+		if (score >= 70) {
+			return "text-yellow-600";
+		}
 		return "text-red-600";
 	};
 
 	const getScoreBadgeVariant = (
-		score: number,
+		score: number
 	): "default" | "secondary" | "destructive" => {
-		if (score >= 90) return "default";
-		if (score >= 70) return "secondary";
+		if (score >= 90) {
+			return "default";
+		}
+		if (score >= 70) {
+			return "secondary";
+		}
 		return "destructive";
 	};
 
 	if (!isVisible) {
 		return (
-			<div className="fixed bottom-4 right-4 z-50">
+			<div className="fixed right-4 bottom-4 z-50">
 				<Button
+					aria-label="Mostrar panel de accesibilidad"
+					className="shadow-lg"
 					onClick={() => setIsVisible(true)}
 					size="sm"
 					variant="outline"
-					className="shadow-lg"
-					aria-label="Mostrar panel de accesibilidad"
 				>
 					<Eye className="h-4 w-4" />
 					A11y Test
@@ -64,25 +72,25 @@ export function AccessibilityTestPanel() {
 	}
 
 	return (
-		<div className="fixed bottom-4 right-4 z-50 w-96 max-h-[80vh] overflow-auto">
-			<Card className="shadow-xl border-2">
+		<div className="fixed right-4 bottom-4 z-50 max-h-[80vh] w-96 overflow-auto">
+			<Card className="border-2 shadow-xl">
 				<CardHeader className="pb-3">
 					<div className="flex items-center justify-between">
 						<CardTitle className="text-lg">Accessibility Audit</CardTitle>
 						<div className="flex gap-2">
 							<Button
+								aria-label="Ejecutar auditoría de accesibilidad"
 								onClick={runAudit}
 								size="sm"
 								variant="outline"
-								aria-label="Ejecutar auditoría de accesibilidad"
 							>
 								Run Audit
 							</Button>
 							<Button
+								aria-label="Cerrar panel de accesibilidad"
 								onClick={() => setIsVisible(false)}
 								size="sm"
 								variant="ghost"
-								aria-label="Cerrar panel de accesibilidad"
 							>
 								<EyeOff className="h-4 w-4" />
 							</Button>
@@ -97,8 +105,8 @@ export function AccessibilityTestPanel() {
 							<div className="flex items-center justify-between">
 								<span className="font-medium">Overall Score</span>
 								<Badge
-									variant={getScoreBadgeVariant(auditResults.overallScore)}
 									className={getScoreColor(auditResults.overallScore)}
+									variant={getScoreBadgeVariant(auditResults.overallScore)}
 								>
 									{auditResults.overallScore.toFixed(1)}%
 								</Badge>
@@ -155,17 +163,17 @@ export function AccessibilityTestPanel() {
 					{/* Common Issues */}
 					{auditResults?.summary.commonIssues.length > 0 && (
 						<div className="space-y-2">
-							<h4 className="font-medium flex items-center gap-2">
+							<h4 className="flex items-center gap-2 font-medium">
 								<AlertTriangle className="h-4 w-4 text-yellow-600" />
 								Common Issues
 							</h4>
 							<ul className="space-y-1 text-sm">
 								{auditResults.summary.commonIssues.map(
 									(issue: string, index: number) => (
-										<li key={index} className="text-muted-foreground">
+										<li className="text-muted-foreground" key={index}>
 											• {issue}
 										</li>
-									),
+									)
 								)}
 							</ul>
 						</div>
@@ -176,12 +184,12 @@ export function AccessibilityTestPanel() {
 						0 && (
 						<div className="space-y-2">
 							<h4 className="font-medium">Failed Elements</h4>
-							<div className="space-y-2 max-h-40 overflow-auto">
+							<div className="max-h-40 space-y-2 overflow-auto">
 								{auditResults.elementAudits
 									.filter((audit: any) => audit.score < 80)
 									.slice(0, 5)
 									.map((audit: any, index: number) => (
-										<div key={index} className="text-sm p-2 bg-muted rounded">
+										<div className="rounded bg-muted p-2 text-sm" key={index}>
 											<div className="font-medium">
 												{audit.tagName} ({audit.score.toFixed(1)}%)
 											</div>
@@ -199,32 +207,26 @@ export function AccessibilityTestPanel() {
 						<h4 className="font-medium">Quick Tests</h4>
 						<div className="grid grid-cols-2 gap-2">
 							<Button
-								size="sm"
-								variant="outline"
 								onClick={() => {
 									// Test keyboard navigation
-									const focusableElements = document.querySelectorAll(
-										'button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])',
-									);
-									console.log(
-										`Found ${focusableElements.length} focusable elements`,
+									const _focusableElements = document.querySelectorAll(
+										'button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])'
 									);
 								}}
+								size="sm"
+								variant="outline"
 							>
 								Test Focus
 							</Button>
 							<Button
-								size="sm"
-								variant="outline"
 								onClick={() => {
 									// Test ARIA labels
-									const elementsWithoutLabels = document.querySelectorAll(
-										"button:not([aria-label]):not([aria-labelledby]), input:not([aria-label]):not([aria-labelledby])",
-									);
-									console.log(
-										`Found ${elementsWithoutLabels.length} elements without labels`,
+									const _elementsWithoutLabels = document.querySelectorAll(
+										"button:not([aria-label]):not([aria-labelledby]), input:not([aria-label]):not([aria-labelledby])"
 									);
 								}}
+								size="sm"
+								variant="outline"
 							>
 								Test ARIA
 							</Button>
@@ -232,7 +234,7 @@ export function AccessibilityTestPanel() {
 					</div>
 
 					{!auditResults && (
-						<div className="text-center text-muted-foreground text-sm py-4">
+						<div className="py-4 text-center text-muted-foreground text-sm">
 							Click &quot;Run Audit&quot; to analyze accessibility
 						</div>
 					)}
@@ -272,34 +274,34 @@ export function AccessibilityKeyboardShortcuts() {
 
 	return (
 		<div className="fixed top-4 right-4 z-50 w-80">
-			<Card className="shadow-xl border-2">
+			<Card className="border-2 shadow-xl">
 				<CardHeader className="pb-3">
 					<CardTitle className="text-lg">Keyboard Shortcuts</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-2 text-sm">
 					<div className="grid grid-cols-2 gap-2">
-						<kbd className="px-2 py-1 bg-muted rounded text-xs">Tab</kbd>
+						<kbd className="rounded bg-muted px-2 py-1 text-xs">Tab</kbd>
 						<span>Navigate forward</span>
 
-						<kbd className="px-2 py-1 bg-muted rounded text-xs">Shift+Tab</kbd>
+						<kbd className="rounded bg-muted px-2 py-1 text-xs">Shift+Tab</kbd>
 						<span>Navigate backward</span>
 
-						<kbd className="px-2 py-1 bg-muted rounded text-xs">Enter</kbd>
+						<kbd className="rounded bg-muted px-2 py-1 text-xs">Enter</kbd>
 						<span>Activate button/link</span>
 
-						<kbd className="px-2 py-1 bg-muted rounded text-xs">Space</kbd>
+						<kbd className="rounded bg-muted px-2 py-1 text-xs">Space</kbd>
 						<span>Activate button</span>
 
-						<kbd className="px-2 py-1 bg-muted rounded text-xs">Escape</kbd>
+						<kbd className="rounded bg-muted px-2 py-1 text-xs">Escape</kbd>
 						<span>Close modal/menu</span>
 
-						<kbd className="px-2 py-1 bg-muted rounded text-xs">Arrows</kbd>
+						<kbd className="rounded bg-muted px-2 py-1 text-xs">Arrows</kbd>
 						<span>Navigate menu items</span>
 					</div>
 
-					<div className="pt-2 border-t">
+					<div className="border-t pt-2">
 						<div className="text-muted-foreground text-xs">
-							Press <kbd className="px-1 bg-muted rounded">Ctrl+Shift+A</kbd> to
+							Press <kbd className="rounded bg-muted px-1">Ctrl+Shift+A</kbd> to
 							toggle this panel
 						</div>
 					</div>

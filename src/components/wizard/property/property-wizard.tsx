@@ -3,10 +3,10 @@
 import { useState } from "react";
 import type { Property } from "@/lib/types/properties";
 
-interface PropertyWizardProps {
+type PropertyWizardProps = {
 	onComplete?: (property: Partial<Property>) => void;
 	initialData?: Partial<Property>;
-}
+};
 
 export function PropertyWizard({
 	onComplete,
@@ -14,7 +14,7 @@ export function PropertyWizard({
 }: PropertyWizardProps) {
 	const [currentStep, setCurrentStep] = useState(0);
 	const [formData, setFormData] = useState<Partial<Property>>(
-		initialData || {},
+		initialData || {}
 	);
 
 	const handleNext = () => {
@@ -32,33 +32,33 @@ export function PropertyWizard({
 	};
 
 	return (
-		<div className="max-w-2xl mx-auto p-6">
+		<div className="mx-auto max-w-2xl p-6">
 			<div className="mb-8">
-				<h2 className="text-2xl font-bold">Property Wizard</h2>
+				<h2 className="font-bold text-2xl">Property Wizard</h2>
 				<p className="text-gray-600">Step {currentStep + 1} of 3</p>
 			</div>
 
 			<div className="space-y-6">
 				{currentStep === 0 && (
 					<div>
-						<h3 className="text-lg font-semibold mb-4">Basic Information</h3>
+						<h3 className="mb-4 font-semibold text-lg">Basic Information</h3>
 						<div className="space-y-4">
 							<input
-								type="text"
-								placeholder="Property Title"
-								className="w-full p-3 border rounded-lg"
-								value={formData.title || ""}
+								className="w-full rounded-lg border p-3"
 								onChange={(e) =>
 									setFormData({ ...formData, title: e.target.value })
 								}
+								placeholder="Property Title"
+								type="text"
+								value={formData.title || ""}
 							/>
 							<textarea
-								placeholder="Property Description"
-								className="w-full p-3 border rounded-lg h-32"
-								value={formData.description || ""}
+								className="h-32 w-full rounded-lg border p-3"
 								onChange={(e) =>
 									setFormData({ ...formData, description: e.target.value })
 								}
+								placeholder="Property Description"
+								value={formData.description || ""}
 							/>
 						</div>
 					</div>
@@ -66,23 +66,23 @@ export function PropertyWizard({
 
 				{currentStep === 1 && (
 					<div>
-						<h3 className="text-lg font-semibold mb-4">Property Details</h3>
+						<h3 className="mb-4 font-semibold text-lg">Property Details</h3>
 						<div className="space-y-4">
 							<input
-								type="number"
-								placeholder="Price"
-								className="w-full p-3 border rounded-lg"
-								value={formData.price || ""}
+								className="w-full rounded-lg border p-3"
 								onChange={(e) =>
 									setFormData({ ...formData, price: Number(e.target.value) })
 								}
+								placeholder="Price"
+								type="number"
+								value={formData.price || ""}
 							/>
 							<select
-								className="w-full p-3 border rounded-lg"
-								value={formData.type || ""}
+								className="w-full rounded-lg border p-3"
 								onChange={(e) =>
 									setFormData({ ...formData, type: e.target.value as any })
 								}
+								value={formData.type || ""}
 							>
 								<option value="">Select Property Type</option>
 								<option value="house">House</option>
@@ -95,8 +95,8 @@ export function PropertyWizard({
 
 				{currentStep === 2 && (
 					<div>
-						<h3 className="text-lg font-semibold mb-4">Review & Submit</h3>
-						<div className="bg-gray-50 p-4 rounded-lg">
+						<h3 className="mb-4 font-semibold text-lg">Review & Submit</h3>
+						<div className="rounded-lg bg-gray-50 p-4">
 							<p>
 								<strong>Title:</strong> {formData.title}
 							</p>
@@ -112,15 +112,15 @@ export function PropertyWizard({
 
 				<div className="flex justify-between pt-6">
 					<button
-						onClick={handleBack}
+						className="rounded-lg border px-4 py-2 disabled:opacity-50"
 						disabled={currentStep === 0}
-						className="px-4 py-2 border rounded-lg disabled:opacity-50"
+						onClick={handleBack}
 					>
 						Back
 					</button>
 					<button
+						className="rounded-lg bg-blue-600 px-4 py-2 text-white"
 						onClick={handleNext}
-						className="px-4 py-2 bg-blue-600 text-white rounded-lg"
 					>
 						{currentStep === 2 ? "Complete" : "Next"}
 					</button>

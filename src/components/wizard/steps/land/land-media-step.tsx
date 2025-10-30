@@ -5,15 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-interface LandMediaData {
+type LandMediaData = {
 	images?: File[];
-}
+};
 
-interface LandMediaStepProps {
+type LandMediaStepProps = {
 	data: LandMediaData;
 	onChange: (data: LandMediaData) => void;
 	errors?: Record<string, string>;
-}
+};
 
 export function LandMediaStep({ data, onChange, errors }: LandMediaStepProps) {
 	const handleChange = (field: keyof LandMediaData, value: File[]) => {
@@ -33,16 +33,16 @@ export function LandMediaStep({ data, onChange, errors }: LandMediaStepProps) {
 					<div className="space-y-2">
 						<Label htmlFor="images">Imágenes</Label>
 						<Input
-							id="images"
-							type="file"
-							multiple
 							accept="image/*"
+							id="images"
+							multiple
 							onChange={(e) => {
 								const files = Array.from(e.target.files || []);
 								handleChange("images", files);
 							}}
+							type="file"
 						/>
-						<p className="text-sm text-muted-foreground">
+						<p className="text-muted-foreground text-sm">
 							Selecciona múltiples imágenes del terreno
 						</p>
 					</div>

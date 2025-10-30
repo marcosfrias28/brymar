@@ -18,14 +18,14 @@ import {
 	useOfflineQueue,
 } from "../lib/utils/network-detection";
 
-export interface ErrorState {
+export type ErrorState = {
 	error: WizardError | null;
 	isRetrying: boolean;
 	retryCount: number;
 	canRetry: boolean;
-}
+};
 
-export interface ErrorHandlingOptions {
+export type ErrorHandlingOptions = {
 	maxRetries?: number;
 	showToast?: boolean;
 	autoRetry?: boolean;
@@ -33,7 +33,7 @@ export interface ErrorHandlingOptions {
 	onError?: (error: WizardError) => void;
 	onRetry?: (attempt: number) => void;
 	onRecover?: () => void;
-}
+};
 
 export function useErrorHandling(options: ErrorHandlingOptions = {}) {
 	const [errorState, setErrorState] = useState<ErrorState>({
@@ -68,7 +68,7 @@ export function useErrorHandling(options: ErrorHandlingOptions = {}) {
 							error instanceof Error ? error.message : String(error),
 							"UNKNOWN_ERROR",
 							true,
-							"Ha ocurrido un error inesperado.",
+							"Ha ocurrido un error inesperado."
 						);
 
 			const recovery = handleErrorWithRecovery(wizardError, {
@@ -90,7 +90,7 @@ export function useErrorHandling(options: ErrorHandlingOptions = {}) {
 
 			return wizardError;
 		},
-		[options],
+		[options]
 	);
 
 	const retryOperation = useCallback(
@@ -122,7 +122,7 @@ export function useErrorHandling(options: ErrorHandlingOptions = {}) {
 				throw wizardError;
 			}
 		},
-		[errorState, options, handleError, clearError],
+		[errorState, options, handleError, clearError]
 	);
 
 	const executeWithErrorHandling = useCallback(
@@ -134,7 +134,7 @@ export function useErrorHandling(options: ErrorHandlingOptions = {}) {
 				queueIfOffline?: boolean;
 				queueType?: "draft" | "upload" | "ai" | "general";
 				queueDescription?: string;
-			} = {},
+			} = {}
 		): Promise<T> => {
 			try {
 				// Check if we should queue the operation when offline
@@ -173,7 +173,7 @@ export function useErrorHandling(options: ErrorHandlingOptions = {}) {
 				throw error;
 			}
 		},
-		[networkStatus.isOnline, queueOperation, options, handleError],
+		[networkStatus.isOnline, queueOperation, options, handleError]
 	);
 
 	// Auto-clear errors when network comes back online
@@ -257,7 +257,7 @@ export function useErrorRecovery() {
 				recovery,
 			};
 		},
-		[],
+		[]
 	);
 
 	const handleUploadError = useCallback((error: UploadError, _file?: File) => {
@@ -293,7 +293,7 @@ export function useErrorRecovery() {
 		// Focus on first error field
 		const firstField = Object.keys(error.fieldErrors)[0];
 		const element = document.querySelector(
-			`[name="${firstField}"]`,
+			`[name="${firstField}"]`
 		) as HTMLElement;
 
 		if (element) {
@@ -302,7 +302,7 @@ export function useErrorRecovery() {
 		}
 
 		toast.error(
-			`Por favor corrige ${fieldCount} campo${fieldCount > 1 ? "s" : ""}`,
+			`Por favor corrige ${fieldCount} campo${fieldCount > 1 ? "s" : ""}`
 		);
 
 		return {
@@ -341,7 +341,7 @@ export function useErrorAnalytics() {
 
 	const getErrorPatterns = useCallback(() => {
 		const recentErrors = errorHistory.filter(
-			(entry) => Date.now() - entry.timestamp < 300000, // Last 5 minutes
+			(entry) => Date.now() - entry.timestamp < 300_000 // Last 5 minutes
 		);
 
 		const errorCounts = recentErrors.reduce(
@@ -350,7 +350,7 @@ export function useErrorAnalytics() {
 				acc[key] = (acc[key] || 0) + 1;
 				return acc;
 			},
-			{} as Record<string, number>,
+			{} as Record<string, number>
 		);
 
 		const frequentErrors = Object.entries(errorCounts)

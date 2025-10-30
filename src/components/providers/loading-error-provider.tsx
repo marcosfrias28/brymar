@@ -4,15 +4,15 @@ import type React from "react";
 import { createContext, useCallback, useContext, useState } from "react";
 import { toast } from "sonner";
 
-interface LoadingState {
+type LoadingState = {
 	[key: string]: boolean;
-}
+};
 
-interface ErrorState {
+type ErrorState = {
 	[key: string]: Error | string | null;
-}
+};
 
-interface LoadingErrorContextType {
+type LoadingErrorContextType = {
 	// Loading state management
 	loadingStates: LoadingState;
 	setLoading: (key: string, loading: boolean) => void;
@@ -34,12 +34,12 @@ interface LoadingErrorContextType {
 			successMessage?: string;
 			errorMessage?: string;
 			showToast?: boolean;
-		},
+		}
 	) => Promise<T | null>;
-}
+};
 
 const LoadingErrorContext = createContext<LoadingErrorContextType | undefined>(
-	undefined,
+	undefined
 );
 
 export function LoadingErrorProvider({
@@ -66,15 +66,14 @@ export function LoadingErrorProvider({
 	}, []);
 
 	const isLoading = useCallback(
-		(key: string) => {
-			return loadingStates[key] || false;
-		},
-		[loadingStates],
+		(key: string) => loadingStates[key],
+		[loadingStates]
 	);
 
-	const isAnyLoading = useCallback(() => {
-		return Object.values(loadingStates).some((loading) => loading);
-	}, [loadingStates]);
+	const isAnyLoading = useCallback(
+		() => Object.values(loadingStates).some((loading) => loading),
+		[loadingStates]
+	);
 
 	const setError = useCallback((key: string, error: Error | string | null) => {
 		setErrorStates((prev) => ({
@@ -92,10 +91,8 @@ export function LoadingErrorProvider({
 	}, []);
 
 	const getError = useCallback(
-		(key: string) => {
-			return errorStates[key] || null;
-		},
-		[errorStates],
+		(key: string) => errorStates[key] || null,
+		[errorStates]
 	);
 
 	const clearError = useCallback((key: string) => {
@@ -117,7 +114,7 @@ export function LoadingErrorProvider({
 				successMessage?: string;
 				errorMessage?: string;
 				showToast?: boolean;
-			} = {},
+			} = {}
 		): Promise<T | null> => {
 			const { successMessage, errorMessage, showToast = true } = options;
 
@@ -143,7 +140,7 @@ export function LoadingErrorProvider({
 				setLoading(key, false);
 			}
 		},
-		[setLoading, setError],
+		[setLoading, setError]
 	);
 
 	const value: LoadingErrorContextType = {
@@ -170,7 +167,7 @@ export function useLoadingError() {
 	const context = useContext(LoadingErrorContext);
 	if (context === undefined) {
 		throw new Error(
-			"useLoadingError must be used within a LoadingErrorProvider",
+			"useLoadingError must be used within a LoadingErrorProvider"
 		);
 	}
 	return context;
@@ -201,7 +198,7 @@ export function useOperationState(key: string) {
 				successMessage?: string;
 				errorMessage?: string;
 				showToast?: boolean;
-			},
+			}
 		) => executeWithLoading(key, operation, options),
 	};
 }

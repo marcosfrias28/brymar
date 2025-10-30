@@ -3,10 +3,10 @@
 import { useState } from "react";
 import type { Land } from "@/lib/types/lands";
 
-interface LandWizardProps {
+type LandWizardProps = {
 	onComplete?: (land: Partial<Land>) => void;
 	initialData?: Partial<Land>;
-}
+};
 
 export function LandWizard({ onComplete, initialData }: LandWizardProps) {
 	const [currentStep, setCurrentStep] = useState(0);
@@ -27,33 +27,33 @@ export function LandWizard({ onComplete, initialData }: LandWizardProps) {
 	};
 
 	return (
-		<div className="max-w-2xl mx-auto p-6">
+		<div className="mx-auto max-w-2xl p-6">
 			<div className="mb-8">
-				<h2 className="text-2xl font-bold">Land Wizard</h2>
+				<h2 className="font-bold text-2xl">Land Wizard</h2>
 				<p className="text-gray-600">Step {currentStep + 1} of 3</p>
 			</div>
 
 			<div className="space-y-6">
 				{currentStep === 0 && (
 					<div>
-						<h3 className="text-lg font-semibold mb-4">Basic Information</h3>
+						<h3 className="mb-4 font-semibold text-lg">Basic Information</h3>
 						<div className="space-y-4">
 							<input
-								type="text"
-								placeholder="Land Name"
-								className="w-full p-3 border rounded-lg"
-								value={formData.name || ""}
+								className="w-full rounded-lg border p-3"
 								onChange={(e) =>
 									setFormData({ ...formData, name: e.target.value })
 								}
+								placeholder="Land Name"
+								type="text"
+								value={formData.name || ""}
 							/>
 							<textarea
-								placeholder="Land Description"
-								className="w-full p-3 border rounded-lg h-32"
-								value={formData.description || ""}
+								className="h-32 w-full rounded-lg border p-3"
 								onChange={(e) =>
 									setFormData({ ...formData, description: e.target.value })
 								}
+								placeholder="Land Description"
+								value={formData.description || ""}
 							/>
 						</div>
 					</div>
@@ -61,32 +61,32 @@ export function LandWizard({ onComplete, initialData }: LandWizardProps) {
 
 				{currentStep === 1 && (
 					<div>
-						<h3 className="text-lg font-semibold mb-4">Land Details</h3>
+						<h3 className="mb-4 font-semibold text-lg">Land Details</h3>
 						<div className="space-y-4">
 							<input
-								type="number"
-								placeholder="Area (sq ft)"
-								className="w-full p-3 border rounded-lg"
-								value={formData.area || ""}
+								className="w-full rounded-lg border p-3"
 								onChange={(e) =>
 									setFormData({ ...formData, area: Number(e.target.value) })
 								}
+								placeholder="Area (sq ft)"
+								type="number"
+								value={formData.area || ""}
 							/>
 							<input
-								type="number"
-								placeholder="Price"
-								className="w-full p-3 border rounded-lg"
-								value={formData.price || ""}
+								className="w-full rounded-lg border p-3"
 								onChange={(e) =>
 									setFormData({ ...formData, price: Number(e.target.value) })
 								}
+								placeholder="Price"
+								type="number"
+								value={formData.price || ""}
 							/>
 							<select
-								className="w-full p-3 border rounded-lg"
-								value={formData.type || ""}
+								className="w-full rounded-lg border p-3"
 								onChange={(e) =>
 									setFormData({ ...formData, type: e.target.value as any })
 								}
+								value={formData.type || ""}
 							>
 								<option value="">Select Land Type</option>
 								<option value="residential">Residential</option>
@@ -99,8 +99,8 @@ export function LandWizard({ onComplete, initialData }: LandWizardProps) {
 
 				{currentStep === 2 && (
 					<div>
-						<h3 className="text-lg font-semibold mb-4">Review & Submit</h3>
-						<div className="bg-gray-50 p-4 rounded-lg">
+						<h3 className="mb-4 font-semibold text-lg">Review & Submit</h3>
+						<div className="rounded-lg bg-gray-50 p-4">
 							<p>
 								<strong>Name:</strong> {formData.name}
 							</p>
@@ -119,15 +119,15 @@ export function LandWizard({ onComplete, initialData }: LandWizardProps) {
 
 				<div className="flex justify-between pt-6">
 					<button
-						onClick={handleBack}
+						className="rounded-lg border px-4 py-2 disabled:opacity-50"
 						disabled={currentStep === 0}
-						className="px-4 py-2 border rounded-lg disabled:opacity-50"
+						onClick={handleBack}
 					>
 						Back
 					</button>
 					<button
+						className="rounded-lg bg-blue-600 px-4 py-2 text-white"
 						onClick={handleNext}
-						className="px-4 py-2 bg-blue-600 text-white rounded-lg"
 					>
 						{currentStep === 2 ? "Complete" : "Next"}
 					</button>

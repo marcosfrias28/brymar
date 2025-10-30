@@ -8,7 +8,7 @@ import { CompactStats } from "./compact-stats";
 import { CompactToolbar } from "./compact-toolbar";
 import { UniversalCard } from "./universal-card";
 
-interface UnifiedPageLayoutProps {
+type UnifiedPageLayoutProps = {
 	title: string;
 	stats: Array<{
 		label: string;
@@ -16,7 +16,7 @@ interface UnifiedPageLayoutProps {
 		icon: React.ReactNode;
 		color: string;
 	}>;
-	items: Array<any>;
+	items: any[];
 	itemType: "property" | "land" | "blog";
 	searchPlaceholder: string;
 	addNewHref: string;
@@ -33,7 +33,7 @@ interface UnifiedPageLayoutProps {
 		active?: boolean;
 		onClick: () => void;
 	}>;
-}
+};
 
 export function UnifiedPageLayout({
 	title,
@@ -62,7 +62,7 @@ export function UnifiedPageLayout({
 					: [item.title, item.author, item.category];
 
 		return searchFields.some((field) =>
-			field?.toLowerCase().includes(searchTerm.toLowerCase()),
+			field?.toLowerCase().includes(searchTerm.toLowerCase())
 		);
 	});
 
@@ -71,34 +71,34 @@ export function UnifiedPageLayout({
 	const startIndex = (currentPage - 1) * itemsPerPage;
 	const paginatedItems = filteredItems.slice(
 		startIndex,
-		startIndex + itemsPerPage,
+		startIndex + itemsPerPage
 	);
 
 	return (
 		<div className="space-y-6">
 			{/* Header */}
 			<div>
-				<h1 className="text-2xl font-bold text-blackCoral mb-2">{title}</h1>
+				<h1 className="mb-2 font-bold text-2xl text-blackCoral">{title}</h1>
 				<CompactStats stats={stats} />
 			</div>
 
 			{/* Status Filters */}
 			{statusFilters.length > 0 && (
 				<div className="flex flex-wrap items-center gap-2">
-					<span className="text-sm text-blackCoral/70 font-medium">
+					<span className="font-medium text-blackCoral/70 text-sm">
 						Estado:
 					</span>
 					{statusFilters.map((filter, index) => (
 						<Button
-							key={index}
-							variant={filter.active ? "default" : "outline"}
-							size="sm"
-							onClick={filter.onClick}
 							className={
 								filter.active
 									? "bg-arsenic text-white hover:bg-blackCoral"
 									: "border-blackCoral text-blackCoral hover:bg-blackCoral hover:text-white"
 							}
+							key={index}
+							onClick={filter.onClick}
+							size="sm"
+							variant={filter.active ? "default" : "outline"}
 						>
 							{filter.label}
 						</Button>
@@ -108,27 +108,27 @@ export function UnifiedPageLayout({
 
 			{/* Toolbar */}
 			<CompactToolbar
-				searchTerm={searchTerm}
-				onSearchChange={setSearchTerm}
-				searchPlaceholder={searchPlaceholder}
-				showFilters={showFilters}
-				onToggleFilters={() => setShowFilters(!showFilters)}
-				viewMode={viewMode}
-				onViewModeChange={setViewMode}
-				itemsPerPage={itemsPerPage}
-				onItemsPerPageChange={setItemsPerPage}
-				totalItems={filteredItems.length}
 				addNewHref={addNewHref}
 				addNewLabel={addNewLabel}
+				itemsPerPage={itemsPerPage}
+				onItemsPerPageChange={setItemsPerPage}
+				onSearchChange={setSearchTerm}
+				onToggleFilters={() => setShowFilters(!showFilters)}
+				onViewModeChange={setViewMode}
 				quickFilters={quickFilters}
+				searchPlaceholder={searchPlaceholder}
+				searchTerm={searchTerm}
+				showFilters={showFilters}
+				totalItems={filteredItems.length}
+				viewMode={viewMode}
 			/>
 
 			{/* Content Grid */}
 			<div
 				className={`
-        ${viewMode === "grid" ? "grid grid-cols-1 smartphone:grid-cols-2 tablet:grid-cols-3 desktop:grid-cols-4 gap-4" : ""}
+        ${viewMode === "grid" ? "grid desktop:grid-cols-4 grid-cols-1 tablet:grid-cols-3 gap-4 smartphone:grid-cols-2" : ""}
         ${viewMode === "list" ? "space-y-3" : ""}
-        ${viewMode === "bento" ? "grid grid-cols-1 smartphone:grid-cols-2 tablet:grid-cols-3 desktop:grid-cols-4 xl:grid-cols-5 gap-4" : ""}
+        ${viewMode === "bento" ? "grid desktop:grid-cols-4 grid-cols-1 tablet:grid-cols-3 gap-4 smartphone:grid-cols-2 xl:grid-cols-5" : ""}
       `}
 			>
 				{paginatedItems.map((item) => (
@@ -144,27 +144,27 @@ export function UnifiedPageLayout({
 			{/* Pagination */}
 			{totalPages > 1 && (
 				<div className="flex items-center justify-between">
-					<div className="text-sm text-blackCoral/70">
+					<div className="text-blackCoral/70 text-sm">
 						Página {currentPage} de {totalPages}
 					</div>
 					<div className="flex items-center gap-2">
 						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-							disabled={currentPage === 1}
 							className="border-blackCoral"
+							disabled={currentPage === 1}
+							onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+							size="sm"
+							variant="outline"
 						>
 							<ChevronLeft className="h-4 w-4" />
 						</Button>
 						<Button
-							variant="outline"
-							size="sm"
+							className="border-blackCoral"
+							disabled={currentPage === totalPages}
 							onClick={() =>
 								setCurrentPage(Math.min(totalPages, currentPage + 1))
 							}
-							disabled={currentPage === totalPages}
-							className="border-blackCoral"
+							size="sm"
+							variant="outline"
 						>
 							<ChevronRight className="h-4 w-4" />
 						</Button>

@@ -7,31 +7,31 @@ export function CategoriesSkeleton() {
 		<SectionWrapper className="relative overflow-hidden">
 			<div className="grid grid-cols-12 items-center gap-10">
 				{/* Header Section */}
-				<div className="lg:col-span-6 col-span-12">
+				<div className="col-span-12 lg:col-span-6">
 					<SectionHeader
-						subtitle="Categorías"
-						title="Explora las mejores propiedades con servicios expertos"
+						className="mb-8 text-left"
 						description="Descubre una amplia gama de propiedades premium, desde apartamentos de lujo hasta villas espaciosas, adaptadas a tus necesidades"
+						descriptionClassName="text-left max-w-none"
 						icon={
 							<svg
-								xmlns="http://www.w3.org/2000/svg"
 								aria-hidden="true"
-								role="img"
 								className="text-2xl text-primary"
-								width="1em"
 								height="1em"
+								role="img"
 								viewBox="0 0 256 256"
+								width="1em"
+								xmlns="http://www.w3.org/2000/svg"
 							>
 								<path
-									fill="currentColor"
 									d="M224 120v96a8 8 0 0 1-8 8H40a8 8 0 0 1-8-8v-96a15.87 15.87 0 0 1 4.69-11.32l80-80a16 16 0 0 1 22.62 0l80 80A15.87 15.87 0 0 1 224 120"
+									fill="currentColor"
 								/>
 							</svg>
 						}
-						className="text-left mb-8"
+						subtitle="Categorías"
 						subtitleClassName="text-left justify-start"
+						title="Explora las mejores propiedades con servicios expertos"
 						titleClassName="text-left text-3xl md:text-4xl lg:text-5xl"
-						descriptionClassName="text-left max-w-none"
 					/>
 					<Skeleton className="h-10 w-40" />
 				</div>
@@ -44,17 +44,17 @@ export function CategoriesSkeleton() {
 						: "lg:col-span-3 col-span-6";
 
 					return (
-						<div key={index} className={cn(colSpan, "w-full")}>
-							<div className="relative rounded-2xl overflow-hidden group h-[25rem]">
-								<Skeleton className="w-full h-full" />
+						<div className={cn(colSpan, "w-full")} key={index}>
+							<div className="group relative h-[25rem] overflow-hidden rounded-2xl">
+								<Skeleton className="h-full w-full" />
 
 								{/* Icon in top right */}
 								<div className="absolute top-6 right-6">
-									<Skeleton className="w-14 h-14 rounded-full" />
+									<Skeleton className="h-14 w-14 rounded-full" />
 								</div>
 
 								{/* Content at bottom */}
-								<div className="absolute bottom-0 left-0 right-0 p-10">
+								<div className="absolute right-0 bottom-0 left-0 p-10">
 									<div className="space-y-2.5">
 										<Skeleton className="h-8 w-3/4 bg-white/20" />
 										<Skeleton className="h-16 w-full bg-white/20" />

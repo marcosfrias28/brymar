@@ -3,7 +3,7 @@
  * Tracks user behavior, performance metrics, and system health for the property wizard
  */
 
-export interface WizardAnalyticsEvent {
+export type WizardAnalyticsEvent = {
 	id: string;
 	sessionId: string;
 	userId?: string;
@@ -13,7 +13,7 @@ export interface WizardAnalyticsEvent {
 	data: Record<string, any>;
 	userAgent?: string;
 	ipAddress?: string;
-}
+};
 
 export enum WizardEventType {
 	// Step completion tracking
@@ -51,36 +51,36 @@ export enum WizardEventType {
 	EXTERNAL_SERVICE_ERROR = "external_service_error",
 }
 
-export interface PerformanceMetric {
+export type PerformanceMetric = {
 	metricName: string;
 	value: number;
 	unit: "ms" | "bytes" | "count" | "percentage";
 	context?: Record<string, any>;
-}
+};
 
-export interface AIGenerationMetrics {
+export type AIGenerationMetrics = {
 	model: string;
 	inputTokens: number;
 	outputTokens: number;
 	responseTime: number;
 	success: boolean;
 	errorType?: string;
-}
+};
 
-export interface UploadMetrics {
+export type UploadMetrics = {
 	fileSize: number;
 	fileType: string;
 	uploadTime: number;
 	success: boolean;
 	errorType?: string;
-}
+};
 
 class WizardAnalyticsService {
-	private sessionId: string;
+	private readonly sessionId: string;
 	private userId?: string;
 	private events: WizardAnalyticsEvent[] = [];
 	private performanceObserver?: PerformanceObserver;
-	private isEnabled: boolean = true;
+	private isEnabled = true;
 
 	constructor() {
 		this.sessionId = this.generateSessionId();
@@ -124,9 +124,11 @@ class WizardAnalyticsService {
 	trackEvent(
 		eventType: WizardEventType,
 		data: Record<string, any> = {},
-		stepNumber?: number,
+		stepNumber?: number
 	): void {
-		if (!this.isEnabled) return;
+		if (!this.isEnabled) {
+			return;
+		}
 
 		const event: WizardAnalyticsEvent = {
 			id: this.generateEventId(),
@@ -147,7 +149,7 @@ class WizardAnalyticsService {
 	trackStepCompletion(
 		stepNumber: number,
 		timeSpent: number,
-		data: Record<string, any> = {},
+		data: Record<string, any> = {}
 	): void {
 		this.trackEvent(
 			WizardEventType.STEP_COMPLETED,
@@ -155,13 +157,13 @@ class WizardAnalyticsService {
 				timeSpent,
 				...data,
 			},
-			stepNumber,
+			stepNumber
 		);
 	}
 
 	trackAIGeneration(
 		type: "title" | "description" | "tags",
-		metrics: AIGenerationMetrics,
+		metrics: AIGenerationMetrics
 	): void {
 		const eventType = metrics.success
 			? WizardEventType.AI_GENERATION_SUCCESS
@@ -189,7 +191,7 @@ class WizardAnalyticsService {
 		service: "huggingface" | "vercel_blob" | "geocoding",
 		success: boolean,
 		responseTime: number,
-		errorType?: string,
+		errorType?: string
 	): void {
 		const eventType = success
 			? WizardEventType.EXTERNAL_SERVICE_CALL
@@ -225,9 +227,7 @@ class WizardAnalyticsService {
 				},
 				body: JSON.stringify(event),
 			});
-		} catch (error) {
-			console.warn("Failed to send analytics event:", error);
-		}
+		} catch (_error) {}
 	}
 
 	// Get analytics summary for current session
@@ -244,26 +244,26 @@ class WizardAnalyticsService {
 		sessionDuration: number;
 	} {
 		const stepCompletions = this.events.filter(
-			(e) => e.eventType === WizardEventType.STEP_COMPLETED,
+			(e) => e.eventType === WizardEventType.STEP_COMPLETED
 		);
 		const aiAttempts = this.events.filter(
-			(e) => e.eventType === WizardEventType.AI_GENERATION_REQUESTED,
+			(e) => e.eventType === WizardEventType.AI_GENERATION_REQUESTED
 		);
 		const aiSuccesses = this.events.filter(
-			(e) => e.eventType === WizardEventType.AI_GENERATION_SUCCESS,
+			(e) => e.eventType === WizardEventType.AI_GENERATION_SUCCESS
 		);
 		const uploadAttempts = this.events.filter(
-			(e) => e.eventType === WizardEventType.UPLOAD_STARTED,
+			(e) => e.eventType === WizardEventType.UPLOAD_STARTED
 		);
 		const uploadSuccesses = this.events.filter(
-			(e) => e.eventType === WizardEventType.UPLOAD_SUCCESS,
+			(e) => e.eventType === WizardEventType.UPLOAD_SUCCESS
 		);
 		const errors = this.events.filter(
-			(e) => e.eventType === WizardEventType.ERROR_OCCURRED,
+			(e) => e.eventType === WizardEventType.ERROR_OCCURRED
 		);
 
 		const firstEvent = this.events[0];
-		const lastEvent = this.events[this.events.length - 1];
+		const lastEvent = this.events.at(-1);
 		const sessionDuration =
 			firstEvent && lastEvent
 				? lastEvent.timestamp.getTime() - firstEvent.timestamp.getTime()

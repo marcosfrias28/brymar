@@ -13,12 +13,12 @@ import {
 } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 
-interface AIServiceStatus {
+type AIServiceStatus = {
 	enabled: boolean;
 	healthy: boolean;
 	message: string;
 	lastChecked?: string;
-}
+};
 
 export function AIServiceToggle() {
 	const [status, setStatus] = useState<AIServiceStatus>({
@@ -115,8 +115,8 @@ export function AIServiceToggle() {
 			<CardContent className="space-y-4">
 				<div className="flex items-center justify-between">
 					<div className="space-y-1">
-						<p className="text-sm font-medium">AI Generation</p>
-						<p className="text-xs text-muted-foreground">
+						<p className="font-medium text-sm">AI Generation</p>
+						<p className="text-muted-foreground text-xs">
 							Enable AI-powered content generation for properties and lands
 						</p>
 					</div>
@@ -132,21 +132,21 @@ export function AIServiceToggle() {
 
 				<div className="space-y-2">
 					<div className="flex items-center justify-between">
-						<span className="text-sm font-medium">Service Status</span>
+						<span className="font-medium text-sm">Service Status</span>
 						<Badge variant={status.healthy ? "default" : "destructive"}>
 							{status.healthy ? (
-								<CheckCircle className="h-3 w-3 mr-1" />
+								<CheckCircle className="mr-1 h-3 w-3" />
 							) : (
-								<AlertCircle className="h-3 w-3 mr-1" />
+								<AlertCircle className="mr-1 h-3 w-3" />
 							)}
 							{status.healthy ? "Healthy" : "Unhealthy"}
 						</Badge>
 					</div>
 
-					<p className="text-xs text-muted-foreground">{status.message}</p>
+					<p className="text-muted-foreground text-xs">{status.message}</p>
 
 					{status.lastChecked && (
-						<p className="text-xs text-muted-foreground">
+						<p className="text-muted-foreground text-xs">
 							Last checked: {status.lastChecked}
 						</p>
 					)}
@@ -154,26 +154,26 @@ export function AIServiceToggle() {
 
 				<div className="flex gap-2">
 					<Button
-						variant="outline"
-						size="sm"
-						onClick={checkAIHealth}
 						disabled={isLoading}
+						onClick={checkAIHealth}
+						size="sm"
+						variant="outline"
 					>
 						Check Health
 					</Button>
 					<Button
-						variant="outline"
-						size="sm"
-						onClick={testAIService}
 						disabled={isLoading}
+						onClick={testAIService}
+						size="sm"
+						variant="outline"
 					>
 						{isLoading ? "Testing..." : "Test Service"}
 					</Button>
 				</div>
 
 				<div className="rounded-lg bg-muted p-3">
-					<h4 className="text-sm font-medium mb-2">Current Behavior</h4>
-					<ul className="text-xs text-muted-foreground space-y-1">
+					<h4 className="mb-2 font-medium text-sm">Current Behavior</h4>
+					<ul className="space-y-1 text-muted-foreground text-xs">
 						<li>• AI generation is currently disabled for reliability</li>
 						<li>• High-quality template content is used instead</li>
 						<li>• Users experience no interruptions or errors</li>

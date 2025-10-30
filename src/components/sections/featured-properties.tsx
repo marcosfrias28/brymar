@@ -57,78 +57,78 @@ const properties = [
 
 export default function FeaturedProperties() {
 	return (
-		<section className="py-24 px-4 bg-gray-50">
+		<section className="bg-gray-50 px-4 py-24">
 			<div className="container mx-auto">
 				<motion.h2
-					className="text-4xl md:text-5xl font-bold text-center mb-4 text-gray-800"
-					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
+					className="mb-4 text-center font-bold text-4xl text-gray-800 md:text-5xl"
+					initial={{ opacity: 0, y: 20 }}
 					transition={{ duration: 0.8 }}
 				>
 					Propiedades Destacadas
 				</motion.h2>
 				<motion.p
-					className="text-xl text-gray-600 text-center mb-16 max-w-3xl mx-auto"
-					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
+					className="mx-auto mb-16 max-w-3xl text-center text-gray-600 text-xl"
+					initial={{ opacity: 0, y: 20 }}
 					transition={{ duration: 0.8, delay: 0.2 }}
 				>
 					Descubre nuestra selección exclusiva de propiedades de lujo
 				</motion.p>
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+				<div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-3">
 					{properties.map((property, index) => (
 						<motion.div
-							key={property.id}
-							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
+							initial={{ opacity: 0, y: 20 }}
+							key={property.id}
 							transition={{ duration: 0.8, delay: 0.2 * (index + 1) }}
 						>
-							<Card className=" bg-white shadow-xl hover:shadow-2xl transition-shadow duration-300 aspect-500/600">
+							<Card className="aspect-500/600 bg-white shadow-xl transition-shadow duration-300 hover:shadow-2xl">
 								<AspectRatio ratio={16 / 9}>
 									<img
-										src={property.image}
 										alt={property.title}
-										className="object-cover w-full h-full"
+										className="h-full w-full object-cover"
+										src={property.image}
 									/>
 								</AspectRatio>
 								<CardHeader>
-									<div className="flex justify-between items-start">
+									<div className="flex items-start justify-between">
 										<div>
-											<CardTitle className="text-2xl text-foreground mb-2">
+											<CardTitle className="mb-2 text-2xl text-foreground">
 												{property.title}
 											</CardTitle>
-											<CardDescription className="flex items-center text-muted-foreground mb-4">
-												<MapPin className="h-4 w-4 mr-1" />
+											<CardDescription className="mb-4 flex items-center text-muted-foreground">
+												<MapPin className="mr-1 h-4 w-4" />
 												{property.location}
 											</CardDescription>
 										</div>
 										<Badge
+											className="bg-primary px-3 py-1 font-semibold text-lg text-primary-foreground"
 											variant="secondary"
-											className="text-lg font-semibold bg-primary text-primary-foreground px-3 py-1"
 										>
 											{property.price}
 										</Badge>
 									</div>
 								</CardHeader>
 								<CardContent>
-									<p className="text-muted-foreground mb-6">
+									<p className="mb-6 text-muted-foreground">
 										{property.description}
 									</p>
-									<div className="flex justify-between items-center mb-6">
+									<div className="mb-6 flex items-center justify-between">
 										<div className="flex items-center text-muted-foreground">
-											<Bed className="h-5 w-5 mr-2" />
+											<Bed className="mr-2 h-5 w-5" />
 											<span>{property.beds} Beds</span>
 										</div>
 										<div className="flex items-center text-gray-600">
-											<Bath className="h-5 w-5 mr-2" />
+											<Bath className="mr-2 h-5 w-5" />
 											<span>{property.baths} Baths</span>
 										</div>
 										<div className="flex items-center text-gray-600">
-											<Square className="h-5 w-5 mr-2" />
+											<Square className="mr-2 h-5 w-5" />
 											<span>{property.area}</span>
 										</div>
 									</div>
-									<Button className="w-full bg-foreground hover:bg-foreground/90 text-background">
+									<Button className="w-full bg-foreground text-background hover:bg-foreground/90">
 										Ver Detalles
 									</Button>
 								</CardContent>
@@ -137,15 +137,15 @@ export default function FeaturedProperties() {
 					))}
 				</div>
 				<motion.div
-					className="text-center mt-16"
-					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
+					className="mt-16 text-center"
+					initial={{ opacity: 0, y: 20 }}
 					transition={{ duration: 0.8, delay: 0.8 }}
 				>
 					<Button
+						className="border-gray-800 text-gray-800 hover:bg-gray-100 dark:text-white"
 						size="lg"
 						variant="outline"
-						className="text-gray-800 dark:text-white border-gray-800 hover:bg-gray-100"
 					>
 						Ver Todas las Propiedades
 						<ArrowRight className="ml-2 h-5 w-5" />

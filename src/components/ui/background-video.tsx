@@ -2,11 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 
-interface BackgroundVideoProps {
+type BackgroundVideoProps = {
 	src: string;
 	className?: string;
 	fallbackGradient?: string;
-}
+};
 
 export function BackgroundVideo({
 	src,
@@ -19,7 +19,9 @@ export function BackgroundVideo({
 
 	useEffect(() => {
 		const video = videoRef.current;
-		if (!video) return;
+		if (!video) {
+			return;
+		}
 
 		const handleLoadedData = () => {
 			setVideoLoaded(true);
@@ -29,7 +31,6 @@ export function BackgroundVideo({
 
 		const handleError = () => {
 			setVideoError(true);
-			console.warn(`Video failed to load: ${src}`);
 		};
 
 		const handleTimeUpdate = () => {
@@ -53,13 +54,13 @@ export function BackgroundVideo({
 			video.removeEventListener("error", handleError);
 			video.removeEventListener("timeupdate", handleTimeUpdate);
 		};
-	}, [src]);
+	}, []);
 
 	// Show fallback if video fails to load
 	if (videoError) {
 		return (
 			<div
-				className={`absolute inset-0 w-full h-full ${fallbackGradient} ${className}`}
+				className={`absolute inset-0 h-full w-full ${fallbackGradient} ${className}`}
 			/>
 		);
 	}
@@ -69,20 +70,20 @@ export function BackgroundVideo({
 			{/* Fallback background while video loads */}
 			{!videoLoaded && (
 				<div
-					className={`absolute inset-0 w-full h-full ${fallbackGradient} ${className}`}
+					className={`absolute inset-0 h-full w-full ${fallbackGradient} ${className}`}
 				/>
 			)}
 
 			{/* Video element */}
 			<video
-				ref={videoRef}
-				className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+				className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
 					videoLoaded ? "opacity-100" : "opacity-0"
 				} ${className}`}
-				src={src}
 				muted
 				playsInline
 				preload="auto"
+				ref={videoRef}
+				src={src}
 				style={{ pointerEvents: "none" }}
 				tabIndex={-1}
 			/>

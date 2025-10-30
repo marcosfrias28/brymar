@@ -15,6 +15,7 @@ import {
 	UsersIcon,
 	XCircleIcon,
 } from "lucide-react";
+import { FilterTabs } from "@/components/dashboard/filter-tabs";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { getStatsAdapter } from "@/lib/adapters/stats-adapters";
 
 export default function AdminPage() {
 	// Mock data for demonstration
@@ -36,6 +38,28 @@ export default function AdminPage() {
 		storage: "warning",
 		backup: "online",
 	};
+
+	// Mock admin stats data
+	const adminData = {
+		totalUsers: 156,
+		activeUsers: 89,
+		systemHealth: 95,
+		pendingTasks: 12,
+		completedBackups: 24,
+		securityAlerts: 3,
+	};
+
+	// Generate stats cards using the admin adapter
+	const statsAdapter = getStatsAdapter("admin");
+	const statsCards = statsAdapter ? statsAdapter.generateStats(adminData) : [];
+
+	// Define filter tabs for admin sections
+	const filterTabs = [
+		{ label: "Sistema", value: "system" },
+		{ label: "Usuarios", value: "users" },
+		{ label: "Seguridad", value: "security" },
+		{ label: "Configuración", value: "settings" },
+	];
 
 	const systemSettings = [
 		{
@@ -114,13 +138,13 @@ export default function AdminPage() {
 		switch (status) {
 			case "online":
 				return (
-					<Badge variant="default" className="bg-green-100 text-green-800">
+					<Badge className="bg-green-100 text-green-800" variant="default">
 						En línea
 					</Badge>
 				);
 			case "warning":
 				return (
-					<Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+					<Badge className="bg-yellow-100 text-yellow-800" variant="secondary">
 						Advertencia
 					</Badge>
 				);
@@ -146,10 +170,24 @@ export default function AdminPage() {
 		}
 	};
 
+	// Handle system refresh
+	const handleSystemRefresh = () => {
+		// Here you would trigger system status refresh
+	};
+
 	return (
 		<DashboardPageLayout
-			title="Administración del Sistema"
+			actions={
+				<Button onClick={handleSystemRefresh} variant="outline">
+					<RefreshCwIcon className="mr-2 h-4 w-4" />
+					Actualizar Sistema
+				</Button>
+			}
 			description="Configuración avanzada y gestión del sistema"
+			headerExtras={<FilterTabs className="mb-4" tabs={filterTabs} />}
+			stats={statsCards}
+			statsLoading={false}
+			title="Administración del Sistema"
 		>
 			<div className="space-y-6">
 				{/* System Status */}
@@ -162,20 +200,20 @@ export default function AdminPage() {
 									Monitoreo en tiempo real de los servicios principales
 								</CardDescription>
 							</div>
-							<Button variant="outline" size="sm">
-								<RefreshCwIcon className="h-4 w-4 mr-2" />
+							<Button size="sm" variant="outline">
+								<RefreshCwIcon className="mr-2 h-4 w-4" />
 								Actualizar
 							</Button>
 						</div>
 					</CardHeader>
 					<CardContent>
 						<div className="grid gap-4 md:grid-cols-5">
-							<div className="flex items-center justify-between p-4 border rounded-lg">
+							<div className="flex items-center justify-between rounded-lg border p-4">
 								<div className="flex items-center gap-3">
 									<ServerIcon className="h-5 w-5 text-muted-foreground" />
 									<div>
 										<p className="font-medium">Servidor</p>
-										<p className="text-sm text-muted-foreground">Web Server</p>
+										<p className="text-muted-foreground text-sm">Web Server</p>
 									</div>
 								</div>
 								<div className="flex flex-col items-end gap-1">
@@ -184,12 +222,12 @@ export default function AdminPage() {
 								</div>
 							</div>
 
-							<div className="flex items-center justify-between p-4 border rounded-lg">
+							<div className="flex items-center justify-between rounded-lg border p-4">
 								<div className="flex items-center gap-3">
 									<DatabaseIcon className="h-5 w-5 text-muted-foreground" />
 									<div>
 										<p className="font-medium">Base de Datos</p>
-										<p className="text-sm text-muted-foreground">PostgreSQL</p>
+										<p className="text-muted-foreground text-sm">PostgreSQL</p>
 									</div>
 								</div>
 								<div className="flex flex-col items-end gap-1">
@@ -198,12 +236,12 @@ export default function AdminPage() {
 								</div>
 							</div>
 
-							<div className="flex items-center justify-between p-4 border rounded-lg">
+							<div className="flex items-center justify-between rounded-lg border p-4">
 								<div className="flex items-center gap-3">
 									<MailIcon className="h-5 w-5 text-muted-foreground" />
 									<div>
 										<p className="font-medium">Email</p>
-										<p className="text-sm text-muted-foreground">SMTP</p>
+										<p className="text-muted-foreground text-sm">SMTP</p>
 									</div>
 								</div>
 								<div className="flex flex-col items-end gap-1">
@@ -212,12 +250,12 @@ export default function AdminPage() {
 								</div>
 							</div>
 
-							<div className="flex items-center justify-between p-4 border rounded-lg">
+							<div className="flex items-center justify-between rounded-lg border p-4">
 								<div className="flex items-center gap-3">
 									<DatabaseIcon className="h-5 w-5 text-muted-foreground" />
 									<div>
 										<p className="font-medium">Almacenamiento</p>
-										<p className="text-sm text-muted-foreground">AWS S3</p>
+										<p className="text-muted-foreground text-sm">AWS S3</p>
 									</div>
 								</div>
 								<div className="flex flex-col items-end gap-1">
@@ -226,12 +264,12 @@ export default function AdminPage() {
 								</div>
 							</div>
 
-							<div className="flex items-center justify-between p-4 border rounded-lg">
+							<div className="flex items-center justify-between rounded-lg border p-4">
 								<div className="flex items-center gap-3">
 									<ShieldIcon className="h-5 w-5 text-muted-foreground" />
 									<div>
 										<p className="font-medium">Respaldos</p>
-										<p className="text-sm text-muted-foreground">Automático</p>
+										<p className="text-muted-foreground text-sm">Automático</p>
 									</div>
 								</div>
 								<div className="flex flex-col items-end gap-1">
@@ -255,12 +293,12 @@ export default function AdminPage() {
 						<div className="space-y-6">
 							{systemSettings.map((setting) => (
 								<div
+									className="flex items-center justify-between rounded-lg border p-4"
 									key={setting.id}
-									className="flex items-center justify-between p-4 border rounded-lg"
 								>
 									<div className="space-y-1">
 										<h3 className="font-medium">{setting.label}</h3>
-										<p className="text-sm text-muted-foreground">
+										<p className="text-muted-foreground text-sm">
 											{setting.description}
 										</p>
 									</div>
@@ -275,7 +313,7 @@ export default function AdminPage() {
 				</Card>
 
 				{/* Quick Actions & Recent Activity */}
-				<div className="grid gap-6 grid-cols-2">
+				<div className="grid grid-cols-2 gap-6">
 					<Card>
 						<CardHeader>
 							<CardTitle>Acciones Rápidas</CardTitle>
@@ -285,23 +323,23 @@ export default function AdminPage() {
 						</CardHeader>
 						<CardContent className="space-y-3">
 							<Button className="w-full justify-start" variant="outline">
-								<UsersIcon className="h-4 w-4 mr-2" />
+								<UsersIcon className="mr-2 h-4 w-4" />
 								Gestionar Usuarios
 							</Button>
 							<Button className="w-full justify-start" variant="outline">
-								<DatabaseIcon className="h-4 w-4 mr-2" />
+								<DatabaseIcon className="mr-2 h-4 w-4" />
 								Respaldo Manual
 							</Button>
 							<Button className="w-full justify-start" variant="outline">
-								<BellIcon className="h-4 w-4 mr-2" />
+								<BellIcon className="mr-2 h-4 w-4" />
 								Enviar Notificación
 							</Button>
 							<Button className="w-full justify-start" variant="outline">
-								<KeyIcon className="h-4 w-4 mr-2" />
+								<KeyIcon className="mr-2 h-4 w-4" />
 								Gestionar API Keys
 							</Button>
 							<Button className="w-full justify-start" variant="outline">
-								<ActivityIcon className="h-4 w-4 mr-2" />
+								<ActivityIcon className="mr-2 h-4 w-4" />
 								Ver Logs del Sistema
 							</Button>
 						</CardContent>
@@ -318,13 +356,13 @@ export default function AdminPage() {
 							<div className="space-y-4">
 								{recentActivities.map((activity) => (
 									<div
+										className="flex items-center gap-3 rounded-lg border p-3"
 										key={`${activity.action}-${activity.timestamp}`}
-										className="flex items-center gap-3 p-3 border rounded-lg"
 									>
 										{getActivityIcon(activity.type)}
 										<div className="flex-1">
-											<p className="text-sm font-medium">{activity.action}</p>
-											<p className="text-xs text-muted-foreground">
+											<p className="font-medium text-sm">{activity.action}</p>
+											<p className="text-muted-foreground text-xs">
 												Por {activity.user} • {activity.timestamp}
 											</p>
 										</div>
@@ -345,24 +383,24 @@ export default function AdminPage() {
 					</CardHeader>
 					<CardContent>
 						<div className="grid gap-4 md:grid-cols-3">
-							<div className="text-center p-4 border rounded-lg">
-								<ShieldIcon className="h-8 w-8 mx-auto mb-2 text-green-600" />
+							<div className="rounded-lg border p-4 text-center">
+								<ShieldIcon className="mx-auto mb-2 h-8 w-8 text-green-600" />
 								<h3 className="font-medium">SSL Activo</h3>
-								<p className="text-sm text-muted-foreground">
+								<p className="text-muted-foreground text-sm">
 									Certificado válido hasta 2025
 								</p>
 							</div>
-							<div className="text-center p-4 border rounded-lg">
-								<KeyIcon className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+							<div className="rounded-lg border p-4 text-center">
+								<KeyIcon className="mx-auto mb-2 h-8 w-8 text-blue-600" />
 								<h3 className="font-medium">API Keys</h3>
-								<p className="text-sm text-muted-foreground">
+								<p className="text-muted-foreground text-sm">
 									5 claves activas
 								</p>
 							</div>
-							<div className="text-center p-4 border rounded-lg">
-								<UsersIcon className="h-8 w-8 mx-auto mb-2 text-purple-600" />
+							<div className="rounded-lg border p-4 text-center">
+								<UsersIcon className="mx-auto mb-2 h-8 w-8 text-purple-600" />
 								<h3 className="font-medium">Roles</h3>
-								<p className="text-sm text-muted-foreground">
+								<p className="text-muted-foreground text-sm">
 									3 roles configurados
 								</p>
 							</div>

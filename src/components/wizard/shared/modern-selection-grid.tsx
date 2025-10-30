@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
 
-export interface SelectionOption {
+export type SelectionOption = {
 	id: string;
 	label: string;
 	description?: string;
@@ -19,9 +19,9 @@ export interface SelectionOption {
 	category?: string;
 	disabled?: boolean;
 	badge?: string;
-}
+};
 
-interface ModernSelectionGridProps {
+type ModernSelectionGridProps = {
 	options: SelectionOption[];
 	value?: string | string[];
 	onChange: (value: string | string[]) => void;
@@ -32,7 +32,7 @@ interface ModernSelectionGridProps {
 	showCategories?: boolean;
 	className?: string;
 	emptyMessage?: string;
-}
+};
 
 export function ModernSelectionGrid({
 	options,
@@ -58,14 +58,16 @@ export function ModernSelectionGrid({
 
 	// Filter options based on search query
 	const filteredOptions = React.useMemo(() => {
-		if (!searchQuery) return options;
+		if (!searchQuery) {
+			return options;
+		}
 
 		const query = searchQuery.toLowerCase();
 		return options.filter(
 			(option) =>
 				option.label.toLowerCase().includes(query) ||
 				option.description?.toLowerCase().includes(query) ||
-				option.category?.toLowerCase().includes(query),
+				option.category?.toLowerCase().includes(query)
 		);
 	}, [options, searchQuery]);
 
@@ -78,11 +80,13 @@ export function ModernSelectionGrid({
 		return filteredOptions.reduce(
 			(acc, option) => {
 				const category = option.category || "Otros";
-				if (!acc[category]) acc[category] = [];
+				if (!acc[category]) {
+					acc[category] = [];
+				}
 				acc[category].push(option);
 				return acc;
 			},
-			{} as Record<string, SelectionOption[]>,
+			{} as Record<string, SelectionOption[]>
 		);
 	}, [filteredOptions, showCategories]);
 
@@ -110,71 +114,71 @@ export function ModernSelectionGrid({
 			<div className={cn("space-y-4", className)}>
 				{searchable && (
 					<div className="relative">
-						<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+						<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
 						<Input
-							type="text"
-							placeholder="Buscar..."
-							value={searchQuery}
-							onChange={(e) => setSearchQuery(e.target.value)}
 							className="pl-9"
+							onChange={(e) => setSearchQuery(e.target.value)}
+							placeholder="Buscar..."
+							type="text"
+							value={searchQuery}
 						/>
 					</div>
 				)}
 
 				{Object.keys(groupedOptions).length === 0 ? (
-					<p className="text-sm text-muted-foreground text-center py-8">
+					<p className="py-8 text-center text-muted-foreground text-sm">
 						{emptyMessage}
 					</p>
 				) : (
 					Object.entries(groupedOptions).map(([category, categoryOptions]) => (
-						<div key={category} className="space-y-3">
+						<div className="space-y-3" key={category}>
 							{showCategories && category && (
-								<h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+								<h4 className="font-medium text-muted-foreground text-sm uppercase tracking-wide">
 									{category}
 								</h4>
 							)}
 
 							<RadioGroup
-								value={selectedValues[0] || ""}
-								onValueChange={handleSelectionChange}
 								className="space-y-2"
+								onValueChange={handleSelectionChange}
+								value={selectedValues[0] || ""}
 							>
 								{categoryOptions.map((option) => (
 									<div
-										key={option.id}
 										className={cn(
 											"flex items-start space-x-3 rounded-lg border p-4 transition-colors hover:bg-accent/50",
 											selectedValues.includes(option.id) &&
 												"border-primary bg-primary/5",
-											option.disabled && "opacity-50 cursor-not-allowed",
+											option.disabled && "cursor-not-allowed opacity-50"
 										)}
+										key={option.id}
 									>
 										<RadioGroupItem
-											value={option.id}
-											id={option.id}
-											disabled={option.disabled}
 											className="mt-1"
+											disabled={option.disabled}
+											id={option.id}
+											value={option.id}
 										/>
 										<div className="flex-1 space-y-1">
 											<Label
-												htmlFor={option.id}
 												className={cn(
-													"flex items-center gap-2 font-medium cursor-pointer",
-													option.disabled && "cursor-not-allowed",
+													"flex cursor-pointer items-center gap-2 font-medium",
+													option.disabled && "cursor-not-allowed"
 												)}
+												htmlFor={option.id}
 											>
 												{option.icon && (
 													<span className="shrink-0">{option.icon}</span>
 												)}
 												{option.label}
 												{option.badge && (
-													<Badge variant="secondary" className="text-xs">
+													<Badge className="text-xs" variant="secondary">
 														{option.badge}
 													</Badge>
 												)}
 											</Label>
 											{option.description && (
-												<p className="text-sm text-muted-foreground leading-relaxed">
+												<p className="text-muted-foreground text-sm leading-relaxed">
 													{option.description}
 												</p>
 											)}
@@ -194,30 +198,30 @@ export function ModernSelectionGrid({
 		<div className={cn("space-y-4", className)}>
 			{searchable && (
 				<div className="relative">
-					<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+					<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
 					<Input
-						type="text"
-						placeholder="Buscar..."
-						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
 						className="pl-9"
+						onChange={(e) => setSearchQuery(e.target.value)}
+						placeholder="Buscar..."
+						type="text"
+						value={searchQuery}
 					/>
 				</div>
 			)}
 
 			{Object.keys(groupedOptions).length === 0 ? (
-				<p className="text-sm text-muted-foreground text-center py-8">
+				<p className="py-8 text-center text-muted-foreground text-sm">
 					{emptyMessage}
 				</p>
 			) : (
 				Object.entries(groupedOptions).map(([category, categoryOptions]) => (
-					<div key={category} className="space-y-3">
+					<div className="space-y-3" key={category}>
 						{showCategories && category && (
 							<div className="flex items-center gap-3">
-								<h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+								<h4 className="font-medium text-muted-foreground text-sm uppercase tracking-wide">
 									{category}
 								</h4>
-								<div className="flex-1 h-px bg-border" />
+								<div className="h-px flex-1 bg-border" />
 							</div>
 						)}
 
@@ -229,19 +233,19 @@ export function ModernSelectionGrid({
 									if (variant === "cards") {
 										return (
 											<motion.div
-												key={option.id}
-												layout
-												initial={{ opacity: 0, scale: 0.95 }}
 												animate={{ opacity: 1, scale: 1 }}
 												exit={{ opacity: 0, scale: 0.95 }}
+												initial={{ opacity: 0, scale: 0.95 }}
+												key={option.id}
+												layout
 												transition={{ duration: 0.2 }}
 											>
 												<Card
 													className={cn(
-														"relative p-4 cursor-pointer transition-all hover:shadow-md",
+														"relative cursor-pointer p-4 transition-all hover:shadow-md",
 														isSelected &&
 															"border-primary bg-primary/5 shadow-sm",
-														option.disabled && "opacity-50 cursor-not-allowed",
+														option.disabled && "cursor-not-allowed opacity-50"
 													)}
 													onClick={() =>
 														!option.disabled && handleSelectionChange(option.id)
@@ -251,8 +255,8 @@ export function ModernSelectionGrid({
 														{mode === "multiple" && (
 															<Checkbox
 																checked={isSelected}
-																disabled={option.disabled}
 																className="mt-1"
+																disabled={option.disabled}
 															/>
 														)}
 
@@ -262,7 +266,7 @@ export function ModernSelectionGrid({
 																	"flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors",
 																	isSelected
 																		? "bg-primary text-primary-foreground"
-																		: "bg-muted",
+																		: "bg-muted"
 																)}
 															>
 																{option.icon}
@@ -273,8 +277,8 @@ export function ModernSelectionGrid({
 															<div className="flex items-center justify-between gap-2">
 																<Label
 																	className={cn(
-																		"font-medium cursor-pointer",
-																		option.disabled && "cursor-not-allowed",
+																		"cursor-pointer font-medium",
+																		option.disabled && "cursor-not-allowed"
 																	)}
 																>
 																	{option.label}
@@ -284,12 +288,12 @@ export function ModernSelectionGrid({
 																)}
 															</div>
 															{option.badge && (
-																<Badge variant="secondary" className="text-xs">
+																<Badge className="text-xs" variant="secondary">
 																	{option.badge}
 																</Badge>
 															)}
 															{option.description && (
-																<p className="text-xs text-muted-foreground leading-relaxed">
+																<p className="text-muted-foreground text-xs leading-relaxed">
 																	{option.description}
 																</p>
 															)}
@@ -303,62 +307,62 @@ export function ModernSelectionGrid({
 									// Compact variant
 									return (
 										<motion.div
-											key={option.id}
-											layout
-											initial={{ opacity: 0, scale: 0.95 }}
 											animate={{ opacity: 1, scale: 1 }}
-											exit={{ opacity: 0, scale: 0.95 }}
-											transition={{ duration: 0.2 }}
 											className={cn(
 												"flex items-center space-x-3 rounded-lg border p-3 transition-colors hover:bg-accent/50",
 												isSelected && "border-primary bg-primary/5",
-												option.disabled && "opacity-50 cursor-not-allowed",
+												option.disabled && "cursor-not-allowed opacity-50"
 											)}
+											exit={{ opacity: 0, scale: 0.95 }}
+											initial={{ opacity: 0, scale: 0.95 }}
+											key={option.id}
+											layout
 											onClick={() =>
 												!option.disabled && handleSelectionChange(option.id)
 											}
+											transition={{ duration: 0.2 }}
 										>
 											{mode === "multiple" ? (
 												<Checkbox
-													id={option.id}
 													checked={isSelected}
 													disabled={option.disabled}
+													id={option.id}
 												/>
 											) : (
 												<RadioGroupItem
-													value={option.id}
-													id={option.id}
 													disabled={option.disabled}
+													id={option.id}
+													value={option.id}
 												/>
 											)}
 
 											<div className="flex-1 space-y-0.5">
 												<Label
-													htmlFor={option.id}
 													className={cn(
-														"flex items-center gap-2 text-sm font-medium cursor-pointer",
-														option.disabled && "cursor-not-allowed",
+														"flex cursor-pointer items-center gap-2 font-medium text-sm",
+														option.disabled && "cursor-not-allowed"
 													)}
+													htmlFor={option.id}
 												>
 													{option.icon && (
 														<span className="shrink-0">{option.icon}</span>
 													)}
 													{option.label}
 													{option.badge && (
-														<Badge variant="outline" className="text-xs">
+														<Badge className="text-xs" variant="outline">
 															{option.badge}
 														</Badge>
 													)}
 												</Label>
 												{option.description && (
-													<p className="text-xs text-muted-foreground">
+													<p className="text-muted-foreground text-xs">
 														{option.description}
 													</p>
 												)}
 											</div>
 
 											{isSelected && mode === "single" && (
-												<Check className="h-4 w-4 text-primary shrink-0" />
+												<Check className="h-4 w-4 shrink-0 text-primary" />
 											)}
 										</motion.div>
 									);

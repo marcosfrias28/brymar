@@ -5,14 +5,14 @@ import {
 } from "@/lib/services/characteristics-service";
 import type { PropertyCharacteristic, PropertyType } from "@/types/wizard";
 
-export interface UseCharacteristicsOptions {
+export type UseCharacteristicsOptions = {
 	propertyType?: PropertyType;
 	initialCharacteristics?: PropertyCharacteristic[];
 	translations?: Record<string, string>;
 	locale?: string;
-}
+};
 
-export interface UseCharacteristicsReturn {
+export type UseCharacteristicsReturn = {
 	// Core data
 	characteristics: PropertyCharacteristic[];
 	characteristicsByCategory: Record<string, PropertyCharacteristic[]>;
@@ -30,7 +30,7 @@ export interface UseCharacteristicsReturn {
 	setCharacteristicSelected: (id: string, selected: boolean) => void;
 	addCustomCharacteristic: (
 		name: string,
-		category?: "amenity" | "feature" | "location",
+		category?: "amenity" | "feature" | "location"
 	) => PropertyCharacteristic;
 	removeCustomCharacteristic: (id: string) => boolean;
 	clearAllSelections: () => void;
@@ -49,10 +49,10 @@ export interface UseCharacteristicsReturn {
 
 	// Service instance for advanced usage
 	service: CharacteristicsService;
-}
+};
 
 export function useCharacteristics(
-	options: UseCharacteristicsOptions = {},
+	options: UseCharacteristicsOptions = {}
 ): UseCharacteristicsReturn {
 	const {
 		propertyType,
@@ -62,9 +62,10 @@ export function useCharacteristics(
 	} = options;
 
 	// Initialize service
-	const service = useMemo(() => {
-		return new CharacteristicsService(translations, locale);
-	}, [translations, locale]);
+	const service = useMemo(
+		() => new CharacteristicsService(translations, locale),
+		[translations, locale]
+	);
 
 	// State
 	const [searchTerm, setSearchTerm] = useState("");
@@ -92,30 +93,35 @@ export function useCharacteristics(
 			search: searchTerm || undefined,
 			category: (categoryFilter as any) || undefined,
 		}),
-		[propertyType, searchTerm, categoryFilter],
+		[propertyType, searchTerm, categoryFilter]
 	);
 
 	// Get characteristics data
-	const characteristics = useMemo(() => {
-		return service.getCharacteristics();
-	}, [service.getCharacteristics]);
+	const characteristics = useMemo(
+		() => service.getCharacteristics(),
+		[service.getCharacteristics]
+	);
 
-	const characteristicsByCategory = useMemo(() => {
-		return service.getCharacteristicsByCategory(filter);
-	}, [filter, service.getCharacteristicsByCategory]);
+	const characteristicsByCategory = useMemo(
+		() => service.getCharacteristicsByCategory(filter),
+		[filter, service.getCharacteristicsByCategory]
+	);
 
-	const filteredCharacteristics = useMemo(() => {
-		return service.getCharacteristics(filter);
-	}, [filter, service.getCharacteristics]);
+	const filteredCharacteristics = useMemo(
+		() => service.getCharacteristics(filter),
+		[filter, service.getCharacteristics]
+	);
 
-	const selectedCharacteristics = useMemo(() => {
-		return service.getSelectedCharacteristics();
-	}, [service.getSelectedCharacteristics]);
+	const selectedCharacteristics = useMemo(
+		() => service.getSelectedCharacteristics(),
+		[service.getSelectedCharacteristics]
+	);
 
 	// Statistics
-	const counts = useMemo(() => {
-		return service.getCharacteristicsCount(filter);
-	}, [filter, service.getCharacteristicsCount]);
+	const counts = useMemo(
+		() => service.getCharacteristicsCount(filter),
+		[filter, service.getCharacteristicsCount]
+	);
 
 	const selectedCount = selectedCharacteristics.length;
 	const totalCount = characteristics.length;
@@ -126,7 +132,7 @@ export function useCharacteristics(
 			service.toggleCharacteristic(id);
 			setUpdateTrigger((prev) => prev + 1);
 		},
-		[service.toggleCharacteristic],
+		[service.toggleCharacteristic]
 	);
 
 	const setCharacteristicSelected = useCallback(
@@ -134,19 +140,19 @@ export function useCharacteristics(
 			service.setCharacteristicSelected(id, selected);
 			setUpdateTrigger((prev) => prev + 1);
 		},
-		[service.setCharacteristicSelected],
+		[service.setCharacteristicSelected]
 	);
 
 	const addCustomCharacteristic = useCallback(
 		(
 			name: string,
-			category: "amenity" | "feature" | "location" = "feature",
+			category: "amenity" | "feature" | "location" = "feature"
 		) => {
 			const characteristic = service.addCustomCharacteristic(name, category);
 			setUpdateTrigger((prev) => prev + 1);
 			return characteristic;
 		},
-		[service.addCustomCharacteristic],
+		[service.addCustomCharacteristic]
 	);
 
 	const removeCustomCharacteristic = useCallback(
@@ -157,7 +163,7 @@ export function useCharacteristics(
 			}
 			return result;
 		},
-		[service.removeCustomCharacteristic],
+		[service.removeCustomCharacteristic]
 	);
 
 	const clearAllSelections = useCallback(() => {
@@ -168,7 +174,9 @@ export function useCharacteristics(
 	}, [characteristics, service.setCharacteristicSelected]);
 
 	const selectRecommendedForPropertyType = useCallback(() => {
-		if (!propertyType) return;
+		if (!propertyType) {
+			return;
+		}
 
 		// Clear current selections
 		clearAllSelections();
@@ -179,11 +187,13 @@ export function useCharacteristics(
 		// Select top characteristics from each category
 		const recommendedByCategory = recommended.reduce(
 			(acc, char) => {
-				if (!acc[char.category]) acc[char.category] = [];
+				if (!acc[char.category]) {
+					acc[char.category] = [];
+				}
 				acc[char.category].push(char);
 				return acc;
 			},
-			{} as Record<string, PropertyCharacteristic[]>,
+			{} as Record<string, PropertyCharacteristic[]>
 		);
 
 		// Select top 3-4 from each category
@@ -202,10 +212,9 @@ export function useCharacteristics(
 	]);
 
 	const validateForPropertyType = useCallback(
-		(targetPropertyType: PropertyType) => {
-			return service.validateCharacteristicsForPropertyType(targetPropertyType);
-		},
-		[service.validateCharacteristicsForPropertyType],
+		(targetPropertyType: PropertyType) =>
+			service.validateCharacteristicsForPropertyType(targetPropertyType),
+		[service.validateCharacteristicsForPropertyType]
 	);
 
 	return {
@@ -245,7 +254,7 @@ export function useCharacteristics(
 // Helper hook for getting characteristics for a specific property type
 export function useCharacteristicsForPropertyType(
 	propertyType: PropertyType | undefined,
-	options: Omit<UseCharacteristicsOptions, "propertyType"> = {},
+	options: Omit<UseCharacteristicsOptions, "propertyType"> = {}
 ) {
 	return useCharacteristics({
 		...options,
@@ -256,7 +265,7 @@ export function useCharacteristicsForPropertyType(
 // Helper hook for managing characteristics in forms
 export function useCharacteristicsForm(
 	initialCharacteristics: PropertyCharacteristic[] = [],
-	options: UseCharacteristicsOptions = {},
+	options: UseCharacteristicsOptions = {}
 ) {
 	const characteristics = useCharacteristics({
 		...options,
@@ -264,16 +273,17 @@ export function useCharacteristicsForm(
 	});
 
 	// Export function for form integration
-	const exportForForm = useCallback(() => {
-		return characteristics.service.exportCharacteristics();
-	}, [characteristics.service]);
+	const exportForForm = useCallback(
+		() => characteristics.service.exportCharacteristics(),
+		[characteristics.service]
+	);
 
 	// Import function for form integration
 	const importFromForm = useCallback(
 		(formCharacteristics: PropertyCharacteristic[]) => {
 			characteristics.service.loadCharacteristics(formCharacteristics);
 		},
-		[characteristics.service],
+		[characteristics.service]
 	);
 
 	return {

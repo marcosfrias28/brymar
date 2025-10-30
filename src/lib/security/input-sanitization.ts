@@ -8,9 +8,7 @@ let DOMPurify: any = null;
 if (typeof window !== "undefined") {
 	try {
 		DOMPurify = require("isomorphic-dompurify");
-	} catch (error) {
-		console.warn("DOMPurify not available:", error);
-	}
+	} catch (_error) {}
 }
 
 // Security configuration
@@ -87,7 +85,7 @@ export function sanitizeText(
 		allowHtml?: boolean;
 		allowedChars?: RegExp;
 		preserveLineBreaks?: boolean;
-	} = {},
+	} = {}
 ): string {
 	if (!input || typeof input !== "string") {
 		return "";
@@ -117,11 +115,7 @@ export function sanitizeText(
 				ALLOWED_ATTR: [],
 				KEEP_CONTENT: true,
 			});
-		} catch (error) {
-			console.warn(
-				"DOMPurify sanitization failed, using basic sanitization:",
-				error,
-			);
+		} catch (_error) {
 			// Fallback: remove all HTML tags
 			sanitized = sanitized.replace(/<[^>]*>/g, "");
 		}
@@ -138,7 +132,7 @@ export function sanitizeText(
 		// Remove disallowed characters
 		sanitized = sanitized.replace(
 			new RegExp(`[^${options.allowedChars.source.slice(2, -2)}]`, "g"),
-			"",
+			""
 		);
 	}
 
@@ -242,7 +236,7 @@ export function sanitizeFilename(filename: string): string {
  */
 export function sanitizeAIContent(
 	content: string,
-	type: "title" | "description" | "tags",
+	type: "title" | "description" | "tags"
 ): string {
 	switch (type) {
 		case "title":
@@ -265,7 +259,7 @@ export function sanitizeAIContent(
  */
 export function sanitizeCoordinates(
 	lat: number,
-	lng: number,
+	lng: number
 ): { latitude: number; longitude: number } | null {
 	// Validate types
 	if (typeof lat !== "number" || typeof lng !== "number") {
@@ -273,7 +267,7 @@ export function sanitizeCoordinates(
 	}
 
 	// Check for valid numbers
-	if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+	if (!(Number.isFinite(lat) && Number.isFinite(lng))) {
 		return null;
 	}
 
@@ -296,8 +290,8 @@ export function sanitizeCoordinates(
 
 	// Round to reasonable precision (6 decimal places ≈ 0.1m accuracy)
 	return {
-		latitude: Math.round(lat * 1000000) / 1000000,
-		longitude: Math.round(lng * 1000000) / 1000000,
+		latitude: Math.round(lat * 1_000_000) / 1_000_000,
+		longitude: Math.round(lng * 1_000_000) / 1_000_000,
 	};
 }
 
@@ -311,10 +305,11 @@ export function sanitizeNumeric(
 		max?: number;
 		integer?: boolean;
 		positive?: boolean;
-	} = {},
+	} = {}
 ): number | null {
 	// Convert to number
-	const num = typeof value === "string" ? parseFloat(value) : Number(value);
+	const num =
+		typeof value === "string" ? Number.parseFloat(value) : Number(value);
 
 	// Check if valid number
 	if (!Number.isFinite(num)) {
@@ -383,7 +378,7 @@ export function sanitizeCharacteristics(characteristics: unknown[]): Array<{
  * Comprehensive form data sanitization
  */
 export function sanitizeFormData(
-	data: Record<string, any>,
+	data: Record<string, any>
 ): Record<string, any> {
 	const sanitized: Record<string, any> = {};
 
@@ -401,7 +396,7 @@ export function sanitizeFormData(
 			case "surface":
 				sanitized[key] = sanitizeNumeric(value, {
 					positive: true,
-					max: 999999999,
+					max: 999_999_999,
 				});
 				break;
 
@@ -437,7 +432,7 @@ export function sanitizeFormData(
 						}),
 						country: "Dominican Republic",
 						formattedAddress: sanitizeAddress(
-							String(value.formattedAddress || ""),
+							String(value.formattedAddress || "")
 						),
 					};
 				}
@@ -445,7 +440,7 @@ export function sanitizeFormData(
 
 			case "characteristics":
 				sanitized[key] = sanitizeCharacteristics(
-					Array.isArray(value) ? value : [],
+					Array.isArray(value) ? value : []
 				);
 				break;
 

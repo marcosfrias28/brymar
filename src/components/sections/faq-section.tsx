@@ -2,17 +2,17 @@
 
 import { HelpCircle } from "lucide-react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import {
 	Accordion,
 	AccordionContent,
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { useSection } from "@/hooks/use-static-content";
 import { FAQSkeleton } from "../skeletons/home/faq-skeleton";
 import { SectionHeader, SectionWrapper } from "../ui/section-wrapper";
-import { useSection } from "@/hooks/use-static-content";
-import Link from "next/link";
 
 // Preparado para i18n - Solo 4 FAQ principales
 const faqData = [
@@ -65,9 +65,9 @@ function FAQSectionHeader() {
 	if (isLoading) {
 		return (
 			<div className="animate-pulse space-y-4 text-center">
-				<div className="h-4 bg-muted rounded w-1/4 mx-auto"></div>
-				<div className="h-8 bg-muted rounded w-1/2 mx-auto"></div>
-				<div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
+				<div className="mx-auto h-4 w-1/4 rounded bg-muted" />
+				<div className="mx-auto h-8 w-1/2 rounded bg-muted" />
+				<div className="mx-auto h-4 w-3/4 rounded bg-muted" />
 			</div>
 		);
 	}
@@ -80,25 +80,25 @@ function FAQSectionHeader() {
 
 	return (
 		<SectionHeader
-			subtitle={subtitle}
-			title={title}
 			description={description}
 			icon={
 				<svg
-					xmlns="http://www.w3.org/2000/svg"
 					aria-hidden="true"
-					role="img"
 					className="text-2xl text-primary"
-					width="1em"
 					height="1em"
+					role="img"
 					viewBox="0 0 256 256"
+					width="1em"
+					xmlns="http://www.w3.org/2000/svg"
 				>
 					<path
-						fill="currentColor"
 						d="M224 120v96a8 8 0 0 1-8 8H40a8 8 0 0 1-8-8v-96a15.87 15.87 0 0 1 4.69-11.32l80-80a16 16 0 0 1 22.62 0l80 80A15.87 15.87 0 0 1 224 120"
+						fill="currentColor"
 					/>
 				</svg>
 			}
+			subtitle={subtitle}
+			title={title}
 		/>
 	);
 }
@@ -119,30 +119,30 @@ export function FAQSection() {
 			<FAQSectionHeader />
 
 			{/* Grid con FAQ a la izquierda e imágenes a la derecha */}
-			<div className="grid grid-cols-12 gap-10 items-start mt-12">
+			<div className="mt-12 grid grid-cols-12 items-start gap-10">
 				{/* FAQ Accordion - Izquierda */}
 				<div className="col-span-12 lg:col-span-7">
 					<Accordion
-						type="single"
-						collapsible
 						className="w-full space-y-6"
+						collapsible
 						defaultValue="faq-1"
+						type="single"
 					>
 						{displayFAQs.map((faq: any, index: number) => (
 							<AccordionItem
+								className="overflow-hidden rounded-2xl border-0 bg-background/60 shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md"
 								key={faq.id}
 								value={faq.id}
-								className="bg-background/60 backdrop-blur-sm rounded-2xl border-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
 							>
-								<AccordionTrigger className="text-left text-xl font-semibold text-foreground hover:text-primary transition-colors px-6 py-6 hover:no-underline accordion-trigger [&[data-state=open]>div>span:first-child]:bg-primary [&[data-state=open]>div>span:first-child]:text-primary-foreground">
-									<div className="flex items-start gap-4 w-full">
-										<span className="bg-primary/10 text-primary rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold flex-shrink-0 transition-all duration-300">
+								<AccordionTrigger className="accordion-trigger px-6 py-6 text-left font-semibold text-foreground text-xl transition-colors hover:text-primary hover:no-underline [&[data-state=open]>div>span:first-child]:bg-primary [&[data-state=open]>div>span:first-child]:text-primary-foreground">
+									<div className="flex w-full items-start gap-4">
+										<span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 font-bold text-primary text-sm transition-all duration-300">
 											{index + 1}
 										</span>
 										<span className="flex-1 text-left">{faq.question}</span>
 									</div>
 								</AccordionTrigger>
-								<AccordionContent className="text-muted-foreground leading-relaxed px-6 pb-6 pt-0 pl-16 text-base accordion-content">
+								<AccordionContent className="accordion-content px-6 pt-0 pb-6 pl-16 text-base text-muted-foreground leading-relaxed">
 									<div className="pt-2">{faq.answer}</div>
 								</AccordionContent>
 							</AccordionItem>
@@ -150,23 +150,23 @@ export function FAQSection() {
 					</Accordion>
 
 					{/* CTA debajo de los FAQ */}
-					<div className="mt-12 p-8 bg-gradient-to-r from-primary/10 to-accent/10 rounded-2xl border border-primary/20 backdrop-blur-sm">
+					<div className="mt-12 rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 to-accent/10 p-8 backdrop-blur-sm">
 						<div className="text-center">
-							<div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-6">
-								<HelpCircle className="w-8 h-8 text-primary" />
+							<div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+								<HelpCircle className="h-8 w-8 text-primary" />
 							</div>
-							<h4 className="text-2xl font-semibold mb-3">
+							<h4 className="mb-3 font-semibold text-2xl">
 								¿Tienes más preguntas?
 							</h4>
-							<p className="text-muted-foreground mb-6 text-lg max-w-md mx-auto">
+							<p className="mx-auto mb-6 max-w-md text-lg text-muted-foreground">
 								Nuestro equipo está listo para resolver todas tus dudas sobre
 								bienes raíces.
 							</p>
-							<div className="flex flex-col sm:flex-row gap-4 justify-center">
+							<div className="flex flex-col justify-center gap-4 sm:flex-row">
 								<Link href="/contact">
 									<Button size="lg">Contactar Experto</Button>
 								</Link>
-								<Button variant="outline" size="lg">
+								<Button size="lg" variant="outline">
 									Ver Más FAQs
 								</Button>
 							</div>
@@ -176,17 +176,17 @@ export function FAQSection() {
 
 				{/* Imágenes Grid - Derecha */}
 				<div className="col-span-12 lg:col-span-5">
-					<div className="grid grid-cols-2 grid-rows-2 gap-10 h-[800px]">
+					<div className="grid h-[800px] grid-cols-2 grid-rows-2 gap-10">
 						{propertyImages.map((image) => (
 							<div
+								className={`${image.className} pointer-events-none relative cursor-none overflow-hidden rounded-2xl`}
 								key={image.id}
-								className={`${image.className} relative rounded-2xl overflow-hidden cursor-none pointer-events-none`}
 							>
 								<Image
-									src={image.src}
 									alt={image.alt}
-									fill
 									className="object-cover"
+									fill
+									src={image.src}
 								/>
 							</div>
 						))}

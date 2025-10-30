@@ -12,17 +12,17 @@ import { cn } from "@/lib/utils";
 // Importación dinámica de Leaflet para evitar problemas de SSR
 const MapContainer = dynamic(
 	() => import("react-leaflet").then((mod) => mod.MapContainer),
-	{ ssr: false },
+	{ ssr: false }
 );
 
 const TileLayer = dynamic(
 	() => import("react-leaflet").then((mod) => mod.TileLayer),
-	{ ssr: false },
+	{ ssr: false }
 );
 
 const Marker = dynamic(
 	() => import("react-leaflet").then((mod) => mod.Marker),
-	{ ssr: false },
+	{ ssr: false }
 );
 
 const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
@@ -30,7 +30,7 @@ const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
 });
 
 // Tipos para las propiedades y terrenos
-interface PropertyLocation {
+type PropertyLocation = {
 	id: string;
 	title: string;
 	price: { amount: number; currency: string } | number;
@@ -58,19 +58,19 @@ interface PropertyLocation {
 		bedrooms?: number;
 		bathrooms?: number;
 	};
-}
+};
 
-interface SearchMapViewProps {
+type SearchMapViewProps = {
 	properties: PropertyLocation[];
 	className?: string;
 	onViewChange?: (view: "results" | "map") => void;
 	currentView?: "results" | "map";
-}
+};
 
 // Componente de carga del mapa
 function MapLoading() {
 	return (
-		<div className="h-full flex items-center justify-center bg-muted">
+		<div className="flex h-full items-center justify-center bg-muted">
 			<div className="flex flex-col items-center space-y-4">
 				<LoadingSpinner />
 				<p className="text-muted-foreground">Cargando mapa...</p>
@@ -82,18 +82,18 @@ function MapLoading() {
 // Componente de error del mapa
 function MapError({ onRetry }: { onRetry?: () => void }) {
 	return (
-		<div className="h-full flex items-center justify-center bg-muted">
-			<div className="text-center space-y-4">
-				<div className="mx-auto w-16 h-16 bg-background rounded-full flex items-center justify-center">
+		<div className="flex h-full items-center justify-center bg-muted">
+			<div className="space-y-4 text-center">
+				<div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-background">
 					<MapPin className="h-8 w-8 text-muted-foreground" />
 				</div>
 				<div>
-					<h3 className="text-lg font-semibold">Error al cargar el mapa</h3>
-					<p className="text-muted-foreground mt-1">
+					<h3 className="font-semibold text-lg">Error al cargar el mapa</h3>
+					<p className="mt-1 text-muted-foreground">
 						No se pudo cargar el mapa. Verifica tu conexión a internet.
 					</p>
 					{onRetry && (
-						<Button onClick={onRetry} className="mt-4">
+						<Button className="mt-4" onClick={onRetry}>
 							Reintentar
 						</Button>
 					)}
@@ -182,13 +182,13 @@ export function SearchMapView({
 		const avgLat =
 			propertiesWithCoords.reduce(
 				(sum, prop) => sum + (prop.coordinates?.lat || 0),
-				0,
+				0
 			) / propertiesWithCoords.length;
 
 		const avgLng =
 			propertiesWithCoords.reduce(
 				(sum, prop) => sum + (prop.coordinates?.lng || 0),
-				0,
+				0
 			) / propertiesWithCoords.length;
 
 		return { lat: avgLat, lng: avgLng };
@@ -216,18 +216,18 @@ export function SearchMapView({
 
 	if (mapError) {
 		return (
-			<div className={cn("h-full flex flex-col", className)}>
+			<div className={cn("flex h-full flex-col", className)}>
 				{/* Header */}
 				<div className="flex-shrink-0 border-b bg-background">
 					<div className="p-4">
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-2">
 								<Button
-									variant="ghost"
-									size="sm"
 									onClick={() => onViewChange?.("results")}
+									size="sm"
+									variant="ghost"
 								>
-									<ArrowLeft className="h-4 w-4 mr-2" />
+									<ArrowLeft className="mr-2 h-4 w-4" />
 									Volver a resultados
 								</Button>
 							</div>
@@ -245,21 +245,21 @@ export function SearchMapView({
 	}
 
 	return (
-		<div className={cn("h-full flex flex-col", className)}>
+		<div className={cn("flex h-full flex-col", className)}>
 			{/* Header */}
 			<div className="flex-shrink-0 border-b bg-background">
 				<div className="p-4">
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-2">
 							<Button
-								variant="ghost"
-								size="sm"
 								onClick={() => onViewChange?.("results")}
+								size="sm"
+								variant="ghost"
 							>
-								<ArrowLeft className="h-4 w-4 mr-2" />
+								<ArrowLeft className="mr-2 h-4 w-4" />
 								Volver a resultados
 							</Button>
-							<h2 className="text-lg font-semibold">Mapa de Propiedades</h2>
+							<h2 className="font-semibold text-lg">Mapa de Propiedades</h2>
 						</div>
 						<Badge variant="secondary">
 							Mostrando {propertiesWithCoords.length} propiedades en el mapa
@@ -269,15 +269,13 @@ export function SearchMapView({
 			</div>
 
 			{/* Map Content */}
-			<div className="flex-1 relative">
-				{!isMapReady ? (
-					<MapLoading />
-				) : (
+			<div className="relative flex-1">
+				{isMapReady ? (
 					<MapContainer
 						center={[mapCenter.lat, mapCenter.lng]}
-						zoom={propertiesWithCoords.length > 0 ? 12 : 8}
-						style={{ height: "100%", width: "100%" }}
 						className="z-0"
+						style={{ height: "100%", width: "100%" }}
+						zoom={propertiesWithCoords.length > 0 ? 12 : 8}
 					>
 						<TileLayer
 							attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -298,15 +296,17 @@ export function SearchMapView({
 							</Marker>
 						))}
 					</MapContainer>
+				) : (
+					<MapLoading />
 				)}
 
 				{/* Overlay con información */}
 				{isMapReady && propertiesWithCoords.length === 0 && (
-					<div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
+					<div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur-sm">
 						<Card className="max-w-md">
 							<CardContent className="p-6 text-center">
-								<MapPin className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-								<h3 className="text-lg font-semibold mb-2">
+								<MapPin className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+								<h3 className="mb-2 font-semibold text-lg">
 									No hay propiedades con ubicación
 								</h3>
 								<p className="text-muted-foreground">
@@ -314,8 +314,8 @@ export function SearchMapView({
 									disponibles para mostrar en el mapa.
 								</p>
 								<Button
-									onClick={() => onViewChange?.("results")}
 									className="mt-4"
+									onClick={() => onViewChange?.("results")}
 								>
 									Ver resultados en lista
 								</Button>
@@ -336,29 +336,29 @@ function PropertyPopup({ property }: { property: any }) {
 			{property.normalizedImage && (
 				<div className="mb-3">
 					<img
-						src={property.normalizedImage}
 						alt={property.title}
-						className="w-full h-32 object-cover rounded"
+						className="h-32 w-full rounded object-cover"
+						src={property.normalizedImage}
 					/>
 				</div>
 			)}
 
 			{/* Contenido */}
 			<div className="space-y-2">
-				<h4 className="font-semibold text-sm line-clamp-2">{property.title}</h4>
+				<h4 className="line-clamp-2 font-semibold text-sm">{property.title}</h4>
 
 				<div className="flex items-center justify-between">
-					<span className="text-lg font-bold text-primary">
+					<span className="font-bold text-lg text-primary">
 						${property.normalizedPrice.toLocaleString()}
 					</span>
 					{property.type && (
-						<Badge variant="secondary" className="text-xs">
+						<Badge className="text-xs" variant="secondary">
 							{property.type}
 						</Badge>
 					)}
 				</div>
 
-				<div className="flex items-center gap-4 text-xs text-muted-foreground">
+				<div className="flex items-center gap-4 text-muted-foreground text-xs">
 					{property.normalizedArea > 0 && (
 						<span>{property.normalizedArea.toLocaleString()} m²</span>
 					)}
@@ -370,11 +370,11 @@ function PropertyPopup({ property }: { property: any }) {
 					)}
 				</div>
 
-				<p className="text-xs text-muted-foreground line-clamp-1">
+				<p className="line-clamp-1 text-muted-foreground text-xs">
 					{property.normalizedLocation}
 				</p>
 
-				<Button size="sm" className="w-full mt-2">
+				<Button className="mt-2 w-full" size="sm">
 					Ver Detalles
 				</Button>
 			</div>

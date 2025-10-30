@@ -51,20 +51,20 @@ const RATE_LIMIT_CONFIG = {
 
 // In-memory store for rate limiting (in production, use Redis)
 class RateLimitStore {
-	private store = new Map<
+	private readonly store = new Map<
 		string,
 		{ count: number; resetTime: number; requests: number[] }
 	>();
 
 	// Clean up expired entries periodically
-	private cleanupInterval: NodeJS.Timeout;
+	private readonly cleanupInterval: NodeJS.Timeout;
 
 	constructor() {
 		this.cleanupInterval = setInterval(
 			() => {
 				this.cleanup();
 			},
-			5 * 60 * 1000,
+			5 * 60 * 1000
 		); // Cleanup every 5 minutes
 	}
 
@@ -78,14 +78,14 @@ class RateLimitStore {
 	}
 
 	get(
-		key: string,
+		key: string
 	): { count: number; resetTime: number; requests: number[] } | undefined {
 		return this.store.get(key);
 	}
 
 	set(
 		key: string,
-		value: { count: number; resetTime: number; requests: number[] },
+		value: { count: number; resetTime: number; requests: number[] }
 	): void {
 		this.store.set(key, value);
 	}
@@ -121,7 +121,7 @@ export class RateLimiter {
 		private readonly windowMs: number,
 		private readonly maxRequests: number,
 		private readonly skipSuccessfulRequests: boolean = false,
-		private readonly skipFailedRequests: boolean = false,
+		private readonly skipFailedRequests: boolean = false
 	) {}
 
 	/**
@@ -129,7 +129,7 @@ export class RateLimiter {
 	 */
 	async isAllowed(
 		identifier: string,
-		success?: boolean,
+		success?: boolean
 	): Promise<{
 		allowed: boolean;
 		remaining: number;
@@ -232,35 +232,35 @@ export const rateLimiters = {
 		RATE_LIMIT_CONFIG.AI_GENERATION.windowMs,
 		RATE_LIMIT_CONFIG.AI_GENERATION.maxRequests,
 		RATE_LIMIT_CONFIG.AI_GENERATION.skipSuccessfulRequests,
-		RATE_LIMIT_CONFIG.AI_GENERATION.skipFailedRequests,
+		RATE_LIMIT_CONFIG.AI_GENERATION.skipFailedRequests
 	),
 
 	imageUpload: new RateLimiter(
 		RATE_LIMIT_CONFIG.IMAGE_UPLOAD.windowMs,
 		RATE_LIMIT_CONFIG.IMAGE_UPLOAD.maxRequests,
 		RATE_LIMIT_CONFIG.IMAGE_UPLOAD.skipSuccessfulRequests,
-		RATE_LIMIT_CONFIG.IMAGE_UPLOAD.skipFailedRequests,
+		RATE_LIMIT_CONFIG.IMAGE_UPLOAD.skipFailedRequests
 	),
 
 	draftSave: new RateLimiter(
 		RATE_LIMIT_CONFIG.DRAFT_SAVE.windowMs,
 		RATE_LIMIT_CONFIG.DRAFT_SAVE.maxRequests,
 		RATE_LIMIT_CONFIG.DRAFT_SAVE.skipSuccessfulRequests,
-		RATE_LIMIT_CONFIG.DRAFT_SAVE.skipFailedRequests,
+		RATE_LIMIT_CONFIG.DRAFT_SAVE.skipFailedRequests
 	),
 
 	formSubmission: new RateLimiter(
 		RATE_LIMIT_CONFIG.FORM_SUBMISSION.windowMs,
 		RATE_LIMIT_CONFIG.FORM_SUBMISSION.maxRequests,
 		RATE_LIMIT_CONFIG.FORM_SUBMISSION.skipSuccessfulRequests,
-		RATE_LIMIT_CONFIG.FORM_SUBMISSION.skipFailedRequests,
+		RATE_LIMIT_CONFIG.FORM_SUBMISSION.skipFailedRequests
 	),
 
 	globalApi: new RateLimiter(
 		RATE_LIMIT_CONFIG.GLOBAL_API.windowMs,
 		RATE_LIMIT_CONFIG.GLOBAL_API.maxRequests,
 		RATE_LIMIT_CONFIG.GLOBAL_API.skipSuccessfulRequests,
-		RATE_LIMIT_CONFIG.GLOBAL_API.skipFailedRequests,
+		RATE_LIMIT_CONFIG.GLOBAL_API.skipFailedRequests
 	),
 } as const;
 
@@ -269,7 +269,7 @@ export const rateLimiters = {
  */
 export function getClientIdentifier(
 	request: NextRequest,
-	userId?: string,
+	userId?: string
 ): string {
 	// Prefer user ID if available
 	if (userId) {
@@ -289,7 +289,7 @@ export function getClientIdentifier(
  * Rate limiting middleware for AI generation
  */
 export async function checkAIGenerationRateLimit(
-	identifier: string,
+	identifier: string
 ): Promise<void> {
 	const result = await rateLimiters.aiGeneration.isAllowed(identifier);
 
@@ -304,7 +304,7 @@ export async function checkAIGenerationRateLimit(
 					resetTime: result.resetTime,
 					totalHits: result.totalHits,
 				},
-			},
+			}
 		);
 	}
 }
@@ -313,7 +313,7 @@ export async function checkAIGenerationRateLimit(
  * Rate limiting middleware for image uploads
  */
 export async function checkImageUploadRateLimit(
-	identifier: string,
+	identifier: string
 ): Promise<void> {
 	const result = await rateLimiters.imageUpload.isAllowed(identifier);
 
@@ -328,7 +328,7 @@ export async function checkImageUploadRateLimit(
 					resetTime: result.resetTime,
 					totalHits: result.totalHits,
 				},
-			},
+			}
 		);
 	}
 }
@@ -337,7 +337,7 @@ export async function checkImageUploadRateLimit(
  * Rate limiting middleware for draft saves
  */
 export async function checkDraftSaveRateLimit(
-	identifier: string,
+	identifier: string
 ): Promise<void> {
 	const result = await rateLimiters.draftSave.isAllowed(identifier);
 
@@ -352,7 +352,7 @@ export async function checkDraftSaveRateLimit(
 					resetTime: result.resetTime,
 					totalHits: result.totalHits,
 				},
-			},
+			}
 		);
 	}
 }
@@ -361,7 +361,7 @@ export async function checkDraftSaveRateLimit(
  * Rate limiting middleware for form submissions
  */
 export async function checkFormSubmissionRateLimit(
-	identifier: string,
+	identifier: string
 ): Promise<void> {
 	const result = await rateLimiters.formSubmission.isAllowed(identifier);
 
@@ -376,7 +376,7 @@ export async function checkFormSubmissionRateLimit(
 					resetTime: result.resetTime,
 					totalHits: result.totalHits,
 				},
-			},
+			}
 		);
 	}
 }
@@ -385,7 +385,7 @@ export async function checkFormSubmissionRateLimit(
  * Global API rate limiting
  */
 export async function checkGlobalApiRateLimit(
-	identifier: string,
+	identifier: string
 ): Promise<void> {
 	const result = await rateLimiters.globalApi.isAllowed(identifier);
 
@@ -400,7 +400,7 @@ export async function checkGlobalApiRateLimit(
 					resetTime: result.resetTime,
 					totalHits: result.totalHits,
 				},
-			},
+			}
 		);
 	}
 }
@@ -410,7 +410,7 @@ export async function checkGlobalApiRateLimit(
  */
 export async function recordSuccessfulOperation(
 	type: "aiGeneration" | "imageUpload" | "draftSave" | "formSubmission",
-	identifier: string,
+	identifier: string
 ): Promise<void> {
 	await rateLimiters[type].recordRequest(identifier, true);
 }
@@ -420,7 +420,7 @@ export async function recordSuccessfulOperation(
  */
 export async function recordFailedOperation(
 	type: "aiGeneration" | "imageUpload" | "draftSave" | "formSubmission",
-	identifier: string,
+	identifier: string
 ): Promise<void> {
 	await rateLimiters[type].recordRequest(identifier, false);
 }
@@ -456,7 +456,7 @@ export async function getRateLimitStatus(identifier: string): Promise<{
 export function getRateLimitHeaders(
 	remaining: number,
 	resetTime: number,
-	totalHits: number,
+	totalHits: number
 ): Record<string, string> {
 	return {
 		"X-RateLimit-Limit": String(remaining + totalHits),
@@ -470,12 +470,12 @@ export function getRateLimitHeaders(
  * Adaptive rate limiting based on user behavior
  */
 export class AdaptiveRateLimiter extends RateLimiter {
-	private suspiciousActivityThreshold = 0.8; // 80% of limit triggers monitoring
-	private suspiciousUsers = new Set<string>();
+	private readonly suspiciousActivityThreshold = 0.8; // 80% of limit triggers monitoring
+	private readonly suspiciousUsers = new Set<string>();
 
 	async isAllowed(
 		identifier: string,
-		success?: boolean,
+		success?: boolean
 	): Promise<{
 		allowed: boolean;
 		remaining: number;
@@ -491,16 +491,6 @@ export class AdaptiveRateLimiter extends RateLimiter {
 
 		if (suspicious) {
 			this.suspiciousUsers.add(identifier);
-
-			// Log suspicious activity
-			console.warn(
-				`Suspicious rate limit activity detected for ${identifier}:`,
-				{
-					totalHits: result.totalHits,
-					remaining: result.remaining,
-					usageRatio,
-				},
-			);
 		} else {
 			this.suspiciousUsers.delete(identifier);
 		}

@@ -3,18 +3,18 @@
 import { useCallback, useEffect, useRef } from "react";
 import { keyboardKeys } from "@/lib/utils/accessibility";
 
-interface UseFocusManagementOptions {
+type UseFocusManagementOptions = {
 	restoreOnUnmount?: boolean;
 	trapFocus?: boolean;
 	autoFocus?: boolean;
-}
+};
 
 /**
  * Hook for managing focus in modals, menus, and other interactive components
  */
 export function useFocusManagement(
 	isOpen: boolean,
-	options: UseFocusManagementOptions = {},
+	options: UseFocusManagementOptions = {}
 ) {
 	const {
 		restoreOnUnmount = true,
@@ -40,10 +40,12 @@ export function useFocusManagement(
 
 	// Get all focusable elements within container
 	const getFocusableElements = useCallback((): HTMLElement[] => {
-		if (!containerRef.current) return [];
+		if (!containerRef.current) {
+			return [];
+		}
 
 		const elements = Array.from(
-			containerRef.current.querySelectorAll(focusableSelector),
+			containerRef.current.querySelectorAll(focusableSelector)
 		) as HTMLElement[];
 
 		// Filter out elements that are not visible
@@ -69,17 +71,22 @@ export function useFocusManagement(
 	const focusLastElement = useCallback(() => {
 		const focusableElements = getFocusableElements();
 		if (focusableElements.length > 0) {
-			focusableElements[focusableElements.length - 1].focus();
+			const lastElement = focusableElements[focusableElements.length - 1];
+			lastElement?.focus();
 		}
 	}, [getFocusableElements]);
 
 	// Handle tab key for focus trapping
 	const handleKeyDown = useCallback(
 		(event: KeyboardEvent) => {
-			if (!trapFocus || event.key !== keyboardKeys.TAB) return;
+			if (!trapFocus || event.key !== keyboardKeys.TAB) {
+				return;
+			}
 
 			const focusableElements = getFocusableElements();
-			if (focusableElements.length === 0) return;
+			if (focusableElements.length === 0) {
+				return;
+			}
 
 			const firstElement = focusableElements[0];
 			const lastElement = focusableElements[focusableElements.length - 1];
@@ -105,7 +112,7 @@ export function useFocusManagement(
 				}
 			}
 		},
-		[trapFocus, getFocusableElements],
+		[trapFocus, getFocusableElements]
 	);
 
 	// Handle escape key
@@ -133,7 +140,9 @@ export function useFocusManagement(
 
 	// Set up event listeners
 	useEffect(() => {
-		if (!isOpen || !containerRef.current) return;
+		if (!(isOpen && containerRef.current)) {
+			return;
+		}
 
 		const container = containerRef.current;
 
@@ -189,7 +198,7 @@ export function useRovingTabIndex(
 		orientation?: "horizontal" | "vertical" | "both";
 		loop?: boolean;
 		onActivate?: (index: number) => void;
-	} = {},
+	} = {}
 ) {
 	const { orientation = "vertical", loop = true, onActivate } = options;
 	const activeIndexRef = useRef(0);
@@ -204,7 +213,7 @@ export function useRovingTabIndex(
 			});
 			activeIndexRef.current = activeIndex;
 		},
-		[items],
+		[items]
 	);
 
 	// Handle keyboard navigation
@@ -281,7 +290,7 @@ export function useRovingTabIndex(
 				}
 			}
 		},
-		[items, orientation, loop, onActivate, updateTabIndex],
+		[items, orientation, loop, onActivate, updateTabIndex]
 	);
 
 	// Initialize tabindex

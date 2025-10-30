@@ -9,15 +9,15 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 import {
-	aiGenerations,
 	blogCategories,
 	blogPosts,
 	lands,
 	properties,
 	users,
-	wizardAnalytics,
-	wizardDrafts,
-	wizardMedia,
+	// aiGenerations, // Commented out - table doesn't exist
+	// wizardAnalytics, // Commented out - table doesn't exist
+	// wizardDrafts, // Commented out - table doesn't exist
+	// wizardMedia, // Commented out - table doesn't exist
 } from "./db/schema";
 
 // ============================================================================
@@ -35,7 +35,7 @@ export const PropertyInsertSchema = createInsertSchema(properties, {
 	price: z
 		.number()
 		.min(1000, "El precio debe ser al menos $1,000")
-		.max(10000000, "El precio no puede exceder $10,000,000"),
+		.max(10_000_000, "El precio no puede exceder $10,000,000"),
 	title: z
 		.string()
 		.min(3, "El título debe tener al menos 3 caracteres")
@@ -58,7 +58,7 @@ export const LandInsertSchema = createInsertSchema(lands, {
 	price: z
 		.number()
 		.min(1000, "El precio debe ser al menos $1,000")
-		.max(50000000, "El precio no puede exceder $50,000,000"),
+		.max(50_000_000, "El precio no puede exceder $50,000,000"),
 	name: z
 		.string()
 		.min(3, "El nombre debe tener al menos 3 caracteres")
@@ -70,7 +70,7 @@ export const LandInsertSchema = createInsertSchema(lands, {
 	area: z
 		.number()
 		.min(100, "El área debe ser al menos 100 m²")
-		.max(1000000, "El área no puede exceder 1,000,000 m²"),
+		.max(1_000_000, "El área no puede exceder 1,000,000 m²"),
 	location: z
 		.string()
 		.min(3, "La ubicación debe tener al menos 3 caracteres")
@@ -93,7 +93,7 @@ export const BlogPostInsertSchema = createInsertSchema(blogPosts, {
 	content: z
 		.string()
 		.min(50, "El contenido debe tener al menos 50 caracteres")
-		.max(10000, "El contenido no puede exceder 10,000 caracteres"),
+		.max(10_000, "El contenido no puede exceder 10,000 caracteres"),
 	category: z.string().min(1, "La categoría es requerida"),
 	status: z.enum(["draft", "published", "archived"]),
 });
@@ -111,7 +111,7 @@ export const BlogCategoryInsertSchema = createInsertSchema(blogCategories, {
 		.max(50, "El slug no puede exceder 50 caracteres")
 		.regex(
 			/^[a-z0-9-]+$/,
-			"El slug solo puede contener letras minúsculas, números y guiones",
+			"El slug solo puede contener letras minúsculas, números y guiones"
 		),
 	description: z
 		.string()
@@ -119,34 +119,34 @@ export const BlogCategoryInsertSchema = createInsertSchema(blogCategories, {
 		.max(500, "La descripción no puede exceder 500 caracteres"),
 });
 
-// Wizard schemas
-export const WizardDraftSelectSchema = createSelectSchema(wizardDrafts);
-export const WizardDraftInsertSchema = createInsertSchema(wizardDrafts, {
-	type: z.enum(["property", "land", "blog"]),
-	status: z.enum(["draft", "completed", "published", "archived"]),
-});
+// Wizard schemas - commented out as tables don't exist
+// export const WizardDraftSelectSchema = createSelectSchema(wizardDrafts);
+// export const WizardDraftInsertSchema = createInsertSchema(wizardDrafts, {
+// 	type: z.enum(["property", "land", "blog"]),
+// 	status: z.enum(["draft", "completed", "published", "archived"]),
+// });
 
-export const WizardMediaSelectSchema = createSelectSchema(wizardMedia);
-export const WizardMediaInsertSchema = createInsertSchema(wizardMedia, {
-	mediaType: z.string().min(1, "El tipo de medio es requerido"),
-	type: z.enum(["property", "land", "blog"]),
-	size: z.number().min(1, "El tamaño del archivo debe ser mayor a 0"),
-	contentType: z.string().min(1, "El tipo de contenido es requerido"),
-});
+// export const WizardMediaSelectSchema = createSelectSchema(wizardMedia);
+// export const WizardMediaInsertSchema = createInsertSchema(wizardMedia, {
+// 	mediaType: z.string().min(1, "El tipo de medio es requerido"),
+// 	type: z.enum(["property", "land", "blog"]),
+// 	size: z.number().min(1, "El tamaño del archivo debe ser mayor a 0"),
+// 	contentType: z.string().min(1, "El tipo de contenido es requerido"),
+// });
 
-// AI Generation schemas
-export const AIGenerationSelectSchema = createSelectSchema(aiGenerations);
-export const AIGenerationInsertSchema = createInsertSchema(aiGenerations, {
-	generationType: z.string().min(1, "El tipo de generación es requerido"),
-	prompt: z.string().min(1, "El prompt es requerido"),
-	success: z.boolean().default(true),
-});
+// AI Generation schemas - commented out as table doesn't exist
+// export const AIGenerationSelectSchema = createSelectSchema(aiGenerations);
+// export const AIGenerationInsertSchema = createInsertSchema(aiGenerations, {
+// 	generationType: z.string().min(1, "El tipo de generación es requerido"),
+// 	prompt: z.string().min(1, "El prompt es requerido"),
+// 	success: z.boolean().default(true),
+// });
 
-// Wizard Analytics schemas
-export const WizardAnalyticSelectSchema = createSelectSchema(wizardAnalytics);
-export const WizardAnalyticInsertSchema = createInsertSchema(wizardAnalytics, {
-	eventType: z.string().min(1, "El tipo de evento es requerido"),
-});
+// Wizard Analytics schemas - commented out as table doesn't exist
+// export const WizardAnalyticSelectSchema = createSelectSchema(wizardAnalytics);
+// export const WizardAnalyticInsertSchema = createInsertSchema(wizardAnalytics, {
+// 	eventType: z.string().min(1, "El tipo de evento es requerido"),
+// });
 
 // ============================================================================
 // FORM VALIDATION SCHEMAS - For client-side forms
@@ -272,17 +272,17 @@ export const WizardProgressSchema = z.object({
 // UNIFIED TYPES - Export Drizzle types as the single source of truth
 // ============================================================================
 
-// Re-export Drizzle types as the canonical types
+// Re-export database types
 export type {
-	AIGeneration,
+	// AIGeneration, // Commented out - type doesn't exist
 	BlogCategory,
 	BlogPost,
 	Land,
 	Property,
 	User,
-	WizardAnalytic,
-	WizardDraft,
-	WizardMedia,
+	// WizardAnalytic, // Commented out - type doesn't exist
+	// WizardDraft, // Commented out - type doesn't exist
+	// WizardMedia, // Commented out - type doesn't exist
 } from "./db/schema";
 
 // Form data types derived from schemas
@@ -311,7 +311,7 @@ export type WizardProgress = z.infer<typeof WizardProgressSchema>;
  */
 export function validateData<T>(
 	schema: z.ZodSchema<T>,
-	data: unknown,
+	data: unknown
 ): {
 	success: boolean;
 	data?: T;
@@ -335,7 +335,7 @@ export function createValidator<T>(schema: z.ZodSchema<T>) {
  * Extracts validation errors in a user-friendly format
  */
 export function extractValidationErrors(
-	error: z.ZodError,
+	error: z.ZodError
 ): Record<string, string[]> {
 	const errors: Record<string, string[]> = {};
 

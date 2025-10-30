@@ -48,30 +48,30 @@ const userStats = [
 
 export function UserStats() {
 	return (
-		<div className="grid grid-cols-1 smartphone:grid-cols-2 laptop:grid-cols-4 gap-4">
+		<div className="grid grid-cols-1 laptop:grid-cols-4 gap-4 smartphone:grid-cols-2">
 			{userStats.map((stat, index) => (
 				<Card
+					className="border-border shadow-lg transition-shadow hover:shadow-xl"
 					key={index}
-					className="border-border shadow-lg hover:shadow-xl transition-shadow"
 				>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium text-muted-foreground">
+						<CardTitle className="font-medium text-muted-foreground text-sm">
 							{stat.title}
 						</CardTitle>
 						<div
-							className={`p-2 rounded-lg ${stat.color.split(" ")[0]} ${stat.color.split(" ")[0]}/10`}
+							className={`rounded-lg p-2 ${stat.color.split(" ")[0]} ${stat.color.split(" ")[0]}/10`}
 						>
 							<stat.icon className={`h-4 w-4 ${stat.color.split(" ")[1]}`} />
 						</div>
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold text-foreground mb-1">
+						<div className="mb-1 font-bold text-2xl text-foreground">
 							{stat.value}
 						</div>
 						<CardDescription className="text-xs">
 							{stat.description}
 						</CardDescription>
-						<Badge variant="outline" className="mt-2 text-xs">
+						<Badge className="mt-2 text-xs" variant="outline">
 							{stat.change}
 						</Badge>
 					</CardContent>

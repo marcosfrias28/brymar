@@ -32,11 +32,11 @@ export const LandStep1Schema = z.object({
 	price: z
 		.number()
 		.positive("El precio debe ser mayor a 0")
-		.max(999999999, "El precio es demasiado alto"),
+		.max(999_999_999, "El precio es demasiado alto"),
 	surface: z
 		.number()
 		.positive("La superficie debe ser mayor a 0")
-		.max(999999, "La superficie es demasiado grande"),
+		.max(999_999, "La superficie es demasiado grande"),
 	landType: z.nativeEnum(LandType, {
 		message: "Selecciona un tipo de terreno válido",
 	}),
@@ -171,7 +171,7 @@ export const LandBasicInfoSchema = z.object({
 // Validation helper functions for land wizard
 export function validateLandStep(
 	stepNumber: number,
-	data: any,
+	data: any
 ): { success: boolean; errors?: any } {
 	try {
 		let dataToValidate = data;
@@ -216,7 +216,7 @@ export function validateLandStep(
 
 export function validatePartialLandStep(
 	stepNumber: number,
-	data: any,
+	data: any
 ): { success: boolean; errors?: any } {
 	try {
 		let dataToValidate = data;

@@ -17,7 +17,7 @@ const sampleProperties = [
 		title: "Villa Moderna en Cap Cana",
 		description:
 			"Espectacular villa de lujo con vista al mar, diseño contemporáneo y acabados de primera calidad. Cuenta con piscina infinita, jardín tropical y acceso directo a la playa.",
-		price: 2500000,
+		price: 2_500_000,
 		type: "villa",
 		location: "Cap Cana, Punta Cana",
 		featured: true,
@@ -34,7 +34,7 @@ const sampleProperties = [
 		title: "Apartamento Penthouse Santo Domingo",
 		description:
 			"Exclusivo penthouse en el corazón de la Zona Colonial con vistas panorámicas de la ciudad. Completamente renovado con cocina gourmet y terraza privada.",
-		price: 850000,
+		price: 850_000,
 		type: "penthouse",
 		location: "Zona Colonial, Santo Domingo",
 		featured: true,
@@ -51,7 +51,7 @@ const sampleProperties = [
 		title: "Casa Familiar en Santiago",
 		description:
 			"Hermosa casa familiar en exclusivo residencial de Santiago. Amplia sala de estar, cocina moderna, jardín con piscina y garaje para 2 vehículos.",
-		price: 320000,
+		price: 320_000,
 		type: "house",
 		location: "Los Jardines, Santiago",
 		featured: false,
@@ -68,7 +68,7 @@ const sampleProperties = [
 		title: "Apartamento Moderno en Bella Vista",
 		description:
 			"Moderno apartamento en torre residencial con amenidades completas. Gimnasio, piscina, área social y seguridad 24/7.",
-		price: 185000,
+		price: 185_000,
 		type: "apartment",
 		location: "Bella Vista, Santo Domingo",
 		featured: false,
@@ -85,7 +85,7 @@ const sampleProperties = [
 		title: "Villa Frente al Mar en Casa de Campo",
 		description:
 			"Exclusiva villa frente al mar en el prestigioso resort Casa de Campo. Diseño arquitectónico único, piscina privada y muelle propio.",
-		price: 4200000,
+		price: 4_200_000,
 		type: "villa",
 		location: "Casa de Campo, La Romana",
 		featured: true,
@@ -112,10 +112,10 @@ async function seedProperties() {
 			process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL;
 		if (!connectionString) {
 			console.error(
-				"❌ Error: No se encontró POSTGRES_PRISMA_URL o POSTGRES_URL",
+				"❌ Error: No se encontró POSTGRES_PRISMA_URL o POSTGRES_URL"
 			);
 			console.error(
-				"   Configura las variables de entorno antes de continuar.",
+				"   Configura las variables de entorno antes de continuar."
 			);
 			process.exit(1);
 		}
@@ -150,7 +150,7 @@ async function seedProperties() {
 
 		// Verificar si ya hay propiedades
 		const existingCount = await sql`SELECT COUNT(*) as count FROM properties`;
-		const currentCount = parseInt(existingCount.rows[0].count, 10);
+		const currentCount = Number.parseInt(existingCount.rows[0].count, 10);
 
 		if (currentCount > 0) {
 			console.log(`ℹ️  Encontradas ${currentCount} propiedades existentes`);
@@ -227,12 +227,12 @@ async function seedProperties() {
 				const inserted = result.rows[0];
 				const featuredIcon = inserted.featured ? "⭐" : "  ";
 				console.log(
-					`${featuredIcon}✅ ${inserted.title} - $${inserted.price.toLocaleString()}`,
+					`${featuredIcon}✅ ${inserted.title} - $${inserted.price.toLocaleString()}`
 				);
 				insertedCount++;
 			} catch (error) {
 				console.log(
-					`❌ Error insertando "${property.title}": ${error.message}`,
+					`❌ Error insertando "${property.title}": ${error.message}`
 				);
 			}
 		}
@@ -240,16 +240,16 @@ async function seedProperties() {
 		console.log("\n🎉 SEED COMPLETADO EXITOSAMENTE!");
 		console.log("===============================");
 		console.log(
-			`📊 Propiedades insertadas: ${insertedCount}/${sampleProperties.length}`,
+			`📊 Propiedades insertadas: ${insertedCount}/${sampleProperties.length}`
 		);
 		console.log(
-			`⭐ Propiedades destacadas: ${sampleProperties.filter((p) => p.featured).length}`,
+			`⭐ Propiedades destacadas: ${sampleProperties.filter((p) => p.featured).length}`
 		);
 
 		if (insertedCount < sampleProperties.length) {
 			console.log("\n⚠️  Algunas propiedades no se pudieron insertar");
 			console.log(
-				"   Esto puede ser normal si ya existían o hay conflictos de datos",
+				"   Esto puede ser normal si ya existían o hay conflictos de datos"
 			);
 		}
 
@@ -257,7 +257,7 @@ async function seedProperties() {
 		console.log("   1. Ejecutar: npm run dev");
 		console.log("   2. Visitar: http://localhost:3000");
 		console.log(
-			"   3. Verificar que las propiedades se muestren correctamente\n",
+			"   3. Verificar que las propiedades se muestren correctamente\n"
 		);
 	} catch (error) {
 		console.error("\n❌ ERROR DURANTE EL SEED:");

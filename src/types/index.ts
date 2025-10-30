@@ -37,7 +37,8 @@ export type {
 	VideoMetadata,
 } from "./property-wizard";
 // Legacy enums (will be gradually removed)
-export { AIServiceError, PropertyType } from "./property-wizard";
+export { AIServiceError } from "./property-wizard";
+export { PropertyType } from "./wizard";
 // Export all unified types and utilities
 export * from "./unified";
 // Legacy wizard types for backward compatibility (will be gradually removed)

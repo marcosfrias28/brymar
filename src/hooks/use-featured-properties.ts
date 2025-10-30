@@ -22,15 +22,15 @@ type DatabaseProperty = {
 	updatedAt: Date;
 };
 
-export interface UseFeaturedPropertiesReturn {
+export type UseFeaturedPropertiesReturn = {
 	properties: DatabaseProperty[];
 	loading: boolean;
 	error: string | null;
 	refreshFeaturedProperties: () => Promise<void>;
-}
+};
 
 export const useFeaturedProperties = (
-	limit = 6,
+	limit = 6
 ): UseFeaturedPropertiesReturn => {
 	const [properties, setProperties] = useState<DatabaseProperty[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -49,7 +49,6 @@ export const useFeaturedProperties = (
 					? err.message
 					: "Error loading featured properties";
 			setError(errorMessage);
-			console.error("Error fetching featured properties:", err);
 		} finally {
 			setLoading(false);
 		}
@@ -61,7 +60,7 @@ export const useFeaturedProperties = (
 
 	useEffect(() => {
 		fetchFeaturedProperties();
-	}, []);
+	}, [fetchFeaturedProperties]);
 
 	return {
 		properties,

@@ -23,7 +23,7 @@ export class AppError extends Error {
 		public readonly code: string,
 		public readonly statusCode: number = 500,
 		context?: Record<string, any>,
-		public readonly cause?: Error,
+		public readonly cause?: Error
 	) {
 		super(message);
 		this.name = "AppError";
@@ -95,7 +95,7 @@ export class ValidationError extends AppError {
 	constructor(
 		message: string,
 		public readonly validationErrors?: Record<string, string[]>,
-		context?: Record<string, any>,
+		context?: Record<string, any>
 	) {
 		super(message, "VALIDATION_ERROR", 400, context);
 		this.name = "ValidationError";
@@ -103,7 +103,7 @@ export class ValidationError extends AppError {
 
 	static fromZodError(
 		error: z.ZodError,
-		context?: Record<string, any>,
+		context?: Record<string, any>
 	): ValidationError {
 		const validationErrors: Record<string, string[]> = {};
 
@@ -130,7 +130,7 @@ export class BusinessRuleError extends AppError {
 	constructor(
 		message: string,
 		public readonly rule: string,
-		context?: Record<string, any>,
+		context?: Record<string, any>
 	) {
 		super(message, `BUSINESS_RULE_${rule}`, 400, context);
 		this.name = "BusinessRuleError";
@@ -144,13 +144,13 @@ export class NotFoundError extends AppError {
 	constructor(
 		resource: string,
 		identifier: string | number,
-		context?: Record<string, any>,
+		context?: Record<string, any>
 	) {
 		super(
 			`${resource} with identifier ${identifier} not found`,
 			"NOT_FOUND",
 			404,
-			context,
+			context
 		);
 		this.name = "NotFoundError";
 	}
@@ -162,8 +162,8 @@ export class NotFoundError extends AppError {
 export class AuthError extends AppError {
 	constructor(
 		message: string,
-		code: string = "AUTH_FAILED",
-		context?: Record<string, any>,
+		code = "AUTH_FAILED",
+		context?: Record<string, any>
 	) {
 		super(message, code, 401, context);
 		this.name = "AuthError";
@@ -174,10 +174,7 @@ export class AuthError extends AppError {
  * Authorization error
  */
 export class AuthorizationError extends AppError {
-	constructor(
-		message: string = "Access denied",
-		context?: Record<string, any>,
-	) {
+	constructor(message = "Access denied", context?: Record<string, any>) {
 		super(message, "AUTHORIZATION_FAILED", 403, context);
 		this.name = "AuthorizationError";
 	}
@@ -191,7 +188,7 @@ export class DatabaseError extends AppError {
 		message: string,
 		operation: string,
 		cause?: Error,
-		context?: Record<string, any>,
+		context?: Record<string, any>
 	) {
 		super(message, `DATABASE_${operation.toUpperCase()}`, 500, context, cause);
 		this.name = "DatabaseError";
@@ -206,14 +203,14 @@ export class ExternalServiceError extends AppError {
 		message: string,
 		service: string,
 		cause?: Error,
-		context?: Record<string, any>,
+		context?: Record<string, any>
 	) {
 		super(
 			message,
 			`EXTERNAL_SERVICE_${service.toUpperCase()}`,
 			502,
 			context,
-			cause,
+			cause
 		);
 		this.name = "ExternalServiceError";
 	}
@@ -224,9 +221,9 @@ export class ExternalServiceError extends AppError {
  */
 export class RateLimitError extends AppError {
 	constructor(
-		message: string = "Rate limit exceeded",
+		message = "Rate limit exceeded",
 		public readonly retryAfterMs?: number,
-		context?: Record<string, any>,
+		context?: Record<string, any>
 	) {
 		super(message, "RATE_LIMIT_EXCEEDED", 429, context);
 		this.name = "RateLimitError";
@@ -242,7 +239,7 @@ export class RateLimitError extends AppError {
  */
 export function createValidationError(
 	error: z.ZodError,
-	context?: Record<string, any>,
+	context?: Record<string, any>
 ): ValidationError {
 	return ValidationError.fromZodError(error, context);
 }
@@ -253,7 +250,7 @@ export function createValidationError(
 export function createBusinessRuleError(
 	message: string,
 	rule: string,
-	context?: Record<string, any>,
+	context?: Record<string, any>
 ): BusinessRuleError {
 	return new BusinessRuleError(message, rule, context);
 }
@@ -264,7 +261,7 @@ export function createBusinessRuleError(
 export function createNotFoundError(
 	resource: string,
 	identifier: string | number,
-	context?: Record<string, any>,
+	context?: Record<string, any>
 ): NotFoundError {
 	return new NotFoundError(resource, identifier, context);
 }
@@ -275,7 +272,7 @@ export function createNotFoundError(
 export function createAuthError(
 	message: string,
 	code?: string,
-	context?: Record<string, any>,
+	context?: Record<string, any>
 ): AuthError {
 	return new AuthError(message, code, context);
 }
@@ -285,7 +282,7 @@ export function createAuthError(
  */
 export function createAuthorizationError(
 	message?: string,
-	context?: Record<string, any>,
+	context?: Record<string, any>
 ): AuthorizationError {
 	return new AuthorizationError(message, context);
 }
@@ -297,7 +294,7 @@ export function createDatabaseError(
 	message: string,
 	operation: string,
 	cause?: Error,
-	context?: Record<string, any>,
+	context?: Record<string, any>
 ): DatabaseError {
 	return new DatabaseError(message, operation, cause, context);
 }
@@ -324,7 +321,7 @@ export function isValidationError(error: unknown): error is ValidationError {
  * Type guard to check if an error is a business rule error
  */
 export function isBusinessRuleError(
-	error: unknown,
+	error: unknown
 ): error is BusinessRuleError {
 	return error instanceof BusinessRuleError;
 }
@@ -348,7 +345,7 @@ export function isAuthError(error: unknown): error is AuthError {
  */
 export function handleError(
 	error: unknown,
-	context?: Record<string, any>,
+	context?: Record<string, any>
 ): AppError {
 	// If it's already an AppError, return as is
 	if (isAppError(error)) {
@@ -443,7 +440,7 @@ export function formatErrorResponse(error: unknown): {
 export function logError(error: unknown, context?: Record<string, any>): void {
 	const appError = handleError(error, context);
 
-	const logData = {
+	const _logData = {
 		message: appError.message,
 		code: appError.code,
 		statusCode: appError.statusCode,
@@ -454,11 +451,8 @@ export function logError(error: unknown, context?: Record<string, any>): void {
 
 	// Log based on severity
 	if (appError.statusCode >= 500) {
-		console.error("Server Error:", logData);
 	} else if (appError.statusCode >= 400) {
-		console.warn("Client Error:", logData);
 	} else {
-		console.info("Error:", logData);
 	}
 }
 
@@ -485,14 +479,14 @@ export function validatePropertyBusinessRules(data: {
 			throw createBusinessRuleError(
 				"Residential properties must have at least 1 bedroom",
 				"MIN_BEDROOMS",
-				{ type: data.type, bedrooms: data.bedrooms },
+				{ type: data.type, bedrooms: data.bedrooms }
 			);
 		}
 		if (data.bathrooms < 1) {
 			throw createBusinessRuleError(
 				"Residential properties must have at least 1 bathroom",
 				"MIN_BATHROOMS",
-				{ type: data.type, bathrooms: data.bathrooms },
+				{ type: data.type, bathrooms: data.bathrooms }
 			);
 		}
 	}
@@ -502,16 +496,12 @@ export function validatePropertyBusinessRules(data: {
 		throw createBusinessRuleError(
 			"Property price must be at least $1,000",
 			"MIN_PRICE",
-			{ price: data.price },
+			{ price: data.price }
 		);
 	}
 
 	// Large properties should have multiple bathrooms (warning, not error)
 	if (data.area > 200 && data.bathrooms < 2) {
-		console.warn("Large property with few bathrooms:", {
-			area: data.area,
-			bathrooms: data.bathrooms,
-		});
 	}
 }
 
@@ -528,7 +518,7 @@ export function validateLandBusinessRules(data: {
 		throw createBusinessRuleError(
 			"Land must have at least 100 m² of area",
 			"MIN_LAND_AREA",
-			{ area: data.area },
+			{ area: data.area }
 		);
 	}
 
@@ -537,7 +527,7 @@ export function validateLandBusinessRules(data: {
 		throw createBusinessRuleError(
 			"Land price must be at least $1,000",
 			"MIN_LAND_PRICE",
-			{ price: data.price },
+			{ price: data.price }
 		);
 	}
 }
@@ -555,10 +545,5 @@ export function validateBlogBusinessRules(data: {
 	const estimatedReadingTime = Math.ceil(wordsCount / 200); // 200 words per minute
 
 	if (Math.abs(data.readingTime - estimatedReadingTime) > 5) {
-		console.warn("Reading time might be inaccurate:", {
-			provided: data.readingTime,
-			estimated: estimatedReadingTime,
-			wordsCount,
-		});
 	}
 }
