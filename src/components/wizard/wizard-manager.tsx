@@ -2,17 +2,28 @@
 
 import { FileText, Home, MapPin, PenTool, Plus, Wand2 } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useGenerateAIContent, useWizardDraft } from "@/hooks/use-wizard";
-import type { WizardType } from "@/lib/types";
-import { cn } from "@/lib/utils";
-import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
-import { BlogWizard } from "./blog-wizard";
-import { DraftList } from "./draft-list";
-import { LandWizard } from "./land-wizard";
-import { PropertyWizard } from "./property-wizard";
+import { Button } from "@/components/ui/button.tsx";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card.tsx";
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@/components/ui/tabs.tsx";
+import { useGenerateAIContent, useWizardDraft } from "@/hooks/use-wizard.ts";
+import type { WizardType } from "@/lib/types/index.ts";
+import { cn } from "@/lib/utils/index.ts";
+import { secondaryColorClasses } from "@/lib/utils/secondary-colors.ts";
+import type { PropertyWizardData } from "@/types/property-wizard.ts";
+import { BlogWizard } from "./blog-wizard.tsx";
+import { DraftList } from "./draft-list.tsx";
+import { LandWizard } from "./land-wizard.tsx";
+import { PropertyWizard } from "./property-wizard.tsx";
 
 type WizardManagerProps = {
 	defaultType?: WizardType;
@@ -83,58 +94,74 @@ export function WizardManager({
 	};
 
 	if (showWizard) {
-		const wizardProps = {
+		const baseWizardProps = {
 			draftId: selectedDraftId || undefined,
-			initialData: selectedDraft?.data,
 			onComplete: handleWizardComplete,
 		};
 
+		const propertyWizardProps = {
+			...baseWizardProps,
+			initialData: selectedDraft?.data as PropertyWizardData | undefined,
+		};
+
+		const landWizardProps = {
+			...baseWizardProps,
+			initialData: selectedDraft?.data,
+		};
+
+		const blogWizardProps = {
+			...baseWizardProps,
+			initialData: selectedDraft?.data,
+		};
+
 		return (
-			<div className="space-y-6">
-				<div className="flex items-center justify-between">
+			<div class="space-y-6">
+				<div class="flex items-center justify-between">
 					<Button onClick={() => setShowWizard(false)} variant="outline">
 						← Volver a la lista
 					</Button>
 
 					{selectedDraft && (
-						<div className="flex items-center gap-2">
+						<div class="flex items-center gap-2">
 							<Button
-								className="flex items-center gap-2"
+								class="flex items-center gap-2"
 								disabled={generateAI.isPending}
 								onClick={() => handleGenerateAI("title")}
 								size="sm"
 								variant="outline"
 							>
-								<Wand2 className="h-4 w-4" />
+								<Wand2 class="h-4 w-4" />
 								Generar Título
 							</Button>
 							<Button
-								className="flex items-center gap-2"
+								class="flex items-center gap-2"
 								disabled={generateAI.isPending}
 								onClick={() => handleGenerateAI("description")}
 								size="sm"
 								variant="outline"
 							>
-								<Wand2 className="h-4 w-4" />
+								<Wand2 class="h-4 w-4" />
 								Generar Descripción
 							</Button>
 						</div>
 					)}
 				</div>
 
-				{activeTab === "property" && <PropertyWizard {...wizardProps} />}
-				{activeTab === "land" && <LandWizard {...wizardProps} />}
-				{activeTab === "blog" && <BlogWizard {...wizardProps} />}
+				{activeTab === "property" && (
+					<PropertyWizard {...propertyWizardProps} />
+				)}
+				{activeTab === "land" && <LandWizard {...landWizardProps} />}
+				{activeTab === "blog" && <BlogWizard {...blogWizardProps} />}
 			</div>
 		);
 	}
 
 	return (
-		<div className="space-y-6">
-			<Card className={cn("border-border", secondaryColorClasses.cardHover)}>
+		<div class="space-y-6">
+			<Card class={cn("border-border", secondaryColorClasses.cardHover)}>
 				<CardHeader>
-					<CardTitle className="flex items-center gap-2">
-						<FileText className="h-5 w-5 text-secondary" />
+					<CardTitle class="flex items-center gap-2">
+						<FileText class="h-5 w-5 text-secondary" />
 						Asistente de Creación
 					</CardTitle>
 				</CardHeader>
@@ -143,32 +170,30 @@ export function WizardManager({
 						onValueChange={(value) => setActiveTab(value as WizardType)}
 						value={activeTab}
 					>
-						<TabsList className="grid w-full grid-cols-3">
+						<TabsList class="grid w-full grid-cols-3">
 							{wizardTypes.map((type) => (
 								<TabsTrigger
-									className="flex items-center gap-2"
+									class="flex items-center gap-2"
 									key={type.id}
 									value={type.id}
 								>
-									<type.icon className="h-4 w-4" />
+									<type.icon class="h-4 w-4" />
 									{type.label}
 								</TabsTrigger>
 							))}
 						</TabsList>
 
 						{wizardTypes.map((type) => (
-							<TabsContent className="space-y-4" key={type.id} value={type.id}>
-								<div className="py-6 text-center">
-									<type.icon className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-									<h3 className="mb-2 font-semibold text-lg">{type.label}</h3>
-									<p className="mb-4 text-muted-foreground">
-										{type.description}
-									</p>
+							<TabsContent class="space-y-4" key={type.id} value={type.id}>
+								<div class="py-6 text-center">
+									<type.icon class="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+									<h3 class="mb-2 font-semibold text-lg">{type.label}</h3>
+									<p class="mb-4 text-muted-foreground">{type.description}</p>
 									<Button
-										className="flex items-center gap-2"
+										class="flex items-center gap-2"
 										onClick={handleStartNew}
 									>
-										<Plus className="h-4 w-4" />
+										<Plus class="h-4 w-4" />
 										Crear Nuevo {type.label.slice(0, -1)}
 									</Button>
 								</div>
