@@ -19,15 +19,15 @@
  */
 
 export {
-	autoSaveProperty,
-	loadPropertyForWizard,
-	publishProperty,
-	savePropertyFromWizard,
-	validatePropertyStep,
-} from "@/lib/actions/property-wizard-actions";
+	loadPropertyDraft,
+	savePropertyDraft,
+	createPropertyFromWizard,
+	updatePropertyFromWizard,
+} from "@/lib/actions/property-wizard-actions.ts";
 // Configuration and Actions (Re-exported for convenience)
-export { propertyWizardConfig } from "@/lib/wizard/property-wizard-config";
+export { propertyWizardConfig } from "@/lib/wizard/property-wizard-config.ts";
+
 // Types (Re-exported for convenience)
-export type { PropertyWizardData } from "@/types/property-wizard";
-// Main Property Wizard Component
-export { PropertyWizard } from "./property-wizard";
+export type { PropertyWizardData } from "@/types/property-wizard.ts";
+// Component
+export { PropertyWizard } from "./property-wizard.tsx";
