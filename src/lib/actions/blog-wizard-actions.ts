@@ -1,303 +1,282 @@
 "use server";
 
-import { put } from "@vercel/blob";
-import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { auth } from "@/lib/auth/auth";
 import { db } from "@/lib/db";
 import { blogPosts } from "@/lib/db/schema";
-import type { BlogWizardData } from "@/lib/schemas/blog-wizard-schemas";
+import { BlogWizardSchema } from "@/lib/schemas/blog-wizard-schemas";
+import type { ActionResult } from "@/lib/types/shared";
+import type { BlogWizardData } from "@/types/blog-wizard";
+import { and, eq } from "drizzle-orm";
+import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 
-// Simple result type
-type ActionResult<T = any> = {
-	success: boolean;
-	data?: T;
-	message?: string;
-};
+// Helper function to generate slug from title
+function generateSlug(title: string): string {
+	return title
+		.toLowerCase()
+		.replace(/[^a-z0-9\s-]/g, "")
+		.replace(/\s+/g, "-")
+		.replace(/-+/g, "-")
+		.trim();
+}
 
-// Create blog post from wizard data
-export const createBlogFromWizard = async (
-	data: BlogWizardData
-): Promise<ActionResult<{ blogPost: any }>> => {
+// Helper function to calculate reading time
+function calculateReadTime(content: string): number {
+	const wordsPerMinute = 200;
+	const words = content.split(/\s+/).length;
+	return Math.ceil(words / wordsPerMinute);
+}
+
+/**
+ * Load a blog draft by ID
+ */
+export async function loadBlogDraft(
+	draftId: string,
+	userId: string
+): Promise<ActionResult<Partial<BlogWizardData> | null>> {
 	try {
-		// Calculate reading time
-		const wordsPerMinute = 200;
-		const wordCount = data.content.split(" ").length;
-		const readingTime = Math.ceil(wordCount / wordsPerMinute);
+		const session = await auth.api.getSession({
+			headers: await headers(),
+		});
+
+		if (!session?.user?.id || session.user.id !== userId) {
+			return { success: false, error: "Unauthorized" };
+		}
+
+		const [draft] = await db
+			.select()
+			.from(blogPosts)
+			.where(
+				and(
+					eq(blogPosts.id, draftId),
+					eq(blogPosts.authorId, userId),
+					eq(blogPosts.status, "draft")
+				)
+			)
+			.limit(1);
+
+		if (!draft) {
+			return { success: true, data: null };
+		}
+
+		// Convert database record to wizard data format
+		const wizardData: Partial<BlogWizardData> = {
+			title: draft.title,
+			description: draft.excerpt || "",
+			content: draft.content,
+			category: draft.category as any, // Type assertion needed
+			status: draft.status as "draft" | "published",
+			excerpt: draft.excerpt || undefined,
+			coverImage: typeof draft.coverImage === 'object' && draft.coverImage ? (draft.coverImage as any).url : undefined,
+			tags: Array.isArray(draft.tags) ? draft.tags as string[] : [],
+			images: [], // No images field in DB schema, start with empty array
+			videos: [],
+			slug: draft.slug,
+		};
+
+		return { success: true, data: wizardData };
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : "Failed to load draft",
+		};
+	}
+}
+
+/**
+ * Save a blog draft
+ */
+export async function saveBlogDraft(
+	data: BlogWizardData
+): Promise<ActionResult<{ id: string }>> {
+	try {
+		const session = await auth.api.getSession({
+			headers: await headers(),
+		});
+
+		if (!session?.user?.id) {
+			return { success: false, error: "Unauthorized" };
+		}
 
 		// Generate slug if not provided
-		const slug =
-			data.slug ||
-			data.title
-				.toLowerCase()
-				.replace(/[^a-z0-9\s-]/g, "")
-				.replace(/\s+/g, "-")
-				.replace(/-+/g, "-")
-				.trim();
+		const slug = data.slug || generateSlug(data.title);
+		const readTime = calculateReadTime(data.content);
 
-		const [newBlogPost] = await db
+		const [draft] = await db
 			.insert(blogPosts)
 			.values({
 				id: crypto.randomUUID(),
 				title: data.title,
 				content: data.content,
-				excerpt: data.excerpt,
+				excerpt: data.excerpt || data.description,
 				slug,
-				status: data.status,
 				category: data.category,
-				// tags: data.tags, // optional if present in data
-				// coverImage: data.coverImage ? { url: data.coverImage } : undefined,
-				authorId: data.author,
-				readTime: readingTime,
-				// publishedAt: data.status === "published" ? new Date() : undefined,
+				tags: data.tags || [],
+				coverImage: data.coverImage ? { url: data.coverImage } : null,
+				authorId: session.user.id,
+				status: "draft",
+				readTime,
+				createdAt: new Date(),
+				updatedAt: new Date(),
 			})
-			.returning();
+			.returning({ id: blogPosts.id });
 
 		revalidatePath("/dashboard/blog");
-		return {
-			success: true,
-			data: { blogPost: newBlogPost },
-			message: "Post de blog creado exitosamente!",
-		};
-	} catch (_error) {
+
+		return { success: true, data: { id: draft.id } };
+	} catch (error) {
 		return {
 			success: false,
-			message: "Error al crear el post de blog",
+			error: error instanceof Error ? error.message : "Failed to save draft",
 		};
 	}
-};
+}
 
-// Update blog post from wizard data
-export const updateBlogFromWizard = async (
-	data: BlogWizardData & { id?: string }
-): Promise<ActionResult<{ blogPost: any }>> => {
+/**
+ * Create a blog post from wizard data
+ */
+export async function createBlogFromWizard(
+	data: BlogWizardData
+): Promise<ActionResult<{ id: string }>> {
 	try {
-		if (!data.id) {
-			throw new Error("ID is required for updating blog post");
+		const session = await auth.api.getSession({
+			headers: await headers(),
+		});
+
+		if (!session?.user?.id) {
+			return { success: false, error: "Unauthorized" };
 		}
 
-		// Calculate reading time
-		const wordsPerMinute = 200;
-		const wordCount = data.content.split(" ").length;
-		const readingTime = Math.ceil(wordCount / wordsPerMinute);
+		// Validate data
+		const validation = BlogWizardSchema.safeParse(data);
+		if (!validation.success) {
+			return {
+				success: false,
+				error: "Invalid data",
+				errors: validation.error.flatten().fieldErrors,
+			};
+		}
 
-		const [updatedBlogPost] = await db
+		// Generate slug if not provided
+		const slug = data.slug || generateSlug(data.title);
+		const readTime = calculateReadTime(data.content);
+
+		// Check if slug already exists
+		const existingPost = await db
+			.select({ id: blogPosts.id })
+			.from(blogPosts)
+			.where(eq(blogPosts.slug, slug))
+			.limit(1);
+
+		if (existingPost.length > 0) {
+			return {
+				success: false,
+				error: "A blog post with this slug already exists",
+			};
+		}
+
+		const [blogPost] = await db
+			.insert(blogPosts)
+			.values({
+				id: crypto.randomUUID(),
+				title: data.title,
+				content: data.content,
+				excerpt: data.excerpt || data.description,
+				slug,
+				category: data.category,
+				tags: data.tags || [],
+				coverImage: data.coverImage ? { url: data.coverImage } : null,
+				authorId: session.user.id,
+				status: data.status,
+				readTime,
+				publishedAt: data.status === "published" ? new Date() : null,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning({ id: blogPosts.id });
+
+		revalidatePath("/dashboard/blog");
+		revalidatePath("/blog");
+
+		return { success: true, data: { id: blogPost.id } };
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : "Failed to create blog post",
+		};
+	}
+}
+
+/**
+ * Update a blog post from wizard data
+ */
+export async function updateBlogFromWizard(
+	id: string,
+	data: BlogWizardData
+): Promise<ActionResult<{ id: string }>> {
+	try {
+		const session = await auth.api.getSession({
+			headers: await headers(),
+		});
+
+		if (!session?.user?.id) {
+			return { success: false, error: "Unauthorized" };
+		}
+
+		// Validate data
+		const validation = BlogWizardSchema.safeParse(data);
+		if (!validation.success) {
+			return {
+				success: false,
+				error: "Invalid data",
+				errors: validation.error.flatten().fieldErrors,
+			};
+		}
+
+		// Generate slug if not provided
+		const slug = data.slug || generateSlug(data.title);
+		const readTime = calculateReadTime(data.content);
+
+		// Check if slug already exists (excluding current post)
+		const existingPost = await db
+			.select({ id: blogPosts.id })
+			.from(blogPosts)
+			.where(eq(blogPosts.slug, slug))
+			.limit(1);
+
+		if (existingPost.length > 0 && existingPost[0].id !== id) {
+			return {
+				success: false,
+				error: "A blog post with this slug already exists",
+			};
+		}
+
+		const [blogPost] = await db
 			.update(blogPosts)
 			.set({
 				title: data.title,
 				content: data.content,
-				excerpt: data.excerpt,
-				slug: data.slug,
-				status: data.status,
+				excerpt: data.excerpt || data.description,
+				slug,
 				category: data.category,
-				// tags: data.tags,
-				// coverImage: data.coverImage ? { url: data.coverImage } : undefined,
-				authorId: data.author,
-				readTime: readingTime,
+				tags: data.tags || [],
+				coverImage: data.coverImage ? { url: data.coverImage } : null,
+				status: data.status,
+				readTime,
+				publishedAt: data.status === "published" ? new Date() : null,
 				updatedAt: new Date(),
 			})
-			.where(eq(blogPosts.id, data.id))
-			.returning();
+			.where(eq(blogPosts.id, id))
+			.returning({ id: blogPosts.id });
 
 		revalidatePath("/dashboard/blog");
-		revalidatePath(`/blog/${data.id}`);
-		return {
-			success: true,
-			data: { blogPost: updatedBlogPost },
-			message: "Post de blog actualizado exitosamente!",
-		};
-	} catch (_error) {
+		revalidatePath("/blog");
+
+		return { success: true, data: { id: blogPost.id } };
+	} catch (error) {
 		return {
 			success: false,
-			message: "Error al actualizar el post de blog",
+			error: error instanceof Error ? error.message : "Failed to update blog post",
 		};
 	}
-};
-
-// Save blog draft
-export const saveBlogDraft = async (
-	_data: Partial<BlogWizardData> & {
-		draftId?: string;
-		userId: string;
-		stepCompleted: number;
-		completionPercentage: number;
-	}
-): Promise<ActionResult<{ draftId: string }>> => {
-	// Draft functionality is temporarily disabled; return a safe fallback
-	return {
-		success: false,
-		message: "La funcionalidad de borradores está deshabilitada temporalmente",
-	};
-};
-
-// Upload blog image
-export const uploadBlogImage = async (data: {
-	title: string;
-	image: File;
-}): Promise<ActionResult<{ url: string; filename: string }>> => {
-	try {
-		if (!data.image?.type.startsWith("image/")) {
-			throw new Error("Invalid image file");
-		}
-
-		const timestamp = Date.now();
-		const filename = `blog/${timestamp}-${data.image.name}`;
-
-		const { url } = await put(filename, data.image, {
-			access: "public",
-		});
-
-		return {
-			success: true,
-			data: { url, filename: data.image.name },
-			message: "Imagen subida exitosamente!",
-		};
-	} catch (_error) {
-		return {
-			success: false,
-			message: "Error al subir la imagen",
-		};
-	}
-};
-
-// Generate AI content for blog
-export const generateBlogContent = async (data: {
-	title: string;
-	category: string;
-	contentType:
-		| "title"
-		| "content"
-		| "excerpt"
-		| "seo-title"
-		| "seo-description"
-		| "tags";
-	prompt?: string;
-}): Promise<ActionResult<{ content: string }>> => {
-	try {
-		// This is a placeholder for AI content generation
-		// In a real implementation, you would integrate with an AI service like OpenAI
-
-		let generatedContent = "";
-
-		switch (data.contentType) {
-			case "title":
-				generatedContent = `${data.title} - Guía Completa`;
-				break;
-			case "content":
-				generatedContent = `# ${data.title}\n\nEste es un artículo generado automáticamente sobre ${data.title}. El contenido incluye información relevante sobre el tema en el contexto inmobiliario.\n\n## Introducción\n\nEn el mundo inmobiliario actual, es importante entender los aspectos clave de ${data.title}.\n\n## Desarrollo\n\nA continuación, exploramos los puntos más importantes:\n\n- Punto clave 1\n- Punto clave 2\n- Punto clave 3\n\n## Conclusión\n\nEn resumen, ${data.title} es un tema fundamental en el sector inmobiliario que requiere atención especializada.`;
-				break;
-			case "excerpt":
-				generatedContent = `Descubre todo lo que necesitas saber sobre ${data.title} en el sector inmobiliario. Una guía completa con consejos prácticos y análisis detallado.`;
-				break;
-			case "seo-title":
-				generatedContent = `${data.title} - Guía Completa 2024`;
-				break;
-			case "seo-description":
-				generatedContent = `Guía completa sobre ${data.title}. Consejos expertos, análisis detallado y todo lo que necesitas saber en el sector inmobiliario.`;
-				break;
-			case "tags":
-				generatedContent =
-					"inmobiliaria,propiedades,inversión,mercado,consejos";
-				break;
-			default:
-				generatedContent = data.prompt || "Contenido generado automáticamente";
-		}
-
-		return {
-			success: true,
-			data: { content: generatedContent },
-			message: "Contenido generado exitosamente!",
-		};
-	} catch (_error) {
-		return {
-			success: false,
-			message: "Error al generar contenido",
-		};
-	}
-};
-
-// Load blog draft
-export const loadBlogDraft = async (_data: {
-	draftId: string;
-	userId: string;
-}): Promise<
-	ActionResult<{ formData: Partial<BlogWizardData>; stepCompleted: number }>
-> => {
-	// Draft functionality is temporarily disabled; return a safe fallback
-	return {
-		success: false,
-		message: "La funcionalidad de borradores está deshabilitada temporalmente",
-	};
-};
-
-// Delete blog draft
-export const deleteBlogDraft = async (_data: {
-	draftId: string;
-	userId: string;
-}): Promise<ActionResult> => {
-	// Draft functionality is temporarily disabled; return a safe fallback
-	return {
-		success: false,
-		message: "La funcionalidad de borradores está deshabilitada temporalmente",
-	};
-};
-
-// Get blog drafts for user
-export const getBlogDrafts = async (_userId: string) => {
-	// Draft functionality is temporarily disabled; return empty list
-	return { drafts: [] };
-};
-
-// Generate SEO suggestions
-export const generateSEOSuggestions = async (data: {
-	title: string;
-	content: string;
-	category: string;
-}): Promise<
-	ActionResult<{
-		seoTitle: string;
-		seoDescription: string;
-		tags: string[];
-		suggestions: string[];
-	}>
-> => {
-	try {
-		// Extract keywords from content
-		const words = data.content.toLowerCase().split(/\W+/);
-		const wordFreq = words.reduce(
-			(acc, word) => {
-				if (word.length > 3) {
-					acc[word] = (acc[word] || 0) + 1;
-				}
-				return acc;
-			},
-			{} as Record<string, number>
-		);
-
-		const topWords = Object.entries(wordFreq)
-			.sort(([, a], [, b]) => b - a)
-			.slice(0, 5)
-			.map(([word]) => word);
-
-		const seoTitle = `${data.title} - Guía Completa 2024`;
-		const seoDescription = `Descubre todo sobre ${data.title}. Guía completa con consejos expertos y análisis detallado del mercado inmobiliario.`;
-		const tags = [...topWords, "inmobiliaria", "propiedades"];
-
-		const suggestions = [
-			"Considera agregar más palabras clave relacionadas con inmobiliaria",
-			"El título SEO está optimizado para búsquedas",
-			"La descripción SEO tiene una longitud adecuada",
-			"Las etiquetas incluyen términos relevantes del sector",
-		];
-
-		return {
-			success: true,
-			data: { seoTitle, seoDescription, tags, suggestions },
-			message: "Sugerencias SEO generadas exitosamente!",
-		};
-	} catch (_error) {
-		return {
-			success: false,
-			message: "Error al generar sugerencias SEO",
-		};
-	}
-};
+}
