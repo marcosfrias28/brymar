@@ -3,8 +3,6 @@
  * Provides consistent error handling for Next.js server actions
  */
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import type { ActionResult } from "../types";
 import {
 	ForbiddenError,
@@ -189,20 +187,6 @@ export function validateFormData(
 	}
 
 	return data;
-}
-
-// Redirect with error handling
-export function safeRedirect(path: string): never {
-	redirect(path);
-}
-
-// Revalidate with error handling
-export function safeRevalidate(path: string): void {
-	try {
-		revalidatePath(path);
-	} catch (_error) {
-		// Don't throw, as this is not critical
-	}
 }
 
 // File upload validation for server actions

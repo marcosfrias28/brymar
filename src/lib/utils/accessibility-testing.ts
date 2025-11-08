@@ -122,12 +122,12 @@ export class AriaValidator {
 		const missingAttributes: string[] = [];
 
 		// Check for accessible name
-		const hasAccessibleName = !!(
+		const hasAccessibleName = Boolean(
 			ariaLabel ||
-			ariaLabelledBy ||
-			element.textContent?.trim() ||
-			(tagName === "input" && element.getAttribute("placeholder")) ||
-			(tagName === "img" && element.getAttribute("alt"))
+				ariaLabelledBy ||
+				element.textContent?.trim() ||
+				(tagName === "input" && element.getAttribute("placeholder")) ||
+				(tagName === "img" && element.getAttribute("alt"))
 		);
 
 		// Check for proper role
@@ -203,7 +203,7 @@ export class AriaValidator {
 
 			// Check for labels
 			if (!(ariaLabel || ariaLabelledBy)) {
-				const label = id ? form.querySelector(`label[for="${id}"]`) : null;
+				const label = id ? form.querySelector(`label[htmlFor="${id}"]`) : null;
 				if (!label) {
 					hasLabels = false;
 					issues.push(`Input ${index + 1} missing label`);

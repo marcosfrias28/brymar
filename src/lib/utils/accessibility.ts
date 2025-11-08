@@ -291,12 +291,12 @@ export const useHighContrast = () => {
 export const validateAccessibility = {
 	// Check if element has accessible name
 	hasAccessibleName: (element: HTMLElement): boolean =>
-		!!(
+		Boolean(
 			element.getAttribute("aria-label") ||
-			element.getAttribute("aria-labelledby") ||
-			element.textContent?.trim() ||
-			element.getAttribute("title") ||
-			element.getAttribute("alt")
+				element.getAttribute("aria-labelledby") ||
+				element.textContent?.trim() ||
+				element.getAttribute("title") ||
+				element.getAttribute("alt")
 		),
 
 	// Check if interactive element has proper role
@@ -338,9 +338,9 @@ export const validateAccessibility = {
 		const ariaLabelledBy = element.getAttribute("aria-labelledby");
 
 		// Check for associated label
-		const hasLabel = id && document.querySelector(`label[for="${id}"]`);
+		const hasLabel = id && document.querySelector(`label[htmlFor="${id}"]`);
 
-		return !!(hasLabel || ariaLabel || ariaLabelledBy);
+		return Boolean(hasLabel || ariaLabel || ariaLabelledBy);
 	},
 
 	// Check if element has proper focus indicator

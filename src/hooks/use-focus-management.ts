@@ -71,7 +71,7 @@ export function useFocusManagement(
 	const focusLastElement = useCallback(() => {
 		const focusableElements = getFocusableElements();
 		if (focusableElements.length > 0) {
-			const lastElement = focusableElements[focusableElements.length - 1];
+			const lastElement = focusableElements.at(-1);
 			lastElement?.focus();
 		}
 	}, [getFocusableElements]);
@@ -89,8 +89,10 @@ export function useFocusManagement(
 			}
 
 			const firstElement = focusableElements[0];
-			const lastElement = focusableElements[focusableElements.length - 1];
+			const lastElement = focusableElements.at(-1);
 			const activeElement = document.activeElement as HTMLElement;
+
+			if (!firstElement || !lastElement) return;
 
 			if (event.shiftKey) {
 				// Shift + Tab: moving backwards

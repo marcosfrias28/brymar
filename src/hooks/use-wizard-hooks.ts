@@ -31,7 +31,7 @@ export function useWizardDraft(draftId: string | null) {
 			// Temporary implementation - return null
 			return null;
 		},
-		enabled: !!draftId,
+		enabled: Boolean(draftId),
 		staleTime: 2 * 60 * 1000, // 2 minutes
 	});
 }

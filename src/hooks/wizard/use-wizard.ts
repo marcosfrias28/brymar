@@ -398,3 +398,5 @@ export function useWizard<T extends WizardData>(
 		error,
 	};
 }
+
+export type { UseWizardReturn } from "@/types/wizard-core";

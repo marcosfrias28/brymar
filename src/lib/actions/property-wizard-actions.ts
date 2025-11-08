@@ -6,15 +6,15 @@
  */
 
 import { and, eq } from "drizzle-orm";
-import { db } from "@/lib/db/index.ts";
-import { properties } from "@/lib/db/schema/index.ts";
-import type { PropertyWizardData } from "@/types/property-wizard.ts";
-import type { ActionResult } from "@/lib/types/shared.ts";
+import { db } from "@/lib/db/index";
+import { properties } from "@/lib/db/schema/index";
+import type { PropertyWizardData } from "@/types/property-wizard";
+import type { ActionResult } from "@/lib/types/shared";
 import {
 	PropertyDraftSchema,
 	PropertyCompleteSchema,
-} from "@/lib/schemas/property-wizard-schemas.ts";
-import { extractValidationErrors } from "@/lib/types/forms.ts";
+} from "@/lib/schemas/property-wizard-schemas";
+import { extractValidationErrors } from "@/lib/types/forms";
 
 /**
  * Load property draft data for editing
@@ -65,8 +65,7 @@ export async function loadPropertyDraft(
 				tags: false,
 			},
 		};
-	} catch (error) {
-		console.error("Error loading property draft:", error);
+	} catch (_error) {
 		return null;
 	}
 }
@@ -144,8 +143,7 @@ export async function savePropertyDraft(
 			success: true,
 			data: { draftId },
 		};
-	} catch (error) {
-		console.error("Error saving property draft:", error);
+	} catch (_error) {
 		return {
 			success: false,
 			errors: { general: ["Error al guardar el borrador"] },
@@ -202,8 +200,7 @@ export async function createPropertyFromWizard(
 			success: true,
 			data: { propertyId },
 		};
-	} catch (error) {
-		console.error("Error creating property:", error);
+	} catch (_error) {
 		return {
 			success: false,
 			errors: { general: ["Error al crear la propiedad"] },
@@ -217,7 +214,7 @@ export async function createPropertyFromWizard(
 export async function updatePropertyFromWizard(
 	propertyId: string,
 	data: PropertyWizardData,
-	authorId: string
+	_authorId: string
 ): Promise<ActionResult<{ propertyId: string }>> {
 	try {
 		// Validate complete data
@@ -257,8 +254,7 @@ export async function updatePropertyFromWizard(
 			success: true,
 			data: { propertyId },
 		};
-	} catch (error) {
-		console.error("Error updating property:", error);
+	} catch (_error) {
 		return {
 			success: false,
 			errors: { general: ["Error al actualizar la propiedad"] },

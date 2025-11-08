@@ -25,7 +25,12 @@ export const properties = pgTable("properties", {
 	type: text("type").notNull(), // PropertyType enum
 	features: jsonb("features").notNull(), // PropertyFeatures object
 	images: jsonb("images").default([]), // Array of Image objects
+	videos: jsonb("videos").default([]), // Array of Video objects/URLs
+	documents: jsonb("documents").default([]), // Array of Document objects/URLs
+	tags: jsonb("tags").default([]), // Array of string tags/categories
+	geometry: jsonb("geometry").default(null), // GeoJSON-like object: point & polygon
 	status: text("status").notNull().default("draft"), // draft, published, sold, rented, archived
+	statusHistory: jsonb("status_history").notNull().default([]), // Array of {status, at, by}
 	featured: boolean("featured").default(false),
 	userId: varchar("user_id", { length: 36 })
 		.notNull()

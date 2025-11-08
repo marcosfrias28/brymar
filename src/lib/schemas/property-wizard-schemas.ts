@@ -80,47 +80,50 @@ export const PropertyGeneralSchema = z.object({
 
 // Lenient version for draft validation
 export const PropertyGeneralDraftSchema = z.object({
-    title: z.string().optional(),
-    description: z.string().optional(),
-    price: z.number().positive().optional(),
-    surface: z.number().positive().optional(),
-    propertyType: z.nativeEnum(PropertyType).optional(),
-    bedrooms: z.number().min(0).max(50).optional(),
-    bathrooms: z.number().min(0).max(50).optional(),
-    characteristics: z.array(PropertyCharacteristicSchema).optional(),
+	title: z.string().optional(),
+	description: z.string().optional(),
+	price: z.number().positive().optional(),
+	surface: z.number().positive().optional(),
+	propertyType: z.nativeEnum(PropertyType).optional(),
+	bedrooms: z.number().min(0).max(50).optional(),
+	bathrooms: z.number().min(0).max(50).optional(),
+	characteristics: z.array(PropertyCharacteristicSchema).optional(),
 });
 
 // Geometry schemas (GeoJSON-like)
 const PositionSchema = z.tuple([z.number(), z.number()]); // [lng, lat]
 export const PointGeometrySchema = z.object({
-    type: z.literal("Point"),
-    coordinates: PositionSchema,
+	type: z.literal("Point"),
+	coordinates: PositionSchema,
 });
 
 export const PolygonGeometrySchema = z.object({
-    type: z.literal("Polygon"),
-    coordinates: z.array(z.array(PositionSchema)), // Array of linear rings
+	type: z.literal("Polygon"),
+	coordinates: z.array(z.array(PositionSchema)), // Array of linear rings
 });
 
-export const GeometrySchema = z.union([PointGeometrySchema, PolygonGeometrySchema]);
+export const GeometrySchema = z.union([
+	PointGeometrySchema,
+	PolygonGeometrySchema,
+]);
 
 // Step 2: Location Schema
 export const PropertyLocationSchema = z.object({
-    coordinates: CoordinatesSchema.optional(),
-    address: AddressSchema.optional(),
-    geometry: GeometrySchema.optional(),
+	coordinates: CoordinatesSchema.optional(),
+	address: AddressSchema.optional(),
+	geometry: GeometrySchema.optional(),
 });
 
 // Step 3: Media Schema
 export const PropertyMediaSchema = z.object({
-    images: z
-        .array(ImageMetadataSchema)
-        .min(1, "Sube al menos una imagen")
-        .max(20, "No puedes subir más de 20 imágenes"),
-    videos: z
-        .array(VideoMetadataSchema)
-        .max(5, "No puedes subir más de 5 videos")
-        .optional(),
+	images: z
+		.array(ImageMetadataSchema)
+		.min(1, "Sube al menos una imagen")
+		.max(20, "No puedes subir más de 20 imágenes"),
+	videos: z
+		.array(VideoMetadataSchema)
+		.max(5, "No puedes subir más de 5 videos")
+		.optional(),
 });
 
 // Complete Property Schema

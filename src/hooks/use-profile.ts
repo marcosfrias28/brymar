@@ -94,7 +94,7 @@ export function useProfile() {
 				location: user.location || "",
 				image: user.avatar || "",
 				role: user.role || "",
-				emailVerified: !!user.emailVerified,
+				emailVerified: Boolean(user.emailVerified),
 				createdAt: user.createdAt || null,
 				updatedAt: user.updatedAt || null,
 			});
@@ -153,7 +153,7 @@ export function useProfileActivity() {
 		gcTime: 15 * 60 * 1000, // 15 minutes garbage collection
 		refetchOnWindowFocus: false,
 		refetchOnMount: false,
-		enabled: !!user?.id,
+		enabled: Boolean(user?.id),
 	});
 
 	const activities: ProfileActivity[] =

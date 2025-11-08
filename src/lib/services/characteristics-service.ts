@@ -288,18 +288,18 @@ export type CharacteristicsFilter = {
 };
 
 export class CharacteristicsService {
-    private readonly characteristics: Map<string, PropertyCharacteristic> =
-        new Map();
-    private customCharacteristics: PropertyCharacteristic[] = [];
-    private locale: string = "en";
+	private readonly characteristics: Map<string, PropertyCharacteristic> =
+		new Map();
+	private customCharacteristics: PropertyCharacteristic[] = [];
+	private locale: string;
 
-    constructor(
-        private translations: Record<string, string> = {},
-        locale = "en"
-    ) {
-        this.locale = locale;
-        this.initializeDefaultCharacteristics();
-    }
+	constructor(
+		private translations: Record<string, string> = {},
+		locale = "en"
+	) {
+		this.locale = locale;
+		this.initializeDefaultCharacteristics();
+	}
 
 	/**
 	 * Initialize default characteristics with translations

@@ -12,8 +12,8 @@ import {
 import { circuitBreakers, retryAIOperation } from "../utils/retry-logic";
 import { validatePropertyBasicInfo } from "../validation/server-validation";
 
-// Simple Gemini AI Configuration - Using latest stable model
-const GEMINI_MODEL = "gemini-2.5-flash-lite"; // Latest stable model with 1M+ context
+// Simple Gemini AI Configuration - Using stable model
+const GEMINI_MODEL = "gemini-1.5-flash"; // Stable model with good performance
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -479,7 +479,7 @@ function cleanGeneratedText(
 
 	// Remove the original prompt if it appears in the response
 	const promptLines = originalPrompt.split("\n");
-	const lastPromptLine = promptLines[promptLines.length - 1];
+	const lastPromptLine = promptLines.at(-1);
 
 	if (typeof lastPromptLine === "string" && cleaned.includes(lastPromptLine)) {
 		cleaned = cleaned.split(lastPromptLine)[1] || cleaned;

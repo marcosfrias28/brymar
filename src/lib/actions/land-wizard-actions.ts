@@ -3,14 +3,17 @@
 import { auth } from "@/lib/auth/auth";
 import { db } from "@/lib/db";
 import { lands } from "@/lib/db/schema";
-import { LandFormDataSchema, type LandFormData } from "@/lib/schemas/land-wizard-schemas";
+import {
+	LandFormDataSchema,
+	type LandFormData,
+} from "@/lib/schemas/land-wizard-schemas";
 import type { ActionResult } from "@/lib/types/shared";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 
 // Helper function to generate slug from name
-function generateSlug(name: string): string {
+function _generateSlug(name: string): string {
 	return name
 		.toLowerCase()
 		.replace(/[^a-z0-9\s-]/g, "")
@@ -54,27 +57,63 @@ export async function loadLandDraft(
 			surface: draft.area,
 			landType: draft.type as any,
 			location: draft.location,
-			address: typeof draft.address === 'object' && draft.address ? draft.address as any : undefined,
-			images: Array.isArray(draft.images) ? draft.images as any[] : [],
+			address:
+				typeof draft.address === "object" && draft.address
+					? (draft.address as any)
+					: undefined,
+			images: Array.isArray(draft.images) ? (draft.images as any[]) : [],
 			status: draft.status as "draft" | "published",
 			// Extract from features object
-			zoning: typeof draft.features === 'object' && draft.features ? (draft.features as any).zoning : undefined,
-			utilities: typeof draft.features === 'object' && draft.features ? (draft.features as any).utilities : [],
-			characteristics: typeof draft.features === 'object' && draft.features ? (draft.features as any).characteristics : [],
-			coordinates: typeof draft.features === 'object' && draft.features ? (draft.features as any).coordinates : undefined,
-			accessRoads: typeof draft.features === 'object' && draft.features ? (draft.features as any).accessRoads : [],
-			nearbyLandmarks: typeof draft.features === 'object' && draft.features ? (draft.features as any).nearbyLandmarks : [],
-			aerialImages: typeof draft.features === 'object' && draft.features ? (draft.features as any).aerialImages : [],
-			documentImages: typeof draft.features === 'object' && draft.features ? (draft.features as any).documentImages : [],
+			zoning:
+				typeof draft.features === "object" && draft.features
+					? (draft.features as any).zoning
+					: undefined,
+			utilities:
+				typeof draft.features === "object" && draft.features
+					? (draft.features as any).utilities
+					: [],
+			characteristics:
+				typeof draft.features === "object" && draft.features
+					? (draft.features as any).characteristics
+					: [],
+			coordinates:
+				typeof draft.features === "object" && draft.features
+					? (draft.features as any).coordinates
+					: undefined,
+			accessRoads:
+				typeof draft.features === "object" && draft.features
+					? (draft.features as any).accessRoads
+					: [],
+			nearbyLandmarks:
+				typeof draft.features === "object" && draft.features
+					? (draft.features as any).nearbyLandmarks
+					: [],
+			aerialImages:
+				typeof draft.features === "object" && draft.features
+					? (draft.features as any).aerialImages
+					: [],
+			documentImages:
+				typeof draft.features === "object" && draft.features
+					? (draft.features as any).documentImages
+					: [],
 			language: "es",
 			aiGenerated: {
 				name: false,
 				description: false,
 				characteristics: false,
 			},
-			tags: typeof draft.features === 'object' && draft.features ? (draft.features as any).tags : [],
-			seoTitle: typeof draft.features === 'object' && draft.features ? (draft.features as any).seoTitle : undefined,
-			seoDescription: typeof draft.features === 'object' && draft.features ? (draft.features as any).seoDescription : undefined,
+			tags:
+				typeof draft.features === "object" && draft.features
+					? (draft.features as any).tags
+					: [],
+			seoTitle:
+				typeof draft.features === "object" && draft.features
+					? (draft.features as any).seoTitle
+					: undefined,
+			seoDescription:
+				typeof draft.features === "object" && draft.features
+					? (draft.features as any).seoDescription
+					: undefined,
 		};
 
 		return { success: true, data: wizardData };

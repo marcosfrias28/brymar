@@ -67,8 +67,11 @@ export async function loadBlogDraft(
 			category: draft.category as any, // Type assertion needed
 			status: draft.status as "draft" | "published",
 			excerpt: draft.excerpt || undefined,
-			coverImage: typeof draft.coverImage === 'object' && draft.coverImage ? (draft.coverImage as any).url : undefined,
-			tags: Array.isArray(draft.tags) ? draft.tags as string[] : [],
+			coverImage:
+				typeof draft.coverImage === "object" && draft.coverImage
+					? (draft.coverImage as any).url
+					: undefined,
+			tags: Array.isArray(draft.tags) ? (draft.tags as string[]) : [],
 			images: [], // No images field in DB schema, start with empty array
 			videos: [],
 			slug: draft.slug,
@@ -202,7 +205,8 @@ export async function createBlogFromWizard(
 	} catch (error) {
 		return {
 			success: false,
-			error: error instanceof Error ? error.message : "Failed to create blog post",
+			error:
+				error instanceof Error ? error.message : "Failed to create blog post",
 		};
 	}
 }
@@ -276,7 +280,8 @@ export async function updateBlogFromWizard(
 	} catch (error) {
 		return {
 			success: false,
-			error: error instanceof Error ? error.message : "Failed to update blog post",
+			error:
+				error instanceof Error ? error.message : "Failed to update blog post",
 		};
 	}
 }

@@ -156,7 +156,7 @@ export function getQueryState(
 	const query = queryClient.getQueryCache().find({ queryKey });
 
 	return {
-		exists: !!query,
+		exists: Boolean(query),
 		isStale: query?.isStale() ?? true,
 		isFetching: query?.state.fetchStatus === "fetching",
 		isError: query?.state.status === "error",

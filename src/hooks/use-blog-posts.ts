@@ -59,7 +59,7 @@ export function useBlogPost(id: string | null) {
 			}
 			return result.data;
 		},
-		enabled: !!id,
+		enabled: Boolean(id),
 		staleTime: 5 * 60 * 1000, // 5 minutes
 	});
 }
@@ -80,7 +80,7 @@ export function useBlogPostBySlug(slug: string | null) {
 			}
 			return result.data;
 		},
-		enabled: !!slug,
+		enabled: Boolean(slug),
 		staleTime: 5 * 60 * 1000, // 5 minutes
 	});
 }

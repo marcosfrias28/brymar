@@ -59,6 +59,40 @@ export type Image = {
 	alt?: string;
 };
 
+// Media types
+export type VideoInput = {
+	file?: File;
+	filename: string;
+	mimeType: string;
+	url?: string;
+};
+
+export type Video = {
+	id: string;
+	url: string;
+	filename: string;
+	mimeType: string;
+	size?: number;
+	duration?: number;
+	thumbnailUrl?: string;
+};
+
+export type DocumentInput = {
+	file?: File;
+	filename: string;
+	mimeType: string;
+	url?: string;
+};
+
+export type Document = {
+	id: string;
+	url: string;
+	filename: string;
+	mimeType: string;
+	size?: number;
+	title?: string;
+};
+
 export type Currency = "USD" | "EUR" | "GBP" | "CAD" | "AUD";
 
 export type SortOrder = "asc" | "desc";
@@ -67,6 +101,21 @@ export type Coordinates = {
 	latitude: number;
 	longitude: number;
 };
+
+// GeoJSON-like geometry types for map selections
+export type Position = [number, number];
+
+export type PointGeometry = {
+	type: "Point";
+	coordinates: Position; // [longitude, latitude]
+};
+
+export type PolygonGeometry = {
+	type: "Polygon";
+	coordinates: Position[][]; // array of linear rings
+};
+
+export type Geometry = PointGeometry | PolygonGeometry;
 
 export type BaseEntity = {
 	id: string;

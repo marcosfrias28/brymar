@@ -16,23 +16,8 @@ export {
 	updateBlogFromWizard,
 } from "./blog-wizard-actions";
 
-// Land Wizard Actions
-export {
-	completeLandWizard,
-	deleteLandDraft,
-	loadLandDraft,
-	saveLandDraft,
-} from "./land-wizard-actions";
 // Profile Actions
 export {
 	getUserProfile,
 	updateProfileAction,
 } from "./profile-actions";
-// Property Wizard Actions
-export {
-	autoSaveProperty,
-	loadPropertyForWizard,
-	publishProperty,
-	savePropertyFromWizard,
-	validatePropertyStep,
-} from "./property-wizard-actions";

@@ -148,7 +148,7 @@ export function useBaseQuery<T>(
 	return {
 		...query,
 		isEmpty: Array.isArray(query.data) ? query.data.length === 0 : !query.data,
-		hasData: !!query.data,
+		hasData: Boolean(query.data),
 		isFirstLoading: query.isLoading && !query.isRefetching,
 		isRefetchError: query.isError && query.isRefetching,
 	} as BaseQueryResult<T>;

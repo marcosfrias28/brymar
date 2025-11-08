@@ -24,3 +24,5 @@ export type {
 } from "@/types/wizard-core";
 // Main Wizard Hook (Replaces all previous wizard hooks)
 export { useWizard } from "./use-wizard";
+// Keyboard Navigation Hook
+export { useWizardKeyboard } from "./use-wizard-keyboard";

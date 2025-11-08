@@ -318,11 +318,13 @@ export function getSafeAreaInsets() {
 
 // Camera and media utilities
 export function isCameraSupported(): boolean {
-	return !!navigator.mediaDevices?.getUserMedia;
+	return Boolean(navigator.mediaDevices?.getUserMedia);
 }
 
 export function isFileAPISupported(): boolean {
-	return !!(window.File && window.FileReader && window.FileList && window.Blob);
+	return Boolean(
+		window.File && window.FileReader && window.FileList && window.Blob
+	);
 }
 
 export async function requestCameraPermission(): Promise<boolean> {

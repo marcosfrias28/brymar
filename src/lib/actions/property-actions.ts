@@ -58,6 +58,9 @@ export async function createPropertyAction(
 			videos: formData.get("videos")
 				? JSON.parse(formData.get("videos") as string)
 				: [],
+			geometry: formData.get("geometry")
+				? JSON.parse(formData.get("geometry") as string)
+				: undefined,
 			status: (formData.get("status") as string) || "draft",
 			language: (formData.get("language") as string) || "es",
 		};
@@ -84,13 +87,15 @@ export async function createPropertyAction(
 				type: validation.data.propertyType,
 				address: validation.data.address || {},
 				features: {
-					surface: validation.data.surface,
+					area: validation.data.surface,
 					bedrooms: validation.data.bedrooms,
 					bathrooms: validation.data.bathrooms,
-					characteristics: validation.data.characteristics,
+					amenities: [],
+					features: validation.data.characteristics,
 					coordinates: validation.data.coordinates,
 				},
 				images: validation.data.images,
+				geometry: validation.data.geometry,
 				status: validation.data.status,
 				featured: false,
 				userId: session.user.id,
@@ -342,6 +347,9 @@ export async function updatePropertyAction(
 			videos: formData.get("videos")
 				? JSON.parse(formData.get("videos") as string)
 				: [],
+			geometry: formData.get("geometry")
+				? JSON.parse(formData.get("geometry") as string)
+				: undefined,
 			status: (formData.get("status") as string) || "draft",
 			language: (formData.get("language") as string) || "es",
 		};
@@ -366,13 +374,15 @@ export async function updatePropertyAction(
 				type: validation.data.propertyType,
 				address: validation.data.address || {},
 				features: {
-					surface: validation.data.surface,
+					area: validation.data.surface,
 					bedrooms: validation.data.bedrooms,
 					bathrooms: validation.data.bathrooms,
-					characteristics: validation.data.characteristics,
+					amenities: [],
+					features: validation.data.characteristics,
 					coordinates: validation.data.coordinates,
 				},
 				images: validation.data.images,
+				geometry: validation.data.geometry,
 				status: validation.data.status,
 				updatedAt: new Date(),
 			})

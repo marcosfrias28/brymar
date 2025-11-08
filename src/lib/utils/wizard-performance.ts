@@ -390,11 +390,11 @@ export const browserCompatibility = {
 	 * Check if browser supports modern features
 	 */
 	supportsModernFeatures(): boolean {
-		return !!(
+		return Boolean(
 			window.IntersectionObserver &&
-			window.ResizeObserver &&
-			"requestIdleCallback" in window &&
-			CSS.supports("display", "grid")
+				window.ResizeObserver &&
+				"requestIdleCallback" in window &&
+				CSS.supports("display", "grid")
 		);
 	},
 

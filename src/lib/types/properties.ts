@@ -10,6 +10,11 @@ import type {
 	Currency,
 	Image,
 	ImageInput,
+	Video,
+	VideoInput,
+	Document,
+	DocumentInput,
+	Geometry,
 	SearchResult,
 } from "./shared";
 
@@ -71,6 +76,16 @@ export interface Property extends BaseEntity {
 	type: PropertyType;
 	features: PropertyFeatures;
 	images: Image[];
+	videos?: Video[];
+	documents?: Document[];
+	tags?: string[];
+	geometry?: Geometry;
+	statusHistory?: Array<{
+		status: PropertyStatus;
+		at: Date;
+		by?: string;
+		note?: string;
+	}>;
 	status: PropertyStatus;
 	featured: boolean;
 	userId: string;
@@ -86,6 +101,10 @@ export type CreatePropertyInput = {
 	type: PropertyType;
 	features: PropertyFeaturesInput;
 	images?: ImageInput[];
+	videos?: VideoInput[];
+	documents?: DocumentInput[];
+	tags?: string[];
+	geometry?: Geometry;
 	featured?: boolean;
 };
 
@@ -104,6 +123,7 @@ export type PropertySearchFilters = {
 	maxArea?: number;
 	amenities?: string[];
 	features?: string[];
+	tags?: string[];
 	status?: PropertyStatus[];
 	featured?: boolean;
 	userId?: string;
