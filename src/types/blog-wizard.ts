@@ -31,7 +31,7 @@ export interface BlogWizardData extends WizardData {
 }
 
 // Supporting types
-export interface BlogImageMetadata {
+export type BlogImageMetadata = {
 	id: string;
 	url: string;
 	filename: string;
@@ -42,15 +42,15 @@ export interface BlogImageMetadata {
 	displayOrder: number;
 	alt?: string;
 	caption?: string;
-}
+};
 
-export interface BlogVideoMetadata {
+export type BlogVideoMetadata = {
 	id: string;
 	url: string;
 	title: string;
 	duration?: number;
 	thumbnail?: string;
-}
+};
 
 // Category labels for UI
 export const categoryLabels = {

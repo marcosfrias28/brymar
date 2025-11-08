@@ -49,14 +49,14 @@ export interface LandWizardData extends WizardData {
 }
 
 // Supporting types
-export interface LandCharacteristic {
+export type LandCharacteristic = {
 	id: string;
 	name: string;
 	category: "zoning" | "utilities" | "access" | "features";
 	selected: boolean;
-}
+};
 
-export interface ImageMetadata {
+export type ImageMetadata = {
 	id: string;
 	url: string;
 	filename: string;
@@ -65,7 +65,7 @@ export interface ImageMetadata {
 	displayOrder: number;
 	alt?: string;
 	caption?: string;
-}
+};
 
 // Default land wizard data
 export const defaultLandWizardData: Partial<LandWizardData> = {

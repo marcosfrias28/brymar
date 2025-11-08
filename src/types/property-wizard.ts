@@ -1,32 +1,32 @@
 // Property Wizard Types for New Framework
 
 import type { WizardData } from "@/types/wizard-core";
-import { PropertyType } from "@/types/wizard";
+import type { PropertyType } from "@/types/wizard";
 
 // Usa il PropertyType centralizzato (enum) da src/types/wizard
 
-export interface Coordinates {
+export type Coordinates = {
 	latitude: number;
 	longitude: number;
-}
+};
 
-export interface Address {
+export type Address = {
 	street: string;
 	city: string;
 	province: string;
 	postalCode?: string;
 	country: string;
 	formattedAddress: string;
-}
+};
 
-export interface PropertyCharacteristic {
+export type PropertyCharacteristic = {
 	id: string;
 	name: string;
 	category: "amenity" | "feature" | "location";
 	selected: boolean;
-}
+};
 
-export interface ImageMetadata {
+export type ImageMetadata = {
 	id: string;
 	url: string;
 	filename: string;
@@ -35,9 +35,9 @@ export interface ImageMetadata {
 	width?: number;
 	height?: number;
 	displayOrder: number;
-}
+};
 
-export interface VideoMetadata {
+export type VideoMetadata = {
 	id: string;
 	url: string;
 	filename: string;
@@ -45,7 +45,7 @@ export interface VideoMetadata {
 	contentType: string;
 	duration?: number;
 	displayOrder: number;
-}
+};
 
 // Property wizard data extending WizardData
 export interface PropertyWizardData extends WizardData {
@@ -75,7 +75,7 @@ export interface PropertyWizardData extends WizardData {
 }
 
 // AI Service Types
-export interface PropertyBasicInfo {
+export type PropertyBasicInfo = {
 	type: string;
 	location: string;
 	price: number;
@@ -83,9 +83,9 @@ export interface PropertyBasicInfo {
 	characteristics: string[];
 	bedrooms?: number;
 	bathrooms?: number;
-}
+};
 
-export interface AIService {
+export type AIService = {
 	generateDescription(propertyData: PropertyBasicInfo): Promise<string>;
 	generateTitle(propertyData: PropertyBasicInfo): Promise<string>;
 	generateTags(propertyData: PropertyBasicInfo): Promise<string[]>;
@@ -93,39 +93,39 @@ export interface AIService {
 		location: string,
 		propertyType: string
 	): Promise<string>;
-}
+};
 
 // Upload Service Types
-export interface SignedUrlResponse {
+export type SignedUrlResponse = {
 	uploadUrl: string;
 	publicUrl: string;
 	expiresAt: Date;
-}
+};
 
-export interface UploadResult {
+export type UploadResult = {
 	url: string;
 	filename: string;
 	size: number;
 	contentType: string;
-}
+};
 
-export interface ImageUploadService {
+export type ImageUploadService = {
 	generateSignedUrl(
 		filename: string,
 		contentType: string
 	): Promise<SignedUrlResponse>;
 	uploadDirect(file: File, signedUrl: string): Promise<UploadResult>;
 	processMetadata(uploadResult: UploadResult): ImageMetadata;
-}
+};
 
 // Map Service Types
-export interface MapService {
+export type MapService = {
 	initializeMap(containerId: string): any; // MapInstance type depends on map library
 	setDominicanRepublicBounds(): void;
 	addMarker(coordinates: Coordinates): any; // Marker type depends on map library
 	reverseGeocode(coordinates: Coordinates): Promise<Address>;
 	geocode(address: string): Promise<Coordinates>;
-}
+};
 
 // Error Types
 export class AIServiceError extends Error {
@@ -143,8 +143,8 @@ export class AIServiceError extends Error {
 	}
 }
 
-export interface UploadError {
+export type UploadError = {
 	file: File;
 	error: string;
 	retryable: boolean;
-}
+};

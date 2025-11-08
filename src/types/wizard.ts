@@ -1,36 +1,38 @@
 // AI Property Wizard Type Definitions
 
-// Property type enum
-export enum PropertyType {
-	HOUSE = "house",
-	APARTMENT = "apartment",
-	LAND = "land",
-	COMMERCIAL = "commercial",
-	VILLA = "villa",
-}
+// Property type union
+export const PropertyType = {
+	HOUSE: "house",
+	APARTMENT: "apartment",
+	LAND: "land",
+	COMMERCIAL: "commercial",
+	VILLA: "villa",
+} as const;
 
-export interface Coordinates {
+export type PropertyType = (typeof PropertyType)[keyof typeof PropertyType];
+
+export type Coordinates = {
 	latitude: number;
 	longitude: number;
-}
+};
 
-export interface Address {
+export type Address = {
 	street: string;
 	city: string;
 	province: string;
 	postalCode?: string;
 	country: string;
 	formattedAddress: string;
-}
+};
 
-export interface PropertyCharacteristic {
+export type PropertyCharacteristic = {
 	id: string;
 	name: string;
 	category: "amenity" | "feature" | "location";
 	selected: boolean;
-}
+};
 
-export interface ImageMetadata {
+export type ImageMetadata = {
 	id: string;
 	url: string;
 	filename: string;
@@ -39,9 +41,9 @@ export interface ImageMetadata {
 	width?: number;
 	height?: number;
 	displayOrder: number;
-}
+};
 
-export interface VideoMetadata {
+export type VideoMetadata = {
 	id: string;
 	url: string;
 	filename: string;
@@ -49,9 +51,9 @@ export interface VideoMetadata {
 	contentType: string;
 	duration?: number;
 	displayOrder: number;
-}
+};
 
-export interface PropertyFormData {
+export type PropertyFormData = {
 	// Step 1: General Information
 	title: string;
 	description: string;
@@ -78,25 +80,25 @@ export interface PropertyFormData {
 		description: boolean;
 		tags: boolean;
 	};
-}
+};
 
-export interface WizardState {
+export type WizardState = {
 	currentStep: number;
 	formData: Partial<PropertyFormData>;
 	isValid: Record<number, boolean>;
 	isDirty: boolean;
 	isLoading: boolean;
 	errors: Record<string, string>;
-}
+};
 
 // Step Component Props
-export interface BaseStepProps {
+export type BaseStepProps = {
 	data: Partial<PropertyFormData>;
 	onUpdate: (data: Partial<PropertyFormData>) => void;
 	onNext?: () => void;
 	onPrevious?: () => void;
 	isLoading?: boolean;
-}
+};
 
 export interface GeneralInfoStepProps extends BaseStepProps {
 	onNext: () => void;
@@ -112,25 +114,25 @@ export interface MediaUploadStepProps extends BaseStepProps {
 	onPrevious: () => void;
 }
 
-export interface PreviewStepProps {
+export type PreviewStepProps = {
 	data: PropertyFormData;
 	onPublish: () => Promise<void>;
 	onSaveDraft: () => Promise<void>;
 	onEdit: (step: number) => void;
 	isLoading?: boolean;
 	isMobile?: boolean;
-}
+};
 
 // Wizard Container Props
-export interface PropertyWizardProps {
+export type PropertyWizardProps = {
 	initialData?: Partial<PropertyFormData>;
 	draftId?: string;
 	onComplete: (data: PropertyFormData) => Promise<void>;
 	onSaveDraft: (data: Partial<PropertyFormData>) => Promise<string>;
-}
+};
 
 // AI Service Types
-export interface PropertyBasicInfo {
+export type PropertyBasicInfo = {
 	type: string;
 	location: string;
 	price: number;
@@ -138,9 +140,9 @@ export interface PropertyBasicInfo {
 	characteristics: string[];
 	bedrooms?: number;
 	bathrooms?: number;
-}
+};
 
-export interface AIService {
+export type AIService = {
 	generateDescription(propertyData: PropertyBasicInfo): Promise<string>;
 	generateTitle(propertyData: PropertyBasicInfo): Promise<string>;
 	generateTags(propertyData: PropertyBasicInfo): Promise<string[]>;
@@ -148,50 +150,50 @@ export interface AIService {
 		location: string,
 		propertyType: string
 	): Promise<string>;
-}
+};
 
 // Upload Service Types
-export interface SignedUrlResponse {
+export type SignedUrlResponse = {
 	uploadUrl: string;
 	publicUrl: string;
 	expiresAt: Date;
-}
+};
 
-export interface UploadResult {
+export type UploadResult = {
 	url: string;
 	filename: string;
 	size: number;
 	contentType: string;
-}
+};
 
-export interface ImageUploadService {
+export type ImageUploadService = {
 	generateSignedUrl(
 		filename: string,
 		contentType: string
 	): Promise<SignedUrlResponse>;
 	uploadDirect(file: File, signedUrl: string): Promise<UploadResult>;
 	processMetadata(uploadResult: UploadResult): ImageMetadata;
-}
+};
 
 // Map Types
-export interface MapInstance {
+export type MapInstance = {
 	setView: (center: [number, number], zoom: number) => void;
 	remove: () => void;
-}
+};
 
-export interface MapMarker {
+export type MapMarker = {
 	setLatLng: (coords: [number, number]) => void;
 	remove: () => void;
-}
+};
 
 // Map Service Types
-export interface MapService {
+export type MapService = {
 	initializeMap(containerId: string): MapInstance;
 	setDominicanRepublicBounds(): void;
 	addMarker(coordinates: Coordinates): MapMarker;
 	reverseGeocode(coordinates: Coordinates): Promise<Address>;
 	geocode(address: string): Promise<Coordinates>;
-}
+};
 
 // Error Types
 export class AIServiceError extends Error {
@@ -203,14 +205,15 @@ export class AIServiceError extends Error {
 		retryable = false
 	) {
 		super(message);
+		// biome-ignore lint/security/noSecrets: Class name, not a secret
 		this.name = "AIServiceError";
 		this.code = code;
 		this.retryable = retryable;
 	}
 }
 
-export interface UploadError {
+export type UploadError = {
 	file: File;
 	error: string;
 	retryable: boolean;
-}
+};

@@ -42,17 +42,17 @@ export type DashboardPageLayoutProps = {
 };
 
 export type PageHeaderProps = {
-    title: string;
-    description?: string;
-    breadcrumbs?: BreadcrumbItem[];
-    actions?: ReactNode;
-    children?: ReactNode;
-    showSearch?: boolean;
-    searchPlaceholder?: string;
-    className?: string;
-    // Stats passed as objects to be rendered in the header
-    stats?: StatCard[];
-    statsLoading?: boolean;
+	title: string;
+	description?: string;
+	breadcrumbs?: BreadcrumbItem[];
+	actions?: ReactNode;
+	children?: ReactNode;
+	showSearch?: boolean;
+	searchPlaceholder?: string;
+	className?: string;
+	// Stats passed as objects to be rendered in the header
+	stats?: StatCard[];
+	statsLoading?: boolean;
 };
 
 export type ContentGridProps = {
