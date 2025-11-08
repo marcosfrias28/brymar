@@ -18,8 +18,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
 	const { isMobile, isTablet } = useResponsive();
 
 	// Limit items on mobile for better UX (use slice to avoid undefined)
-	const displayItems =
-		isMobile && items.length > 2 ? items.slice(-2) : items;
+	const displayItems = isMobile && items.length > 2 ? items.slice(-2) : items;
 
 	return (
 		<nav

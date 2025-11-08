@@ -35,7 +35,16 @@ function SelectTrigger({
 	return (
 		<SelectPrimitive.Trigger
 			className={cn(
-				"flex w-fit items-center justify-between gap-2 whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none transition-[color,box-shadow] hover:border-secondary/30 focus-visible:border-secondary focus-visible:ring-[3px] focus-visible:ring-secondary/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 data-[size=default]:h-9 data-[size=sm]:h-8 data-[placeholder]:text-muted-foreground *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 dark:bg-input/30 dark:aria-invalid:ring-destructive/40 dark:hover:bg-input/50 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
+				"selection:bg-primary/30 selection:text-foreground placeholder:text-muted-foreground/60",
+				"flex h-10 w-full min-w-0 items-center justify-between gap-2 rounded-full border border-border bg-background px-4 py-2 text-base",
+				"outline-none ring-offset-background transition-all duration-200",
+				"disabled:pointer-events-none disabled:opacity-50",
+				"focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+				"aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
+				"dark:border-input/50 dark:bg-input/30 dark:focus:border-primary/50",
+				"data-[placeholder]:text-muted-foreground/60",
+				"*:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2",
+				"[&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
 				className
 			)}
 			data-size={size}
@@ -43,7 +52,7 @@ function SelectTrigger({
 			{...props}
 		>
 			{children}
-			<SelectPrimitive.Icon asChild>
+			<SelectPrimitive.Icon asChild={true}>
 				<ChevronDownIcon className="size-4 opacity-50" />
 			</SelectPrimitive.Icon>
 		</SelectPrimitive.Trigger>
@@ -106,7 +115,7 @@ function SelectItem({
 	return (
 		<SelectPrimitive.Item
 			className={cn(
-				"relative flex w-full cursor-default select-none items-center gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm outline-hidden focus:bg-secondary/20 focus:text-secondary-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+				"relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pr-8 pl-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
 				className
 			)}
 			data-slot="select-item"
@@ -128,7 +137,7 @@ function SelectSeparator({
 }: React.ComponentProps<typeof SelectPrimitive.Separator>) {
 	return (
 		<SelectPrimitive.Separator
-			className={cn("-mx-1 pointer-events-none my-1 h-px bg-border", className)}
+			className={cn("-mx-1 my-1 h-px bg-muted", className)}
 			data-slot="select-separator"
 			{...props}
 		/>

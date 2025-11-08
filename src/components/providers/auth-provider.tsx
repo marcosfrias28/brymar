@@ -110,7 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 		user,
 		loading: loading || isInitialLoad,
 		isLoading: loading || isInitialLoad,
-		isAuthenticated: !!user,
+		isAuthenticated: Boolean(user),
 		error: error?.message || null,
 		updateProfile,
 		refetch,

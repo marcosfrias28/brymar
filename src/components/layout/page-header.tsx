@@ -34,7 +34,7 @@ export function PageHeader({
 			{/* Stats rendered within the header when provided */}
 			{stats && stats.length > 0 && (
 				<div className="mt-4">
-					<StatsCards isLoading={!!statsLoading} stats={stats} />
+					<StatsCards isLoading={Boolean(statsLoading)} stats={stats} />
 				</div>
 			)}
 		</div>

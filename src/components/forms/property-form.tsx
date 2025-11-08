@@ -1,516 +1,439 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, MapPin, Plus, Sparkles, Trash2, Upload } from "lucide-react";
-import { useCallback, useState } from "react";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { EnhancedImageUpload } from "@/components/wizard/shared/enhanced-image-upload";
-import { generateAllPropertyContent } from "@/lib/actions/ai-actions";
+import { InteractiveMap } from "@/components/wizard/shared/interactive-map";
+import { generatePropertyDescription } from "@/lib/actions/ai-actions";
+import {
+	createPropertyAction,
+	updatePropertyAction,
+} from "@/lib/actions/property-actions";
+import type { Geometry } from "@/lib/types/shared";
+import {
+	type PropertyFormData,
+	PropertyFormSchema,
+} from "@/schemas/property-schema";
+import type { Coordinates } from "@/types/wizard";
 import { PropertyType } from "@/types/wizard";
-import type { ImageMetadata, PropertyCharacteristic, PropertyWizardData } from "@/types/property-wizard";
 
-// Schema de validación basado en el esquema de la base de datos
-const propertyFormSchema = z.object({
-  title: z.string().min(1, "El título es requerido"),
-  description: z.string().min(10, "La descripción debe tener al menos 10 caracteres"),
-  price: z.number().min(1, "El precio debe ser mayor a 0"),
-  currency: z.string().default("USD"),
-  surface: z.number().min(1, "La superficie debe ser mayor a 0"),
-  propertyType: z.nativeEnum(PropertyType),
-  bedrooms: z.number().optional(),
-  bathrooms: z.number().optional(),
-  address: z.object({
-    street: z.string().min(1, "La dirección es requerida"),
-    city: z.string().min(1, "La ciudad es requerida"),
-    province: z.string().min(1, "La provincia es requerida"),
-    postalCode: z.string().optional(),
-    country: z.string().default("República Dominicana"),
-    formattedAddress: z.string(),
-  }),
-  coordinates: z.object({
-    latitude: z.number(),
-    longitude: z.number(),
-  }).optional(),
-  characteristics: z.array(z.object({
-    id: z.string(),
-    name: z.string(),
-    category: z.enum(["amenity", "feature", "location"]),
-    selected: z.boolean(),
-  })),
-  images: z.array(z.object({
-    id: z.string(),
-    url: z.string(),
-    filename: z.string(),
-    size: z.number(),
-    contentType: z.string(),
-    width: z.number().optional(),
-    height: z.number().optional(),
-    displayOrder: z.number(),
-  })),
-  language: z.enum(["es", "en"]).default("es"),
-  featured: z.boolean().default(false),
-  status: z.enum(["draft", "published", "sold", "rented", "archived"]).default("draft"),
-});
-
-type PropertyFormData = z.infer<typeof propertyFormSchema>;
-
-interface PropertyFormProps {
-  initialData?: Partial<PropertyWizardData>;
-  onSubmit: (data: PropertyFormData) => Promise<void>;
-  onSaveDraft?: (data: Partial<PropertyFormData>) => Promise<void>;
-  isLoading?: boolean;
-}
-
-// Características predefinidas
-const defaultCharacteristics: PropertyCharacteristic[] = [
-  // Amenidades
-  { id: "pool", name: "Piscina", category: "amenity", selected: false },
-  { id: "gym", name: "Gimnasio", category: "amenity", selected: false },
-  { id: "parking", name: "Estacionamiento", category: "amenity", selected: false },
-  { id: "security", name: "Seguridad 24/7", category: "amenity", selected: false },
-  { id: "elevator", name: "Ascensor", category: "amenity", selected: false },
-  { id: "garden", name: "Jardín", category: "amenity", selected: false },
-  
-  // Características
-  { id: "furnished", name: "Amueblado", category: "feature", selected: false },
-  { id: "ac", name: "Aire Acondicionado", category: "feature", selected: false },
-  { id: "balcony", name: "Balcón", category: "feature", selected: false },
-  { id: "terrace", name: "Terraza", category: "feature", selected: false },
-  { id: "laundry", name: "Área de Lavado", category: "feature", selected: false },
-  { id: "storage", name: "Depósito", category: "feature", selected: false },
-  
-  // Ubicación
-  { id: "beach", name: "Cerca de la Playa", category: "location", selected: false },
-  { id: "downtown", name: "Centro de la Ciudad", category: "location", selected: false },
-  { id: "shopping", name: "Cerca de Centros Comerciales", category: "location", selected: false },
-  { id: "schools", name: "Cerca de Escuelas", category: "location", selected: false },
-  { id: "transport", name: "Transporte Público", category: "location", selected: false },
-  { id: "hospital", name: "Cerca de Hospitales", category: "location", selected: false },
+const propertyTypeOptions: { value: PropertyType; label: string }[] = [
+	{ value: PropertyType.HOUSE, label: "Casa" },
+	{ value: PropertyType.APARTMENT, label: "Apartamento" },
+	{ value: PropertyType.VILLA, label: "Villa" },
+	{ value: PropertyType.COMMERCIAL, label: "Comercial" },
+	{ value: PropertyType.LAND, label: "Terreno" },
 ];
 
 export function PropertyForm({ initialData, onSubmit, onSaveDraft, isLoading }: PropertyFormProps) {
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
-  const form = useForm<PropertyFormData>({
-    resolver: zodResolver(propertyFormSchema),
-    defaultValues: {
-      title: initialData?.title || "",
-      description: initialData?.description || "",
-      price: initialData?.price || 0,
-      currency: "USD",
-      surface: initialData?.surface || 0,
-      propertyType: initialData?.propertyType || PropertyType.APARTMENT,
-      bedrooms: initialData?.bedrooms || undefined,
-      bathrooms: initialData?.bathrooms || undefined,
-      address: initialData?.address || {
-        street: "",
-        city: "",
-        province: "",
-        postalCode: "",
-        country: "República Dominicana",
-        formattedAddress: "",
-      },
-      coordinates: initialData?.coordinates,
-      characteristics: initialData?.characteristics || defaultCharacteristics,
-      images: initialData?.images || [],
-      language: initialData?.language || "es",
-      featured: false,
-      status: initialData?.status || "draft",
-    },
-  });
+export function PropertyForm({
+	initialData,
+	isEditing = false,
+	onCancel,
+	onSuccess,
+}: PropertyFormProps) {
+	const router = useRouter();
+	const [coordinates, setCoordinates] = useState<Coordinates | undefined>(
+		initialData?.features?.coordinates || initialData?.address?.coordinates
+	);
+	const [address, setAddress] = useState<any | undefined>(initialData?.address);
+	const [geometry, setGeometry] = useState<Geometry | undefined>(
+		initialData?.geometry
+	);
+	const form = useForm<PropertyFormData>({
+		resolver: zodResolver(PropertyFormSchema),
+		defaultValues: {
+			title: initialData?.title ?? "",
+			description: initialData?.description ?? "",
+			price: initialData?.price ?? ("" as unknown as number),
+			surface: initialData?.surface ?? ("" as unknown as number),
+			propertyType: initialData?.propertyType ?? undefined,
+			bedrooms: initialData?.bedrooms ?? undefined,
+			bathrooms: initialData?.bathrooms ?? undefined,
+		},
+	});
 
-  const watchedTitle = form.watch("title");
-  const watchedPropertyType = form.watch("propertyType");
-  const watchedAddress = form.watch("address");
-  const watchedPrice = form.watch("price");
-  const watchedSurface = form.watch("surface");
-  const watchedBedrooms = form.watch("bedrooms");
-  const watchedBathrooms = form.watch("bathrooms");
+	const {
+		handleSubmit,
+		setValue,
+		getValues,
+		formState: { isSubmitting },
+	} = form;
 
-  // Generar contenido con AI cuando el título cambie
-  const handleAIGeneration = useCallback(async () => {
-    if (!watchedTitle || watchedTitle.length < 3) {
-      toast.error("Ingresa un título para generar contenido con AI");
-      return;
-    }
+	const onSubmit = async (data: PropertyFormData) => {
+		try {
+			const formData = new FormData();
 
-    setIsGeneratingAI(true);
-    try {
-      const propertyData = {
-        type: watchedPropertyType,
-        location: watchedAddress?.city || "Santo Domingo",
-        price: watchedPrice || 100000,
-        surface: watchedSurface || 100,
-        characteristics: form.getValues("characteristics")
-          .filter(c => c.selected)
-          .map(c => c.name),
-        bedrooms: watchedBedrooms,
-        bathrooms: watchedBathrooms,
-      };
+			if (isEditing && initialData?.id) {
+				formData.append("id", initialData.id);
+			}
 
-      const result = await generateAllPropertyContent(propertyData, {
-        language: form.getValues("language"),
-        maxLength: 500,
-      });
+			formData.append("title", data.title);
+			formData.append("description", data.description);
+			formData.append("price", String(data.price));
+			formData.append("surface", String(data.surface));
+			formData.append("propertyType", String(data.propertyType));
+			if (data.bedrooms !== undefined) {
+				formData.append("bedrooms", String(data.bedrooms));
+			}
+			if (data.bathrooms !== undefined) {
+				formData.append("bathrooms", String(data.bathrooms));
+			}
 
-      if (result.success && result.data) {
-        form.setValue("title", result.data.title);
-        form.setValue("description", result.data.description);
-        toast.success("Contenido generado con AI exitosamente");
-      } else {
-        toast.error(result.error || "Error al generar contenido con AI");
-      }
-    } catch (error) {
-      console.error("Error generating AI content:", error);
-      toast.error("Error inesperado al generar contenido");
-    } finally {
-      setIsGeneratingAI(false);
-    }
-  }, [watchedTitle, watchedPropertyType, watchedAddress?.city, watchedPrice, watchedSurface, watchedBedrooms, watchedBathrooms, form]);
+			// Campos que el Server Action espera (en ausencia, usa defaults)
+			// characteristics -> default [] en el servidor (puede causar error por esquema estricto)
+			formData.append("characteristics", JSON.stringify([]));
 
-  // Manejar cambio de características
-  const handleCharacteristicChange = useCallback((characteristicId: string, checked: boolean) => {
-    const currentCharacteristics = form.getValues("characteristics");
-    const updatedCharacteristics = currentCharacteristics.map(char =>
-      char.id === characteristicId ? { ...char, selected: checked } : char
-    );
-    form.setValue("characteristics", updatedCharacteristics);
-  }, [form]);
+			// Ubicación y geometría
+			if (coordinates) {
+				formData.append("coordinates", JSON.stringify(coordinates));
+			}
+			if (address) {
+				formData.append("address", JSON.stringify(address));
+			}
+			if (geometry) {
+				formData.append("geometry", JSON.stringify(geometry));
+			}
 
-  const handleFormSubmit = async (data: PropertyFormData) => {
-    try {
-      await onSubmit(data);
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      toast.error("Error al guardar la propiedad");
-    }
-  };
+			// images/videos pueden omitirse; el servidor usa valores por defecto
 
-  const handleSaveDraft = async () => {
-    if (onSaveDraft) {
-      try {
-        const data = form.getValues();
-        await onSaveDraft(data);
-        toast.success("Borrador guardado");
-      } catch (error) {
-        console.error("Error saving draft:", error);
-        toast.error("Error al guardar borrador");
-      }
-    }
-  };
+			const action = isEditing ? updatePropertyAction : createPropertyAction;
 
-  return (
-    <div className="max-w-6xl mx-auto p-6 space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Nueva Propiedad</h1>
-          <p className="text-muted-foreground">
-            Crea una nueva propiedad con generación automática de contenido AI
-          </p>
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handleAIGeneration}
-          disabled={isGeneratingAI || !watchedTitle}
-          className="flex items-center gap-2"
-        >
-          {isGeneratingAI ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Sparkles className="h-4 w-4" />
-          )}
-          Generar con AI
-        </Button>
-      </div>
+			const result = await action({ success: false } as any, formData);
 
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-8">
-        {/* Información Básica */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="h-5 w-5" />
-              Información Básica
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="title">Título *</Label>
-                <Input
-                  id="title"
-                  placeholder="Ej: Apartamento moderno en Piantini"
-                  {...form.register("title")}
-                />
-                {form.formState.errors.title && (
-                  <p className="text-sm text-destructive">
-                    {form.formState.errors.title.message}
-                  </p>
-                )}
-              </div>
+			if (result?.success) {
+				toast.success(
+					result.message ||
+						(isEditing ? "Propiedad actualizada" : "Propiedad creada")
+				);
+				onSuccess?.();
+			} else if (result?.errors) {
+				// Mapear errores del server a RHF
+				Object.entries(result.errors).forEach(([field, messages]) => {
+					const msg = Array.isArray(messages) ? messages[0] : String(messages);
+					// Sólo seteamos errores para campos visibles
+					if (
+						[
+							"title",
+							"description",
+							"price",
+							"surface",
+							"propertyType",
+							"bedrooms",
+							"bathrooms",
+						].includes(field)
+					) {
+						form.setError(field as any, { message: msg });
+					}
+				});
+				if (result.message) {
+					toast.error(result.message);
+				}
+			} else if (result?.message) {
+				toast.error(result.message);
+			}
+		} catch (error) {
+			const msg =
+				error instanceof Error
+					? error.message
+					: "Error al enviar el formulario";
+			// Manejo especial para redirecciones en Server Actions
+			if (msg.includes("NEXT_REDIRECT")) {
+				// Next se encargará de la navegación
+				return;
+			}
+			toast.error(msg);
+		}
+	};
 
-              <div className="space-y-2">
-                <Label htmlFor="propertyType">Tipo de Propiedad *</Label>
-                <Select
-                  value={form.watch("propertyType")}
-                  onValueChange={(value) => form.setValue("propertyType", value as PropertyType)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona el tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={PropertyType.APARTMENT}>Apartamento</SelectItem>
-                    <SelectItem value={PropertyType.HOUSE}>Casa</SelectItem>
-                    <SelectItem value={PropertyType.VILLA}>Villa</SelectItem>
-                    <SelectItem value={PropertyType.COMMERCIAL}>Comercial</SelectItem>
-                    <SelectItem value={PropertyType.LAND}>Terreno</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle>
+					{isEditing ? "Editar Propiedad" : "Crear Nueva Propiedad"}
+				</CardTitle>
+			</CardHeader>
+			<CardContent>
+				<Form {...form}>
+					<form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+						{/* Título */}
+						<FormField
+							control={form.control}
+							name="title"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Título de la Propiedad *</FormLabel>
+									<FormControl>
+										<Input
+											placeholder="Ej: Villa de Lujo en Punta Cana"
+											{...field}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Descripción *</Label>
-              <Textarea
-                id="description"
-                placeholder="Describe la propiedad en detalle..."
-                rows={4}
-                {...form.register("description")}
-              />
-              {form.formState.errors.description && (
-                <p className="text-sm text-destructive">
-                  {form.formState.errors.description.message}
-                </p>
-              )}
-            </div>
+						{/* Descripción */}
+						<FormField
+							control={form.control}
+							name="description"
+							render={({ field }) => (
+								<FormItem>
+									<div className="flex items-center justify-between">
+										<FormLabel>Descripción *</FormLabel>
+										<Button
+											onClick={async () => {
+												try {
+													const values = getValues();
+													const aiInput = {
+														type: String(values.propertyType || ""),
+														location: "República Dominicana",
+														price: Number(values.price || 0),
+														surface: Number(values.surface || 0),
+														characteristics: [],
+														bedrooms: values.bedrooms,
+														bathrooms: values.bathrooms,
+													};
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="price">Precio *</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  placeholder="100000"
-                  {...form.register("price", { valueAsNumber: true })}
-                />
-                {form.formState.errors.price && (
-                  <p className="text-sm text-destructive">
-                    {form.formState.errors.price.message}
-                  </p>
-                )}
-              </div>
+													const res =
+														await generatePropertyDescription(aiInput);
+													if (res.success && res.data) {
+														setValue("description", res.data, {
+															shouldDirty: true,
+															shouldValidate: true,
+														});
+														toast.success("Descripción generada");
+													} else {
+														toast.error(
+															res.error || "No se pudo generar la descripción"
+														);
+													}
+												} catch (_e) {
+													toast.error("Error al generar la descripción");
+												}
+											}}
+											type="button"
+											variant="outline"
+										>
+											Generar descripción (IA)
+										</Button>
+									</div>
+									<FormControl>
+										<Textarea
+											placeholder="Describe las características principales de la propiedad..."
+											rows={5}
+											{...field}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 
-              <div className="space-y-2">
-                <Label htmlFor="surface">Superficie (m²) *</Label>
-                <Input
-                  id="surface"
-                  type="number"
-                  placeholder="100"
-                  {...form.register("surface", { valueAsNumber: true })}
-                />
-                {form.formState.errors.surface && (
-                  <p className="text-sm text-destructive">
-                    {form.formState.errors.surface.message}
-                  </p>
-                )}
-              </div>
+						{/* Información Básica - 4 campos en fila en desktop, 2 por fila en tablet/móvil */}
+						<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+							{/* Precio */}
+							<FormField
+								control={form.control}
+								name="price"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Precio (USD) *</FormLabel>
+										<FormControl>
+											<Input
+												placeholder="450000"
+												type="number"
+												{...field}
+												onChange={(e) => field.onChange(Number(e.target.value))}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
 
-              <div className="space-y-2">
-                <Label htmlFor="bedrooms">Habitaciones</Label>
-                <Input
-                  id="bedrooms"
-                  type="number"
-                  placeholder="3"
-                  {...form.register("bedrooms", { valueAsNumber: true })}
-                />
-              </div>
+							{/* Área */}
+							<FormField
+								control={form.control}
+								name="surface"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Área (m²) *</FormLabel>
+										<FormControl>
+											<Input
+												placeholder="150"
+												type="number"
+												{...field}
+												onChange={(e) => field.onChange(Number(e.target.value))}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
 
-              <div className="space-y-2">
-                <Label htmlFor="bathrooms">Baños</Label>
-                <Input
-                  id="bathrooms"
-                  type="number"
-                  placeholder="2"
-                  {...form.register("bathrooms", { valueAsNumber: true })}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+							{/* Tipo de Propiedad */}
+							<FormField
+								control={form.control}
+								name="propertyType"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Tipo de Propiedad *</FormLabel>
+										<Select
+											defaultValue={field.value}
+											onValueChange={field.onChange}
+										>
+											<FormControl>
+												<SelectTrigger>
+													<SelectValue placeholder="Seleccionar tipo" />
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												{propertyTypeOptions.map((option) => (
+													<SelectItem key={option.value} value={option.value}>
+														{option.label}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
 
-        {/* Ubicación */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Ubicación</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="street">Dirección *</Label>
-                <Input
-                  id="street"
-                  placeholder="Calle Principal #123"
-                  {...form.register("address.street")}
-                />
-                {form.formState.errors.address?.street && (
-                  <p className="text-sm text-destructive">
-                    {form.formState.errors.address.street.message}
-                  </p>
-                )}
-              </div>
+							{/* Habitaciones */}
+							<FormField
+								control={form.control}
+								name="bedrooms"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Habitaciones</FormLabel>
+										<FormControl>
+											<Input
+												placeholder="0"
+												type="number"
+												{...field}
+												onChange={(e) =>
+													field.onChange(
+														e.target.value ? Number(e.target.value) : undefined
+													)
+												}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
 
-              <div className="space-y-2">
-                <Label htmlFor="city">Ciudad *</Label>
-                <Input
-                  id="city"
-                  placeholder="Santo Domingo"
-                  {...form.register("address.city")}
-                />
-                {form.formState.errors.address?.city && (
-                  <p className="text-sm text-destructive">
-                    {form.formState.errors.address.city.message}
-                  </p>
-                )}
-              </div>
+							{/* Baños */}
+							<FormField
+								control={form.control}
+								name="bathrooms"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Baños</FormLabel>
+										<FormControl>
+											<Input
+												placeholder="0"
+												type="number"
+												{...field}
+												onChange={(e) =>
+													field.onChange(
+														e.target.value ? Number(e.target.value) : undefined
+													)
+												}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</div>
 
-              <div className="space-y-2">
-                <Label htmlFor="province">Provincia *</Label>
-                <Input
-                  id="province"
-                  placeholder="Distrito Nacional"
-                  {...form.register("address.province")}
-                />
-                {form.formState.errors.address?.province && (
-                  <p className="text-sm text-destructive">
-                    {form.formState.errors.address.province.message}
-                  </p>
-                )}
-              </div>
+						{/* Ubicación */}
+						<div className="space-y-4">
+							<h3 className="font-semibold text-lg">Ubicación</h3>
 
-              <div className="space-y-2">
-                <Label htmlFor="postalCode">Código Postal</Label>
-                <Input
-                  id="postalCode"
-                  placeholder="10101"
-                  {...form.register("address.postalCode")}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+							{/* Mapa Interactivo */}
+							<div className="space-y-2">
+								<label className="font-medium text-sm">
+									Ubicación en el mapa
+								</label>
+								<InteractiveMap
+									coordinates={coordinates}
+									height="280px"
+									onAddressChange={(addr: any) => {
+										setAddress(addr);
+										form.setValue("address", addr);
+									}}
+									onCoordinatesChange={(coords: Coordinates) => {
+										setCoordinates(coords);
+										form.setValue("coordinates", coords);
+									}}
+									onGeometryChange={(geom: Geometry) => {
+										setGeometry(geom);
+										form.setValue("geometry", geom);
+									}}
+								/>
+							</div>
+						</div>
 
-        {/* Características */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Características</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {["amenity", "feature", "location"].map((category) => (
-                <div key={category} className="space-y-3">
-                  <h4 className="font-medium capitalize">
-                    {category === "amenity" && "Amenidades"}
-                    {category === "feature" && "Características"}
-                    {category === "location" && "Ubicación"}
-                  </h4>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {form.watch("characteristics")
-                      .filter((char) => char.category === category)
-                      .map((characteristic) => (
-                        <div key={characteristic.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={characteristic.id}
-                            checked={characteristic.selected}
-                            onCheckedChange={(checked) =>
-                              handleCharacteristicChange(characteristic.id, !!checked)
-                            }
-                          />
-                          <Label
-                            htmlFor={characteristic.id}
-                            className="text-sm font-normal cursor-pointer"
-                          >
-                            {characteristic.name}
-                          </Label>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Imágenes */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Upload className="h-5 w-5" />
-              Imágenes de la Propiedad
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <EnhancedImageUpload
-              images={form.watch("images")}
-              onImagesChange={(images) => form.setValue("images", images)}
-              maxImages={10}
-              maxFileSize={5 * 1024 * 1024} // 5MB
-            />
-          </CardContent>
-        </Card>
-
-        {/* Acciones */}
-        <div className="flex items-center justify-between pt-6">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="featured"
-                checked={form.watch("featured")}
-                onCheckedChange={(checked) => form.setValue("featured", !!checked)}
-              />
-              <Label htmlFor="featured" className="text-sm font-normal cursor-pointer">
-                Propiedad destacada
-              </Label>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            {onSaveDraft && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleSaveDraft}
-                disabled={isLoading}
-              >
-                Guardar Borrador
-              </Button>
-            )}
-            <Button
-              type="submit"
-              disabled={isLoading || isGeneratingAI}
-              className="min-w-[120px]"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Guardando...
-                </>
-              ) : (
-                "Crear Propiedad"
-              )}
-            </Button>
-          </div>
-        </div>
-      </form>
-    </div>
-  );
+						{/* Botones */}
+						<div className="flex gap-4 pt-6">
+							<Button
+								className="flex-1"
+								onClick={() => router.push("/dashboard/properties")}
+								type="button"
+								variant="outline"
+							>
+								Cancelar
+							</Button>
+							<Button
+								className="flex-1"
+								disabled={form.formState.isSubmitting}
+								type="submit"
+							>
+								{form.formState.isSubmitting ? (
+									<>
+										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+										{initialData ? "Actualizando..." : "Creando..."}
+									</>
+								) : initialData ? (
+									"Actualizar Propiedad"
+								) : (
+									"Crear Propiedad"
+								)}
+							</Button>
+						</div>
+					</form>
+				</Form>
+			</CardContent>
+		</Card>
+	);
 }
