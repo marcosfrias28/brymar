@@ -40,6 +40,16 @@ import {
 import type { Coordinates } from "@/types/wizard";
 import { PropertyType } from "@/types/wizard";
 
+interface PropertyFormProps {
+	initialData?: Partial<PropertyFormData>;
+	isEditing?: boolean;
+	onCancel?: () => void;
+	onSuccess?: () => void;
+	onSubmit?: (data: PropertyFormData) => Promise<void>;
+	onSaveDraft?: (data: PropertyFormData) => Promise<void>;
+	isLoading?: boolean;
+}
+
 const propertyTypeOptions: { value: PropertyType; label: string }[] = [
 	{ value: PropertyType.HOUSE, label: "Casa" },
 	{ value: PropertyType.APARTMENT, label: "Apartamento" },
@@ -47,9 +57,6 @@ const propertyTypeOptions: { value: PropertyType; label: string }[] = [
 	{ value: PropertyType.COMMERCIAL, label: "Comercial" },
 	{ value: PropertyType.LAND, label: "Terreno" },
 ];
-
-export function PropertyForm({ initialData, onSubmit, onSaveDraft, isLoading }: PropertyFormProps) {
-  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
 export function PropertyForm({
 	initialData,
@@ -61,7 +68,7 @@ export function PropertyForm({
 	const [coordinates, setCoordinates] = useState<Coordinates | undefined>(
 		initialData?.features?.coordinates || initialData?.address?.coordinates
 	);
-	const [address, setAddress] = useState<any | undefined>(initialData?.address);
+	const [address, setAddress] = useState<Record<string, unknown> | undefined>(initialData?.address);
 	const [geometry, setGeometry] = useState<Geometry | undefined>(
 		initialData?.geometry
 	);
@@ -70,9 +77,9 @@ export function PropertyForm({
 		defaultValues: {
 			title: initialData?.title ?? "",
 			description: initialData?.description ?? "",
-			price: initialData?.price ?? ("" as unknown as number),
-			surface: initialData?.surface ?? ("" as unknown as number),
-			propertyType: initialData?.propertyType ?? undefined,
+			price: initialData?.price ?? 0,
+			surface: initialData?.surface ?? 0,
+			propertyType: initialData?.propertyType ?? PropertyType.APARTMENT,
 			bedrooms: initialData?.bedrooms ?? undefined,
 			bathrooms: initialData?.bathrooms ?? undefined,
 		},
@@ -98,156 +105,85 @@ export function PropertyForm({
 			formData.append("price", String(data.price));
 			formData.append("surface", String(data.surface));
 			formData.append("propertyType", String(data.propertyType));
-			if (data.bedrooms !== undefined) {
+
+			if (data.bedrooms) {
 				formData.append("bedrooms", String(data.bedrooms));
 			}
-			if (data.bathrooms !== undefined) {
+
+			if (data.bathrooms) {
 				formData.append("bathrooms", String(data.bathrooms));
 			}
 
-			// Campos que el Server Action espera (en ausencia, usa defaults)
-			// characteristics -> default [] en el servidor (puede causar error por esquema estricto)
-			formData.append("characteristics", JSON.stringify([]));
-
-			// Ubicación y geometría
 			if (coordinates) {
-				formData.append("coordinates", JSON.stringify(coordinates));
+				formData.append("latitude", String(coordinates.latitude));
+				formData.append("longitude", String(coordinates.longitude));
 			}
+
 			if (address) {
 				formData.append("address", JSON.stringify(address));
 			}
+
 			if (geometry) {
 				formData.append("geometry", JSON.stringify(geometry));
 			}
 
-			// images/videos pueden omitirse; el servidor usa valores por defecto
+			const result = isEditing
+				? await updatePropertyAction(formData)
+				: await createPropertyAction(formData);
 
-			const action = isEditing ? updatePropertyAction : createPropertyAction;
-
-			const result = await action({ success: false } as any, formData);
-
-			if (result?.success) {
+			if (result.success) {
 				toast.success(
-					result.message ||
-						(isEditing ? "Propiedad actualizada" : "Propiedad creada")
+					isEditing
+						? "Propiedad actualizada correctamente"
+						: "Propiedad creada correctamente"
 				);
 				onSuccess?.();
-			} else if (result?.errors) {
-				// Mapear errores del server a RHF
-				Object.entries(result.errors).forEach(([field, messages]) => {
-					const msg = Array.isArray(messages) ? messages[0] : String(messages);
-					// Sólo seteamos errores para campos visibles
-					if (
-						[
-							"title",
-							"description",
-							"price",
-							"surface",
-							"propertyType",
-							"bedrooms",
-							"bathrooms",
-						].includes(field)
-					) {
-						form.setError(field as any, { message: msg });
-					}
-				});
-				if (result.message) {
-					toast.error(result.message);
-				}
-			} else if (result?.message) {
-				toast.error(result.message);
+			} else {
+				toast.error(result.error || "Error al guardar la propiedad");
 			}
 		} catch (error) {
-			const msg =
-				error instanceof Error
-					? error.message
-					: "Error al enviar el formulario";
-			// Manejo especial para redirecciones en Server Actions
-			if (msg.includes("NEXT_REDIRECT")) {
-				// Next se encargará de la navegación
-				return;
-			}
-			toast.error(msg);
+			toast.error("Error inesperado al guardar la propiedad");
 		}
 	};
 
+	const handleLocationSelect = (newCoordinates: Coordinates, newAddress: Record<string, unknown>, newGeometry?: Geometry) => {
+		setCoordinates(newCoordinates);
+		setAddress(newAddress);
+		setGeometry(newGeometry);
+	};
+
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>
-					{isEditing ? "Editar Propiedad" : "Crear Nueva Propiedad"}
-				</CardTitle>
-			</CardHeader>
-			<CardContent>
-				<Form {...form}>
-					<form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-						{/* Título */}
+		<Form {...form}>
+			<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+				<Card>
+					<CardHeader>
+						<CardTitle>Información básica</CardTitle>
+					</CardHeader>
+					<CardContent className="space-y-4">
 						<FormField
 							control={form.control}
 							name="title"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Título de la Propiedad *</FormLabel>
+									<FormLabel>Título</FormLabel>
 									<FormControl>
-										<Input
-											placeholder="Ej: Villa de Lujo en Punta Cana"
-											{...field}
-										/>
+										<Input placeholder="Ej: Apartamento en Piantini" {...field} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
 							)}
 						/>
 
-						{/* Descripción */}
 						<FormField
 							control={form.control}
 							name="description"
 							render={({ field }) => (
 								<FormItem>
-									<div className="flex items-center justify-between">
-										<FormLabel>Descripción *</FormLabel>
-										<Button
-											onClick={async () => {
-												try {
-													const values = getValues();
-													const aiInput = {
-														type: String(values.propertyType || ""),
-														location: "República Dominicana",
-														price: Number(values.price || 0),
-														surface: Number(values.surface || 0),
-														characteristics: [],
-														bedrooms: values.bedrooms,
-														bathrooms: values.bathrooms,
-													};
-
-													const res =
-														await generatePropertyDescription(aiInput);
-													if (res.success && res.data) {
-														setValue("description", res.data, {
-															shouldDirty: true,
-															shouldValidate: true,
-														});
-														toast.success("Descripción generada");
-													} else {
-														toast.error(
-															res.error || "No se pudo generar la descripción"
-														);
-													}
-												} catch (_e) {
-													toast.error("Error al generar la descripción");
-												}
-											}}
-											type="button"
-											variant="outline"
-										>
-											Generar descripción (IA)
-										</Button>
-									</div>
+									<FormLabel>Descripción</FormLabel>
 									<FormControl>
 										<Textarea
-											placeholder="Describe las características principales de la propiedad..."
-											rows={5}
+											placeholder="Describe la propiedad..."
+											rows={4}
 											{...field}
 										/>
 									</FormControl>
@@ -256,19 +192,17 @@ export function PropertyForm({
 							)}
 						/>
 
-						{/* Información Básica - 4 campos en fila en desktop, 2 por fila en tablet/móvil */}
-						<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-							{/* Precio */}
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							<FormField
 								control={form.control}
 								name="price"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Precio (USD) *</FormLabel>
+										<FormLabel>Precio</FormLabel>
 										<FormControl>
 											<Input
-												placeholder="450000"
 												type="number"
+												placeholder="100000"
 												{...field}
 												onChange={(e) => field.onChange(Number(e.target.value))}
 											/>
@@ -278,17 +212,16 @@ export function PropertyForm({
 								)}
 							/>
 
-							{/* Área */}
 							<FormField
 								control={form.control}
 								name="surface"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Área (m²) *</FormLabel>
+										<FormLabel>Superficie (m²)</FormLabel>
 										<FormControl>
 											<Input
-												placeholder="150"
 												type="number"
+												placeholder="100"
 												{...field}
 												onChange={(e) => field.onChange(Number(e.target.value))}
 											/>
@@ -297,21 +230,19 @@ export function PropertyForm({
 									</FormItem>
 								)}
 							/>
+						</div>
 
-							{/* Tipo de Propiedad */}
+						<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 							<FormField
 								control={form.control}
 								name="propertyType"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Tipo de Propiedad *</FormLabel>
-										<Select
-											defaultValue={field.value}
-											onValueChange={field.onChange}
-										>
+										<FormLabel>Tipo de propiedad</FormLabel>
+										<Select onValueChange={field.onChange} defaultValue={field.value}>
 											<FormControl>
 												<SelectTrigger>
-													<SelectValue placeholder="Seleccionar tipo" />
+													<SelectValue placeholder="Selecciona tipo" />
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
@@ -327,7 +258,6 @@ export function PropertyForm({
 								)}
 							/>
 
-							{/* Habitaciones */}
 							<FormField
 								control={form.control}
 								name="bedrooms"
@@ -336,14 +266,10 @@ export function PropertyForm({
 										<FormLabel>Habitaciones</FormLabel>
 										<FormControl>
 											<Input
-												placeholder="0"
 												type="number"
+												placeholder="3"
 												{...field}
-												onChange={(e) =>
-													field.onChange(
-														e.target.value ? Number(e.target.value) : undefined
-													)
-												}
+												onChange={(e) => field.onChange(Number(e.target.value))}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -351,7 +277,6 @@ export function PropertyForm({
 								)}
 							/>
 
-							{/* Baños */}
 							<FormField
 								control={form.control}
 								name="bathrooms"
@@ -360,14 +285,10 @@ export function PropertyForm({
 										<FormLabel>Baños</FormLabel>
 										<FormControl>
 											<Input
-												placeholder="0"
 												type="number"
+												placeholder="2"
 												{...field}
-												onChange={(e) =>
-													field.onChange(
-														e.target.value ? Number(e.target.value) : undefined
-													)
-												}
+												onChange={(e) => field.onChange(Number(e.target.value))}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -376,64 +297,87 @@ export function PropertyForm({
 							/>
 						</div>
 
-						{/* Ubicación */}
-						<div className="space-y-4">
-							<h3 className="font-semibold text-lg">Ubicación</h3>
+						<FormField
+							control={form.control}
+							name="description"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Descripción</FormLabel>
+									<FormControl>
+										<Textarea
+											placeholder="Describe la propiedad..."
+											rows={4}
+											{...field}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 
-							{/* Mapa Interactivo */}
-							<div className="space-y-2">
-								<label className="font-medium text-sm">
-									Ubicación en el mapa
-								</label>
-								<InteractiveMap
-									coordinates={coordinates}
-									height="280px"
-									onAddressChange={(addr: any) => {
-										setAddress(addr);
-										form.setValue("address", addr);
-									}}
-									onCoordinatesChange={(coords: Coordinates) => {
-										setCoordinates(coords);
-										form.setValue("coordinates", coords);
-									}}
-									onGeometryChange={(geom: Geometry) => {
-										setGeometry(geom);
-										form.setValue("geometry", geom);
-									}}
-								/>
-							</div>
-						</div>
+						<Button
+							type="button"
+							variant="outline"
+							onClick={async () => {
+								try {
+									const values = getValues();
+									const aiInput = {
+										type: String(values.propertyType || ""),
+										location: "República Dominicana",
+										price: Number(values.price || 0),
+										surface: Number(values.surface || 0),
+										characteristics: [],
+										bedrooms: values.bedrooms,
+										bathrooms: values.bathrooms,
+									};
 
-						{/* Botones */}
-						<div className="flex gap-4 pt-6">
-							<Button
-								className="flex-1"
-								onClick={() => router.push("/dashboard/properties")}
-								type="button"
-								variant="outline"
-							>
-								Cancelar
-							</Button>
-							<Button
-								className="flex-1"
-								disabled={form.formState.isSubmitting}
-								type="submit"
-							>
-								{form.formState.isSubmitting ? (
-									<>
-										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-										{initialData ? "Actualizando..." : "Creando..."}
-									</>
-								) : initialData ? (
-									"Actualizar Propiedad"
-								) : (
-									"Crear Propiedad"
-								)}
-							</Button>
-						</div>
-					</form>
-				</Form>
-			</CardContent>
-		</Card>
+									const res = await generatePropertyDescription(aiInput);
+									if (res.success && res.data) {
+										setValue("description", res.data, {
+											shouldDirty: true,
+											shouldValidate: true,
+										});
+										toast.success("Descripción generada");
+									} else {
+										toast.error(
+											res.error || "No se pudo generar la descripción"
+										);
+									}
+								} catch (_e) {
+									toast.error("Error al generar la descripción");
+								}
+							}}
+						>
+							Generar descripción con IA
+						</Button>
+					</CardContent>
+				</Card>
+
+				<Card>
+					<CardHeader>
+						<CardTitle>Ubicación</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<InteractiveMap
+							onLocationSelect={handleLocationSelect}
+							initialCoordinates={coordinates}
+							initialAddress={address}
+						/>
+					</CardContent>
+				</Card>
+
+				<div className="flex justify-end space-x-4">
+					{onCancel && (
+						<Button type="button" variant="outline" onClick={onCancel}>
+							Cancelar
+						</Button>
+					)}
+					<Button type="submit" disabled={isSubmitting}>
+						{isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+						{isEditing ? "Actualizar" : "Crear"}
+					</Button>
+				</div>
+			</form>
+		</Form>
 	);
 }

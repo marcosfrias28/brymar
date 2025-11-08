@@ -11,12 +11,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { AdvancedRichTextEditor } from "@/components/ui/advanced-rich-text-editor";
 import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
 import { Textarea } from "@/components/ui/textarea";
@@ -243,7 +238,9 @@ export function EnhancedAIDescription({
 								type="button"
 								variant="outline"
 							>
-								<Edit3 className={cn("mr-2", isMobile ? "h-5 w-5" : "h-4 w-4")} />
+								<Edit3
+									className={cn("mr-2", isMobile ? "h-5 w-5" : "h-4 w-4")}
+								/>
 								Editar con Formato
 							</Button>
 						)}

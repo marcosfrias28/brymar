@@ -5,7 +5,10 @@ interface WizardErrorDisplayProps {
 	mobileOptimizations: boolean;
 }
 
-export function WizardErrorDisplay({ error, mobileOptimizations }: WizardErrorDisplayProps) {
+export function WizardErrorDisplay({
+	error,
+	mobileOptimizations,
+}: WizardErrorDisplayProps) {
 	if (!error) {
 		return null;
 	}

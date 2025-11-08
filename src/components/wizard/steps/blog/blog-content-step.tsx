@@ -7,12 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -169,7 +164,9 @@ export function BlogContentStep({
 	const renderPreview = () => {
 		if (!watchedValues.content) {
 			return (
-				<p className="text-muted-foreground">No hay contenido para previsualizar</p>
+				<p className="text-muted-foreground">
+					No hay contenido para previsualizar
+				</p>
 			);
 		}
 
@@ -220,7 +217,9 @@ export function BlogContentStep({
 							placeholder="Ingresa el título del artículo..."
 						/>
 						{formErrors.title && (
-							<p className="text-destructive text-sm">{formErrors.title.message}</p>
+							<p className="text-destructive text-sm">
+								{formErrors.title.message}
+							</p>
 						)}
 					</div>
 

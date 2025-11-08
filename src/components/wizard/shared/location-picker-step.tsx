@@ -196,14 +196,18 @@ export function LocationPickerStep({
 								value={data.address?.city || ""}
 							/>
 							{errors["address.city"] && (
-								<p className="text-destructive text-sm">{errors["address.city"]}</p>
+								<p className="text-destructive text-sm">
+									{errors["address.city"]}
+								</p>
 							)}
 						</div>
 
 						<div className="space-y-2">
 							<Label htmlFor="province">Provincia *</Label>
 							<Input
-								className={errors["address.province"] ? "border-destructive" : ""}
+								className={
+									errors["address.province"] ? "border-destructive" : ""
+								}
 								id="province"
 								onChange={(e) =>
 									handleAddressChange("province", e.target.value)

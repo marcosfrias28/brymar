@@ -349,7 +349,10 @@ export function ImageUploadStep({
 												<div className="space-y-2">
 													{showAltText && (
 														<div>
-															<Label className="text-xs" htmlFor={`alt-${image.id}`}>
+															<Label
+																className="text-xs"
+																htmlFor={`alt-${image.id}`}
+															>
 																Texto alternativo
 															</Label>
 															<Input

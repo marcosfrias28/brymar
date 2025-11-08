@@ -438,7 +438,9 @@ export function InteractiveMap({
 					>
 						<div className="text-center">
 							<div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-primary border-b-2" />
-							<p className="text-muted-foreground text-sm">Inicializando mapa...</p>
+							<p className="text-muted-foreground text-sm">
+								Inicializando mapa...
+							</p>
 						</div>
 					</div>
 				</CardContent>
@@ -586,9 +588,13 @@ export function InteractiveMap({
 								size={isMobileDevice ? "default" : "sm"}
 								variant={isDrawing ? "default" : "outline"}
 							>
-								<PenTool className={cn(isMobileDevice ? "h-5 w-5" : "h-4 w-4")} />
+								<PenTool
+									className={cn(isMobileDevice ? "h-5 w-5" : "h-4 w-4")}
+								/>
 								<span
-									className={cn(isMobileDevice ? "ml-2 text-base" : "ml-2 text-sm")}
+									className={cn(
+										isMobileDevice ? "ml-2 text-base" : "ml-2 text-sm"
+									)}
 								>
 									{isDrawing ? "Dibujando..." : "Dibujar polígono"}
 								</span>
@@ -601,7 +607,9 @@ export function InteractiveMap({
 							>
 								<Undo2 className={cn(isMobileDevice ? "h-5 w-5" : "h-4 w-4")} />
 								<span
-									className={cn(isMobileDevice ? "ml-2 text-base" : "ml-2 text-sm")}
+									className={cn(
+										isMobileDevice ? "ml-2 text-base" : "ml-2 text-sm"
+									)}
 								>
 									Deshacer
 								</span>
@@ -612,9 +620,13 @@ export function InteractiveMap({
 								size={isMobileDevice ? "default" : "sm"}
 								variant="outline"
 							>
-								<XCircle className={cn(isMobileDevice ? "h-5 w-5" : "h-4 w-4")} />
+								<XCircle
+									className={cn(isMobileDevice ? "h-5 w-5" : "h-4 w-4")}
+								/>
 								<span
-									className={cn(isMobileDevice ? "ml-2 text-base" : "ml-2 text-sm")}
+									className={cn(
+										isMobileDevice ? "ml-2 text-base" : "ml-2 text-sm"
+									)}
 								>
 									Limpiar
 								</span>

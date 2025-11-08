@@ -3,18 +3,8 @@
 import { FileText, Home, MapPin, PenTool, Plus, Wand2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import {
-	Tabs,
-	TabsContent,
-	TabsList,
-	TabsTrigger,
-} from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGenerateAIContent, useWizardDraft } from "@/hooks/use-wizard";
 import type { WizardType } from "@/lib/types/index";
 import { cn } from "@/lib/utils/index";
@@ -188,7 +178,9 @@ export function WizardManager({
 								<div className="py-6 text-center">
 									<type.icon className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
 									<h3 className="mb-2 font-semibold text-lg">{type.label}</h3>
-									<p className="mb-4 text-muted-foreground">{type.description}</p>
+									<p className="mb-4 text-muted-foreground">
+										{type.description}
+									</p>
 									<Button
 										className="flex items-center gap-2"
 										onClick={handleStartNew}

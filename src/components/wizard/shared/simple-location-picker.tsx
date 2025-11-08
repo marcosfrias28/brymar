@@ -244,7 +244,9 @@ export function SimpleLocationPicker({
 						<div className="rounded-lg border border-green-200 bg-green-50 p-3">
 							<div className="flex items-center gap-2 text-green-700">
 								<CheckCircle className="h-4 w-4" />
-								<span className="font-medium text-sm">Ubicación encontrada</span>
+								<span className="font-medium text-sm">
+									Ubicación encontrada
+								</span>
 							</div>
 							<p className="mt-1 text-green-600 text-sm">
 								Coordenadas: {data.coordinates.lat.toFixed(4)},{" "}
@@ -284,7 +286,9 @@ export function SimpleLocationPicker({
 								value={data.address?.city || ""}
 							/>
 							{errors["address.city"] && (
-								<p className="text-destructive text-sm">{errors["address.city"]}</p>
+								<p className="text-destructive text-sm">
+									{errors["address.city"]}
+								</p>
 							)}
 						</div>
 
@@ -297,7 +301,9 @@ export function SimpleLocationPicker({
 								value={data.address?.province || ""}
 							>
 								<SelectTrigger
-									className={errors["address.province"] ? "border-destructive" : ""}
+									className={
+										errors["address.province"] ? "border-destructive" : ""
+									}
 								>
 									<SelectValue placeholder="Selecciona una provincia" />
 								</SelectTrigger>

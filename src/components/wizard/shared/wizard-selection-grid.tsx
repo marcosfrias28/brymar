@@ -123,7 +123,9 @@ export function WizardSelectionGrid({
 										<div className="flex-1 space-y-1">
 											<div className="flex items-center justify-between">
 												<span className="font-medium">{option.label}</span>
-												{isSelected && <Check className="h-4 w-4 text-primary" />}
+												{isSelected && (
+													<Check className="h-4 w-4 text-primary" />
+												)}
 											</div>
 											{option.description && (
 												<p className="text-muted-foreground text-xs">

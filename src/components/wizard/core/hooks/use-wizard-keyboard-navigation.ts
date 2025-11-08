@@ -155,7 +155,8 @@ function handleKeyNavigation({
 		announceAction,
 	});
 
-	const handler = arrowHandlers[event.key as keyof typeof arrowHandlers] ||
+	const handler =
+		arrowHandlers[event.key as keyof typeof arrowHandlers] ||
 		actionHandlers[event.key as keyof typeof actionHandlers] ||
 		helpHandlers[event.key as keyof typeof helpHandlers];
 

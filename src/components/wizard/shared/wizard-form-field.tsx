@@ -38,7 +38,9 @@ export function WizardFormField({
 			)}
 		>
 			{(label || description) && (
-				<div className={cn("space-y-1", isHorizontal && "sm:pt-2", labelClassName)}>
+				<div
+					className={cn("space-y-1", isHorizontal && "sm:pt-2", labelClassName)}
+				>
 					{label && (
 						<Label
 							className={cn(
@@ -57,7 +59,11 @@ export function WizardFormField({
 			)}
 
 			<div
-				className={cn("space-y-1", isHorizontal && "sm:col-span-2", fieldClassName)}
+				className={cn(
+					"space-y-1",
+					isHorizontal && "sm:col-span-2",
+					fieldClassName
+				)}
 			>
 				{children}
 				{error && <p className="text-destructive text-xs">{error}</p>}

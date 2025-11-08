@@ -2,7 +2,7 @@
 
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { RouteGuard } from "@/components/auth/route-guard";
@@ -20,6 +20,7 @@ import { PropertyType } from "@/types/wizard";
 
 export default function NewPropertyPage() {
 	const router = useRouter();
+	const searchParams = useSearchParams();
 	const breadcrumbs = useBreadcrumbs();
 	const { user } = useUser();
 	const [loading, setLoading] = useState(false);
@@ -56,7 +57,7 @@ export default function NewPropertyPage() {
 		loadDraftData();
 	}, [draftId, user?.id, router]);
 
-	const handleSubmit = async (data: any) => {
+	const handleSubmit = async (data: PropertyWizardData) => {
 		if (!user?.id) {
 			toast.error("Usuario no autenticado");
 			throw new Error("Usuario no autenticado");
@@ -92,12 +93,11 @@ export default function NewPropertyPage() {
 				toast.error(result.error || "Error al crear la propiedad");
 			}
 		} catch (error) {
-			console.error("Error creating property:", error);
 			toast.error("Error inesperado al crear la propiedad");
 		}
 	};
 
-	const handleSaveDraft = async (data: any) => {
+	const handleSaveDraft = async (data: PropertyWizardData) => {
 		if (!user?.id) {
 			toast.error("Usuario no autenticado");
 			throw new Error("Usuario no autenticado");
@@ -130,13 +130,14 @@ export default function NewPropertyPage() {
 				toast.success("Borrador guardado exitosamente");
 				// Actualizar la URL con el ID del borrador si es nuevo
 				if (!draftId && result.data?.propertyId) {
-					router.replace(`/dashboard/properties/new?draft=${result.data.propertyId}`);
+					router.replace(
+						`/dashboard/properties/new?draft=${result.data.propertyId}`
+					);
 				}
 			} else {
 				toast.error(result.error || "Error al guardar el borrador");
 			}
 		} catch (error) {
-			console.error("Error saving draft:", error);
 			toast.error("Error inesperado al guardar el borrador");
 		}
 	};

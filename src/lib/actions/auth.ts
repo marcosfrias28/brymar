@@ -917,7 +917,10 @@ export async function changePasswordAction(formData: FormData) {
 export async function sendVerificationOTPAction(formData: FormData) {
 	const email = formData.get("email") as string;
 	const username = formData.get("username") as string;
-	return await sendVerificationOTP({ email, username } as SendVerificationOTPInput);
+	return await sendVerificationOTP({
+		email,
+		username,
+	} as SendVerificationOTPInput);
 }
 
 export async function verifyOTPAction(formData: FormData) {

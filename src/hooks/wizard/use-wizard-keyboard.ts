@@ -4,12 +4,13 @@ import type { WizardData } from "@/types/wizard-core";
 
 type UseWizardKeyboardProps<T extends WizardData> = {
 	enableKeyboardNavigation: boolean;
-	wizard: Pick<UseWizardReturn<T>, 
-		| "nextStep" 
-		| "previousStep" 
-		| "saveDraft" 
-		| "complete" 
-		| "canGoNext" 
+	wizard: Pick<
+		UseWizardReturn<T>,
+		| "nextStep"
+		| "previousStep"
+		| "saveDraft"
+		| "complete"
+		| "canGoNext"
 		| "canComplete"
 	>;
 	onCancel?: () => void;
@@ -23,17 +24,20 @@ const isInputElement = (target: EventTarget): boolean =>
 const handleNavigationKeys = <T extends WizardData>(
 	key: string,
 	ctrlOrMeta: boolean,
-	wizard: Pick<UseWizardReturn<T>, 
-		| "nextStep" 
-		| "previousStep" 
-		| "saveDraft" 
-		| "complete" 
-		| "canGoNext" 
+	wizard: Pick<
+		UseWizardReturn<T>,
+		| "nextStep"
+		| "previousStep"
+		| "saveDraft"
+		| "complete"
+		| "canGoNext"
 		| "canComplete"
 	>
 ): boolean => {
-	if (!ctrlOrMeta) return false;
-	
+	if (!ctrlOrMeta) {
+		return false;
+	}
+
 	switch (key) {
 		case "ArrowRight":
 		case "PageDown":
@@ -76,7 +80,7 @@ export function useWizardKeyboard<T extends WizardData>({
 			}
 
 			const ctrlOrMeta = event.ctrlKey || event.metaKey;
-			
+
 			if (handleNavigationKeys(event.key, ctrlOrMeta, wizard)) {
 				event.preventDefault();
 				return;
@@ -91,9 +95,5 @@ export function useWizardKeyboard<T extends WizardData>({
 
 		document.addEventListener("keydown", handleKeyDown);
 		return () => document.removeEventListener("keydown", handleKeyDown);
-	}, [
-		enableKeyboardNavigation,
-		wizard,
-		onCancel,
-	]);
+	}, [enableKeyboardNavigation, wizard, onCancel]);
 }

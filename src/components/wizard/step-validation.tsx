@@ -137,13 +137,18 @@ export function StepValidation({
 						</span>
 						<div>
 							<h3
-								className={cn("font-semibold", isMobile ? "text-base" : "text-lg")}
+								className={cn(
+									"font-semibold",
+									isMobile ? "text-base" : "text-lg"
+								)}
 							>
 								{stepTitle}
 							</h3>
 							<div className="mt-1 flex items-center space-x-2">
 								{getValidationIcon()}
-								<span className={cn("font-medium text-sm", getValidationColor())}>
+								<span
+									className={cn("font-medium text-sm", getValidationColor())}
+								>
 									{getValidationStatus()}
 								</span>
 							</div>

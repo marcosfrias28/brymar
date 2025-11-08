@@ -216,7 +216,12 @@ function NetworkStatusBar({
 				</div>
 
 				{queuedOperations > 0 && (
-					<Button className="h-6 px-2" onClick={onRetry} size="sm" variant="ghost">
+					<Button
+						className="h-6 px-2"
+						onClick={onRetry}
+						size="sm"
+						variant="ghost"
+					>
 						<RefreshCw className="mr-1 h-3 w-3" />
 						Reintentar
 					</Button>
@@ -262,7 +267,10 @@ function OfflineModeAlert({
 							</p>
 							<div className="max-h-32 space-y-1 overflow-y-auto">
 								{queuedOperations.slice(0, 5).map((op) => (
-									<div className="rounded border bg-white p-2 text-xs" key={op.id}>
+									<div
+										className="rounded border bg-white p-2 text-xs"
+										key={op.id}
+									>
 										<div className="font-medium">{op.description}</div>
 										<div className="text-gray-500">
 											{new Date(op.timestamp).toLocaleTimeString()}

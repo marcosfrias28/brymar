@@ -5,7 +5,8 @@ import type { UseWizardReturn } from "@/hooks/wizard/use-wizard";
 import type { WizardConfig, WizardData } from "@/types/wizard-core";
 
 type WizardContentProps<T extends WizardData> = {
-	wizard: Pick<UseWizardReturn<T>,
+	wizard: Pick<
+		UseWizardReturn<T>,
 		| "data"
 		| "getStepErrors"
 		| "isLoading"

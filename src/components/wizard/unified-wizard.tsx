@@ -11,12 +11,7 @@ import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils/index";
 import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
@@ -274,7 +269,9 @@ export function UnifiedWizard<T = Record<string, unknown>>({
 						)}
 					</CardTitle>
 					{currentStepConfig.description && (
-						<p className="text-muted-foreground">{currentStepConfig.description}</p>
+						<p className="text-muted-foreground">
+							{currentStepConfig.description}
+						</p>
 					)}
 					{hasStepErrors && (
 						<div className="flex items-center gap-2 text-destructive text-sm">

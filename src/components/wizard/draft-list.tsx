@@ -12,12 +12,7 @@ import {
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -120,7 +115,10 @@ export function DraftList({
 
 	return (
 		<Card
-			className={cn("transition-all duration-200", secondaryColorClasses.cardHover)}
+			className={cn(
+				"transition-all duration-200",
+				secondaryColorClasses.cardHover
+			)}
 		>
 			<CardHeader>
 				<CardTitle className="flex items-center gap-2">
@@ -193,7 +191,11 @@ export function DraftList({
 									{showActions && (
 										<DropdownMenu>
 											<DropdownMenuTrigger asChild>
-												<Button className="h-8 w-8 p-0" size="sm" variant="ghost">
+												<Button
+													className="h-8 w-8 p-0"
+													size="sm"
+													variant="ghost"
+												>
 													<MoreHorizontal className="h-4 w-4" />
 												</Button>
 											</DropdownMenuTrigger>

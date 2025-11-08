@@ -7,10 +7,7 @@ interface WizardKeyboardHelpProps {
 export function WizardKeyboardHelp({
 	enableKeyboardNavigation,
 }: WizardKeyboardHelpProps) {
-	if (
-		process.env.NODE_ENV !== "development" ||
-		!enableKeyboardNavigation
-	) {
+	if (process.env.NODE_ENV !== "development" || !enableKeyboardNavigation) {
 		return null;
 	}
 
