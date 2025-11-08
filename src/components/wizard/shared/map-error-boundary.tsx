@@ -11,6 +11,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import process from "node:process";
 
 type MapErrorBoundaryState = {
 	hasError: boolean;

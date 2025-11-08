@@ -22,7 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/index";
 
 export type ImageMetadata = {
 	id: string;
@@ -349,10 +349,7 @@ export function ImageUploadStep({
 												<div className="space-y-2">
 													{showAltText && (
 														<div>
-															<Label
-																className="text-xs"
-																htmlFor={`alt-${image.id}`}
-															>
+															<Label className="text-xs" htmlFor={`alt-${image.id}`}>
 																Texto alternativo
 															</Label>
 															<Input

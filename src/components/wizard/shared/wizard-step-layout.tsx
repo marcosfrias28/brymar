@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/index";
 
 type WizardStepLayoutProps = {
 	title: string;

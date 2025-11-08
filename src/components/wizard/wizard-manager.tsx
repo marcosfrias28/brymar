@@ -2,28 +2,28 @@
 
 import { FileText, Home, MapPin, PenTool, Plus, Wand2 } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button.tsx";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
 	CardHeader,
 	CardTitle,
-} from "@/components/ui/card.tsx";
+} from "@/components/ui/card";
 import {
 	Tabs,
 	TabsContent,
 	TabsList,
 	TabsTrigger,
-} from "@/components/ui/tabs.tsx";
-import { useGenerateAIContent, useWizardDraft } from "@/hooks/use-wizard.ts";
-import type { WizardType } from "@/lib/types/index.ts";
-import { cn } from "@/lib/utils/index.ts";
-import { secondaryColorClasses } from "@/lib/utils/secondary-colors.ts";
-import type { PropertyWizardData } from "@/types/property-wizard.ts";
-import { BlogWizard } from "./blog-wizard.tsx";
-import { DraftList } from "./draft-list.tsx";
-import { LandWizard } from "./land-wizard.tsx";
-import { PropertyWizard } from "./property-wizard.tsx";
+} from "@/components/ui/tabs";
+import { useGenerateAIContent, useWizardDraft } from "@/hooks/use-wizard";
+import type { WizardType } from "@/lib/types/index";
+import { cn } from "@/lib/utils/index";
+import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
+import type { PropertyWizardData } from "@/types/property-wizard";
+import { BlogWizard } from "./blog-wizard";
+import { DraftList } from "./draft-list";
+import { LandWizard } from "./land-wizard";
+import { PropertyWizard } from "./property-wizard";
 
 type WizardManagerProps = {
 	defaultType?: WizardType;
@@ -115,32 +115,32 @@ export function WizardManager({
 		};
 
 		return (
-			<div class="space-y-6">
-				<div class="flex items-center justify-between">
+			<div className="space-y-6">
+				<div className="flex items-center justify-between">
 					<Button onClick={() => setShowWizard(false)} variant="outline">
 						← Volver a la lista
 					</Button>
 
 					{selectedDraft && (
-						<div class="flex items-center gap-2">
+						<div className="flex items-center gap-2">
 							<Button
-								class="flex items-center gap-2"
+								className="flex items-center gap-2"
 								disabled={generateAI.isPending}
 								onClick={() => handleGenerateAI("title")}
 								size="sm"
 								variant="outline"
 							>
-								<Wand2 class="h-4 w-4" />
+								<Wand2 className="h-4 w-4" />
 								Generar Título
 							</Button>
 							<Button
-								class="flex items-center gap-2"
+								className="flex items-center gap-2"
 								disabled={generateAI.isPending}
 								onClick={() => handleGenerateAI("description")}
 								size="sm"
 								variant="outline"
 							>
-								<Wand2 class="h-4 w-4" />
+								<Wand2 className="h-4 w-4" />
 								Generar Descripción
 							</Button>
 						</div>
@@ -157,11 +157,11 @@ export function WizardManager({
 	}
 
 	return (
-		<div class="space-y-6">
-			<Card class={cn("border-border", secondaryColorClasses.cardHover)}>
+		<div className="space-y-6">
+			<Card className={cn("border-border", secondaryColorClasses.cardHover)}>
 				<CardHeader>
-					<CardTitle class="flex items-center gap-2">
-						<FileText class="h-5 w-5 text-secondary" />
+					<CardTitle className="flex items-center gap-2">
+						<FileText className="h-5 w-5 text-secondary" />
 						Asistente de Creación
 					</CardTitle>
 				</CardHeader>
@@ -170,30 +170,30 @@ export function WizardManager({
 						onValueChange={(value) => setActiveTab(value as WizardType)}
 						value={activeTab}
 					>
-						<TabsList class="grid w-full grid-cols-3">
+						<TabsList className="grid w-full grid-cols-3">
 							{wizardTypes.map((type) => (
 								<TabsTrigger
-									class="flex items-center gap-2"
+									className="flex items-center gap-2"
 									key={type.id}
 									value={type.id}
 								>
-									<type.icon class="h-4 w-4" />
+									<type.icon className="h-4 w-4" />
 									{type.label}
 								</TabsTrigger>
 							))}
 						</TabsList>
 
 						{wizardTypes.map((type) => (
-							<TabsContent class="space-y-4" key={type.id} value={type.id}>
-								<div class="py-6 text-center">
-									<type.icon class="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-									<h3 class="mb-2 font-semibold text-lg">{type.label}</h3>
-									<p class="mb-4 text-muted-foreground">{type.description}</p>
+							<TabsContent className="space-y-4" key={type.id} value={type.id}>
+								<div className="py-6 text-center">
+									<type.icon className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+									<h3 className="mb-2 font-semibold text-lg">{type.label}</h3>
+									<p className="mb-4 text-muted-foreground">{type.description}</p>
 									<Button
-										class="flex items-center gap-2"
+										className="flex items-center gap-2"
 										onClick={handleStartNew}
 									>
-										<Plus class="h-4 w-4" />
+										<Plus className="h-4 w-4" />
 										Crear Nuevo {type.label.slice(0, -1)}
 									</Button>
 								</div>

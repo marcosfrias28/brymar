@@ -3,10 +3,10 @@
 import {
 	createPropertyFromWizard,
 	savePropertyDraft,
-} from "@/lib/actions/property-wizard-actions.ts";
-import type { PropertyWizardData } from "@/types/property-wizard.ts";
-import { PropertyForm } from "../forms/property-form.tsx";
-import { UnifiedWizard, type WizardStep } from "./unified-wizard.tsx";
+} from "@/lib/actions/property-wizard-actions";
+import type { PropertyWizardData } from "@/types/property-wizard";
+import { PropertyForm } from "../forms/property-form";
+import { UnifiedWizard, type WizardStep } from "./unified-wizard";
 
 type PropertyStepProps = {
 	data: PropertyWizardData;
@@ -21,7 +21,7 @@ const PropertyBasicInfoStep = ({
 	errors,
 }: PropertyStepProps) => {
 	return (
-		<div class="space-y-4">
+		<div className="space-y-4">
 			<PropertyForm
 				initialData={data as any}
 				onSubmit={async (formData) => {
@@ -69,13 +69,9 @@ export function PropertyWizard({
 		try {
 			const result = await savePropertyDraft(data, "user-id"); // TODO: Get actual user ID
 			if (result.success) {
-				console.log("Draft saved successfully:", result.data);
 			} else {
-				console.error("Error saving draft:", result.error);
 			}
-		} catch (error) {
-			console.error("Error saving draft:", error);
-		}
+		} catch (_error) {}
 	};
 
 	const handleComplete = async (data: PropertyWizardData) => {
@@ -90,8 +86,7 @@ export function PropertyWizard({
 				success: false,
 				error: result.error || "Error al crear la propiedad",
 			};
-		} catch (error) {
-			console.error("Error creating property:", error);
+		} catch (_error) {
 			return { success: false, error: "Error al crear la propiedad" };
 		}
 	};

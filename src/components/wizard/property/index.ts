@@ -23,11 +23,11 @@ export {
 	savePropertyDraft,
 	createPropertyFromWizard,
 	updatePropertyFromWizard,
-} from "@/lib/actions/property-wizard-actions.ts";
+} from "@/lib/actions/property-wizard-actions";
 // Configuration and Actions (Re-exported for convenience)
-export { propertyWizardConfig } from "@/lib/wizard/property-wizard-config.ts";
+export { propertyWizardConfig } from "@/lib/wizard/property-wizard-config";
 
 // Types (Re-exported for convenience)
-export type { PropertyWizardData } from "@/types/property-wizard.ts";
+export type { PropertyWizardData } from "@/types/property-wizard";
 // Component
-export { PropertyWizard } from "./property-wizard.tsx";
+export { PropertyWizard } from "./property-wizard";

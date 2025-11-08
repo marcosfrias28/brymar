@@ -3,7 +3,7 @@
 import { Check } from "lucide-react";
 import type React from "react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/index";
 
 type SelectionOption = {
 	id: string;
@@ -123,9 +123,7 @@ export function WizardSelectionGrid({
 										<div className="flex-1 space-y-1">
 											<div className="flex items-center justify-between">
 												<span className="font-medium">{option.label}</span>
-												{isSelected && (
-													<Check className="h-4 w-4 text-primary" />
-												)}
+												{isSelected && <Check className="h-4 w-4 text-primary" />}
 											</div>
 											{option.description && (
 												<p className="text-muted-foreground text-xs">

@@ -24,9 +24,10 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ErrorFactory, type WizardError } from "@/lib/errors/wizard-errors";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/index";
 import { handleErrorWithRecovery } from "@/lib/utils/error-recovery";
 import { useNetworkStatus } from "@/lib/utils/network-detection";
+import process from "node:process";
 
 export type ErrorRecoveryState = {
 	errors: WizardError[];

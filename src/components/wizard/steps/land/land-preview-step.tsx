@@ -2,7 +2,12 @@
 
 import { Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 
 type LandPreviewData = {
 	name?: string;
@@ -36,9 +41,7 @@ export function LandPreviewStep({
 				<CardContent className="space-y-4">
 					<div className="space-y-4">
 						<div>
-							<h3 className="font-semibold text-lg">
-								{data.name || "Sin nombre"}
-							</h3>
+							<h3 className="font-semibold text-lg">{data.name || "Sin nombre"}</h3>
 							<p className="text-muted-foreground">
 								{data.description || "Sin descripción"}
 							</p>

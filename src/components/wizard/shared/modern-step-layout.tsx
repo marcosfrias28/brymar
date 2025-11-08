@@ -20,9 +20,14 @@ import {
 import type React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/index";
 
 // Animation variants
 const containerVariants = {
@@ -117,9 +122,7 @@ export function ModernSectionCard({
 						<div>
 							<CardTitle className="text-xl">{title}</CardTitle>
 							{description && (
-								<p className="mt-1 text-muted-foreground text-sm">
-									{description}
-								</p>
+								<p className="mt-1 text-muted-foreground text-sm">{description}</p>
 							)}
 						</div>
 					</div>
@@ -132,10 +135,7 @@ export function ModernSectionCard({
 
 	if (variant === "ghost") {
 		return (
-			<motion.div
-				className={cn("space-y-4", className)}
-				variants={itemVariants}
-			>
+			<motion.div className={cn("space-y-4", className)} variants={itemVariants}>
 				<div className="mb-4 flex items-center space-x-3">
 					{icon && <div className="rounded-lg bg-primary/10 p-2">{icon}</div>}
 					<div>
@@ -153,9 +153,7 @@ export function ModernSectionCard({
 
 	return (
 		<motion.div variants={itemVariants}>
-			<Card className={cn("border-border/50 shadow-sm", className)}>
-				{content}
-			</Card>
+			<Card className={cn("border-border/50 shadow-sm", className)}>{content}</Card>
 		</motion.div>
 	);
 }
@@ -187,9 +185,7 @@ export function ModernGridSection({
 	};
 
 	return (
-		<div
-			className={cn("grid", gridClasses[columns], gapClasses[gap], className)}
-		>
+		<div className={cn("grid", gridClasses[columns], gapClasses[gap], className)}>
 			{children}
 		</div>
 	);
@@ -234,11 +230,7 @@ export function ModernInfoBox({
 	return (
 		<motion.div variants={itemVariants}>
 			<div
-				className={cn(
-					"rounded-lg border p-4",
-					variantStyles[variant],
-					className
-				)}
+				className={cn("rounded-lg border p-4", variantStyles[variant], className)}
 			>
 				<div className="flex items-start space-x-3">
 					<div className="flex-shrink-0">
@@ -268,9 +260,7 @@ export function ModernDivider({ label, className }: ModernDividerProps) {
 					<Separator className="w-full" />
 				</div>
 				<div className="relative flex justify-center text-xs uppercase">
-					<span className="bg-background px-2 text-muted-foreground">
-						{label}
-					</span>
+					<span className="bg-background px-2 text-muted-foreground">{label}</span>
 				</div>
 			</div>
 		);
@@ -318,9 +308,7 @@ export function ModernStatsCard({
 					<p className="font-medium text-muted-foreground text-sm">{title}</p>
 					<p className="font-bold text-2xl">{value}</p>
 					{trend && trendValue && TrendIcon && (
-						<div
-							className={cn("flex items-center text-sm", trendColors[trend])}
-						>
+						<div className={cn("flex items-center text-sm", trendColors[trend])}>
 							<TrendIcon className="mr-1 h-4 w-4" />
 							{trendValue}
 						</div>

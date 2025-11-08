@@ -1,6 +1,9 @@
 "use client";
 
-import { useCreateWizardDraft, useSaveWizardDraft } from "@/hooks/use-wizard";
+import {
+	useCreateWizardDraft,
+	useSaveWizardDraft,
+} from "@/hooks/use-wizard";
 import { createLand } from "@/lib/actions/lands";
 import type { CreateLandInput } from "@/lib/types/lands";
 import { LandForm } from "../forms/land-form";

@@ -6,9 +6,24 @@ import {
 	type Map as LeafletMap,
 	type LeafletMouseEvent,
 } from "leaflet";
-import { AlertCircle, CheckCircle, Crosshair, MapPin } from "lucide-react";
+import {
+	AlertCircle,
+	CheckCircle,
+	Crosshair,
+	MapPin,
+	Search,
+	PenTool,
+	Undo2,
+	XCircle,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
+import {
+	MapContainer,
+	Marker,
+	Polygon,
+	TileLayer,
+	useMapEvents,
+} from "react-leaflet";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -16,13 +31,18 @@ import {
 	DOMINICAN_REPUBLIC_CENTER,
 	mapService,
 } from "@/lib/services/map-service";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/index";
 import {
 	isMobile,
 	isTouchDevice,
 	mobileClasses,
 } from "@/lib/utils/mobile-utils";
 import type { Coordinates } from "@/types/wizard";
+import type {
+	Geometry,
+	PolygonGeometry,
+	PointGeometry,
+} from "@/lib/types/shared";
 
 // Import Leaflet CSS
 import "leaflet/dist/leaflet.css";
@@ -45,6 +65,7 @@ type InteractiveMapProps = {
 	coordinates?: Coordinates;
 	onCoordinatesChange: (coordinates: Coordinates) => void;
 	onAddressChange?: (address: any) => void;
+	onGeometryChange?: (geometry: Geometry) => void;
 	className?: string;
 	height?: string;
 	isMobile?: boolean;
@@ -56,20 +77,26 @@ function MapClickHandler({
 	onAddressChange,
 	isProcessing,
 	onProcessingChange,
+	onGeometryChange,
 }: {
 	onCoordinatesChange: (coordinates: Coordinates) => void;
 	onAddressChange?: (address: any) => void;
 	isProcessing: boolean;
 	onProcessingChange: (processing: boolean) => void;
+	onGeometryChange?: (geometry: Geometry) => void;
 }) {
 	// Use ref to prevent stale closures and ensure latest callback is used
 	const onCoordinatesChangeRef = useRef(onCoordinatesChange);
 	const onAddressChangeRef = useRef(onAddressChange);
+	const onGeometryChangeRef = useRef(onGeometryChange);
 
 	useEffect(() => {
 		onCoordinatesChangeRef.current = onCoordinatesChange;
 		onAddressChangeRef.current = onAddressChange;
 	}, [onCoordinatesChange, onAddressChange]);
+	useEffect(() => {
+		onGeometryChangeRef.current = onGeometryChange;
+	}, [onGeometryChange]);
 
 	const handleMapClick = useCallback(
 		async (e: LeafletMouseEvent) => {
@@ -99,6 +126,15 @@ function MapClickHandler({
 			// Update coordinates immediately
 			onCoordinatesChangeRef.current(coordinates);
 
+			// Also emit point geometry if requested
+			if (onGeometryChangeRef.current) {
+				const point: PointGeometry = {
+					type: "Point",
+					coordinates: [lng, lat],
+				};
+				onGeometryChangeRef.current(point);
+			}
+
 			// Reverse geocode to get address if callback provided
 			if (onAddressChangeRef.current) {
 				onProcessingChange(true);
@@ -126,6 +162,7 @@ export function InteractiveMap({
 	coordinates,
 	onCoordinatesChange,
 	onAddressChange,
+	onGeometryChange,
 	className,
 	height = "400px",
 	isMobile: propIsMobile,
@@ -135,11 +172,40 @@ export function InteractiveMap({
 	const [mapError, setMapError] = useState<string | null>(null);
 	const [isLocating, setIsLocating] = useState(false);
 	const [isProcessingClick, setIsProcessingClick] = useState(false);
+	const [searchQuery, setSearchQuery] = useState("");
+	const [isSearching, setIsSearching] = useState(false);
+	const [isDrawing, setIsDrawing] = useState(false);
+	const [polygonPoints, setPolygonPoints] = useState<Coordinates[]>([]);
 
 	// Detect mobile if not provided as prop
 	const isMobileDevice =
 		propIsMobile ?? (typeof window !== "undefined" && isMobile());
 	const isTouch = typeof window !== "undefined" && isTouchDevice();
+
+	// Memoize map configuration to prevent unnecessary re-renders (must be before any conditional returns)
+	const mapConfig = useMemo(() => {
+		const center: LatLngExpression = coordinates
+			? [coordinates.latitude, coordinates.longitude]
+			: [
+					DOMINICAN_REPUBLIC_CENTER.latitude,
+					DOMINICAN_REPUBLIC_CENTER.longitude,
+				];
+
+		const bounds: [[number, number], [number, number]] = [
+			[DOMINICAN_REPUBLIC_BOUNDS.south, DOMINICAN_REPUBLIC_BOUNDS.west], // Southwest corner
+			[DOMINICAN_REPUBLIC_BOUNDS.north, DOMINICAN_REPUBLIC_BOUNDS.east], // Northeast corner
+		];
+
+		const zoom = coordinates
+			? isMobileDevice
+				? 14
+				: 15
+			: isMobileDevice
+				? 7
+				: 8;
+
+		return { center, bounds, zoom };
+	}, [coordinates, isMobileDevice]);
 
 	// Memoize callbacks to prevent unnecessary re-renders
 	const stableOnCoordinatesChange = useCallback(
@@ -156,6 +222,15 @@ export function InteractiveMap({
 			}
 		},
 		[onAddressChange]
+	);
+
+	const stableOnGeometryChange = useCallback(
+		(geometry: Geometry) => {
+			if (onGeometryChange) {
+				onGeometryChange(geometry);
+			}
+		},
+		[onGeometryChange]
 	);
 
 	// Ensure component only renders on client side with proper hydration
@@ -229,6 +304,12 @@ export function InteractiveMap({
 					}
 				}
 
+				// Emit point geometry
+				stableOnGeometryChange({
+					type: "Point",
+					coordinates: [coordinates.longitude, coordinates.latitude],
+				});
+
 				setIsLocating(false);
 			},
 			(error) => {
@@ -261,7 +342,90 @@ export function InteractiveMap({
 		stableOnCoordinatesChange,
 		stableOnAddressChange,
 		onAddressChange,
+		stableOnGeometryChange,
 	]);
+
+	// Search address -> coordinates
+	const handleSearch = useCallback(async () => {
+		if (!searchQuery.trim() || isSearching) {
+			return;
+		}
+		try {
+			setIsSearching(true);
+			setMapError(null);
+			const coords = await mapService.geocode(searchQuery.trim());
+			stableOnCoordinatesChange(coords);
+			try {
+				const address = await mapService.reverseGeocode(coords);
+				stableOnAddressChange(address);
+			} catch (_error) {}
+			stableOnGeometryChange({
+				type: "Point",
+				coordinates: [coords.longitude, coords.latitude],
+			});
+		} catch (error) {
+			setMapError(
+				error instanceof Error
+					? error.message
+					: "No se pudo buscar la dirección"
+			);
+		} finally {
+			setIsSearching(false);
+		}
+	}, [
+		searchQuery,
+		isSearching,
+		stableOnCoordinatesChange,
+		stableOnAddressChange,
+		stableOnGeometryChange,
+	]);
+
+	// Polygon drawing handler
+	function PolygonDrawHandler() {
+		useMapEvents({
+			click: async (e) => {
+				if (!isDrawing) {
+					return;
+				}
+				const { lat, lng } = e.latlng;
+				const coords: Coordinates = { latitude: lat, longitude: lng };
+				if (!mapService.isWithinDominicanRepublic(coords)) {
+					return;
+				}
+				setPolygonPoints((prev) => [...prev, coords]);
+			},
+		});
+		return null;
+	}
+
+	const undoLastPoint = useCallback(() => {
+		setPolygonPoints((prev) => prev.slice(0, -1));
+	}, []);
+
+	const clearPolygon = useCallback(() => {
+		setPolygonPoints([]);
+	}, []);
+
+	const finishPolygon = useCallback(() => {
+		if (polygonPoints.length < 3) {
+			setMapError("El polígono requiere al menos 3 puntos");
+			return;
+		}
+		setIsDrawing(false);
+		// Build GeoJSON polygon (close ring)
+		const ring = polygonPoints.map<[number, number]>((p) => [
+			p.longitude,
+			p.latitude,
+		]);
+		if (
+			ring.length &&
+			(ring[0][0] !== ring.at(-1)?.[0] || ring[0][1] !== ring.at(-1)?.[1])
+		) {
+			ring.push(ring[0]);
+		}
+		const polygon: PolygonGeometry = { type: "Polygon", coordinates: [ring] };
+		stableOnGeometryChange(polygon);
+	}, [polygonPoints, stableOnGeometryChange]);
 
 	// Don't render on server side - show loading state
 	if (!isClient) {
@@ -274,40 +438,13 @@ export function InteractiveMap({
 					>
 						<div className="text-center">
 							<div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-primary border-b-2" />
-							<p className="text-muted-foreground text-sm">
-								Inicializando mapa...
-							</p>
+							<p className="text-muted-foreground text-sm">Inicializando mapa...</p>
 						</div>
 					</div>
 				</CardContent>
 			</Card>
 		);
 	}
-
-	// Memoize map configuration to prevent unnecessary re-renders
-	const mapConfig = useMemo(() => {
-		const center: LatLngExpression = coordinates
-			? [coordinates.latitude, coordinates.longitude]
-			: [
-					DOMINICAN_REPUBLIC_CENTER.latitude,
-					DOMINICAN_REPUBLIC_CENTER.longitude,
-				];
-
-		const bounds: [[number, number], [number, number]] = [
-			[DOMINICAN_REPUBLIC_BOUNDS.south, DOMINICAN_REPUBLIC_BOUNDS.west], // Southwest corner
-			[DOMINICAN_REPUBLIC_BOUNDS.north, DOMINICAN_REPUBLIC_BOUNDS.east], // Northeast corner
-		];
-
-		const zoom = coordinates
-			? isMobileDevice
-				? 14
-				: 15
-			: isMobileDevice
-				? 7
-				: 8;
-
-		return { center, bounds, zoom };
-	}, [coordinates, isMobileDevice]);
 
 	return (
 		<Card
@@ -326,6 +463,57 @@ export function InteractiveMap({
 								: "flex items-center justify-between"
 						)}
 					>
+						{/* Search input */}
+						<div
+							className={cn(
+								"flex items-center",
+								isMobileDevice ? "space-x-1" : "space-x-2"
+							)}
+						>
+							<div
+								className={cn(
+									"flex items-center rounded-md border px-2",
+									isMobileDevice ? "h-9 w-full" : "h-8 w-80"
+								)}
+								role="search"
+							>
+								<Search
+									className={cn(
+										"text-muted-foreground",
+										isMobileDevice ? "h-4 w-4" : "h-4 w-4"
+									)}
+								/>
+								<input
+									className={cn(
+										"ml-2 flex-1 bg-transparent outline-none",
+										isMobileDevice ? "text-xs" : "text-sm"
+									)}
+									onChange={(e) => setSearchQuery(e.target.value)}
+									onKeyDown={(e) => {
+										if (e.key === "Enter") {
+											e.preventDefault();
+											handleSearch();
+										}
+									}}
+									placeholder={
+										isMobileDevice
+											? "Buscar dirección"
+											: "Buscar dirección en RD"
+									}
+									type="text"
+									value={searchQuery}
+								/>
+								<Button
+									disabled={isSearching}
+									onClick={handleSearch}
+									size={isMobileDevice ? "default" : "sm"}
+									variant="outline"
+								>
+									{isSearching ? "Buscando..." : "Buscar"}
+								</Button>
+							</div>
+						</div>
+
 						<div
 							className={cn(
 								"flex items-center",
@@ -385,6 +573,61 @@ export function InteractiveMap({
 								{isLocating ? "Ubicando..." : "Mi ubicación"}
 							</span>
 						</Button>
+						<div
+							className={cn(
+								"flex items-center",
+								isMobileDevice ? "mt-2 space-x-1" : "ml-4 space-x-2"
+							)}
+						>
+							<Button
+								className={cn(isMobileDevice && `${mobileClasses.touchButton}`)}
+								disabled={isProcessingClick}
+								onClick={() => setIsDrawing((v) => !v)}
+								size={isMobileDevice ? "default" : "sm"}
+								variant={isDrawing ? "default" : "outline"}
+							>
+								<PenTool className={cn(isMobileDevice ? "h-5 w-5" : "h-4 w-4")} />
+								<span
+									className={cn(isMobileDevice ? "ml-2 text-base" : "ml-2 text-sm")}
+								>
+									{isDrawing ? "Dibujando..." : "Dibujar polígono"}
+								</span>
+							</Button>
+							<Button
+								disabled={!isDrawing && polygonPoints.length === 0}
+								onClick={undoLastPoint}
+								size={isMobileDevice ? "default" : "sm"}
+								variant="outline"
+							>
+								<Undo2 className={cn(isMobileDevice ? "h-5 w-5" : "h-4 w-4")} />
+								<span
+									className={cn(isMobileDevice ? "ml-2 text-base" : "ml-2 text-sm")}
+								>
+									Deshacer
+								</span>
+							</Button>
+							<Button
+								disabled={polygonPoints.length === 0}
+								onClick={clearPolygon}
+								size={isMobileDevice ? "default" : "sm"}
+								variant="outline"
+							>
+								<XCircle className={cn(isMobileDevice ? "h-5 w-5" : "h-4 w-4")} />
+								<span
+									className={cn(isMobileDevice ? "ml-2 text-base" : "ml-2 text-sm")}
+								>
+									Limpiar
+								</span>
+							</Button>
+							<Button
+								disabled={polygonPoints.length < 3}
+								onClick={finishPolygon}
+								size={isMobileDevice ? "default" : "sm"}
+								variant="default"
+							>
+								Guardar polígono
+							</Button>
+						</div>
 					</div>
 
 					{/* Error message */}
@@ -457,14 +700,29 @@ export function InteractiveMap({
 								isProcessing={isProcessingClick}
 								onAddressChange={stableOnAddressChange}
 								onCoordinatesChange={stableOnCoordinatesChange}
+								onGeometryChange={stableOnGeometryChange}
 								onProcessingChange={setIsProcessingClick}
 							/>
+
+							{/* Polygon drawing handler */}
+							{isDrawing && <PolygonDrawHandler />}
 
 							{/* Marker for selected coordinates */}
 							{coordinates && (
 								<Marker
 									icon={markerIcon}
 									position={[coordinates.latitude, coordinates.longitude]}
+								/>
+							)}
+
+							{/* Polygon display */}
+							{polygonPoints.length >= 2 && (
+								<Polygon
+									pathOptions={{ color: "#2563eb", weight: 3 }}
+									positions={polygonPoints.map((p) => [
+										p.latitude,
+										p.longitude,
+									])}
 								/>
 							)}
 						</MapContainer>
@@ -500,6 +758,16 @@ export function InteractiveMap({
 									>
 										para seleccionar la ubicación
 									</p>
+									{isDrawing && (
+										<p
+											className={cn(
+												"mt-2 text-primary",
+												isMobileDevice ? "text-xs" : "text-xs"
+											)}
+										>
+											Modo dibujo: agrega puntos para crear el polígono.
+										</p>
+									)}
 								</div>
 							</div>
 						)}

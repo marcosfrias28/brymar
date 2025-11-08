@@ -2,7 +2,7 @@
 
 // Dynamic Step Rendering Component
 
-import React, { Suspense, useMemo } from "react";
+import React, { Suspense } from "react";
 import {
 	Card,
 	CardContent,
@@ -11,35 +11,19 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { WizardData, WizardStepRendererProps } from "@/types/wizard-core";
+import type {
+	WizardData,
+	WizardStepRendererProps,
+	WizardStep,
+} from "@/types/wizard-core";
 import { WizardErrorBoundary } from "./wizard-error-boundary";
 
-export function WizardStepRenderer<T extends WizardData>({
-	step,
-	data,
-	onUpdate,
-	onNext,
-	onPrevious,
-	errors,
-	isLoading,
-	isMobile,
-}: WizardStepRendererProps<T>) {
-	// Memoize step props to prevent unnecessary re-renders
-	const stepProps = useMemo(
-		() => ({
-			data,
-			onUpdate,
-			onNext,
-			onPrevious,
-			errors,
-			isLoading,
-			isMobile,
-		}),
-		[data, onUpdate, onNext, onPrevious, errors, isLoading, isMobile]
-	);
+// Constants for magic numbers
+const ACCESSIBILITY_ANNOUNCEMENT_DURATION_MS = 1000;
 
-	// Loading skeleton for step content
-	const StepSkeleton = () => (
+// Loading skeleton for step content - extracted to avoid inline component
+function StepSkeleton() {
+	return (
 		<Card className="w-full">
 			<CardHeader>
 				<Skeleton className="h-6 w-3/4" />
@@ -56,56 +40,79 @@ export function WizardStepRenderer<T extends WizardData>({
 			</CardContent>
 		</Card>
 	);
+}
 
-	// Error fallback for step rendering
-	const StepErrorFallback = () => {
-		// Special handling for location steps
-		if (step.id.includes("location")) {
-			return (
-				<Card className="w-full border-orange-200 bg-orange-50">
-					<CardHeader>
-						<CardTitle className="text-orange-800">
-							Problema con el paso de ubicación
-						</CardTitle>
-						<CardDescription className="text-orange-700">
-							El mapa interactivo no se pudo cargar. Usa el formulario simple
-							para continuar.
-						</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<div className="space-y-2 text-orange-700 text-sm">
-							<p>Posibles soluciones:</p>
-							<ul className="list-inside list-disc space-y-1 text-xs">
-								<li>Recargar la página</li>
-								<li>Verificar la conexión a internet</li>
-								<li>Desactivar bloqueadores de anuncios temporalmente</li>
-								<li>Usar un navegador diferente</li>
-							</ul>
-						</div>
-					</CardContent>
-				</Card>
-			);
-		}
+// Error fallback for step rendering - extracted to avoid inline component
+type StepErrorFallbackProps<T extends WizardData> = {
+	step: WizardStep<T>;
+};
 
+function StepErrorFallback<T extends WizardData>({
+	step,
+}: StepErrorFallbackProps<T>) {
+	// Special handling for location steps
+	if (step.id.includes("location")) {
 		return (
-			<Card className="w-full border-destructive">
+			<Card className="w-full border-orange-200 bg-orange-50">
 				<CardHeader>
-					<CardTitle className="text-destructive">
-						Error al cargar el paso
+					<CardTitle className="text-orange-800">
+						Problema con el paso de ubicación
 					</CardTitle>
-					<CardDescription>
-						No se pudo cargar el contenido del paso "{step.title}".
+					<CardDescription className="text-orange-700">
+						El mapa interactivo no se pudo cargar. Usa el formulario simple para
+						continuar.
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<p className="text-muted-foreground text-sm">
-						Por favor, intenta recargar la página o contacta al soporte técnico.
-					</p>
+					<div className="space-y-2 text-orange-700 text-sm">
+						<p>Posibles soluciones:</p>
+						<ul className="list-inside list-disc space-y-1 text-xs">
+							<li>Recargar la página</li>
+							<li>Verificar la conexión a internet</li>
+							<li>Desactivar bloqueadores de anuncios temporalmente</li>
+							<li>Usar un navegador diferente</li>
+						</ul>
+					</div>
 				</CardContent>
 			</Card>
 		);
-	};
+	}
 
+	return (
+		<Card className="w-full border-destructive">
+			<CardHeader>
+				<CardTitle className="text-destructive">
+					Error al cargar el paso
+				</CardTitle>
+				<CardDescription>
+					No se pudo cargar el contenido del paso "{step.title}".
+				</CardDescription>
+			</CardHeader>
+			<CardContent>
+				<TechnicalSupportMessage />
+			</CardContent>
+		</Card>
+	);
+}
+
+function TechnicalSupportMessage() {
+	return (
+		<p className="text-muted-foreground text-sm">
+			Por favor, intenta recargar la página o contacta al soporte técnico.
+		</p>
+	);
+}
+
+export function WizardStepRenderer<T extends WizardData>({
+	step,
+	data,
+	onUpdate,
+	onNext,
+	onPrevious,
+	errors,
+	isLoading,
+	isMobile,
+}: WizardStepRendererProps<T>) {
 	return (
 		<div className="wizard-step-renderer w-full">
 			{/* Step Header */}
@@ -118,14 +125,25 @@ export function WizardStepRenderer<T extends WizardData>({
 
 			{/* Step Content */}
 			<WizardErrorBoundary
-				fallback={() => <StepErrorFallback />}
-				onError={(_error) => {}}
+				fallback={() => <StepErrorFallback<T> step={step} />}
+				onError={() => {
+					// Error logged by WizardErrorBoundary
+				}}
 			>
 				<Suspense fallback={<StepSkeleton />}>
 					<StepContent
 						isLoading={isLoading}
 						step={step}
-						stepProps={stepProps}
+						stepProps={{
+							data,
+							onUpdate,
+							onNext,
+							onPrevious,
+							errors,
+							isLoading,
+							isMobile,
+							step,
+						}}
 					/>
 				</Suspense>
 			</WizardErrorBoundary>
@@ -156,7 +174,7 @@ function StepContent<T extends WizardData>({
 	isLoading,
 }: {
 	step: WizardStepRendererProps<T>["step"];
-	stepProps: any;
+	stepProps: WizardStepRendererProps<T>;
 	isLoading: boolean;
 }) {
 	const StepComponent = step.component;
@@ -189,10 +207,12 @@ export function withLazyLoading<P extends object>(
 export function createLazyStep<_T extends WizardData>(
 	id: string,
 	title: string,
-	importFn: () => Promise<{ default: React.ComponentType<any> }>,
+	importFn: () => Promise<{
+		default: React.ComponentType<Record<string, unknown>>;
+	}>,
 	options?: {
 		description?: string;
-		validation?: any;
+		validation?: Record<string, unknown>;
 		isOptional?: boolean;
 		canSkip?: boolean;
 	}
@@ -206,25 +226,6 @@ export function createLazyStep<_T extends WizardData>(
 		isOptional: options?.isOptional,
 		canSkip: options?.canSkip,
 	};
-}
-
-// Performance monitoring hook for step rendering
-export function useStepPerformance(_stepId: string) {
-	React.useEffect(() => {
-		const startTime = performance.now();
-
-		return () => {
-			const endTime = performance.now();
-			const renderTime = endTime - startTime;
-
-			// Log performance metrics (in development)
-			if (process.env.NODE_ENV === "development") {
-				// Warn about slow renders
-				if (renderTime > 100) {
-				}
-			}
-		};
-	}, []);
 }
 
 // Accessibility helper for step navigation
@@ -243,7 +244,7 @@ export function useStepAccessibility(stepId: string, isActive: boolean) {
 			// Clean up after announcement
 			setTimeout(() => {
 				document.body.removeChild(announcement);
-			}, 1000);
+			}, ACCESSIBILITY_ANNOUNCEMENT_DURATION_MS);
 		}
 	}, [stepId, isActive]);
 }

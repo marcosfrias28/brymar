@@ -13,12 +13,17 @@ import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useGenerateAIContent } from "@/hooks/use-wizard";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/index";
 
 const PropertyGeneralSchema = z.object({
 	title: z.string().min(1, "El título es requerido"),
@@ -230,9 +235,7 @@ export function PropertyGeneralStep({
 										<Icon className="h-6 w-6" />
 										<div className="text-center">
 											<div className="font-medium">{type.label}</div>
-											<div className="text-xs opacity-70">
-												{type.description}
-											</div>
+											<div className="text-xs opacity-70">{type.description}</div>
 										</div>
 									</Button>
 								);
@@ -267,9 +270,7 @@ export function PropertyGeneralStep({
 							placeholder="Ej: Hermosa casa con jardín en zona residencial"
 						/>
 						{formErrors.title && (
-							<p className="text-destructive text-sm">
-								{formErrors.title.message}
-							</p>
+							<p className="text-destructive text-sm">{formErrors.title.message}</p>
 						)}
 					</div>
 

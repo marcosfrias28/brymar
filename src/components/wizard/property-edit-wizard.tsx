@@ -27,8 +27,8 @@ export function PropertyEditWizard({
 					{JSON.stringify(
 						{
 							initialData,
-							hasOnComplete: !!onComplete,
-							hasOnSaveDraft: !!onSaveDraft,
+							hasOnComplete: Boolean(onComplete),
+							hasOnSaveDraft: Boolean(onSaveDraft),
 						},
 						null,
 						2

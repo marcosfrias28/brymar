@@ -7,7 +7,12 @@
 
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type WizardFallbackUIProps = {
@@ -103,9 +108,7 @@ export function WizardFallbackUI({
 				<CardContent className="space-y-4">
 					{showDetails && (
 						<div className="rounded-lg border border-destructive/20 bg-destructive/10 p-4">
-							<p className="font-mono text-destructive text-sm">
-								{errorMessage}
-							</p>
+							<p className="font-mono text-destructive text-sm">{errorMessage}</p>
 						</div>
 					)}
 

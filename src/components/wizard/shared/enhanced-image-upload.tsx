@@ -21,13 +21,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-import { uploadPropertyImages } from "@/lib/services/image-upload-service";
-import { cn } from "@/lib/utils";
 import {
 	formatFileSize,
 	isFileSizeValid,
 	isImageTypeSupported,
 } from "@/lib/utils/image-utils";
+// import { uploadPropertyImages } from "@/lib/services/image-upload-service"; // TODO: Create service
+import { cn } from "@/lib/utils/index";
 import {
 	isMobile,
 	isTouchDevice,
@@ -81,7 +81,7 @@ export function EnhancedImageUpload({
 	// Handle file validation
 	const validateFiles = useCallback(
 		(
-			files: FileList | File[]
+			files: FileList | File[],
 		): { valid: File[]; invalid: { file: File; reason: string }[] } => {
 			const fileArray = Array.from(files);
 			const valid: File[] = [];
@@ -117,7 +117,7 @@ export function EnhancedImageUpload({
 
 			return { valid, invalid };
 		},
-		[maxFileSize, maxImages, images.length]
+		[maxFileSize, maxImages, images.length],
 	);
 
 	// Handle file upload with progress tracking
@@ -147,8 +147,8 @@ export function EnhancedImageUpload({
 										...item,
 										progress: Math.min(item.progress + Math.random() * 20, 90),
 									}
-								: item
-						)
+								: item,
+						),
 					);
 				}, 500);
 
@@ -197,7 +197,7 @@ export function EnhancedImageUpload({
 					});
 					onImagesChange(newImages);
 					toast.success(
-						`${result.successful.length} imagen(es) subida(s) exitosamente`
+						`${result.successful.length} imagen(es) subida(s) exitosamente`,
 					);
 				}
 
@@ -220,13 +220,13 @@ export function EnhancedImageUpload({
 						status: "error" as const,
 						error: "Error de conexión",
 						progress: 0,
-					}))
+					})),
 				);
 			} finally {
 				setIsUploading(false);
 			}
 		},
-		[images, onImagesChange]
+		[images, onImagesChange],
 	);
 
 	// Handle files from input or drop
@@ -248,7 +248,7 @@ export function EnhancedImageUpload({
 				await handleFileUpload(valid);
 			}
 		},
-		[validateFiles, handleFileUpload, disabled]
+		[validateFiles, handleFileUpload, disabled],
 	);
 
 	// Drag and drop handlers
@@ -286,7 +286,7 @@ export function EnhancedImageUpload({
 				handleFiles(e.dataTransfer.files);
 			}
 		},
-		[handleFiles]
+		[handleFiles],
 	);
 
 	// File input handler
@@ -298,7 +298,7 @@ export function EnhancedImageUpload({
 				e.target.value = "";
 			}
 		},
-		[handleFiles]
+		[handleFiles],
 	);
 
 	// Remove image
@@ -308,7 +308,7 @@ export function EnhancedImageUpload({
 			onImagesChange(newImages);
 			toast.success("Imagen eliminada");
 		},
-		[images, onImagesChange]
+		[images, onImagesChange],
 	);
 
 	// Reorder images
@@ -326,7 +326,7 @@ export function EnhancedImageUpload({
 
 			onImagesChange(updatedImages);
 		},
-		[images, onImagesChange]
+		[images, onImagesChange],
 	);
 
 	// Retry failed upload
@@ -334,7 +334,7 @@ export function EnhancedImageUpload({
 		(file: File) => {
 			handleFileUpload([file]);
 		},
-		[handleFileUpload]
+		[handleFileUpload],
 	);
 
 	return (
@@ -365,7 +365,7 @@ export function EnhancedImageUpload({
 					disabled && "cursor-not-allowed opacity-50",
 					isUploading && "pointer-events-none",
 					// Disable drag on mobile since it interferes with scrolling
-					isMobileDevice && "pointer-events-none"
+					isMobileDevice && "pointer-events-none",
 				)}
 				onDragEnter={isMobileDevice ? undefined : handleDragIn}
 				onDragLeave={isMobileDevice ? undefined : handleDragOut}
@@ -375,7 +375,7 @@ export function EnhancedImageUpload({
 				<div
 					className={cn(
 						"flex flex-col items-center",
-						isMobileDevice ? "gap-3" : "gap-4"
+						isMobileDevice ? "gap-3" : "gap-4",
 					)}
 				>
 					<div
@@ -384,14 +384,14 @@ export function EnhancedImageUpload({
 							isMobileDevice ? "p-3" : "p-4",
 							dragActive
 								? "bg-primary text-primary-foreground"
-								: "bg-primary/10 text-primary"
+								: "bg-primary/10 text-primary",
 						)}
 					>
 						{isUploading ? (
 							<Loader2
 								className={cn(
 									"animate-spin",
-									isMobileDevice ? "h-6 w-6" : "h-8 w-8"
+									isMobileDevice ? "h-6 w-6" : "h-8 w-8",
 								)}
 							/>
 						) : (
@@ -403,7 +403,7 @@ export function EnhancedImageUpload({
 						<p
 							className={cn(
 								"font-medium",
-								isMobileDevice ? "text-base" : "text-lg"
+								isMobileDevice ? "text-base" : "text-lg",
 							)}
 						>
 							{isUploading
@@ -415,7 +415,7 @@ export function EnhancedImageUpload({
 						<p
 							className={cn(
 								"mt-1 text-muted-foreground",
-								isMobileDevice ? "text-xs" : "text-sm"
+								isMobileDevice ? "text-xs" : "text-sm",
 							)}
 						>
 							Máximo {maxImages} imágenes, hasta{" "}
@@ -424,7 +424,7 @@ export function EnhancedImageUpload({
 						<p
 							className={cn(
 								"text-muted-foreground",
-								isMobileDevice ? "text-xs" : "text-xs"
+								isMobileDevice ? "text-xs" : "text-xs",
 							)}
 						>
 							Formatos soportados: JPEG, PNG, WebP
@@ -434,7 +434,7 @@ export function EnhancedImageUpload({
 					<Button
 						className={cn(
 							isMobileDevice &&
-								`${mobileClasses.touchButton} min-h-[48px] text-base`
+								`${mobileClasses.touchButton} min-h-[48px] text-base`,
 						)}
 						disabled={disabled || isUploading}
 						onClick={() => fileInputRef.current?.click()}
@@ -464,7 +464,7 @@ export function EnhancedImageUpload({
 					<h4
 						className={cn(
 							"font-medium",
-							isMobileDevice ? "text-xs" : "text-sm"
+							isMobileDevice ? "text-xs" : "text-sm",
 						)}
 					>
 						Progreso de subida
@@ -474,20 +474,20 @@ export function EnhancedImageUpload({
 							<div
 								className={cn(
 									"flex items-center",
-									isMobileDevice ? "gap-2" : "gap-3"
+									isMobileDevice ? "gap-2" : "gap-3",
 								)}
 							>
 								<div className="flex-1">
 									<div
 										className={cn(
 											"flex items-center justify-between",
-											isMobileDevice ? "mb-0.5" : "mb-1"
+											isMobileDevice ? "mb-0.5" : "mb-1",
 										)}
 									>
 										<span
 											className={cn(
 												"truncate font-medium",
-												isMobileDevice ? "text-xs" : "text-sm"
+												isMobileDevice ? "text-xs" : "text-sm",
 											)}
 										>
 											{item.file.name}
@@ -495,14 +495,14 @@ export function EnhancedImageUpload({
 										<div
 											className={cn(
 												"flex items-center",
-												isMobileDevice ? "gap-1" : "gap-2"
+												isMobileDevice ? "gap-1" : "gap-2",
 											)}
 										>
 											{item.status === "uploading" && (
 												<Loader2
 													className={cn(
 														"animate-spin text-blue-500",
-														isMobileDevice ? "h-3 w-3" : "h-4 w-4"
+														isMobileDevice ? "h-3 w-3" : "h-4 w-4",
 													)}
 												/>
 											)}
@@ -510,7 +510,7 @@ export function EnhancedImageUpload({
 												<CheckCircle2
 													className={cn(
 														"text-green-500",
-														isMobileDevice ? "h-3 w-3" : "h-4 w-4"
+														isMobileDevice ? "h-3 w-3" : "h-4 w-4",
 													)}
 												/>
 											)}
@@ -519,12 +519,12 @@ export function EnhancedImageUpload({
 													<AlertCircle
 														className={cn(
 															"text-red-500",
-															isMobileDevice ? "h-3 w-3" : "h-4 w-4"
+															isMobileDevice ? "h-3 w-3" : "h-4 w-4",
 														)}
 													/>
 													<Button
 														className={cn(
-															isMobileDevice && mobileClasses.touchButton
+															isMobileDevice && mobileClasses.touchButton,
 														)}
 														onClick={() => retryUpload(item.file)}
 														size={isMobileDevice ? "sm" : "sm"}
@@ -532,7 +532,7 @@ export function EnhancedImageUpload({
 													>
 														<RotateCcw
 															className={cn(
-																isMobileDevice ? "h-3 w-3" : "h-3 w-3"
+																isMobileDevice ? "h-3 w-3" : "h-3 w-3",
 															)}
 														/>
 													</Button>
@@ -552,7 +552,7 @@ export function EnhancedImageUpload({
 										<p
 											className={cn(
 												"text-red-500",
-												isMobileDevice ? "text-xs" : "text-xs"
+												isMobileDevice ? "text-xs" : "text-xs",
 											)}
 										>
 											{item.error}
@@ -582,7 +582,7 @@ export function EnhancedImageUpload({
 							"gap-4",
 							isMobileDevice
 								? "grid grid-cols-2 gap-2"
-								: "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+								: "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
 						)}
 					>
 						{images.map((image, index) => (
@@ -601,21 +601,21 @@ export function EnhancedImageUpload({
 												"absolute inset-0 flex items-center justify-center bg-black/50 transition-opacity",
 												isMobileDevice
 													? "gap-1 opacity-100" // Always visible on mobile
-													: "gap-2 opacity-0 group-hover:opacity-100"
+													: "gap-2 opacity-0 group-hover:opacity-100",
 											)}
 										>
 											<Dialog>
 												<DialogTrigger asChild>
 													<Button
 														className={cn(
-															isMobileDevice && mobileClasses.touchButton
+															isMobileDevice && mobileClasses.touchButton,
 														)}
 														size={isMobileDevice ? "sm" : "sm"}
 														variant="secondary"
 													>
 														<Eye
 															className={cn(
-																isMobileDevice ? "h-3 w-3" : "h-4 w-4"
+																isMobileDevice ? "h-3 w-3" : "h-4 w-4",
 															)}
 														/>
 													</Button>
@@ -624,7 +624,7 @@ export function EnhancedImageUpload({
 													className={cn(
 														isMobileDevice
 															? "max-h-[95vh] max-w-[95vw]"
-															: "max-w-3xl"
+															: "max-w-3xl",
 													)}
 												>
 													<div className="relative aspect-video">
@@ -639,7 +639,7 @@ export function EnhancedImageUpload({
 
 											<Button
 												className={cn(
-													isMobileDevice && mobileClasses.touchButton
+													isMobileDevice && mobileClasses.touchButton,
 												)}
 												onClick={() => removeImage(index)}
 												size={isMobileDevice ? "sm" : "sm"}
@@ -671,7 +671,7 @@ export function EnhancedImageUpload({
 										<p
 											className={cn(
 												"truncate text-muted-foreground",
-												isMobileDevice ? "text-xs" : "text-xs"
+												isMobileDevice ? "text-xs" : "text-xs",
 											)}
 										>
 											{image.filename}
@@ -679,7 +679,7 @@ export function EnhancedImageUpload({
 										<p
 											className={cn(
 												"text-muted-foreground",
-												isMobileDevice ? "text-xs" : "text-xs"
+												isMobileDevice ? "text-xs" : "text-xs",
 											)}
 										>
 											{formatFileSize(image.size)}

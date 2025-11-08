@@ -22,13 +22,13 @@ export {
 	loadLandDraft,
 	saveLandDraft,
 	updateLandFromWizard,
-} from "@/lib/actions/land-wizard-actions.ts";
+} from "@/lib/actions/land-wizard-actions";
 // Configuration and Actions (Re-exported for convenience)
-export { landWizardConfig } from "@/lib/wizard/land-wizard-config.ts";
+export { landWizardConfig } from "@/lib/wizard/land-wizard-config";
 // Types (Re-exported for convenience)
-export type { LandWizardData } from "@/types/land-wizard.ts";
+export type { LandWizardData } from "@/types/land-wizard";
 // Main Land Wizard Component
-export { LandWizard } from "./land-wizard.tsx";
+export { LandWizard } from "./land-wizard";
 // Land Wizard Steps
 // export { LandGeneralStep } from "./steps/land-general-step"; // TODO: Create step
 // export { LandLocationStep } from "./steps/land-location-step"; // TODO: Create step

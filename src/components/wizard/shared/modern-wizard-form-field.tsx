@@ -36,7 +36,7 @@ import {
 	type AIContentData,
 	useEnhancedAIGeneration,
 } from "@/hooks/use-enhanced-ai-generation";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/index";
 import { ModernAIButton } from "./modern-step-layout";
 
 // Icon mapping for different field types

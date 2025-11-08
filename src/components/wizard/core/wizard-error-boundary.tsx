@@ -21,6 +21,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import type { ErrorRecoveryStrategy, WizardError } from "@/types/wizard-core";
+import process from "node:process";
 
 type WizardErrorBoundaryProps = {
 	children: ReactNode;
