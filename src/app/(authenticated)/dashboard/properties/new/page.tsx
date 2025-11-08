@@ -65,7 +65,7 @@ export default function NewPropertyPage() {
 		}
 
 		try {
-			const result = draftId 
+			const result = draftId
 				? await updatePropertyFromWizard(draftId, data, user.id)
 				: await createPropertyFromWizard(data, user.id);
 

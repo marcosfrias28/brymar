@@ -26,7 +26,7 @@ import {
 	isFileSizeValid,
 	isImageTypeSupported,
 } from "@/lib/utils/image-utils";
-// import { uploadPropertyImages } from "@/lib/services/image-upload-service"; // TODO: Create service
+import { uploadPropertyImages } from "@/lib/services/image-upload-service";
 import { cn } from "@/lib/utils/index";
 import {
 	isMobile,

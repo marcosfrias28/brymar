@@ -14,9 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { InteractiveMap } from "@/components/wizard/shared/interactive-map";
-import {
-	createPropertyAction,
-} from "@/lib/actions/property-actions";
+import { createPropertyAction } from "@/lib/actions/property-actions";
 import type { Geometry } from "@/lib/types/shared";
 import type {
 	PropertyWizardData,
@@ -52,7 +50,9 @@ export function PropertyForm({
 	const [coordinates, setCoordinates] = useState<Coordinates | undefined>(
 		initialData?.coordinates
 	);
-	const [address, setAddress] = useState<Address | undefined>(initialData?.address);
+	const [address, setAddress] = useState<Address | undefined>(
+		initialData?.address
+	);
 	const [formData, setFormData] = useState<Partial<PropertyWizardData>>({
 		title: initialData?.title ?? "",
 		description: initialData?.description ?? "",
@@ -69,27 +69,30 @@ export function PropertyForm({
 	const handleSubmit = async (data: PropertyWizardData) => {
 		try {
 			// Convert PropertyWizardData to FormData for the action
-			const formData = new FormData();
-			formData.append("title", data.title || "");
-			formData.append("description", data.description || "");
-			formData.append("price", String(data.price || 0));
-			formData.append("surface", String(data.surface || 0));
-			formData.append("propertyType", data.propertyType || "apartment");
-			
+			const actionFormData = new FormData();
+			actionFormData.append("title", data.title || "");
+			actionFormData.append("description", data.description || "");
+			actionFormData.append("price", String(data.price || 0));
+			actionFormData.append("surface", String(data.surface || 0));
+			actionFormData.append("propertyType", data.propertyType || "apartment");
+
 			if (data.bedrooms) {
-				formData.append("bedrooms", String(data.bedrooms));
+				actionFormData.append("bedrooms", String(data.bedrooms));
 			}
 			if (data.bathrooms) {
-				formData.append("bathrooms", String(data.bathrooms));
+				actionFormData.append("bathrooms", String(data.bathrooms));
 			}
 			if (data.address) {
-				formData.append("address", JSON.stringify(data.address));
+				actionFormData.append("address", JSON.stringify(data.address));
 			}
 			if (data.coordinates) {
-				formData.append("coordinates", JSON.stringify(data.coordinates));
+				actionFormData.append("coordinates", JSON.stringify(data.coordinates));
 			}
 
-			const result = await createPropertyAction({ success: false, data: { id: "" }, errors: {} }, formData);
+			const result = await createPropertyAction(
+				{ success: false, data: { id: "" }, errors: {} },
+				actionFormData
+			);
 
 			if (result.success) {
 				toast.success(
@@ -106,18 +109,18 @@ export function PropertyForm({
 		}
 	};
 
-	const handleLocationSelect = (newCoordinates: Coordinates, newAddress: Address) => {
-		setCoordinates(newCoordinates);
-		setAddress(newAddress);
-		setFormData(prev => ({ ...prev, coordinates: newCoordinates, address: newAddress }));
-	};
-
-	const updateField = (field: keyof PropertyWizardData, value: any) => {
-		setFormData(prev => ({ ...prev, [field]: value }));
+	const updateField = (field: keyof PropertyWizardData, value: unknown) => {
+		setFormData((prev) => ({ ...prev, [field]: value }));
 	};
 
 	return (
-		<form onSubmit={(e) => { e.preventDefault(); handleSubmit(formData as PropertyWizardData); }} className="space-y-6">
+		<form
+			onSubmit={(e) => {
+				e.preventDefault();
+				handleSubmit(formData as PropertyWizardData);
+			}}
+			className="space-y-6"
+		>
 			<Card>
 				<CardHeader>
 					<CardTitle>Información básica</CardTitle>
@@ -125,10 +128,10 @@ export function PropertyForm({
 				<CardContent className="space-y-4">
 					<div className="space-y-2">
 						<label className="text-sm font-medium">Título</label>
-						<Input 
-							placeholder="Ej: Apartamento en Piantini" 
-							value={formData.title || ""} 
-							onChange={(e) => updateField("title", e.target.value)} 
+						<Input
+							placeholder="Ej: Apartamento en Piantini"
+							value={formData.title || ""}
+							onChange={(e) => updateField("title", e.target.value)}
 						/>
 					</div>
 
@@ -167,7 +170,12 @@ export function PropertyForm({
 					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 						<div className="space-y-2">
 							<label className="text-sm font-medium">Tipo de propiedad</label>
-							<Select value={formData.propertyType || ""} onValueChange={(value) => updateField("propertyType", value as PropertyType)}>
+							<Select
+								value={formData.propertyType || ""}
+								onValueChange={(value) =>
+									updateField("propertyType", value as PropertyType)
+								}
+							>
 								<SelectTrigger>
 									<SelectValue placeholder="Selecciona tipo" />
 								</SelectTrigger>
@@ -187,7 +195,9 @@ export function PropertyForm({
 								type="number"
 								placeholder="3"
 								value={formData.bedrooms || ""}
-								onChange={(e) => updateField("bedrooms", Number(e.target.value))}
+								onChange={(e) =>
+									updateField("bedrooms", Number(e.target.value))
+								}
 							/>
 						</div>
 
@@ -197,7 +207,9 @@ export function PropertyForm({
 								type="number"
 								placeholder="2"
 								value={formData.bathrooms || ""}
-								onChange={(e) => updateField("bathrooms", Number(e.target.value))}
+								onChange={(e) =>
+									updateField("bathrooms", Number(e.target.value))
+								}
 							/>
 						</div>
 					</div>
@@ -223,9 +235,7 @@ export function PropertyForm({
 						Cancelar
 					</Button>
 				)}
-				<Button type="submit">
-					{isEditing ? "Actualizar" : "Crear"}
-				</Button>
+				<Button type="submit">{isEditing ? "Actualizar" : "Crear"}</Button>
 			</div>
 		</form>
 	);

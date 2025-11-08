@@ -49,6 +49,7 @@ export const auth = betterAuth({
 						to: email,
 						subject: "Código de verificación",
 						url: `Tu código de verificación es: ${otp}`,
+						username: email,
 					});
 					if (!result.success) {
 						// Log seguro para el servidor (sin exponer detalles técnicos)
@@ -73,6 +74,7 @@ export const auth = betterAuth({
 				to: user.email,
 				subject: "Reset della password",
 				url,
+				username: user.email,
 			});
 			if (!result.success) {
 				await logError("Password reset email failed to send", result.error, {
