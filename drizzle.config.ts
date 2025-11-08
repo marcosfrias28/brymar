@@ -9,6 +9,6 @@ export default defineConfig({
 	dialect: "postgresql",
 	dbCredentials: {
 		// Usa DATABASE_URL per Neon Database
-		url: process.env.DATABASE_URL!,
+		url: process.env.DATABASE_URL ?? "",
 	},
 });

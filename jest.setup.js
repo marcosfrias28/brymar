@@ -86,6 +86,7 @@ global.TextDecoder = TextDecoder;
 global.TextEncoder = TextEncoder;
 
 // Suppress console errors in tests unless explicitly testing them
+// biome-ignore lint: Test setup file - console usage needed for test setup
 const originalError = console.error;
 beforeAll(() => {
 	console.error = (...args) => {

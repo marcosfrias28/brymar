@@ -94,6 +94,8 @@ function isLikelyAuthRedirect(pathname: string): boolean {
 /**
  * Main middleware for authentication and authorization
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Middleware requires comprehensive auth logic
+// biome-ignore lint/complexity/noExcessiveLinesPerFunction: Middleware requires comprehensive auth logic
 export async function proxy(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 	const requestId = generateRequestId();
@@ -213,9 +215,10 @@ export async function proxy(request: NextRequest) {
 				"profile.manage": ["admin", "agent", "user"],
 			} as const;
 
-			const allowedRoles =
-				permissionConfig[requiredPermission as keyof typeof permissionConfig];
-			if (!allowedRoles?.includes(user.role as any)) {
+			const allowedRoles = permissionConfig[
+				requiredPermission as keyof typeof permissionConfig
+			] as readonly string[];
+			if (!allowedRoles?.includes(user.role as UserRole)) {
 				return createUnauthorizedResponse(
 					`Insufficient permissions for role: ${user.role}`,
 					requestId
@@ -247,6 +250,7 @@ export async function proxy(request: NextRequest) {
 		// For GET requests, redirect to sign-in
 		if (request.method === "GET") {
 			const response = createUnauthorizedResponse(
+				// biome-ignore lint/security/noSecrets: Error message, not a secret
 				"Authentication verification failed",
 				requestId
 			);
