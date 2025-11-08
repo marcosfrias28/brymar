@@ -1,13 +1,15 @@
 "use client";
 
 import { ArrowLeft } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { RouteGuard } from "@/components/auth/route-guard";
 import { PropertyForm } from "@/components/forms/property-form";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { Button } from "@/components/ui/button";
+import { useBreadcrumbs } from "@/hooks/use-breadcrumbs";
 import { useUser } from "@/hooks/use-user";
 import {
 	loadPropertyForWizard,
@@ -18,12 +20,10 @@ import { PropertyType } from "@/types/wizard";
 
 export default function NewPropertyPage() {
 	const router = useRouter();
-	const searchParams = useSearchParams();
+	const breadcrumbs = useBreadcrumbs();
 	const { user } = useUser();
-	const [initialData, setInitialData] = useState<Partial<PropertyWizardData>>(
-		{}
-	);
 	const [loading, setLoading] = useState(false);
+	const [initialData, setInitialData] = useState<Partial<PropertyWizardData>>();
 
 	const draftId = searchParams?.get("draft");
 
@@ -141,70 +141,34 @@ export default function NewPropertyPage() {
 		}
 	};
 
-	const breadcrumbs = [
-		{ label: "Dashboard", href: "/dashboard" },
-		{ label: "Propiedades", href: "/dashboard/properties" },
-		{ label: draftId ? "Continuar Borrador" : "Nueva Propiedad" },
-	];
-
-	if (loading) {
-		return (
-			<RouteGuard requiredPermission="properties.manage">
-				<DashboardPageLayout
-					actions={
-						<Button asChild variant="outline">
-							<a href="/dashboard/properties">
-								<ArrowLeft className="mr-2 h-4 w-4" />
-								Volver a Propiedades
-							</a>
-						</Button>
-					}
-					breadcrumbs={breadcrumbs}
-					description="Cargando borrador"
-					title="Cargando..."
-				>
-					<div className="flex min-h-[400px] items-center justify-center">
-						<div className="text-center">
-							<div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-primary border-b-2" />
-							<h2 className="mb-2 font-semibold text-xl">
-								Cargando borrador...
-							</h2>
-							<p className="text-muted-foreground">
-								Preparando el asistente con tus datos guardados
-							</p>
-						</div>
-					</div>
-				</DashboardPageLayout>
-			</RouteGuard>
-		);
-	}
+	const actions = (
+		<Button asChild variant="outline">
+			<Link href="/dashboard/properties">
+				<ArrowLeft className="mr-2 h-4 w-4" />
+				Volver a Propiedades
+			</Link>
+		</Button>
+	);
 
 	return (
-			<RouteGuard requiredPermission="properties.manage">
-				<DashboardPageLayout
-					actions={
-						<Button asChild variant="outline">
-							<a href="/dashboard/properties">
-								<ArrowLeft className="mr-2 h-4 w-4" />
-								Volver a Propiedades
-							</a>
-						</Button>
-					}
-					breadcrumbs={breadcrumbs}
-					description={
-						draftId
-							? "Continúa editando tu borrador guardado"
-							: "Crea una nueva propiedad usando el asistente inteligente"
-					}
-					title={draftId ? "Continuar Borrador" : "Nueva Propiedad"}
-				>
-						<PropertyForm
-							initialData={initialData}
-							onSubmit={handleSubmit}
-							onSaveDraft={handleSaveDraft}
-							isLoading={loading}
-						/>
-				</DashboardPageLayout>
-			</RouteGuard>
-		);
+		<RouteGuard requiredPermission="properties.manage">
+			<DashboardPageLayout
+				actions={actions}
+				breadcrumbs={breadcrumbs}
+				description={
+					draftId
+						? "Continúa editando tu borrador guardado"
+						: "Crea una nueva propiedad usando el asistente inteligente"
+				}
+				title={draftId ? "Continuar Borrador" : "Nueva Propiedad"}
+			>
+				<PropertyForm
+					initialData={initialData}
+					onSubmit={handleSubmit}
+					onSaveDraft={handleSaveDraft}
+					isLoading={loading}
+				/>
+			</DashboardPageLayout>
+		</RouteGuard>
+	);
 }

@@ -1,10 +1,8 @@
 import { Mail, MapPin, Phone } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { SectionHeader, SectionWrapper } from "@/components/ui/section-wrapper";
-import { Textarea } from "@/components/ui/textarea";
+import { UnifiedForm, type FormConfig } from "@/components/forms/unified-form";
 
 const ContactIcon = () => (
 	<svg
@@ -17,6 +15,92 @@ const ContactIcon = () => (
 		<path d="M224 120v96a8 8 0 0 1-8 8H40a8 8 0 0 1-8-8v-96a15.87 15.87 0 0 1 4.69-11.32l80-80a16 16 0 0 1 22.62 0l80 80A15.87 15.87 0 0 1 224 120" />
 	</svg>
 );
+
+// Acción del formulario de contacto
+async function contactFormAction(
+	_prevState: {
+		success?: boolean;
+		errors?: Record<string, string[]>;
+		message?: string;
+	},
+	formData: FormData
+) {
+	"use server";
+
+	// Simula procesamiento del formulario
+	await new Promise((resolve) => setTimeout(resolve, 1000));
+
+	const name = formData.get("name") as string;
+	const email = formData.get("email") as string;
+	const phone = formData.get("phone") as string;
+	const message = formData.get("message") as string;
+
+	// Validación básica
+	const errors: Record<string, string[]> = {};
+
+	if (!name || name.length < 2) {
+		errors.name = ["El nombre es requerido y debe tener al menos 2 caracteres"];
+	}
+
+	if (!email?.includes("@")) {
+		errors.email = ["Ingresa un correo electrónico válido"];
+	}
+
+	if (!phone || phone.length < 8) {
+		errors.phone = ["Ingresa un número de teléfono válido"];
+	}
+
+	if (!message || message.length < 10) {
+		errors.message = ["El mensaje debe tener al menos 10 caracteres"];
+	}
+
+	if (Object.keys(errors).length > 0) {
+		return { success: false, errors };
+	}
+
+	return {
+		success: true,
+		message: "¡Gracias por contactarnos! Te responderemos pronto.",
+	};
+}
+
+// Configuración del formulario de contacto
+const contactFormConfig: FormConfig = {
+	title: "Envíanos un mensaje",
+	description: "Completa el formulario y nos pondremos en contacto contigo",
+	submitText: "Enviar mensaje",
+	fields: [
+		{
+			name: "name",
+			label: "Nombre completo",
+			type: "text",
+			required: true,
+			placeholder: "Tu nombre completo",
+		},
+		{
+			name: "email",
+			label: "Correo electrónico",
+			type: "text",
+			required: true,
+			placeholder: "tu@email.com",
+		},
+		{
+			name: "phone",
+			label: "Teléfono",
+			type: "text",
+			required: true,
+			placeholder: "Tu número de teléfono",
+		},
+		{
+			name: "message",
+			label: "Mensaje",
+			type: "textarea",
+			required: true,
+			placeholder: "Escribe tu mensaje aquí...",
+			rows: 5,
+		},
+	],
+};
 
 export default function ContactPage() {
 	return (
@@ -90,48 +174,10 @@ export default function ContactPage() {
 					</div>
 
 					<div className="w-full p-6 lg:w-1/2 lg:p-8">
-						<form className="space-y-6">
-							<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-								<Input
-									id="name"
-									name="name"
-									placeholder="Nombre*"
-									required
-									type="text"
-								/>
-								<Input
-									id="phone"
-									name="phone"
-									placeholder="Teléfono*"
-									required
-									type="tel"
-								/>
-							</div>
-
-							<div className="space-y-6">
-								<Input
-									id="email"
-									name="email"
-									placeholder="Correo electrónico*"
-									required
-									type="email"
-								/>
-
-								<Textarea
-									id="message"
-									name="message"
-									placeholder="Escribe tu mensaje aquí*"
-									required
-									rows={5}
-								/>
-							</div>
-
-							<div className="flex justify-end">
-								<Button size="lg" type="submit">
-									Enviar mensaje
-								</Button>
-							</div>
-						</form>
+						<UnifiedForm
+							action={contactFormAction}
+							config={contactFormConfig}
+						/>
 					</div>
 				</div>
 			</div>
