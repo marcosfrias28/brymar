@@ -1,22 +1,9 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
 	Select,
@@ -27,26 +14,24 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { InteractiveMap } from "@/components/wizard/shared/interactive-map";
-import { generatePropertyDescription } from "@/lib/actions/ai-actions";
 import {
 	createPropertyAction,
-	updatePropertyAction,
 } from "@/lib/actions/property-actions";
 import type { Geometry } from "@/lib/types/shared";
-import {
-	type PropertyFormData,
-	PropertyFormSchema,
-} from "@/schemas/property-schema";
-import type { Coordinates } from "@/types/wizard";
+import type {
+	PropertyWizardData,
+	Coordinates,
+	Address,
+} from "@/types/property-wizard";
 import { PropertyType } from "@/types/wizard";
 
 interface PropertyFormProps {
-	initialData?: Partial<PropertyFormData>;
+	initialData?: Partial<PropertyWizardData>;
 	isEditing?: boolean;
 	onCancel?: () => void;
 	onSuccess?: () => void;
-	onSubmit?: (data: PropertyFormData) => Promise<void>;
-	onSaveDraft?: (data: PropertyFormData) => Promise<void>;
+	onSubmit?: (data: PropertyWizardData) => Promise<void>;
+	onSaveDraft?: (data: PropertyWizardData) => Promise<void>;
 	isLoading?: boolean;
 }
 
@@ -64,72 +49,47 @@ export function PropertyForm({
 	onCancel,
 	onSuccess,
 }: PropertyFormProps) {
-	const router = useRouter();
 	const [coordinates, setCoordinates] = useState<Coordinates | undefined>(
-		initialData?.features?.coordinates || initialData?.address?.coordinates
+		initialData?.coordinates
 	);
-	const [address, setAddress] = useState<Record<string, unknown> | undefined>(initialData?.address);
-	const [geometry, setGeometry] = useState<Geometry | undefined>(
-		initialData?.geometry
-	);
-	const form = useForm<PropertyFormData>({
-		resolver: zodResolver(PropertyFormSchema),
-		defaultValues: {
-			title: initialData?.title ?? "",
-			description: initialData?.description ?? "",
-			price: initialData?.price ?? 0,
-			surface: initialData?.surface ?? 0,
-			propertyType: initialData?.propertyType ?? PropertyType.APARTMENT,
-			bedrooms: initialData?.bedrooms ?? undefined,
-			bathrooms: initialData?.bathrooms ?? undefined,
-		},
+	const [address, setAddress] = useState<Address | undefined>(initialData?.address);
+	const [formData, setFormData] = useState<Partial<PropertyWizardData>>({
+		title: initialData?.title ?? "",
+		description: initialData?.description ?? "",
+		price: initialData?.price ?? 0,
+		surface: initialData?.surface ?? 0,
+		propertyType: initialData?.propertyType ?? PropertyType.APARTMENT,
+		bedrooms: initialData?.bedrooms ?? undefined,
+		bathrooms: initialData?.bathrooms ?? undefined,
+		characteristics: initialData?.characteristics ?? [],
+		images: initialData?.images ?? [],
+		language: initialData?.language ?? "es",
 	});
 
-	const {
-		handleSubmit,
-		setValue,
-		getValues,
-		formState: { isSubmitting },
-	} = form;
-
-	const onSubmit = async (data: PropertyFormData) => {
+	const handleSubmit = async (data: PropertyWizardData) => {
 		try {
+			// Convert PropertyWizardData to FormData for the action
 			const formData = new FormData();
-
-			if (isEditing && initialData?.id) {
-				formData.append("id", initialData.id);
-			}
-
-			formData.append("title", data.title);
-			formData.append("description", data.description);
-			formData.append("price", String(data.price));
-			formData.append("surface", String(data.surface));
-			formData.append("propertyType", String(data.propertyType));
-
+			formData.append("title", data.title || "");
+			formData.append("description", data.description || "");
+			formData.append("price", String(data.price || 0));
+			formData.append("surface", String(data.surface || 0));
+			formData.append("propertyType", data.propertyType || "apartment");
+			
 			if (data.bedrooms) {
 				formData.append("bedrooms", String(data.bedrooms));
 			}
-
 			if (data.bathrooms) {
 				formData.append("bathrooms", String(data.bathrooms));
 			}
-
-			if (coordinates) {
-				formData.append("latitude", String(coordinates.latitude));
-				formData.append("longitude", String(coordinates.longitude));
+			if (data.address) {
+				formData.append("address", JSON.stringify(data.address));
+			}
+			if (data.coordinates) {
+				formData.append("coordinates", JSON.stringify(data.coordinates));
 			}
 
-			if (address) {
-				formData.append("address", JSON.stringify(address));
-			}
-
-			if (geometry) {
-				formData.append("geometry", JSON.stringify(geometry));
-			}
-
-			const result = isEditing
-				? await updatePropertyAction(formData)
-				: await createPropertyAction(formData);
+			const result = await createPropertyAction({ success: false, data: { id: "" }, errors: {} }, formData);
 
 			if (result.success) {
 				toast.success(
@@ -139,245 +99,134 @@ export function PropertyForm({
 				);
 				onSuccess?.();
 			} else {
-				toast.error(result.error || "Error al guardar la propiedad");
+				toast.error("Error al guardar la propiedad");
 			}
 		} catch (error) {
 			toast.error("Error inesperado al guardar la propiedad");
 		}
 	};
 
-	const handleLocationSelect = (newCoordinates: Coordinates, newAddress: Record<string, unknown>, newGeometry?: Geometry) => {
+	const handleLocationSelect = (newCoordinates: Coordinates, newAddress: Address) => {
 		setCoordinates(newCoordinates);
 		setAddress(newAddress);
-		setGeometry(newGeometry);
+		setFormData(prev => ({ ...prev, coordinates: newCoordinates, address: newAddress }));
+	};
+
+	const updateField = (field: keyof PropertyWizardData, value: any) => {
+		setFormData(prev => ({ ...prev, [field]: value }));
 	};
 
 	return (
-		<Form {...form}>
-			<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-				<Card>
-					<CardHeader>
-						<CardTitle>Información básica</CardTitle>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						<FormField
-							control={form.control}
-							name="title"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Título</FormLabel>
-									<FormControl>
-										<Input placeholder="Ej: Apartamento en Piantini" {...field} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
+		<form onSubmit={(e) => { e.preventDefault(); handleSubmit(formData as PropertyWizardData); }} className="space-y-6">
+			<Card>
+				<CardHeader>
+					<CardTitle>Información básica</CardTitle>
+				</CardHeader>
+				<CardContent className="space-y-4">
+					<div className="space-y-2">
+						<label className="text-sm font-medium">Título</label>
+						<Input 
+							placeholder="Ej: Apartamento en Piantini" 
+							value={formData.title || ""} 
+							onChange={(e) => updateField("title", e.target.value)} 
 						/>
+					</div>
 
-						<FormField
-							control={form.control}
-							name="description"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Descripción</FormLabel>
-									<FormControl>
-										<Textarea
-											placeholder="Describe la propiedad..."
-											rows={4}
-											{...field}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
+					<div className="space-y-2">
+						<label className="text-sm font-medium">Descripción</label>
+						<Textarea
+							placeholder="Describe la propiedad..."
+							rows={4}
+							value={formData.description || ""}
+							onChange={(e) => updateField("description", e.target.value)}
 						/>
+					</div>
 
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-							<FormField
-								control={form.control}
-								name="price"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Precio</FormLabel>
-										<FormControl>
-											<Input
-												type="number"
-												placeholder="100000"
-												{...field}
-												onChange={(e) => field.onChange(Number(e.target.value))}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-
-							<FormField
-								control={form.control}
-								name="surface"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Superficie (m²)</FormLabel>
-										<FormControl>
-											<Input
-												type="number"
-												placeholder="100"
-												{...field}
-												onChange={(e) => field.onChange(Number(e.target.value))}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Precio</label>
+							<Input
+								type="number"
+								placeholder="100000"
+								value={formData.price || ""}
+								onChange={(e) => updateField("price", Number(e.target.value))}
 							/>
 						</div>
 
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-							<FormField
-								control={form.control}
-								name="propertyType"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Tipo de propiedad</FormLabel>
-										<Select onValueChange={field.onChange} defaultValue={field.value}>
-											<FormControl>
-												<SelectTrigger>
-													<SelectValue placeholder="Selecciona tipo" />
-												</SelectTrigger>
-											</FormControl>
-											<SelectContent>
-												{propertyTypeOptions.map((option) => (
-													<SelectItem key={option.value} value={option.value}>
-														{option.label}
-													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Superficie (m²)</label>
+							<Input
+								type="number"
+								placeholder="100"
+								value={formData.surface || ""}
+								onChange={(e) => updateField("surface", Number(e.target.value))}
 							/>
+						</div>
+					</div>
 
-							<FormField
-								control={form.control}
-								name="bedrooms"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Habitaciones</FormLabel>
-										<FormControl>
-											<Input
-												type="number"
-												placeholder="3"
-												{...field}
-												onChange={(e) => field.onChange(Number(e.target.value))}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Tipo de propiedad</label>
+							<Select value={formData.propertyType || ""} onValueChange={(value) => updateField("propertyType", value as PropertyType)}>
+								<SelectTrigger>
+									<SelectValue placeholder="Selecciona tipo" />
+								</SelectTrigger>
+								<SelectContent>
+									{propertyTypeOptions.map((option) => (
+										<SelectItem key={option.value} value={option.value}>
+											{option.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
 
-							<FormField
-								control={form.control}
-								name="bathrooms"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Baños</FormLabel>
-										<FormControl>
-											<Input
-												type="number"
-												placeholder="2"
-												{...field}
-												onChange={(e) => field.onChange(Number(e.target.value))}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Habitaciones</label>
+							<Input
+								type="number"
+								placeholder="3"
+								value={formData.bedrooms || ""}
+								onChange={(e) => updateField("bedrooms", Number(e.target.value))}
 							/>
 						</div>
 
-						<FormField
-							control={form.control}
-							name="description"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Descripción</FormLabel>
-									<FormControl>
-										<Textarea
-											placeholder="Describe la propiedad..."
-											rows={4}
-											{...field}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
+						<div className="space-y-2">
+							<label className="text-sm font-medium">Baños</label>
+							<Input
+								type="number"
+								placeholder="2"
+								value={formData.bathrooms || ""}
+								onChange={(e) => updateField("bathrooms", Number(e.target.value))}
+							/>
+						</div>
+					</div>
+				</CardContent>
+			</Card>
 
-						<Button
-							type="button"
-							variant="outline"
-							onClick={async () => {
-								try {
-									const values = getValues();
-									const aiInput = {
-										type: String(values.propertyType || ""),
-										location: "República Dominicana",
-										price: Number(values.price || 0),
-										surface: Number(values.surface || 0),
-										characteristics: [],
-										bedrooms: values.bedrooms,
-										bathrooms: values.bathrooms,
-									};
+			<Card>
+				<CardHeader>
+					<CardTitle>Ubicación</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<InteractiveMap
+						coordinates={coordinates}
+						onCoordinatesChange={(coords) => setCoordinates(coords)}
+						onAddressChange={(addr) => setAddress(addr)}
+					/>
+				</CardContent>
+			</Card>
 
-									const res = await generatePropertyDescription(aiInput);
-									if (res.success && res.data) {
-										setValue("description", res.data, {
-											shouldDirty: true,
-											shouldValidate: true,
-										});
-										toast.success("Descripción generada");
-									} else {
-										toast.error(
-											res.error || "No se pudo generar la descripción"
-										);
-									}
-								} catch (_e) {
-									toast.error("Error al generar la descripción");
-								}
-							}}
-						>
-							Generar descripción con IA
-						</Button>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader>
-						<CardTitle>Ubicación</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<InteractiveMap
-							onLocationSelect={handleLocationSelect}
-							initialCoordinates={coordinates}
-							initialAddress={address}
-						/>
-					</CardContent>
-				</Card>
-
-				<div className="flex justify-end space-x-4">
-					{onCancel && (
-						<Button type="button" variant="outline" onClick={onCancel}>
-							Cancelar
-						</Button>
-					)}
-					<Button type="submit" disabled={isSubmitting}>
-						{isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-						{isEditing ? "Actualizar" : "Crear"}
+			<div className="flex justify-end space-x-4">
+				{onCancel && (
+					<Button type="button" variant="outline" onClick={onCancel}>
+						Cancelar
 					</Button>
-				</div>
-			</form>
-		</Form>
+				)}
+				<Button type="submit">
+					{isEditing ? "Actualizar" : "Crear"}
+				</Button>
+			</div>
+		</form>
 	);
 }
