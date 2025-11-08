@@ -916,11 +916,12 @@ export async function changePasswordAction(formData: FormData) {
 
 export async function sendVerificationOTPAction(formData: FormData) {
 	const email = formData.get("email") as string;
-	return sendVerificationOTP({ email });
+	const username = formData.get("username") as string;
+	return await sendVerificationOTP({ email, username } as SendVerificationOTPInput);
 }
 
 export async function verifyOTPAction(formData: FormData) {
 	const email = formData.get("email") as string;
 	const otp = formData.get("otp") as string;
-	return verifyOTP({ email, otp });
+	return await verifyOTP({ email, otp } as VerifyOTPInput);
 }

@@ -1,24 +1,44 @@
-import { Hr, Link, Section, Text } from "@react-email/components";
+import { Link, Section, Text } from '@react-email/components'
 
-export const EmailFooter = () => {
-	const currentYear = new Date().getFullYear();
+const EmailFooter = () => {
+  return (
+    <Section style={footer}>
+      <Text style={links}>
+        <Link href="https://www.marbryinmobiliaria.com/about" style={link}>
+          About Us
+        </Link>{' '}
+        •
+        <Link href="https://www.marbryinmobiliaria.com/contact" style={link}>
+          Contact
+        </Link>{' '}
+        •
+        <Link href="https://www.marbryinmobiliaria.com/privacy" style={link}>
+          Privacy Policy
+        </Link>
+      </Text>
+      <Text style={copyright}>© 2025 MARBRY INMOBILIARIA. All rights reserved.</Text>
+    </Section>
+  )
+}
 
-	return (
-		<Section className="bg-slate-50 px-8 py-6">
-			<Hr className="my-4 border-slate-200" />
-			<Text className="mb-2 text-center text-slate-600 text-sm">
-				Este correo fue enviado por ARBRY. Si tienes alguna pregunta,{" "}
-				<Link
-					className="text-blue-600 no-underline"
-					href="mailto:support@arbry.com"
-				>
-					contáctanos
-				</Link>
-				.
-			</Text>
-			<Text className="m-0 text-center text-slate-500 text-xs">
-				© {currentYear} ARBRY. Todos los derechos reservados.
-			</Text>
-		</Section>
-	);
-};
+export default EmailFooter
+
+const footer = {
+  backgroundColor: '#f6f9fc',
+  padding: '20px 0',
+  textAlign: 'center' as const,
+}
+
+const links = {
+  marginBottom: '10px',
+}
+
+const link = {
+  color: '#007bff',
+  textDecoration: 'none',
+}
+
+const copyright = {
+  color: '#6c757d',
+  fontSize: '12px',
+}

@@ -97,6 +97,7 @@ export type VerifyEmailInput = {
 
 export type SendVerificationOTPInput = {
 	email: string;
+	username: string;
 };
 
 export type VerifyOTPInput = {

@@ -1,33 +1,34 @@
-import { EmailVerificationEmail } from "../src/lib/email-templates/email-verification";
-import { ForgotPasswordEmail } from "../src/lib/email-templates/forgot-password";
-import { WelcomeEmail } from "../src/lib/email-templates/welcome";
+import EmailVerificationEmail from "../src/lib/email-templates/components/email-verification.tsx";
+import ForgotPasswordEmail from "../src/lib/email-templates/components/forgot-password.tsx";
+import WelcomeEmail from "../src/lib/email-templates/components/welcome.tsx";
 
 // Preview data for development
 const previewData = {
-	userName: "María García",
-	resetUrl: "https://arbry.com/reset-password?token=abc123",
-	dashboardUrl: "https://arbry.com/dashboard",
-	verificationUrl: "https://arbry.com/verify-email?token=xyz789",
+	username: "María García",
+	resetPasswordUrl:
+		"https://marbryinmobiliaria.com/reset-password?token=abc123",
+	loginUrl: "https://marbryinmobiliaria.com/dashboard",
+	verificationUrl: "https://marbryinmobiliaria.com/verify-email?token=xyz789",
 };
 
 // Export templates for react-email preview
 export const ForgotPassword = () => (
 	<ForgotPasswordEmail
-		resetUrl={previewData.resetUrl}
-		userName={previewData.userName}
+		resetPasswordUrl={previewData.resetPasswordUrl}
+		username={previewData.username}
 	/>
 );
 
 export const Welcome = () => (
 	<WelcomeEmail
-		dashboardUrl={previewData.dashboardUrl}
-		userName={previewData.userName}
+		loginUrl={previewData.loginUrl}
+		username={previewData.username}
 	/>
 );
 
 export const EmailVerification = () => (
 	<EmailVerificationEmail
-		userName={previewData.userName}
+		username={previewData.username}
 		verificationUrl={previewData.verificationUrl}
 	/>
 );

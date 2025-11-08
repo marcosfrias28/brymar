@@ -1,38 +1,31 @@
-import {
-	Body,
-	Container,
-	Head,
-	Html,
-	Preview,
-	Section,
-	Tailwind,
-} from "@react-email/components";
-import type { ReactNode } from "react";
-import { EmailFooter } from "./email-footer";
-import { EmailHeader } from "./email-header";
+import { Html, Body, Container } from "@react-email/components";
+import React from "react";
 
-type EmailLayoutProps = {
-	children: ReactNode;
-	preview: string;
-	title?: string;
+interface EmailLayoutProps {
+  children: React.ReactNode;
+}
+
+const EmailLayout: React.FC<EmailLayoutProps> = ({ children }) => {
+  return (
+    <Html>
+      <Body style={main}>
+        <Container style={container}>{children}</Container>
+      </Body>
+    </Html>
+  );
 };
 
-export const EmailLayout = ({ children, preview, title }: EmailLayoutProps) => (
-	<Html>
-		<Head>
-			<title>{title || "ARBRY"}</title>
-		</Head>
-		<Preview>{preview}</Preview>
-		<Tailwind>
-			<Body className="bg-slate-50 font-sans">
-				<Container className="mx-auto max-w-2xl px-4 py-8">
-					<Section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-						<EmailHeader />
-						<Section className="px-8 py-6">{children}</Section>
-						<EmailFooter />
-					</Section>
-				</Container>
-			</Body>
-		</Tailwind>
-	</Html>
-);
+export default EmailLayout;
+
+const main = {
+  backgroundColor: "#f6f9fc",
+  fontFamily:
+    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+};
+
+const container = {
+  backgroundColor: "#ffffff",
+  margin: "0 auto",
+  padding: "20px 0 48px",
+  marginBottom: "64px",
+};
