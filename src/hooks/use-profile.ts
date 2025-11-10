@@ -332,8 +332,8 @@ export function useProfileMessages() {
 				{
 					id: "2",
 					senderId: "admin-1",
-					senderName: "Soporte Brymar",
-					subject: "Bienvenido a Brymar",
+					senderName: "Soporte Marbry",
+					subject: "Bienvenido a Marbry",
 					message:
 						"¡Bienvenido a nuestra plataforma! Estamos aquí para ayudarte a encontrar la casa de tus sueños.",
 					content:
@@ -345,7 +345,7 @@ export function useProfileMessages() {
 					createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
 					sender: {
 						id: "admin-1",
-						name: "Soporte Brymar",
+						name: "Soporte Marbry",
 						email: "soporte@brymar.com",
 						avatar: "/avatars/support.jpg",
 					},

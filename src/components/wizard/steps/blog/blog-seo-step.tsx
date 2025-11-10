@@ -8,24 +8,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-
-type BlogSeoData = {
-	slug?: string;
-	metaDescription?: string;
-	tags?: string[];
-};
+import type { BlogWizardData } from "@/lib/schemas/blog-wizard-schemas";
 
 type BlogSeoStepProps = {
-	data: BlogSeoData;
-	onChange: (data: BlogSeoData) => void;
-	errors?: Record<string, string>;
+	data: BlogWizardData;
+	onChange: (data: BlogWizardData) => void;
 };
 
-export function BlogSeoStep({ data, onChange, errors }: BlogSeoStepProps) {
+export function BlogSeoStep({ data, onChange }: BlogSeoStepProps) {
 	const [newTag, setNewTag] = useState("");
 	const tags = data.tags || [];
 
-	const handleChange = (field: keyof BlogSeoData, value: string | string[]) => {
+	const handleChange = (field: 'slug' | 'seoDescription' | 'tags', value: string | string[]) => {
 		onChange({ ...data, [field]: value });
 	};
 
@@ -68,14 +62,14 @@ export function BlogSeoStep({ data, onChange, errors }: BlogSeoStepProps) {
 					</div>
 
 					<div className="space-y-2">
-						<Label htmlFor="metaDescription">Meta Descripción</Label>
+						<Label htmlFor="seoDescription">Meta Descripción</Label>
 						<Textarea
-							id="metaDescription"
+							id="seoDescription"
 							maxLength={160}
-							onChange={(e) => handleChange("metaDescription", e.target.value)}
+							onChange={(e) => handleChange("seoDescription", e.target.value)}
 							placeholder="Descripción breve para motores de búsqueda..."
 							rows={3}
-							value={data.metaDescription || ""}
+							value={data.seoDescription || ""}
 						/>
 						<p className="text-muted-foreground text-sm">
 							Máximo 160 caracteres. Aparecerá en los resultados de búsqueda.

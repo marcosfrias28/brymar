@@ -29,7 +29,9 @@
     "db:force-reset": "node scripts/force-reset-database.js --force",
     "db:drop": "drizzle-kit drop",
     "auth:test": "node scripts/test-auth-connection.js",
-    "check-env": "node scripts/check-env.js"
+    "check-env": "node scripts/check-env.js",
+    "deploy:production": "node scripts/deploy-production.js",
+    "deploy:validate": "node src/scripts/validate-deployment.js"
   },
   "dependencies": {
     "@better-fetch/fetch": "^1.1.18",

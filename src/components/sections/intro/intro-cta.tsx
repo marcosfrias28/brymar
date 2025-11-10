@@ -35,7 +35,7 @@ export const IntroCTA: React.FC<IntroCTAProps> = ({
 				<span
 					className={cn(
 						italianno.className,
-						"-mt-56 max-md:-mt-32 -mb-48 inline-block tablet:text-[350px] text-[250px] smartphonexs:text-[200px]",
+						"-mt-56 max-xl:-mt-32 -mb-48 inline-block tablet:text-[350px] text-[250px] smartphonexs:text-[200px]",
 						WordsStyle
 					)}
 				>

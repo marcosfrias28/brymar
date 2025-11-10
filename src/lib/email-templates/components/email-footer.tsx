@@ -1,7 +1,6 @@
 import { Link, Section, Text } from "@react-email/components";
 
-const EmailFooter = () => {
-	return (
+const EmailFooter = () => (
 		<Section style={footer}>
 			<Text style={links}>
 				<Link href="https://www.marbryinmobiliaria.com/about" style={link}>
@@ -21,7 +20,6 @@ const EmailFooter = () => {
 			</Text>
 		</Section>
 	);
-};
 
 export default EmailFooter;
 

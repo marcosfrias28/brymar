@@ -281,7 +281,7 @@ export function ProfileFavorites() {
 						<CardTitle className="text-lg">Estadísticas de Favoritos</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+						<div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
 							<div className="text-center">
 								<div className="font-bold text-2xl text-primary">
 									{favorites.length}

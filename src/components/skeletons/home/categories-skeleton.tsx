@@ -31,7 +31,7 @@ export function CategoriesSkeleton() {
 						subtitle="Categorías"
 						subtitleClassName="text-left justify-start"
 						title="Explora las mejores propiedades con servicios expertos"
-						titleClassName="text-left text-3xl md:text-4xl lg:text-5xl"
+						titleClassName="text-left text-3xl xl:text-4xl lg:text-5xl"
 					/>
 					<Skeleton className="h-10 w-40" />
 				</div>

@@ -58,7 +58,7 @@ export function DashboardPageSkeleton() {
 				{/* Main Content */}
 				<div className="space-y-6 lg:col-span-3">
 					{/* Stats Cards */}
-					<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+					<div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
 						{Array.from({ length: 3 }).map((_, i) => (
 							<div
 								className={cn(
@@ -78,7 +78,7 @@ export function DashboardPageSkeleton() {
 					{/* Main Content Area */}
 					<div className="animation-delay-400 animate-fade-in space-y-4">
 						<LoadingSkeleton className="h-64 w-full" variant="shimmer" />
-						<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+						<div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
 							<LoadingSkeleton className="animation-delay-500 h-32 w-full animate-fade-in" />
 							<LoadingSkeleton className="animation-delay-500 h-32 w-full animate-fade-in" />
 						</div>
@@ -140,7 +140,7 @@ export function CardListSkeleton({ count = 6 }: { count?: number }) {
 export function FormSkeleton() {
 	return (
 		<div className="space-y-6">
-			<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+			<div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
 				<div className="space-y-2">
 					<LoadingSkeleton className="h-4 w-20" />
 					<LoadingSkeleton className="h-10 w-full" variant="pulse" />
@@ -156,7 +156,7 @@ export function FormSkeleton() {
 				<LoadingSkeleton className="h-24 w-full" variant="shimmer" />
 			</div>
 
-			<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+			<div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
 				{Array.from({ length: 3 }).map((_, i) => (
 					<div className="space-y-2" key={i}>
 						<LoadingSkeleton className="h-4 w-16" />

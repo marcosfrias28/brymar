@@ -16,7 +16,7 @@ export type PageSection = {
 	title?: string;
 	subtitle?: string;
 	description?: string;
-	content?: Record<string, any>;
+	content?: Record<string, unknown>;
 	images?: string[];
 };
 
@@ -126,7 +126,7 @@ export const PAGE_SECTIONS = {
 		},
 		features: {
 			id: "features",
-			title: "¿Por qué Elegir Brymar?",
+			title: "¿Por qué Elegir Marbry?",
 			subtitle: "Experiencia y Confianza en Bienes Raíces",
 			description:
 				"Más de 10 años ayudando a familias a encontrar su hogar perfecto.",
@@ -218,7 +218,7 @@ export const PAGE_SECTIONS = {
 			content: {
 				members: [
 					{
-						name: "Roberto Brymar",
+						name: "Roberto Marbry",
 						role: "Director General",
 						experience: "15 años de experiencia",
 						image:

@@ -10,7 +10,7 @@ import {
 	generateWizardBreadcrumbs,
 	ConsistentLoadingState,
 	ConsistentErrorState,
-} from "@/components/wizard/shared/index";
+} from "@/components/wizard/shared-components";
 import { useUser } from "@/hooks/use-user";
 import { loadBlogDraft } from "@/lib/actions/index";
 import type { BlogWizardData } from "@/types/index";
@@ -86,11 +86,7 @@ function useBlogHandlers() {
 }
 
 // Loading state component
-function LoadingState({
-	breadcrumbs,
-}: {
-	breadcrumbs: Array<{ label: string; href?: string }>;
-}) {
+function LoadingState() {
 	return (
 		<RouteGuard requiredPermission="blog.manage">
 			<DashboardPageLayout
@@ -102,12 +98,9 @@ function LoadingState({
 						</Link>
 					</Button>
 				}
-				breadcrumbs={breadcrumbs}
-				description="Cargando borrador"
 				title="Cargando..."
 			>
 				<ConsistentLoadingState
-					breadcrumbs={breadcrumbs}
 					description="Preparando el asistente con tus datos guardados"
 					title="Cargando borrador..."
 				/>
@@ -117,11 +110,7 @@ function LoadingState({
 }
 
 // Error state component
-function ErrorState({
-	breadcrumbs,
-}: {
-	breadcrumbs: Array<{ label: string; href?: string }>;
-}) {
+function ErrorState() {
 	const router = useRouter();
 
 	return (
@@ -135,13 +124,13 @@ function ErrorState({
 						</Link>
 					</Button>
 				}
-				breadcrumbs={breadcrumbs}
 				description="Usuario no autenticado"
 				title="Error"
 			>
 				<ConsistentErrorState
 					actionLabel="Volver al Blog"
 					description="No se pudo verificar tu identidad"
+					error="Usuario no autenticado"
 					onAction={() => router.push("/dashboard/blog")}
 					title="Error de autenticación"
 				/>
@@ -253,11 +242,11 @@ export default function NewBlogPage() {
 	const breadcrumbs = generateWizardBreadcrumbs("blog", draftId !== null);
 
 	if (loading) {
-		return <LoadingState breadcrumbs={breadcrumbs} />;
+		return <LoadingState />;
 	}
 
 	if (!user?.id) {
-		return <ErrorState breadcrumbs={breadcrumbs} />;
+		return <ErrorState />;
 	}
 
 	return (

@@ -1,70 +1,11 @@
-import { Mail, MapPin, Phone } from "lucide-react";
+import { ContactRound, Mail, MapPin, Phone } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { SectionHeader, SectionWrapper } from "@/components/ui/section-wrapper";
 import { UnifiedForm, type FormConfig } from "@/components/forms/unified-form";
+import { contactFormAction } from "@/lib/actions/contact-actions";
 
-const ContactIcon = () => (
-	<svg
-		className="fill-current"
-		height="20"
-		viewBox="0 0 256 256"
-		width="20"
-		xmlns="http://www.w3.org/2000/svg"
-	>
-		<path d="M224 120v96a8 8 0 0 1-8 8H40a8 8 0 0 1-8-8v-96a15.87 15.87 0 0 1 4.69-11.32l80-80a16 16 0 0 1 22.62 0l80 80A15.87 15.87 0 0 1 224 120" />
-	</svg>
-);
-
-// Acción del formulario de contacto
-async function contactFormAction(
-	_prevState: {
-		success?: boolean;
-		errors?: Record<string, string[]>;
-		message?: string;
-	},
-	formData: FormData
-) {
-	"use server";
-
-	// Simula procesamiento del formulario
-	await new Promise((resolve) => setTimeout(resolve, 1000));
-
-	const name = formData.get("name") as string;
-	const email = formData.get("email") as string;
-	const phone = formData.get("phone") as string;
-	const message = formData.get("message") as string;
-
-	// Validación básica
-	const errors: Record<string, string[]> = {};
-
-	if (!name || name.length < 2) {
-		errors.name = ["El nombre es requerido y debe tener al menos 2 caracteres"];
-	}
-
-	if (!email?.includes("@")) {
-		errors.email = ["Ingresa un correo electrónico válido"];
-	}
-
-	if (!phone || phone.length < 8) {
-		errors.phone = ["Ingresa un número de teléfono válido"];
-	}
-
-	if (!message || message.length < 10) {
-		errors.message = ["El mensaje debe tener al menos 10 caracteres"];
-	}
-
-	if (Object.keys(errors).length > 0) {
-		return { success: false, errors };
-	}
-
-	return {
-		success: true,
-		message: "¡Gracias por contactarnos! Te responderemos pronto.",
-	};
-}
-
-// Configuración del formulario de contacto
+// Constants for validation
 const contactFormConfig: FormConfig = {
 	title: "Envíanos un mensaje",
 	description: "Completa el formulario y nos pondremos en contacto contigo",
@@ -107,7 +48,7 @@ export default function ContactPage() {
 		<SectionWrapper>
 			<SectionHeader
 				description="¿Buscas tu hogar soñado o estás listo para vender? Nuestro equipo de expertos ofrece orientación personalizada y conocimiento del mercado adaptado a ti."
-				icon={<ContactIcon />}
+				icon={<ContactRound />}
 				subtitle="Contáctanos"
 				title="¿Tienes preguntas? ¡Estamos aquí para ayudarte!"
 			/>

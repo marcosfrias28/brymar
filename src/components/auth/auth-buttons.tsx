@@ -2,13 +2,11 @@
 
 import { LogInIcon, UserCheck2, User as UserIcon } from "lucide-react";
 import Link from "next/link";
-import LogOutButton from "@/components/auth/logout-button";
 import { ModeToggle } from "@/components/mode-toggle";
 import {
 	NavigationMenu,
 	NavigationMenuContent,
 	NavigationMenuItem,
-	NavigationMenuLink,
 	NavigationMenuList,
 	NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
@@ -16,6 +14,7 @@ import { PillContainer, PillLink } from "@/components/ui/pill-container";
 import { useAdmin } from "@/hooks/use-admin";
 import { useUser } from "@/hooks/use-user";
 import getProfileItems from "@/lib/navbar/getProfileItems";
+import { UserSection } from "@/components/navigation/shared/user-section";
 
 type AuthButtonsProps = {
 	className?: string;
@@ -51,46 +50,14 @@ export function AuthButtons({
 									)}
 								</NavigationMenuTrigger>
 								<NavigationMenuContent className="w-80 border border-border/50 shadow-xl backdrop-blur-sm sm:w-96">
-									{/* Información del usuario */}
-									<div className="border-border/50 border-b px-3 py-2 text-muted-foreground text-sm">
-										<Link href={role === "admin" ? "/dashboard" : "/profile"}>
-											<div className="truncate whitespace-nowrap font-medium text-card-foreground">
-												{user.name ||
-													`${user.firstName || ""} ${
-														user.lastName || ""
-													}`.trim() ||
-													user.email}
-											</div>
-											<div className="whitespace-nowrap text-xs capitalize">
-												{role === "admin"
-													? "Administrador"
-													: role === "agent"
-														? "Agente"
-														: "Usuario"}
-											</div>
-										</Link>
-									</div>
-
-									{/* Elementos del menú basados en rol */}
-									{profileItems.map(({ icon: Icon, href, label }) => (
-										<NavigationMenuLink asChild key={href}>
-											<Link href={href}>
-												<div className="flex flex-nowrap items-center gap-2 whitespace-nowrap rounded-sm px-3 py-2 transition-colors hover:bg-secondary/60 hover:text-secondary-foreground">
-													<Icon className="h-4 w-4" />
-													<span className="truncate">{label}</span>
-												</div>
-											</Link>
-										</NavigationMenuLink>
-									))}
-
-									{profileItems.length > 0 && (
-										<div className="my-1 border-border/50 border-t" />
-									)}
-
-									{/* Cerrar sesión */}
-									<NavigationMenuLink asChild>
-										<LogOutButton user={null} />
-									</NavigationMenuLink>
+									<UserSection
+										className="p-0"
+										isMobile={false}
+										linkClassName="flex flex-nowrap items-center gap-2 whitespace-nowrap rounded-sm px-3 py-2 transition-colors hover:bg-secondary/60 hover:text-secondary-foreground"
+										profileItems={profileItems}
+										role={role || null}
+										user={user}
+									/>
 								</NavigationMenuContent>
 							</NavigationMenuItem>
 						</NavigationMenuList>
@@ -100,13 +67,13 @@ export function AuthButtons({
 						<Link href="/sign-in">
 							<PillLink>
 								<span className="hidden sm:inline">Iniciar sesión</span>
-								<LogInIcon className="h-4 w-4 sm:hidden" />
+								<LogInIcon className="h-4 w-4 xl:hidden" />
 							</PillLink>
 						</Link>
 						<Link href="/sign-up">
 							<PillLink isActive={true}>
 								<span className="hidden sm:inline">Registrarse</span>
-								<UserCheck2 className="h-4 w-4 sm:hidden" />
+								<UserCheck2 className="h-4 w-4 xl:hidden" />
 							</PillLink>
 						</Link>
 					</>

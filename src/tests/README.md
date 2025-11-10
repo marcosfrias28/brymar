@@ -1,6 +1,6 @@
-# Testing Guide - Brymar Inmobiliaria
+# Testing Guide - Marbry Inmobiliaria
 
-This document explains how to run and understand the test suite for the Brymar Inmobiliaria application.
+This document explains how to run and understand the test suite for the Marbry Inmobiliaria application.
 
 ## 🧪 Test Structure
 

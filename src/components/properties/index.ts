@@ -5,7 +5,6 @@
 
 // Core property components
 export { PropertyCard } from "../cards/property-card";
-export { PropertyForm } from "../forms/property-form";
 // export { PropertyList } from "../lists/property-list"; // TODO: Create property-list component
 export { ImageUpload } from "./image-upload";
 // Specialized property components

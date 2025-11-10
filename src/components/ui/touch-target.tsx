@@ -26,7 +26,8 @@ export function TouchTarget({
 	const sizeClasses = {
 		sm: "min-h-[40px] min-w-[40px]", // 40px minimum
 		md: "min-h-[44px] min-w-[44px]", // 44px WCAG recommended
-		lg: "min-h-[48px] min-w-[48px]", // 48px for better accessibility
+		xl: "min-h-[48px] min-w-[48px]", // 48px for better accessibility
+		lg: "min-h-[52px] min-w-[52px]", // 52px for even better accessibility
 	};
 
 	const touchClasses = cn(
@@ -87,7 +88,8 @@ export function TouchButton({
 	const sizeClasses = {
 		sm: cn("h-9 px-3 text-sm", isTouch && "min-h-[40px] px-4"),
 		md: cn("h-10 px-4 py-2", isTouch && "min-h-[44px] px-5"),
-		lg: cn("h-11 px-8", isTouch && "min-h-[48px] px-9"),
+		xl: cn("h-11 px-6", isTouch && "min-h-[48px] px-7"),
+		lg: cn("h-11 px-8", isTouch && "min-h-[52px] px-9"),
 	};
 
 	return (

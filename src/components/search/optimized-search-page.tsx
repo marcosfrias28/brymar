@@ -408,7 +408,7 @@ export function OptimizedSearchPage() {
 			</div>
 
 			{/* Mobile Layout - Stacked vertically */}
-			<div className="flex flex-1 flex-col overflow-hidden md:hidden">
+			<div className="flex flex-1 flex-col overflow-hidden xl:hidden">
 				{/* Mobile Header with Tabs */}
 				<div className="flex-shrink-0 border-b bg-background">
 					<div className="p-2">
@@ -516,9 +516,9 @@ export function OptimizedSearchPage() {
 			</div>
 
 			{/* Desktop Layout - Side by side */}
-			<div className="hidden flex-1 overflow-hidden md:flex">
+			<div className="hidden flex-1 overflow-hidden xl:flex">
 				{/* Left Sidebar - Responsive width to fit all filters */}
-				<div className="w-full flex-shrink-0 border-r bg-background md:w-2/5 xl:w-1/3">
+				<div className="w-full flex-shrink-0 border-r bg-background xl:w-1/3 xl:w-2/5">
 					<div className="flex h-full flex-col">
 						{/* Tabs - Fixed at top of sidebar */}
 						<div className="flex-shrink-0 border-b p-2">

@@ -3,16 +3,54 @@
 import { z } from "zod";
 import { PropertyType } from "@/types/wizard";
 
+// Geographic constants
+const MIN_LATITUDE = 17.5;
+const MAX_LATITUDE = 19.9;
+const MIN_LONGITUDE = -72.0;
+const MAX_LONGITUDE = -68.3;
+
+// Address validation constants
+const MIN_STREET_LENGTH = 5;
+const MIN_CITY_LENGTH = 2;
+const MIN_STATE_LENGTH = 2;
+const MIN_COUNTRY_LENGTH = 2;
+
+// Content validation constants
+const MIN_TITLE_LENGTH = 10;
+const MAX_TITLE_LENGTH = 100;
+const MIN_DESCRIPTION_LENGTH = 50;
+const MAX_DESCRIPTION_LENGTH = 2000;
+const MAX_PRICE = 999_999_999;
+const MAX_SURFACE = 999_999;
+
+// Property feature limits
+const MAX_BEDROOMS = 50;
+const MAX_BATHROOMS = 50;
+const MAX_CHARACTERISTICS = 20;
+
+// Media limits
+const MAX_IMAGES = 20;
+const MAX_VIDEOS = 10;
+
 // Base schemas for reusable types
 export const CoordinatesSchema = z.object({
-	latitude: z.number().min(17.5).max(19.9), // Dominican Republic bounds
-	longitude: z.number().min(-72.0).max(-68.3),
+	latitude: z.number().min(MIN_LATITUDE).max(MAX_LATITUDE), // Dominican Republic bounds
+	longitude: z.number().min(MIN_LONGITUDE).max(MAX_LONGITUDE),
 });
 
 export const AddressSchema = z.object({
-	street: z.string().min(5, "La dirección debe tener al menos 5 caracteres"),
-	city: z.string().min(2, "La ciudad debe tener al menos 2 caracteres"),
-	province: z.string().min(2, "La provincia debe tener al menos 2 caracteres"),
+	street: z.string().min(
+		MIN_STREET_LENGTH,
+		`La dirección debe tener al menos ${MIN_STREET_LENGTH} caracteres`
+	),
+	city: z.string().min(
+		MIN_CITY_LENGTH,
+		`La ciudad debe tener al menos ${MIN_CITY_LENGTH} caracteres`
+	),
+	province: z.string().min(
+		MIN_STATE_LENGTH,
+		`La provincia debe tener al menos ${MIN_STATE_LENGTH} caracteres`
+	),
 	postalCode: z.string().optional(),
 	country: z.literal("Dominican Republic"),
 	formattedAddress: z.string().min(1),
@@ -54,28 +92,31 @@ export const VideoMetadataSchema = z.object({
 export const PropertyGeneralSchema = z.object({
 	title: z
 		.string()
-		.min(10, "El título debe tener al menos 10 caracteres")
-		.max(100, "El título no puede superar 100 caracteres"),
+		.min(MIN_TITLE_LENGTH, `El título debe tener al menos ${MIN_TITLE_LENGTH} caracteres`)
+		.max(MAX_TITLE_LENGTH, `El título no puede superar ${MAX_TITLE_LENGTH} caracteres`),
 	description: z
 		.string()
-		.min(50, "La descripción debe tener al menos 50 caracteres")
-		.max(5000, "La descripción no puede superar 5000 caracteres"),
+		.min(MIN_DESCRIPTION_LENGTH, `La descripción debe tener al menos ${MIN_DESCRIPTION_LENGTH} caracteres`)
+		.max(MAX_DESCRIPTION_LENGTH, `La descripción no puede superar ${MAX_DESCRIPTION_LENGTH} caracteres`),
 	price: z
 		.number()
 		.positive("El precio debe ser mayor a 0")
-		.max(999_999_999, "El precio es demasiado alto"),
+		.max(MAX_PRICE, "El precio es demasiado alto"),
 	surface: z
 		.number()
 		.positive("La superficie debe ser mayor a 0")
-		.max(999_999, "La superficie es demasiado grande"),
+		.max(MAX_SURFACE, "La superficie es demasiado grande"),
 	propertyType: z.nativeEnum(PropertyType, {
 		message: "Selecciona un tipo de propiedad válido",
 	}),
-	bedrooms: z.number().min(0).max(50).optional(),
-	bathrooms: z.number().min(0).max(50).optional(),
+	bedrooms: z.number().min(0).max(MAX_BEDROOMS).optional(),
+	bathrooms: z.number().min(0).max(MAX_BATHROOMS).optional(),
 	characteristics: z
-		.array(PropertyCharacteristicSchema)
-		.min(1, "Selecciona al menos una característica"),
+		.array(z.string())
+		.max(
+			MAX_CHARACTERISTICS,
+			`No puede haber más de ${MAX_CHARACTERISTICS} características`
+		),
 });
 
 // Lenient version for draft validation
@@ -85,9 +126,9 @@ export const PropertyGeneralDraftSchema = z.object({
 	price: z.number().positive().optional(),
 	surface: z.number().positive().optional(),
 	propertyType: z.nativeEnum(PropertyType).optional(),
-	bedrooms: z.number().min(0).max(50).optional(),
-	bathrooms: z.number().min(0).max(50).optional(),
-	characteristics: z.array(PropertyCharacteristicSchema).optional(),
+	bedrooms: z.number().min(0).max(MAX_BEDROOMS).optional(),
+	bathrooms: z.number().min(0).max(MAX_BATHROOMS).optional(),
+	characteristics: z.array(z.string()).optional(),
 });
 
 // Geometry schemas (GeoJSON-like)
@@ -119,10 +160,10 @@ export const PropertyMediaSchema = z.object({
 	images: z
 		.array(ImageMetadataSchema)
 		.min(1, "Sube al menos una imagen")
-		.max(20, "No puedes subir más de 20 imágenes"),
+		.max(MAX_IMAGES, `No puedes subir más de ${MAX_IMAGES} imágenes`),
 	videos: z
 		.array(VideoMetadataSchema)
-		.max(5, "No puedes subir más de 5 videos")
+		.max(MAX_VIDEOS, `No puedes subir más de ${MAX_VIDEOS} videos`)
 		.optional(),
 });
 
@@ -194,7 +235,7 @@ export const PropertyDraftSchema = z.object({
 	propertyType: z.nativeEnum(PropertyType).optional(),
 	bedrooms: z.number().optional(),
 	bathrooms: z.number().optional(),
-	characteristics: z.array(PropertyCharacteristicSchema).optional(),
+	characteristics: z.array(z.string()).optional(),
 	coordinates: CoordinatesSchema.optional(),
 	address: AddressSchema.optional(),
 	geometry: GeometrySchema.optional(),

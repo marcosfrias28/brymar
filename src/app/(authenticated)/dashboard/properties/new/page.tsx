@@ -6,104 +6,87 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { RouteGuard } from "@/components/auth/route-guard";
-import { PropertyForm } from "@/components/forms/property-form";
+import { PropertyWizardNew } from "@/components/wizard/property-wizard-new";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { Button } from "@/components/ui/button";
 import { useBreadcrumbs } from "@/hooks/use-breadcrumbs";
 import { useUser } from "@/hooks/use-user";
-import {
-	loadPropertyDraft,
-	createPropertyFromWizard,
-	updatePropertyFromWizard,
-} from "@/lib/actions/property-wizard-actions";
-import type { PropertyWizardData } from "@/types/property-wizard";
-import { PropertyType } from "@/types/wizard";
+import { loadPropertyDraft } from "@/lib/actions/property-wizard-actions";
+import type { PropertyWizardData } from "@/components/wizard/property-wizard-new";
 
-export default function NewPropertyPage() {
-	const router = useRouter();
-	const searchParams = useSearchParams();
-	const breadcrumbs = useBreadcrumbs();
-	const { user } = useUser();
-	const [loading, setLoading] = useState(false);
+const DEFAULT_PROPERTY_DATA: Partial<PropertyWizardData> = {
+	title: "",
+	description: "",
+	price: 0,
+	surface: 0,
+	propertyType: "house" as const,
+	bedrooms: 0,
+	bathrooms: 0,
+	coordinates: {
+		lat: 18.735_693,
+		lng: -70.162_651,
+	},
+	address: {
+		street: "",
+		city: "",
+		state: "",
+		country: "República Dominicana",
+		postalCode: "",
+	},
+	characteristics: [],
+	images: [],
+	videos: [],
+	language: "es" as const,
+	aiGenerated: {
+		title: false,
+		description: false,
+		tags: false,
+	},
+};
+
+function useDraftLoader(
+	draftId: string | null,
+	userId: string | undefined,
+	router: ReturnType<typeof useRouter>
+) {
 	const [initialData, setInitialData] = useState<Partial<PropertyWizardData>>();
-
-	const draftId = searchParams?.get("draft");
 
 	useEffect(() => {
 		const loadDraftData = async () => {
-			if (!(draftId && user?.id)) {
+			if (!(draftId && userId)) {
 				return;
 			}
 
-			setLoading(true);
 			try {
-				const result = await loadPropertyDraft(draftId, user.id);
+				const result = await loadPropertyDraft(draftId, userId);
 
 				if (result) {
 					setInitialData(result);
 					toast.success("Borrador cargado exitosamente");
 				} else {
 					toast.error("Error al cargar el borrador");
-					// Redirect to new property without draft
 					router.replace("/dashboard/properties/new");
 				}
-			} catch (error) {
+			} catch {
 				toast.error("Error inesperado al cargar el borrador");
 				router.replace("/dashboard/properties/new");
-			} finally {
-				setLoading(false);
 			}
 		};
 
 		loadDraftData();
-	}, [draftId, user?.id, router]);
+	}, [draftId, userId, router]);
 
-	const handleSubmit = async (data: PropertyWizardData) => {
-		if (!user?.id) {
-			toast.error("Usuario no autenticado");
-			throw new Error("Usuario no autenticado");
-		}
+	return initialData;
+}
 
-		try {
-			const result = draftId
-				? await updatePropertyFromWizard(draftId, data, user.id)
-				: await createPropertyFromWizard(data, user.id);
+export default function NewPropertyPage() {
+	const router = useRouter();
+	const searchParams = useSearchParams();
+	const breadcrumbs = useBreadcrumbs();
+	const { user } = useUser();
 
-			if (result.success) {
-				toast.success("¡Propiedad creada exitosamente!");
-				router.push("/dashboard/properties");
-			} else {
-				toast.error(result.error || "Error al crear la propiedad");
-			}
-		} catch (error) {
-			toast.error("Error inesperado al crear la propiedad");
-		}
-	};
-
-	const handleSaveDraft = async (data: PropertyWizardData) => {
-		if (!user?.id) {
-			toast.error("Usuario no autenticado");
-			throw new Error("Usuario no autenticado");
-		}
-
-		try {
-			// For draft saving, we need to use the savePropertyDraft function
-			// or create a new draft if it doesn't exist
-			if (draftId) {
-				const result = await updatePropertyFromWizard(draftId, data, user.id);
-				if (result.success) {
-					toast.success("Borrador guardado exitosamente");
-				} else {
-					toast.error(result.error || "Error al guardar el borrador");
-				}
-			} else {
-				// Create new draft - need to implement this function
-				toast.error("Función de crear nuevo borrador no implementada");
-			}
-		} catch (error) {
-			toast.error("Error inesperado al guardar el borrador");
-		}
-	};
+	const draftId = searchParams?.get("draft");
+	const initialData = useDraftLoader(draftId, user?.id, router);
 
 	const actions = (
 		<Button asChild variant="outline">
@@ -126,11 +109,9 @@ export default function NewPropertyPage() {
 				}
 				title={draftId ? "Continuar Borrador" : "Nueva Propiedad"}
 			>
-				<PropertyForm
-					initialData={initialData}
-					onSubmit={handleSubmit}
-					onSaveDraft={handleSaveDraft}
-					isLoading={loading}
+				<PropertyWizardNew
+					initialData={initialData || DEFAULT_PROPERTY_DATA}
+					onComplete={() => router.push("/dashboard/properties")}
 				/>
 			</DashboardPageLayout>
 		</RouteGuard>

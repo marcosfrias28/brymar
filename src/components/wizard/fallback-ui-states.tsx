@@ -57,7 +57,7 @@ export function WizardFallbackUI({
 					</div>
 
 					{/* Form skeleton */}
-					<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+					<div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
 						<div className="space-y-4">
 							<Skeleton className="h-4 w-24" />
 							<Skeleton className="h-10 w-full" />
@@ -66,7 +66,7 @@ export function WizardFallbackUI({
 							<Skeleton className="h-4 w-32" />
 							<Skeleton className="h-10 w-full" />
 						</div>
-						<div className="space-y-4 md:col-span-2">
+						<div className="space-y-4 xl:col-span-2">
 							<Skeleton className="h-4 w-28" />
 							<Skeleton className="h-24 w-full" />
 						</div>

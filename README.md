@@ -1,4 +1,4 @@
-# Brymar Inmobiliaria
+# Marbry Inmobiliaria
 
 A modern real estate platform built with Next.js 15, featuring a simplified architecture for optimal performance and maintainability.
 

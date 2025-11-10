@@ -2,7 +2,6 @@
 
 import { Activity, ArrowLeft, Home, User } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { FilterTabs } from "@/components/dashboard/filter-tabs";
 import { StatsCards } from "@/components/dashboard/stats-cards";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";

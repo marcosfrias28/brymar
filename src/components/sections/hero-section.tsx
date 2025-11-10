@@ -18,7 +18,7 @@ export function HeroSection() {
 
 				<div className="container relative z-20 flex min-h-screen flex-col items-center justify-center px-4 text-center">
 					{/* Main hero title */}
-					<h1 className="mb-8 max-w-5xl text-pretty font-bold font-serif text-6xl text-white uppercase leading-[110%] tracking-tight md:text-7xl lg:text-8xl xl:text-9xl">
+					<h1 className="mb-8 max-w-5xl text-pretty font-bold font-serif text-6xl text-white uppercase leading-[110%] tracking-tight lg:text-8xl xl:text-7xl xl:text-9xl">
 						Encuentra <div>tu hogar</div> perfecto
 					</h1>
 

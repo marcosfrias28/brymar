@@ -249,7 +249,7 @@ export default function UsersPage() {
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<div className="grid gap-4 md:grid-cols-3">
+						<div className="grid gap-4 xl:grid-cols-3">
 							<div className="rounded-lg border p-4">
 								<div className="mb-2 flex items-center gap-2">
 									<ShieldIcon className="h-5 w-5 text-red-500" />

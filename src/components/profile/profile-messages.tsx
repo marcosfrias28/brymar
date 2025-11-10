@@ -218,7 +218,7 @@ export function ProfileMessages() {
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+					<div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
 						<div className="text-center">
 							<div className="font-bold text-2xl text-blue-600">
 								{messages.length}
@@ -250,7 +250,7 @@ export function ProfileMessages() {
 			{/* Controles */}
 			<Card>
 				<CardContent className="pt-6">
-					<div className="flex flex-col gap-4 md:flex-row">
+					<div className="flex flex-col gap-4 xl:flex-row">
 						<div className="flex-1">
 							<div className="relative">
 								<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-muted-foreground" />
@@ -266,7 +266,7 @@ export function ProfileMessages() {
 							onValueChange={(value: FilterType) => setFilterType(value)}
 							value={filterType}
 						>
-							<SelectTrigger className="w-full md:w-48">
+							<SelectTrigger className="w-full xl:w-48">
 								<SelectValue placeholder="Filtrar por estado" />
 							</SelectTrigger>
 							<SelectContent>

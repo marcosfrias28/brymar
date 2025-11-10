@@ -1,6 +1,6 @@
 # DDD Clean Architecture Implementation
 
-This directory contains the Domain-Driven Design (DDD) implementation for the Brymar Real Estate Platform.
+This directory contains the Domain-Driven Design (DDD) implementation for the Marbry Real Estate Platform.
 
 ## Architecture Overview
 

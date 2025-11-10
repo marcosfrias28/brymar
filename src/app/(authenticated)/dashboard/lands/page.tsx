@@ -183,7 +183,7 @@ export default function LandsPage() {
 			>
 				<div className="space-y-6">
 					{/* Stats Cards */}
-					<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+					<div className="grid grid-cols-1 gap-4 lg:grid-cols-4 xl:grid-cols-2">
 						{stats.map((stat) => (
 							<Card
 								className={cn(

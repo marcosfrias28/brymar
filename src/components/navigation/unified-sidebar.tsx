@@ -30,7 +30,6 @@ import { NavDocuments } from "@/components/nav-documents";
 import { type NavItem, NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
-import { PageTransition } from "@/components/ui/page-transition";
 import {
 	Sidebar,
 	SidebarContent,
@@ -57,217 +56,233 @@ export type SidebarConfig = {
 	};
 };
 
+const getAdminDashboardItems = (): NavItem[] => [
+	{
+		title: "Dashboard",
+		url: "/dashboard",
+		icon: LayoutDashboardIcon,
+	},
+];
+
+const getAdminPropertyItems = (): NavItem[] => [
+	{
+		title: "Propiedades",
+		url: "/dashboard/properties",
+		icon: BuildingIcon,
+		items: [
+			{
+				title: "Ver Todas",
+				url: "/dashboard/properties",
+				icon: FolderIcon,
+			},
+			{
+				title: "Nueva Propiedad",
+				url: "/dashboard/properties/new",
+				icon: PlusIcon,
+			},
+			{
+				title: "Borradores",
+				url: "/dashboard/properties/drafts",
+				icon: FileTextIcon,
+			},
+		],
+	},
+	{
+		title: "Terrenos",
+		url: "/dashboard/lands",
+		icon: MapPinIcon,
+		items: [
+			{
+				title: "Ver Todos",
+				url: "/dashboard/lands",
+				icon: FolderIcon,
+			},
+			{
+				title: "Nuevo Terreno",
+				url: "/dashboard/lands/new",
+				icon: PlusIcon,
+			},
+		],
+	},
+];
+
+const getAdminConditionalItems = (
+	permissions: SidebarConfig["permissions"]
+): NavItem[] => [
+	...(permissions.canManageBlog
+		? [
+				{
+					title: "Blog",
+					url: "/dashboard/blog",
+					icon: FileTextIcon,
+					items: [
+						{
+							title: "Ver Artículos",
+							url: "/dashboard/blog",
+							icon: FolderIcon,
+						},
+						{
+							title: "Nuevo Artículo",
+							url: "/dashboard/blog/new",
+							icon: PlusIcon,
+						},
+					],
+				},
+			]
+		: []),
+	...(permissions.canAccessDashboard
+		? [
+				{
+					title: "Secciones",
+					url: "/dashboard/sections",
+					icon: LayersIcon,
+				},
+			]
+		: []),
+];
+
+const getAdminMainNavigation = (
+	permissions: SidebarConfig["permissions"]
+): NavItem[] => [
+	...getAdminDashboardItems(),
+	...getAdminPropertyItems(),
+	...getAdminConditionalItems(permissions),
+];
+
+const getUserMainNavigation = (): NavItem[] => [
+	{
+		title: "Mi Perfil",
+		url: "/profile",
+		icon: UserIcon,
+	},
+	{
+		title: "Propiedades",
+		url: "/search?type=properties",
+		icon: BuildingIcon,
+	},
+	{
+		title: "Terrenos",
+		url: "/search?type=lands",
+		icon: MapPinIcon,
+	},
+	{
+		title: "Blog",
+		url: "/blog",
+		icon: FileTextIcon,
+	},
+];
+
+const getAdminDocuments = (
+	userRole: SidebarConfig["userRole"],
+	permissions: SidebarConfig["permissions"]
+) => [
+	...(permissions.canManageUsers
+		? [
+				{
+					name: "Gestión de Usuarios",
+					url: "/dashboard/users",
+					icon: UsersIcon,
+				},
+			]
+		: []),
+	...(permissions.canViewAnalytics
+		? [
+				{
+					name: "Análisis y Reportes",
+					url: "/dashboard/analytics",
+					icon: TrendingUpIcon,
+				},
+			]
+		: []),
+	...(permissions.canAccessDashboard
+		? [
+				{
+					name: "Base de Datos",
+					url: "/dashboard/database",
+					icon: DatabaseIcon,
+				},
+			]
+		: []),
+	...(userRole === "admin"
+		? [
+				{
+					name: "Administración",
+					url: "/dashboard/admin",
+					icon: ShieldIcon,
+				},
+			]
+		: []),
+];
+
+const getUserDocuments = () => [
+	{
+		name: "Mis Favoritos",
+		url: "/profile/favorites",
+		icon: HeartIcon,
+	},
+	{
+		name: "Mi Actividad",
+		url: "/profile/activity",
+		icon: BarChartIcon,
+	},
+	{
+		name: "Notificaciones",
+		url: "/profile/notifications",
+		icon: BellIcon,
+	},
+	{
+		name: "Mensajes",
+		url: "/profile/messages",
+		icon: MessageCircleIcon,
+	},
+	{
+		name: "Guías",
+		url: "/guides",
+		icon: BookOpenIcon,
+	},
+];
+
+const getSecondaryNavigation = (isAdmin: boolean) => [
+	{
+		title: "Buscar",
+		url: "/search",
+		icon: SearchIcon,
+	},
+	{
+		title: "Configuración",
+		url: isAdmin ? "/dashboard/settings" : "/profile/settings",
+		icon: SettingsIcon,
+	},
+	{
+		title: "Ayuda",
+		url: "/help",
+		icon: HelpCircleIcon,
+	},
+];
+
 const getNavigationData = (config: SidebarConfig) => {
 	const { userRole, permissions } = config;
 	const isAdmin =
 		userRole === "admin" || userRole === "editor" || userRole === "agent";
 
-	// Main navigation
-	const navMain: NavItem[] = [];
-
-	if (isAdmin) {
-		navMain.push({
-			title: "Dashboard",
-			url: "/dashboard",
-			icon: LayoutDashboardIcon,
-		});
-
-		navMain.push({
-			title: "Propiedades",
-			url: "/dashboard/properties",
-			icon: BuildingIcon,
-			items: [
-				{
-					title: "Ver Todas",
-					url: "/dashboard/properties",
-					icon: FolderIcon,
-				},
-				{
-					title: "Nueva Propiedad",
-					url: "/dashboard/properties/new",
-					icon: PlusIcon,
-				},
-				{
-					title: "Borradores",
-					url: "/dashboard/properties/drafts",
-					icon: FileTextIcon,
-				},
-			],
-		});
-
-		navMain.push({
-			title: "Terrenos",
-			url: "/dashboard/lands",
-			icon: MapPinIcon,
-			items: [
-				{
-					title: "Ver Todos",
-					url: "/dashboard/lands",
-					icon: FolderIcon,
-				},
-				{
-					title: "Nuevo Terreno",
-					url: "/dashboard/lands/new",
-					icon: PlusIcon,
-				},
-			],
-		});
-
-		if (permissions.canManageBlog) {
-			navMain.push({
-				title: "Blog",
-				url: "/dashboard/blog",
-				icon: FileTextIcon,
-				items: [
-					{
-						title: "Ver Artículos",
-						url: "/dashboard/blog",
-						icon: FolderIcon,
-					},
-					{
-						title: "Nuevo Artículo",
-						url: "/dashboard/blog/new",
-						icon: PlusIcon,
-					},
-				],
-			});
-		}
-
-		if (permissions.canAccessDashboard) {
-			navMain.push({
-				title: "Secciones",
-				url: "/dashboard/sections",
-				icon: LayersIcon,
-			});
-		}
-	} else {
-		// User navigation
-		navMain.push({
-			title: "Mi Perfil",
-			url: "/profile",
-			icon: UserIcon,
-		});
-
-		navMain.push({
-			title: "Propiedades",
-			url: "/search?type=properties",
-			icon: BuildingIcon,
-		});
-
-		navMain.push({
-			title: "Terrenos",
-			url: "/search?type=lands",
-			icon: MapPinIcon,
-		});
-
-		navMain.push({
-			title: "Blog",
-			url: "/blog",
-			icon: FileTextIcon,
-		});
-	}
-
-	// Documents section
-	const documents = [];
-
-	if (isAdmin) {
-		if (permissions.canManageUsers) {
-			documents.push({
-				name: "Gestión de Usuarios",
-				url: "/dashboard/users",
-				icon: UsersIcon,
-			});
-		}
-
-		if (permissions.canViewAnalytics) {
-			documents.push({
-				name: "Análisis y Reportes",
-				url: "/dashboard/analytics",
-				icon: TrendingUpIcon,
-			});
-		}
-
-		if (permissions.canAccessDashboard) {
-			documents.push({
-				name: "Base de Datos",
-				url: "/dashboard/database",
-				icon: DatabaseIcon,
-			});
-		}
-
-		if (userRole === "admin") {
-			documents.push({
-				name: "Administración",
-				url: "/dashboard/admin",
-				icon: ShieldIcon,
-			});
-		}
-	} else {
-		// User documents
-		documents.push(
-			{
-				name: "Mis Favoritos",
-				url: "/profile/favorites",
-				icon: HeartIcon,
-			},
-			{
-				name: "Mi Actividad",
-				url: "/profile/activity",
-				icon: BarChartIcon,
-			},
-			{
-				name: "Notificaciones",
-				url: "/profile/notifications",
-				icon: BellIcon,
-			},
-			{
-				name: "Mensajes",
-				url: "/profile/messages",
-				icon: MessageCircleIcon,
-			},
-			{
-				name: "Guías",
-				url: "/guides",
-				icon: BookOpenIcon,
-			}
-		);
-	}
-
-	// Secondary navigation
-	const navSecondary = [
-		{
-			title: "Buscar",
-			url: "/search",
-			icon: SearchIcon,
-		},
-		{
-			title: "Configuración",
-			url: isAdmin ? "/dashboard/settings" : "/profile/settings",
-			icon: SettingsIcon,
-		},
-		{
-			title: "Ayuda",
-			url: "/help",
-			icon: HelpCircleIcon,
-		},
-	];
-
 	return {
-		navMain,
-		documents,
-		navSecondary,
+		navMain: isAdmin
+			? getAdminMainNavigation(permissions)
+			: getUserMainNavigation(),
+		documents: isAdmin
+			? getAdminDocuments(userRole, permissions)
+			: getUserDocuments(),
+		navSecondary: getSecondaryNavigation(isAdmin),
 	};
 };
 
 interface UnifiedSidebarProps
 	extends Omit<React.ComponentProps<typeof Sidebar>, "variant"> {
-	variant?: "auto" | "admin" | "user";
+	mode?: "auto" | "admin" | "user";
 }
 
-export const UnifiedSidebar = memo(function UnifiedSidebar({
-	variant = "auto",
-	...props
-}: UnifiedSidebarProps) {
+// Custom hook to determine user role and permissions
+const useUserRoleConfig = (mode: UnifiedSidebarProps["mode"]) => {
 	const pathname = usePathname();
 	const { user } = useUser();
 	const {
@@ -277,13 +292,12 @@ export const UnifiedSidebar = memo(function UnifiedSidebar({
 		canManageBlog,
 	} = useAdmin();
 
-	// Determine user role and permissions
-	const config = useMemo(() => {
+	return useMemo(() => {
 		let userRole: SidebarConfig["userRole"] = "user";
 
-		if (variant === "admin") {
+		if (mode === "admin") {
 			userRole = "admin";
-		} else if (variant === "user") {
+		} else if (mode === "user") {
 			userRole = "user";
 		} else {
 			// Auto-detect based on route or user role
@@ -300,6 +314,7 @@ export const UnifiedSidebar = memo(function UnifiedSidebar({
 
 		return {
 			userRole,
+			email: user?.email || "usuario@brymar.com",
 			permissions: {
 				canManageUsers,
 				canAccessDashboard,
@@ -308,40 +323,51 @@ export const UnifiedSidebar = memo(function UnifiedSidebar({
 			},
 		};
 	}, [
-		variant,
+		mode,
 		pathname,
 		user?.role,
+		user?.email,
 		canManageUsers,
 		canAccessDashboard,
 		canViewAnalytics,
 		canManageBlog,
 	]);
+};
 
-	// Memoize navigation data
+// Custom hook to get navigation and user data
+const useSidebarData = (config: ReturnType<typeof useUserRoleConfig>) => {
+	const { user } = useUser();
+
 	const navigationData = useMemo(() => getNavigationData(config), [config]);
 
-	// Memoize user data
 	const userData = useMemo(
 		() => ({
 			name: user?.name || "Usuario",
-			email: user?.email || "usuario@brymar.com",
+			email: config.email,
 			avatar: user?.avatar || "/avatars/default.jpg",
 		}),
-		[user?.name, user?.email, user?.avatar]
+		[user?.name, user?.avatar, config.email]
 	);
 
-	return (
-		<Sidebar
-			aria-label={ariaLabels.sidebarNavigation}
-			collapsible="offcanvas"
-			{...props}
-		>
-			<SidebarHeader>
-				<PageTransition delay={1} variant="slideDown">
+	return { navigationData, userData };
+};
+
+export const UnifiedSidebar = memo(
+	({ mode = "auto", ...props }: UnifiedSidebarProps) => {
+		const config = useUserRoleConfig(mode);
+		const { navigationData, userData } = useSidebarData(config);
+
+		return (
+			<Sidebar
+				aria-label={ariaLabels.sidebarNavigation}
+				collapsible="offcanvas"
+				{...props}
+			>
+				<SidebarHeader>
 					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton
-								aria-label="Brymar Inmobiliaria - Ir al inicio"
+								aria-label="Marbry Inmobiliaria - Ir al inicio"
 								asChild
 								className={cn(
 									"data-[slot=sidebar-menu-button]:!p-1.5",
@@ -354,11 +380,9 @@ export const UnifiedSidebar = memo(function UnifiedSidebar({
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 					</SidebarMenu>
-				</PageTransition>
-			</SidebarHeader>
+				</SidebarHeader>
 
-			<SidebarContent>
-				<PageTransition delay={2} stagger="children" variant="slideUp">
+				<SidebarContent>
 					<nav aria-label={ariaLabels.mainNavigation}>
 						<NavMain items={navigationData.navMain} />
 					</nav>
@@ -371,16 +395,14 @@ export const UnifiedSidebar = memo(function UnifiedSidebar({
 							items={navigationData.navSecondary}
 						/>
 					</nav>
-				</PageTransition>
-			</SidebarContent>
+				</SidebarContent>
 
-			<SidebarFooter>
-				<PageTransition delay={3} variant="slideUp">
+				<SidebarFooter>
 					<nav aria-label={ariaLabels.userNavigation}>
 						<NavUser user={userData} />
 					</nav>
-				</PageTransition>
-			</SidebarFooter>
-		</Sidebar>
-	);
-});
+				</SidebarFooter>
+			</Sidebar>
+		);
+	}
+);

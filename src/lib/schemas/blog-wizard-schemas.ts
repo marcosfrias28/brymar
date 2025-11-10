@@ -1,15 +1,34 @@
 import { z } from "zod";
 
+const MIN_TITLE_LENGTH = 10;
+const MAX_TITLE_LENGTH = 200;
+const MIN_DESCRIPTION_LENGTH = 50;
+const MAX_DESCRIPTION_LENGTH = 500;
+const MIN_CONTENT_LENGTH = 100;
+const MAX_CONTENT_LENGTH = 10_000;
+const MIN_AUTHOR_LENGTH = 2;
+const MAX_AUTHOR_LENGTH = 100;
+const MIN_EXCERPT_LENGTH = 50;
+const MAX_EXCERPT_LENGTH = 500;
+const MIN_SLUG_LENGTH = 3;
+const MAX_SLUG_LENGTH = 100;
+
 // Base blog wizard data schema
 export const BaseBlogWizardSchema = z.object({
 	title: z
 		.string()
-		.min(10, "El título debe tener al menos 10 caracteres")
-		.max(200, "El título no puede exceder 200 caracteres"),
+		.min(MIN_TITLE_LENGTH, "El título debe tener al menos 10 caracteres")
+		.max(MAX_TITLE_LENGTH, "El título no puede exceder 200 caracteres"),
 	description: z
 		.string()
-		.min(50, "La descripción debe tener al menos 50 caracteres")
-		.max(500, "La descripción no puede exceder 500 caracteres"),
+		.min(
+			MIN_DESCRIPTION_LENGTH,
+			"La descripción debe tener al menos 50 caracteres"
+		)
+		.max(
+			MAX_DESCRIPTION_LENGTH,
+			"La descripción no puede exceder 500 caracteres"
+		),
 	status: z.enum(["draft", "published"]).default("draft"),
 });
 
@@ -17,16 +36,16 @@ export const BaseBlogWizardSchema = z.object({
 export const BlogContentStepSchema = z.object({
 	title: z
 		.string()
-		.min(10, "El título debe tener al menos 10 caracteres")
-		.max(200, "El título no puede exceder 200 caracteres"),
+		.min(MIN_TITLE_LENGTH, "El título debe tener al menos 10 caracteres")
+		.max(MAX_TITLE_LENGTH, "El título no puede exceder 200 caracteres"),
 	content: z
 		.string()
-		.min(100, "El contenido debe tener al menos 100 caracteres")
-		.max(10_000, "El contenido no puede exceder 10,000 caracteres"),
+		.min(MIN_CONTENT_LENGTH, "El contenido debe tener al menos 100 caracteres")
+		.max(MAX_CONTENT_LENGTH, "El contenido no puede exceder 10,000 caracteres"),
 	author: z
 		.string()
-		.min(2, "El autor debe tener al menos 2 caracteres")
-		.max(100, "El autor no puede exceder 100 caracteres"),
+		.min(MIN_AUTHOR_LENGTH, "El autor debe tener al menos 2 caracteres")
+		.max(MAX_AUTHOR_LENGTH, "El autor no puede exceder 100 caracteres"),
 	category: z.enum([
 		"market-analysis",
 		"investment-tips",
@@ -36,8 +55,8 @@ export const BlogContentStepSchema = z.object({
 	]),
 	excerpt: z
 		.string()
-		.min(50, "El extracto debe tener al menos 50 caracteres")
-		.max(500, "El extracto no puede exceder 500 caracteres")
+		.min(MIN_EXCERPT_LENGTH, "El extracto debe tener al menos 50 caracteres")
+		.max(MAX_EXCERPT_LENGTH, "El extracto no puede exceder 500 caracteres")
 		.optional(),
 });
 
@@ -72,11 +91,14 @@ export const BlogMediaStepSchema = z.object({
 export const BlogSEOStepSchema = z.object({
 	seoTitle: z
 		.string()
-		.max(60, "El título SEO no puede exceder 60 caracteres")
+		.max(MIN_TITLE_LENGTH, "El título SEO no puede exceder 60 caracteres")
 		.optional(),
 	seoDescription: z
 		.string()
-		.max(160, "La descripción SEO no puede exceder 160 caracteres")
+		.max(
+			MIN_DESCRIPTION_LENGTH,
+			"La descripción SEO no puede exceder 160 caracteres"
+		)
 		.optional(),
 	tags: z
 		.array(z.string().min(1))
@@ -84,8 +106,8 @@ export const BlogSEOStepSchema = z.object({
 		.max(10, "No puede exceder 10 etiquetas"),
 	slug: z
 		.string()
-		.min(3, "El slug debe tener al menos 3 caracteres")
-		.max(100, "El slug no puede exceder 100 caracteres")
+		.min(MIN_SLUG_LENGTH, "El slug debe tener al menos 3 caracteres")
+		.max(MAX_SLUG_LENGTH, "El slug no puede exceder 100 caracteres")
 		.optional(),
 	publishDate: z.date().optional(),
 	featured: z.boolean(),
@@ -96,22 +118,28 @@ export const BlogWizardSchema = z.object({
 	// Base fields
 	title: z
 		.string()
-		.min(10, "El título debe tener al menos 10 caracteres")
-		.max(200, "El título no puede exceder 200 caracteres"),
+		.min(MIN_TITLE_LENGTH, "El título debe tener al menos 10 caracteres")
+		.max(MAX_TITLE_LENGTH, "El título no puede exceder 200 caracteres"),
 	description: z
 		.string()
-		.min(50, "La descripción debe tener al menos 50 caracteres")
-		.max(500, "La descripción no puede exceder 500 caracteres"),
+		.min(
+			MIN_DESCRIPTION_LENGTH,
+			"La descripción debe tener al menos 50 caracteres"
+		)
+		.max(
+			MAX_DESCRIPTION_LENGTH,
+			"La descripción no puede exceder 500 caracteres"
+		),
 	status: z.enum(["draft", "published"]),
 	// Content fields
 	content: z
 		.string()
-		.min(100, "El contenido debe tener al menos 100 caracteres")
-		.max(10_000, "El contenido no puede exceder 10,000 caracteres"),
+		.min(MIN_CONTENT_LENGTH, "El contenido debe tener al menos 100 caracteres")
+		.max(MAX_CONTENT_LENGTH, "El contenido no puede exceder 10,000 caracteres"),
 	author: z
 		.string()
-		.min(2, "El autor debe tener al menos 2 caracteres")
-		.max(100, "El autor no puede exceder 100 caracteres"),
+		.min(MIN_AUTHOR_LENGTH, "El autor debe tener al menos 2 caracteres")
+		.max(MAX_AUTHOR_LENGTH, "El autor no puede exceder 100 caracteres"),
 	category: z.enum([
 		"market-analysis",
 		"investment-tips",
@@ -121,8 +149,8 @@ export const BlogWizardSchema = z.object({
 	]),
 	excerpt: z
 		.string()
-		.min(50, "El extracto debe tener al menos 50 caracteres")
-		.max(500, "El extracto no puede exceder 500 caracteres")
+		.min(MIN_EXCERPT_LENGTH, "El extracto debe tener al menos 50 caracteres")
+		.max(MAX_EXCERPT_LENGTH, "El extracto no puede exceder 500 caracteres")
 		.optional(),
 
 	// Media fields
@@ -153,11 +181,14 @@ export const BlogWizardSchema = z.object({
 	// SEO fields
 	seoTitle: z
 		.string()
-		.max(60, "El título SEO no puede exceder 60 caracteres")
+		.max(MIN_TITLE_LENGTH, "El título SEO no puede exceder 60 caracteres")
 		.optional(),
 	seoDescription: z
 		.string()
-		.max(160, "La descripción SEO no puede exceder 160 caracteres")
+		.max(
+			MIN_DESCRIPTION_LENGTH,
+			"La descripción SEO no puede exceder 160 caracteres"
+		)
 		.optional(),
 	tags: z
 		.array(z.string().min(1))
@@ -165,8 +196,8 @@ export const BlogWizardSchema = z.object({
 		.max(10, "No puede exceder 10 etiquetas"),
 	slug: z
 		.string()
-		.min(3, "El slug debe tener al menos 3 caracteres")
-		.max(100, "El slug no puede exceder 100 caracteres")
+		.min(MIN_SLUG_LENGTH, "El slug debe tener al menos 3 caracteres")
+		.max(MAX_SLUG_LENGTH, "El slug no puede exceder 100 caracteres")
 		.optional(),
 	publishDate: z.date().optional(),
 	featured: z.boolean(),

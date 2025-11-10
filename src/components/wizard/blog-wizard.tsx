@@ -3,53 +3,68 @@
 import { useCreateWizardDraft, useSaveWizardDraft } from "@/hooks/use-wizard";
 import { createBlogPost } from "@/lib/actions/blog";
 import type { CreateBlogPostInput } from "@/lib/types/blog";
-import { BlogForm } from "../blog/blog-form";
+import { BlogContentStep } from "./steps/blog/blog-content-step";
+import { BlogMediaStep } from "./steps/blog/blog-media-step";
+import { BlogSeoStep } from "./steps/blog/blog-seo-step";
+import { BlogPreviewStep } from "./steps/blog/blog-preview-step";
 import { UnifiedWizard, type WizardStep } from "./unified-wizard";
+import { BlogWizardSchema, type BlogWizardData } from "@/lib/schemas/blog-wizard-schemas";
+import { z } from "zod";
 
-type BlogWizardData = {
-	title?: string;
-	content?: string;
-	author?: string;
-	status?: string;
-	[key: string]: unknown;
-};
-
-type BlogStepProps = {
-	data: BlogWizardData;
-	onChange: (data: BlogWizardData) => void;
-	errors?: Record<string, string>;
-};
-
-// Blog wizard step components
-const BlogBasicInfoStep = ({ data, onChange, errors }: BlogStepProps) => {
-	return (
-		<div className="space-y-4">
-			<BlogForm
-				initialData={data as any}
-				onSuccess={() => {
-					// Handle success if needed
-				}}
-			/>
-		</div>
-	);
-};
-
-const blogWizardSteps: WizardStep[] = [
+// Blog wizard steps using proper shadcn form components
+const blogWizardSteps: WizardStep<BlogWizardData>[] = [
 	{
-		id: "basic-info",
-		title: "Información del Post",
-		description: "Datos principales del artículo",
-		component: BlogBasicInfoStep,
+		id: "content",
+		title: "Contenido del Artículo",
+		description: "Escribe el contenido principal de tu artículo",
+		component: BlogContentStep,
 		validation: (data: BlogWizardData) => {
 			const errors: Record<string, string> = {};
-			if (!data.title) {
+			if (!data.title || data.title.trim() === "") {
 				errors.title = "El título es requerido";
 			}
-			if (!data.content) {
+			if (!data.description || data.description.trim() === "") {
+				errors.description = "La descripción es requerida";
+			}
+			if (!data.content || data.content.trim() === "") {
 				errors.content = "El contenido es requerido";
 			}
-			if (!data.author) {
+			if (!data.author || data.author.trim() === "") {
 				errors.author = "El autor es requerido";
+			}
+			if (!data.category || data.category.trim() === "") {
+				errors.category = "La categoría es requerida";
+			}
+			return Object.keys(errors).length > 0 ? errors : null;
+		},
+	},
+	{
+		id: "media",
+		title: "Imágenes y Multimedia",
+		description: "Agrega imágenes y contenido multimedia",
+		component: BlogMediaStep,
+		optional: true,
+	},
+	{
+		id: "seo",
+		title: "SEO y Metadatos",
+		description: "Optimiza tu artículo para motores de búsqueda",
+		component: BlogSeoStep,
+		optional: true,
+	},
+	{
+		id: "preview",
+		title: "Vista Previa y Publicación",
+		description: "Revisa tu artículo antes de publicarlo",
+		component: BlogPreviewStep,
+		validation: (data: BlogWizardData) => {
+			// Final validation before publishing
+			const errors: Record<string, string> = {};
+			if (!data.title || data.title.trim() === "") {
+				errors.title = "El título es requerido";
+			}
+			if (!data.content || data.content.trim() === "") {
+				errors.content = "El contenido es requerido";
 			}
 			return Object.keys(errors).length > 0 ? errors : null;
 		},
@@ -72,27 +87,37 @@ export function BlogWizard({
 
 	const handleComplete = async (data: BlogWizardData) => {
 		try {
+			// Validate with Zod schema
+			const validatedData = BlogWizardSchema.parse(data);
+			
 			const blogPostData: CreateBlogPostInput = {
-				title: data.title || "Untitled",
-				content: data.content || "",
-				category: (data.category as string) || "general",
-				authorId: (data.authorId as string) || "default-author-id",
-				excerpt: (data.excerpt as string) || undefined,
-				slug: (data.slug as string) || undefined,
-				tags: (data.tags as string[]) || undefined,
-				coverImage: (data.coverImage as any) || undefined,
+				title: validatedData.title,
+				content: validatedData.content,
+				category: validatedData.category,
+				authorId: "current-author-id", // TODO: Get from user context
+				excerpt: validatedData.excerpt,
+				slug: validatedData.slug,
+				tags: validatedData.tags,
+				coverImage: validatedData.coverImage ? { url: validatedData.coverImage } : undefined,
 			};
+			
 			const result = await createBlogPost(blogPostData);
 
 			if (result.success) {
 				onComplete?.();
-				return { success: true, message: "Post creado exitosamente" };
+				return { success: true, message: "Artículo creado exitosamente" };
 			}
 			return {
 				success: false,
-				error: result.error || "Error al crear el post",
+				error: result.error || "Error al crear el artículo",
 			};
-		} catch (_error) {
+		} catch (error) {
+			if (error instanceof z.ZodError) {
+				return {
+					success: false,
+					error: `Datos inválidos: ${error.flatten().fieldErrors}`,
+				};
+			}
 			return { success: false, error: "Error inesperado" };
 		}
 	};
@@ -111,14 +136,14 @@ export function BlogWizard({
 	};
 
 	return (
-		<UnifiedWizard
+		<UnifiedWizard<BlogWizardData>
 			description="Completa la información para agregar un nuevo artículo al blog"
 			initialData={initialData}
 			onComplete={handleComplete}
 			onSaveDraft={handleSaveDraft}
 			showDraftOption={true}
 			steps={blogWizardSteps}
-			title="Crear Nuevo Post"
+			title="Crear Nuevo Artículo"
 		/>
 	);
 }

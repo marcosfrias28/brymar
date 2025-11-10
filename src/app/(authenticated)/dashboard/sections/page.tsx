@@ -120,7 +120,7 @@ export default function SectionsPage() {
 				</div>
 
 				{/* Información sobre las secciones disponibles */}
-				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+				<div className="grid gap-4 lg:grid-cols-4 xl:grid-cols-2">
 					<Card>
 						<CardHeader className="pb-3">
 							<CardTitle className="flex items-center gap-2 font-medium text-sm">

@@ -37,7 +37,9 @@ export default function LocaleLayout({
 								{/* Global accessibility live regions */}
 								<GlobalLiveRegion />
 
-								<Navbar />
+								<header className="px-6">
+									<Navbar />
+								</header>
 								<main className="flex-1 overflow-y-auto overflow-x-hidden bg-background">
 									{children}
 								</main>

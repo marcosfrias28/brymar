@@ -260,7 +260,6 @@ export default function ErrorTestingPage() {
 										/>
 									)}
 									maxRetries={3}
-									onError={(_error) => {}}
 									onRecovery={handleErrorRecovery}
 								>
 									<div className="rounded-lg border border-green-200 bg-green-50 p-4 text-center">
@@ -369,7 +368,7 @@ export default function ErrorTestingPage() {
 						</AlertDescription>
 					</Alert>
 
-					<div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
+					<div className="grid grid-cols-1 gap-4 text-sm xl:grid-cols-2">
 						<div>
 							<h4 className="mb-2 font-medium">Tipos de Error Soportados:</h4>
 							<ul className="space-y-1 text-muted-foreground">

@@ -69,10 +69,10 @@ const RegistrationSuccessPage = () => {
 					<CardDescription>
 						{username ? (
 							<>
-								¡Bienvenido a Brymar, <strong>{username}</strong>!
+								¡Bienvenido a Marbry, <strong>{username}</strong>!
 							</>
 						) : (
-							"¡Bienvenido a Brymar!"
+							"¡Bienvenido a Marbry!"
 						)}
 					</CardDescription>
 				</CardHeader>

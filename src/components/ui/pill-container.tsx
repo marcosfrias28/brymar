@@ -2,17 +2,14 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 // Stili condivisi per tutti i componenti pill
-const PILL_CONTAINER_STYLES =
-	"flex items-center justify-center bg-black/30 backdrop-blur-xl rounded-full shadow-lg border border-white/20 p-1.5 gap-2";
+const PILL_CONTAINER_STYLES = "flex items-center justify-center p-1.5 gap-2";
 
 const PILL_BASE_STYLES =
-	"text-center font-sofia-pro font-medium transition-all rounded-full whitespace-nowrap px-3 py-2 text-sm";
+	"text-center font-medium transition-all rounded-full whitespace-nowrap px-3 py-2 text-sm";
 
-const PILL_ACTIVE_STYLES =
-	"bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm";
+const PILL_ACTIVE_STYLES = "bg-primary text-primary-foreground";
 
-const PILL_INACTIVE_STYLES =
-	"text-white hover:bg-white/20 hover:text-white hover:shadow-sm";
+const PILL_INACTIVE_STYLES = "text-white";
 
 type PillContainerProps = {
 	children: ReactNode;

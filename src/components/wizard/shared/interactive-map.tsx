@@ -66,6 +66,7 @@ type InteractiveMapProps = {
 	onCoordinatesChange: (coordinates: Coordinates) => void;
 	onAddressChange?: (address: any) => void;
 	onGeometryChange?: (geometry: Geometry) => void;
+	onError?: (error: string) => void;
 	className?: string;
 	height?: string;
 	isMobile?: boolean;
@@ -163,6 +164,7 @@ export function InteractiveMap({
 	onCoordinatesChange,
 	onAddressChange,
 	onGeometryChange,
+	onError,
 	className,
 	height = "400px",
 	isMobile: propIsMobile,
@@ -181,6 +183,14 @@ export function InteractiveMap({
 	const isMobileDevice =
 		propIsMobile ?? (typeof window !== "undefined" && isMobile());
 	const isTouch = typeof window !== "undefined" && isTouchDevice();
+
+	// Error handler
+	const handleError = useCallback((error: string) => {
+		setMapError(error);
+		if (onError) {
+			onError(error);
+		}
+	}, [onError]);
 
 	// Memoize map configuration to prevent unnecessary re-renders (must be before any conditional returns)
 	const mapConfig = useMemo(() => {

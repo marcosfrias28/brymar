@@ -13,7 +13,7 @@ import { getStatsAdapter } from "@/lib/adapters/stats-adapters";
 import { auth } from "@/lib/auth/auth";
 
 export const metadata: Metadata = {
-	title: "Wizard Analytics | Brymar Inmobiliaria",
+	title: "Wizard Analytics | Marbry Inmobiliaria",
 	description: "Property wizard analytics and performance monitoring",
 };
 

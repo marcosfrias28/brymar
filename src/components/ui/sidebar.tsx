@@ -208,7 +208,7 @@ function Sidebar({
 
 	return (
 		<div
-			className="group peer hidden text-sidebar-foreground md:block"
+			className="group peer hidden text-sidebar-foreground xl:block"
 			data-collapsible={state === "collapsed" ? collapsible : ""}
 			data-side={side}
 			data-slot="sidebar"
@@ -229,7 +229,7 @@ function Sidebar({
 			/>
 			<div
 				className={cn(
-					"fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
+					"fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear xl:flex",
 					side === "left"
 						? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
 						: "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
@@ -310,7 +310,7 @@ function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
 		<main
 			className={cn(
 				"relative flex w-full flex-1 flex-col bg-background",
-				"md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2 md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm",
+				"xl:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2 xl:peer-data-[variant=inset]:m-2 xl:peer-data-[variant=inset]:ml-0 xl:peer-data-[variant=inset]:rounded-xl xl:peer-data-[variant=inset]:shadow-sm",
 				className
 			)}
 			data-slot="sidebar-inset"
@@ -427,7 +427,7 @@ function SidebarGroupAction({
 			className={cn(
 				"absolute top-3.5 right-3 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-hidden ring-sidebar-ring transition-transform hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
 				// Increases the hit area of the button on mobile.
-				"after:-inset-2 after:absolute md:after:hidden",
+				"after:-inset-2 after:absolute xl:after:hidden",
 				"group-data-[collapsible=icon]:hidden",
 				className
 			)}
@@ -562,13 +562,13 @@ function SidebarMenuAction({
 			className={cn(
 				"absolute top-1.5 right-1 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-hidden ring-sidebar-ring transition-transform hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 peer-hover/menu-button:text-sidebar-accent-foreground [&>svg]:size-4 [&>svg]:shrink-0",
 				// Increases the hit area of the button on mobile.
-				"after:-inset-2 after:absolute md:after:hidden",
+				"after:-inset-2 after:absolute xl:after:hidden",
 				"peer-data-[size=sm]/menu-button:top-1",
 				"peer-data-[size=default]/menu-button:top-1.5",
 				"peer-data-[size=lg]/menu-button:top-2.5",
 				"group-data-[collapsible=icon]:hidden",
 				showOnHover &&
-					"group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground md:opacity-0",
+					"group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground xl:opacity-0",
 				className
 			)}
 			data-sidebar="menu-action"

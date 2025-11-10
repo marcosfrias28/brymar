@@ -3,29 +3,16 @@
 import { Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-type BlogPreviewData = {
-	title?: string;
-	author?: string;
-	description?: string;
-	excerpt?: string;
-	category?: string;
-	slug?: string;
-	tags?: string[];
-	content?: string;
-};
+import type { BlogWizardData } from "@/lib/schemas/blog-wizard-schemas";
 
 type BlogPreviewStepProps = {
-	data: BlogPreviewData;
-	onChange: (data: BlogPreviewData) => void;
-	errors?: Record<string, string>;
+	data: BlogWizardData;
+	onChange: (data: BlogWizardData) => void;
 };
 
 export function BlogPreviewStep({
 	data,
-	onChange,
-	errors,
-}: BlogPreviewStepProps) {
+}: Omit<BlogPreviewStepProps, 'onChange'>) {
 	return (
 		<div className="space-y-6">
 			<Card>
@@ -67,8 +54,8 @@ export function BlogPreviewStep({
 							<div>
 								<h4 className="mb-2 font-medium">Etiquetas:</h4>
 								<div className="flex flex-wrap gap-1">
-									{data.tags.map((tag: string, index: number) => (
-										<Badge className="text-xs" key={index} variant="secondary">
+									{data.tags.map((tag: string) => (
+										<Badge className="text-xs" key={tag} variant="secondary">
 											{tag}
 										</Badge>
 									))}

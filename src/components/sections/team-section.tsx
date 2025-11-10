@@ -22,7 +22,7 @@ import { SectionHeader, SectionWrapper } from "../ui/section-wrapper";
 const teamMembers = [
 	{
 		id: 1,
-		name: "Marco Brymar",
+		name: "Marco Marbry",
 		role: "Propietario y CEO",
 		image:
 			"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop&crop=face",

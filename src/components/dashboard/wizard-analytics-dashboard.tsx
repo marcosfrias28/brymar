@@ -187,7 +187,7 @@ export function WizardAnalyticsDashboard() {
 	if (loading) {
 		return (
 			<div className="space-y-6">
-				<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+				<div className="grid grid-cols-1 gap-4 lg:grid-cols-4 xl:grid-cols-2">
 					{[...new Array(4)].map((_, i) => (
 						<Card key={i}>
 							<CardHeader className="animate-pulse">
@@ -235,7 +235,7 @@ export function WizardAnalyticsDashboard() {
 
 			{/* Summary Cards */}
 			{summary && (
-				<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+				<div className="grid grid-cols-1 gap-4 lg:grid-cols-4 xl:grid-cols-2">
 					<Card>
 						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 							<CardTitle className="font-medium text-sm">
@@ -331,7 +331,7 @@ export function WizardAnalyticsDashboard() {
 						</CardContent>
 					</Card>
 
-					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+					<div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
 						{stepAnalytics.map((step) => (
 							<Card key={step.step}>
 								<CardHeader>
@@ -379,7 +379,7 @@ export function WizardAnalyticsDashboard() {
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+							<div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
 								{aiAnalytics.map((ai) => (
 									<Card key={ai.type}>
 										<CardHeader>
@@ -435,7 +435,7 @@ export function WizardAnalyticsDashboard() {
 
 				<TabsContent className="space-y-4" value="uploads">
 					{uploadAnalytics && (
-						<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+						<div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
 							<Card>
 								<CardHeader>
 									<CardTitle>Upload Statistics</CardTitle>
@@ -506,7 +506,7 @@ export function WizardAnalyticsDashboard() {
 
 				<TabsContent className="space-y-4" value="health">
 					{systemHealth && (
-						<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+						<div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
 							<Card>
 								<CardHeader>
 									<CardTitle className="flex items-center gap-2">

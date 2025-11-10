@@ -24,7 +24,7 @@ export function StatsCards({
 	gridCols = {
 		default: "2",
 		sm: "2",
-		md: "3",
+		xl: "3",
 		lg: "4",
 	},
 }: StatsCardsProps) {
@@ -32,7 +32,7 @@ export function StatsCards({
 		"grid gap-4",
 		`grid-cols-${gridCols.default || "2"}`,
 		gridCols.sm && `sm:grid-cols-${gridCols.sm}`,
-		gridCols.md && `md:grid-cols-${gridCols.md}`,
+		gridCols.md && `xl:grid-cols-${gridCols.md}`,
 		gridCols.lg && `lg:grid-cols-${gridCols.lg}`,
 		gridCols.xl && `xl:grid-cols-${gridCols.xl}`,
 		className

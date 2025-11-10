@@ -87,19 +87,19 @@ export default function DashboardPage() {
 				}
 				title="Dashboard"
 			>
-				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+				<div className="grid gap-6 lg:grid-cols-3 xl:grid-cols-2">
 					{/* Quick Actions */}
-					<div className="md:col-span-2 lg:col-span-1">
+					<div className="lg:col-span-1 xl:col-span-2">
 						<QuickActions />
 					</div>
 
 					{/* Property Chart */}
-					<div className="md:col-span-2 lg:col-span-2">
+					<div className="lg:col-span-2 xl:col-span-2">
 						<PropertyChart />
 					</div>
 
 					{/* Recent Activity */}
-					<div className="md:col-span-2 lg:col-span-3">
+					<div className="lg:col-span-3 xl:col-span-2">
 						<RecentActivity />
 					</div>
 				</div>

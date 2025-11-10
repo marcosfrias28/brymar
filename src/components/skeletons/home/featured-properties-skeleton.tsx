@@ -11,7 +11,7 @@ export function FeaturedPropertiesSkeleton() {
 			/>
 
 			{/* Property Grid Skeleton */}
-			<div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+			<div className="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-3 xl:grid-cols-2">
 				{Array.from({ length: 6 }).map((_, index) => (
 					<div className="group relative" key={index}>
 						<div className="relative overflow-hidden rounded-2xl">

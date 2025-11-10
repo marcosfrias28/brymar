@@ -63,7 +63,7 @@ export function RouteGuard({
 	if (loading) {
 		return (
 			fallback || (
-				<div className="flex items-center justify-center min-h-screen">
+				<div className="flex min-h-screen items-center justify-center">
 					<Loader2 className="h-8 w-8 animate-spin" />
 				</div>
 			)

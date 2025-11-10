@@ -1,87 +1,101 @@
 "use client";
 
-import { useCreateWizardDraft, useSaveWizardDraft } from "@/hooks/use-wizard";
 import { createLand } from "@/lib/actions/lands";
-import type { CreateLandInput } from "@/lib/types/lands";
-import { LandForm } from "../forms/land-form";
+import type { CreateLandInput, LandType } from "@/lib/types/lands";
+import { LandGeneralStep } from "./steps/land/land-general-step";
+import { LandLocationStep } from "./steps/land/land-location-step";
+import { LandMediaStep } from "./steps/land/land-media-step";
 import { UnifiedWizard, type WizardStep } from "./unified-wizard";
+import { z } from "zod";
 
-type LandWizardData = {
-	name?: string;
-	price?: number;
-	area?: number;
-	[key: string]: unknown;
-};
+const LandWizardSchema = z.object({
+	name: z.string().min(1, "El nombre es requerido"),
+	description: z.string().min(1, "La descripción es requerida"),
+	landType: z.string().min(1, "El tipo de terreno es requerido"),
+	location: z.string().min(1, "La ubicación es requerida"),
+	surface: z.number().min(1, "La superficie es requerida"),
+	price: z.number().min(1, "El precio es requerido"),
+	currency: z.string().default("USD"),
+	images: z.array(z.string()).optional(),
+});
 
-type LandStepProps = {
-	data: LandWizardData;
-	onChange: (data: LandWizardData) => void;
-	errors?: Record<string, string>;
-};
+export type LandWizardData = z.infer<typeof LandWizardSchema>;
 
-// Land wizard step components
-const LandBasicInfoStep = ({ data, onChange, errors }: LandStepProps) => {
-	return (
-		<div className="space-y-4">
-			<LandForm
-				initialData={data as any}
-				onSuccess={() => {
-					// Handle success if needed
-				}}
-			/>
-		</div>
-	);
-};
-
-const landWizardSteps: WizardStep[] = [
+// Land wizard steps - simplified
+const landWizardSteps: WizardStep<LandWizardData>[] = [
 	{
-		id: "basic-info",
-		title: "Información Básica",
+		id: "general",
+		title: "Información General",
 		description: "Datos principales del terreno",
-		component: LandBasicInfoStep,
+		component: LandGeneralStep,
 		validation: (data: LandWizardData) => {
 			const errors: Record<string, string> = {};
-			if (!data.name) {
+			if (!data.name || data.name.trim() === "") {
 				errors.name = "El nombre es requerido";
 			}
-			if (!data.price) {
+			if (!data.description || data.description.trim() === "") {
+				errors.description = "La descripción es requerida";
+			}
+			if (!data.surface || data.surface <= 0) {
+				errors.surface = "La superficie es requerida";
+			}
+			if (!data.price || data.price <= 0) {
 				errors.price = "El precio es requerido";
 			}
-			if (!data.area) {
-				errors.area = "El área es requerida";
+			if (!data.landType) {
+				errors.landType = "El tipo de terreno es requerido";
 			}
-			return Object.keys(errors).length > 0 ? errors : null;
+			return errors;
 		},
+	},
+	{
+		id: "location",
+		title: "Ubicación",
+		description: "¿Dónde se encuentra el terreno?",
+		component: LandLocationStep,
+		validation: (data: LandWizardData) => {
+			const errors: Record<string, string> = {};
+			if (!data.location || data.location.trim() === "") {
+				errors.location = "La ubicación es requerida";
+			}
+			return errors;
+		},
+	},
+	{
+		id: "media",
+		title: "Imágenes",
+		description: "Sube imágenes del terreno",
+		component: LandMediaStep,
+		validation: () => ({}),
 	},
 ];
 
 type LandWizardProps = {
-	draftId?: string;
-	initialData?: LandWizardData;
+	initialData?: Partial<LandWizardData>;
 	onComplete?: () => void;
 };
 
-export function LandWizard({
-	draftId,
-	initialData,
-	onComplete,
-}: LandWizardProps) {
-	const createDraft = useCreateWizardDraft();
-	const saveDraft = useSaveWizardDraft();
-
+export function LandWizard({ initialData, onComplete }: LandWizardProps) {
 	const handleComplete = async (data: LandWizardData) => {
 		try {
+			// Validate with Zod schema
+			const validatedData = LandWizardSchema.parse(data);
+
 			const landData: CreateLandInput = {
-				name: (data.name as string) || "Untitled Land",
-				description: (data.description as string) || "",
-				area: (data.area as number) || 0,
-				price: (data.price as number) || 0,
+				name: validatedData.name,
+				description: validatedData.description,
+				area: validatedData.surface,
+				price: validatedData.price,
 				currency: "USD" as const,
-				location: (data.location as string) || "",
-				type: (data.type as any) || "residential",
-				features: (data.features as any) || {},
-				images: (data.images as any) || [],
+				location: validatedData.location || "",
+				type: (validatedData.landType as LandType) || "residential",
+				features: {
+					utilities: [],
+					access: [],
+				},
+				images: [],
 			};
+
 			const result = await createLand(landData);
 
 			if (result.success) {
@@ -92,26 +106,23 @@ export function LandWizard({
 				success: false,
 				error: result.error || "Error al crear el terreno",
 			};
-		} catch (_error) {
+		} catch (error) {
+			if (error instanceof z.ZodError) {
+				return {
+					success: false,
+					error: `Datos inválidos: ${Object.values(error.flatten().fieldErrors).flat().join(", ")}`,
+				};
+			}
 			return { success: false, error: "Error inesperado" };
 		}
 	};
 
-	const handleSaveDraft = async (data: LandWizardData) => {
-		try {
-			if (draftId) {
-				await saveDraft.mutateAsync({
-					id: draftId,
-					data,
-				});
-			} else {
-				await createDraft.mutateAsync();
-			}
-		} catch (_error) {}
+	const handleSaveDraft = async (_data: LandWizardData) => {
+		// Draft functionality temporarily disabled
 	};
 
 	return (
-		<UnifiedWizard
+		<UnifiedWizard<LandWizardData>
 			description="Completa la información para agregar un nuevo terreno"
 			initialData={initialData}
 			onComplete={handleComplete}

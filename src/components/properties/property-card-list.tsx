@@ -14,7 +14,7 @@ export function PropertyCardList({
 }: PropertyCardListProps) {
 	if (loading) {
 		return (
-			<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+			<div className="grid grid-cols-1 gap-6 lg:grid-cols-3 xl:grid-cols-2">
 				{Array.from({ length: 6 }).map((_, i) => (
 					<div className="animate-pulse" key={i}>
 						<div className="mb-4 h-48 rounded-lg bg-gray-200" />
@@ -35,7 +35,7 @@ export function PropertyCardList({
 	}
 
 	return (
-		<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+		<div className="grid grid-cols-1 gap-6 lg:grid-cols-3 xl:grid-cols-2">
 			{properties.map((property) => (
 				<PropertyCard
 					key={property.id}

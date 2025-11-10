@@ -12,7 +12,7 @@ type SearchSkeletonProps = {
 export function SearchSkeleton({ count = 6, className }: SearchSkeletonProps) {
 	return (
 		<div className={cn("p-8", className)}>
-			<div className="grid grid-cols-1 gap-8 pt-20 md:grid-cols-2 lg:grid-cols-3">
+			<div className="grid grid-cols-1 gap-8 pt-20 lg:grid-cols-3 xl:grid-cols-2">
 				{Array.from({ length: count }, (_, index) => (
 					<PropertyCardSkeleton key={index} />
 				))}
@@ -126,9 +126,9 @@ export function GridSkeleton({
 }) {
 	const gridCols = {
 		1: "grid-cols-1",
-		2: "grid-cols-1 md:grid-cols-2",
-		3: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
-		4: "grid-cols-1 md:grid-cols-2 lg:grid-cols-4",
+		2: "grid-cols-1 xl:grid-cols-2",
+		3: "grid-cols-1 xl:grid-cols-2 lg:grid-cols-3",
+		4: "grid-cols-1 xl:grid-cols-2 lg:grid-cols-4",
 	};
 
 	return (
@@ -166,7 +166,7 @@ export function ListSkeleton({ count = 5 }: { count?: number }) {
 								<div className="h-4 w-24 animate-pulse rounded bg-muted" />
 							</div>
 
-							<div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+							<div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
 								<div className="flex items-center gap-2">
 									<div className="h-3 w-3 animate-pulse rounded bg-muted" />
 									<div className="h-3 w-16 animate-pulse rounded bg-muted" />
@@ -198,7 +198,7 @@ export function ListSkeleton({ count = 5 }: { count?: number }) {
 export function ShimmerSkeleton({ count = 6 }: { count?: number }) {
 	return (
 		<div className="p-8">
-			<div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+			<div className="grid grid-cols-1 gap-8 lg:grid-cols-3 xl:grid-cols-2">
 				{Array.from({ length: count }, (_, index) => (
 					<div
 						className="overflow-hidden rounded-xl border bg-card"

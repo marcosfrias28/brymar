@@ -53,7 +53,7 @@ export function Testimonials() {
 			<div className="container mx-auto">
 				<motion.h2
 					animate={{ opacity: 1, y: 0 }}
-					className="mb-4 text-center font-bold text-4xl text-foreground md:text-5xl"
+					className="mb-4 text-center font-bold text-4xl text-foreground xl:text-5xl"
 					initial={{ opacity: 0, y: 20 }}
 					transition={{ duration: 0.8 }}
 				>

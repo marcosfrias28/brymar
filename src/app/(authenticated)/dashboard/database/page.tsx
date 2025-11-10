@@ -200,7 +200,7 @@ export default function DatabasePage() {
 				</Card>
 
 				{/* Backup Management */}
-				<div className="grid gap-6 md:grid-cols-2">
+				<div className="grid gap-6 xl:grid-cols-2">
 					<Card>
 						<CardHeader>
 							<CardTitle>Gestión de Respaldos</CardTitle>
@@ -276,7 +276,7 @@ export default function DatabasePage() {
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<div className="grid gap-4 md:grid-cols-3">
+						<div className="grid gap-4 xl:grid-cols-3">
 							<div className="rounded-lg border p-4 text-center">
 								<h3 className="font-bold text-2xl text-green-600">98.5%</h3>
 								<p className="text-muted-foreground text-sm">

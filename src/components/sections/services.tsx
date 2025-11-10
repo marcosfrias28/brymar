@@ -62,7 +62,7 @@ export function Services() {
 			<div className="container mx-auto">
 				<motion.h2
 					animate={{ opacity: 1, y: 0 }}
-					className="mb-4 text-center font-bold text-4xl text-gray-800 md:text-5xl"
+					className="mb-4 text-center font-bold text-4xl text-gray-800 xl:text-5xl"
 					initial={{ opacity: 0, y: 20 }}
 					transition={{ duration: 0.8 }}
 				>
@@ -77,7 +77,7 @@ export function Services() {
 					Servicios exclusivos diseñados para satisfacer todas tus necesidades
 					inmobiliarias de lujo
 				</motion.p>
-				<div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-3">
+				<div className="grid grid-cols-1 gap-12 lg:grid-cols-3 xl:grid-cols-2">
 					{services.map(({ title, description, icon: Icon, color }, index) => (
 						<motion.div
 							animate={{ opacity: 1, y: 0 }}

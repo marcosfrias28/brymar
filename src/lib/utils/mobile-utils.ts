@@ -137,7 +137,7 @@ export const mobileClasses = {
 	// Grid classes
 	mobileGrid: "grid grid-cols-1 gap-4",
 	mobileGrid2: "grid grid-cols-2 gap-3",
-	tabletGrid: "grid grid-cols-2 md:grid-cols-3 gap-4",
+	tabletGrid: "grid grid-cols-2 xl:grid-cols-3 gap-4",
 
 	// Spacing classes
 	mobileSpacing: "space-y-4",
@@ -175,7 +175,7 @@ export function responsiveClass(
 	const classes = [mobile];
 
 	if (tablet) {
-		classes.push(`md:${tablet}`);
+		classes.push(`xl:${tablet}`);
 	}
 
 	if (desktop) {

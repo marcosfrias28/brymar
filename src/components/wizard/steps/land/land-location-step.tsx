@@ -1,31 +1,42 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { MapPin } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import type { LandWizardData } from "../../land-wizard";
 
-type LandLocationData = {
-	location?: string;
-	city?: string;
-	state?: string;
-	country?: string;
-};
+const LandLocationSchema = z.object({
+	location: z.string().min(1, "La ubicación es requerida"),
+});
 
 type LandLocationStepProps = {
-	data: LandLocationData;
-	onChange: (data: LandLocationData) => void;
-	errors?: Record<string, string>;
+	data: LandWizardData;
+	onChange: (data: LandWizardData) => void;
 };
 
-export function LandLocationStep({
-	data,
-	onChange,
-	errors,
-}: LandLocationStepProps) {
-	const handleChange = (field: keyof LandLocationData, value: string) => {
-		onChange({ ...data, [field]: value });
-	};
+export function LandLocationStep({ data, onChange }: LandLocationStepProps) {
+	const form = useForm<z.infer<typeof LandLocationSchema>>({
+		resolver: zodResolver(LandLocationSchema),
+		defaultValues: {
+			location: data.location || "",
+		},
+	});
+
+	// Watch form values and update parent
+	form.watch((values) => {
+		onChange({ ...data, ...values });
+	});
 
 	return (
 		<div className="space-y-6">
@@ -37,47 +48,26 @@ export function LandLocationStep({
 					</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-4">
-					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-						<div className="space-y-2">
-							<Label htmlFor="location">Ubicación</Label>
-							<Input
-								id="location"
-								onChange={(e) => handleChange("location", e.target.value)}
-								placeholder="Ubicación del terreno"
-								value={data.location || ""}
+					<Form {...form}>
+						<form className="space-y-4">
+							<FormField
+								control={form.control}
+								name="location"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Ubicación *</FormLabel>
+										<FormControl>
+											<Input
+												placeholder="Punta Cana, República Dominicana"
+												{...field}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
 							/>
-						</div>
-
-						<div className="space-y-2">
-							<Label htmlFor="city">Ciudad</Label>
-							<Input
-								id="city"
-								onChange={(e) => handleChange("city", e.target.value)}
-								placeholder="Ciudad"
-								value={data.city || ""}
-							/>
-						</div>
-
-						<div className="space-y-2">
-							<Label htmlFor="state">Provincia/Estado</Label>
-							<Input
-								id="state"
-								onChange={(e) => handleChange("state", e.target.value)}
-								placeholder="Provincia o Estado"
-								value={data.state || ""}
-							/>
-						</div>
-
-						<div className="space-y-2">
-							<Label htmlFor="country">País</Label>
-							<Input
-								id="country"
-								onChange={(e) => handleChange("country", e.target.value)}
-								placeholder="País"
-								value={data.country || ""}
-							/>
-						</div>
-					</div>
+						</form>
+					</Form>
 				</CardContent>
 			</Card>
 		</div>

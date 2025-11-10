@@ -7,47 +7,12 @@
     "config": "tailwind.config.ts",
     "css": "src/app/globals.css",
     "baseColor": "slate",
-    "cssVariables": true
+    "cssVariables": true,
+    "prefix": ""
   },
   "aliases": {
     "components": "@/components",
-    "utils": "@/lib/utils"
-  },
-  "components": [
-    "accordion",
-    "alert-dialog",
-    "alert",
-    "aspect-ratio",
-    "avatar",
-    "badge",
-    "button",
-    "card",
-    "checkbox",
-    "collapsible",
-    "command",
-    "context-menu",
-    "dialog",
-    "dropdown-menu",
-    "hover-card",
-    "input",
-    "label",
-    "menubar",
-    "navigation-menu",
-    "popover",
-    "progress",
-    "radio-group",
-    "scroll-area",
-    "select",
-    "separator",
-    "sheet",
-    "skeleton",
-    "slider",
-    "switch",
-    "table",
-    "tabs",
-    "textarea",
-    "toast",
-    "toggle",
-    "tooltip"
-  ]
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui"
+  }
 }

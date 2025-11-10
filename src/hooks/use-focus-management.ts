@@ -92,7 +92,7 @@ export function useFocusManagement(
 			const lastElement = focusableElements.at(-1);
 			const activeElement = document.activeElement as HTMLElement;
 
-			if (!firstElement || !lastElement) return;
+			if (!(firstElement && lastElement)) return;
 
 			if (event.shiftKey) {
 				// Shift + Tab: moving backwards

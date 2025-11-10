@@ -407,7 +407,7 @@ export function ProfileActivity() {
 						<CardTitle className="text-lg">Estadísticas de Actividad</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+						<div className="grid grid-cols-2 gap-4 xl:grid-cols-5">
 							<div className="text-center">
 								<div className="font-bold text-2xl text-primary">
 									{activities.length}

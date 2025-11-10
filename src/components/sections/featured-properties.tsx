@@ -61,7 +61,7 @@ export default function FeaturedProperties() {
 			<div className="container mx-auto">
 				<motion.h2
 					animate={{ opacity: 1, y: 0 }}
-					className="mb-4 text-center font-bold text-4xl text-gray-800 md:text-5xl"
+					className="mb-4 text-center font-bold text-4xl text-gray-800 xl:text-5xl"
 					initial={{ opacity: 0, y: 20 }}
 					transition={{ duration: 0.8 }}
 				>
@@ -75,7 +75,7 @@ export default function FeaturedProperties() {
 				>
 					Descubre nuestra selección exclusiva de propiedades de lujo
 				</motion.p>
-				<div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-3">
+				<div className="grid grid-cols-1 gap-12 lg:grid-cols-3 xl:grid-cols-2">
 					{properties.map((property, index) => (
 						<motion.div
 							animate={{ opacity: 1, y: 0 }}

@@ -78,7 +78,7 @@ function CategoriesSectionHeader() {
 			subtitle={subtitle}
 			subtitleClassName="text-left justify-start"
 			title={title}
-			titleClassName="text-left text-3xl md:text-4xl lg:text-5xl"
+			titleClassName="text-left text-3xl xl:text-4xl lg:text-5xl"
 		/>
 	);
 }

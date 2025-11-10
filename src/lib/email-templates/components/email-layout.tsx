@@ -1,19 +1,17 @@
 import { Html, Body, Container } from "@react-email/components";
-import React from "react";
+import type React from "react";
 
 interface EmailLayoutProps {
 	children: React.ReactNode;
 }
 
-const EmailLayout: React.FC<EmailLayoutProps> = ({ children }) => {
-	return (
+const EmailLayout: React.FC<EmailLayoutProps> = ({ children }) => (
 		<Html>
 			<Body style={main}>
 				<Container style={container}>{children}</Container>
 			</Body>
 		</Html>
 	);
-};
 
 export default EmailLayout;
 

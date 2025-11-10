@@ -59,7 +59,7 @@ export function AvatarUpload({
 				<div className="relative inline-flex">
 					{/* Drop area */}
 					<button
-						className="border-input hover:bg-accent/50 data-[dragging=true]:bg-accent/50 focus-visible:border-ring focus-visible:ring-ring/50 relative flex size-20 items-center justify-center overflow-hidden rounded-full border border-dashed transition-colors outline-none focus-visible:ring-[3px] has-disabled:pointer-events-none has-disabled:opacity-50 has-[img]:border-none"
+						className="relative flex size-20 items-center justify-center overflow-hidden rounded-full border border-input border-dashed outline-none transition-colors hover:bg-accent/50 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 has-disabled:pointer-events-none has-[img]:border-none has-disabled:opacity-50 data-[dragging=true]:bg-accent/50"
 						onClick={openFileDialog}
 						onDragEnter={handleDragEnter}
 						onDragLeave={handleDragLeave}
@@ -87,7 +87,7 @@ export function AvatarUpload({
 						<Button
 							onClick={() => removeFile(files[0]?.id)}
 							size="icon"
-							className="border-background focus-visible:border-background absolute -top-1 -right-1 size-6 rounded-full border-2 shadow-none"
+							className="-top-1 -right-1 absolute size-6 rounded-full border-2 border-background shadow-none focus-visible:border-background"
 							aria-label="Eliminar imagen"
 						>
 							<XIcon className="size-3.5" />
@@ -100,10 +100,10 @@ export function AvatarUpload({
 						tabIndex={-1}
 					/>
 				</div>
-				<p className="text-muted-foreground text-xs text-center max-w-[200px]">
+				<p className="max-w-[200px] text-center text-muted-foreground text-xs">
 					Arrastra y suelta una imagen o haz clic para seleccionar
 				</p>
-				{error && <p className="text-sm text-red-500">{error}</p>}
+				{error && <p className="text-red-500 text-sm">{error}</p>}
 			</div>
 		</div>
 	);

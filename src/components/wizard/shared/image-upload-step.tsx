@@ -288,7 +288,7 @@ export function ImageUploadStep({
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+						<div className="grid grid-cols-1 gap-4 lg:grid-cols-3 xl:grid-cols-2">
 							{images
 								.sort((a, b) => a.displayOrder - b.displayOrder)
 								.map((image, index) => (

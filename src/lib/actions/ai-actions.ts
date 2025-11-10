@@ -873,6 +873,17 @@ async function callGeminiAPI(
 	maxTokens = 500,
 	temperature = 0.7
 ): Promise<string> {
+	// Debug: Check if API key is loaded (remove in production)
+	if (process.env.NODE_ENV === "development") {
+		// eslint-disable-next-line no-console
+		console.log(
+			"Gemini API Key status:",
+			GEMINI_API_KEY ? "Present" : "Missing"
+		);
+		// eslint-disable-next-line no-console
+		console.log("API Key length:", GEMINI_API_KEY?.length || 0);
+	}
+
 	if (!GEMINI_API_KEY) {
 		throw new AIServiceError(
 			"Gemini API key not configured",
@@ -882,6 +893,33 @@ async function callGeminiAPI(
 	}
 
 	try {
+		// Debug: Log API call details
+		if (process.env.NODE_ENV === "development") {
+			// eslint-disable-next-line no-console
+			console.log(
+				"Making API call to:",
+				GEMINI_API_URL.replace(/key=.*/, "key=***")
+			);
+			// eslint-disable-next-line no-console
+			console.log(
+				"Request payload size:",
+				JSON.stringify({
+					contents: [
+						{
+							role: "user",
+							parts: [{ text: prompt.substring(0, 100) + "..." }],
+						},
+					],
+					generationConfig: {
+						temperature,
+						maxOutputTokens: maxTokens,
+						topP: 0.9,
+					},
+				}).length,
+				"characters"
+			);
+		}
+
 		const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
 			method: "POST",
 			headers: {
@@ -903,9 +941,22 @@ async function callGeminiAPI(
 			}),
 		});
 
+		// Debug: Log response
+		if (process.env.NODE_ENV === "development") {
+			// eslint-disable-next-line no-console
+			console.log("API Response status:", response.status);
+			// eslint-disable-next-line no-console
+			console.log("API Response ok:", response.ok);
+		}
+
 		if (!response.ok) {
+			const errorText = await response.text();
+			if (process.env.NODE_ENV === "development") {
+				// eslint-disable-next-line no-console
+				console.log("API Error response:", errorText);
+			}
 			throw new AIServiceError(
-				`Gemini API error: ${response.status}`,
+				`Gemini API error: ${response.status} - ${errorText}`,
 				"API_ERROR",
 				response.status >= 500
 			);

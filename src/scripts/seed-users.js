@@ -16,9 +16,9 @@ const sampleUsers = [
 	{
 		id: "seed_user_001",
 		email: "admin@brymar.com",
-		name: "Administrador Brymar",
+		name: "Administrador Marbry",
 		firstName: "Admin",
-		lastName: "Brymar",
+		lastName: "Marbry",
 		phone: "+1-809-555-0001",
 		role: "admin",
 		isActive: true,
@@ -26,9 +26,9 @@ const sampleUsers = [
 	{
 		id: "seed_user_002",
 		email: "agente@brymar.com",
-		name: "Marco Brymar",
+		name: "Marco Marbry",
 		firstName: "Marco",
-		lastName: "Brymar",
+		lastName: "Marbry",
 		phone: "+1-809-555-0002",
 		role: "agent",
 		isActive: true,

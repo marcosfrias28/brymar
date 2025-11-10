@@ -25,8 +25,8 @@ export function Footer() {
 	return (
 		<footer className="border-t bg-background py-12">
 			<div className="container mx-auto px-4">
-				<div className="grid grid-cols-1 gap-8 md:grid-cols-4">
-					<div className="col-span-1 md:col-span-2">
+				<div className="grid grid-cols-1 gap-8 xl:grid-cols-4">
+					<div className="col-span-1 xl:col-span-2">
 						<Logo />
 						<p className="text-muted-foreground">
 							&copy; {new Date().getFullYear()} Marbry Inmobiliaria. Todos los

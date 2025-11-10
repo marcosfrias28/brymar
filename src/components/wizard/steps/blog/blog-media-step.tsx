@@ -2,24 +2,30 @@
 
 import { ImageIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-
-type BlogMediaData = {
-	coverImage?: File;
-	imageUrl?: string;
-};
+import { ImageUploadStep, type ImageMetadata } from "@/components/wizard/shared/image-upload-step";
+import type { BlogWizardData } from "@/lib/schemas/blog-wizard-schemas";
 
 type BlogMediaStepProps = {
-	data: BlogMediaData;
-	onChange: (data: BlogMediaData) => void;
-	errors?: Record<string, string>;
+	data: BlogWizardData;
+	onChange: (data: BlogWizardData) => void;
 };
 
-export function BlogMediaStep({ data, onChange, errors }: BlogMediaStepProps) {
-	const handleChange = (field: keyof BlogMediaData, value: File | string) => {
-		onChange({ ...data, [field]: value });
+export function BlogMediaStep({ data, onChange }: BlogMediaStepProps) {
+	const handleImagesChange = (images: ImageMetadata[]) => {
+		// For blog, we only need the first image as coverImage
+		const coverImage = images.length > 0 ? images[0].url : undefined;
+		onChange({ ...data, coverImage });
 	};
+
+	// Convert coverImage string back to ImageMetadata for the component
+	const imageMetadata: ImageMetadata[] = data.coverImage ? [{
+		id: "cover-image",
+		url: data.coverImage,
+		filename: data.coverImage.split('/').pop() || "cover-image",
+		size: 0,
+		contentType: 'image/jpeg',
+		displayOrder: 0,
+	}] : [];
 
 	return (
 		<div className="space-y-6">
@@ -30,37 +36,14 @@ export function BlogMediaStep({ data, onChange, errors }: BlogMediaStepProps) {
 						Imagen de Portada
 					</CardTitle>
 				</CardHeader>
-				<CardContent className="space-y-4">
-					<div className="space-y-2">
-						<Label htmlFor="coverImage">Imagen de Portada</Label>
-						<Input
-							accept="image/*"
-							id="coverImage"
-							onChange={(e) => {
-								const file = e.target.files?.[0];
-								if (file) {
-									handleChange("coverImage", file);
-								}
-							}}
-							type="file"
-						/>
-						<p className="text-muted-foreground text-sm">
-							Selecciona una imagen de portada para el artículo
-						</p>
-					</div>
-
-					<div className="space-y-2">
-						<Label htmlFor="imageUrl">URL de Imagen (alternativa)</Label>
-						<Input
-							id="imageUrl"
-							onChange={(e) => handleChange("imageUrl", e.target.value)}
-							placeholder="https://ejemplo.com/imagen.jpg"
-							value={data.imageUrl || ""}
-						/>
-						<p className="text-muted-foreground text-sm">
-							O proporciona una URL de imagen externa
-						</p>
-					</div>
+				<CardContent>
+					<ImageUploadStep
+						images={imageMetadata}
+						onImagesChange={handleImagesChange}
+						title="Imagen de Portada"
+						description="Sube una imagen para la portada del artículo"
+						maxImages={1}
+					/>
 				</CardContent>
 			</Card>
 		</div>

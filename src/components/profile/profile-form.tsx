@@ -243,7 +243,7 @@ export function ProfileForm() {
 					icon={<User className="h-5 w-5" />}
 					title="Información Personal"
 				>
-					<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+					<div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
 						<div className="space-y-2">
 							<Label htmlFor="name">Nombre Completo</Label>
 							<Input
@@ -275,7 +275,7 @@ export function ProfileForm() {
 					icon={<Shield className="h-5 w-5" />}
 					title="Información de Cuenta"
 				>
-					<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+					<div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
 						<div className="space-y-2">
 							<Label htmlFor="userId">ID de Usuario</Label>
 							<Input
@@ -320,7 +320,7 @@ export function ProfileForm() {
 								value={formatDate(user.createdAt)}
 							/>
 						</div>
-						<div className="space-y-2 md:col-span-2">
+						<div className="space-y-2 xl:col-span-2">
 							<Label htmlFor="updatedAt">Última Actualización</Label>
 							<Input
 								className="bg-muted"
@@ -339,7 +339,7 @@ export function ProfileForm() {
 					icon={<Mail className="h-5 w-5" />}
 					title="Información Adicional"
 				>
-					<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+					<div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
 						<div className="space-y-2">
 							<Label htmlFor="firstName">Primer Nombre</Label>
 							<Input
@@ -384,7 +384,7 @@ export function ProfileForm() {
 							/>
 						</div>
 
-						<div className="space-y-2 md:col-span-2">
+						<div className="space-y-2 xl:col-span-2">
 							<Label htmlFor="website">Sitio Web</Label>
 							<Input
 								defaultValue={userProfile?.website || ""}
@@ -395,7 +395,7 @@ export function ProfileForm() {
 							/>
 						</div>
 
-						<div className="space-y-2 md:col-span-2">
+						<div className="space-y-2 xl:col-span-2">
 							<Label htmlFor="bio">Biografía</Label>
 							<Textarea
 								defaultValue={userProfile?.bio || user?.bio || ""}
@@ -409,7 +409,7 @@ export function ProfileForm() {
 				</ProfileSection>
 
 				<ProfileSection
-					description="Configuración de notificaciones y privacidad"
+					description="Personaliza tus ajustes generales, notificaciones y temas"
 					icon={<Settings className="h-5 w-5" />}
 					title="Preferencias"
 				>
@@ -418,7 +418,7 @@ export function ProfileForm() {
 							<h4 className="mb-3 font-medium text-gray-900 text-sm">
 								Notificaciones
 							</h4>
-							<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+							<div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
 								<div className="space-y-2">
 									<Label htmlFor="emailNotifications">Email</Label>
 									<div className="flex items-center space-x-2">
@@ -471,7 +471,7 @@ export function ProfileForm() {
 							<h4 className="mb-3 font-medium text-gray-900 text-sm">
 								Privacidad
 							</h4>
-							<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+							<div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
 								<div className="space-y-2">
 									<Label htmlFor="profileVisible">Perfil Visible</Label>
 									<Select
@@ -530,9 +530,9 @@ export function ProfileForm() {
 
 						<div>
 							<h4 className="mb-3 font-medium text-gray-900 text-sm">
-								Configuración de Pantalla
+								Preferencias Generales
 							</h4>
-							<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+							<div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
 								<div className="space-y-2">
 									<Label htmlFor="theme">Tema</Label>
 									<Select

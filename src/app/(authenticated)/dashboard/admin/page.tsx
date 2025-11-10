@@ -207,7 +207,7 @@ export default function AdminPage() {
 						</div>
 					</CardHeader>
 					<CardContent>
-						<div className="grid gap-4 md:grid-cols-5">
+						<div className="grid gap-4 xl:grid-cols-5">
 							<div className="flex items-center justify-between rounded-lg border p-4">
 								<div className="flex items-center gap-3">
 									<ServerIcon className="h-5 w-5 text-muted-foreground" />
@@ -382,7 +382,7 @@ export default function AdminPage() {
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<div className="grid gap-4 md:grid-cols-3">
+						<div className="grid gap-4 xl:grid-cols-3">
 							<div className="rounded-lg border p-4 text-center">
 								<ShieldIcon className="mx-auto mb-2 h-8 w-8 text-green-600" />
 								<h3 className="font-medium">SSL Activo</h3>

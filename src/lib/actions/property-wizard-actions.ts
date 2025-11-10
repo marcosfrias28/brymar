@@ -8,13 +8,47 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db/index";
 import { properties } from "@/lib/db/schema/index";
-import type { PropertyWizardData } from "@/types/property-wizard";
+import type { PropertyWizardData } from "@/components/wizard/property-wizard-steps";
 import type { ActionResult } from "@/lib/types/shared";
+import type { Property, PropertyFeatures, Address, Image, Video } from "@/lib/types/properties";
 import {
 	PropertyDraftSchema,
 	PropertyCompleteSchema,
 } from "@/lib/schemas/property-wizard-schemas";
 import { extractValidationErrors } from "@/lib/types/forms";
+
+/**
+ * Maps a database Property to PropertyWizardData for editing
+ */
+function mapPropertyToWizardData(property: Property): PropertyWizardData {
+	return {
+		id: property.id,
+		title: property.title || "",
+		description: property.description || "",
+		status: property.status as "draft" | "published",
+		createdAt: property.createdAt,
+		updatedAt: property.updatedAt,
+		price: property.price || 0,
+		surface: property.features.area || 0,
+		propertyType: property.type,
+		bedrooms: property.features.bedrooms,
+		bathrooms: property.features.bathrooms,
+		characteristics: property.features.amenities || [],
+		coordinates: property.address.coordinates ? {
+			lat: property.address.coordinates.latitude,
+			lng: property.address.coordinates.longitude,
+		} : undefined,
+		address: property.address,
+		images: property.images || [],
+		videos: property.videos || [],
+		language: "es" as const,
+		aiGenerated: {
+			title: false,
+			description: false,
+			tags: false,
+		},
+	};
+}
 
 /**
  * Load property draft data for editing
@@ -40,31 +74,7 @@ export async function loadPropertyDraft(
 			return null;
 		}
 
-		// Map database property to wizard data
-		return {
-			id: property.id,
-			title: property.title || "",
-			description: property.description || "",
-			status: property.status as "draft" | "published",
-			createdAt: property.createdAt,
-			updatedAt: property.updatedAt,
-			price: property.price || 0,
-			surface: (property.features as any)?.area || 0,
-			propertyType: property.type as any,
-			bedrooms: (property.features as any)?.bedrooms,
-			bathrooms: (property.features as any)?.bathrooms,
-			characteristics: (property.features as any)?.characteristics || [],
-			coordinates: (property.address as any)?.coordinates,
-			address: property.address as any,
-			images: (property.images as any) || [],
-			videos: (property.videos as any) || [],
-			language: "es" as const,
-			aiGenerated: {
-				title: false,
-				description: false,
-				tags: false,
-			},
-		};
+		return mapPropertyToWizardData(property as Property);
 	} catch (_error) {
 		return null;
 	}

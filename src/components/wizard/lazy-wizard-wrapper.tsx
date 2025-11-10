@@ -7,7 +7,7 @@
 
 import { type ComponentType, lazy, Suspense } from "react";
 import type { WizardData, WizardProps } from "@/types/wizard-core";
-import { WizardErrorBoundary } from "./core/wizard-error-boundary";
+import { WizardErrorBoundary } from "./wizard-error-boundary";
 import { WizardFallbackUI } from "./fallback-ui-states";
 
 interface LazyWizardWrapperProps<T extends WizardData>
@@ -26,19 +26,19 @@ interface LazyWizardWrapperProps<T extends WizardData>
 
 // Lazy load wizard components
 const LazyPropertyWizard = lazy(() =>
-	import("./property/property-wizard").then((module) => ({
+	import("./property-wizard").then((module) => ({
 		default: module.PropertyWizard,
 	}))
 );
 
 const LazyLandWizard = lazy(() =>
-	import("./land/land-wizard").then((module) => ({
+	import("./land-wizard").then((module) => ({
 		default: module.LandWizard,
 	}))
 );
 
 const LazyBlogWizard = lazy(() =>
-	import("./blog/blog-wizard").then((module) => ({
+	import("./blog-wizard").then((module) => ({
 		default: module.BlogWizard,
 	}))
 );
@@ -99,7 +99,7 @@ export function LazyWizardWrapper<T extends WizardData>({
 					)
 				}
 			>
-				<WizardComponent {...(wizardProps as any)} />
+				<WizardComponent {...(wizardProps as WizardProps<T>)} />
 			</Suspense>
 		</WizardErrorBoundary>
 	);

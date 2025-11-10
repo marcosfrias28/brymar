@@ -96,7 +96,7 @@ class MapServiceImpl implements MapService {
 				`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1&accept-language=es`,
 				{
 					headers: {
-						"User-Agent": "Brymar-Inmobiliaria/1.0",
+						"User-Agent": "Marbry-Inmobiliaria/1.0",
 					},
 				}
 			);
@@ -177,7 +177,7 @@ class MapServiceImpl implements MapService {
 				)}&limit=1&countrycodes=do&addressdetails=1&accept-language=es`,
 				{
 					headers: {
-						"User-Agent": "Brymar-Inmobiliaria/1.0",
+						"User-Agent": "Marbry-Inmobiliaria/1.0",
 					},
 				}
 			);

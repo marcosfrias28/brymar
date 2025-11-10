@@ -261,7 +261,7 @@ export function SystemHealthMonitor() {
 			)}
 
 			{/* Service Status Cards */}
-			<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+			<div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
 				{services.map((service) => (
 					<Card
 						className={`border-2 ${getStatusColor(service.status)}`}
@@ -346,7 +346,7 @@ export function SystemHealthMonitor() {
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+						<div className="grid grid-cols-2 gap-4 lg:grid-cols-6 xl:grid-cols-3">
 							<div className="text-center">
 								<div className="font-bold text-2xl text-blue-600">
 									{metrics.totalRequests.toLocaleString()}

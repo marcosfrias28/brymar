@@ -39,7 +39,7 @@ export function NewsSection() {
 				<p className="mb-12 text-center text-muted-foreground text-xl">
 					Mantente actualizado con las tendencias del mercado inmobiliario
 				</p>
-				<div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+				<div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
 					{news.map((item, index) => (
 						<Card className="" key={index}>
 							<img

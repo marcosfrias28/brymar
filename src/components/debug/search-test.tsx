@@ -67,7 +67,7 @@ export function SearchTest() {
 		<div className="space-y-6 p-6">
 			<h1 className="font-bold text-2xl">Search Actions Test</h1>
 
-			<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+			<div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
 				{/* Property Search Test */}
 				<Card>
 					<CardHeader>

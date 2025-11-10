@@ -30,9 +30,9 @@ export function ContentGrid({
 			case "compact":
 				return "gap-4";
 			case "relaxed":
-				return "gap-8 md:gap-12";
+				return "gap-8 xl:gap-12";
 			default:
-				return "gap-6 md:gap-8";
+				return "gap-6 xl:gap-8";
 		}
 	};
 
@@ -47,7 +47,7 @@ export function ContentGrid({
 						? "grid grid-cols-1 lg:grid-cols-[300px_1fr]"
 						: "grid grid-cols-1 lg:grid-cols-[1fr_300px]";
 				}
-				return "grid grid-cols-1 md:grid-cols-2";
+				return "grid grid-cols-1 xl:grid-cols-2";
 
 			case "three-column":
 				if (sidebarContent) {
@@ -55,7 +55,7 @@ export function ContentGrid({
 						? "grid grid-cols-1 lg:grid-cols-[250px_1fr_250px]"
 						: "grid grid-cols-1 lg:grid-cols-[250px_1fr_250px]";
 				}
-				return "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
+				return "grid grid-cols-1 xl:grid-cols-2 lg:grid-cols-3";
 
 			case "card-grid":
 				return "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5";
@@ -129,7 +129,7 @@ type CardGridProps = {
 
 export function CardGrid({
 	children,
-	columns = { sm: 2, md: 2, lg: 3, xl: 4, "2xl": 5 },
+	columns = { sm: 2, lg: 3, xl: 4, "2xl": 5 },
 	spacing = "normal",
 	className,
 }: CardGridProps) {
@@ -140,7 +140,7 @@ export function CardGrid({
 			classes.push(`sm:grid-cols-${columns.sm}`);
 		}
 		if (columns.md) {
-			classes.push(`md:grid-cols-${columns.md}`);
+			classes.push(`xl:grid-cols-${columns.md}`);
 		}
 		if (columns.lg) {
 			classes.push(`lg:grid-cols-${columns.lg}`);
@@ -158,11 +158,11 @@ export function CardGrid({
 	const getSpacingClasses = () => {
 		switch (spacing) {
 			case "compact":
-				return "gap-3 md:gap-4";
+				return "gap-3 xl:gap-4";
 			case "relaxed":
-				return "gap-6 md:gap-8";
+				return "gap-6 xl:gap-8";
 			default:
-				return "gap-4 md:gap-6";
+				return "gap-4 xl:gap-6";
 		}
 	};
 
@@ -190,11 +190,11 @@ export function ResponsiveGrid({
 	const getSpacingClasses = () => {
 		switch (spacing) {
 			case "compact":
-				return "gap-3 md:gap-4";
+				return "gap-3 xl:gap-4";
 			case "relaxed":
-				return "gap-6 md:gap-8";
+				return "gap-6 xl:gap-8";
 			default:
-				return "gap-4 md:gap-6";
+				return "gap-4 xl:gap-6";
 		}
 	};
 
@@ -229,7 +229,7 @@ export function AccentGrid({
 	return (
 		<div
 			className={cn(
-				showAccents && "secondary-accent rounded-lg p-4 md:p-6",
+				showAccents && "secondary-accent rounded-lg p-4 xl:p-6",
 				className
 			)}
 		>

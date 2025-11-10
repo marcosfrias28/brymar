@@ -75,7 +75,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
 	return (
 		<SidebarProvider>
-			<UnifiedSidebar variant="auto" />
+			<UnifiedSidebar mode="auto" />
 			<SidebarInset>
 				<SiteHeader />
 				<div className="flex flex-1 flex-col">

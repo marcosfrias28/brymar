@@ -4,12 +4,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, FileText, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import type { z } from "zod";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
 	Select,
 	SelectContent,
@@ -19,18 +26,17 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useGenerateAIContent } from "@/hooks/use-wizard";
-import { cn } from "@/lib/utils/index";
+import {
+	BlogContentStepSchema,
+	type BlogWizardData,
+} from "@/lib/schemas/blog-wizard-schemas";
 
-const BlogContentSchema = z.object({
-	title: z.string().min(1, "El título es requerido"),
-	description: z.string().min(1, "La descripción es requerida"),
-	content: z.string().min(1, "El contenido es requerido"),
-	author: z.string().min(1, "El autor es requerido"),
-	category: z.string().min(1, "La categoría es requerida"),
-	excerpt: z.string().optional(),
-});
+type BlogContentFormData = z.infer<typeof BlogContentStepSchema>;
 
-type BlogContentData = z.infer<typeof BlogContentSchema>;
+type BlogContentStepProps = {
+	data: BlogWizardData;
+	onChange: (data: BlogWizardData) => void;
+};
 
 const BLOG_CATEGORIES = [
 	{ value: "property-news", label: "Noticias de Propiedades" },
@@ -41,59 +47,37 @@ const BLOG_CATEGORIES = [
 	{ value: "lifestyle", label: "Estilo de Vida" },
 ];
 
-type BlogData = {
-	title?: string;
-	description?: string;
-	content?: string;
-	author?: string;
-	category?: string;
-	excerpt?: string;
-};
+const WORDS_PER_MINUTE = 200;
 
-type BlogContentStepProps = {
-	data: BlogData;
-	onChange: (data: BlogData) => void;
-	errors?: Record<string, string>;
-};
-
-export function BlogContentStep({
-	data,
-	onChange,
-	errors,
-}: BlogContentStepProps) {
+export function BlogContentStep({ data, onChange }: BlogContentStepProps) {
 	const [showPreview, setShowPreview] = useState(false);
 	const [wordCount, setWordCount] = useState(0);
 	const [readTime, setReadTime] = useState(0);
 
 	const generateAI = useGenerateAIContent();
 
-	const {
-		register,
-		handleSubmit,
-		watch,
-		setValue,
-		formState: { errors: formErrors, isValid },
-	} = useForm<BlogContentData>({
-		resolver: zodResolver(BlogContentSchema),
+	const form = useForm<BlogContentFormData>({
+		resolver: zodResolver(BlogContentStepSchema),
 		mode: "onChange",
 		defaultValues: {
 			title: data.title || "",
-			description: data.description || "",
 			content: data.content || "",
 			author: data.author || "",
-			category: data.category || "",
+			category: data.category || "property-news",
 			excerpt: data.excerpt || "",
 		},
 	});
 
-	const watchedValues = watch();
+	const watchedValues = form.watch();
 
 	// Calculate word count and reading time
 	useEffect(() => {
 		const content = watchedValues.content || "";
-		const words = content.split(/\s+/).filter((word) => word.length > 0).length;
+		const words = content
+			.split(/\s+/g)
+			.filter((word) => word.length > 0).length;
 		setWordCount(words);
-		setReadTime(Math.ceil(words / 200)); // 200 words per minute
+		setReadTime(Math.ceil(words / WORDS_PER_MINUTE));
 	}, [watchedValues.content]);
 
 	const handleGenerateTitle = useCallback(async () => {
@@ -103,15 +87,17 @@ export function BlogContentStep({
 				contentType: "title",
 				baseData: {
 					category: watchedValues.category,
-					topic: watchedValues.description,
+					topic: watchedValues.content,
 				},
 			});
 
 			if (result.success && result.data?.content?.title) {
-				setValue("title", result.data.content.title);
+				form.setValue("title", result.data.content.title);
 			}
-		} catch (_error) {}
-	}, [watchedValues, generateAI, setValue]);
+		} catch (error) {
+			console.error("Error generating title:", error);
+		}
+	}, [watchedValues, generateAI, form]);
 
 	const handleGenerateContent = useCallback(async () => {
 		if (!watchedValues.title) {
@@ -125,15 +111,17 @@ export function BlogContentStep({
 				baseData: {
 					title: watchedValues.title,
 					category: watchedValues.category,
-					description: watchedValues.description,
+					description: watchedValues.content,
 				},
 			});
 
 			if (result.success && result.data?.content?.content) {
-				setValue("content", result.data.content.content);
+				form.setValue("content", result.data.content.content);
 			}
-		} catch (_error) {}
-	}, [watchedValues, generateAI, setValue]);
+		} catch (error) {
+			console.error("Error generating content:", error);
+		}
+	}, [watchedValues, generateAI, form]);
 
 	const handleGenerateExcerpt = useCallback(async () => {
 		if (!watchedValues.title) {
@@ -151,30 +139,34 @@ export function BlogContentStep({
 			});
 
 			if (result.success && result.data?.content?.excerpt) {
-				setValue("excerpt", result.data.content.excerpt);
+				form.setValue("excerpt", result.data.content.excerpt);
 			}
-		} catch (_error) {}
-	}, [watchedValues, generateAI, setValue]);
+		} catch (error) {
+			console.error("Error generating excerpt:", error);
+		}
+	}, [watchedValues, generateAI, form]);
 
 	// Update parent when form data changes
 	useEffect(() => {
-		onChange(watchedValues);
-	}, [watchedValues, onChange]);
+		onChange({ ...data, ...watchedValues });
+	}, [watchedValues, data, onChange]);
 
 	const renderPreview = () => {
 		if (!watchedValues.content) {
 			return (
 				<p className="text-muted-foreground">
-					No hay contenido para previsualizar
+					El contenido del artículo aparecerá aquí...
 				</p>
 			);
 		}
 
 		return (
 			<div className="prose prose-sm max-w-none">
+				<h3 className="mb-2 font-semibold text-lg">{watchedValues.title}</h3>
 				<div
+					className="whitespace-pre-wrap text-sm"
 					dangerouslySetInnerHTML={{
-						__html: watchedValues.content.replace(/\n/g, "<br>"),
+						__html: watchedValues.content.replace(/\n/g, "<br />"),
 					}}
 				/>
 			</div>
@@ -194,172 +186,197 @@ export function BlogContentStep({
 						<Badge variant="outline">{readTime} min lectura</Badge>
 					</div>
 				</CardHeader>
-				<CardContent className="space-y-4">
-					{/* Title */}
-					<div className="space-y-2">
-						<div className="flex items-center justify-between">
-							<Label htmlFor="title">Título *</Label>
-							<Button
-								disabled={generateAI.isPending}
-								onClick={handleGenerateTitle}
-								size="sm"
-								type="button"
-								variant="outline"
-							>
-								<Sparkles className="mr-2 h-4 w-4" />
-								{generateAI.isPending ? "Generando..." : "Generar"}
-							</Button>
-						</div>
-						<Input
-							id="title"
-							{...register("title")}
-							className={cn(formErrors.title && "border-destructive")}
-							placeholder="Ingresa el título del artículo..."
-						/>
-						{formErrors.title && (
-							<p className="text-destructive text-sm">
-								{formErrors.title.message}
-							</p>
-						)}
-					</div>
-
-					{/* Description */}
-					<div className="space-y-2">
-						<Label htmlFor="description">Descripción Breve *</Label>
-						<Textarea
-							id="description"
-							{...register("description")}
-							className={cn(formErrors.description && "border-destructive")}
-							placeholder="Breve descripción del artículo..."
-							rows={2}
-						/>
-						{formErrors.description && (
-							<p className="text-destructive text-sm">
-								{formErrors.description.message}
-							</p>
-						)}
-					</div>
-
-					{/* Author and Category */}
-					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-						<div className="space-y-2">
-							<Label htmlFor="author">Autor *</Label>
-							<Input
-								id="author"
-								{...register("author")}
-								className={cn(formErrors.author && "border-destructive")}
-								placeholder="Nombre del autor..."
+				<CardContent>
+					<Form {...form}>
+						<form className="space-y-4">
+							{/* Title */}
+							<FormField
+								control={form.control}
+								name="title"
+								render={({ field }) => (
+									<FormItem>
+										<div className="flex items-center justify-between">
+											<FormLabel>Título *</FormLabel>
+											<Button
+												disabled={generateAI.isPending}
+												onClick={handleGenerateTitle}
+												size="sm"
+												type="button"
+												variant="outline"
+											>
+												<Sparkles className="mr-2 h-4 w-4" />
+												{generateAI.isPending ? "Generando..." : "Generar"}
+											</Button>
+										</div>
+										<FormControl>
+											<Input
+												placeholder="Ingresa el título del artículo..."
+												{...field}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
 							/>
-							{formErrors.author && (
-								<p className="text-destructive text-sm">
-									{formErrors.author.message}
-								</p>
-							)}
-						</div>
 
-						<div className="space-y-2">
-							<Label>Categoría *</Label>
-							<Select
-								onValueChange={(value) => setValue("category", value)}
-								value={watchedValues.category || ""}
-							>
-								<SelectTrigger
-									className={cn(formErrors.category && "border-destructive")}
-								>
-									<SelectValue placeholder="Selecciona una categoría" />
-								</SelectTrigger>
-								<SelectContent>
-									{BLOG_CATEGORIES.map((category) => (
-										<SelectItem key={category.value} value={category.value}>
-											{category.label}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							{formErrors.category && (
-								<p className="text-destructive text-sm">
-									{formErrors.category.message}
-								</p>
-							)}
-						</div>
-					</div>
+							{/* Description */}
+							<FormField
+								control={form.control}
+								name="content"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Descripción Breve *</FormLabel>
+										<FormControl>
+											<Textarea
+												placeholder="Breve descripción del artículo..."
+												rows={2}
+												{...field}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
 
-					{/* Excerpt */}
-					<div className="space-y-2">
-						<div className="flex items-center justify-between">
-							<Label htmlFor="excerpt">Extracto</Label>
-							<Button
-								disabled={!watchedValues.title || generateAI.isPending}
-								onClick={handleGenerateExcerpt}
-								size="sm"
-								type="button"
-								variant="outline"
-							>
-								<Sparkles className="mr-2 h-4 w-4" />
-								{generateAI.isPending ? "Generando..." : "Generar"}
-							</Button>
-						</div>
-						<Textarea
-							id="excerpt"
-							{...register("excerpt")}
-							placeholder="Breve extracto del artículo..."
-							rows={3}
-						/>
-					</div>
-
-					{/* Content */}
-					<div className="space-y-2">
-						<div className="flex items-center justify-between">
-							<Label htmlFor="content">Contenido *</Label>
-							<div className="flex gap-2">
-								<Button
-									onClick={() => setShowPreview(!showPreview)}
-									size="sm"
-									type="button"
-									variant="outline"
-								>
-									{showPreview ? (
-										<>
-											<EyeOff className="mr-2 h-4 w-4" />
-											Editar
-										</>
-									) : (
-										<>
-											<Eye className="mr-2 h-4 w-4" />
-											Vista Previa
-										</>
+							{/* Author and Category */}
+							<div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+								<FormField
+									control={form.control}
+									name="author"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Autor *</FormLabel>
+											<FormControl>
+												<Input placeholder="Nombre del autor..." {...field} />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
 									)}
-								</Button>
-								<Button
-									disabled={!watchedValues.title || generateAI.isPending}
-									onClick={handleGenerateContent}
-									size="sm"
-									type="button"
-									variant="outline"
-								>
-									<Sparkles className="mr-2 h-4 w-4" />
-									{generateAI.isPending ? "Generando..." : "Generar"}
-								</Button>
-							</div>
-						</div>
+								/>
 
-						{showPreview ? (
-							<Card className="min-h-[300px] p-4">{renderPreview()}</Card>
-						) : (
-							<Textarea
-								id="content"
-								{...register("content")}
-								className={cn(formErrors.content && "border-destructive")}
-								placeholder="Escribe el contenido del artículo..."
-								rows={15}
+								<FormField
+									control={form.control}
+									name="category"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Categoría *</FormLabel>
+											<Select
+												onValueChange={field.onChange}
+												value={field.value}
+											>
+												<FormControl>
+													<SelectTrigger>
+														<SelectValue placeholder="Selecciona una categoría" />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													{BLOG_CATEGORIES.map((category) => (
+														<SelectItem
+															key={category.value}
+															value={category.value}
+														>
+															{category.label}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</div>
+
+							{/* Excerpt */}
+							<FormField
+								control={form.control}
+								name="excerpt"
+								render={({ field }) => (
+									<FormItem>
+										<div className="flex items-center justify-between">
+											<FormLabel>Extracto</FormLabel>
+											<Button
+												disabled={!watchedValues.title || generateAI.isPending}
+												onClick={handleGenerateExcerpt}
+												size="sm"
+												type="button"
+												variant="outline"
+											>
+												<Sparkles className="mr-2 h-4 w-4" />
+												{generateAI.isPending ? "Generando..." : "Generar"}
+											</Button>
+										</div>
+										<FormControl>
+											<Textarea
+												placeholder="Breve extracto del artículo..."
+												rows={3}
+												{...field}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
 							/>
-						)}
-						{formErrors.content && (
-							<p className="text-destructive text-sm">
-								{formErrors.content.message}
-							</p>
-						)}
-					</div>
+
+							{/* Content */}
+							<FormField
+								control={form.control}
+								name="content"
+								render={({ field }) => (
+									<FormItem>
+										<div className="flex items-center justify-between">
+											<FormLabel>Contenido *</FormLabel>
+											<div className="flex gap-2">
+												<Button
+													onClick={() => setShowPreview(!showPreview)}
+													size="sm"
+													type="button"
+													variant="outline"
+												>
+													{showPreview ? (
+														<>
+															<EyeOff className="mr-2 h-4 w-4" />
+															Editar
+														</>
+													) : (
+														<>
+															<Eye className="mr-2 h-4 w-4" />
+															Vista Previa
+														</>
+													)}
+												</Button>
+												<Button
+													disabled={
+														!watchedValues.title || generateAI.isPending
+													}
+													onClick={handleGenerateContent}
+													size="sm"
+													type="button"
+													variant="outline"
+												>
+													<Sparkles className="mr-2 h-4 w-4" />
+													{generateAI.isPending ? "Generando..." : "Generar"}
+												</Button>
+											</div>
+										</div>
+										{showPreview ? (
+											<Card className="min-h-[300px] p-4">
+												{renderPreview()}
+											</Card>
+										) : (
+											<FormControl>
+												<Textarea
+													placeholder="Escribe el contenido del artículo..."
+													rows={15}
+													{...field}
+												/>
+											</FormControl>
+										)}
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</form>
+					</Form>
 				</CardContent>
 			</Card>
 		</div>

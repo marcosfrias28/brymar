@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 
 const sizes = {
 	sm: { width: 256, height: 256 },
-	md: { width: 384, height: 384 },
 	lg: { width: 600, height: 400 },
 	xl: { width: 800, height: 500 },
 	"2xl": { width: 1000, height: 600 },
@@ -112,7 +111,7 @@ export function ImageContainer({
 
 				{title && (
 					<div className="-translate-x-1/2 absolute bottom-8 left-1/2 transform">
-						<h3 className="text-center font-normal font-satoshi text-7xl text-white uppercase leading-tight tracking-tight md:text-8xl lg:text-9xl">
+						<h3 className="text-center font-normal font-satoshi text-7xl text-white uppercase leading-tight tracking-tight lg:text-9xl xl:text-8xl">
 							{title}
 						</h3>
 					</div>
@@ -153,7 +152,7 @@ export function ImageContainer({
 
 			{title && (
 				<div className="-translate-x-1/2 absolute bottom-8 left-1/2 transform">
-					<h3 className="text-center font-normal font-satoshi text-7xl text-white uppercase leading-tight tracking-tight md:text-8xl lg:text-9xl">
+					<h3 className="text-center font-normal font-satoshi text-7xl text-white uppercase leading-tight tracking-tight lg:text-9xl xl:text-8xl">
 						{title}
 					</h3>
 				</div>

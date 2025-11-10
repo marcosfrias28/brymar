@@ -13,7 +13,7 @@ export type Coordinates = {
 export type Address = {
 	street: string;
 	city: string;
-	province: string;
+	state: string;
 	postalCode?: string;
 	country: string;
 	formattedAddress: string;
@@ -55,7 +55,7 @@ export interface PropertyWizardData extends WizardData {
 	propertyType: PropertyType;
 	bedrooms?: number;
 	bathrooms?: number;
-	characteristics: PropertyCharacteristic[];
+	characteristics: string[];
 
 	// Step 2: Location
 	coordinates?: Coordinates;
@@ -120,26 +120,28 @@ export type ImageUploadService = {
 
 // Map Service Types
 export type MapService = {
-	initializeMap(containerId: string): any; // MapInstance type depends on map library
+	initializeMap(containerId: string): unknown; // MapInstance type depends on map library
 	setDominicanRepublicBounds(): void;
-	addMarker(coordinates: Coordinates): any; // Marker type depends on map library
+	addMarker(coordinates: Coordinates): unknown; // Marker type depends on map library
 	reverseGeocode(coordinates: Coordinates): Promise<Address>;
 	geocode(address: string): Promise<Coordinates>;
 };
 
 // Error Types
 export class AIServiceError extends Error {
+	code: "RATE_LIMIT" | "API_ERROR" | "INVALID_RESPONSE" | "NETWORK_ERROR";
+	retryable: boolean;
+
 	constructor(
 		message: string,
-		public code:
-			| "RATE_LIMIT"
-			| "API_ERROR"
-			| "INVALID_RESPONSE"
-			| "NETWORK_ERROR",
-		public retryable = false
+		code: "RATE_LIMIT" | "API_ERROR" | "INVALID_RESPONSE" | "NETWORK_ERROR",
+		retryable = false
 	) {
 		super(message);
+		// biome-ignore lint/security/noSecrets: This is a class name, not a secret
 		this.name = "AIServiceError";
+		this.code = code;
+		this.retryable = retryable;
 	}
 }
 

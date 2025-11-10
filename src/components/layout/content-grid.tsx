@@ -20,13 +20,13 @@ export function ContentGrid({
 			case "two-column":
 				return sidebar
 					? `grid grid-cols-1 lg:grid-cols-4 ${gapClass} w-full`
-					: `grid grid-cols-1 md:grid-cols-2 ${gapClass} w-full`;
+					: `grid grid-cols-1 xl:grid-cols-2 ${gapClass} w-full`;
 			case "three-column":
 				// Better tablet behavior for three-column
 				return `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 ${gapClass} w-full`;
 			case "grid":
 				// Enhanced responsive grid with better tablet breakpoints
-				return `grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 ${gapClass} w-full`;
+				return `grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 ${gapClass} w-full`;
 			default:
 				return sidebar
 					? `grid grid-cols-1 lg:grid-cols-4 ${gapClass} w-full`

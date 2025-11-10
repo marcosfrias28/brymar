@@ -415,4 +415,4 @@ When contributing to the wizard framework:
 
 ## 📄 License
 
-This wizard framework is part of the Brymar Inmobiliaria project and follows the project's licensing terms.
+This wizard framework is part of the Marbry Inmobiliaria project and follows the project's licensing terms.

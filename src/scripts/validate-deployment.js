@@ -40,18 +40,18 @@ function log(message, color = colors.reset) {
 
 function logSuccess(message) {
 	log(`✅ ${message}`, colors.green);
-	results.passed++;
+	results.passed += 1;
 }
 
 function logError(message) {
 	log(`❌ ${message}`, colors.red);
-	results.failed++;
+	results.failed += 1;
 	results.details.push({ type: "error", message });
 }
 
 function logWarning(message) {
 	log(`⚠️  ${message}`, colors.yellow);
-	results.warnings++;
+	results.warnings += 1;
 	results.details.push({ type: "warning", message });
 }
 
@@ -64,6 +64,8 @@ function logHeader(message) {
 }
 
 // Environment variable validation
+const MIN_SECRET_LENGTH = 32;
+// biome-ignore lint/complexity/noExcessiveLinesPerFunction: Utility function with comprehensive validation
 function validateEnvironmentVariables() {
 	logHeader("Environment Variables Validation");
 
@@ -84,33 +86,33 @@ function validateEnvironmentVariables() {
 	const productionRequiredVars = ["CSRF_SECRET", "PRODUCTION_URL"];
 
 	// Check required variables
-	requiredVars.forEach((varName) => {
+	for (const varName of requiredVars) {
 		if (process.env[varName]) {
 			logSuccess(`${varName} is set`);
 		} else {
 			logError(`${varName} is missing (required)`);
 		}
-	});
+	}
 
 	// Check production-specific variables
 	if (process.env.NODE_ENV === "production") {
-		productionRequiredVars.forEach((varName) => {
+		for (const varName of productionRequiredVars) {
 			if (process.env[varName]) {
 				logSuccess(`${varName} is set (production)`);
 			} else {
 				logError(`${varName} is missing (required for production)`);
 			}
-		});
+		}
 	}
 
 	// Check optional variables
-	optionalVars.forEach((varName) => {
+	for (const varName of optionalVars) {
 		if (process.env[varName]) {
 			logSuccess(`${varName} is set (optional)`);
 		} else {
 			logWarning(`${varName} is not set (optional)`);
 		}
-	});
+	}
 
 	// Validate variable formats
 	if (
@@ -127,17 +129,27 @@ function validateEnvironmentVariables() {
 		logError('HUGGINGFACE_API_KEY must start with "hf_"');
 	}
 
-	if (process.env.AUTH_SECRET && process.env.AUTH_SECRET.length < 32) {
-		logError("AUTH_SECRET must be at least 32 characters long");
+	if (
+		process.env.AUTH_SECRET &&
+		process.env.AUTH_SECRET.length < MIN_SECRET_LENGTH
+	) {
+		logError(
+			`AUTH_SECRET must be at least ${MIN_SECRET_LENGTH} characters long`
+		);
 	}
 
-	if (process.env.CSRF_SECRET && process.env.CSRF_SECRET.length < 32) {
-		logError("CSRF_SECRET must be at least 32 characters long");
+	if (
+		process.env.CSRF_SECRET &&
+		process.env.CSRF_SECRET.length < MIN_SECRET_LENGTH
+	) {
+		logError(
+			`CSRF_SECRET must be at least ${MIN_SECRET_LENGTH} characters long`
+		);
 	}
 }
 
 // Database connectivity test
-async function validateDatabaseConnection() {
+function validateDatabaseConnection() {
 	logHeader("Database Connection Validation");
 
 	if (!process.env.DATABASE_URL) {
@@ -164,7 +176,28 @@ async function validateDatabaseConnection() {
 		logInfo(`Database host: ${url.hostname}`);
 		logInfo(`Database name: ${url.pathname.slice(1)}`);
 
-		// In a real implementation, you would test the actual connection here
+		// Check if migrations have been applied by testing for user table
+		logInfo("Checking database schema migration status...");
+		try {
+			// This would require actual DB connection - for now we'll check if migration files exist
+			const migrationsDir = "src/lib/db/migrations";
+			if (fs.existsSync(migrationsDir)) {
+				const migrationFiles = fs
+					.readdirSync(migrationsDir)
+					.filter((f) => f.endsWith(".sql"));
+				if (migrationFiles.length > 0) {
+					logSuccess(`Migration files found (${migrationFiles.length} files)`);
+					logInfo("To apply migrations in production, run: npm run db:migrate");
+				} else {
+					logWarning("No migration files found");
+				}
+			} else {
+				logError("Migrations directory not found");
+			}
+		} catch (_error) {
+			logWarning("Could not verify migration status");
+		}
+
 		logWarning(
 			"Database connectivity test skipped (requires runtime environment)"
 		);
@@ -173,7 +206,11 @@ async function validateDatabaseConnection() {
 	}
 }
 
+const API_TIMEOUT = 10_000;
+const HEALTH_CHECK_TIMEOUT = 5000;
+
 // External service connectivity tests
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Service validation with multiple checks
 async function validateExternalServices() {
 	logHeader("External Services Validation");
 
@@ -188,7 +225,7 @@ async function validateExternalServices() {
 					headers: {
 						Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
 					},
-					signal: AbortSignal.timeout(10_000),
+					signal: AbortSignal.timeout(API_TIMEOUT),
 				}
 			);
 
@@ -260,26 +297,26 @@ function validateFileSystem() {
 	];
 
 	// Check directories
-	requiredDirectories.forEach((dir) => {
+	for (const dir of requiredDirectories) {
 		if (fs.existsSync(dir)) {
 			logSuccess(`Directory exists: ${dir}`);
 		} else {
 			logError(`Missing directory: ${dir}`);
 		}
-	});
+	}
 
 	// Check files
-	requiredFiles.forEach((file) => {
+	for (const file of requiredFiles) {
 		if (fs.existsSync(file)) {
 			logSuccess(`File exists: ${file}`);
 		} else {
 			logError(`Missing file: ${file}`);
 		}
-	});
+	}
 
 	// Check write permissions for upload directories
 	const uploadDirs = ["public", "tmp"];
-	uploadDirs.forEach((dir) => {
+	for (const dir of uploadDirs) {
 		try {
 			if (fs.existsSync(dir)) {
 				fs.accessSync(dir, fs.constants.W_OK);
@@ -290,10 +327,11 @@ function validateFileSystem() {
 		} catch (_error) {
 			logError(`No write permission: ${dir}`);
 		}
-	});
+	}
 }
 
 // Build and dependency validation
+// biome-ignore lint/complexity/noExcessiveLinesPerFunction: Comprehensive build validation function
 function validateBuildAndDependencies() {
 	logHeader("Build and Dependencies Validation");
 
@@ -315,7 +353,7 @@ function validateBuildAndDependencies() {
 			"react-hook-form",
 		];
 
-		criticalDeps.forEach((dep) => {
+		for (const dep of criticalDeps) {
 			if (
 				packageJson.dependencies?.[dep] ||
 				packageJson.devDependencies?.[dep]
@@ -324,7 +362,7 @@ function validateBuildAndDependencies() {
 			} else {
 				logError(`Missing critical dependency: ${dep}`);
 			}
-		});
+		}
 	} catch (error) {
 		logError(`Failed to read package.json: ${error.message}`);
 	}
@@ -380,11 +418,11 @@ function validateSecurity() {
 		"secrets.json",
 	];
 
-	sensitiveFiles.forEach((file) => {
+	for (const file of sensitiveFiles) {
 		if (fs.existsSync(file)) {
 			logWarning(`Sensitive file found: ${file} (ensure it's in .gitignore)`);
 		}
-	});
+	}
 
 	// Check .gitignore
 	try {
@@ -392,13 +430,13 @@ function validateSecurity() {
 
 		const requiredIgnores = [".env", ".env.local", "node_modules", ".next"];
 
-		requiredIgnores.forEach((pattern) => {
+		for (const pattern of requiredIgnores) {
 			if (gitignore.includes(pattern)) {
 				logSuccess(`Gitignore includes: ${pattern}`);
 			} else {
 				logError(`Gitignore missing: ${pattern}`);
 			}
-		});
+		}
 	} catch (_error) {
 		logError("Failed to read .gitignore file");
 	}
@@ -420,6 +458,8 @@ function validateSecurity() {
 }
 
 // Performance validation
+// biome-ignore lint/complexity/noExcessiveLinesPerFunction: Performance analysis function
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Complex performance validation logic
 function validatePerformance() {
 	logHeader("Performance Validation");
 
@@ -475,7 +515,7 @@ function validatePerformance() {
 }
 
 // Test suite validation
-async function validateTestSuite() {
+function validateTestSuite() {
 	logHeader("Test Suite Validation");
 
 	// Check test files exist
@@ -485,7 +525,7 @@ async function validateTestSuite() {
 		"hooks/__tests__",
 	];
 
-	testDirectories.forEach((dir) => {
+	for (const dir of testDirectories) {
 		if (fs.existsSync(dir)) {
 			const testFiles = fs
 				.readdirSync(dir)
@@ -500,18 +540,18 @@ async function validateTestSuite() {
 		} else {
 			logWarning(`Test directory not found: ${dir}`);
 		}
-	});
+	}
 
 	// Check Jest configuration
 	const jestConfigs = ["jest.config.js"];
 
-	jestConfigs.forEach((config) => {
+	for (const config of jestConfigs) {
 		if (fs.existsSync(config)) {
 			logSuccess(`Jest configuration found: ${config}`);
 		} else {
 			logWarning(`Jest configuration not found: ${config}`);
 		}
-	});
+	}
 
 	// Run tests (if not in CI and tests exist)
 	if (!process.env.CI && fs.existsSync("components/wizard/__tests__")) {
@@ -534,14 +574,14 @@ async function validateHealthChecks() {
 	const healthEndpoints = ["/api/health-check", "/api/analytics/wizard/health"];
 
 	// Check if health check files exist
-	healthEndpoints.forEach((endpoint) => {
+	for (const endpoint of healthEndpoints) {
 		const filePath = `app${endpoint}/route.ts`;
 		if (fs.existsSync(filePath)) {
 			logSuccess(`Health check endpoint exists: ${endpoint}`);
 		} else {
 			logError(`Health check endpoint missing: ${endpoint}`);
 		}
-	});
+	}
 
 	// If running locally, test the endpoints
 	if (
@@ -554,7 +594,7 @@ async function validateHealthChecks() {
 				const response = await fetch(
 					`${process.env.NEXT_PUBLIC_APP_URL}${endpoint}`,
 					{
-						signal: AbortSignal.timeout(5000),
+						signal: AbortSignal.timeout(HEALTH_CHECK_TIMEOUT),
 					}
 				);
 
@@ -609,9 +649,12 @@ async function runValidation() {
 
 			// Show failed validations
 			log("\nFailed validations:");
-			results.details
-				.filter((detail) => detail.type === "error")
-				.forEach((detail) => logError(detail.message));
+			const failedDetails = results.details.filter(
+				(detail) => detail.type === "error"
+			);
+			for (const detail of failedDetails) {
+				logError(detail.message);
+			}
 
 			process.exit(1);
 		}
