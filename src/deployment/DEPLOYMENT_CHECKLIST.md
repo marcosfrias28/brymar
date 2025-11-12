@@ -11,8 +11,6 @@ This comprehensive checklist ensures the AI Property Wizard is properly deployed
   - [ ] `DATABASE_URL` - PostgreSQL connection string
   - [ ] `HUGGINGFACE_API_KEY` - AI service API key
   - [ ] `BLOB_READ_WRITE_TOKEN` - Vercel Blob storage token
-  - [ ] `AUTH_SECRET` - Authentication secret (32+ characters)
-  - [ ] `CSRF_SECRET` - CSRF protection secret (32+ characters)
   - [ ] `SENTRY_DSN` - Error tracking DSN (optional but recommended)
   - [ ] `PRODUCTION_URL` - Production domain URL
 

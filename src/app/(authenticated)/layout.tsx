@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import React from "react";
+import type React from "react";
 import { UnifiedSidebar } from "@/components/navigation/unified-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -14,29 +13,8 @@ type DashboardLayoutProps = {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
 	const { user, loading } = useUser();
-	const _pathname = usePathname();
 
-	// Handle auth reload logic at the top level (always called)
-	React.useEffect(() => {
-		if (!(user || loading)) {
-			const lastReload = localStorage.getItem("lastAuthReload");
-			const now = Date.now();
-
-			// Solo recargar si han pasado más de 5 segundos desde la última recarga
-			if (!lastReload || now - Number.parseInt(lastReload, 10) > 5000) {
-				const timer = setTimeout(() => {
-					localStorage.setItem("lastAuthReload", now.toString());
-					// Forzar refresh de la sesión
-					window.location.reload();
-				}, 2000);
-
-				return () => clearTimeout(timer);
-			}
-		}
-	}, [user, loading]);
-
-	// Mostrar loading mientras se verifica la autenticación
-	if (loading) {
+	if (loading && !user) {
 		return (
 			<div className="flex min-h-screen items-center justify-center">
 				<div className="text-center">
