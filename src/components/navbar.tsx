@@ -31,7 +31,7 @@ export function Navbar({ className }: NavbarProps) {
 		<div
 			className={cn(
 				"-translate-x-1/2 container fixed top-4 left-1/2 z-50 w-full transform",
-				"rounded-full bg-background p-4",
+				"rounded-full bg-background p-4 text-foreground",
 				className
 			)}
 		>

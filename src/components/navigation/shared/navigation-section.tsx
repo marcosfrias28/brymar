@@ -32,7 +32,7 @@ const navigationItems: NavigationItem[] = [
 export function NavigationSection({
 	items = navigationItems,
 	className,
-	iconClassName = "h-5 w-5 text-muted-foreground",
+	iconClassName = "h-5 w-5 text-foreground",
 	showIcons = true,
 	closeMenu,
 }: NavigationSectionProps) {
@@ -53,11 +53,10 @@ export function NavigationSection({
 					(item.href !== "/" && pathname.startsWith(item.href));
 
 				return (
-					<PillLink key={item.href}>
+					<PillLink isActive={isActive} key={item.href}>
 						<Link
 							className={cn(
-								"flex items-center gap-3 rounded-lg transition-colors hover:bg-muted/50",
-								isActive && "bg-secondary text-foreground"
+								"flex items-center gap-3 rounded-lg transition-colors hover:bg-muted/50"
 							)}
 							href={item.href}
 							onClick={handleClick}
