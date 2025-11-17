@@ -16,12 +16,19 @@ export default function PropertyNewPage() {
   return (
     <DashboardPageLayout
       actions={
+        <>
         <Button asChild variant="outline">
           <Link href="/dashboard/properties">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Volver a Propiedades
           </Link>
+        </Button><Button asChild variant="outline">
+          <Link href="/dashboard/properties">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Volver a Propiedades
+          </Link>
         </Button>
+        </>
       }
       breadcrumbs={breadcrumbs}
       description="Crea una nueva propiedad con soporte de validación e IA"
