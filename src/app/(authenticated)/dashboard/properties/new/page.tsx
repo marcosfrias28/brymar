@@ -4,7 +4,7 @@ import { ArrowLeft, Home, Plus } from "lucide-react";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { PropertyCreator } from "@/components/creator/PropertyCreator";
+import { PropertyCreator } from "@/components/smart-form/property-creator";
 
 export default function PropertyNewPage() {
   const breadcrumbs = [
