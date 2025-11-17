@@ -15,7 +15,7 @@ import {
 	UsersIcon,
 	XCircleIcon,
 } from "lucide-react";
-import { FilterTabs } from "@/components/dashboard/filter-tabs";
+import { UnifiedFilterChips } from "@/components/dashboard";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -55,10 +55,10 @@ export default function AdminPage() {
 
 	// Define filter tabs for admin sections
 	const filterTabs = [
-		{ label: "Sistema", value: "system" },
-		{ label: "Usuarios", value: "users" },
-		{ label: "Seguridad", value: "security" },
-		{ label: "Configuración", value: "settings" },
+		{ label: "Sistema", value: "system", active: true, onClick: () => {} },
+		{ label: "Usuarios", value: "users", active: false, onClick: () => {} },
+		{ label: "Seguridad", value: "security", active: false, onClick: () => {} },
+		{ label: "Configuración", value: "settings", active: false, onClick: () => {} },
 	];
 
 	const systemSettings = [
@@ -184,7 +184,7 @@ export default function AdminPage() {
 				</Button>
 			}
 			description="Configuración avanzada y gestión del sistema"
-			headerExtras={<FilterTabs className="mb-4" tabs={filterTabs} />}
+			headerExtras={<UnifiedFilterChips className="mb-4" chips={filterTabs} />}
 			stats={statsCards}
 			statsLoading={false}
 			title="Administración del Sistema"

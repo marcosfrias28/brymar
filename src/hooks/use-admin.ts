@@ -43,8 +43,8 @@ export function useAdmin() {
 		// Usar la lógica nativa del plugin admin si está disponible
 		// Por ahora, usar nuestra configuración local
 		const allowedRoles = {
-			// Dashboard y administración
-			"dashboard.access": ["admin", "agent"],
+            // Dashboard y administración
+            "dashboard.access": ["admin", "agent"],
 			"analytics.view": ["admin"],
 			"settings.view": ["admin", "agent"],
 

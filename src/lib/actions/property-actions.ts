@@ -1,126 +1,15 @@
 "use server";
 
-import { and, desc, eq, gte, lte, or } from "drizzle-orm";
+import { and, desc, eq, gte, lte, or, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/auth";
 import { db } from "@/lib/db";
 import { properties } from "@/lib/db/schema";
-import { PropertyCompleteSchema } from "@/lib/schemas/property-wizard-schemas";
+import { propertyInquiries } from "@/lib/db/schema";
 import { extractValidationErrors, type FormState } from "@/lib/types/forms";
+import { z } from "zod";
 
-/**
- * Create a new property using FormState pattern
- */
-export async function createPropertyAction(
-	_prevState: FormState<{ id: string }>,
-	formData: FormData
-): Promise<FormState<{ id: string }>> {
-	try {
-		// Check authentication
-		const session = await auth.api.getSession({
-			headers: await headers(),
-		});
-
-		if (!session?.user?.id) {
-			return {
-				success: false,
-				message: "You must be logged in to create a property",
-			};
-		}
-
-		// Parse form data
-		const data = {
-			title: formData.get("title") as string,
-			description: formData.get("description") as string,
-			price: Number.parseFloat(formData.get("price") as string),
-			surface: Number.parseFloat(formData.get("surface") as string),
-			propertyType: formData.get("propertyType") as string,
-			bedrooms: formData.get("bedrooms")
-				? Number.parseInt(formData.get("bedrooms") as string, 10)
-				: undefined,
-			bathrooms: formData.get("bathrooms")
-				? Number.parseInt(formData.get("bathrooms") as string, 10)
-				: undefined,
-			characteristics: formData.get("characteristics")
-				? JSON.parse(formData.get("characteristics") as string)
-				: [],
-			coordinates: formData.get("coordinates")
-				? JSON.parse(formData.get("coordinates") as string)
-				: undefined,
-			address: formData.get("address")
-				? JSON.parse(formData.get("address") as string)
-				: undefined,
-			images: formData.get("images")
-				? JSON.parse(formData.get("images") as string)
-				: [],
-			videos: formData.get("videos")
-				? JSON.parse(formData.get("videos") as string)
-				: [],
-			geometry: formData.get("geometry")
-				? JSON.parse(formData.get("geometry") as string)
-				: undefined,
-			status: (formData.get("status") as string) || "draft",
-			language: (formData.get("language") as string) || "es",
-		};
-
-		// Validate with Zod schema
-		const validation = PropertyCompleteSchema.safeParse(data);
-
-		if (!validation.success) {
-			return {
-				success: false,
-				errors: extractValidationErrors(validation.error),
-			};
-		}
-
-		// Create property - map to database schema
-		const [property] = await db
-			.insert(properties)
-			.values({
-				id: crypto.randomUUID(),
-				title: validation.data.title,
-				description: validation.data.description,
-				price: validation.data.price,
-				currency: "USD",
-				type: validation.data.propertyType,
-				address: validation.data.address || {},
-				features: {
-					area: validation.data.surface,
-					bedrooms: validation.data.bedrooms,
-					bathrooms: validation.data.bathrooms,
-					amenities: [],
-					features: validation.data.characteristics,
-					coordinates: validation.data.coordinates,
-				},
-				images: validation.data.images,
-				geometry: validation.data.geometry,
-				status: validation.data.status,
-				featured: false,
-				userId: session.user.id,
-				createdAt: new Date(),
-				updatedAt: new Date(),
-			})
-			.returning();
-
-		revalidatePath("/dashboard/properties");
-		revalidatePath("/properties");
-
-		// Redirect to the property edit page
-		redirect(`/dashboard/properties/${property.id}/edit`);
-	} catch (error) {
-		if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
-			throw error; // Re-throw redirect errors
-		}
-
-		return {
-			success: false,
-			message:
-				error instanceof Error ? error.message : "Failed to create property",
-		};
-	}
-}
 
 /**
  * Get featured properties
@@ -222,11 +111,10 @@ export async function searchProperties(filters: any = {}) {
  * Search properties action for useActionState
  */
 export async function searchPropertiesAction(
-	_prevState: FormState<{ properties: any[] }>,
-	formData: FormData
-): Promise<FormState<{ properties: any[] }>> {
+    _prevState: FormState<{ properties: any[]; total: number }>,
+    formData: FormData
+): Promise<FormState<{ properties: any[]; total: number }>> {
 	try {
-		// Parse search filters from formData
 		const _filters = {
 			location: formData.get("location") as string,
 			minPrice: formData.get("minPrice")
@@ -242,21 +130,33 @@ export async function searchPropertiesAction(
 			bathrooms: formData.get("bathrooms")
 				? Number.parseInt(formData.get("bathrooms") as string, 10)
 				: undefined,
+			page: formData.get("page") ? Number.parseInt(formData.get("page") as string, 10) : 1,
+			limit: formData.get("limit") ? Number.parseInt(formData.get("limit") as string, 10) : 20,
 		};
 
-		// Build query
-		const query = db
-			.select()
-			.from(properties)
-			.where(eq(properties.status, "published"));
+		let base: any = db.select().from(properties);
+		const conditions: any[] = [];
+		conditions.push(eq(properties.status, "published"));
+		if (_filters.minPrice !== undefined) conditions.push(gte(properties.price, _filters.minPrice));
+		if (_filters.maxPrice !== undefined) conditions.push(lte(properties.price, _filters.maxPrice));
+		if (_filters.propertyType) conditions.push(eq(properties.type, _filters.propertyType));
+			if (conditions.length) base = base.where(and(...conditions));
 
-		// Apply filters
-		// Note: This is a simplified version. You'll need to add proper filtering logic
-		const results = await query.limit(50);
+		const page = Math.max(_filters.page || 1, 1);
+		const limit = Math.min(Math.max(_filters.limit || 20, 1), 100);
+		const offset = (page - 1) * limit;
+
+    const totalRows = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(properties)
+        .where(eq(properties.status, "published"));
+		const total = Number(totalRows[0]?.count || 0);
+
+		const results = await base.orderBy(desc(properties.createdAt)).limit(limit).offset(offset);
 
 		return {
 			success: true,
-			data: { properties: results },
+			data: { properties: results, total },
 		};
 	} catch (error) {
 		return {
@@ -267,142 +167,59 @@ export async function searchPropertiesAction(
 	}
 }
 
-/**
- * Update an existing property using FormState pattern
- */
-export async function updatePropertyAction(
-	_prevState: FormState<{ id: string }>,
-	formData: FormData
+
+const InquirySchema = z.object({
+  propertyId: z.string().uuid(),
+  name: z.string().min(2),
+  email: z.string().email(),
+  phone: z.string().optional(),
+  message: z.string().min(10),
+});
+
+export async function createPropertyInquiryAction(
+  _prevState: FormState<{ id: string }>,
+  formData: FormData
 ): Promise<FormState<{ id: string }>> {
-	try {
-		// Check authentication
-		const session = await auth.api.getSession({
-			headers: await headers(),
-		});
+  try {
+    const session = await auth.api.getSession({ headers: await headers() });
+    const data = {
+      propertyId: formData.get("propertyId") as string,
+      name: formData.get("name") as string,
+      email: formData.get("email") as string,
+      phone: (formData.get("phone") as string) || undefined,
+      message: formData.get("message") as string,
+    };
 
-		if (!session?.user?.id) {
-			return {
-				success: false,
-				message: "You must be logged in to update a property",
-			};
-		}
+    const validation = InquirySchema.safeParse(data);
+    if (!validation.success) {
+      return {
+        success: false,
+        errors: extractValidationErrors(validation.error),
+      };
+    }
 
-		const id = formData.get("id") as string;
+    const [inquiry] = await db
+      .insert(propertyInquiries)
+      .values({
+        id: crypto.randomUUID(),
+        propertyId: validation.data.propertyId,
+        userId: session?.user?.id || null,
+        name: validation.data.name,
+        email: validation.data.email,
+        phone: validation.data.phone || null,
+        message: validation.data.message,
+        status: "new",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
 
-		if (!id) {
-			return {
-				success: false,
-				errors: {
-					id: ["Property ID is required"],
-				},
-			};
-		}
-
-		// Check if property exists and user owns it
-		const existingProperty = await db
-			.select()
-			.from(properties)
-			.where(eq(properties.id, id))
-			.limit(1);
-
-		if (existingProperty.length === 0) {
-			return {
-				success: false,
-				message: "Property not found",
-			};
-		}
-
-		if (existingProperty[0].userId !== session.user.id) {
-			return {
-				success: false,
-				message: "You are not authorized to update this property",
-			};
-		}
-
-		// Parse form data
-		const data = {
-			title: formData.get("title") as string,
-			description: formData.get("description") as string,
-			price: Number.parseFloat(formData.get("price") as string),
-			surface: Number.parseFloat(formData.get("surface") as string),
-			propertyType: formData.get("propertyType") as string,
-			bedrooms: formData.get("bedrooms")
-				? Number.parseInt(formData.get("bedrooms") as string, 10)
-				: undefined,
-			bathrooms: formData.get("bathrooms")
-				? Number.parseInt(formData.get("bathrooms") as string, 10)
-				: undefined,
-			characteristics: formData.get("characteristics")
-				? JSON.parse(formData.get("characteristics") as string)
-				: [],
-			coordinates: formData.get("coordinates")
-				? JSON.parse(formData.get("coordinates") as string)
-				: undefined,
-			address: formData.get("address")
-				? JSON.parse(formData.get("address") as string)
-				: undefined,
-			images: formData.get("images")
-				? JSON.parse(formData.get("images") as string)
-				: [],
-			videos: formData.get("videos")
-				? JSON.parse(formData.get("videos") as string)
-				: [],
-			geometry: formData.get("geometry")
-				? JSON.parse(formData.get("geometry") as string)
-				: undefined,
-			status: (formData.get("status") as string) || "draft",
-			language: (formData.get("language") as string) || "es",
-		};
-
-		// Validate with Zod schema
-		const validation = PropertyCompleteSchema.safeParse(data);
-
-		if (!validation.success) {
-			return {
-				success: false,
-				errors: extractValidationErrors(validation.error),
-			};
-		}
-
-		// Update property - map to database schema
-		const [updatedProperty] = await db
-			.update(properties)
-			.set({
-				title: validation.data.title,
-				description: validation.data.description,
-				price: validation.data.price,
-				type: validation.data.propertyType,
-				address: validation.data.address || {},
-				features: {
-					area: validation.data.surface,
-					bedrooms: validation.data.bedrooms,
-					bathrooms: validation.data.bathrooms,
-					amenities: [],
-					features: validation.data.characteristics,
-					coordinates: validation.data.coordinates,
-				},
-				images: validation.data.images,
-				geometry: validation.data.geometry,
-				status: validation.data.status,
-				updatedAt: new Date(),
-			})
-			.where(eq(properties.id, id))
-			.returning();
-
-		revalidatePath("/dashboard/properties");
-		revalidatePath("/properties");
-		revalidatePath(`/properties/${updatedProperty.id}`);
-
-		return {
-			success: true,
-			message: "Property updated successfully",
-			data: { id: updatedProperty.id },
-		};
-	} catch (error) {
-		return {
-			success: false,
-			message:
-				error instanceof Error ? error.message : "Failed to update property",
-		};
-	}
+    revalidatePath(`/properties/${validation.data.propertyId}`);
+    return { success: true, data: { id: inquiry.id }, message: "Inquiry sent" };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to send inquiry",
+    };
+  }
 }

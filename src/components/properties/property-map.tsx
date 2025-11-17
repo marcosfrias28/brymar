@@ -1,4 +1,4 @@
-import type { Property } from "@/lib/types/properties";
+import type { Property } from "@/lib/db/schema/properties";
 
 type PropertyMapProps = {
 	properties: Property[];

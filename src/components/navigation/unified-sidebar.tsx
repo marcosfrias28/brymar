@@ -57,11 +57,16 @@ export type SidebarConfig = {
 };
 
 const getAdminDashboardItems = (): NavItem[] => [
-	{
-		title: "Dashboard",
-		url: "/dashboard",
-		icon: LayoutDashboardIcon,
-	},
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: LayoutDashboardIcon,
+  },
+  {
+    title: "Creator",
+    url: "/dashboard/creator",
+    icon: LayersIcon,
+  },
 ];
 
 const getAdminPropertyItems = (): NavItem[] => [
@@ -69,40 +74,25 @@ const getAdminPropertyItems = (): NavItem[] => [
 		title: "Propiedades",
 		url: "/dashboard/properties",
 		icon: BuildingIcon,
-		items: [
-			{
-				title: "Ver Todas",
-				url: "/dashboard/properties",
-				icon: FolderIcon,
-			},
-			{
-				title: "Nueva Propiedad",
-				url: "/dashboard/properties/new",
-				icon: PlusIcon,
-			},
-			{
-				title: "Borradores",
-				url: "/dashboard/properties/drafts",
-				icon: FileTextIcon,
-			},
-		],
+    items: [
+        {
+            title: "Ver Todas",
+            url: "/dashboard/properties",
+            icon: FolderIcon,
+        },
+    ],
 	},
 	{
 		title: "Terrenos",
 		url: "/dashboard/lands",
 		icon: MapPinIcon,
-		items: [
-			{
-				title: "Ver Todos",
-				url: "/dashboard/lands",
-				icon: FolderIcon,
-			},
-			{
-				title: "Nuevo Terreno",
-				url: "/dashboard/lands/new",
-				icon: PlusIcon,
-			},
-		],
+    items: [
+        {
+            title: "Ver Todos",
+            url: "/dashboard/lands",
+            icon: FolderIcon,
+        },
+    ],
 	},
 ];
 
@@ -121,11 +111,7 @@ const getAdminConditionalItems = (
 							url: "/dashboard/blog",
 							icon: FolderIcon,
 						},
-						{
-							title: "Nuevo Artículo",
-							url: "/dashboard/blog/new",
-							icon: PlusIcon,
-						},
+                        
 					],
 				},
 			]
@@ -265,15 +251,15 @@ const getNavigationData = (config: SidebarConfig) => {
 	const isAdmin =
 		userRole === "admin" || userRole === "editor" || userRole === "agent";
 
-	return {
-		navMain: isAdmin
-			? getAdminMainNavigation(permissions)
-			: getUserMainNavigation(),
-		documents: isAdmin
-			? getAdminDocuments(userRole, permissions)
-			: getUserDocuments(),
-		navSecondary: getSecondaryNavigation(isAdmin),
-	};
+  return {
+    navMain: isAdmin
+      ? getAdminMainNavigation(permissions)
+      : getUserMainNavigation(),
+    documents: isAdmin
+      ? getAdminDocuments(userRole, permissions)
+      : getUserDocuments(),
+    navSecondary: getSecondaryNavigation(isAdmin),
+  };
 };
 
 interface UnifiedSidebarProps

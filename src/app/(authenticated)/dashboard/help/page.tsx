@@ -12,7 +12,7 @@ import {
 	PhoneIcon,
 	VideoIcon,
 } from "lucide-react";
-import { FilterTabs } from "@/components/dashboard/filter-tabs";
+import { UnifiedFilterChips } from "@/components/dashboard";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -96,12 +96,12 @@ const CONTACT_OPTIONS = [
 ];
 
 const FILTER_TABS = [
-	{ label: "Todo", value: "all" },
-	{ label: "Guías", value: "guides" },
-	{ label: "Videos", value: "videos" },
-	{ label: "FAQ", value: "faq" },
-	{ label: "Documentación", value: "docs" },
-	{ label: "Soporte", value: "support" },
+	{ label: "Todo", value: "all", active: true, onClick: () => {} },
+	{ label: "Guías", value: "guides", active: false, onClick: () => {} },
+	{ label: "Videos", value: "videos", active: false, onClick: () => {} },
+	{ label: "FAQ", value: "faq", active: false, onClick: () => {} },
+	{ label: "Documentación", value: "docs", active: false, onClick: () => {} },
+	{ label: "Soporte", value: "support", active: false, onClick: () => {} },
 ];
 
 // Helper components
@@ -211,7 +211,7 @@ export default function HelpPage() {
 				</Button>
 			}
 			description="Encuentra respuestas, guías y soporte para usar la plataforma"
-			headerExtras={<FilterTabs className="mb-4" tabs={FILTER_TABS} />}
+			headerExtras={<UnifiedFilterChips className="mb-4" chips={FILTER_TABS} />}
 			stats={statsCards}
 			statsLoading={false}
 			title="Centro de Ayuda"

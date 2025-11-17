@@ -10,8 +10,7 @@ import {
 	UserCheckIcon,
 	UserIcon,
 } from "lucide-react";
-import { FilterTabs } from "@/components/dashboard/filter-tabs";
-import { StatsCards } from "@/components/dashboard/stats-cards";
+import { UnifiedFilterChips, UnifiedStatsCards } from "@/components/dashboard";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -89,12 +88,12 @@ export default function UsersPage() {
 
 	// Define filter tabs for users sections
 	const filterTabs = [
-		{ label: "Todos", value: "all" },
-		{ label: "Administradores", value: "admin" },
-		{ label: "Agentes", value: "agent" },
-		{ label: "Usuarios", value: "user" },
-		{ label: "Activos", value: "active" },
-		{ label: "Inactivos", value: "inactive" },
+		{ label: "Todos", value: "all", active: true, onClick: () => {} },
+		{ label: "Administradores", value: "admin", active: false, onClick: () => {} },
+		{ label: "Agentes", value: "agent", active: false, onClick: () => {} },
+		{ label: "Usuarios", value: "user", active: false, onClick: () => {} },
+		{ label: "Activos", value: "active", active: false, onClick: () => {} },
+		{ label: "Inactivos", value: "inactive", active: false, onClick: () => {} },
 	];
 
 	const getRoleBadgeVariant = (role: string) => {
@@ -142,8 +141,8 @@ export default function UsersPage() {
 			description="Administra usuarios, roles y permisos de la plataforma"
 			headerExtras={
 				<div className="space-y-4">
-					<StatsCards className="mb-4" isLoading={false} stats={statsCards} />
-					<FilterTabs className="mb-4" tabs={filterTabs} />
+					<UnifiedStatsCards className="mb-4" loading={false} stats={statsCards} />
+					<UnifiedFilterChips className="mb-4" chips={filterTabs} />
 				</div>
 			}
 			title="Gestión de Usuarios"

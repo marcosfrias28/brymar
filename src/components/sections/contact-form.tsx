@@ -2,13 +2,6 @@
 
 import { Mail, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -29,16 +22,12 @@ export function ContactForm() {
 					Estamos aquí para ayudarte a encontrar tu propiedad ideal
 				</p>
 				<div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-					<Card className="border-gray-200 bg-white shadow-lg">
-						<CardHeader>
-							<CardTitle className="text-gray-800">
-								Información de Contacto
-							</CardTitle>
-							<CardDescription className="text-gray-600">
-								Estamos aquí para ayudarte a encontrar tu propiedad ideal
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="space-y-4">
+					<div className="rounded-lg border border-gray-200 bg-white p-6 shadow-lg">
+						<div className="mb-4">
+							<h3 className="text-gray-800 text-xl font-semibold">Información de Contacto</h3>
+							<p className="text-gray-600">Estamos aquí para ayudarte a encontrar tu propiedad ideal</p>
+						</div>
+						<div className="space-y-4">
 							{isLoading ? (
 								<div className="space-y-4">
 									<div className="flex items-center">
@@ -88,19 +77,15 @@ export function ContactForm() {
 									</div>
 								</>
 							)}
-						</CardContent>
-					</Card>
+						</div>
+					</div>
 
-					<Card className="border-gray-200 bg-white shadow-lg">
-						<CardHeader>
-							<CardTitle className="text-gray-800">
-								Envíanos un Mensaje
-							</CardTitle>
-							<CardDescription className="text-gray-600">
-								Completa el formulario y nos pondremos en contacto contigo
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
+					<div className="rounded-lg border border-gray-200 bg-white p-6 shadow-lg">
+						<div className="mb-4">
+							<h3 className="text-gray-800 text-xl font-semibold">Envíanos un Mensaje</h3>
+							<p className="text-gray-600">Completa el formulario y nos pondremos en contacto contigo</p>
+						</div>
+						<div>
 							<form className="space-y-4">
 								<div>
 									<Input
@@ -126,8 +111,8 @@ export function ContactForm() {
 									Enviar Mensaje
 								</Button>
 							</form>
-						</CardContent>
-					</Card>
+						</div>
+					</div>
 				</div>
 			</div>
 		</section>

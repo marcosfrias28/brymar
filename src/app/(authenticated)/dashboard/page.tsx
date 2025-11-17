@@ -6,7 +6,7 @@ import { RouteGuard } from "@/components/auth/route-guard";
 import { PropertyChart } from "@/components/dashboard/property-chart";
 import { QuickActions } from "@/components/dashboard/quick-actions";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
-import { StatsCards } from "@/components/dashboard/stats-cards";
+import { UnifiedStatsCards } from "@/components/dashboard";
 import { DashboardPageLayout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { useBlogPosts } from "@/hooks/use-blog-posts";
@@ -79,9 +79,9 @@ export default function DashboardPage() {
 				breadcrumbs={breadcrumbs}
 				description="Panel de control principal"
 				headerExtras={
-					<StatsCards
+					<UnifiedStatsCards
 						className="mb-4"
-						isLoading={isLoading}
+						loading={isLoading}
 						stats={statsCards}
 					/>
 				}

@@ -22,11 +22,11 @@ const routeConfig: Record<
 > = {
 	"/dashboard": { label: "Dashboard" },
 	"/dashboard/properties": { label: "Propiedades", icon: BuildingIcon },
-	"/dashboard/properties/new": { label: "Nueva Propiedad", icon: BuildingIcon },
+    
 	"/dashboard/lands": { label: "Terrenos", icon: MapPinIcon },
-	"/dashboard/lands/new": { label: "Nuevo Terreno", icon: MapPinIcon },
+    
 	"/dashboard/blog": { label: "Blog", icon: FileTextIcon },
-	"/dashboard/blog/new": { label: "Nueva Entrada", icon: FileTextIcon },
+    
 	"/dashboard/users": { label: "Usuarios", icon: UsersIcon },
 	"/dashboard/users/new": { label: "Nuevo Usuario", icon: UsersIcon },
 	"/dashboard/settings": { label: "Configuración", icon: SettingsIcon },

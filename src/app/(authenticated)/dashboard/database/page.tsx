@@ -9,7 +9,7 @@ import {
 	RefreshCwIcon,
 	UploadIcon,
 } from "lucide-react";
-import { FilterTabs } from "@/components/dashboard/filter-tabs";
+import { UnifiedFilterChips } from "@/components/dashboard";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -51,10 +51,10 @@ export default function DatabasePage() {
 
 	// Define filter tabs for database sections
 	const filterTabs = [
-		{ label: "Resumen", value: "overview" },
-		{ label: "Tablas", value: "tables" },
-		{ label: "Respaldos", value: "backups" },
-		{ label: "Rendimiento", value: "performance" },
+		{ label: "Resumen", value: "overview", active: true, onClick: () => {} },
+		{ label: "Tablas", value: "tables", active: false, onClick: () => {} },
+		{ label: "Respaldos", value: "backups", active: false, onClick: () => {} },
+		{ label: "Rendimiento", value: "performance", active: false, onClick: () => {} },
 	];
 
 	const tables = [
@@ -148,7 +148,7 @@ export default function DatabasePage() {
 				</Button>
 			}
 			description="Monitorea el estado, rendimiento y respaldos de la base de datos"
-			headerExtras={<FilterTabs className="mb-4" tabs={filterTabs} />}
+			headerExtras={<UnifiedFilterChips className="mb-4" chips={filterTabs} />}
 			stats={statsCards}
 			statsLoading={false}
 			title="Gestión de Base de Datos"

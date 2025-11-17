@@ -2,7 +2,6 @@
 
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { type ReactNode, useActionState, useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -42,6 +41,108 @@ type AuthFormWrapperProps<T = any> = {
 	isLoading?: boolean; // New prop for external loading state
 };
 
+const useAuthFormFeedback = <T,>({
+	state,
+	onSuccess,
+	onError,
+}: {
+	state: FormState<T>;
+	onSuccess?: (data?: T) => void;
+	onError?: (error: string) => void;
+}) => {
+	useEffect(() => {
+		if (state?.message && !state.success) {
+			toast.error(state.message);
+			onError?.(state.message);
+		}
+	}, [state?.message, state?.success, onError]);
+
+	useEffect(() => {
+		if (state?.success) {
+			toast.success(state.message || "Operación exitosa");
+			onSuccess?.(state.data);
+		}
+	}, [state?.success, state?.message, state?.data, onSuccess]);
+};
+
+type HiddenAuthField = NonNullable<AuthFormWrapperProps["hiddenFields"]>[number];
+
+const HiddenFieldInputs = ({
+	hiddenFields = [],
+}: {
+	hiddenFields?: HiddenAuthField[];
+}) => {
+	if (!hiddenFields.length) {
+		return null;
+	}
+
+	return hiddenFields.map((field) => (
+		<input name={field.name} type="hidden" value={field.value} key={field.name} />
+	));
+};
+
+const AuthField = ({
+	field,
+	error,
+}: {
+	field: AuthFormField;
+	error?: string[];
+}) => {
+	const errorMessage = error?.[0];
+	const errorId = errorMessage ? `${field.id}-error` : undefined;
+
+	return (
+		<div className="grid gap-2">
+			{typeof field.label === "string" ? (
+				<Label htmlFor={field.id}>{field.label}</Label>
+			) : (
+				field.label
+			)}
+			<Input
+				aria-describedby={errorId}
+				aria-invalid={errorMessage ? "true" : "false"}
+				autoComplete={field.autoComplete}
+				id={field.id}
+				maxLength={field.maxLength}
+				minLength={field.minLength}
+				name={field.name}
+				pattern={field.pattern}
+				placeholder={field.placeholder}
+				required={field.required}
+				type={field.type}
+			/>
+			{errorMessage && (
+				<p className="text-destructive text-sm" id={errorId}>
+					{errorMessage}
+				</p>
+			)}
+		</div>
+	);
+};
+
+const SubmitButton = ({
+	isDisabled,
+	isLoading,
+	loadingText,
+	submitText,
+}: {
+	isDisabled: boolean;
+	isLoading: boolean;
+	loadingText: string;
+	submitText: string;
+}) => (
+	<Button className="w-full" disabled={isDisabled} type="submit">
+		{isLoading ? (
+			<>
+				<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+				{loadingText}
+			</>
+		) : (
+			submitText
+		)}
+	</Button>
+);
+
 export function AuthFormWrapper<T = any>({
 	title,
 	subtitle,
@@ -56,32 +157,10 @@ export function AuthFormWrapper<T = any>({
 	hiddenFields = [],
 	isLoading = false, // New prop with default value
 }: AuthFormWrapperProps<T>) {
-	const initialState: FormState<T> = {
-		success: false,
-	};
-
+	const initialState: FormState<T> = { success: false };
 	const [state, formAction, isPending] = useActionState(action, initialState);
 
-	const _router = useRouter();
-
-	// Handle general error message
-	useEffect(() => {
-		if (state?.message && !state.success) {
-			toast.error(state.message);
-			onError?.(state.message);
-		}
-	}, [state?.message, state?.success, onError]);
-
-	// Handle success
-	useEffect(() => {
-		if (state?.success) {
-			toast.success(state.message || "Operación exitosa");
-
-			if (onSuccess) {
-				onSuccess(state.data);
-			}
-		}
-	}, [state?.success, state?.message, state?.data, onSuccess]);
+	useAuthFormFeedback({ state, onSuccess, onError });
 
 	return (
 		<div className={cn("flex flex-col gap-6", className)}>
@@ -91,57 +170,20 @@ export function AuthFormWrapper<T = any>({
 			</div>
 
 			<form action={formAction} className="grid gap-6">
-				{hiddenFields.map((field) => (
-					<input
-						key={field.name}
-						name={field.name}
-						type="hidden"
-						value={field.value}
+				<HiddenFieldInputs hiddenFields={hiddenFields} />
+				{fields.map((field) => (
+					<AuthField
+						field={field}
+						error={state?.errors?.[field.name]}
+						key={field.id}
 					/>
 				))}
-				{fields.map((field) => (
-					<div className="grid gap-2" key={field.id}>
-						{typeof field.label === "string" ? (
-							<Label htmlFor={field.id}>{field.label}</Label>
-						) : (
-							field.label
-						)}
-						<Input
-							aria-describedby={
-								state?.errors?.[field.name] ? `${field.id}-error` : undefined
-							}
-							aria-invalid={state?.errors?.[field.name] ? "true" : "false"}
-							autoComplete={field.autoComplete}
-							id={field.id}
-							maxLength={field.maxLength}
-							minLength={field.minLength}
-							name={field.name}
-							pattern={field.pattern}
-							placeholder={field.placeholder}
-							required={field.required}
-							type={field.type}
-						/>
-						{state?.errors?.[field.name] && (
-							<p className="text-red-500 text-sm" id={`${field.id}-error`}>
-								{state.errors[field.name][0]}
-							</p>
-						)}
-					</div>
-				))}
-				<Button
-					className="w-full"
-					disabled={isPending || isLoading}
-					type="submit"
-				>
-					{isPending || isLoading ? (
-						<>
-							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-							{loadingText}
-						</>
-					) : (
-						submitText
-					)}
-				</Button>
+				<SubmitButton
+					isDisabled={isPending || isLoading}
+					isLoading={isPending || isLoading}
+					loadingText={loadingText}
+					submitText={submitText}
+				/>
 			</form>
 
 			{footerContent && (

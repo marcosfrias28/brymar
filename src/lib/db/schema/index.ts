@@ -10,6 +10,8 @@ export {
 	blogCategories,
 	blogPosts,
 } from "./blog";
+export * from "./comments";
+export { blogComments } from "./comments";
 export * from "./lands";
 export { lands } from "./lands";
 // Feature-specific schemas

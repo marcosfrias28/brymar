@@ -24,7 +24,7 @@ animation: shimmer 2s infinite;
 --popover: rgb(255, 255, 255);
 --popover-foreground: rgb(15, 23, 42);
 --primary: rgb(94, 220, 160);
---primary-foreground: rgb(255, 255, 255);
+--primary-foreground: rgb(15, 23, 42);
 --secondary: rgb(234, 225, 183);
 --secondary-foreground: rgb(15, 23, 42);
 --muted: rgb(243, 244, 246);

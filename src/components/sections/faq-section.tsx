@@ -111,7 +111,8 @@ export function FAQSection() {
 	}
 
 	// Use static FAQ data
-	const displayFAQs = section?.content?.faqs || faqData;
+    const displayFAQs = section?.content?.faqs || faqData;
+    const faqList = Array.isArray(displayFAQs) ? displayFAQs : faqData;
 
 	return (
 		<SectionWrapper className="bg-muted/30">
@@ -128,7 +129,7 @@ export function FAQSection() {
 						defaultValue="faq-1"
 						type="single"
 					>
-						{displayFAQs.map((faq: any, index: number) => (
+                        {faqList.map((faq: any, index: number) => (
 							<AccordionItem
 								className="overflow-hidden rounded-2xl border-0 bg-background/60 shadow-sm backdrop-blur-sm transition-all duration-300 hover:shadow-md"
 								key={faq.id}

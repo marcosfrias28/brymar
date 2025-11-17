@@ -9,7 +9,7 @@ type BlogListProps = {
 	posts: BlogPost[];
 	isLoading?: boolean;
 	error?: string;
-	showActions?: boolean;
+    showActions?: boolean;
 	onSearch?: (query: string) => void;
 	onFilter?: (filters: Record<string, any>) => void;
 };
@@ -43,18 +43,16 @@ const blogFilters: FilterOption[] = [
 ];
 
 export function BlogList({
-	posts,
-	isLoading,
-	error,
-	showActions = true,
-	onSearch,
-	onFilter,
+    posts,
+    isLoading,
+    error,
+    showActions = false,
+    onSearch,
+    onFilter,
 }: BlogListProps) {
 	const router = useRouter();
 
-	const handleEdit = (id: string) => {
-		router.push(`/dashboard/blog/${id}/edit`);
-	};
+    const handleEdit = (_id: string) => {};
 
 	const handleView = (id: string) => {
 		router.push(`/dashboard/blog/${id}`);
@@ -62,34 +60,32 @@ export function BlogList({
 
 	const handleDelete = (_id: string) => {};
 
-	const handleAdd = () => {
-		router.push("/dashboard/blog/new");
-	};
+    const handleAdd = () => {};
 
 	return (
-		<UnifiedList
-			addButtonText="Nuevo Post"
+        <UnifiedList
+            addButtonText=""
 			emptyDescription="Intenta ajustar los filtros o agrega un nuevo post"
 			emptyMessage="No se encontraron posts"
 			error={error}
 			filters={blogFilters}
 			isLoading={isLoading}
 			items={posts}
-			onAdd={handleAdd}
+            onAdd={undefined}
 			onFilter={onFilter}
 			onSearch={onSearch}
 			renderItem={(post) => (
 				<BlogCard
 					key={post.id}
 					onDelete={handleDelete}
-					onEdit={handleEdit}
+            onEdit={undefined}
 					onView={handleView}
 					post={post}
 					showActions={showActions}
 				/>
 			)}
 			searchPlaceholder="Buscar posts..."
-			showAddButton={showActions}
+            showAddButton={false}
 			title="Posts del Blog"
 		/>
 	);

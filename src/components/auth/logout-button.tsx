@@ -2,8 +2,8 @@
 
 import { Loader2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useSignOut } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
+import { useSignOut } from "@/hooks/use-auth-actions";
 
 const logoutText = "Cerrar Sesión";
 const pendingText = "Cerrando sesión...";

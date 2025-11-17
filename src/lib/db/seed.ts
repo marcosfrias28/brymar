@@ -12,6 +12,24 @@ import {
 } from "./schema/index";
 
 export async function seedDatabase() {
+    await db
+        .insert(users)
+        .values([
+            {
+                id: "user-1",
+                name: "Seeder User",
+                email: "seed@example.com",
+                emailVerified: true,
+                role: "admin",
+                image: null,
+                firstName: "Seed",
+                lastName: "User",
+                phone: null,
+                bio: null,
+                location: "República Dominicana",
+            },
+        ])
+        .onConflictDoNothing();
 	await db
 		.insert(blogCategories)
 		.values([
@@ -292,6 +310,150 @@ export async function seedDatabase() {
 				userId: "user-1",
 				publishedAt: new Date(),
 			},
+			{
+				id: "prop-7",
+				title: "Casa moderna en Punta Cana",
+				description:
+					"Residencia moderna con espacios abiertos y acabados premium, cerca de zonas turísticas.",
+				price: 350_000,
+				currency: "USD",
+				address: {
+					street: "Av. Barceló 45",
+					city: "Punta Cana",
+					state: "La Altagracia",
+					country: "República Dominicana",
+					postalCode: "23000",
+				},
+				type: "house",
+				features: {
+					bedrooms: 4,
+					bathrooms: 3,
+					area: 220,
+					parking: true,
+					balcony: true,
+					furnished: false,
+					pool: true,
+				},
+				images: [
+					{
+						url: "https://source.unsplash.com/random/1200x800/?punta-cana,house&sig=301",
+						alt: "Casa moderna en Punta Cana",
+						order: 0,
+					},
+				],
+				status: "published",
+				featured: false,
+				userId: "user-1",
+				publishedAt: new Date(),
+			},
+			{
+				id: "prop-8",
+				title: "Apartamento en Piantini",
+				description:
+					"Apartamento de lujo cerca de centros comerciales y restaurantes.",
+				price: 285_000,
+				currency: "USD",
+				address: {
+					street: "Calle Gustavo Mejía Ricart 120",
+					city: "Santo Domingo",
+					state: "Distrito Nacional",
+					country: "República Dominicana",
+					postalCode: "10148",
+				},
+				type: "apartment",
+				features: {
+					bedrooms: 2,
+					bathrooms: 2,
+					area: 140,
+					parking: true,
+					balcony: true,
+					furnished: false,
+					gym: true,
+					pool: true,
+				},
+				images: [
+					{
+						url: "https://source.unsplash.com/random/1200x800/?piantini,apartment&sig=302",
+						alt: "Apartamento en Piantini",
+						order: 0,
+					},
+				],
+				status: "published",
+				featured: true,
+				userId: "user-1",
+				publishedAt: new Date(),
+			},
+			{
+				id: "prop-9",
+				title: "Casa con jardín en La Romana",
+				description:
+					"Hermosa casa con amplio jardín y área social.",
+				price: 210_000,
+				currency: "USD",
+				address: {
+					street: "Calle Duarte 56",
+					city: "La Romana",
+					state: "La Romana",
+					country: "República Dominicana",
+					postalCode: "22000",
+				},
+				type: "house",
+				features: {
+					bedrooms: 3,
+					bathrooms: 2,
+					area: 170,
+					parking: true,
+					garden: true,
+					furnished: false,
+				},
+				images: [
+					{
+						url: "https://source.unsplash.com/random/1200x800/?la-romana,house&sig=303",
+						alt: "Casa con jardín en La Romana",
+						order: 0,
+					},
+				],
+				status: "published",
+				featured: false,
+				userId: "user-1",
+				publishedAt: new Date(),
+			},
+			{
+				id: "prop-10",
+				title: "Villa en Casa de Campo",
+				description:
+					"Villa de lujo con piscina y acabados de alta gama en exclusivo complejo.",
+				price: 980_000,
+				currency: "USD",
+				address: {
+					street: "Casa de Campo",
+					city: "La Romana",
+					state: "La Romana",
+					country: "República Dominicana",
+					postalCode: "22000",
+				},
+				type: "villa",
+				features: {
+					bedrooms: 5,
+					bathrooms: 5,
+					area: 450,
+					parking: true,
+					pool: true,
+					furnished: true,
+					security: true,
+				},
+				images: [
+					{
+						url: "https://source.unsplash.com/random/1200x800/?villa,luxury&sig=304",
+						alt: "Villa en Casa de Campo",
+						order: 0,
+					},
+				],
+				status: "published",
+				featured: true,
+				userId: "user-1",
+				publishedAt: new Date(),
+			},
 		])
 		.onConflictDoNothing();
 	await db
@@ -299,35 +461,330 @@ export async function seedDatabase() {
 		.values([
 			{
 				id: "land-1",
-				name: "Prime Development Land",
+				name: "Terreno residencial en Santo Domingo Este",
 				description:
-					"Excellent location for residential or commercial development.",
-				area: 5000,
-				price: 150_000,
+					"Parcela ideal para construir vivienda, cerca de avenidas principales y servicios.",
+				area: 380,
+				price: 65_000,
 				currency: "USD",
-				location: "Suburban Area, CA",
+				location: "Santo Domingo Este, Santo Domingo",
 				address: {
-					street: "456 Development Ave",
-					city: "Suburban Area",
-					state: "CA",
-					country: "USA",
-					postalCode: "90211",
+					street: "Calle Principal 12",
+					city: "Santo Domingo Este",
+					state: "Santo Domingo",
+					country: "República Dominicana",
+					postalCode: "11501",
 				},
 				type: "residential",
 				features: {
 					zoning: "residential",
 					utilities: ["water", "electricity"],
-					access: "paved road",
-					topography: "flat",
+					access: "calle asfaltada",
+					topography: "plano",
 				},
 				images: [
 					{
-						url: "/placeholder.svg",
-						alt: "Development land overview",
+						url: "https://source.unsplash.com/random/1200x800/?dominican,land&sig=101",
+						alt: "Terreno residencial en Santo Domingo Este",
 						order: 0,
 					},
 				],
-				status: "available",
+				status: "published",
+				userId: "user-1",
+			},
+			{
+				id: "land-2",
+				name: "Solar en Punta Cana cerca de la playa",
+				description:
+					"Terreno a pocos minutos del mar, ideal para proyecto turístico o residencial.",
+				area: 520,
+				price: 130_000,
+				currency: "USD",
+				location: "Punta Cana, La Altagracia",
+				address: {
+					street: "Carretera Coral",
+					city: "Punta Cana",
+					state: "La Altagracia",
+					country: "República Dominicana",
+					postalCode: "23000",
+				},
+				type: "touristic",
+				features: {
+					nearBeach: true,
+					zoning: "turístico",
+					access: "calle asfaltada",
+					topography: "plano",
+				},
+				images: [
+					{
+						url: "https://source.unsplash.com/random/1200x800/?punta-cana,land&sig=103",
+						alt: "Solar en Punta Cana",
+						order: 0,
+					},
+				],
+				status: "published",
+				userId: "user-1",
+			},
+			{
+				id: "land-3",
+				name: "Lote en Bávaro con servicios",
+				description:
+					"Parcela con acceso a agua y electricidad, excelente para inversión.",
+				area: 400,
+				price: 90_000,
+				currency: "USD",
+				location: "Bávaro, La Altagracia",
+				address: {
+					street: "Av. España",
+					city: "Bávaro",
+					state: "La Altagracia",
+					country: "República Dominicana",
+					postalCode: "23301",
+				},
+				type: "residential",
+				features: {
+					utilities: ["water", "electricity"],
+					access: "calle asfaltada",
+					topography: "ligeramente ondulada",
+				},
+				images: [
+					{
+						url: "https://source.unsplash.com/random/1200x800/?bavaro,land&sig=105",
+						alt: "Lote en Bávaro",
+						order: 0,
+					},
+				],
+				status: "published",
+				userId: "user-1",
+			},
+			{
+				id: "land-4",
+				name: "Terreno agrícola en La Vega",
+				description:
+					"Suelo fértil ideal para cultivos diversos, acceso a camino vecinal.",
+				area: 1500,
+				price: 45_000,
+				currency: "USD",
+				location: "La Vega",
+				address: {
+					street: "Camino a Jarabacoa",
+					city: "La Vega",
+					state: "La Vega",
+					country: "República Dominicana",
+					postalCode: "41000",
+				},
+				type: "agricultural",
+				features: {
+					soil: "fértil",
+					irrigation: false,
+					access: "camino vecinal",
+					topography: "mixta",
+				},
+				images: [
+					{
+						url: "https://source.unsplash.com/random/1200x800/?agriculture,field&sig=107",
+						alt: "Terreno agrícola en La Vega",
+						order: 0,
+					},
+				],
+				status: "published",
+				userId: "user-1",
+			},
+			{
+				id: "land-5",
+				name: "Parcelas en San Cristóbal",
+				description:
+					"Terrenos con acceso a carretera y servicios básicos, listos para construir.",
+				area: 600,
+				price: 55_000,
+				currency: "USD",
+				location: "San Cristóbal",
+				address: {
+					street: "Carretera Sánchez",
+					city: "San Cristóbal",
+					state: "San Cristóbal",
+					country: "República Dominicana",
+					postalCode: "91000",
+				},
+				type: "residential",
+				features: {
+					utilities: ["water", "electricity"],
+					access: "carretera principal",
+					topography: "plano",
+				},
+				images: [
+					{
+						url: "https://source.unsplash.com/random/1200x800/?san-cristobal,land&sig=109",
+						alt: "Parcelas en San Cristóbal",
+						order: 0,
+					},
+				],
+				status: "published",
+				userId: "user-1",
+			},
+			{
+				id: "land-6",
+				name: "Terreno comercial en Santiago",
+				description:
+					"Ubicado en zona de alto tráfico, perfecto para locales comerciales o plazas.",
+				area: 700,
+				price: 180_000,
+				currency: "USD",
+				location: "Santiago",
+				address: {
+					street: "Av. Juan Pablo Duarte",
+					city: "Santiago",
+					state: "Santiago",
+					country: "República Dominicana",
+					postalCode: "51000",
+				},
+				type: "commercial",
+				features: {
+					zoning: "comercial",
+					cornerLot: true,
+					access: "avenida principal",
+					topography: "plano",
+				},
+				images: [
+					{
+						url: "https://source.unsplash.com/random/1200x800/?santiago,commercial&sig=111",
+						alt: "Terreno comercial en Santiago",
+						order: 0,
+					},
+				],
+				status: "published",
+				userId: "user-1",
+			},
+			{
+				id: "land-7",
+				name: "Solar en Juan Dolio a pasos del mar",
+				description:
+					"Terreno con gran potencial para proyecto residencial vacacional.",
+				area: 620,
+				price: 160_000,
+				currency: "USD",
+				location: "Juan Dolio",
+				address: {
+					street: "Calle Costera",
+					city: "Juan Dolio",
+					state: "San Pedro de Macorís",
+					country: "República Dominicana",
+					postalCode: "21000",
+				},
+				type: "touristic",
+				features: {
+					nearBeach: true,
+					security: true,
+					access: "calle asfaltada",
+					topography: "plano",
+				},
+				images: [
+					{
+						url: "https://source.unsplash.com/random/1200x800/?juan-dolio,beach&sig=113",
+						alt: "Solar en Juan Dolio",
+						order: 0,
+					},
+				],
+				status: "published",
+				userId: "user-1",
+			},
+			{
+				id: "land-8",
+				name: "Terreno en Cabarete cerca de deportes acuáticos",
+				description:
+					"Ideal para villas o pequeños hoteles, ambiente turístico activo.",
+				area: 800,
+				price: 210_000,
+				currency: "USD",
+				location: "Cabarete",
+				address: {
+					street: "Carretera Principal",
+					city: "Cabarete",
+					state: "Puerto Plata",
+					country: "República Dominicana",
+					postalCode: "57000",
+				},
+				type: "touristic",
+				features: {
+					nearBeach: true,
+					waterSports: true,
+					access: "carretera",
+					topography: "mixta",
+				},
+				images: [
+					{
+						url: "https://source.unsplash.com/random/1200x800/?cabarete,beach&sig=115",
+						alt: "Terreno en Cabarete",
+						order: 0,
+					},
+				],
+				status: "published",
+				userId: "user-1",
+			},
+			{
+				id: "land-9",
+				name: "Lote en Jarabacoa con vista a montañas",
+				description:
+					"Clima agradable, ideal para cabañas y desarrollos ecoturísticos.",
+				area: 900,
+				price: 120_000,
+				currency: "USD",
+				location: "Jarabacoa",
+				address: {
+					street: "Camino al Salto",
+					city: "Jarabacoa",
+					state: "La Vega",
+					country: "República Dominicana",
+					postalCode: "41000",
+				},
+				type: "ecotourism",
+				features: {
+					mountainView: true,
+					coolClimate: true,
+					access: "camino vecinal",
+					topography: "montañoso",
+				},
+				images: [
+					{
+						url: "https://source.unsplash.com/random/1200x800/?jarabacoa,mountain&sig=117",
+						alt: "Lote en Jarabacoa",
+						order: 0,
+					},
+				],
+				status: "published",
+				userId: "user-1",
+			},
+			{
+				id: "land-10",
+				name: "Parcela en Barahona cerca de playas vírgenes",
+				description:
+					"Gran potencial ecoturístico y de desarrollo sostenible.",
+				area: 1000,
+				price: 80_000,
+				currency: "USD",
+				location: "Barahona",
+				address: {
+					street: "Carretera Enriquillo",
+					city: "Barahona",
+					state: "Barahona",
+					country: "República Dominicana",
+					postalCode: "81000",
+				},
+				type: "ecotourism",
+				features: {
+					ecoPotential: true,
+					nearBeach: true,
+					access: "carretera",
+					topography: "mixta",
+				},
+				images: [
+					{
+						url: "https://source.unsplash.com/random/1200x800/?barahona,beach&sig=119",
+						alt: "Parcela en Barahona",
+						order: 0,
+					},
+				],
+				status: "published",
 				userId: "user-1",
 			},
 		])
@@ -337,22 +794,102 @@ export async function seedDatabase() {
 		.values([
 			{
 				id: "blog-1",
-				title: "Real Estate Market Trends 2024",
+				title: "Guía para comprar vivienda en República Dominicana",
 				content:
-					"The real estate market continues to evolve with new trends emerging...",
+					"Comprar vivienda en RD requiere evaluar ubicación, presupuesto y tipo de propiedad. Recomendamos análisis de mercado y asesoría legal.",
 				excerpt:
-					"Discover the latest trends shaping the real estate market in 2024.",
-				slug: "real-estate-market-trends-2024",
+					"Consejos claves para adquirir tu hogar en RD.",
+				slug: "guia-comprar-vivienda-rd",
 				status: "published",
-				category: "market-insights",
-				tags: ["market", "trends", "2024"],
+				category: "guias",
+				tags: ["compra", "hogar", "RD"],
 				coverImage: {
-					url: "/placeholder.svg",
-					alt: "Market trends chart",
+					url: "https://source.unsplash.com/random/1200x800/?dominican,home&sig=201",
+					alt: "Guía para comprar vivienda",
+				},
+				authorId: "user-1",
+				publishedAt: new Date(),
+				readTime: 6,
+				views: 0,
+			},
+			{
+				id: "blog-2",
+				title: "Mejores zonas para invertir en Santo Domingo",
+				content:
+					"Zonas como Piantini, Naco y Bella Vista presentan alta valorización y demanda sostenida.",
+				excerpt:
+					"Zonas con alto potencial de valorización.",
+				slug: "mejores-zonas-invertir-sd",
+				status: "published",
+				category: "analisis",
+				tags: ["inversión", "Santo Domingo"],
+				coverImage: {
+					url: "https://source.unsplash.com/random/1200x800/?santo-domingo,city&sig=202",
+					alt: "Zonas de inversión",
+				},
+				authorId: "user-1",
+				publishedAt: new Date(),
+				readTime: 4,
+				views: 0,
+			},
+			{
+				id: "blog-3",
+				title: "Cómo preparar tu casa para la venta",
+				content:
+					"Mejoras menores, limpieza profunda y fotografías profesionales aceleran la venta y mejoran el precio.",
+				excerpt:
+					"Checklist para vender más rápido.",
+				slug: "como-preparar-casa-venta",
+				status: "published",
+				category: "consejos",
+				tags: ["venta", "consejos"],
+				coverImage: {
+					url: "https://source.unsplash.com/random/1200x800/?house,interior&sig=203",
+					alt: "Preparar casa para venta",
 				},
 				authorId: "user-1",
 				publishedAt: new Date(),
 				readTime: 5,
+				views: 0,
+			},
+			{
+				id: "blog-4",
+				title: "Tendencias del mercado inmobiliario 2025",
+				content:
+					"Proyecciones de demanda, precios y desarrollos en República Dominicana para 2025.",
+				excerpt:
+					"Qué esperar del mercado este año.",
+				slug: "tendencias-mercado-2025",
+				status: "published",
+				category: "analisis",
+				tags: ["tendencias", "mercado"],
+				coverImage: {
+					url: "https://source.unsplash.com/random/1200x800/?market,chart&sig=204",
+					alt: "Tendencias 2025",
+				},
+				authorId: "user-1",
+				publishedAt: new Date(),
+				readTime: 7,
+				views: 0,
+			},
+			{
+				id: "blog-5",
+				title: "Ventajas de vivir cerca de la playa",
+				content:
+					"La vida costera ofrece bienestar, ocio y un entorno único con acceso al mar.",
+				excerpt:
+					"Beneficios de una vida costera.",
+				slug: "ventajas-vivir-cerca-playa",
+				status: "published",
+				category: "estilo-de-vida",
+				tags: ["playa", "bienestar"],
+				coverImage: {
+					url: "https://source.unsplash.com/random/1200x800/?beach,caribbean&sig=205",
+					alt: "Vida cerca de la playa",
+				},
+				authorId: "user-1",
+				publishedAt: new Date(),
+				readTime: 3,
 				views: 0,
 			},
 		])

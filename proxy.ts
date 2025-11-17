@@ -33,15 +33,18 @@ function generateRequestId(): string {
  * Create an unauthorized response with redirect to sign-in
  */
 function createUnauthorizedResponse(
-	reason: string,
-	requestId: string
+    reason: string,
+    requestId: string,
+    targetPath?: string
 ): NextResponse {
-	const response = NextResponse.redirect(
-		new URL(
-			"/sign-in",
-			process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-		)
-	);
+    const signInUrl = new URL(
+        "/sign-in",
+        process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+    );
+    if (targetPath) {
+        signInUrl.searchParams.set("redirect", targetPath);
+    }
+    const response = NextResponse.redirect(signInUrl);
 
 	// Add debugging headers in development
 	if (process.env.NODE_ENV === "development") {
@@ -116,19 +119,16 @@ export async function proxy(request: NextRequest) {
 			headers: request.headers,
 		});
 
-		// Handle missing or invalid session
-		if (!session?.user) {
-			// For POST requests, allow them through to API routes to handle authentication
-			if (request.method === "POST") {
-				return NextResponse.next();
-			}
+        // Handle missing or invalid session
+        if (!session?.user) {
+            // For POST requests, allow them through to API routes to handle authentication
+            if (request.method === "POST") {
+                return NextResponse.next();
+            }
 
-			// Check if this might be a redirect from an auth action
-			if (isLikelyAuthRedirect(pathname)) {
-				return NextResponse.next();
-			}
-			return createUnauthorizedResponse("No valid session found", requestId);
-		}
+            // Always redirect unauthenticated access to protected routes to sign-in
+            return createUnauthorizedResponse("No valid session found", requestId, pathname);
+        }
 
 		const { user } = session;
 
@@ -190,10 +190,11 @@ export async function proxy(request: NextRequest) {
 		// Validate user role
 		const validRoles: UserRole[] = ["admin", "agent", "user"];
 		if (!(user.role && validRoles.includes(user.role as UserRole))) {
-			return createUnauthorizedResponse(
-				"User role not defined or invalid",
-				requestId
-			);
+            return createUnauthorizedResponse(
+                "User role not defined or invalid",
+                requestId,
+                pathname
+            );
 		}
 
 		// Check permissions for specific routes
@@ -209,6 +210,7 @@ export async function proxy(request: NextRequest) {
 				"lands.manage": ["admin", "agent"],
 				"blog.view": ["admin", "agent", "user"],
 				"blog.manage": ["admin"],
+				"creator.manage": ["admin", "agent"],
 				"users.view": ["admin"],
 				"users.manage": ["admin"],
 				"profile.access": ["admin", "agent", "user"],
@@ -219,10 +221,11 @@ export async function proxy(request: NextRequest) {
 				requiredPermission as keyof typeof permissionConfig
 			] as readonly string[];
 			if (!allowedRoles?.includes(user.role as UserRole)) {
-				return createUnauthorizedResponse(
-					`Insufficient permissions for role: ${user.role}`,
-					requestId
-				);
+                return createUnauthorizedResponse(
+                    `Insufficient permissions for role: ${user.role}`,
+                    requestId,
+                    pathname
+                );
 			}
 		}
 
@@ -249,11 +252,12 @@ export async function proxy(request: NextRequest) {
 
 		// For GET requests, redirect to sign-in
 		if (request.method === "GET") {
-			const response = createUnauthorizedResponse(
-				// biome-ignore lint/security/noSecrets: Error message, not a secret
-				"Authentication verification failed",
-				requestId
-			);
+            const response = createUnauthorizedResponse(
+                // biome-ignore lint/security/noSecrets: Error message, not a secret
+                "Authentication verification failed",
+                requestId,
+                pathname
+            );
 			response.headers.set("X-Content-Type-Options", "nosniff");
 			response.headers.set("X-Frame-Options", "DENY");
 			response.headers.set("X-XSS-Protection", "1; mode=block");

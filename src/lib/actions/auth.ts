@@ -721,8 +721,9 @@ export async function signInAction(
 			role: userRole,
 		});
 
-		// Determine redirect URL based on user role
-		const redirectUrl = getRedirectUrlForRole(userRole);
+
+		const redirectParam = (formData.get("redirect") as string) || "";
+		const redirectUrl = redirectParam || getRedirectUrlForRole(userRole);
 
 		// Redirect on success
 		redirect(redirectUrl);

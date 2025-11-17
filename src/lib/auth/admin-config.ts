@@ -21,6 +21,9 @@ export const PERMISSIONS = {
 	BLOG_VIEW: "blog.view",
 	BLOG_MANAGE: "blog.manage",
 
+	// Creador de borradores
+	CREATOR_MANAGE: "creator.manage",
+
 	// Gestión de usuarios
 	USERS_VIEW: "users.view",
 	USERS_MANAGE: "users.manage",
@@ -45,6 +48,7 @@ export const ROLE_PERMISSIONS = {
 		PERMISSIONS.BLOG_MANAGE,
 		PERMISSIONS.USERS_VIEW,
 		PERMISSIONS.USERS_MANAGE,
+		PERMISSIONS.CREATOR_MANAGE,
 		PERMISSIONS.PROFILE_ACCESS,
 		PERMISSIONS.PROFILE_MANAGE,
 	],
@@ -57,6 +61,7 @@ export const ROLE_PERMISSIONS = {
 		PERMISSIONS.LANDS_VIEW,
 		PERMISSIONS.LANDS_MANAGE,
 		PERMISSIONS.BLOG_VIEW,
+		PERMISSIONS.CREATOR_MANAGE,
 		PERMISSIONS.PROFILE_ACCESS,
 		PERMISSIONS.PROFILE_MANAGE,
 	],
@@ -92,6 +97,9 @@ export const adminConfig = {
 		[PERMISSIONS.BLOG_VIEW]: ["admin", "agent", "user"],
 		[PERMISSIONS.BLOG_MANAGE]: ["admin"],
 
+		// Creator
+		[PERMISSIONS.CREATOR_MANAGE]: ["admin", "agent"],
+
 		// Usuarios
 		[PERMISSIONS.USERS_VIEW]: ["admin"],
 		[PERMISSIONS.USERS_MANAGE]: ["admin"],
@@ -109,6 +117,7 @@ export type Permission = keyof typeof adminConfig.permissions;
 // Mapeo de rutas a permisos requeridos
 export const ROUTE_PERMISSIONS = {
 	"/dashboard": PERMISSIONS.DASHBOARD_ACCESS,
+	"/dashboard/creator": PERMISSIONS.CREATOR_MANAGE,
 	"/dashboard/properties": PERMISSIONS.PROPERTIES_MANAGE,
 	"/dashboard/lands": PERMISSIONS.LANDS_MANAGE,
 	"/dashboard/blog": PERMISSIONS.BLOG_MANAGE,

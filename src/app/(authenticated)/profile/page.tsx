@@ -2,8 +2,7 @@
 
 import { Activity, ArrowLeft, Home, User } from "lucide-react";
 import Link from "next/link";
-import { FilterTabs } from "@/components/dashboard/filter-tabs";
-import { StatsCards } from "@/components/dashboard/stats-cards";
+import { UnifiedFilterChips, UnifiedStatsCards } from "@/components/dashboard";
 import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
 import { ProfileActivity } from "@/components/profile/profile-activity";
 import { ProfileForm } from "@/components/profile/profile-form";
@@ -41,6 +40,7 @@ export default function ProfilePage() {
 			value: "profile",
 			count: 1,
 			active: true,
+			onClick: () => {},
 		},
 		{
 			id: "activity",
@@ -48,6 +48,7 @@ export default function ProfilePage() {
 			value: "activity",
 			count: 15,
 			active: false,
+			onClick: () => {},
 		},
 	];
 
@@ -67,8 +68,8 @@ export default function ProfilePage() {
 			description="Gestiona tu información personal y configuración de la cuenta"
 			headerExtras={
 				<div className="space-y-4">
-					<StatsCards className="mb-4" isLoading={false} stats={statsCards} />
-					<FilterTabs className="mb-4" tabs={filterTabs} />
+					<UnifiedStatsCards className="mb-4" loading={false} stats={statsCards} />
+					<UnifiedFilterChips className="mb-4" chips={filterTabs} />
 				</div>
 			}
 			title="Mi Perfil"

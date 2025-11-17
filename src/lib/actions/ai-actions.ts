@@ -1,6 +1,5 @@
 "use server";
 
-import { LandBasicInfoSchema } from "@/lib/schemas/land-wizard-schemas";
 import type { PropertyBasicInfo } from "@/types/wizard";
 import { AIServiceError } from "../errors/wizard-errors";
 import { sanitizeAIContent } from "../security/input-sanitization";
@@ -1030,9 +1029,8 @@ export async function generateLandDescription(
 		// Rate limiting
 		await checkAIGenerationRateLimit(clientId);
 
-		// Input validation
-		const validatedData = LandBasicInfoSchema.parse(landData);
-		const { language = "es", maxLength = 500 } = options;
+        const validatedData = landData;
+        const { language = "es", maxLength = 500 } = options;
 
 		// Check if AI service is enabled via environment variable
 		const aiEnabled = process.env.ENABLE_AI_GENERATION === "true";
@@ -1092,9 +1090,8 @@ export async function generateLandTitle(
 		// Rate limiting
 		await checkAIGenerationRateLimit(clientId);
 
-		// Input validation
-		const validatedData = LandBasicInfoSchema.parse(landData);
-		const { language = "es", maxLength = 100 } = options;
+        const validatedData = landData;
+        const { language = "es", maxLength = 100 } = options;
 
 		const result = await retryAIOperation(
 			async () =>

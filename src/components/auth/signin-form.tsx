@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { signInAction } from "@/lib/actions/auth";
 import { AuthFormWrapper, AuthLink, useAuthFields } from "./auth-form-wrapper";
 
-export function SignInForm() {
+export function SignInForm({ redirect }: { redirect?: string }) {
 	const { emailField, passwordField } = useAuthFields();
 
 	const passwordFieldWithLink = {
@@ -33,6 +33,7 @@ export function SignInForm() {
 		<AuthFormWrapper
 			action={signInAction}
 			fields={[emailField, passwordFieldWithLink]}
+			hiddenFields={redirect ? [{ name: "redirect", value: redirect }] : []}
 			footerContent={footerContent}
 			loadingText="Iniciando sesión..."
 			submitText="Iniciar Sesión"

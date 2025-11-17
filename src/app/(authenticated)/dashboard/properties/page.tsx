@@ -2,13 +2,10 @@
 
 import { ArrowLeft, FileText, Plus } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { RouteGuard } from "@/components/auth/route-guard";
-import { FilterTabs } from "@/components/dashboard/filter-tabs";
-import { DashboardPageLayout } from "@/components/layout/dashboard-page-layout";
-import { PropertyCardList } from "@/components/properties/property-card-list";
-import { PropertyFilters } from "@/components/properties/property-filters";
+import { StandardCardList } from "@/components/dashboard/standard-card-list";
+import { UnifiedDashboardLayout } from "@/components/dashboard/unified-dashboard-layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useProperties } from "@/hooks/use-properties";
@@ -17,8 +14,8 @@ import type { Property } from "@/lib/types/properties";
 import { cn } from "@/lib/utils";
 import { secondaryColorClasses } from "@/lib/utils/secondary-colors";
 
+
 export default function PropertiesPage() {
-	const _router = useRouter();
 	const [statusFilter, setStatusFilter] = useState<
 		"all" | "published" | "sold" | "rented"
 	>("all");
@@ -37,7 +34,7 @@ export default function PropertiesPage() {
 	const propertiesAdapter = getStatsAdapter("properties");
 	const statsCards = propertiesAdapter?.generateStats({ properties }) || [];
 
-	const filterTabs = [
+	const filterChips = [
 		{
 			label: "Todas",
 			value: "all",
@@ -79,20 +76,24 @@ export default function PropertiesPage() {
 			property.address?.city?.toLowerCase().includes(searchTerm.toLowerCase())
 	);
 
-	const backAction = (
-		<Button asChild variant="outline">
-			<Link href="/dashboard">
-				<ArrowLeft className="mr-2 h-4 w-4" />
-				Volver al Dashboard
-			</Link>
-		</Button>
-	);
+	const breadcrumbs = [
+		{ label: "Dashboard", href: "/dashboard" },
+		{ label: "Propiedades" },
+	];
+
+    const actions: { label: string; icon: any; href: string; variant: "default" | "outline" }[] = [];
 
 	if (loading) {
 		return (
-			<DashboardPageLayout
-				actions={backAction}
-				description="Administra todas las propiedades del sistema"
+			<UnifiedDashboardLayout
+				actions={actions}
+				breadcrumbs={breadcrumbs}
+				description="Gestiona todas las propiedades inmobiliarias"
+				filterChips={filterChips}
+				loading={loading}
+				searchPlaceholder="Buscar propiedades..."
+				showSearch={true}
+				stats={statsCards}
 				title="Gestión de Propiedades"
 			>
 				<div className="flex min-h-[400px] items-center justify-center">
@@ -101,15 +102,21 @@ export default function PropertiesPage() {
 						<p className="mb-4 text-muted-foreground">Cargando propiedades.</p>
 					</div>
 				</div>
-			</DashboardPageLayout>
+			</UnifiedDashboardLayout>
 		);
 	}
 
 	if (error) {
 		return (
-			<DashboardPageLayout
-				actions={backAction}
-				description="Administra todas las propiedades del sistema"
+			<UnifiedDashboardLayout
+				actions={actions}
+				breadcrumbs={breadcrumbs}
+				description="Gestiona todas las propiedades inmobiliarias"
+				filterChips={filterChips}
+				loading={loading}
+				searchPlaceholder="Buscar propiedades..."
+				showSearch={true}
+				stats={statsCards}
 				title="Gestión de Propiedades"
 			>
 				<div className="flex min-h-[400px] items-center justify-center">
@@ -123,99 +130,75 @@ export default function PropertiesPage() {
 						<Button onClick={() => refetch()}>Reintentar</Button>
 					</div>
 				</div>
-			</DashboardPageLayout>
+			</UnifiedDashboardLayout>
 		);
 	}
 
-	const breadcrumbs = [
-		{ label: "Dashboard", href: "/dashboard" },
-		{ label: "Propiedades" },
-	];
-
-	const actions = (
-		<div className="flex gap-2">
-			<Button
-				asChild
-				className={cn(secondaryColorClasses.interactive)}
-				variant="outline"
-			>
-				<Link href="/dashboard/properties/drafts">
-					<FileText className="mr-2 h-4 w-4" />
-					Borradores
-				</Link>
-			</Button>
-			<Button
-				asChild
-				className={cn(
-					"bg-primary hover:bg-primary/90",
-					secondaryColorClasses.focusRing
-				)}
-			>
-				<Link href="/dashboard/properties/new">
-					<Plus className="mr-2 h-4 w-4" />
-					Agregar Propiedad
-				</Link>
-			</Button>
-		</div>
-	);
-
 	return (
 		<RouteGuard requiredPermission="properties.view">
-			<DashboardPageLayout
+			<UnifiedDashboardLayout
 				actions={actions}
 				breadcrumbs={breadcrumbs}
-				className="bg-background"
 				description="Gestiona todas las propiedades inmobiliarias"
-				headerExtras={<FilterTabs className="mb-4" tabs={filterTabs} />}
+				filterChips={filterChips}
+				loading={loading}
+				onSearchChange={setSearchTerm}
 				searchPlaceholder="Buscar propiedades..."
+				searchValue={searchTerm}
 				showSearch={true}
 				stats={statsCards}
-				statsLoading={loading}
-				title="Propiedades"
+				title="Gestión de Propiedades"
 			>
-				<div className="space-y-4">
-					{/* Search and Filters */}
-					<PropertyFilters
-						onSearchChange={setSearchTerm}
-						properties={properties}
-						searchTerm={searchTerm}
-					/>
-
-					{/* Properties List */}
-					<PropertyCardList properties={filteredBySearch} />
-
-					{/* Results Summary */}
-					{filteredBySearch.length === 0 && searchTerm && (
-						<div className="py-8 text-center">
-							<p className="text-muted-foreground">
-								No se encontraron propiedades que coincidan con &quot;
-								{searchTerm}&quot;
-							</p>
-						</div>
-					)}
-
-					{filteredBySearch.length > 0 && (
-						<div className="flex items-center justify-between text-muted-foreground text-sm">
-							<span>
-								Mostrando {filteredBySearch.length} de {properties.length}{" "}
-								propiedades
-							</span>
-							<Badge
-								className={secondaryColorClasses.badge}
-								variant="secondary"
-							>
-								{statusFilter === "all"
-									? "Todas"
-									: statusFilter === "published"
-										? "Publicadas"
-										: statusFilter === "sold"
-											? "Vendidas"
-											: "Alquiladas"}
-							</Badge>
-						</div>
-					)}
-				</div>
-			</DashboardPageLayout>
+				<StandardCardList
+					className="mt-6"
+					items={filteredBySearch}
+					onDelete={(id) => {
+						// Handle delete logic here
+						console.log("Delete property:", id);
+					}}
+					onEdit={(id) => {
+						// Handle edit logic here
+						console.log("Edit property:", id);
+					}}
+					onView={(id) => {
+						// Handle view logic here
+						console.log("View property:", id);
+					}}
+					showActions={true}
+					type="property"
+					variant={"list"}
+				/>
+				
+				{filteredBySearch.length === 0 && searchTerm && (
+					<div className="py-8 text-center">
+						<p className="text-muted-foreground">
+							No se encontraron propiedades que coincidan con &quot;
+							{searchTerm}&quot;
+						</p>
+					</div>
+				)}
+				
+				{filteredBySearch.length > 0 && (
+					<div className="mt-6 flex items-center justify-between text-muted-foreground text-sm">
+						<span>
+							Mostrando {filteredBySearch.length} de {properties.length}{" "}
+							propiedades
+						</span>
+						<Badge
+							className={secondaryColorClasses.badge}
+							variant="secondary"
+						>
+							{statusFilter === "all"
+								? "Todas"
+								: statusFilter === "published"
+									? "Publicadas"
+									: statusFilter === "sold"
+										? "Vendidas"
+										: "Alquiladas"}
+						</Badge>
+					</div>
+				)}
+			</UnifiedDashboardLayout>
 		</RouteGuard>
 	);
 }

@@ -71,7 +71,7 @@ The following files were updated to use the new consolidated components:
 
 - `src/app/(dashboard)/dashboard/lands/new/page.tsx`
 - `src/app/(dashboard)/dashboard/lands/[id]/edit/page.tsx`
-- `src/components/search/property-results.tsx`
+
 - `src/app/properties/page.tsx`
 - `src/app/(dashboard)/layout.tsx`
 

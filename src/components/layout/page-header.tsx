@@ -1,6 +1,6 @@
 "use client";
 
-import { StatsCards } from "@/components/dashboard/stats-cards";
+import { UnifiedStatsCards } from "@/components/dashboard";
 import { cn } from "@/lib/utils";
 import type { PageHeaderProps } from "@/types/layout";
 import type { ReactNode } from "react";
@@ -34,7 +34,7 @@ export function PageHeader({
 			{/* Stats rendered within the header when provided */}
 			{stats && stats.length > 0 && (
 				<div className="mt-4">
-					<StatsCards isLoading={Boolean(statsLoading)} stats={stats} />
+					<UnifiedStatsCards loading={Boolean(statsLoading)} stats={stats} />
 				</div>
 			)}
 		</div>

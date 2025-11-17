@@ -9,6 +9,7 @@ export const useAvoidRoutes = () => {
 		"/verify-email",
 		"/forgot-password",
 		"/reset-password",
+		"/search",
 	];
 	const pathname = usePathname();
 
