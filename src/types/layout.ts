@@ -25,34 +25,38 @@ export type FilterTab = {
 };
 
 export type DashboardPageLayoutProps = {
-	title: string;
-	description?: string;
-	breadcrumbs?: BreadcrumbItem[];
-	actions?: ReactNode;
-	headerExtras?: ReactNode; // Slot para contenidos de cabecera (stats, filtros, etc.)
-	children: ReactNode;
-	sidebar?: ReactNode;
-	className?: string;
-	contentClassName?: string;
-	showSearch?: boolean;
-	searchPlaceholder?: string;
-	// Unified stats support rendered inside PageHeader
-	stats?: StatCard[];
-	statsLoading?: boolean;
+  title: string;
+  description?: string;
+  breadcrumbs?: BreadcrumbItem[];
+  actions?: ReactNode;
+  headerExtras?: ReactNode; // Slot para contenidos de cabecera (stats, filtros, etc.)
+  children: ReactNode;
+  sidebar?: ReactNode;
+  className?: string;
+  contentClassName?: string;
+  showSearch?: boolean;
+  searchPlaceholder?: string;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
+  // Unified stats support rendered inside PageHeader
+  stats?: StatCard[];
+  statsLoading?: boolean;
 };
 
 export type PageHeaderProps = {
-	title: string;
-	description?: string;
-	breadcrumbs?: BreadcrumbItem[];
-	actions?: ReactNode;
-	children?: ReactNode;
-	showSearch?: boolean;
-	searchPlaceholder?: string;
-	className?: string;
-	// Stats passed as objects to be rendered in the header
-	stats?: StatCard[];
-	statsLoading?: boolean;
+  title: string;
+  description?: string;
+  breadcrumbs?: BreadcrumbItem[];
+  actions?: ReactNode;
+  children?: ReactNode;
+  showSearch?: boolean;
+  searchPlaceholder?: string;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
+  className?: string;
+  // Stats passed as objects to be rendered in the header
+  stats?: StatCard[];
+  statsLoading?: boolean;
 };
 
 export type ContentGridProps = {

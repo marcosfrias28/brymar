@@ -40,7 +40,9 @@ export function DashboardPageLayout({
 							actions={actions}
 							breadcrumbs={breadcrumbs}
 							description={description}
+							onSearchChange={() => null}
 							searchPlaceholder={searchPlaceholder}
+							searchValue={""}
 							showSearch={showSearch}
 							stats={stats}
 							statsLoading={statsLoading}
