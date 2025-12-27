@@ -18,23 +18,47 @@ import { getStatsAdapter } from "@/lib/adapters/stats-adapters";
 export default function DashboardPage() {
 	const breadcrumbs = useBreadcrumbs();
 
+	return (
+		<RouteGuard requiredPermission="dashboard.access">
+			<DashboardPageLayout
+				actions={<DashboardActions />}
+				breadcrumbs={breadcrumbs}
+				description="Panel de control principal"
+				headerExtras={<DashboardStats />}
+				title="Dashboard"
+			>
+				<div className="grid gap-6 lg:grid-cols-3 xl:grid-cols-2">
+					{/* Quick Actions */}
+					<div className="lg:col-span-1 xl:col-span-2">
+						<QuickActions />
+					</div>
+
+					{/* Property Chart */}
+					<div className="lg:col-span-2 xl:col-span-2">
+						<PropertyChart />
+					</div>
+
+					{/* Recent Activity */}
+					<div className="lg:col-span-3 xl:col-span-2">
+						<RecentActivity />
+					</div>
+				</div>
+			</DashboardPageLayout>
+		</RouteGuard>
+	);
+}
+
+function DashboardStats() {
 	// Fetch data for stats
 	const { data: propertiesData, isLoading: propertiesLoading } =
 		useProperties();
-	const { data: landsData, isLoading: landsLoading } = useLands();
+	const { isLoading: landsLoading } = useLands();
 	const { data: blogPostsData, isLoading: postsLoading } = useBlogPosts();
 
 	const properties = propertiesData || [];
-	const _lands = landsData?.items || [];
 	const blogPosts = blogPostsData?.posts || [];
 
 	const isLoading = propertiesLoading || landsLoading || postsLoading;
-
-	// Handle dashboard refresh
-	const _handleRefreshDashboard = () => {
-		// Here you would trigger data refetch
-		// refetch functions from the hooks could be called here
-	};
 
 	// Generate stats using the adapter system
 	const adminAdapter = getStatsAdapter("admin");
@@ -46,7 +70,17 @@ export default function DashboardPage() {
 			systemHealth: "good" as const,
 		}) || [];
 
-	const actions = (
+	return (
+		<UnifiedStatsCards
+			className="mb-4"
+			loading={isLoading}
+			stats={statsCards}
+		/>
+	);
+}
+
+function DashboardActions() {
+	return (
 		<div className="flex items-center gap-3">
 			<Button
 				asChild
@@ -70,40 +104,5 @@ export default function DashboardPage() {
 				</Link>
 			</Button>
 		</div>
-	);
-
-	return (
-		<RouteGuard requiredPermission="dashboard.access">
-			<DashboardPageLayout
-				actions={actions}
-				breadcrumbs={breadcrumbs}
-				description="Panel de control principal"
-				headerExtras={
-					<UnifiedStatsCards
-						className="mb-4"
-						loading={isLoading}
-						stats={statsCards}
-					/>
-				}
-				title="Dashboard"
-			>
-				<div className="grid gap-6 lg:grid-cols-3 xl:grid-cols-2">
-					{/* Quick Actions */}
-					<div className="lg:col-span-1 xl:col-span-2">
-						<QuickActions />
-					</div>
-
-					{/* Property Chart */}
-					<div className="lg:col-span-2 xl:col-span-2">
-						<PropertyChart />
-					</div>
-
-					{/* Recent Activity */}
-					<div className="lg:col-span-3 xl:col-span-2">
-						<RecentActivity />
-					</div>
-				</div>
-			</DashboardPageLayout>
-		</RouteGuard>
 	);
 }
